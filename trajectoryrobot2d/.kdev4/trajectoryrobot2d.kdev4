@@ -1,0 +1,40 @@
+[Buildset]
+BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00"\x00t\x00r\x00a\x00j\x00e\x00c\x00t\x00o\x00r\x00y\x00r\x00o\x00b\x00o\x00t\x002\x00d)
+
+[Launch]
+Launch Configurations=Launch Configuration 0
+
+[Launch][Launch Configuration 0]
+Configured Launch Modes=execute
+Configured Launchers=nativeAppLauncher
+Name=New Application Launcher
+Type=Native Application
+
+[Launch][Launch Configuration 0][Data]
+Arguments=--Ice.Config=config
+Debugger Shell=
+Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
+Dependency Action=Nothing
+Display Demangle Names=true
+Display Static Members=false
+EnvironmentGroup=default
+Executable=file:///home/pbustos/robocomp/Components/RoboLab/Experimental/trajectoryrobot2d/bin/trajectoryrobot2dcomp
+External Terminal=konsole --noclose --workdir %workdir -e %exe
+GDB Path=gdb
+Project Target=
+Remote GDB Config Script=
+Remote GDB Run Script=
+Remote GDB Shell Script=
+Start With=ApplicationOutput
+Use External Terminal=false
+Working Directory=.
+isExecutable=true
+
+[MakeBuilder]
+Number Of Jobs=4
+
+[Project]
+VersionControlSupport=kdevgit
+
+[SourceFileTemplates]
+LastUsedTemplate=/home/pbustos/.kde/share/apps/kdevfiletemplates/template_descriptions/cpp_basic.desktop

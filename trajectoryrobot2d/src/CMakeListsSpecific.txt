@@ -1,0 +1,23 @@
+# Sources set
+SET ( SOURCES
+  specificworker.cpp
+  specificmonitor.cpp
+  pointstoroad.cpp
+  controller.cpp
+  qline2d.cpp
+  elasticband.cpp
+  rcisdraw.cpp
+  waypoints.cpp
+  planner.cpp
+)
+
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+  pointstoroad.h
+  controller.h
+  planner.h
+)
+
+SET (LIBS ${LIBS} -losgViewer)

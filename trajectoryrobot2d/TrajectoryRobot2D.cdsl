@@ -1,0 +1,16 @@
+import "/robocomp/Interfaces/IDSLs/InnerModelManager.idsl";
+import "/robocomp/Interfaces/IDSLs/DifferentialRobot.idsl";
+import "/robocomp/Interfaces/IDSLs/Laser.idsl";
+Component TrajectoryRobot2DComp{
+	Communications{
+		requires Laser, DifferentialRobot, InnerModelManager;
+	};
+	RoboCompClasses{
+		"/Classes/rcdraw/rcdraw.cpp";
+		"/Classes/rcdraw/rcdraw.h";
+		"/Classes/rcdraw/rcdrawrobot.cpp";
+		"/Classes/rcdraw/rcdrawrobot.h";
+	};
+	language Cpp;
+	gui Qt(QWidget);
+};
