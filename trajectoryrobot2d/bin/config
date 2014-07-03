@@ -11,3 +11,5 @@ InnerModelManagerProxy = innermodelmanager:tcp -h localhost -p 11175
 DifferentialRobotProxy = differentialrobot:tcp -h localhost -p 10004
 
 PointsFile = puntosOcho.txt
+
+Ice.MessageSizeMax=800000

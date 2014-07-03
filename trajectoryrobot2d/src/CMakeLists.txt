@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT( trajectoryrobot2dcomp )
 IF(NOT EXISTS $ENV{ROBOCOMP}/cmake)
-MESSAGE(FATAL_ERROR " ROBOCOMPROOT variable not set, check your bashrc profile!")
+MESSAGE(FATAL_ERROR "
+ ROBOCOMPROOT variable not set, check your bashrc profile!
+")
 ENDIF(NOT EXISTS $ENV{ROBOCOMP}/cmake)
 INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
-INCLUDE ( CMakeListsSpecific.txt )
+INCLUDE ( CMakeListsSpecific.txt)
 
 # Sources set
 SET ( SOURCES
   ${SOURCES}
   trajectoryrobot2dcomp.cpp
   
-  $ENV{ROBOCOMP}/classes/rcdraw/rcdraw.cpp
-  $ENV{ROBOCOMP}/classes/rcdraw/rcdrawrobot.cpp
   genericmonitor.cpp
   commonbehaviorI.cpp
   genericworker.cpp
@@ -24,8 +24,6 @@ SET ( SOURCES
 SET ( HEADERS
   ${HEADERS}
   
-  $ENV{ROBOCOMP}/classes/rcdraw/rcdraw.h
-  $ENV{ROBOCOMP}/classes/rcdraw/rcdrawrobot.h
   genericmonitor.h
   commonbehaviorI.h
   genericworker.h

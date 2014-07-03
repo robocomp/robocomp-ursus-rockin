@@ -20,4 +20,4 @@ SET ( HEADERS
   planner.h
 )
 
-SET (LIBS ${LIBS} -losgViewer)
+#SET (LIBS ${LIBS} -losgViewer)

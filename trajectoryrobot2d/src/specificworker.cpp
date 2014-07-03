@@ -27,42 +27,45 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 {
 	this->params = params;
 	
-	innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel->setUpdateTranslationPointers("base", &(bState.x), NULL, &(bState.z));
-	innerModel->setUpdateRotationPointers("base", NULL, &(bState.alpha), NULL);
+	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockin.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	
-	moveBoxes();
+	innerModel->setUpdateTranslationPointers("robot", &(bState.x), NULL, &(bState.z));
+	innerModel->setUpdateRotationPointers("robot", NULL, &(bState.alpha), NULL);
+	
+	//moveBoxes();
  
 	try { differentialrobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; }
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; }
-
+	
 	innerModel->update();
 
 	planner = new Planner(innerModel);
 
-	cleanWorld();
+	//cleanWorld();
 	
 	//road.readRoadFromFile(innerModel, "puntos2.txt");
 	
 	//Set target
-	target = QVec::vec3(-1050,0,600);
+	target = QVec::vec3(5000,0,-6500);
 
 	//Draw target as red box	
-	RoboCompInnerModelManager::Plane3D plane;
-	plane.px = target.x(); plane.py = 200; plane.pz = target.z(); plane.nx = 1; plane.texture = "#990000"; plane.thickness = 150; plane.height = plane.width = 100;
-	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "floor", plane);
+// 	RoboCompInnerModelManager::Plane3D plane;
+// 	plane.px = target.x(); plane.py = 200; plane.pz = target.z(); plane.nx = 1; plane.texture = "#990000"; plane.thickness = 150; plane.height = plane.width = 100;
+// 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "floor", plane);
 	
 	//Plan path
 	qDebug("Planning ...");
-	drawThinkingRobot("red");
+//	drawThinkingRobot("red");
 	planner->computePath(target);
 	
 	if(planner->getPath().size() == 0)
 		qFatal("Path NOT found");
 
-	drawThinkingRobot("green");
+	
+//	drawThinkingRobot("green");
 	//planner->drawTree(innermodelmanager_proxy);
 	road.readRoadFromList( planner->getPath() );
 	road.print();

@@ -20,6 +20,7 @@
 #define GENERICWORKER_H
 
 // #include <ipp.h>
+#include "config.h"
 #include <QtGui>
 #include <stdint.h>
 #include <qlog/qlog.h>
@@ -29,8 +30,6 @@
 #include <Laser.h>
 #include <InnerModelManager.h>
 #include <DifferentialRobot.h>
-#include "rcdraw/rcdraw.h"
-#include "rcdraw/rcdrawrobot.h"
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
