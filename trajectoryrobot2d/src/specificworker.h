@@ -65,6 +65,7 @@ private:
 	void cleanWorld();
 	void moveBoxes();
 	void drawThinkingRobot(const QString &color);
+	void sendRobotHome();
 };
 
 #endif

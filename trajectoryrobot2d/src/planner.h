@@ -36,7 +36,7 @@ class Planner : public QObject
 {
 Q_OBJECT
 public:
-	Planner(InnerModel *innerModel, QObject *parent=0);
+	Planner(InnerModel *innerModel_, QObject *parent=0);
 	~Planner(){};
   
 	 void setMaxIter( int v) 		{ MAX_ITER = v;}
@@ -73,6 +73,9 @@ public:
 		QVec p1,p2,origin,target;
 		int MAX_ITER;
 		QList<QVec> currentPath, currentSmoothedPath, currentAdaptiveSmoothedPath;
+		void getCollisionObjects(InnerModelNode* node); 										//Obtains a list of id's of planes and meshes for collision detection
+		
+		QStringList listCollisionObjects;
 		
   public:
 		

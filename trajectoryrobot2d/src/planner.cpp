@@ -20,20 +20,25 @@
 #include "planner.h"
 #include <boost/concept_check.hpp>
 
-Planner::Planner(InnerModel *innerModel, QObject *parent)
+Planner::Planner(InnerModel *innerModel_, QObject *parent)
 {
-  this->innerModel = innerModel;
+	this->innerModel = innerModel_;
 	InnerModelTransform *t = innerModel->newTransform("baseT", "static", innerModel->getNode("floor"), 0, 0, 0, 0, 0, 0);
 	innerModel->getNode("floor")->addChild(t);
-	InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/Files/osgModels/RobEx/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
+	InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
 	t->addChild(m);
   
-  //Trees and planning
-  arbol = new tree<QVec>;
-  arbolGoal = new tree<QVec>;
-  //p2Ant = innerModel->robotToWorld(QVec::vec3(0,0,-500));	
-  PATH_FOUND = false;
-  MAX_ITER = 5000;
+	//Create list of colision objects;
+	listCollisionObjects.clear();
+	getCollisionObjects(innerModel->getRoot());
+	qDebug() << __FILE__ << __FUNCTION__ << "listaCollision" <<  listCollisionObjects;
+	
+	//Trees and planning
+	arbol = new tree<QVec>;
+	arbolGoal = new tree<QVec>;
+	//p2Ant = innerModel->robotToWorld(QVec::vec3(0,0,-500));	
+	PATH_FOUND = false;
+	MAX_ITER = 5000;
 
 }
 
@@ -43,16 +48,15 @@ Planner::Planner(InnerModel *innerModel, QObject *parent)
 */
 bool Planner::computePath(const QVec & target)
 {
-	//p2Ant = innerModel->robotToWorld(QVec::vec3(0,0,-500));	
+	
 	this->finalTarget = target;
 	QVec currentTarget = finalTarget;
-	//QVec robot = innerModel->robotInWorld();
 	QVec robot = innerModel->getBaseCoordinates();
 	QVec currentTargetGoal = robot;
 
 	if(collisionDetector( this->finalTarget, innerModel ) == true)
 	{
-		qDebug() << "Planner::computePath - collides in target";
+		qDebug() << __FILE__ << __FUNCTION__ << "Planner::computePath - collides in target";
 		PATH_FOUND = false;
 		return false;
 	}
@@ -130,11 +134,13 @@ bool Planner::computePath(const QVec & target)
   			CURRENT_LEAF = auxLeaf;			//if even (par) then trees are in original position
 			swapCounter++;
 		}
+		
+		if (i%50 == 0)
+			qDebug()  << __FILE__ << __FUNCTION__ << "Planning iteration" << i;
 	}
 	
 	if ( i < MAX_ITER)
 	{
-		
 		PATH_FOUND = true;
 		//If not even we do one more swap to restore trees to original position
 		if( swapCounter%2 > 0)
@@ -147,11 +153,14 @@ bool Planner::computePath(const QVec & target)
 			CURRENT_LEAF_GOAL = CURRENT_LEAF;
 			CURRENT_LEAF = auxLeaf;
 		}
-		currentPath = recoverPath(arbol,CURRENT_LEAF, arbolGoal,CURRENT_LEAF_GOAL);
+ 		currentPath = recoverPath(arbol,CURRENT_LEAF, arbolGoal,CURRENT_LEAF_GOAL);
+
+	//	currentSmoothedPath = recoverPath(arbol,CURRENT_LEAF, arbolGoal,CURRENT_LEAF_GOAL);
 
 		if (currentPath.size()>0)
 		{
-		  adaptiveSmoother(currentPath);
+		  //adaptiveSmoother(currentPath);
+		  smoothPath(currentPath);
 		}
 		return true;
 	}
@@ -162,7 +171,9 @@ bool Planner::computePath(const QVec & target)
 	}
 }
 
-	tree<QVec>::iterator Planner::findClosestPointInTree( tree<QVec> * arb, const QVec & currentTarget){
+	
+tree<QVec>::iterator Planner::findClosestPointInTree( tree<QVec> * arb, const QVec & currentTarget)
+{
 	tree<QVec>::pre_order_iterator ini = arb->begin();
 	tree<QVec>::pre_order_iterator end = arb->end();
 	tree<QVec>::iterator nodeCurrentPos;
@@ -180,6 +191,7 @@ bool Planner::computePath(const QVec & target)
 	}
    return nodeCurrentPos;
 }
+	
 
 QVec Planner::chooseRandomPointInFreeSpace()
 {
@@ -204,10 +216,14 @@ QVec Planner::chooseRandomPointInFreeSpace()
 
 void Planner::computeRandomSequence(const QVec & target)
 {
- 	QRect floorRect(-2500,2500,5000,-5000);
+ 	//QRect floorRect(6000,-12000, 12000,-12000);  ///OJO GET THIS FROM INNERMODEL
+	//qDebug() << floorRect.left() << floorRect.right() << floorRect.bottom() << floorRect.top();
 	
-	this->fsX = QVec::uniformVector(MAX_ITER , floorRect.left()+1, floorRect.right()-1);
- 	this->fsZ = QVec::uniformVector(MAX_ITER , floorRect.bottom()+1, floorRect.top()-1);
+//	this->fsX = QVec::uniformVector(MAX_ITER , floorRect.left()+1, floorRect.right()-1);
+// 	this->fsZ = QVec::uniformVector(MAX_ITER , floorRect.bottom()+1, floorRect.top()-1);
+	this->fsX = QVec::uniformVector(MAX_ITER , 0, 12000);
+ 	this->fsZ = QVec::uniformVector(MAX_ITER , -12000, 0);
+	
 	this->fsX(0) = 	target.x();
  	this->fsZ(0) = 	target.z();
  	this->ind = 0;
@@ -221,27 +237,66 @@ bool Planner::equal(const QVec & p1, const QVec & p2)
 		return false;
 }
 
+void Planner::getCollisionObjects(InnerModelNode* node)
+{	
+// 	InnerModelMesh *mesh;
+// 	InnerModelPlane *plane;
+// 	InnerModelTransform *transformation;
+// 	
+// 	// Find out which kind of node are we dealing with
+// 	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))   //Aquí se incluyen Transform, Joint, PrismaticJoint, DifferentialRobot
+// 	{	
+// 		for(int i=0; i<node->children.size(); i++)
+// 		{
+// 			getCollisionObjects(node->children[i]);
+// 		}
+// 	}
+// 	else if ((plane = dynamic_cast<InnerModelPlane *>(node)))
+// 	{
+// 		listCollisionObjects.append(plane->id);
+// 	}
+// 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)))
+// 	{
+// 		listCollisionObjects.append(mesh->id);
+// 	}
+	
+// 	listCollisionObjects <<  "mesacentro" << "sofa0"<< "sofa1"<< "sofaAA"<< "k"<< "r"<< "b"<< 
+// 	"mesanoche1"<< "mesanoche2"<< "macetero1"<< "macetero2"<< "rrr"<< "shelve"<< 
+// 	"shelve2"<< "torchere1"<< "torchere2"<< "chair0"<< "chair1"<< "chair2"<< "chair3"<< 
+// 	"dinin_table"<< "P_Wall_0"<< "P_Door_0"<< "P_Door_0d"<< "door_camera_plane"<< "P_Wall_1"<< 
+// 	"P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< 
+// 	"P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< 
+// 	"P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< 
+// 	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
+// 	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19";
+	
+	
+	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d"<< "door_camera_plane"<< "P_Wall_1"<< 
+	"P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< 
+	"P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< 
+	"P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< 
+	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
+	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19";
+}		
+
+
 bool Planner::collisionDetector( const QVec &point,  InnerModel *innerModel)
 {
 	//Check if the virtual robot collides with any obstacle
-	innerModel->updateTransformValues("baseT", point(0), 0, point(2), 0, 0, 0);
+	innerModel->updateTransformValues("baseT", point.x(), point.y(), point.z(), 0, 0, 0);
 	bool hit = false;
-	for(int i=1; i<=16; i++)
+
+	foreach( QString name, listCollisionObjects)
 	{
-		QString caja("cajaMesh" + QString::number(i));
-		if (innerModel->collide("baseFake", caja) )
+		if (innerModel->collide("baseFake", name) or 
+			innerModel->collide("barracolumna", name) or 
+			innerModel->collide("handleftMesh1", name) or 
+			innerModel->collide("finger_right_2_mesh2", name))
 		{
 			hit = true;
 			break;
 		}
 	}
-	
-// 	bool hit = innerModel->collide("baseFake", "cajaMesh1") or innerModel->collide("baseFake", "cajaMesh2") or 
-// 						 innerModel->collide("baseFake", "cajaMesh3") or innerModel->collide("baseFake", "cajaMesh4") or
-// 						 innerModel->collide("baseFake", "cajaMesh5") or innerModel->collide("baseFake", "cajaMesh6") or
-// 						 innerModel->collide("baseFake", "cajaMesh7") or innerModel->collide("baseFake", "cajaMesh8") or
-// 						 innerModel->collide("baseFake", "cajaMesh9") or innerModel->collide("baseFake", "cajaMesh10"); 
-						 
 	return hit;
 	
 }
@@ -275,11 +330,20 @@ bool Planner::isThereAnObstacleAtPosition(const QVec & pCenter, float rX, float 
 	return false;  
 }
 
+/**
+ * @brief Local controller
+ * 
+ * @param origin ...
+ * @param target ...
+ * @param reachEnd ...
+ * @param arbol ...
+ * @param nodeCurrentPos ...
+ * @return RMat::QVec
+ */
 QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec> * arbol , tree<QVec>::iterator & nodeCurrentPos)
 {
 	float stepSize = 100.f; //100 mms chunks
 	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
-	float acumOccupancy=0.;
 	float step;
 	
 	//if too close return target
@@ -303,7 +367,6 @@ QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool
 		// center of robot position
 		point = (origin * (1-landa)) + (target * landa);
 		
-		acumOccupancy=0.;
 		//Collision detector
 		if (collisionDetector( point, innerModel) == true)
 		{
@@ -322,6 +385,15 @@ QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool
 }
 
 
+/**
+ * @brief Recovers the path between current and currentGoal
+ * 
+ * @param arbol ...
+ * @param _current ...
+ * @param arbolGoal ...
+ * @param _currentGoal ...
+ * @return QList< QVec >
+ */
 QList<QVec> Planner::recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal)
 {
 	QList<QVec> path;
@@ -357,12 +429,18 @@ QList<QVec> Planner::recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order
 	return path;
 }
 
+/**
+ * @brief Post proccess of solution path
+ * 
+ * @param list ...
+ * @return void
+ */
 void Planner::adaptiveSmoother( const QList<QVec> & list)
 {
 	float sum=0.f, sumAnt=0.f;
 	QList<QVec> localList = list;
 	
-// 	qDebug()<<"adaptiveSmoother";
+ 	qDebug() << __FILE__ << __FUNCTION__ <<"adaptiveSmoother";
   	for(int i=0; i< 10; i++)
 	{
 	  currentSmoothedPath.clear();
@@ -375,7 +453,7 @@ void Planner::adaptiveSmoother( const QList<QVec> & list)
 	  qDebug()<<"----------------currentSmoothedPath-----------------";
 	  for(int j=0 ; j< currentSmoothedPath.size();j++)
 	    qDebug()<<"point"<<j<<":"<<currentSmoothedPath[j];*/
-	  if( fabs(sumAnt-sum) == 0.f )
+	  if( fabs(sumAnt-sum) < 10 )
 		break;
 	  else
 	  {

@@ -24,15 +24,10 @@ PointsToRoad::PointsToRoad(InnerModel *innermodel, InnerModelManagerPrx _innermo
 	innerModel(innermodel), 
 	innermodelmanager_proxy(_innermodelmanager_proxy)
 {
-	//currentPoint = 0;
-	//nextPoint = 1;
-	
-	//Alert, we still don't have the road here
 }
 
 PointsToRoad::~PointsToRoad()
 {
-
 }
 
 /**
@@ -44,12 +39,11 @@ PointsToRoad::~PointsToRoad()
 void PointsToRoad::setRoad(WayPoints &road)
 {
 	Q_ASSERT(_road.size() > 1);
-	
 	//road = _road;
 	//Initialize current robot position wrt to frontier line
 	currentSign = getRobotFrontierCondition(road);
-	
-	
+	qDebug() << __FILE__ << __FUNCTION__ << "currentSign" << currentSign;
+
 }
 
 bool PointsToRoad::update(WayPoints &road)
@@ -59,25 +53,35 @@ bool PointsToRoad::update(WayPoints &road)
 	
 	if((road.finish == true) or (road.requiresReplanning == true)) 
 	{
-		qDebug() << "Nothing to do in PointsToRoad::update";
+		qDebug() << __FILE__ << __FUNCTION__ << "Nothing to do in PointsToRoad::update";
 		return false;
 	}
 		
 	//qDebug() << "Entering update";
 	bool frontier = getRobotFrontierCondition(road);
 	
-	//qDebug() << "PointsToRoad::update: frontier" << frontier << "current sign" << currentSign << "cur point" << road.currentPointIndex << "next point " << road.nextPointIndex << road.size();
+	//qDebug() << __FUNCTION__ << "PointsToRoad::update: frontier" << frontier << ". Current sign" << currentSign << ". Cur point" << road.currentPointIndex 
+	//		 << ". Next point " << road.nextPointIndex << ". Road size" << road.size() 
+	//		 << "Distance to next point" << road.robotDistanceToNextPoint(innerModel) << "Dist to current " << road.robotDistanceToCurrentPoint(innerModel);
 
+//  	if( road.robotDistanceToNextPoint(innerModel) < road.robotDistanceToCurrentPoint(innerModel) )
+// 	{
+// 		road.isLost = true;
+// 		qDebug() << __FILE__ << __FUNCTION__ << "Loosing the road";
+// 	}
+// 	else 
+// 		road.isLost = false;
+			 
 	//Check if crossed the line!
-	if ( (frontier != currentSign) and (road.robotDistanceToNextPoint(innerModel) < road.robotDistanceToCurrentPoint(innerModel)) ) 	
+	if ( (frontier != currentSign) /*and (road.robotDistanceToNextPoint(innerModel) < road.robotDistanceToCurrentPoint(innerModel))*/ ) 	
 	{
-		//qDebug() << "--------------------------linecrossed--------------------------";
+		qDebug() << "--------------------------linecrossed--------------------------";
 		if( road.nextPointIndex == road.size()-1 ) //The final goal is reached
 		{
 			road.finish = true; 
 			road.removeFirst(innermodelmanager_proxy); 
 		//	road.removeFirst(innermodelmanager_proxy); //next
-			qDebug() << "PointsToRoad::update-Road finished!";
+			qDebug() <<__FILE__ << __FUNCTION__  << "PointsToRoad::update-Road finished!";
 			return false;
 		}
 		//road to go
@@ -89,14 +93,17 @@ bool PointsToRoad::update(WayPoints &road)
 		//Remove point just passed
 		for(int i=0; i<road.currentPointIndex; i++)
 		{
-			//qDebug() << "removing point " << i;
+			qDebug() << "removing point " << i;
 			road.removeFirst(innermodelmanager_proxy);
 		}
 		road.currentPointIndex = 0;
 		road.nextPointIndex = 1;
 	}
 	else if (frontier != currentSign)
-			currentSign = getRobotFrontierCondition(road);
+	{
+		currentSign = getRobotFrontierCondition(road);
+	}
+	
 
 	QVec robot2DPos = QVec::vec2( innerModel->getBaseX(), innerModel->getBaseZ());
 	road.angleWithTangent = getAngleWithTangent(road, robot2DPos);
@@ -110,6 +117,12 @@ bool PointsToRoad::update(WayPoints &road)
 
 /////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Returns true if the perpendicular distance to the Frontier line es greater than 0
+ * 
+ * @param road ...
+ * @return bool
+ */
 bool PointsToRoad::getRobotFrontierCondition(WayPoints &road)
 {	
 	//Build a line perpendicular to the robot Z axis and passing through road[nextPoint]
@@ -135,7 +148,7 @@ bool PointsToRoad::getRobotFrontierCondition(WayPoints &road)
 		//getRobotZAxis().print("Robot Axis");
 		
 	  road.currentDistanceToFrontier = dist;
-		return (dist>=0); 
+	  return (dist>=0); 
 	}
 //  	else 
 // 	{
@@ -227,6 +240,17 @@ float PointsToRoad::roadCurvature(WayPoints &road, const QVec& robotPos)
 		return 0.f;
 }
 
+// float PointsToRoad::maxRoadCurvatureAhead(WayPoints &road, const QVec& robotPos)
+// {
+// 	int index = road.currentPointIndex;
+// 	float maxC = -999999;
+// 	while( index < road.size()-2 )
+// 	{
+// 		current = getLineSegmentBetweenPoints(road, index, index+1).signedAngleWithLine2D(getLineSegmentBetweenPoints(road, index+1, index+2));
+// 		if (current > maxC)
+// 			maxC = current;
+// 	}
+// }
 
 float PointsToRoad::distanceToNextVisible(const WayPoints &road, const QVec& robotPos)
 {

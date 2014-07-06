@@ -67,6 +67,7 @@ class WayPoints : public QList< WayPoint >
 		WayPoint const getNextPoint() const {return (*this)[nextPointIndex];};
 		QLine2D getRobotZAxis(InnerModel* innerModel);
 		void computeDistancesToNext();
+		QLine2D getTangentToCurrentPoint();
 		
 		int currentPointIndex, nextPointIndex;
 		
@@ -77,8 +78,8 @@ class WayPoints : public QList< WayPoint >
 		float roadCurvature;
 		float distanceToLastVisible;
 		bool finish;
-		float MIN_RADIUS;
 		bool isBlocked;
+		bool isLost;
 		int currentCollisionIndex;
 		float currentDistanceToFrontier;
 		bool requiresReplanning;

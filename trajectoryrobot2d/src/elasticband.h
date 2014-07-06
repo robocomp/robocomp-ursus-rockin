@@ -33,25 +33,24 @@
 class ElasticBand
 {
 	public:
-		ElasticBand(InnerModel *_innermodel, InnerModelManagerPrx _innermodelmanager_proxy);
+		ElasticBand(InnerModel *_innermodel);
 		~ElasticBand();
 		
 		//void setRoad(WayPoints *_road, const RoboCompLaser::TLaserData &laserData);
 		bool update(WayPoints &road, const RoboCompLaser::TLaserData &laserData);
 		void addPoints(WayPoints &road);
+		//void adjustPoints(WayPoints &road);
+		
 		
 	private:		
 		InnerModel *innermodel;
-		InnerModelManagerPrx innermodelmanager_proxy;
 		
 		float computeIntersectionChord( const WayPoint b1, const WayPoint b2);
 		void computeDistanceField(WayPoint &ball, const RoboCompLaser::TLaserData &laserData, float forceDistanceLimit);
-		void manageBallIntersections( WayPoints &road, const RoboCompLaser::TLaserData &laserDat ); 
 		bool computeFreePath(const WayPoint &w1, const WayPoint &w2, const RoboCompLaser::TLaserData &laserData );
 		void checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData &laserData);
 		bool checkCollision(WayPoints &road, const RoboCompLaser::TLaserData &laserData,float robotRadius);
 		float computeForces(WayPoints &road, const RoboCompLaser::TLaserData& laserData);
-	
 		void cleanPoints(WayPoints &road);
 		bool checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData);
 };
