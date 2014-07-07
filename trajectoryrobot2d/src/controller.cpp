@@ -33,40 +33,46 @@ Controller::~Controller()
 bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  WayPoints &road)
 {	
 	
-	if((road.isBlocked == true) or (road.finish == true ) or (road.requiresReplanning== true))
+	if((road.isBlocked == true) or (road.finish == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
-		qDebug() << "Controller::update - Robot blocked of target reached";
+		qDebug() << __FILE__ << __FUNCTION__ << "Robot blocked,  target reached or road lost";
 		stopTheRobot(differentialrobot_proxy);
 		return false;
 	}
 		
-	if (road.distanceToLastVisible < 400 and road.distanceToLastVisible < road.distanceToTarget ) 
-	{
-		qDebug() << "Controller::update - Robot stopped to avoid collision";
-		road.requiresReplanning = true;
-		stopTheRobot(differentialrobot_proxy);
-		return false;
-	}
+		///ELIMINADO MOEMENTANME
+		
+// 	if (road.distanceToLastVisible < 400 /*and road.distanceToLastVisible < road.distanceToTarget*/ ) 
+// 	{
+// 		qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to last point visible is" << road.distanceToLastVisible << "less than 400";
+// 		road.requiresReplanning = true;
+// 		stopTheRobot(differentialrobot_proxy);
+// 		return false;
+// 	}
 	
 	if ( time.elapsed() > delay*1000 and (road.finish==false))   //ojo desbordamientos
 	{
-		const float MAX_ADV_SPEED = 200;
+		const float MAX_ADV_SPEED = 250;
 	
+		// VRot is computed as the sum of three terms: angle with tangent to road + atan(perp. distance to road) + road curvature
+		// as descirbed in Thrun's paper on DARPA challenge
 		vrot = -road.angleWithTangent + atan( road.distanceToRoad/350.) + 0.8 * road.roadCurvature ;
 	
-		//speed control when approaching the end of the road
+		// Factors to be used in speed control when approaching the end of the road
 		float teta;
 		if( road.distanceToTarget < 500)
 			teta = exponentialFunction(1./road.distanceToTarget,1./200,0.7, 0.1);
 		else
 			teta= 1;
+		
+		//VAdv is computed as a reduction of MAX_ADV_SPEED by two exponential functions: road curvature and VRot, and teta that applies when arriving at target
  		vadvance = MAX_ADV_SPEED * exp(-fabs(2.1* road.roadCurvature)) * exp(-fabs(vrot*1.3)) * teta;
  	
-// 		//Limiting filter
+ 		// Limiting filter
  		if( vadvance > MAX_ADV_SPEED ) 
  			vadvance = MAX_ADV_SPEED;
  		
- 		//qDebug() << "Controller::update - VAdv = " << vadvance << " VRot = " << vrot;
+ 		// qDebug() << "Controller::update - VAdv = " << vadvance << " VRot = " << vrot;
  		
   		try {	differentialrobot_proxy->setSpeedBase( vadvance, vrot);	} 
   		catch (const Ice::Exception &e) { std::cout << e << std::endl;		}	

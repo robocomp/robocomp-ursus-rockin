@@ -35,65 +35,68 @@ void RcisDraw::addMesh_ignoreExisting(InnerModelManagerPrx innermodelmanager_pro
 {
 	try
 	{
+		//qDebug() << __FILE__ << __FUNCTION__ << "parent" << parent << "mesh" << a;
 		innermodelmanager_proxy->addMesh(a.toStdString(),parent.toStdString(), m);
 	} 
 	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
-	//	if (e.text != RoboCompInnerModelManager::NodeAlreadyExists)
-		if (e.text != "")
-			
-		{
-			std::cout << e << std::endl;
-			qFatal("Probably the parent does not exist!");
-		}
-		else
+		try
 		{
 			innermodelmanager_proxy->removeNode(a.toStdString());
 			innermodelmanager_proxy->addMesh(a.toStdString(),parent.toStdString(), m);
+		}
+		catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
+		{
+			qDebug() << __FUNCTION__ << "Error adding mesh.";
+			qDebug() << QString::fromStdString(e.text);
 		}
 	}
 }
 
 void RcisDraw::addTransform_ignoreExisting(InnerModelManagerPrx innermodelmanager_proxy, QString a, QString b, const RoboCompInnerModelManager::Pose3D &m)
 {
-	 try
-	 {
+	try
+	{
+		//qDebug() << __FILE__ << __FUNCTION__ << "parent" << b << "tranform" << a;
 		innermodelmanager_proxy->addTransform(a.toStdString(),"static",b.toStdString(), m);
-	 } 
-	 catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
-	 {
-		//if (e.text != RoboCompInnerModelManager::NodeAlreadyExists)
-		if (e.text != "")
+	} 
+	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
+	{
+		try
 		{
-			qFatal("Probably the parent does not exist!");
+			innermodelmanager_proxy->setPoseFromParent(a.toStdString(),m);			
 		}
-		else
+		catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 		{
-			innermodelmanager_proxy->setPoseFromParent(a.toStdString(),m);
+			qDebug() << __FILE__ << __FUNCTION__<< "Error adding transform";
+			qDebug() << QString::fromStdString(e.text);
+			qFatal("Aborting...");
 		}
-	 }
+	}
 }
 
 
 void RcisDraw::addPlane_ignoreExisting(InnerModelManagerPrx innermodelmanager_proxy, QString a, QString b, const RoboCompInnerModelManager::Plane3D &p)
 {
-	 try
-	 {
+	try
+	{
+		//qDebug() << __FILE__ << __FUNCTION__ << "parent" << a << "plane" << b;
 		innermodelmanager_proxy->addPlane(a.toStdString(),b.toStdString(), p);
-	 } 
-	 catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
-	 {
-		//if (e.text != RoboCompInnerModelManager::NodeAlreadyExists)
-		if (e.text != "")
-		{
-			qFatal("Probably the parent does not exist!");
-		}
-		else
+	} 
+	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
+	{
+		try 
 		{
 			innermodelmanager_proxy->removeNode(a.toStdString());
-			innermodelmanager_proxy->addPlane(a.toStdString(),b.toStdString(), p);
+			innermodelmanager_proxy->addPlane(a.toStdString(),b.toStdString(), p);		
+		} 
+		catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
+		{
+			qDebug() << __FUNCTION__ << "Probably the parent does not exist!";
+			qDebug() << QString::fromStdString(e.text);
+			qFatal("Aborting...");
 		}
-	 }
+	}
 }
 
 
@@ -115,11 +118,12 @@ void RcisDraw::removeObject(InnerModelManagerPrx innermodelmanager_proxy, QStrin
 {
 	try
 	 {
+		 //qDebug() << __FILE__ << __FUNCTION__ << "name" << name;
 		 innermodelmanager_proxy->removeNode(name.toStdString());
 	 } 
 	 catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
 	 {
-		//	if( e.err != RoboCompInnerModelManager::NodeAlreadyExists)
-				//qDebug() << "Something bad happened when deleting Node " << name;
+// 		qDebug() << __FUNCTION__ << "Probably the object does not exist in InnerModel!";
+// 		qDebug() << QString::fromStdString(e.text);
 	 }
 }

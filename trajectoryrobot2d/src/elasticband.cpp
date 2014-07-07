@@ -19,11 +19,9 @@
 #include <complex>
 #include <boost/concept_check.hpp>
 
-ElasticBand::ElasticBand(InnerModel *_innermodel, InnerModelManagerPrx _innermodelmanager_proxy):
-	innermodel(_innermodel),
-	innermodelmanager_proxy(_innermodelmanager_proxy)												
+ElasticBand::ElasticBand(InnerModel *_innermodel):
+	innermodel(_innermodel)
 {
-	
 }
 
 ElasticBand::~ElasticBand()
@@ -33,41 +31,78 @@ ElasticBand::~ElasticBand()
 bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
 {
 	
-	qDebug() << "ElasticBand::Update - "<< "num points " << road.size();
+	//qDebug() << __FILE__ << __FUNCTION__ << "ElasticBand::Update - "<< "num points " << road.size();
 	
 	if( road.finish == true )
 			return false;
 
+	//Tags all points in the road as visible or blocked, depending on laser visibility
+	//Only visible points are processed in this iteration
 	checkVisiblePoints(road, laserData);
 
 	//road.print();
 	
  	if( road[1].isVisible == false)
  	{
-		qDebug() << "ElasticBand::update NextPoint is NOT visible or road BLOCKED";
+		qDebug() << __FILE__ << __FUNCTION__ << "ElasticBand::update NextPoint is NOT visible or road BLOCKED";
 		road.requiresReplanning = true;
  		return false;
  	}
 	
-	
-  float total = computeForces(road, laserData); 	 
-	
 	///Instead of the Jacobian wrt the point distance field, a better approach would be the Jacobian wrt the real shape of the robot. 
 	///Mindist would be between robot pose at point, including angle, and laser field
-
+	
+	//Computes repulsive and attractive forces and moves the road elements accordingly
+	computeForces(road, laserData); 	 
+	
  	addPoints(road);
+	//adjustPoints(road);
  	cleanPoints(road);
 	
 	return true;
 }
 
+// void ElasticBand::adjustPoints(WayPoints &road)
+// {
+// 	Q_ASSERT( road.size()>1 );
+// 		
+// 	for(int i=0; i< road.size()-1; i++) 
+// 	{
+// 		if( i>0 and road[i].isVisible == false )
+// 			break;
+// 	
+// 		WayPoint &w = road[i];
+// 		WayPoint &wNext = road[i+1];
+// 		float dist = (w.pos-wNext.pos).norm2();
+// 		//qDebug() << __FUNCTION__ << "i" << i << "dist" << dist;
+// 		if( dist > ROBOT_RADIUS/2 + 50)
+// 		{
+// 			float l = ROBOT_RADIUS/2/dist;
+// 			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
+// 			road.insert(i+1,wNew);
+// 			//qDebug() << __FILE__ << __FUNCTION__ << "addPoints:: inserted at" << i+1 << (wNew.pos-road[0].pos).norm2();
+// 		}
+// 		else if( i>0 and i < road.size()-2 and dist < ROBOT_RADIUS/5)
+// 		{
+// 			road.removeAt(i+1);
+// 			//qDebug() << __FILE__<< __FUNCTION__ << "removed from" << i+1 << dist;
+// 		}
+// 	}
+// 	//qDebug() << "ElasticBand addpoints road size" << road.size();
+// }
 
+
+/**
+ * @brief Adds points to the band if two existing ones are too far apart
+ * 
+ * @param road ...
+ * @return void
+ */
 void ElasticBand::addPoints(WayPoints &road)
 {
 	Q_ASSERT( road.size()>1 );
 		
-
-	for(int i=0; i< road.size()-1; i++) // exlude 0 because it is underneath the robot
+	for(int i=0; i< road.size()-1; i++) 
 	{
 		if( i>0 and road[i].isVisible == false )
 			break;
@@ -77,18 +112,24 @@ void ElasticBand::addPoints(WayPoints &road)
 		//qDebug() << "i" << i << "dist" << (w.pos-wNext.pos).norm2();
 		float dist = (w.pos-wNext.pos).norm2();
 		
-		if( dist > ROBOT_RADIUS/2.)
+		if( dist > ROBOT_RADIUS)
 		{
 			//WayPoint wNew( (w.pos * (T)0.5) + (wNext.pos * (T)0.5));
-			float l = ROBOT_RADIUS/2./dist;
+			float l = ROBOT_RADIUS/dist;
 			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
 			road.insert(i+1,wNew);
-			qDebug() << "addPoints:: inserted at" << i+1 << dist;
+		//	qDebug() << __FILE__ << __FUNCTION__ << "addPoints:: inserted at" << i+1 << dist;
 		}
 	}
-	qDebug() << "ElasticBand addpoints road size" << road.size();
+	//qDebug() << "ElasticBand addpoints road size" << road.size();
 }
 
+/**
+ * @brief Removes points from the band if two of them are too close
+ * 
+ * @param road ...
+ * @return void
+ */
 void ElasticBand::cleanPoints(WayPoints &road)
 {
 	Q_ASSERT( road.size()>1 );
@@ -97,18 +138,16 @@ void ElasticBand::cleanPoints(WayPoints &road)
 	for(i=1; i< road.size()-2; i++) // exlude 1 to avoid deleting the nextPoint and last to avoid deleting the target
 	{
 		//qDebug() << "i" << i << "visible in clean" << road[i].isVisible;
-	
 		if( i>0 and road[i].isVisible == false )
 			break;
-	
 		WayPoint &w = road[i];
 		WayPoint &wNext = road[i+1];
 		//qDebug() << "i" << i << "dist" << (w.pos-wNext.pos).norm2();
 		float dist = (w.pos-wNext.pos).norm2();
-		if( dist < ROBOT_RADIUS/5. )
+		if( dist < ROBOT_RADIUS/3. )
 		{
 			road.removeAt(i+1);
-			qDebug() << "removed from" << i+1 << dist;
+		//	qDebug() << __FILE__<< __FUNCTION__ << "removed from" << i+1 << dist;
 		}
 	}
 }
@@ -171,8 +210,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 		{	
 			jacobian = QVec::vec3( w1.bMinusX  - w1.bPlusX , 
 														 0 ,
-														 w1.bMinusY  - w1.bPlusY 
-													 ) * (T)(1.f/(2.f*h));
+									w1.bMinusY  - w1.bPlusY ) * (T)(1.f/(2.f*h));
 																
 			repulsionForce = jacobian * ( FORCE_DISTANCE_LIMIT - w1.minDist );
 		
@@ -184,14 +222,18 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 // 		computeDistanceField(w1, laserData, FORCE_DISTANCE_LIMIT);
 // 		repulsionForce = w1.minDistPoint * (FORCE_DISTANCE_LIMIT - w1.minDist);
 		
-		float alpha = -0.4;
-		float beta = 0.1;
+		float alpha = -0.7;
+		float beta = 0.03;
 			
 		QVec change = (atractionForce*alpha) + (repulsionForce*beta);		
-	/*	if(i == road.nextPointIndex or i==road.currentPointIndex) 
-			qFatal("fary");
-	*/	
+		
+		//Now we remove the tangencial component of the force to avoid recirculation of band points
+		//QVec pp = road.getTangentToCurrentPoint().getPerpendicularVector();
+		//QVec nChange = pp * (pp * change);
+		
 		w1.pos = w1.pos - change;
+		//w1.pos = w1.pos - nChange;
+		
 		totalChange = totalChange + change.norm2();
 	}
 	return totalChange;
@@ -201,7 +243,6 @@ bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLase
 {
 	//A point of the road is visible if it is between the robot and the laser beam running through it, and if the previous point was visible
 	//We go through the laser array until the nearest beam is found
-	//Another option is to translate the whole laser array to the bubble reference system or to build an inverse index
 	//Compute max and min angles in laser beam
 	
 	Q_ASSERT(road.size()>1);
@@ -223,7 +264,7 @@ bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLase
 		
 		if(((angle < minAngle) or (angle > maxAngle)) and (pr.z()>10)) 
 		{
-			qDebug()<< "ElasticBand::checkVisiblePoints - exiting due to angle" << angle << i << pr;
+			qDebug() << __FILE__<< __FUNCTION__ << "ElasticBand::checkVisiblePoints - exiting due to angle" << angle << i << pr;
 			w.isVisible = false;
 			for(int k=i;k<road.size();k++)
 				road[k].isVisible = false;
@@ -380,7 +421,7 @@ void ElasticBand::checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData 
 			if( pr.norm2() > laserData[j].dist ) // laser beam is smaller than p distance to robot. The path is crossed by an obstacle
 			{
 				road.isBlocked = true;
-				qDebug() << "Blocked index" << i << "dist robot2point" << pr.norm2() << "laser" << laserData[j].dist << "k" << k << pr 
+				qDebug() << __FILE__ << "Blocked index" << i << "dist robot2point" << pr.norm2() << "laser" << laserData[j].dist << "k" << k << pr 
 									<< "laserIndex" << j << "laserAngle" << laserData[j].angle << "angle" << angle;;
 				break;
 			}		
@@ -390,54 +431,7 @@ void ElasticBand::checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData 
 
 
 
-void ElasticBand::manageBallIntersections(WayPoints &road,  const RoboCompLaser::TLaserData &laserData )
-{	
-	for(int i=0; i<road.size()-1; i++)
-	{
-		qDebug() << "size" << road.size() << "i" << i;
-		//Local reference assignment to simplify code
-		WayPoint &w1 = road[i];
-		WayPoint &w2 = road[i+1];
-		QVec midPoint = (w1.pos * (T)0.5) + (w2.pos * (T)0.5);
-		float length = (w1.pos -w2.pos).norm2();
-		
-		//compute the length of the intersection of two adjacent circles
-		float chord = computeIntersectionChord(w1, w2);
-		qDebug() << "ElasticBand::manageBallIntersections: Chord" << chord ;
-		
-		//compute if the path between two adjacent circles is not crossed bu current laser measures
-		bool freePath = computeFreePath( w1, w2, laserData );
-		qDebug() << "ElasticBand::manageBallIntersections: Free Path" << freePath ;
-				
-		if( (freePath == true) and (chord < 400) and (w1.minDist >= road.MIN_RADIUS)) //insert ball if intersection is under 400 and radious > 250
-		{
-			float landa = 150./length; ///CHECK
-			WayPoint w( w1.pos * (T)(1.-landa) + w2.pos * (T)landa );
-			road.insert(i+1,w);
-			qDebug() << "ADDING ball because too far apart";
-		}
-		
-		 //we need to insert a ball at 45 degrees and close enough to get a wide enough intersection, to avoid the obstacle
-		if( freePath == false )
-		{
-			QLine2D line(w1.pos , w2.pos); 
-			line.print("line");
-			QLine2D newLine = line.getPlus45DegreesLinePassingThroughPoint(w1.pos);
-			newLine.print("newline");
-			QVec p = newLine.pointAlongLineStartingAtP1AtLanda(w1.pos, 250.);
-			WayPoint w( QVec::vec3(p.x(),0,p.y()) );
-			road.insert(i+1,w);
-			qDebug() << "ADDING ball because blocking path" << w.pos;
-			
-		}
-		//removing
-		if( length < road.MIN_RADIUS/2) //delete ball if very close to previous
-		{
-			//road.removeAt(i);
-			//qDebug() << "REMOVING ball because too close";
-		}
-	}		
-}
+
 
 /**
  * @brief The path between two adjacent nodes is free if the line joining their centers is not crossed by a laser measure * 
@@ -462,7 +456,7 @@ bool ElasticBand::computeFreePath(const WayPoint &w1, const WayPoint &w2, const 
 	uint i;
 	float init = laserData[0].angle;
 			
-	qDebug() << "angle" << angle << "length" << length << "init" << init << pr << w1.pos << w2.pos;
+	qDebug() << __FILE__<< __FUNCTION__ << "angle" << angle << "length" << length << "init" << init << pr << w1.pos << w2.pos;
 	for(i=1; i< laserData.size();i++)
 	{
 		if( laserData[i].angle > init ) //ascending order
@@ -480,7 +474,7 @@ bool ElasticBand::computeFreePath(const WayPoint &w1, const WayPoint &w2, const 
 	//Now is the path to the next bubble is blocked we find an alternative free direction or report complete failure.
 	//additional criteria: free dir with minimun angle wrt to previous segment aka inertial term
 	
-	qDebug() << "i" << i << pr.norm2()+250. << laserData[i].dist;
+	qDebug() << __FILE__ << __FUNCTION__ << "i" << i << pr.norm2()+250. << laserData[i].dist;
 	//now we have the k index. we need a simple interpolation among neighboors and the final check
 	if( pr.norm2()+250. > laserData[i].dist ) // laser beam is smaller than p point. The path is crossed by an obstacle
 	{
