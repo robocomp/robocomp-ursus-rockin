@@ -51,7 +51,7 @@
 				<plane id="P_Door_0d" py="1200" nz="1" size="1000,-2400,100" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/door_entree.png" />
 				<transform id="door_camera" tz="200" ty="2550" rx="1"> 
 					<plane id="door_camera_plane" nz="1" pz="0" size="80,60" repeat="1" texture="#0000ff" />
-					<rgbd id="door_rgbd" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
+<!-- 					<rgbd id="door_rgbd" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" /> -->
 				</transform>	
 			</transform>
 			<!-- Large wall at the top -->
@@ -264,7 +264,7 @@
 														<transform id="sensor_transform2" ty="125" tz="27" > <!-- rx="0.7" -->
 															<transform id="rgbd_transform" rx="0">
 																<plane id="sensor" nz="1" pz="-50" size="80,60" repeat="1" texture="#0000ff" />
-																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" />
+<!-- 																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" /> -->
 															</transform>
 														</transform>
 													</transform>
