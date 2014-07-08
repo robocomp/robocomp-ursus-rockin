@@ -49,8 +49,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
 	//target = QVec::vec3(800,10,-3000);
-	//target = QVec::vec3(1800,10,-5300);
-	target = QVec::vec3(5800,10,-5000);
+	target = QVec::vec3(6000,10,-8100);
+	//target = QVec::vec3(5800,10,-5000);
 	
 	
 	
@@ -66,13 +66,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	qDebug() << __FUNCTION__ << "Planning ...";
 	//	drawThinkingRobot("red");
 	planner->computePath(target);
-	
 	if(planner->getPath().size() == 0)
 		qFatal("SpecificWorker: Path NOT found. Aborting");
-
+	
 	//planner->drawTree(innermodelmanager_proxy);
 	//road.readRoadFromList( planner->getPath() );
 	road = planner->getPath();
+	//road = planner->smoothRoad(road);
 	road.print();
 	
 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
@@ -109,9 +109,7 @@ SpecificWorker::~SpecificWorker()
 }
 
 void SpecificWorker::compute( )
-{
-	static QTime reloj=QTime::currentTime();
-	
+{	
 	try{	differentialrobot_proxy->getBaseState(bState);  }  
 	catch(const Ice::Exception &ex){ cout << ex << endl;};
 	try{	laserData = laser_proxy->getLaserData();}  
@@ -157,12 +155,6 @@ void SpecificWorker::compute( )
 			road.computeDistancesToNext();
 		}
 	}
-	
-// 	if (reloj.elapsed() > 3000) 
-// 	{
-// 		road = planner->smoothRoad(road);
-// 		reloj.restart();
-// 	}
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)

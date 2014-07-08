@@ -56,7 +56,6 @@ class WayPoints : public QList< WayPoint >
 		~WayPoints();
 		void readRoadFromFile(InnerModel *innerModel, std::string name);
 		void readRoadFromList(QList<QVec> list);
-		
 		void printRobotState(InnerModel* innerModel);
 		void print();
 		bool draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo = -1);  //Default in upTo means all list

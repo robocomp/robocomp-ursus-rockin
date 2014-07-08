@@ -30,7 +30,11 @@ Planner::Planner(InnerModel *innerModel_, QObject *parent)
 {
 	innerModel = innerModel_;
 	
-	//Add a fake robot (transform and mesh) to Innermodel to emulate paths with it. OJOOOO Se necesita un clon completo con brazos, etc para las colisiones.
+	//Add a fake robot (transform and mesh) to Innermodel to emulate paths with it. OJOOOO Se necesita un clon completo con brazos, etc para las colisiones
+	
+	//Pedir el subarbol a partir de "base"
+	//insertarlo colgando de floor
+	
 	InnerModelTransform *t = innerModel->newTransform("baseT", "static", innerModel->getNode("floor"), 0, 0, 0, 0, 0, 0);
 	innerModel->getNode("floor")->addChild(t);
 	InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
@@ -166,9 +170,9 @@ bool Planner::computePath(const QVec & target)
 
 		if (currentPath.size()>0)
 		{
-		  smoothPath(currentPath);
-		  //smoothPathStochastic(currentPath);
-		  //currentSmoothedPath = currentPath;
+		  //smoothPath(currentPath);
+			smoothPathStochastic(currentPath);
+		    currentSmoothedPath = currentPath;
 	}
 		return true;
 	}
@@ -266,13 +270,27 @@ QList<QVec> Planner::recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order
 	return path;
 }
 
-WayPoints Planner::smoothRoad( const WayPoints &road)
+WayPoints Planner::smoothRoad( WayPoints road)
 {
+	for(int i=0; i< road.size()-1; i++) 
+	{
+		WayPoint &w = road[i];
+		WayPoint &wNext = road[i+1];
+		float dist = (w.pos-wNext.pos).norm2();		
+		if( dist > ROBOT_RADIUS)
+		{
+			float l = ROBOT_RADIUS/dist;
+			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
+			road.insert(i+1,wNew);
+		}
+	}
 	currentSmoothedPath.clear();
 	QList<QVec> l;
 	foreach(WayPoint w, road)
 		l.append(w.pos);
+
 	smoothPath(l);
+	
 	WayPoints w;
 	w.readRoadFromList(currentSmoothedPath);
  	return w;
@@ -334,7 +352,7 @@ void Planner::smoothPathStochastic(QList< QVec >& list)
 		{
 			qDebug() << "cortando desde " << first+1 << "hasta" << second;
 			for(int j=first+1; j<second; j++)
-				list.removeAt(j);
+				list.removeAt(first+1);
 		}
 		if(list.size() < 3)
 			break;
@@ -437,7 +455,8 @@ void Planner::getCollisionObjects(InnerModelNode* node)
 	"P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< 
 	"P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< 
 	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
-	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19";
+	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19" <<
+	 "dinin_table";
 }		
 
 

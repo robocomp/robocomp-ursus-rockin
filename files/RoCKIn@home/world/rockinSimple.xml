@@ -8,7 +8,16 @@
 			<plane id="worldy" py="250" nx="1" size="5,500,5" repeat="1" texture="#00ff00" />
 			<plane id="worldz" pz="250" nx="1" size="500,5,5" repeat="1" texture="#0000ff" />
 		</transform>	
-			
+		
+		<!--<transform id="b_t" tx="8500" tz="-2300" ty="0">
+			<mesh id="b" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Alicudi.3ds" rx="1.57" rz="-1.57" scale="1000,1000,1000"  />
+		</transform>-->
+		
+		<transform id="dinin_table_t" tx="6400" tz="-7700" ry="1.57">
+			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Table N250414.3DS" rx="1.57" rz="1.57" scale="20,20,25"  />
+		</transform>
+	
+		
 		<transform id="floor">
 
 			<!-- Left wall of the hallway -->

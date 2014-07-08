@@ -40,7 +40,7 @@ Q_OBJECT
   
 		void setMaxIter( int v) 						{ MAX_ITER = v;}
 		bool computePath(const QVec &target);
-		WayPoints smoothRoad( const WayPoints &road);
+		WayPoints smoothRoad( WayPoints road);
 		void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
 		// 	 void drawPath( qWorld *world, const QList<QVec> & path , const QColor & color);
 		// 	 void drawPath(qWorld *world);
