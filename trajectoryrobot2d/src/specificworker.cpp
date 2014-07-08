@@ -18,6 +18,7 @@
  */
  
  #include "specificworker.h"
+#include <qt4/QtCore/qdatetime.h>
 
 /**
 * \brief Default constructor
@@ -61,7 +62,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//qFatal("fary");
 	
 	//Plan 
-	planner = new Planner(innerModel);
+	planner = new Planner(innerModel);									////////PLANNER SHOOULD TAKE WAYPOINTS structure
 	qDebug() << __FUNCTION__ << "Planning ...";
 	//	drawThinkingRobot("red");
 	planner->computePath(target);
@@ -70,7 +71,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 		qFatal("SpecificWorker: Path NOT found. Aborting");
 
 	//planner->drawTree(innermodelmanager_proxy);
-	road.readRoadFromList( planner->getPath() );
+	//road.readRoadFromList( planner->getPath() );
+	road = planner->getPath();
 	road.print();
 	
 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
@@ -108,14 +110,14 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	static QTime reloj=QTime::currentTime();
+	
 	try{	differentialrobot_proxy->getBaseState(bState);  }  
 	catch(const Ice::Exception &ex){ cout << ex << endl;};
 	try{	laserData = laser_proxy->getLaserData();}  
 	catch(const Ice::Exception &ex){ cout << ex << endl;};
 		
 	innerModel->update();
-		
-	//elasticband->update( road, laserData );
 		
 	elasticband->update( road, laserData );
 	
@@ -124,7 +126,6 @@ void SpecificWorker::compute( )
     controller->update(differentialrobot_proxy, road);
 	
 	road.draw(innermodelmanager_proxy, innerModel);	
-	
 	
 	if(road.finish == true)
 	{
@@ -148,13 +149,20 @@ void SpecificWorker::compute( )
 		else
 		{
 			//drawThinkingRobot("green");
-			road.readRoadFromList( planner->getPath() );
+			//road.readRoadFromList( planner->getPath() );
+			road = planner->getPath();
 			road.requiresReplanning = false;
 			elasticband->addPoints(road);  //SEND THIS TO A RESET
 			//elasticband->adjustPoints(road);  //SEND THIS TO A RESET
 			road.computeDistancesToNext();
 		}
 	}
+	
+// 	if (reloj.elapsed() > 3000) 
+// 	{
+// 		road = planner->smoothRoad(road);
+// 		reloj.restart();
+// 	}
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
