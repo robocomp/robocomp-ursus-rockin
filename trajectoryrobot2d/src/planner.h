@@ -35,11 +35,11 @@ class Planner : public QObject
 {
 Q_OBJECT
 	public:
-		Planner(InnerModel *innerModel_, QObject *parent=0);
+		Planner(const InnerModel &innerModel_, QObject *parent=0);
 		~Planner(){};
   
 		void setMaxIter( int v) 						{ MAX_ITER = v;}
-		bool computePath(const QVec &target);
+		bool computePath(const QVec &target, InnerModel *inner);
 		WayPoints smoothRoad( WayPoints road);
 		void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
 		// 	 void drawPath( qWorld *world, const QList<QVec> & path , const QColor & color);
@@ -70,10 +70,10 @@ Q_OBJECT
 		void smoothPath( const QList< QVec >& list);
 		void smoothPathStochastic( QList<QVec> & list);
 		tree<QVec>::iterator findClosestPointInTree( tree<QVec> *arb , const QVec & currentTarget);
-		void getCollisionObjects(InnerModelNode* node); 										//Obtains a list of id's of planes and meshes for collision detection
-		bool collisionDetector( const QVec &point,  InnerModel *innerModel);	
-		QStringList listCollisionObjects;
-		
+		void getCollisionObjects(InnerModelNode* node); 														// Obtains a list of id's of planes and meshes for collision detection
+		bool collisionDetector( const QVec &point,  InnerModel *innerModel);			
+		QStringList listCollisionObjects, listCollisionRobotParts;												// List of meshes used for collision detection							
+																			
   public:
 		
 };

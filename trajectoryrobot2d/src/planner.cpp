@@ -26,22 +26,20 @@
  * @param innerModel_ Pointer to InnerModel
  * @param parent ...
  */
-Planner::Planner(InnerModel *innerModel_, QObject *parent)
+Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 {
-	innerModel = innerModel_;
 	
+	// 	innerModel = innerModel_;
+	//Clone innermodel
+	innerModel = new InnerModel(innerModel_);
 	//Add a fake robot (transform and mesh) to Innermodel to emulate paths with it. OJOOOO Se necesita un clon completo con brazos, etc para las colisiones
 	
-	//Pedir el subarbol a partir de "base"
-	//insertarlo colgando de floor
-	
-	InnerModelTransform *t = innerModel->newTransform("baseT", "static", innerModel->getNode("floor"), 0, 0, 0, 0, 0, 0);
-	innerModel->getNode("floor")->addChild(t);
-	InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
-	t->addChild(m);
+	//InnerModelTransform *t = innerModel->newTransform("baseT", "static", innerModel->getNode("floor"), 0, 0, 0, 0, 0, 0);
+	//innerModel->getNode("floor")->addChild(t);
+	//InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
+	//t->addChild(m);
   
 	//Create list of colision objects;
-	listCollisionObjects.clear();
 	getCollisionObjects(innerModel->getRoot());
 	qDebug() << __FILE__ << __FUNCTION__ << "listaCollision" <<  listCollisionObjects;
 	
@@ -53,23 +51,28 @@ Planner::Planner(InnerModel *innerModel_, QObject *parent)
 }
 
 /**
-* \brief computes a path to a target from current position of robot. Is called from outside whenever a new path to target is requiered
+* \brief computes a path to a target from current position of robot. Is called from outside whenever a new path to target is required
 * @param target point in 3D space
 */
-bool Planner::computePath(const QVec & target)
+bool Planner::computePath(const QVec &target, InnerModel *inner)
 {
+	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning";
 	QVec currentTarget = finalTarget;
-	QVec robot = innerModel->getBaseCoordinates();
+	
+	//We need to resynchronize here because in subsequent call the robot will be "Dios sabe dónde"
+	QVec robot = inner->transform("world", QVec::zeros(3), "robot");
+	float rYaw =  inner->getRotationMatrixTo("world", "robot").extractAnglesR_min()(1);
+	innerModel->updateTransformValues("robot", robot.x(), robot.y(), robot.z(), 0, rYaw, 0);
 	QVec currentTargetGoal = robot;
 
 	//If target on obstacle, abort
 	if(collisionDetector( target, innerModel ) == true)
 	{
-		qDebug() << __FILE__ << __FUNCTION__ << "Planner::computePath - collides in target";
+		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";
 		PATH_FOUND = false;
 		return false;
 	}
-	
+
 	//Sample R2 space
 	computeRandomSequence(target);	
 	
@@ -170,9 +173,9 @@ bool Planner::computePath(const QVec & target)
 
 		if (currentPath.size()>0)
 		{
-		  //smoothPath(currentPath);
-			smoothPathStochastic(currentPath);
-		    currentSmoothedPath = currentPath;
+		  smoothPath(currentPath);
+		//	smoothPathStochastic(currentPath);
+		 //   currentSmoothedPath = currentPath;
 	}
 		return true;
 	}
@@ -449,36 +452,56 @@ void Planner::getCollisionObjects(InnerModelNode* node)
 // 	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
 // 	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19";
 	
-	
-	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d"<< "door_camera_plane"<< "P_Wall_1"<< 
+	listCollisionObjects.clear();
+	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d" << "P_Wall_1"<< 
 	"P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< 
 	"P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< 
 	"P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< 
 	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
 	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19" <<
 	 "dinin_table";
+	
+	listCollisionRobotParts.clear();
+	listCollisionRobotParts << "base_mesh" << "barracolumna" << "tabletMesh" << "arm_right_1_mesh" << "shoulder_right_1_mesh"
+							<< "shoulder_right_2_mesh" << "shoulder_right_3_mesh" << "elbow_right_mesh" << "handMesh1"  
+							<< "arm_left_1_mesh" << "shoulder_left_1_mesh" << "shoulder_left_2_mesh" 
+							<< "shoulder_left_3_mesh" << "elbow_left_mesh" << "handleftMesh1";
 }		
-
 
 bool Planner::collisionDetector( const QVec &point,  InnerModel *innerModel)
 {
 	//Check if the virtual robot collides with any obstacle
-	innerModel->updateTransformValues("baseT", point.x(), point.y(), point.z(), 0, 0, 0);
+	//innerModel->updateTransformValues("baseT", point.x(), point.y(), point.z(), 0, 0, 0);
+	innerModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
 	bool hit = false;
 
-	foreach( QString name, listCollisionObjects)
+	QString worldPart, robotPart;
+	try
 	{
-		if (innerModel->collide("baseFake", name) /*or    //We cannot check the other meshes here because they are not on the clone robot. A complete clone is needed
-			innerModel->collide("barracolumna", name) or 
-			innerModel->collide("handleftMesh1", name) or 
-			innerModel->collide("finger_right_2_mesh2", name)*/)
+		foreach( worldPart, listCollisionObjects)
 		{
-			hit = true;
-			break;
+			//qDebug() << "vertices of" << robotPart << innerModel->getNode(robotPart)->fclMesh->num_vertices;
+			foreach( robotPart, listCollisionRobotParts)
+			{
+				//qDebug() << robotPart << worldPart;
+				if( innerModel->collide(robotPart, worldPart))
+				{ 
+					hit = true;  
+					qDebug() << "A fucking collision finally between" << robotPart << "and" << worldPart;
+					qFatal("fary");
+					break; 
+				}
+			}	
+			if( hit == true) break;   //To get out of the first
 		}
 	}
-	return hit;
-	
+	catch(int ex) 
+	{ 
+		if( ex == 1 ) qDebug() << "robotPart" << robotPart << "not found in InnerModel";
+		if( ex == 2 ) qDebug() << "worldPart" << worldPart << "not found in InnerModel";
+		qFatal("Fary");
+	}
+	return hit;	
 }
 
 ////////////////////////////////////////////////////////////////////////
