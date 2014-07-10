@@ -18,6 +18,7 @@
  */
  
  #include "specificworker.h"
+#include <qt4/QtCore/qdatetime.h>
 
 /**
 * \brief Default constructor
@@ -48,7 +49,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
 	//target = QVec::vec3(800,10,-3000);
-	//target = QVec::vec3(1800,10,-5300);
+//	target = QVec::vec3(6000,10,-8100);
 	target = QVec::vec3(5800,10,-5000);
 	
 	
@@ -67,16 +68,17 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//qFatal("fary");
 	
 	//Plan 
-	planner = new Planner(innerModel);
+	planner = new Planner(*innerModel);									////////PLANNER SHOOULD TAKE WAYPOINTS structure
 	qDebug() << __FUNCTION__ << "Planning ...";
 	//	drawThinkingRobot("red");
-	planner->computePath(target);
-	
+	planner->computePath(target, innerModel);
 	if(planner->getPath().size() == 0)
 		qFatal("SpecificWorker: Path NOT found. Aborting");
-
+	
 	//planner->drawTree(innermodelmanager_proxy);
-	road.readRoadFromList( planner->getPath() );
+	//road.readRoadFromList( planner->getPath() );
+	road = planner->getPath();
+	//road = planner->smoothRoad(road);
 	road.print();
 	
 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
@@ -113,15 +115,13 @@ SpecificWorker::~SpecificWorker()
 }
 
 void SpecificWorker::compute( )
-{
+{	
 	try{	differentialrobot_proxy->getBaseState(bState);  }  
 	catch(const Ice::Exception &ex){ cout << ex << endl;};
 	try{	laserData = laser_proxy->getLaserData();}  
 	catch(const Ice::Exception &ex){ cout << ex << endl;};
 		
 	innerModel->update();
-		
-	//elasticband->update( road, laserData );
 		
 	elasticband->update( road, laserData );
 	
@@ -130,7 +130,6 @@ void SpecificWorker::compute( )
     controller->update(differentialrobot_proxy, road);
 	
 	road.draw(innermodelmanager_proxy, innerModel);	
-	
 	
 	if(road.finish == true)
 	{
@@ -147,14 +146,15 @@ void SpecificWorker::compute( )
 		qDebug("Planning ...");
 		//drawThinkingRobot("red");
 		innerModel->update();
-		bool havePlan = planner->computePath( target );
+		bool havePlan = planner->computePath( target, innerModel );
 	
 		if(havePlan == false or planner->getPath().size() == 0)
 			qFatal("NO PLAN AVAILABLE");
 		else
 		{
 			//drawThinkingRobot("green");
-			road.readRoadFromList( planner->getPath() );
+			//road.readRoadFromList( planner->getPath() );
+			road = planner->getPath();
 			road.requiresReplanning = false;
 			elasticband->addPoints(road);  //SEND THIS TO A RESET
 			//elasticband->adjustPoints(road);  //SEND THIS TO A RESET

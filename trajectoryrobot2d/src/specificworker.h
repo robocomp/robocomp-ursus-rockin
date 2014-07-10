@@ -28,6 +28,7 @@
 #include "elasticband.h"
 #include "waypoints.h"
 #include "planner.h"
+//#include "ParabolicPathSmooth/smoother.h"
 
 /**
        \brief Algorithm to control de robot along a trajectory defined by a set of points
@@ -60,6 +61,8 @@ private:
 	ElasticBand *elasticband;
 	
 	Planner *planner;
+	
+	//Smoother smoother;
 	
 	void readRoadFromFile(string name, WayPoints *road);
 	void cleanWorld();

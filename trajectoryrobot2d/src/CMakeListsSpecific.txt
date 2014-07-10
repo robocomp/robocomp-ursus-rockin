@@ -9,6 +9,7 @@ SET ( SOURCES
   rcisdraw.cpp
   waypoints.cpp
   planner.cpp
+  #ParabolicPathSmooth/smoother.cpp
 )
 
 # Headers set

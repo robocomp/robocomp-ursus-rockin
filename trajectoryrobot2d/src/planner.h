@@ -27,56 +27,53 @@
 #include <InnerModelManager.h>
 #include "rcisdraw.h"
 #include "qline2d.h"
-
-#define GLOBAL_OCCUPANCY_THRESHOLD 18.f
+#include "waypoints.h"
 
 using namespace RoboCompInnerModelManager;
 
 class Planner : public QObject
 {
 Q_OBJECT
-public:
-	Planner(InnerModel *innerModel_, QObject *parent=0);
-	~Planner(){};
+	public:
+		Planner(const InnerModel &innerModel_, QObject *parent=0);
+		~Planner(){};
   
-	 void setMaxIter( int v) 		{ MAX_ITER = v;}
-	 bool computePath(const QVec &target);
- 	 void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
-// 	 void drawPath( qWorld *world, const QList<QVec> & path , const QColor & color);
-// 	 void drawPath(qWorld *world);
-// 	 void drawSmoothedPath(qWorld *world);
+		void setMaxIter( int v) 						{ MAX_ITER = v;}
+		bool computePath(const QVec &target, InnerModel *inner);
+		WayPoints smoothRoad( WayPoints road);
+		void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
+		// 	 void drawPath( qWorld *world, const QList<QVec> & path , const QColor & color);
+		// 	 void drawPath(qWorld *world);
+		// 	 void drawSmoothedPath(qWorld *world);
 
-	 QList<QVec> getPath() const	{ return currentSmoothedPath;}; 
-	 QVec trySegmentToTarget(const QVec & origin, const QVec & target, bool & reachEnd, tree<QVec>  *arbol, tree<QVec>::iterator & nodeCurrentPos);
-	 //QVec tryBezierToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec>  *arbol , tree<QVec>::iterator & nodeCurrentPos);
-	 QList<QVec> recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal);
-	 bool isThereAnObstacleAtPosition(const QVec & pCenter, float rX, float rZ);
+		WayPoints getPath() { WayPoints road; road.readRoadFromList(currentSmoothedPath); return road;}; 
+		//QVec tryBezierToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec>  *arbol , tree<QVec>::iterator & nodeCurrentPos);
 	 
   private:
 		InnerModel *innerModel;
 		tree<QVec> *arbol, *arbolGoal, *aux;
 		tree<QVec>::pre_order_iterator CURRENT_LEAF, CURRENT_LEAF_GOAL;
-		void cellOccupancyAlongLine( const QVec & roiPos);
-		QVec chooseRandomPointInFreeSpace();
-		bool collisionDetector( const QVec &point,  InnerModel *innerModel);
-		bool equal(const QVec & p1, const QVec & p2);
-		void smoothPath( const QList<QVec> & list);
-		void adaptiveSmoother( const QList<QVec> & list);
-		QList<QVec> adaptiveSmootherInsertPoints( const QList<QVec> & list);
-		tree<QVec>::iterator findClosestPointInTree( tree<QVec> *arb , const QVec & currentTarget);
 		QVec fsX, fsZ;
-		void computeRandomSequence(const QVec & target);
 		int ind;
-		//QVec p2Ant; //init point
 		QVec finalTarget;
 		bool  PATH_FOUND;
 		QVec p1,p2,origin,target;
 		int MAX_ITER;
 		QList<QVec> currentPath, currentSmoothedPath, currentAdaptiveSmoothedPath;
-		void getCollisionObjects(InnerModelNode* node); 										//Obtains a list of id's of planes and meshes for collision detection
-		
-		QStringList listCollisionObjects;
-		
+	    QVec trySegmentToTarget(const QVec & origin, const QVec & target, bool & reachEnd, tree<QVec>  *arbol, tree<QVec>::iterator & nodeCurrentPos);
+		QList<QVec> recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal);
+		bool isThereAnObstacleAtPosition(const QVec & pCenter, float rX, float rZ);
+
+		QVec chooseRandomPointInFreeSpace(const QVec &currentTarget);
+		void computeRandomSequence(const QVec & currentTarget);
+		bool equal(const QVec & p1, const QVec & p2);
+		void smoothPath( const QList< QVec >& list);
+		void smoothPathStochastic( QList<QVec> & list);
+		tree<QVec>::iterator findClosestPointInTree( tree<QVec> *arb , const QVec & currentTarget);
+		void getCollisionObjects(InnerModelNode* node); 														// Obtains a list of id's of planes and meshes for collision detection
+		bool collisionDetector( const QVec &point,  InnerModel *innerModel);			
+		QStringList listCollisionObjects, listCollisionRobotParts;												// List of meshes used for collision detection							
+																			
   public:
 		
 };

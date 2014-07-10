@@ -20,59 +20,75 @@
 #include "planner.h"
 #include <boost/concept_check.hpp>
 
-Planner::Planner(InnerModel *innerModel_, QObject *parent)
+/**
+ * @brief Constructor of a RRT Planner class. Currently works for (x,0,z) poses (2D)
+ * 
+ * @param innerModel_ Pointer to InnerModel
+ * @param parent ...
+ */
+Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 {
-	this->innerModel = innerModel_;
-	InnerModelTransform *t = innerModel->newTransform("baseT", "static", innerModel->getNode("floor"), 0, 0, 0, 0, 0, 0);
-	innerModel->getNode("floor")->addChild(t);
-	InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
-	t->addChild(m);
+	
+	// 	innerModel = innerModel_;
+	//Clone innermodel
+	innerModel = new InnerModel(innerModel_);
+	//Add a fake robot (transform and mesh) to Innermodel to emulate paths with it. OJOOOO Se necesita un clon completo con brazos, etc para las colisiones
+	
+	//InnerModelTransform *t = innerModel->newTransform("baseT", "static", innerModel->getNode("floor"), 0, 0, 0, 0, 0, 0);
+	//innerModel->getNode("floor")->addChild(t);
+	//InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
+	//t->addChild(m);
   
 	//Create list of colision objects;
-	listCollisionObjects.clear();
 	getCollisionObjects(innerModel->getRoot());
 	qDebug() << __FILE__ << __FUNCTION__ << "listaCollision" <<  listCollisionObjects;
 	
-	//Trees and planning
+	//Trees (forward and backward) creation
 	arbol = new tree<QVec>;
 	arbolGoal = new tree<QVec>;
-	//p2Ant = innerModel->robotToWorld(QVec::vec3(0,0,-500));	
 	PATH_FOUND = false;
 	MAX_ITER = 5000;
-
 }
 
 /**
-* \brief computes a path to a target from current position of robot. Is activated asynchronously
+* \brief computes a path to a target from current position of robot. Is called from outside whenever a new path to target is required
 * @param target point in 3D space
 */
-bool Planner::computePath(const QVec & target)
+bool Planner::computePath(const QVec &target, InnerModel *inner)
 {
-	
-	this->finalTarget = target;
+	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning";
 	QVec currentTarget = finalTarget;
-	QVec robot = innerModel->getBaseCoordinates();
+	
+	//We need to resynchronize here because in subsequent call the robot will be "Dios sabe dónde"
+	QVec robot = inner->transform("world", QVec::zeros(3), "robot");
+	float rYaw =  inner->getRotationMatrixTo("world", "robot").extractAnglesR_min()(1);
+	innerModel->updateTransformValues("robot", robot.x(), robot.y(), robot.z(), 0, rYaw, 0);
 	QVec currentTargetGoal = robot;
 
-	if(collisionDetector( this->finalTarget, innerModel ) == true)
+	//If target on obstacle, abort
+	if(collisionDetector( target, innerModel ) == true)
 	{
-		qDebug() << __FILE__ << __FUNCTION__ << "Planner::computePath - collides in target";
+		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";
 		PATH_FOUND = false;
 		return false;
 	}
+
+	//Sample R2 space
+	computeRandomSequence(target);	
 	
-	computeRandomSequence(this->finalTarget);	
+	//Clean trees
  	arbol->clear();
 	arbolGoal->clear();
 
+	//Handy iterators
 	tree<QVec>::iterator top, nodeCurrentPos, auxNode, auxNodeGoal;
 	tree<QVec>::iterator topGoal, nodeCurrentPosGoal;
 
+	//Initialize trees
 	top = arbol->begin();
 	topGoal =arbolGoal->begin();
-
 	nodeCurrentPos = arbol->insert(top, robot);
-	nodeCurrentPosGoal = arbolGoal->insert(topGoal, finalTarget);
+	nodeCurrentPosGoal = arbolGoal->insert(topGoal, target);
    	CURRENT_LEAF_GOAL = nodeCurrentPosGoal;
    	CURRENT_LEAF = nodeCurrentPos;
    
@@ -84,7 +100,7 @@ bool Planner::computePath(const QVec & target)
 	for(i=0; i< MAX_ITER; i++)
 	{
 		//get new point form random sequence. First point is always the target
-		currentTarget = chooseRandomPointInFreeSpace();
+		currentTarget = chooseRandomPointInFreeSpace(target);
 		// find closest point from random point to tree
 		nodeCurrentPos = findClosestPointInTree( arbol, currentTarget);	
 		
@@ -155,13 +171,12 @@ bool Planner::computePath(const QVec & target)
 		}
  		currentPath = recoverPath(arbol,CURRENT_LEAF, arbolGoal,CURRENT_LEAF_GOAL);
 
-	//	currentSmoothedPath = recoverPath(arbol,CURRENT_LEAF, arbolGoal,CURRENT_LEAF_GOAL);
-
 		if (currentPath.size()>0)
 		{
-		  //adaptiveSmoother(currentPath);
 		  smoothPath(currentPath);
-		}
+		//	smoothPathStochastic(currentPath);
+		 //   currentSmoothedPath = currentPath;
+	}
 		return true;
 	}
 	else
@@ -171,8 +186,30 @@ bool Planner::computePath(const QVec & target)
 	}
 }
 
+/**
+ * @brief Method to compare poses for equality
+ * 
+ * @param p1 ...
+ * @param p2 ...
+ * @return bool
+ */
+bool Planner::equal(const QVec & p1, const QVec & p2)
+{
+	if( (p1-p2).norm2() < 50)
+		return true;
+	else
+		return false;
+}
+
 	
-tree<QVec>::iterator Planner::findClosestPointInTree( tree<QVec> * arb, const QVec & currentTarget)
+/**
+* @brief Searches the closest point in the current tree to the parameter currentTarget
+* 
+* @param arb Current tree
+* @param currentTarget pose to be searched wrt to the tree
+* @return tree< RMat::QVec, std::allocator< tree_node_< RMat::QVec > > >::iterator Iterator to the closest node in the tree
+*/
+tree<QVec>::iterator Planner::findClosestPointInTree( tree<QVec> * arb, const QVec &currentTarget)
 {
 	tree<QVec>::pre_order_iterator ini = arb->begin();
 	tree<QVec>::pre_order_iterator end = arb->end();
@@ -192,15 +229,180 @@ tree<QVec>::iterator Planner::findClosestPointInTree( tree<QVec> * arb, const QV
    return nodeCurrentPos;
 }
 	
+/**
+ * @brief Recovers the path between current and currentGoal
+ * 
+ * @param arbol ...
+ * @param _current ...
+ * @param arbolGoal ...
+ * @param _currentGoal ...
+ * @return QList< QVec >
+ */
+QList<QVec> Planner::recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal)
+{
+	QList<QVec> path;
+	tree<QVec>::pre_order_iterator begin, current;
+	
+	if ( arbol == NULL or arbol->is_valid(_current) == false )
+		  return path; 
+	
+	begin = arbol->begin();
+	current = _current;
+	
+	path.append(*current);
+	while(current!=begin) 
+	{
+	  current = arbol->parent(current);
+	  path.prepend(*current);
 
-QVec Planner::chooseRandomPointInFreeSpace()
+	}
+	//Second tree
+	if ( arbolGoal == NULL or arbolGoal->is_valid(_currentGoal) == false)
+	  return path;
+	begin = arbolGoal->begin();
+	tree<QVec>::pre_order_iterator currentGoal = _currentGoal;
+
+	path.append(*currentGoal);
+
+	while(currentGoal!=begin) 
+	{
+		currentGoal = arbolGoal->parent(currentGoal);
+		path.append(*currentGoal);
+
+	}
+	return path;
+}
+
+WayPoints Planner::smoothRoad( WayPoints road)
+{
+	for(int i=0; i< road.size()-1; i++) 
+	{
+		WayPoint &w = road[i];
+		WayPoint &wNext = road[i+1];
+		float dist = (w.pos-wNext.pos).norm2();		
+		if( dist > ROBOT_RADIUS)
+		{
+			float l = ROBOT_RADIUS/dist;
+			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
+			road.insert(i+1,wNew);
+		}
+	}
+	currentSmoothedPath.clear();
+	QList<QVec> l;
+	foreach(WayPoint w, road)
+		l.append(w.pos);
+
+	smoothPath(l);
+	
+	WayPoints w;
+	w.readRoadFromList(currentSmoothedPath);
+ 	return w;
+}
+
+/**
+ * @brief Fast recursive smoother that takes a list of poses and returns a safe shorter path free of collisions.
+ * 
+ * @param list List of poses comprising the path
+ * @return void
+ */
+void Planner::smoothPath( const QList<QVec> & list)
+{
+	bool reachEnd;
+	tree<QVec>::iterator it;
+
+	trySegmentToTarget( list.first(), list.last(), reachEnd, NULL, it);
+
+	if (reachEnd == true) 
+	{
+		if(currentSmoothedPath.contains(list.first()) == false)
+		  currentSmoothedPath.append(list.first());
+		if(currentSmoothedPath.contains(list.last()) == false)
+		  currentSmoothedPath.append(list.last());
+
+		return;
+	}
+	else		//call again with the first half first and the second half later
+	{
+		if(list.size()>2)	   
+		{
+		      smoothPath( list.mid(0,list.size()/2 +1));
+		      smoothPath( list.mid( list.size()/2 , -1 ));
+		}
+	}
+}
+
+/**
+ * @brief Fast recursive smoother that takes a list of poses and returns a safe shorter path free of collisions.
+ * 
+ * @param list List of poses comprising the path
+ * @return void
+ */
+void Planner::smoothPathStochastic(QList< QVec >& list)
+{
+	bool reachEnd;
+	tree<QVec>::iterator it;
+	const int M_ITER = 50;
+	
+	for(int i=0; i<M_ITER; i++)
+	{
+		//pick two points in path
+		int first = (int)(QVec::uniformVector(1, 0, list.size()-3)[0]);
+		int second = (int)(QVec::uniformVector(1,first+1, list.size()-2)[0]);
+		//Check if there is a shortcut
+		qDebug() << "size" << list.size() << "first" << first << "second" << second;
+		trySegmentToTarget( list[first], list[second], reachEnd, NULL, it);	
+		if( reachEnd == true)  //remove detour
+		{
+			qDebug() << "cortando desde " << first+1 << "hasta" << second;
+			for(int j=first+1; j<second; j++)
+				list.removeAt(first+1);
+		}
+		if(list.size() < 3)
+			break;
+	}
+}
+
+/////////////////////////////////////////////////////
+/// Sampler. This baby here admits a lot of improvements!
+////////////////////////////////////////////////////
+
+/**
+ * @brief Samples poses in SE(2)
+ * 
+ * @param target ...
+ * @return void
+ */
+void Planner::computeRandomSequence(const QVec& currentTarget)
+{
+ 	//QRect floorRect(6000,-12000, 12000,-12000);  ///OJO GET THIS FROM INNERMODEL
+	//qDebug() << floorRect.left() << floorRect.right() << floorRect.bottom() << floorRect.top();
+	
+//	this->fsX = QVec::uniformVector(MAX_ITER , floorRect.left()+1, floorRect.right()-1);
+// 	this->fsZ = QVec::uniformVector(MAX_ITER , floorRect.bottom()+1, floorRect.top()-1);
+	this->fsX = QVec::uniformVector(MAX_ITER , 0, 12000);									/////////OJO GET THIS FROM INNERMODEL
+ 	this->fsZ = QVec::uniformVector(MAX_ITER , -12000, 0);
+	
+	this->fsX(0) = 	currentTarget.x();
+ 	this->fsZ(0) = 	currentTarget.z();
+ 	this->ind = 0;
+}
+
+
+/**
+* @brief Picks a random point of the list created by the sampler and checks that it is out of obstacles (Free Space)
+* 
+* @param currentTarget Current target provided to bias the sample. 20% of the times the target is returned.
+* @return RMat::QVec
+*/
+
+QVec Planner::chooseRandomPointInFreeSpace(const QVec &currentTarget)
 {
 	QVec p(3),x(3);
 	bool collision=true;
 
 	//Inject goal position to bias the distribution
 	if (ind > 0 and (float)qrand()*100/RAND_MAX > 80)
-		return(this->finalTarget);
+		return(currentTarget);
  
 	do
 	{
@@ -213,29 +415,9 @@ QVec Planner::chooseRandomPointInFreeSpace()
 	if(ind > fsX.size()) qDebug()<<"no se encuentra posición libre";
 		return p;	
 }
-
-void Planner::computeRandomSequence(const QVec & target)
-{
- 	//QRect floorRect(6000,-12000, 12000,-12000);  ///OJO GET THIS FROM INNERMODEL
-	//qDebug() << floorRect.left() << floorRect.right() << floorRect.bottom() << floorRect.top();
-	
-//	this->fsX = QVec::uniformVector(MAX_ITER , floorRect.left()+1, floorRect.right()-1);
-// 	this->fsZ = QVec::uniformVector(MAX_ITER , floorRect.bottom()+1, floorRect.top()-1);
-	this->fsX = QVec::uniformVector(MAX_ITER , 0, 12000);
- 	this->fsZ = QVec::uniformVector(MAX_ITER , -12000, 0);
-	
-	this->fsX(0) = 	target.x();
- 	this->fsZ(0) = 	target.z();
- 	this->ind = 0;
-}
-
-bool Planner::equal(const QVec & p1, const QVec & p2)
-{
-	if( (p1-p2).norm2() < 50)
-		return true;
-	else
-		return false;
-}
+////////////////////////////////////////////////////////////////////////
+/// COLLISION DETECTOR
+////////////////////////////////////////////////////////////////////////
 
 void Planner::getCollisionObjects(InnerModelNode* node)
 {	
@@ -270,75 +452,72 @@ void Planner::getCollisionObjects(InnerModelNode* node)
 // 	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
 // 	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19";
 	
-	
-	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d"<< "door_camera_plane"<< "P_Wall_1"<< 
+	listCollisionObjects.clear();
+	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d" << "P_Wall_1"<< 
 	"P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< 
 	"P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< 
 	"P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< 
 	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
-	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19";
+	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19" <<
+	 "dinin_table";
+	
+	listCollisionRobotParts.clear();
+	listCollisionRobotParts << "base_mesh" << "barracolumna" << "tabletMesh" << "arm_right_1_mesh" << "shoulder_right_1_mesh"
+							<< "shoulder_right_2_mesh" << "shoulder_right_3_mesh" << "elbow_right_mesh" << "handMesh1"  
+							<< "arm_left_1_mesh" << "shoulder_left_1_mesh" << "shoulder_left_2_mesh" 
+							<< "shoulder_left_3_mesh" << "elbow_left_mesh" << "handleftMesh1";
 }		
-
 
 bool Planner::collisionDetector( const QVec &point,  InnerModel *innerModel)
 {
 	//Check if the virtual robot collides with any obstacle
-	innerModel->updateTransformValues("baseT", point.x(), point.y(), point.z(), 0, 0, 0);
+	//innerModel->updateTransformValues("baseT", point.x(), point.y(), point.z(), 0, 0, 0);
+	innerModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
 	bool hit = false;
 
-	foreach( QString name, listCollisionObjects)
+	QString worldPart, robotPart;
+	try
 	{
-		if (innerModel->collide("baseFake", name) or 
-			innerModel->collide("barracolumna", name) or 
-			innerModel->collide("handleftMesh1", name) or 
-			innerModel->collide("finger_right_2_mesh2", name))
+		foreach( worldPart, listCollisionObjects)
 		{
-			hit = true;
-			break;
+			//qDebug() << "vertices of" << robotPart << innerModel->getNode(robotPart)->fclMesh->num_vertices;
+			foreach( robotPart, listCollisionRobotParts)
+			{
+				//qDebug() << robotPart << worldPart;
+				if( innerModel->collide(robotPart, worldPart))
+				{ 
+					hit = true;  
+					qDebug() << "A fucking collision finally between" << robotPart << "and" << worldPart;
+					qFatal("fary");
+					break; 
+				}
+			}	
+			if( hit == true) break;   //To get out of the first
 		}
 	}
-	return hit;
-	
+	catch(int ex) 
+	{ 
+		if( ex == 1 ) qDebug() << "robotPart" << robotPart << "not found in InnerModel";
+		if( ex == 2 ) qDebug() << "worldPart" << worldPart << "not found in InnerModel";
+		qFatal("Fary");
+	}
+	return hit;	
 }
 
-bool Planner::isThereAnObstacleAtPosition(const QVec & pCenter, float rX, float rZ)
-{
-// 	//Construct robot contour from "point. Assume a square of side 2*radius + security offset
-// 	QVec upLeft = cube->fromMetricToCell( pCenter - QVec::vec3(rX,0,rZ) );
-// 	QVec downRight = cube->fromMetricToCell( pCenter + QVec::vec3(rX,0,rZ) );
-// 	QVec cellPos;
-// 	int x, z;
-// 	
-// 	float acumOccupancy=0.;
-// 	
-// 	//if inside limits
-// 	if (upLeft.isEmpty()==false and downRight.isEmpty()==false)
-// 	{
-// 		//walk all inside cells checking occupancy
-// 		for(int v=upLeft.x() ; v<=downRight.x() ; v++)
-// 			for(int w=upLeft.z() ; w<=downRight.z() ; w++)
-// 			{
-// 				if(cube->getCellOccupancy(v,w)>cube->OCC_THRESHOLD)
-// 					  acumOccupancy+=cube->getCellOccupancy(v,w);
-// 				if(acumOccupancy > GLOBAL_OCCUPANCY_THRESHOLD)
-// 					  return true;
-// 			}
-// 	}
-// 	else
-// 		return true;
-// 	
-	return false;  
-}
+////////////////////////////////////////////////////////////////////////
+/// LOCAL CONTROLLER. Also a lot of improvements fit here
+////////////////////////////////////////////////////////////////////////
+
 
 /**
- * @brief Local controller
- * 
- * @param origin ...
- * @param target ...
- * @param reachEnd ...
- * @param arbol ...
+ * @brief Local controller. Goes along a straight line connecting the current robot pose and target pose in world coordinates
+ * checking collisions with the environment
+ * @param origin Current pose
+ * @param target Target pose 
+ * @param reachEnd True is successful
+ * @param arbol Current search tree
  * @param nodeCurrentPos ...
- * @return RMat::QVec
+ * @return RMat::QVec final pose reached
  */
 QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec> * arbol , tree<QVec>::iterator & nodeCurrentPos)
 {
@@ -384,167 +563,9 @@ QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool
 	return target;
 }
 
-
-/**
- * @brief Recovers the path between current and currentGoal
- * 
- * @param arbol ...
- * @param _current ...
- * @param arbolGoal ...
- * @param _currentGoal ...
- * @return QList< QVec >
- */
-QList<QVec> Planner::recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal)
-{
-	QList<QVec> path;
-	tree<QVec>::pre_order_iterator begin, current;
-	
-	if ( arbol == NULL or arbol->is_valid(_current) == false )
-		  return path; 
-	
-	begin = arbol->begin();
-	current = _current;
-	
-	path.append(*current);
-	while(current!=begin) 
-	{
-	  current = arbol->parent(current);
-	  path.prepend(*current);
-
-	}
-	//Second tree
-	if ( arbolGoal == NULL or arbolGoal->is_valid(_currentGoal) == false)
-	  return path;
-	begin = arbolGoal->begin();
-	tree<QVec>::pre_order_iterator currentGoal = _currentGoal;
-
-	path.append(*currentGoal);
-
-	while(currentGoal!=begin) 
-	{
-		currentGoal = arbolGoal->parent(currentGoal);
-		path.append(*currentGoal);
-
-	}
-	return path;
-}
-
-/**
- * @brief Post proccess of solution path
- * 
- * @param list ...
- * @return void
- */
-void Planner::adaptiveSmoother( const QList<QVec> & list)
-{
-	float sum=0.f, sumAnt=0.f;
-	QList<QVec> localList = list;
-	
- 	qDebug() << __FILE__ << __FUNCTION__ <<"adaptiveSmoother";
-  	for(int i=0; i< 10; i++)
-	{
-	  currentSmoothedPath.clear();
-
-	  smoothPath(localList);
-	  sum = 0.f;
-	  for(int j=0 ; j< currentSmoothedPath.size()-1;j++)
-		sum += (currentSmoothedPath[j] - currentSmoothedPath[j+1]).norm2();
-/*	  qDebug() << "Sum " << sum << currentSmoothedPath.size();
-	  qDebug()<<"----------------currentSmoothedPath-----------------";
-	  for(int j=0 ; j< currentSmoothedPath.size();j++)
-	    qDebug()<<"point"<<j<<":"<<currentSmoothedPath[j];*/
-	  if( fabs(sumAnt-sum) < 10 )
-		break;
-	  else
-	  {
-		sumAnt = sum;
-		localList = adaptiveSmootherInsertPoints( currentSmoothedPath );
-	  }
-//   	  qDebug()<<"----------------localList-----------------";
-// 	  for(int j=0 ; j< localList.size();j++)
-// 	    qDebug()<<"point"<<j<<":"<<localList[j];
-
-	}
-	
-}
-
-void Planner::smoothPath( const QList<QVec> & list)
-{
-	bool reachEnd;
-	tree<QVec>::iterator it;
-
-	trySegmentToTarget( list.first(), list.last(), reachEnd, NULL, it);
-
-// 	if(!reachEnd && list.size()<=2)
-// 	  qDebug()<<"algo raro está pasando.......";
-
-	if (reachEnd == true) 
-	{
-		if(!this->currentSmoothedPath.contains(list.first()))
-		  this->currentSmoothedPath.append(list.first());
-		if(!this->currentSmoothedPath.contains(list.last()))
-		  this->currentSmoothedPath.append(list.last());
-
-		return;
-	}
-	else
-	{
-		if(list.size()>2)	   
-		{
-		      smoothPath( list.mid(0,list.size()/2 +1));
-		      smoothPath( list.mid( list.size()/2 , -1 ));
-		}
-	}
-}
-
-QList<QVec> Planner::adaptiveSmootherInsertPoints( const QList<QVec> & list)
-{
-	bool reachEnd, rEl1, rEl2;
-	tree<QVec>::iterator it;
-	QVec vl(3),vr(3);
-	int NUM_ITER = 20;
-	QList<QVec> localList;
-	  
-	localList.append(list.first());
-	for(int i=1; i<list.size()-1; i++)
-	{
-	  reachEnd=false;
-	  float kp2 = 2.f;
-	  for(int k=1; k<NUM_ITER; k++)
-	  {
-		  vl = (list[i-1]*(1.f/kp2)) + (list[i]*((kp2-1)/kp2));
-		  vr = (list[i+1]*(1.f/kp2)) + (list[i]*((kp2-1)/kp2));
-		  kp2 = kp2 * 2.f;
-		  trySegmentToTarget( vl, vr, reachEnd, NULL, it);
-		  trySegmentToTarget( list[i-1], vl, rEl1, NULL, it);
-		  trySegmentToTarget( vr, list[i+1], rEl2, NULL, it);
-		  if (reachEnd && rEl1 && rEl2) 
-		  {
-			localList.append(vl);
-// 			localList.append(list[i]);	
-			localList.append(vr);
-// 			qDebug() << "breaking " << k;
-			break;
-		  }
-		  else
-		    reachEnd=false;
-	  }
-	  if(!reachEnd)
-		localList.append(list[i]);
-	  else
-	  {
-		i++;
-		if(i<list.size()-1)
-			localList.append(list[i]);
-	  }
-	}
-  	localList.append(currentSmoothedPath.last());
-	return localList;
-}
-
-////////////
-////Drawing
-///////////
+//////////////////////////////////////////////
+////  Tree Drawing
+///////////////////////////////////////////////
 
 void Planner::drawTree(InnerModelManagerPrx innermodelmanager_proxy)
 {
@@ -577,69 +598,4 @@ void Planner::drawTree(InnerModelManagerPrx innermodelmanager_proxy)
 		}
 		++begin;
 	}
-
-// 	tree<QVec>::pre_order_iterator beginGoal = arbolGoal->begin();
-// 	tree<QVec>::pre_order_iterator endGoal = arbolGoal->end();
-// 	tree<QVec>::pre_order_iterator padreGoal;
-	
-// 	if (finalTarget.isEmpty() == false)
-// 		world->drawEllipse(QPointF(this->finalTarget.x(), this->finalTarget.z()), 40, 40 , Qt::green, true);
-
-// 	while(beginGoal!=endGoal) 
-// 	{
-// 		padreGoal = arbolGoal->parent(beginGoal);
-// 		if(arbolGoal->is_valid(padreGoal))
-// 		{
-// 			name = "t_" + QString::number(i++);
-// 			QVec midPoint = (QVec::vec3((*padreGoal).x(), 600, (*padreGoal).z()) + QVec::vec3((*beginGoal).x(), 600, (*beginGoal).z()) )*(T)0.5; 
-// 			p.px = midPoint.x(); p.py = midPoint.y();	p.pz = midPoint.z();
-// 			QLine2D line(QVec::vec3((*padre).x(), 600, (*padre).z()),QVec::vec3((*begin).x(), 600, (*begin).z()));
-// 			QVec normal = line.getNormalForOSGLineDraw();
-// 			p.nx = normal.x();	p.ny = normal.y();	p.nz = normal.z();
-// 			p.height = 20;	p.width = midPoint.norm2();	p.thickness = 20;
-// 			p.texture = "#'0000FF";
-// 			RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, name, "floor", p);
-// 			//world->drawLine(QLine((*padreGoal).x(), (*padreGoal).z(),(*beginGoal).x(),(*beginGoal).z()), Qt::magenta, 20);
-// 		}
-// 		++beginGoal;
-// 	}
 }
-
-// void Planner::drawPath(qWorld *world)
-// {
-//  // drawPath(world, currentPath, Qt::yellow);
-// }
-
-// void Planner::drawSmoothedPath(qWorld *world)
-// {
-//   drawPath(world, currentSmoothedPath, Qt::green);
-//   
-//   QList<QVec> currentSmoothedPath2=currentSmoothedPath;
-//   currentSmoothedPath.clear();
-//   if(currentPath.size()>0)
-//   {
-// 	smoothPath(currentPath);
-// 	drawPath(world, currentSmoothedPath, Qt::red);
-//   }
-// 
-//   currentSmoothedPath=currentSmoothedPath2;
-//}
-
-// void Planner::drawPath(qWorld *world, const QList<QVec> & path, const QColor & color)
-// {
-//   if( path.size() > 1)
-//   {	
-// 	QVec pant = path[0];
-// 	for(int i=1; i< path.size(); i++)
-// 	{
-// 	  world->drawLine(QLine(pant.x(), pant.z(), path[i].x(), path[i].z()), color, 40);
-// 	  pant = path[i];
-// 	}	
-//   }
-//}
-
-// Only for Bezier
-// 		this->world->drawEllipse(QPointF( this->origin.x(),this->origin.z()), 60, 60, Qt::blue,  true);
-// 		this->world->drawEllipse(QPointF( this->p1.x(),this->p1.z()), 60, 60, Qt::black,true);
-// 		this->world->drawEllipse(QPointF( this->p2.x(),this->p2.z()), 60, 60, Qt::red, true);
-// 		this->world->drawEllipse(QPointF( this->target.x(),this->target.z()), 60, 60, Qt::magenta, true);	

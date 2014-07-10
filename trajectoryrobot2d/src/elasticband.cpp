@@ -239,6 +239,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 	return totalChange;
 }
 
+
 bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
 {
 	//A point of the road is visible if it is between the robot and the laser beam running through it, and if the previous point was visible
@@ -428,9 +429,6 @@ void ElasticBand::checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData 
 		}	
 	}
 }
-
-
-
 
 
 /**
@@ -648,4 +646,133 @@ bool ElasticBand::checkCollision(WayPoints &road, const RoboCompLaser::TLaserDat
 	}
 	return false;
 }
+
+
+///////////////////
+/// Continuous smoothing of the road to provide opportunistic skills
+///////////////////
+
+/**
+ * @brief Fast recursive smoother that takes a list of poses and returns a safe shorter path free of collisions.
+ * 
+ * @param list List of poses comprising the path
+ * @return void
+ */
+// void ElasticBand::smoothPath( const WayPoints &road)
+// {
+// 	bool reachEnd;
+// 	
+// 	trySegmentToTarget( list.first(), list.last(), reachEnd, NULL, it);
+// 
+// 	if (reachEnd == true) 
+// 	{
+// 		if(currentSmoothedPath.contains(list.first()) == false)
+// 		  currentSmoothedPath.append(list.first());
+// 		if(currentSmoothedPath.contains(list.last()) == false)
+// 		  currentSmoothedPath.append(list.last());
+// 
+// 		return;
+// 	}
+// 	else		//call again with the first half first and the second half later
+// 	{
+// 		if(list.size()>2)	   
+// 		{
+// 		      smoothPath( list.mid(0,list.size()/2 +1));
+// 		      smoothPath( list.mid( list.size()/2 , -1 ));
+// 		}
+// 	}
+// }
+
+
+//bool ElasticBand::collisionDetector( const QVec &point,  InnerModel *innerModel)
+//{
+// 	//Check if the virtual robot collides with any obstacle
+// 	innerModel->updateTransformValues("baseT", point.x(), point.y(), point.z(), 0, 0, 0);
+// 	bool hit = false;
+// 
+// 	foreach( QString name, listCollisionObjects)
+// 	{
+// 		if (innerModel->collide("baseFake", name) /*or    //We cannot check the other meshes here because they are not on the clone robot. A complete clone is needed
+// 			innerModel->collide("barracolumna", name) or 
+// 			innerModel->collide("handleftMesh1", name) or 
+// 			innerModel->collide("finger_right_2_mesh2", name)*/)
+// 		{
+// 			hit = true;
+// 			break;
+// 		}
+// 	}
+// 	return hit;
+// 	
+// }
+
+/**
+ * @brief Local controller. Goes along a straight line connecting the current robot pose and target pose in world coordinates
+ * checking collisions with the environment
+ * @param origin Current pose
+ * @param target Target pose 
+ * @param reachEnd True is successful
+ * @param arbol Current search tree
+ * @param nodeCurrentPos ...
+ * @return RMat::QVec final pose reached
+ */
+// QVec ElasticBand::trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd)
+// {
+// 	float stepSize = 100.f; //100 mms chunks
+// 	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
+// 	float step;
+// 	
+// 	//if too close return target
+// 	if (nSteps == 0) 
+// 	{
+// 		reachEnd = true;
+// 		return target;
+// 	}
+// 	step = 1./nSteps;
+// 	
+// 	//go along visual ray connecting robot pose and target pos in world coordinates
+// 	// l*robot + (1-r)*roiPos = 0
+// 	
+// 	QVec point(3), pointAnt(3);
+// 	float landa = step;
+// 	QVec pos(3), front(3);
+// 	
+// 	pointAnt=origin;
+// 	for(uint i=1 ; i<=nSteps; i++)
+// 	{
+// 		// center of robot position
+// 		point = (origin * (1-landa)) + (target * landa);
+// 		
+// 		//Collision detector
+// 		if (collisionDetector( point, innerModel) == true)
+// 		{
+// 		  reachEnd = false;
+// 		  return pointAnt;
+// 		}		
+// 		 
+// 		landa = landa + step;
+// 		pointAnt = point;
+// 	}
+// 	reachEnd= true;
+// 	return target;
+// }
+// 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
