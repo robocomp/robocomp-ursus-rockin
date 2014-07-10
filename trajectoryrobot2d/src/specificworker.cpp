@@ -55,7 +55,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	//Draw target as red box	
 	RoboCompInnerModelManager::Plane3D plane;
-	plane.px = target.x(); plane.py = 200; plane.pz = target.z(); plane.nx = 1; plane.texture = "#990000"; plane.thickness = 150; plane.height = plane.width = 100;
+	plane.px = target.x();
+	plane.py = 1800;
+	plane.pz = target.z();
+	plane.nx = 1;
+	plane.texture = "#990000";
+	plane.thickness = 150;
+	plane.height = plane.width = 100;
 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "floor", plane);
 	
 	//qFatal("fary");
@@ -130,7 +136,7 @@ void SpecificWorker::compute( )
 	{
 		//Draw target as red box	
 		RoboCompInnerModelManager::Plane3D plane;
-		plane.px = target.x(); plane.py = 200; plane.pz = target.z(); plane.nx = 1; plane.texture = "#009900"; plane.thickness = 150; plane.height = plane.width = 100;
+		plane.px = target.x(); plane.py = 1800; plane.pz = target.z(); plane.nx = 1; plane.texture = "#009900"; plane.thickness = 150; plane.height = plane.width = 100;
 		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "floor", plane);
 		qFatal("GOODBYE, FINISHED ROAD");
 	}
@@ -200,7 +206,7 @@ void SpecificWorker::drawThinkingRobot(const QString &color)
 {
 	RoboCompInnerModelManager::Plane3D p;
 	p.px = 0;
-	p.py = 210;
+	p.py = 1810;
 	p.pz = -200;
 	p.nx = 0;
 	p.ny = 1;

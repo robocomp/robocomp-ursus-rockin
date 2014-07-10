@@ -170,7 +170,7 @@
 
 				<translation id="laserPose" tx="0" ty="40" tz="100">
 					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" />
-					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" /> 
+<!-- 					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  -->
 				</translation>	-->
 				
 				

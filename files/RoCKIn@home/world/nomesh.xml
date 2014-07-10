@@ -50,7 +50,7 @@
 				<plane id="P_Door_0" py="2700" nz="1" size="1000,600,200" texture="#666672" />
 				<plane id="P_Door_0d" py="1200" nz="1" size="1000,-2400,100" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/door_entree.png" />
 				<transform id="door_camera" tz="200" ty="2550" rx="1"> 
-					<plane id="door_camera_plane" nz="1" pz="0" size="80,60" repeat="1" texture="#0000ff" />
+<!-- 					<plane id="door_camera_plane" nz="1" pz="0" size="80,60" repeat="1" texture="#0000ff" /> -->
 <!-- 					<rgbd id="door_rgbd" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" /> -->
 				</transform>	
 			</transform>
@@ -196,12 +196,12 @@
 		
 		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="800" tz="-800" ry="-3.14">
-			<differentialrobot id="robot" port="10004" ty="10" >
+			<omnirobot id="robot" port="10004" ty="10" >
 
-				<translation id="laserPose" tx="0" ty="260" tz="0">
-					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" />
-					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" /> 
-				</translation>	-->
+<!-- 				<translation id="laserPose" tx="0" ty="260" tz="0"> -->
+<!-- 					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" /> -->
+<!-- 					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  -->
+<!-- 				</translation>	--> -->
 				
 				
 				<transform  id="base_trans" >
@@ -682,7 +682,7 @@
 					</transform> <!-- base tronco -->
 					</joint> <!-- joint base -->
 				</transform> <!-- cambiocoordenadas -->
-			</differentialrobot> <!--base -->
+			</omnirobot> <!--base -->
 		</transform>
 
 

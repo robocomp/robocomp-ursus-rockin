@@ -159,7 +159,9 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 	static int nPoints=0;
 	
 	RoboCompInnerModelManager::Pose3D pose;
-	pose.y = 0;		pose.x = 0; 		pose.z = 0;
+	pose.y = 0;
+	pose.x = 0;
+	pose.z = 0;
 	pose.rx = pose.ry = pose.z = 0.;
 	RoboCompInnerModelManager::meshType mesh;
 	
@@ -186,7 +188,9 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 	
 	WayPoint &w = (*this)[0];
 	item = "p_" + QString::number(0);		
-	pose.y = 100;		pose.x = w.pos.x(); 		pose.z = w.pos.z();
+	pose.x = w.pos.x();
+	pose.y = 1900;
+	pose.z = w.pos.z();
 	RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "floor", pose);
 	RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, QVec::vec3(0,0,1), 50, 50, "#335577" );
 	
@@ -199,7 +203,9 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		QLine2D lp = l.getPerpendicularLineThroughPoint( QVec::vec2(w.pos.x(), w.pos.z()));
 		QVec normal = lp.getNormalForOSGLineDraw();  //3D vector
 		item = "p_" + QString::number(i);		
-		pose.y = 100;		pose.x = w.pos.x(); 		pose.z = w.pos.z();
+		pose.x = w.pos.x();
+		pose.y = 1900;
+		pose.z = w.pos.z();
 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "floor", pose);
 		RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 150, 50, "#005500" );
 		if ( i-1 == currentPointIndex )
@@ -253,7 +259,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 // 	for(int i=0; i<upTo; i++)
 // 	{
 // 		WayPoint &w = (*this)[i];
-// 		pose.y = 100;
+// 		posef = 100;
 // 		pose.x = w.pos.x(); 
 // 		pose.z = w.pos.z();
 // 		mesh.scaleX = w.minDist;	
