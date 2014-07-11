@@ -453,13 +453,8 @@ void Planner::getCollisionObjects(InnerModelNode* node)
 // 	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19";
 	
 	listCollisionObjects.clear();
-	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d" << "P_Wall_1"<< 
-	"P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< 
-	"P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< 
-	"P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< 
-	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
-	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19" <<
-	 "dinin_table";
+// 	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d" << "P_Wall_1"<< "P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< "P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< "P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< "P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< "P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19" << "dinin_table";
+	listCollisionObjects << "ss1" << "ss3";
 	
 	listCollisionRobotParts.clear();
 	listCollisionRobotParts << "base_mesh" << "barracolumna" << "tabletMesh" << "arm_right_1_mesh" << "shoulder_right_1_mesh"
@@ -483,20 +478,21 @@ bool Planner::collisionDetector( const QVec &point,  InnerModel *innerModel)
 			//qDebug() << "vertices of" << robotPart << innerModel->getNode(robotPart)->fclMesh->num_vertices;
 			foreach( robotPart, listCollisionRobotParts)
 			{
-				//qDebug() << robotPart << worldPart;
+// 				qDebug() << robotPart << worldPart;
 				if( innerModel->collide(robotPart, worldPart))
-				{ 
-					hit = true;  
-					qDebug() << "A fucking collision finally between" << robotPart << "and" << worldPart;
-					qFatal("fary");
-					break; 
+				{
+// 					printf("%s %s\n", worldPart.toStdString().c_str(), robotPart.toStdString().c_str());
+						hit = true;  
+						qDebug() << "collision between" << robotPart << "and" << worldPart;
+						qFatal("fary");
+						break; 
 				}
 			}	
-			if( hit == true) break;   //To get out of the first
+			if (hit) break;
 		}
 	}
 	catch(int ex) 
-	{ 
+	{
 		if( ex == 1 ) qDebug() << "robotPart" << robotPart << "not found in InnerModel";
 		if( ex == 2 ) qDebug() << "worldPart" << worldPart << "not found in InnerModel";
 		qFatal("Fary");

@@ -30,7 +30,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 //	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockin.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	innerModel->setUpdateTranslationPointers("robot", &(bState.x), NULL, &(bState.z));
 	innerModel->setUpdateRotationPointers("robot", NULL, &(bState.alpha), NULL);
@@ -50,7 +50,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//target = QVec::vec3(8000,10,-1000);
 	//target = QVec::vec3(800,10,-3000);
 //	target = QVec::vec3(6000,10,-8100);
-	target = QVec::vec3(5800,10,-5000);
+	target = QVec::vec3(0,1800,5000);
 	
 	
 	
@@ -63,7 +63,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	plane.texture = "#990000";
 	plane.thickness = 150;
 	plane.height = plane.width = 100;
-	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "floor", plane);
+	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 	
 	//qFatal("fary");
 	
@@ -117,9 +117,9 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::compute( )
 {	
 	try{	differentialrobot_proxy->getBaseState(bState);  }  
-	catch(const Ice::Exception &ex){ cout << ex << endl;};
+	catch(const Ice::Exception &ex){ cout << ex << endl;}
 	try{	laserData = laser_proxy->getLaserData();}  
-	catch(const Ice::Exception &ex){ cout << ex << endl;};
+	catch(const Ice::Exception &ex){ cout << ex << endl;}
 		
 	innerModel->update();
 		
@@ -127,16 +127,24 @@ void SpecificWorker::compute( )
 	
 	pointstoroad->update(road);
 	
-    controller->update(differentialrobot_proxy, road);
+	controller->update(differentialrobot_proxy, road);
 	
 	road.draw(innermodelmanager_proxy, innerModel);	
 	
-	if(road.finish == true)
+	if (road.finish == true)
 	{
 		//Draw target as red box	
 		RoboCompInnerModelManager::Plane3D plane;
-		plane.px = target.x(); plane.py = 1800; plane.pz = target.z(); plane.nx = 1; plane.texture = "#009900"; plane.thickness = 150; plane.height = plane.width = 100;
-		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "floor", plane);
+		plane.px = target.x();
+		plane.py = 1800;
+		plane.pz = target.z();
+		plane.nx = 1;
+		plane.ny = 0;
+		plane.nz = 0;
+		plane.texture = "#009900";
+		plane.thickness = 150;
+		plane.height = plane.width = 100;
+		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 		qFatal("GOODBYE, FINISHED ROAD");
 	}
 	
@@ -146,7 +154,7 @@ void SpecificWorker::compute( )
 		qDebug("Planning ...");
 		//drawThinkingRobot("red");
 		innerModel->update();
-		bool havePlan = planner->computePath( target, innerModel );
+		bool havePlan = planner->computePath(target, innerModel);
 	
 		if(havePlan == false or planner->getPath().size() == 0)
 			qFatal("NO PLAN AVAILABLE");
@@ -180,7 +188,7 @@ void SpecificWorker::sendRobotHome()
 		pose.x= 0; pose.y=0; pose.z=0;pose.rx=0; pose.ry=0; pose.rz=0;
 		innermodelmanager_proxy->setPoseFromParent("robot", pose);
 	} 
-	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
+	catch (const RoboCompInnerModelManager::InnerModelManagerError &e)
 	{ std::cout << e << std::endl; }
 }
 

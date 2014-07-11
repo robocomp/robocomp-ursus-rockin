@@ -191,7 +191,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 	pose.x = w.pos.x();
 	pose.y = 1900;
 	pose.z = w.pos.z();
-	RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "floor", pose);
+	RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 	RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, QVec::vec3(0,0,1), 50, 50, "#335577" );
 	
 	for(int i=1; i<upTo; i++)
@@ -206,7 +206,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		pose.x = w.pos.x();
 		pose.y = 1900;
 		pose.z = w.pos.z();
-		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "floor", pose);
+		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 		RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 150, 50, "#005500" );
 		if ( i-1 == currentPointIndex )
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 1000, 30, "#000055" );	
@@ -268,7 +268,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 // 		mesh.meshPath = "/home/robocomp/robocomp/Files/osgModels/basics/sphere.ive";
 // 		mesh.pose.x = mesh.pose.y = mesh.pose.z = 0.;
 // 		item = "b_" + QString::number(i);
-// 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "floor", pose);
+// 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 // 		RcisDraw::addMesh_ignoreExisting(innermodelmanager_proxy, item + "_mesh", item, mesh );
 // 		w.ballTransformName = item;
 // 		w.ballMeshName = item+"_mesh";
@@ -278,7 +278,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 // 		mesh.meshPath = "/home/robocomp/robocomp/Files/osgModels/humanColor/jointbox_azul.osg";	 
 // 		mesh.scaleX = mesh.scaleY = mesh.scaleZ=50;
 // 		mesh.pose.x = mesh.pose.y = mesh.pose.z = 0;
-// 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "floor", pose);
+// 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 // 		RcisDraw::addMesh_ignoreExisting(innermodelmanager_proxy, item + "_mesh", item, mesh );
 // 		w.centerTransformName = item;
 // 		w.centerMeshName = item+"_mesh";
