@@ -55,7 +55,6 @@ class PointsToRoad : public QObject
 		QLine2D getRobotZAxis();
 		
 	private:		
-		//WayPoints *road;
 	
 		InnerModel *innerModel;
 		//int currentPoint, nextPoint;

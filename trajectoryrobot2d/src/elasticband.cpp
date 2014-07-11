@@ -240,12 +240,15 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 }
 
 
+/**
+ * @brief A point of the road is visible if it is between the robot and the laser beam running through it, and if the previous point was visible
+ * We go through the laser array until the nearest beam is found
+ * @param road ...
+ * @param laserData ...
+ * @return bool
+ */
 bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
-{
-	//A point of the road is visible if it is between the robot and the laser beam running through it, and if the previous point was visible
-	//We go through the laser array until the nearest beam is found
-	//Compute max and min angles in laser beam
-	
+{	
 	Q_ASSERT(road.size()>1);
 	
 	float maxAngle, minAngle;

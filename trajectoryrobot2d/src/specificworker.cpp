@@ -31,7 +31,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockin.xml");  ///CHECK IT CORRESPONDS TO RCIS
+//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	innerModel->setUpdateTranslationPointers("robot", &(bState.x), NULL, &(bState.z));
 	innerModel->setUpdateRotationPointers("robot", NULL, &(bState.alpha), NULL);
 	
@@ -50,7 +50,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//target = QVec::vec3(8000,10,-1000);
 	//target = QVec::vec3(800,10,-3000);
 //	target = QVec::vec3(6000,10,-8100);
-	target = QVec::vec3(0,1800,5000);
+	target = QVec::vec3(0,0,2000);
 	
 	
 	
@@ -127,6 +127,8 @@ void SpecificWorker::compute( )
 	
 	pointstoroad->update(road);
 	
+	road.printRobotState( innerModel);
+	
 	controller->update(differentialrobot_proxy, road);
 	
 	road.draw(innermodelmanager_proxy, innerModel);	
@@ -135,15 +137,8 @@ void SpecificWorker::compute( )
 	{
 		//Draw target as red box	
 		RoboCompInnerModelManager::Plane3D plane;
-		plane.px = target.x();
-		plane.py = 1800;
-		plane.pz = target.z();
-		plane.nx = 1;
-		plane.ny = 0;
-		plane.nz = 0;
-		plane.texture = "#009900";
-		plane.thickness = 150;
-		plane.height = plane.width = 100;
+		plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
+		plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
 		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 		qFatal("GOODBYE, FINISHED ROAD");
 	}
@@ -162,6 +157,7 @@ void SpecificWorker::compute( )
 		{
 			//drawThinkingRobot("green");
 			//road.readRoadFromList( planner->getPath() );
+			road.clear();
 			road = planner->getPath();
 			road.requiresReplanning = false;
 			elasticband->addPoints(road);  //SEND THIS TO A RESET

@@ -32,6 +32,7 @@ Controller::~Controller()
 
 bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  WayPoints &road)
 {	
+	qDebug() << __FILE__ << __FUNCTION__ << "entering update";
 	
 	if((road.isBlocked == true) or (road.finish == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
@@ -52,7 +53,7 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 	
 	if ( time.elapsed() > delay*1000 and (road.finish==false))   //ojo desbordamientos
 	{
-		const float MAX_ADV_SPEED = 250;
+		const float MAX_ADV_SPEED = 150;
 	
 		// VRot is computed as the sum of three terms: angle with tangent to road + atan(perp. distance to road) + road curvature
 		// as descirbed in Thrun's paper on DARPA challenge
@@ -72,7 +73,7 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
  		if( vadvance > MAX_ADV_SPEED ) 
  			vadvance = MAX_ADV_SPEED;
  		
- 		// qDebug() << "Controller::update - VAdv = " << vadvance << " VRot = " << vrot;
+ 		qDebug() << "Controller::update - VAdv = " << vadvance << " VRot = " << vrot;
  		
   		try {	differentialrobot_proxy->setSpeedBase( vadvance, vrot);	} 
   		catch (const Ice::Exception &e) { std::cout << e << std::endl;		}	

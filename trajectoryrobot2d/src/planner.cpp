@@ -375,12 +375,17 @@ void Planner::smoothPathStochastic(QList< QVec >& list)
 void Planner::computeRandomSequence(const QVec& currentTarget)
 {
  	//QRect floorRect(6000,-12000, 12000,-12000);  ///OJO GET THIS FROM INNERMODEL
-	//qDebug() << floorRect.left() << floorRect.right() << floorRect.bottom() << floorRect.top();
+	//qDebug() << floorRect.left() << floorRect.right() << floorRect.bottom() << floorRect.top();	
 	
 //	this->fsX = QVec::uniformVector(MAX_ITER , floorRect.left()+1, floorRect.right()-1);
 // 	this->fsZ = QVec::uniformVector(MAX_ITER , floorRect.bottom()+1, floorRect.top()-1);
-	this->fsX = QVec::uniformVector(MAX_ITER , 0, 12000);									/////////OJO GET THIS FROM INNERMODEL
- 	this->fsZ = QVec::uniformVector(MAX_ITER , -12000, 0);
+	
+// 	this->fsX = QVec::uniformVector(MAX_ITER , 0, 12000);									/////////OJO GET THIS FROM INNERMODEL
+//  	this->fsZ = QVec::uniformVector(MAX_ITER , -12000, 0);
+
+	this->fsX = QVec::uniformVector(MAX_ITER , -5000, 5000);									/////////OJO GET THIS FROM INNERMODEL
+ 	this->fsZ = QVec::uniformVector(MAX_ITER , -5000, 5000);
+
 	
 	this->fsX(0) = 	currentTarget.x();
  	this->fsZ(0) = 	currentTarget.z();
@@ -412,7 +417,8 @@ QVec Planner::chooseRandomPointInFreeSpace(const QVec &currentTarget)
 		collision = collisionDetector( p, innerModel);	
 	}
 	while (collision and ind == fsX.size());
-	if(ind > fsX.size()) qDebug()<<"no se encuentra posición libre";
+	if(ind > fsX.size()) 
+		qDebug() << __FILE__ << __FUNCTION__ << "no se encuentra posición libre";
 		return p;	
 }
 ////////////////////////////////////////////////////////////////////////
@@ -484,7 +490,7 @@ bool Planner::collisionDetector( const QVec &point,  InnerModel *innerModel)
 // 					printf("%s %s\n", worldPart.toStdString().c_str(), robotPart.toStdString().c_str());
 						hit = true;  
 						qDebug() << "collision between" << robotPart << "and" << worldPart;
-						qFatal("fary");
+						//qFatal("fary");
 						break; 
 				}
 			}	

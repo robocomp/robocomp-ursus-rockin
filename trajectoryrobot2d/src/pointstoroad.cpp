@@ -39,7 +39,6 @@ PointsToRoad::~PointsToRoad()
 void PointsToRoad::setRoad(WayPoints &road)
 {
 	Q_ASSERT(_road.size() > 1);
-	//road = _road;
 	//Initialize current robot position wrt to frontier line
 	currentSign = getRobotFrontierCondition(road);
 	qDebug() << __FILE__ << __FUNCTION__ << "currentSign" << currentSign;
@@ -60,9 +59,9 @@ bool PointsToRoad::update(WayPoints &road)
 	//qDebug() << "Entering update";
 	bool frontier = getRobotFrontierCondition(road);
 	
-	//qDebug() << __FUNCTION__ << "PointsToRoad::update: frontier" << frontier << ". Current sign" << currentSign << ". Cur point" << road.currentPointIndex 
-	//		 << ". Next point " << road.nextPointIndex << ". Road size" << road.size() 
-	//		 << "Distance to next point" << road.robotDistanceToNextPoint(innerModel) << "Dist to current " << road.robotDistanceToCurrentPoint(innerModel);
+	qDebug() << __FUNCTION__ << "PointsToRoad::update: frontier" << frontier << ". Current sign" << currentSign << ". Cur point" << road.currentPointIndex 
+			 << ". Next point " << road.nextPointIndex << ". Road size" << road.size() 
+			 << "Distance to next point" << road.robotDistanceToNextPoint(innerModel) << "Dist to current " << road.robotDistanceToCurrentPoint(innerModel);
 
 //  	if( road.robotDistanceToNextPoint(innerModel) < road.robotDistanceToCurrentPoint(innerModel) )
 // 	{
@@ -80,7 +79,6 @@ bool PointsToRoad::update(WayPoints &road)
 		{
 			road.finish = true; 
 			road.removeFirst(innermodelmanager_proxy); 
-		//	road.removeFirst(innermodelmanager_proxy); //next
 			qDebug() <<__FILE__ << __FUNCTION__  << "PointsToRoad::update-Road finished!";
 			return false;
 		}
@@ -264,9 +262,6 @@ float PointsToRoad::distanceToNextVisible(const WayPoints &road, const QVec& rob
 	}
 	return dist;
 }
-
-
-
 
 
 float PointsToRoad::exponential(float value, float xValue, float yValue)
