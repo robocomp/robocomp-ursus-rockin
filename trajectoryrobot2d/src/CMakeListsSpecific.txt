@@ -2,13 +2,14 @@
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
-  pointstoroad.cpp
+  #pointstoroad.cpp
   controller.cpp
   qline2d.cpp
   elasticband.cpp
   rcisdraw.cpp
   waypoints.cpp
   planner.cpp
+  forcefield.cpp
   #ParabolicPathSmooth/smoother.cpp
 )
 
@@ -16,9 +17,10 @@ SET ( SOURCES
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
-  pointstoroad.h
+  #pointstoroad.h
   controller.h
   planner.h
+  forcefield.h
 )
 
 #SET (LIBS ${LIBS} -losgViewer)

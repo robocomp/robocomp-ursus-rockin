@@ -19,20 +19,24 @@
 
 WayPoints::WayPoints()
 {
+	indexOfClosestPointToRobot = 0;
+	robotDistanceToClosestPoint = 0;
+	robotPerpendicularDistanceToRoad = 0;
+	indexOfClosestPointToRobot = 0;
+	currentPointIndex = 0;
+	angleWithTangentAtClosestPoint = 0;
+	roadCurvatureAtClosestPoint = 0;
+	robotDistanceToTarget = 0;
+	robotDistanceToLastVisible = 0;
 	currentPointIndex = 0;
 	nextPointIndex = 1;
-	
-	distanceToRoad = 0 ;
-	angleWithTangent = 0;
-	distanceToTarget = 0;
-	roadCurvature = 0;
 	finish = false;
 	isBlocked = false;
 	isLost = false;
 	currentCollisionIndex = 0;
 	currentDistanceToFrontier = 0;
 	requiresReplanning = false;
-	
+
 }
 
 WayPoints::~WayPoints()
@@ -127,19 +131,26 @@ QLine2D WayPoints::getTangentToCurrentPoint()
 
 void WayPoints::printRobotState(InnerModel* innerModel)
 {
-		qDebug() << "WayPoints ---------------------";
-		qDebug() << "	num points " << this->size();
-		qDebug() << "	current point index " << this->currentPointIndex;
-		qDebug() << "	next point index" << this->nextPointIndex;
-		qDebug() << "	dist to road " << distanceToRoad;
-		qDebug() << "	angle with road " << angleWithTangent;
-		qDebug() << "	dist to target " << distanceToTarget;
-		qDebug() << "	dist to current " << robotDistanceToCurrentPoint(innerModel);
-		qDebug() << "	dist to next " << robotDistanceToNextPoint(innerModel);
-		qDebug() << "	distance to frontier " << currentDistanceToFrontier;
-		qDebug() << "	road curvature " << roadCurvature;
-		qDebug() << "	Current point" << getCurrentPoint().pos;
-		qDebug() << "	Next Point" << getNextPoint().pos;
+		QVec robot3DPos = innerModel->transform("world", "robot");
+		qDebug() << "Scalar magnitudes ---------------------";
+		qDebug() << "	Num points:" << this->size();
+		qDebug() << "	Robot dist to closest point in road:" << getRobotDistanceToClosestPoint();
+		qDebug() << "	Robot perp. dist to road tangent at closest point:" << getRobotPerpendicularDistanceToRoad();
+		qDebug() << "	Angle with road:" << getAngleWithTangentAtClosestPoint();
+		qDebug() << "	Dist to target:" << getRobotDistanceToTarget();
+		qDebug() << "	Road curvature:" << getRoadCurvatureAtClosestPoint();
+		qDebug() << "	Index of closest point:" << getIndexOfClosestPointToRobot();
+		qDebug() << "	Closest point:" << (*this)[getIndexOfClosestPointToRobot()].pos;
+		qDebug() << "	Robot position:" << robot3DPos;
+		qDebug() << "	Tangent at closest point:" << getTangentAtClosestPoint();
+		qDebug() << "	Current point index: " << currentPointIndex;
+		
+		//qDebug() << "	Current point" << getCurrentPoint().pos;		
+		//qDebug() << "	next point index" << this->nextPointIndex;
+		//qDebug() << "	dist to current " << robotDistanceToCurrentPoint(innerModel);
+		//qDebug() << "	dist to next " << robotDistanceToNextPoint(innerModel);
+		//qDebug() << "	distance to frontier " << currentDistanceToFrontier;
+		//qDebug() << "	Next Point" << getNextPoint().pos;
 		qDebug();		
 }
 
@@ -164,16 +175,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 	pose.z = 0;
 	pose.rx = pose.ry = pose.z = 0.;
 	RoboCompInnerModelManager::meshType mesh;
-	
-	//Number or points in RCIS
-//  	RoboCompInnerModelManager::NodeInformationSequence nodesInfo;
-//  	try
-//  	{ 
-// 		innermodelmanager_proxy->getAllNodeInformation(nodesInfo);
-// 		qDebug() << " WayPoints::draw nodes in RCIS" << nodesInfo.size() << "points in road" <<this->size();;
-// 	}
-//  	catch(const Ice::Exception &e){ std::cout << "Removing points " << e << std::endl;};
-	
+		
 	if( this->isEmpty() )
 		return false;
 	
@@ -189,7 +191,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 	WayPoint &w = (*this)[0];
 	item = "p_" + QString::number(0);		
 	pose.x = w.pos.x();
-	pose.y = 1900;
+	pose.y = 10;
 	pose.z = w.pos.z();
 	RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 	RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, QVec::vec3(0,0,1), 50, 50, "#335577" );
@@ -202,21 +204,24 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		QLine2D l(wAnt.pos, w.pos);
 		QLine2D lp = l.getPerpendicularLineThroughPoint( QVec::vec2(w.pos.x(), w.pos.z()));
 		QVec normal = lp.getNormalForOSGLineDraw();  //3D vector
+		//QVec tangent = l.getNormalForOSGLineDraw();
+		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();
+		
 		item = "p_" + QString::number(i);		
 		pose.x = w.pos.x();
-		pose.y = 1900;
+		pose.y = 10;
 		pose.z = w.pos.z();
 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 		RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 150, 50, "#005500" );
-		if ( i-1 == currentPointIndex )
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 1000, 30, "#000055" );	
-		else if (i == nextPointIndex )
+		if ( (i-1) == currentPointIndex )	
+			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 1000, 30, "#000055" );	
+	/*	else if (i == nextPointIndex )
 		{
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 400, 30, "#999900" );
 			QVec normalR = (getRobotZAxis(innerModel).getPerpendicularLineThroughPoint( QVec::vec2(getNextPoint().pos.x(), getNextPoint().pos.z()))).getNormalForOSGLineDraw();
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_lineA", item, normalR, 1000, 20, "#009999" );  //ligh blue, frontier
 		}
-		else	if(w.isVisible)
+	*/	else if(w.isVisible)
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 400, 30, "#550099" );  //Morado
 		else	
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 400, 30 );
@@ -236,52 +241,178 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 			//qDebug() << "RCDRaw::removing " << obj;
 			innermodelmanager_proxy->removeNode(obj.toStdString());
 		}
-		catch(const Ice::Exception &ex){ std::cout << "Shit removinh" << ex << std::endl;};	
+		catch(const Ice::Exception &ex){ std::cout << __FILE__ << __FUNCTION__ << "Shit removinh" << ex << std::endl;};	
 	}
 	nPoints = upTo;
 	
 	return true;
 }
 
-// void WayPoints::draw2(InnerModelManagerPrx innermodelmanager_proxy, int upTo)
-// {
-// 	RoboCompInnerModelManager::Pose3D pose;
-// 	RoboCompInnerModelManager::meshType mesh;
-// 	QString item;
-// 	
-// 	if( upTo == -1) 
-// 		upTo = this->size();  
-// 	if( upTo < 0 ) 
-// 		upTo = 0;
-// 	if( upTo > this->size() ) 
-// 		upTo = this->size();
-// 	
-// 	for(int i=0; i<upTo; i++)
-// 	{
-// 		WayPoint &w = (*this)[i];
-// 		posef = 100;
-// 		pose.x = w.pos.x(); 
-// 		pose.z = w.pos.z();
-// 		mesh.scaleX = w.minDist;	
-// 		mesh.scaleZ = w.minDist;
-// 		mesh.scaleY = 5;
-// 		mesh.meshPath = "/home/robocomp/robocomp/Files/osgModels/basics/sphere.ive";
-// 		mesh.pose.x = mesh.pose.y = mesh.pose.z = 0.;
-// 		item = "b_" + QString::number(i);
-// 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
-// 		RcisDraw::addMesh_ignoreExisting(innermodelmanager_proxy, item + "_mesh", item, mesh );
-// 		w.ballTransformName = item;
-// 		w.ballMeshName = item+"_mesh";
-// 		//the blue centers
-// 		item = "p_" + QString::number(i);		
-// 		pose.y = 100;		pose.x = w.pos.x(); 		pose.z = w.pos.z();
-// 		mesh.meshPath = "/home/robocomp/robocomp/Files/osgModels/humanColor/jointbox_azul.osg";	 
-// 		mesh.scaleX = mesh.scaleY = mesh.scaleZ=50;
-// 		mesh.pose.x = mesh.pose.y = mesh.pose.z = 0;
-// 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
-// 		RcisDraw::addMesh_ignoreExisting(innermodelmanager_proxy, item + "_mesh", item, mesh );
-// 		w.centerTransformName = item;
-// 		w.centerMeshName = item+"_mesh";
-// 	}
-// }
+
+//////////////////////////////////////////////////////////////////////////////////
+///////COMPUTATION OF SCALAR MAGNITUDES OF FORCEFIELD
+//////////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ * @brief Computes closest point in trajectory to robot. Updates robotDistanceToClosestPoint and currentPointIndex
+ * 
+ * @param robot 3d vector coding robot's position (x,y,z)
+ * @return WayPoint closest to Robot
+ */
+WayPoints::iterator WayPoints::computeClosestPointToRobot(const QVec& robot)
+{
+	float min = FLT_MAX;
+	QList<WayPoint>::iterator it = this->begin();
+	QList<WayPoint>::iterator res = this->end();
+	uint count=0, index = 0;
+	
+	for(it = this->begin(); it != this->end(); ++it, ++count)
+	{
+		float d = (it->pos - robot).norm2();
+		//qDebug () << "d" << d;
+		if( d < min ) 
+		{
+			min = d;
+			res = it;
+			index = count;
+		}
+	}
+	
+	robotDistanceToClosestPoint = min;
+	currentPointIndex = index;   //DEPRECATED
+	indexOfClosestPointToRobot = index;
+	return res;
+}
+
+
+
+/**
+ * @brief Computes the road tangent at point pointed by iterator w
+ * 
+ * @param w WayPoints::iterator pointing to the point of interest
+ * @return QLine2D
+ */
+QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
+{
+	WayPoints::iterator ant,post;
+	if( w == this->begin())
+		ant = w;
+	else
+		ant = w-1;
+
+	if( w+1 == this->end())
+		post = w;
+	else
+		post = w+1;
+
+	if( ant == post ) 
+		qFatal("fary");
+	else 
+	{
+// 		ant->pos.print("ant");
+// 		post->pos.print("post");
+		return QLine2D( ant->pos , post->pos );
+	}
+}
+
+/**
+ * @brief Computes the distance from the robot to the last visible point in the road
+ * 
+ * @param road ...
+ * @param closestPoint ...
+ * @param robotPos ...
+ * @return float
+ */
+float WayPoints::computeDistanceToLastVisible(WayPoints::iterator closestPoint, const QVec &robotPos)
+{
+	float dist = (robotPos - closestPoint->pos).norm2();
+	WayPoints::const_iterator it;
+	for(it = closestPoint; it != end()-1; ++it)
+	{
+		if(it->isVisible == true )
+			dist += (it->pos - (it+1)->pos).norm2();
+		else 
+			break;
+	}
+	return dist;
+}
+
+/**
+ * @brief Computes the distance to the Target along the road
+ * 
+ * @param road ...
+ * @param robotPos ...
+ * @return float Distance to target in the units of InnerModel
+ */
+float WayPoints::computeDistanceToTarget(WayPoints::iterator closestPoint, const QVec &robotPos)
+{
+	float dist = (robotPos - closestPoint->pos).norm2();
+	WayPoints::iterator it;
+	for(it = closestPoint; it != end()-1; ++it)
+	{
+		dist += (it->pos - (it+1)->pos).norm2();
+	}
+	return dist;
+}
+
+/**
+ * @brief Compute angle between current and next segment using the cross product
+ * @param robot2DPos (X,Y) positionof the robot
+ * @return float value between 0 curvature for straight lines and PI for U turns.
+ */
+
+float WayPoints::computeRoadCurvature(WayPoints::iterator closestPoint, uint pointsAhead)
+{
+	WayPoints::iterator it, final;
+	uint count = 0;
+	int achieved = 0;
+	float sumAng = 0.f;
+	for(it = closestPoint; it != end()-1 and count < pointsAhead; ++it, ++count, ++achieved)
+	{
+		float ang = computeTangentAt( it ).signedAngleWithLine2D( computeTangentAt( it + 1));
+		//qDebug() << achieved << road.size() << ang;
+		sumAng += ang;
+	}
+	if( achieved > 0 and isnan(sumAng)==false) 
+		return sumAng/achieved;
+	else 
+		return 0;
+}
+
+/**
+ * @brief Computes all scalar values used by the Controller to obtain the force field that acts on the robot
+ * 
+ * @return void
+ */
+void WayPoints::computeForces()
+{
+	//Get robot's position in world and create robot's nose
+	QVec robot3DPos = innerModel->transform("world", "robot");
+	QVec noseInRobot = innerModel->transform("world", QVec::vec3(0,0,1000), "robot");
+	QLine2D nose =  QLine2D(  QVec::vec2(robot3DPos.x(),robot3DPos.z()), QVec::vec2(noseInRobot.x(), noseInRobot.z()));
+	
+	//Compute closest existing trajectory point to robot
+	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
+	//Compute roadTangent at closestPoint;
+	qDebug() << __FUNCTION__ << "just here" << getCurrentPointIndex() << getRobotDistanceToClosestPoint();
+	if(closestPoint == end())
+		qFatal("fary");
+	QLine2D tangent = computeTangentAt( closestPoint );
+	setTangentAtClosestPoint(tangent);
+	//Compute signed perpenduicular distance from robot to tangent at closest point
+	setRobotPerpendicularDistanceToRoad( tangent.perpendicularDistanceToPoint(robot3DPos) );
+ 	setAngleWithTangentAtClosestPoint( nose.signedAngleWithLine2D( tangent ));
+	//compute distanceToTarget along trajectory
+  	setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );
+	
+	//Check for arrival to target  TOO SIMPLE 
+	if(	( getCurrentPointIndex() == size()-1)  and  
+		( getRobotDistanceToTarget() < 100)) 
+		setFinished(true);
+	
+	//compute curvature of trajectory at closest point to robot
+  	setRoadCurvatureAtClosestPoint( computeRoadCurvature(closestPoint, 3) );
+	setRobotDistanceToLastVisible( computeDistanceToLastVisible(closestPoint, robot3DPos ) );
+}
 

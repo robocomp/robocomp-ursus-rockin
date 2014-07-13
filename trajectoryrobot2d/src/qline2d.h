@@ -31,23 +31,26 @@ class QLine2D : public QVec
 {
 
 	public:
-		QLine2D();
+		QLine2D() : QVec(3,0.f) {};               
 		QLine2D(const QVec &p1, const QVec &p2);
 		QLine2D(T x1, T y1, T x2, T y2);
-		QLine2D(const QLine2D& other);
+		QLine2D(const QLine2D& other): QVec(3)				{setA(other.A());setB( other.B()); setC( other.C());};
 		QLine2D(const QVec &dirVector, T x, T y);
-		virtual ~QLine2D(){};
-		virtual QLine2D& operator=(const QLine2D& other);
+		~QLine2D()											{};
 		virtual bool operator==(const QLine2D& other) const;
 		T perpendicularDistanceToPoint(const QVec &point);
 		T signedAngleWithLine2D(const QLine2D &line);
-		void print(const QString &p) {qDebug() << p << A << B << C;};
-		float getA() const {return A;};
-		float getB() const {return B;};
-		float getC() const {return C;};
+		void print(const QString &p) 						{qDebug() << p << A() << B() << C();};
+		inline T A() const 									{return (*this)[0];};
+		inline T B() const 									{return (*this)[1];};
+		inline T C() const 									{return (*this)[2];};
+		inline void setA(float a)  							{(*this)[0] = a;};	
+		inline void setB(float b)  							{(*this)[1] = b;};	
+		inline void setC(float c)  							{(*this)[2] = c;};	
 		QLine2D getPerpendicularLineThroughPoint(const QVec &point);  //2D point
-		QVec getDirectionVector() const { return QVec::vec2(-B,A);};;
-		QVec getPerpendicularVector() const { return QVec::vec2(A,B);};
+		QVec getDirectionVector() const 					{ return QVec::vec2(-B(),A());};;
+		QVec getNormalizedDirectionVector() const 			{ return QVec::vec2(-B(),A()).normalize();};;
+		QVec getPerpendicularVector() const					{ return QVec::vec2(A(),B());};
 		QVec intersectionPoint(const QLine2D &l);
 		QLine2D getNormalLineThroughOrigin();
 		QVec getIntersectionPointOfNormalThroughOrigin();
@@ -56,10 +59,9 @@ class QLine2D : public QVec
 		T getAngleWithZAxis();
 		QVec pointAlongLineStartingAtP1AtLanda(const QVec &p1, float landa);
 
-		
-	private:
-		float A, B, C;
 };
+
+std::ostream& operator << ( std::ostream &os, const RMat::QVec &vector );
 
 #endif // LINE2D_H
 

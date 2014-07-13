@@ -42,11 +42,8 @@ Q_OBJECT
 		bool computePath(const QVec &target, InnerModel *inner);
 		WayPoints smoothRoad( WayPoints road);
 		void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
-		// 	 void drawPath( qWorld *world, const QList<QVec> & path , const QColor & color);
-		// 	 void drawPath(qWorld *world);
-		// 	 void drawSmoothedPath(qWorld *world);
-
-		WayPoints getPath() { WayPoints road; road.readRoadFromList(currentSmoothedPath); return road;}; 
+		QList<QVec> getPath() { return currentSmoothedPath; }; 
+		
 		//QVec tryBezierToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec>  *arbol , tree<QVec>::iterator & nodeCurrentPos);
 	 
   private:

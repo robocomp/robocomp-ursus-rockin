@@ -23,11 +23,13 @@
 #include <iostream>
 #include <fstream>
 //#include <boost/concept_check.hpp>
-#include "pointstoroad.h"
+//#include "pointstoroad.h"
 #include "controller.h"
 #include "elasticband.h"
 #include "waypoints.h"
 #include "planner.h"
+#include "forcefield.h"
+
 //#include "ParabolicPathSmooth/smoother.h"
 
 /**
@@ -54,13 +56,12 @@ private:
 	RoboCompLaser::TLaserData laserData;
 	QVec target;
  	
-  QVec P;
-  WayPoints road;
-	PointsToRoad *pointstoroad;
+	QVec P;
+	WayPoints road;
 	Controller *controller;
 	ElasticBand *elasticband;
-	
 	Planner *planner;
+	ForceField *forcefield;
 	
 	//Smoother smoother;
 	

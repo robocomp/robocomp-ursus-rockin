@@ -37,11 +37,9 @@ class ElasticBand
 		~ElasticBand();
 		
 		//void setRoad(WayPoints *_road, const RoboCompLaser::TLaserData &laserData);
-		bool update(WayPoints &road, const RoboCompLaser::TLaserData &laserData);
+		bool update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, uint iter = 1);
 		void addPoints(WayPoints &road);
-		//void adjustPoints(WayPoints &road);
-		
-		
+
 	private:		
 		InnerModel *innermodel;
 		

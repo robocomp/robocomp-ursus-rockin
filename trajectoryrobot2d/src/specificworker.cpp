@@ -50,14 +50,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//target = QVec::vec3(8000,10,-1000);
 	//target = QVec::vec3(800,10,-3000);
 //	target = QVec::vec3(6000,10,-8100);
-	target = QVec::vec3(0,0,2000);
-	
+	target = QVec::vec3(0,0,4000);
 	
 	
 	//Draw target as red box	
 	RoboCompInnerModelManager::Plane3D plane;
 	plane.px = target.x();
-	plane.py = 1800;
+	plane.py = 10;
 	plane.pz = target.z();
 	plane.nx = 1;
 	plane.texture = "#990000";
@@ -65,45 +64,30 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	plane.height = plane.width = 100;
 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 	
-	//qFatal("fary");
-	
 	//Plan 
-	planner = new Planner(*innerModel);									////////PLANNER SHOOULD TAKE WAYPOINTS structure
+	planner = new Planner(*innerModel);									
 	qDebug() << __FUNCTION__ << "Planning ...";
-	//	drawThinkingRobot("red");
 	planner->computePath(target, innerModel);
 	if(planner->getPath().size() == 0)
 		qFatal("SpecificWorker: Path NOT found. Aborting");
 	
-	//planner->drawTree(innermodelmanager_proxy);
-	//road.readRoadFromList( planner->getPath() );
-	road = planner->getPath();
-	//road = planner->smoothRoad(road);
-	road.print();
-	
+	road.setInnerModel(innerModel);
+	road.readRoadFromList( planner->getPath() );
 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
 	
 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
-	elasticband = new ElasticBand(innerModel);
-	elasticband->addPoints(road);
-	//elasticband->adjustPoints(road);
-	
+	elasticband = new ElasticBand(innerModel);	
 	qDebug() << __FUNCTION__ << "----- elasticband set";
 	
-	//Converts the road and the current robot position into a set of four parameters that are used by the Controller to physically drive the robot
-	pointstoroad = new PointsToRoad(innerModel, innermodelmanager_proxy);
-	pointstoroad->setRoad(road);
-	
-	qDebug() << __FUNCTION__ << "----- pointstoroad set";
+	//Computes de scalar magnitudes of the Forcefield
+	//forcefield = new ForceField(innerModel, innermodelmanager_proxy);
+	//qDebug() << __FUNCTION__ << "----- forcefield set";
 	
 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
 	controller = new Controller(2);
-
 	qDebug() << __FUNCTION__ << "----- controller set";
 	
 	sleep(1);
-	
-//	road.draw(innermodelmanager_proxy, innerModel);
 		
 }
 
@@ -114,28 +98,41 @@ SpecificWorker::~SpecificWorker()
 {
 }
 
+/**
+ * @brief All architecture goes here. 
+ * 
+ * @return void
+ */
 void SpecificWorker::compute( )
 {	
+	static QTime reloj = QTime::currentTime();
+	static QTime reloj2 = QTime::currentTime();
+	
 	try{	differentialrobot_proxy->getBaseState(bState);  }  
 	catch(const Ice::Exception &ex){ cout << ex << endl;}
 	try{	laserData = laser_proxy->getLaserData();}  
 	catch(const Ice::Exception &ex){ cout << ex << endl;}
 		
 	innerModel->update();
-		
+	
 	elasticband->update( road, laserData );
 	
-	pointstoroad->update(road);
-	
+	//forcefield->update(road);
+	road.computeForces();
+
 	road.printRobotState( innerModel);
-	
+
 	controller->update(differentialrobot_proxy, road);
 	
-	road.draw(innermodelmanager_proxy, innerModel);	
 	
-	if (road.finish == true)
+	if(reloj.elapsed() > 2000) 
 	{
-		//Draw target as red box	
+		road.draw(innermodelmanager_proxy, innerModel);	
+		reloj.restart();
+	}
+	
+	if (road.isFinished() == true)
+	{
 		RoboCompInnerModelManager::Plane3D plane;
 		plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
 		plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
@@ -158,19 +155,24 @@ void SpecificWorker::compute( )
 			//drawThinkingRobot("green");
 			//road.readRoadFromList( planner->getPath() );
 			road.clear();
-			road = planner->getPath();
+			road.readRoadFromList( planner->getPath() );
 			road.requiresReplanning = false;
-			elasticband->addPoints(road);  //SEND THIS TO A RESET
+			//elasticband->addPoints(road);  //SEND THIS TO A RESET
 			//elasticband->adjustPoints(road);  //SEND THIS TO A RESET
 			road.computeDistancesToNext();
 		}
 	}
+
+	qDebug() << reloj2.elapsed() << "ms"; reloj2.restart();
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	//qDebug() << QString::fromStdString(params["PointsFile"].value);
-	timer.start(100);
+	timer.start(40);
 	
 	return true;
 };
@@ -210,7 +212,7 @@ void SpecificWorker::drawThinkingRobot(const QString &color)
 {
 	RoboCompInnerModelManager::Plane3D p;
 	p.px = 0;
-	p.py = 1810;
+	p.py = 10;
 	p.pz = -200;
 	p.nx = 0;
 	p.ny = 1;

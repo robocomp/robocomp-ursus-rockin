@@ -104,11 +104,11 @@ bool PointsToRoad::update(WayPoints &road)
 	
 
 	QVec robot2DPos = QVec::vec2( innerModel->getBaseX(), innerModel->getBaseZ());
-	road.angleWithTangent = getAngleWithTangent(road, robot2DPos);
-	road.distanceToRoad = distanceToRoad(road, robot2DPos);
-	road.distanceToTarget = distanceToTarget(road, innerModel->getBaseCoordinates());
-	road.roadCurvature = roadCurvature(road, innerModel->getBaseCoordinates());
-	road.distanceToLastVisible = distanceToNextVisible(road, innerModel->getBaseCoordinates() );
+// 	road.angleWithTangent = getAngleWithTangent(road, robot2DPos);
+// 	road.distanceToRoad = distanceToRoad(road, robot2DPos);
+// 	road.distanceToTarget = distanceToTarget(road, innerModel->getBaseCoordinates());
+// 	road.roadCurvature = roadCurvature(road, innerModel->getBaseCoordinates());
+// 	road.distanceToLastVisible = distanceToNextVisible(road, innerModel->getBaseCoordinates() );
 
 	return true;
 }

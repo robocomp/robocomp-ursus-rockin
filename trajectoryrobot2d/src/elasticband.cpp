@@ -16,8 +16,6 @@
  */
 
 #include "elasticband.h"
-#include <complex>
-#include <boost/concept_check.hpp>
 
 ElasticBand::ElasticBand(InnerModel *_innermodel):
 	innermodel(_innermodel)
@@ -28,80 +26,35 @@ ElasticBand::~ElasticBand()
 {
 }
 
-bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
+bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, uint iter)
 {
 	
-	//qDebug() << __FILE__ << __FUNCTION__ << "ElasticBand::Update - "<< "num points " << road.size();
+	qDebug() << __FILE__ << __FUNCTION__ << "road size"<<  road.size();
 	
-	if( road.finish == true )
+	if( road.isFinished() == true )
 			return false;
 
-	//Tags all points in the road as visible or blocked, depending on laser visibility
-	//Only visible points are processed in this iteration
-	checkVisiblePoints(road, laserData);
-
-	//road.print();
-	
- 	if( road[1].isVisible == false)
- 	{
-		qDebug() << __FILE__ << __FUNCTION__ << "ElasticBand::update NextPoint is NOT visible or road BLOCKED";
-		road.requiresReplanning = true;
- 		return false;
- 	}
-	
-	///Instead of the Jacobian wrt the point distance field, a better approach would be the Jacobian wrt the real shape of the robot. 
-	///Mindist would be between robot pose at point, including angle, and laser field
-	
-	//Computes repulsive and attractive forces and moves the road elements accordingly
+	//Tags all points in the road as visible or blocked, depending on laser visibility. Only visible points are processed in this iteration
+	checkVisiblePoints(road, laserData);	
+ 	addPoints(road);
+ 	cleanPoints(road);
 	computeForces(road, laserData); 	 
 	
- 	addPoints(road);
-	//adjustPoints(road);
- 	cleanPoints(road);
+	//Delete half the tail behind, if greater than 6, to release resources
+	if( road.getIndexOfClosestPointToRobot() > 6)
+		road.erase(road.begin(), road.begin() + (road.getIndexOfClosestPointToRobot() / 2));
 	
 	return true;
 }
 
-// void ElasticBand::adjustPoints(WayPoints &road)
-// {
-// 	Q_ASSERT( road.size()>1 );
-// 		
-// 	for(int i=0; i< road.size()-1; i++) 
-// 	{
-// 		if( i>0 and road[i].isVisible == false )
-// 			break;
-// 	
-// 		WayPoint &w = road[i];
-// 		WayPoint &wNext = road[i+1];
-// 		float dist = (w.pos-wNext.pos).norm2();
-// 		//qDebug() << __FUNCTION__ << "i" << i << "dist" << dist;
-// 		if( dist > ROBOT_RADIUS/2 + 50)
-// 		{
-// 			float l = ROBOT_RADIUS/2/dist;
-// 			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
-// 			road.insert(i+1,wNew);
-// 			//qDebug() << __FILE__ << __FUNCTION__ << "addPoints:: inserted at" << i+1 << (wNew.pos-road[0].pos).norm2();
-// 		}
-// 		else if( i>0 and i < road.size()-2 and dist < ROBOT_RADIUS/5)
-// 		{
-// 			road.removeAt(i+1);
-// 			//qDebug() << __FILE__<< __FUNCTION__ << "removed from" << i+1 << dist;
-// 		}
-// 	}
-// 	//qDebug() << "ElasticBand addpoints road size" << road.size();
-// }
-
-
 /**
- * @brief Adds points to the band if two existing ones are too far apart
+ * @brief Adds points to the band if two existing ones are too far apart (ROBOT_RADIUS)
  * 
  * @param road ...
  * @return void
  */
 void ElasticBand::addPoints(WayPoints &road)
-{
-	Q_ASSERT( road.size()>1 );
-		
+{		
 	for(int i=0; i< road.size()-1; i++) 
 	{
 		if( i>0 and road[i].isVisible == false )
@@ -109,23 +62,20 @@ void ElasticBand::addPoints(WayPoints &road)
 	
 		WayPoint &w = road[i];
 		WayPoint &wNext = road[i+1];
-		//qDebug() << "i" << i << "dist" << (w.pos-wNext.pos).norm2();
 		float dist = (w.pos-wNext.pos).norm2();
 		
 		if( dist > ROBOT_RADIUS)
 		{
-			//WayPoint wNew( (w.pos * (T)0.5) + (wNext.pos * (T)0.5));
 			float l = ROBOT_RADIUS/dist;
 			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
 			road.insert(i+1,wNew);
 		//	qDebug() << __FILE__ << __FUNCTION__ << "addPoints:: inserted at" << i+1 << dist;
 		}
 	}
-	//qDebug() << "ElasticBand addpoints road size" << road.size();
 }
 
 /**
- * @brief Removes points from the band if two of them are too close
+ * @brief Removes points from the band if two of them are too close, ROBOT_RADIUS/3.
  * 
  * @param road ...
  * @return void
@@ -152,6 +102,13 @@ void ElasticBand::cleanPoints(WayPoints &road)
 	}
 }
 
+/**
+ * @brief Computes the forces exerted on the elements of the road
+ * 
+ * @param road ...
+ * @param laserData ...
+ * @return float
+ */
 float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserData& laserData)
 {
 	Q_ASSERT( road.size()>3 );  //CHECK THIS TO ALLOW TWO AND ONE POINTS ROADS
@@ -264,20 +221,21 @@ bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLase
 		WayPoint &w = road[i];	
 		w.isVisible = true;
 		QVec pr = innermodel->transform("laser", w.pos, "world");
+		//Angle of point in laser plane
 		float angle = atan2(pr.x(),pr.z());
-		
+		//Check for outofbounds
 		if(((angle < minAngle) or (angle > maxAngle)) and (pr.z()>10)) 
 		{
-			qDebug() << __FILE__<< __FUNCTION__ << "ElasticBand::checkVisiblePoints - exiting due to angle" << angle << i << pr;
+			//qDebug() << __FILE__<< __FUNCTION__ << "ElasticBand::checkVisiblePoints - exiting due to angle" << angle << i << pr;
 			w.isVisible = false;
 			for(int k=i;k<road.size();k++)
 				road[k].isVisible = false;
 			return false;
 		}
 			
+		//Find laser index corresponding to "angle"
 		uint j;
-		float init = laserData[0].angle;
-				
+		float init = laserData[0].angle;				
 		//qDebug() << "angle" << angle << "length" << length << "init" << init << pr << w1.pos << w2.pos;
 		for(j=1; j< laserData.size();j++)
 		{
@@ -768,7 +726,24 @@ bool ElasticBand::checkCollision(WayPoints &road, const RoboCompLaser::TLaserDat
 
 
 
-
+//NECESITAMOS OTRA COMPROBACION DE BLOCKED
+	
+//  	if( road[1].isVisible == false)
+//  	{
+// 		qDebug() << __FILE__ << __FUNCTION__ << "ElasticBand::update NextPoint is NOT visible or road BLOCKED";
+// 		road.requiresReplanning = true;
+//  		return false;
+//  	}
+	
+	///Instead of the Jacobian wrt the point distance field, a better approach would be the Jacobian wrt the real shape of the robot. 
+	///Mindist would be between robot pose at point, including angle, and laser field
+	
+	//Computes repulsive and attractive forces and moves the road elements accordingly
+// 	computeForces(road, laserData); 	 
+// 	
+//  	addPoints(road);
+// 	//adjustPoints(road);
+//  	cleanPoints(road);
 
 
 
