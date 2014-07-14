@@ -42,6 +42,7 @@ Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 	//Create list of colision objects;
 	getCollisionObjects(innerModel->getRoot());
 	qDebug() << __FILE__ << __FUNCTION__ << "listaCollision" <<  listCollisionObjects;
+	qDebug() << __FILE__ << __FUNCTION__ << "listaCollision" <<  listCollisionRobotParts;
 	
 	//Trees (forward and backward) creation
 	arbol = new tree<QVec>;
@@ -55,9 +56,9 @@ Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 * @param target point in 3D space
 */
 bool Planner::computePath(const QVec &target, InnerModel *inner)
-{
+{	
 	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning";
-	QVec currentTarget = finalTarget;
+	QVec currentTarget = target;
 	
 	//We need to resynchronize here because in subsequent call the robot will be "Dios sabe dónde"
 	QVec robot = inner->transform("world", QVec::zeros(3), "robot");
@@ -74,7 +75,9 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	}
 
 	//Sample R2 space
-	computeRandomSequence(target);	
+	//computeRandomSequence(target);
+	//Init random sequence
+	qsrand ( QTime::currentTime().msec() );
 	
 	//Clean trees
  	arbol->clear();
@@ -100,7 +103,8 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	for(i=0; i< MAX_ITER; i++)
 	{
 		//get new point form random sequence. First point is always the target
-		currentTarget = chooseRandomPointInFreeSpace(target);
+		if( i>0)
+			currentTarget = chooseRandomPointInFreeSpace(target);
 		// find closest point from random point to tree
 		nodeCurrentPos = findClosestPointInTree( arbol, currentTarget);	
 		
@@ -403,24 +407,43 @@ void Planner::computeRandomSequence(const QVec& currentTarget)
 
 QVec Planner::chooseRandomPointInFreeSpace(const QVec &currentTarget)
 {
-	QVec p(3),x(3);
-	bool collision=true;
-
+	qFatal("faryRANDOM");
+	bool collision = true;
+	float range = 8000.f / RAND_MAX;
+	QVec p(3,0.f);
+	
 	//Inject goal position to bias the distribution
-	if (ind > 0 and (float)qrand()*100/RAND_MAX > 80)
+	if ( qrand()*100.f/RAND_MAX > 80)
 		return(currentTarget);
- 
-	do
+	
+	while( collision == true )
 	{
-		p = QVec::vec3(fsX[ind], 0 , fsZ[ind]);
-		//ind = (ind +1 )%(MAX_ITER*10);
-		ind++;
+		p[0] =  range * rand() -3500;
+		p[2] =  range * rand() -3500;
 		collision = collisionDetector( p, innerModel);	
+//		if( collision == true) qFatal("fary3");
 	}
-	while (collision and ind == fsX.size());
-	if(ind > fsX.size()) 
-		qDebug() << __FILE__ << __FUNCTION__ << "no se encuentra posición libre";
-		return p;	
+	return p;
+
+	
+// 	QVec p(3,0.f),x(3);
+// 	bool collision=true;
+// 
+// 	//Inject goal position to bias the distribution
+// 	if (ind > 0 and (float)qrand()*100/RAND_MAX > 80)
+// 		return(currentTarget);
+//  
+// 	while( (collision = true) and (ind < fsX.size))   //CHANGE THIS TO ADMIT NON-SQUARE REGIONS
+// 	{
+// 		p[0] = fsX[ind];
+// 		p[2] = fsZ[ind];
+// 		collision = collisionDetector( p, innerModel);	
+// 		ind++;
+// 	}
+// 	while (collision and ind < fsX.size());
+// 	if(ind >= fsX.size()) 
+// 		qDebug() << __FILE__ << __FUNCTION__ << "no se encuentra posición libre";
+// 		return p;	
 }
 ////////////////////////////////////////////////////////////////////////
 /// COLLISION DETECTOR
@@ -461,7 +484,8 @@ void Planner::getCollisionObjects(InnerModelNode* node)
 	
 	listCollisionObjects.clear();
 // 	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d" << "P_Wall_1"<< "P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< "P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< "P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< "P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< "P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19" << "dinin_table";
-	listCollisionObjects << "wall1" << "wall11" << "wall2" << "wall22" << "ddR" << "ddL" << "ddF" << "ddB" << "ddR2" << "ddL2" << "ddF2" << "ddB2";
+//	listCollisionObjects << "wall1" << "wall11" << "wall2" << "wall22" << "ddR" << "ddL" << "ddF" << "ddB" << "ddR2" << "ddL2" << "ddF2" << "ddB2";
+	listCollisionObjects <<  "dinin_table" << "ddR" << "ddL" << "ddF" << "ddB";
 	
 	listCollisionRobotParts.clear();
 	listCollisionRobotParts << "base_mesh" << "barracolumna" << "tabletMesh" << "arm_right_1_mesh" << "shoulder_right_1_mesh"
@@ -485,13 +509,19 @@ bool Planner::collisionDetector( const QVec &point,  InnerModel *innerModel)
 			//qDebug() << "vertices of" << robotPart << innerModel->getNode(robotPart)->fclMesh->num_vertices;
 			foreach( robotPart, listCollisionRobotParts)
 			{
-// 				qDebug() << robotPart << worldPart;
+ 				qDebug() << "Checking" << robotPart << worldPart << "at" << point;
 				if( innerModel->collide(robotPart, worldPart))
 				{
 // 					printf("%s %s\n", worldPart.toStdString().c_str(), robotPart.toStdString().c_str());
 						hit = true;  
-						//qDebug() << "collision between" << robotPart << "and" << worldPart;
-						//qFatal("fary");
+						qDebug() << "collision between" << robotPart << "and" << worldPart;
+						qDebug() << "dist" << (innerModel->transform("world","base_mesh") - innerModel->transform("world","ddB")).norm2();
+						innerModel->transform("world","ddB").print("ddB");
+						innerModel->getNode("ddB")->getTr().print("ddB2");
+						innerModel->transform("world","base_mesh").print("base");
+						innerModel->transform("world","dinin_table").print("table");
+						
+						qFatal("fary");
 						break; 
 				}
 			}	

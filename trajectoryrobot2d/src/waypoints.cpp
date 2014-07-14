@@ -49,8 +49,7 @@ void WayPoints::readRoadFromFile(InnerModel *innerModel, std::string name)
 	std::ifstream file(name.c_str(), std::ios_base::in);
 	if( file.is_open() )
 	{
-		QVec rPos = innerModel->getBaseCoordinates();
-		rPos[2] += 100;  ///CHECK
+		QVec rPos = innerModel->transform("world","robot");
 		append(WayPoint(rPos));
 		
 		while(file.eof() == false)
@@ -205,15 +204,14 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		QLine2D lp = l.getPerpendicularLineThroughPoint( QVec::vec2(w.pos.x(), w.pos.z()));
 		QVec normal = lp.getNormalForOSGLineDraw();  //3D vector
 		//QVec tangent = l.getNormalForOSGLineDraw();
-		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();
-		
+		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();		//OJO, PETA SI NO ESTA LA TG CALCULADA ANTES
 		item = "p_" + QString::number(i);		
 		pose.x = w.pos.x();
 		pose.y = 10;
 		pose.z = w.pos.z();
 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 		RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 150, 50, "#005500" );
-		if ( (i-1) == currentPointIndex )	
+		if ( (i-1) == currentPointIndex )	//CHANGE TO getIndexOfClosestPointToRobot()
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 1000, 30, "#000055" );	
 	/*	else if (i == nextPointIndex )
 		{
@@ -221,11 +219,11 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 			QVec normalR = (getRobotZAxis(innerModel).getPerpendicularLineThroughPoint( QVec::vec2(getNextPoint().pos.x(), getNextPoint().pos.z()))).getNormalForOSGLineDraw();
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_lineA", item, normalR, 1000, 20, "#009999" );  //ligh blue, frontier
 		}
-	*/	else if(w.isVisible)
+*/
+		else if(w.isVisible)
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 400, 30, "#550099" );  //Morado
 		else	
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 400, 30 );
-		
 		
 		w.centerTransformName = item;
 		w.centerLineName = item + "_line";

@@ -44,13 +44,12 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	innerModel->update();
 	cleanWorld();
-	//sendRobotHome();
 	
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
 	//target = QVec::vec3(800,10,-3000);
 //	target = QVec::vec3(6000,10,-8100);
-	target = QVec::vec3(0,0,4000);
+	target = QVec::vec3(0,0,3000);
 	
 	
 	//Draw target as red box	
@@ -74,6 +73,11 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	road.setInnerModel(innerModel);
 	road.readRoadFromList( planner->getPath() );
 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
+	
+	road.print();
+	road.computeForces();
+	road.draw(innermodelmanager_proxy, innerModel);	
+	qFatal("fary2");
 	
 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
 	elasticband = new ElasticBand(innerModel);	
