@@ -129,36 +129,11 @@ int Cuba2DnaturallandmarksComp::run(int argc, char* argv[])
 	LaserPrx laser_proxy;
 	DifferentialRobotPrx base_proxy;
 
-	CCDAmatchingPrx ccdamatching_proxy;
 	string proxy;
 
 	// User variables
 
 	initialize();
-
-
-	try
-	{
-		// Load the remote server proxy
-		proxy = communicator()->getProperties()->getProperty("CCDAmatchingProxy");
-		cout << "[" << PROGRAM_NAME << "]: Loading [" << proxy << "] proxy at (" << "CCDAmatchingProxy" << ")..." << endl;
-		if( proxy.empty() )
-		{
-			cout << "[" << PROGRAM_NAME << "]: Error loading proxy config! Check config file for missing of incorrect proxies" << endl;
-			return EXIT_FAILURE;
-		}
-		ccdamatching_proxy = CCDAmatchingPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-		if( !ccdamatching_proxy )
-		{
-			cout << "[" << PROGRAM_NAME << "]: Error loading proxy!" << endl;
-			return EXIT_FAILURE;		}
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex << endl;
-		return EXIT_FAILURE;
-	}
-	cout << "CCDAmatchingProxy initialized Ok!" << endl;
 
 	try
 	{
@@ -209,7 +184,7 @@ int Cuba2DnaturallandmarksComp::run(int argc, char* argv[])
 
 
 	float h = atof(communicator()->getProperties()->getProperty("Height").c_str());
-	Worker *worker = new Worker(ccdamatching_proxy, laser_proxy, base_proxy, h);
+	Worker *worker = new Worker(laser_proxy, base_proxy, h);
 
 	try
 	{

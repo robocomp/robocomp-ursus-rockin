@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2008-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
  *
  *    This file is part of RoboComp
  *
@@ -16,61 +16,40 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef WORKER_H
-#define WORKER_H
+#ifndef SPECIFICWORKER_H
+#define SPECIFICWORKER_H
 
-#include <ipp.h>
-#include <QtGui>
-#include <stdio.h>
-#include <time.h>
-#include <sys/time.h>
-#include <cstring>
-
-#include <Laser.h>
-#include <DifferentialRobot.h>
-#include <CamMotion.h>
-#include <Cuba2Dnaturallandmarks.h>
-
-//#include <innermodel/robotinnermodel.h>
-#include <innermodel/innermodel.h>
-#include <rcdraw/rcdraw.h>
-#include <rcdraw/rcdrawrobot.h>
-#include <qmat/QMatAll>
-//#include <qworld/qworld.h>
-//#include <qmatrix/QMatAll>
+#include <genericworker.h>
 #include "definitions.h"
 #include "curvaturalaser.h"
 #include "cdata.h"
 #include "circle.h"
-
-
-#define CHECK_PERIOD 5000
-#define BASIC_PERIOD 100
-
+#include <innermodel/innermodel.h>
+#include <ipp.h>
 
 /**
        \brief
-       @author Pedro Nunez@2008
+       @author authorname
 */
-class Worker : public QObject
-{
-Q_OBJECT
-public:
-    Worker(RoboCompLaser::LaserPrx laserprx, RoboCompDifferentialRobot::DifferentialRobotPrx baseprx, float h, QObject *parent = 0);
-    ~Worker();
-    QMutex *mutex;                //Shared mutex with servant
-	RoboCompCuba2Dnaturallandmarks::Features computeFeatures( const RoboCompLaser::TLaserData & lData);
-	RoboCompCuba2Dnaturallandmarks::Features getFeatures();
-	RoboCompCuba2Dnaturallandmarks::Features getLocalFeatures();
 
-private:
-    QTimer timer;
-	RoboCompLaser::LaserPrx laser;
-	RoboCompDifferentialRobot::DifferentialRobotPrx base;
+class SpecificWorker : public GenericWorker
+{
+	Q_OBJECT
+	public:
+		SpecificWorker(MapPrx& mprx, QObject *parent = 0);	
+		~SpecificWorker();
+		bool setParams(RoboCompCommonBehavior::ParameterList params);
+		RoboCompCuba2Dnaturallandmarks::Features computeFeatures( const RoboCompLaser::TLaserData & lData);
+		RoboCompCuba2Dnaturallandmarks::Features getFeatures();
+		RoboCompCuba2Dnaturallandmarks::Features getLocalFeatures();
+
+	public slots:
+		void compute(); 	
+		
+	private:
 	RoboCompDifferentialRobot::TBaseState bState, tmp_state;
 	RoboCompLaser::TLaserData laserData;
 	RoboCompLaser::TLaserData laserDataMedian;
-	RoboCompCamMotion::THeadState hState;
 	InnerModel *innerModel;
 
 	// PMNT Enero 2010
@@ -125,14 +104,12 @@ private:
 	double dist_r(int contador, double robotx, double roboty, double * array_pixels_lc);
 	double angle2rad(double angle);
 	double rad2angle ( double angle );
-
 	void segment_new(double *segmento_new, double *pixels, double *points, int inicio, int fin);
 	void segmento_Kai(double *segment, double *puntos, int inicio, int fin);
 	void extremo_kai(double rho, double theta, double alfa, double r, double *x1, double *y1);
 	void incluir_segmento(SEGMENTO *array_segment_local,double *segmento,int _cont);
 	void detectar_EsquinaVirtual(SEGMENTO *array_segment_local,double *esquina, int _cont, double *matriz_R);
 	void iniciar_mapa_local(MAPA_LASER &mapa);//****************** Sigma ************************************
-
 	void destruir_mapa_local(MAPA_LASER *mapa); // (added by Ricardo Vazquez)
 	void incluir_esquina_virtual(MAPA_LASER *mapa, double *esquinas, double *matriz);
 	void  obtener_mapa(MAPA_LASER *mapa, SEGMENTO *array_segment_local,int *_cont);
@@ -143,15 +120,11 @@ private:
 	CIRCULO circulo_new(double *array_pixels,int inicio,int fin);
 	void incluir_circulo(MAPA_LASER *mapa, CIRCULO *array_circle_local, CIRCULO circle, int cont_circle, double *matriz);
 	void  matriz_covarianza_circulo(CIRCULO circle, double *matriz, int cont);
-	double Sigma(Data data, Circle circle);
+	double Sigma(Data data, ::Circle circle);
 	void  matriz_covarianza_virtual(SEGMENTO segmento_2,SEGMENTO segmento_1, double *matriz, int cont);
 	double dist_euclidean2D(double x1, double y1, double x2, double y2);
 	void  map_copy(MAPA_LASER *mapa, MAPA_LASER *ref);
 
-
-public slots:
-    void compute();
-	
 };
 
 #endif

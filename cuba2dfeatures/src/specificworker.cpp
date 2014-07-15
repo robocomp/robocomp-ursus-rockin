@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
  *
  *    This file is part of RoboComp
  *
@@ -16,14 +16,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "worker.h"
+ 
+ #include "specificworker.h"
 
+/**
+* \brief Default constructor
+*/
 
-Worker::Worker ( RoboCompLaser::LaserPrx laserprx,  RoboCompDifferentialRobot::DifferentialRobotPrx baseprx, float h, QObject *parent ) : QObject ( parent )
+SpecificWorker::SpecificWorker(MapPrx& mprx, QObject *parent) : GenericWorker(mprx, parent)	
 {
-	laser = laserprx;
-	base = baseprx;
-	height = h;
+	height = 200;   //SACAR ESTO DEL InnerModel
 	
 	debug_cont = 0;
 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");	
@@ -34,7 +36,7 @@ Worker::Worker ( RoboCompLaser::LaserPrx laserprx,  RoboCompDifferentialRobot::D
 
 	try 
 	{
-		configLaser = laser->getLaserConfData();
+		configLaser = laser_proxy->getLaserConfData();
 		qDebug() << "MaxRange: " << configLaser.maxRange;
 		laserRange = configLaser.maxRange*2;
 		qDebug() << "MinRange: " << configLaser.minRange;
@@ -54,7 +56,7 @@ Worker::Worker ( RoboCompLaser::LaserPrx laserprx,  RoboCompDifferentialRobot::D
 
 	try
 	{
-		laserData = laser->getLaserData();
+		laserData = laser_proxy->getLaserData();
 	}
 	catch ( const Ice::Exception& ex )
 	{
@@ -65,25 +67,23 @@ Worker::Worker ( RoboCompLaser::LaserPrx laserprx,  RoboCompDifferentialRobot::D
 	iniciar_mapa_local( scan_mapa );
 	iniciar_mapa_local( scan_maparef );
 
-	connect ( &timer, SIGNAL ( timeout() ), this, SLOT ( compute() ) );
-	timer.start ( BASIC_PERIOD );
-
-
 	qDebug() << "Cuba2DnaturallandmarksComp::Worker constructor finished OK";
-	
 }
 
-Worker::~Worker()
+/**
+* \brief Default destructor
+*/
+
+SpecificWorker::~SpecificWorker()
 {
 }
 
-void Worker::compute( )
+void SpecificWorker::compute( )
 {
- 
 	static bool baseFunciona = true;
 	try
 	{
-		base->getBaseState ( bState );
+		differentialrobot_proxy->getBaseState ( bState );
 		innerModel->updateTransformValues("base", bState.x, 0, bState.z, 0, bState.alpha, 0);
 	}
 	catch ( const Ice::Exception& ex )
@@ -97,7 +97,7 @@ void Worker::compute( )
 	try
 	{
 		debug_cont ++;
-		laserData = laser->getLaserData( );
+		laserData = laser_proxy->getLaserData( );
 		medianFilter(laserData);
 	}
 	catch ( const Ice::Exception& ex )
@@ -109,7 +109,14 @@ void Worker::compute( )
 
 }
 
-void Worker::medianFilter( const RoboCompLaser::TLaserData & laserData )
+
+bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
+{
+	timer.start(Period);
+	return true;
+};
+
+void SpecificWorker::medianFilter( const RoboCompLaser::TLaserData & laserData )
 {
 	Ipp32f x[laserData.size()];
 	
@@ -127,7 +134,7 @@ void Worker::medianFilter( const RoboCompLaser::TLaserData & laserData )
  * Inicialización de variables dinámicas de features
  * @param n
  */
-void Worker::iniFeaturesVar ( int n )
+void SpecificWorker::iniFeaturesVar ( int n )
 {
 	array_pixels= ( double* ) malloc ( ( n*offset_points+1 ) *sizeof ( double ) );
 	array_points= ( double* ) malloc ( ( n*offset_points+1 ) *sizeof ( double ) );
@@ -146,7 +153,7 @@ void Worker::iniFeaturesVar ( int n )
  * @param lData scan data
  * @param mapa mapa de la observacion
  */
-void Worker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LASER *scan_mapa, MAPA_LASER *scan_maparef )
+void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LASER *scan_mapa, MAPA_LASER *scan_maparef )
 {
 	char nomb1[30];	
 	static int cont = 0;
@@ -455,7 +462,7 @@ void Worker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LASER *sca
 // IN:	angulo en grados
 // OUT: angulo en radianes
 // ***************************************************************************
-double Worker::angle2rad ( double angle ){
+double SpecificWorker::angle2rad ( double angle ){
 	return angle*M_PI/180;
 }
 
@@ -465,7 +472,7 @@ double Worker::angle2rad ( double angle ){
 // IN:	angulo en radianes
 // OUT: angulo en grados
 // ***************************************************************************
-double Worker::rad2angle ( double angle )
+double SpecificWorker::rad2angle ( double angle )
 {
 	return angle*180/M_PI;
 }
@@ -478,7 +485,7 @@ double Worker::rad2angle ( double angle )
 //		robotx,roboty: posicion del robot
 // OUT: distancia euclidea del punto array_pixels_lc[contador] al robot
 // ***************************************************************************
-double Worker::dist_r ( int contador, double robotx, double roboty, double * array_pixels_lc )
+double SpecificWorker::dist_r ( int contador, double robotx, double roboty, double * array_pixels_lc )
 {
 	double x,y;
 
@@ -494,7 +501,7 @@ double Worker::dist_r ( int contador, double robotx, double roboty, double * arr
 // IN:	contador: posicion en el scan
 // OUT: distancia euclidea del punto array_pixels_lc[contador] al array_pixels_lc[contador-1]
 // ***************************************************************************
-double Worker::dist_p ( int contador, double * array_pixels_lc )
+double SpecificWorker::dist_p ( int contador, double * array_pixels_lc )
 {
 	return ( sqrt (
 	             ( array_pixels_lc[contador*3+1] - array_pixels_lc[ ( contador-1 ) *3+1] )
@@ -511,7 +518,7 @@ double Worker::dist_p ( int contador, double * array_pixels_lc )
 //		robotx,roboty: posicion del robot
 // OUT: array_pixels_lc[contador] es un breakpoint/no lo es
 // ***************************************************************************
-bool Worker::find_breakPoints ( int contador, double robotx, double roboty, double * array_pixels_lc )
+bool SpecificWorker::find_breakPoints ( int contador, double robotx, double roboty, double * array_pixels_lc )
 {
 	double Dmax;
 	double sigma;
@@ -537,7 +544,7 @@ bool Worker::find_breakPoints ( int contador, double robotx, double roboty, doub
 // OUT: fichero de posiciones con puntos de ruptura
 //			+1 : posicion x; +2: posicion y; +3: longitud del tramo entre puntos
 // ***************************************************************************
-void Worker::MapBreakPoints ( int *indice_grupo, int num_pixels, double * _array_pixels_lc, double robotx,
+void SpecificWorker::MapBreakPoints ( int *indice_grupo, int num_pixels, double * _array_pixels_lc, double robotx,
                               double roboty )
 {
 	int i; 
@@ -595,7 +602,7 @@ void Worker::MapBreakPoints ( int *indice_grupo, int num_pixels, double * _array
 //
 // OUT:
 // ***************************************************************************
-int Worker::MaxDistEuclidea(double a, double b, double c, double d, double e, double f)
+int SpecificWorker::MaxDistEuclidea(double a, double b, double c, double d, double e, double f)
 {
 	if (sqrt((a-e)*(a-e)+(b-f)*(b-f))<sqrt((c-e)*(c-e)+(d-f)*(d-f)))
 		return 1;
@@ -615,13 +622,13 @@ int Worker::MaxDistEuclidea(double a, double b, double c, double d, double e, do
 // OUT:
 // 
 // ***************************************************************************
-void Worker::extremo_kai(double rho, double theta, double alfa, double r, double *x1, double *y1)
+void SpecificWorker::extremo_kai(double rho, double theta, double alfa, double r, double *x1, double *y1)
 {
 	
   double r2, alfa2; double x,y;
 
   // Comment: punto de corte entre el punto (su recta generada) y la recta pasado como parametro
-  alfa2=alfa+(double)(PI/2);
+  alfa2=alfa+(double)(M_PI/2);
  
   x=rho*cos(theta);
   y=rho*sin(theta);
@@ -629,10 +636,10 @@ void Worker::extremo_kai(double rho, double theta, double alfa, double r, double
   
   r2=x*cos(alfa2) + y*sin(alfa2);
   
-  if (r2<0) {alfa2+=(double)PI;r2=-r2;}
+  if (r2<0) {alfa2+=(double)M_PI;r2=-r2;}
 
 #ifdef __DEBUG__
-  printf("[EXT] alfa2,r2: %f,%f x,y: %f,%f \n",alfa2*180/PI,r2,x,y);
+  printf("[EXT] alfa2,r2: %f,%f x,y: %f,%f \n",alfa2*180/M_PI,r2,x,y);
 #endif
 
   *y1=(r2*cos(alfa) - r*cos(alfa2))/(sin(alfa2)*cos(alfa) - sin(alfa)*cos(alfa2));
@@ -651,7 +658,7 @@ void Worker::extremo_kai(double rho, double theta, double alfa, double r, double
 //     double*: devuelve el segmento definitivo. 
 // ***************************************************************************
 
-void Worker::segmento_Kai(double *segment, double *puntos, int inicio, int fin)
+void SpecificWorker::segmento_Kai(double *segment, double *puntos, int inicio, int fin)
 {
 
   //double xi,xf,yi,yf;
@@ -703,22 +710,22 @@ void Worker::segmento_Kai(double *segment, double *puntos, int inicio, int fin)
 
    if (r<0) {
 		r=-r; 
-		alfa+=(double)PI;
-		if (alfa>PI) alfa-=2*(double)PI;
+		alfa+=(double)M_PI;
+		if (alfa>M_PI) alfa-=2*(double)M_PI;
 	}
 	
   segment[_ALFA]=alfa;
   segment[_RO]=r;
   
 
-//   printf("\n[SEGM]: (alfa,r) (%f,%f) inicio(r,th) (%f,%f) (x,y) (%f,%f)\n",alfa*180/PI,r,puntos[3*inicio+1],puntos[3*inicio+2]*180/PI,
+//   printf("\n[SEGM]: (alfa,r) (%f,%f) inicio(r,th) (%f,%f) (x,y) (%f,%f)\n",alfa*180/M_PI,r,puntos[3*inicio+1],puntos[3*inicio+2]*180/M_PI,
 //     puntos[3*inicio+1]*cos(puntos[3*inicio+2]),puntos[3*inicio+1]*sin(puntos[3*inicio+2]));
 
 
   extremo_kai(puntos[offset_points*inicio+_R],puntos[offset_points*inicio+_Q],alfa,r,&segment[_XINI],&segment[_YINI]); 
 
 
-//  printf("\n[SEGM]: (alfa,r)  (%f,%f) fin(r,th) (%f,%f) (x,y) (%f,%f)\n",alfa*180/PI,r,puntos[3*fin+1],puntos[3*fin+2]*180/PI,
+//  printf("\n[SEGM]: (alfa,r)  (%f,%f) fin(r,th) (%f,%f) (x,y) (%f,%f)\n",alfa*180/M_PI,r,puntos[3*fin+1],puntos[3*fin+2]*180/M_PI,
 //	  puntos[3*fin+1]*cos(puntos[3*fin+2]),puntos[3*fin+1]*sin(puntos[3*fin+2]));
   
   extremo_kai(puntos[offset_points*fin+_R],puntos[offset_points*fin+_Q],alfa,r,&segment[_XFIN],&segment[_YFIN]); 
@@ -776,7 +783,7 @@ void Worker::segmento_Kai(double *segment, double *puntos, int inicio, int fin)
 // OUT:
 //     double*: devuelve el segmento definitivo. 
 // ***************************************************************************
-void Worker::segment_new(double *segmento_new, double *pixels, double *points, int inicio, int fin) 
+void SpecificWorker::segment_new(double *segmento_new, double *pixels, double *points, int inicio, int fin) 
 {
   segmento_Kai(segmento_new,points,inicio, fin);
 	//pixels=pixels;
@@ -792,7 +799,7 @@ void Worker::segment_new(double *segmento_new, double *pixels, double *points, i
 //
 // OUT:
 // ***************************************************************************
-void Worker::incluir_segmento(SEGMENTO *array_segment_local,double *segmento,int _cont)
+void SpecificWorker::incluir_segmento(SEGMENTO *array_segment_local,double *segmento,int _cont)
 {
 	int cont_segment;	// Contador de segmentos actuales
 
@@ -819,7 +826,7 @@ void Worker::incluir_segmento(SEGMENTO *array_segment_local,double *segmento,int
  	array_segment_local[cont_segment].lcalfar = 0; //segmento[12];
  	
 // 	std::cout << "----incluir_segmento----" << std::endl;
-// 	std::cout << "segmento: (alfa, d, length)" << array_segment_local[cont_segment].lalfa *180/M_PI << ", " << array_segment_local[cont_segment].lr << ", " << array_segment_local[cont_segment].longitud << std::endl;
+// 	std::cout << "segmento: (alfa, d, length)" << array_segment_local[cont_segment].lalfa *180/M_M_PI << ", " << array_segment_local[cont_segment].lr << ", " << array_segment_local[cont_segment].longitud << std::endl;
 // 	std::cout << "segmento: (calfa, crho, calfarho)" << array_segment_local[cont_segment].lcalfa << ", " << array_segment_local[cont_segment].lcr << ", " << array_segment_local[cont_segment].lcalfar << std::endl;
 // 	std::cout << "det2R: " << array_segment_local[cont_segment].lcalfa*array_segment_local[cont_segment].lcr - array_segment_local[cont_segment].lcalfar *array_segment_local[cont_segment].lcalfar  << std::endl;
 // 	std::cout << "-----------" << std::endl;
@@ -835,7 +842,7 @@ void Worker::incluir_segmento(SEGMENTO *array_segment_local,double *segmento,int
 //
 // OUT:
 // ***************************************************************************
-void Worker::incluir_edge(MAPA_LASER *mapa, double posx, double posy, double r, double theta, double Calfa, double alfa)
+void SpecificWorker::incluir_edge(MAPA_LASER *mapa, double posx, double posy, double r, double theta, double Calfa, double alfa)
 {
 	int indice;
 
@@ -870,7 +877,7 @@ void Worker::incluir_edge(MAPA_LASER *mapa, double posx, double posy, double r, 
 //		Actualiza esquina
 // ***************************************************************************
 
-void Worker::detectar_Edge(MAPA_LASER *mapa, int contseg, int *breakpoints,double *array_corners, double *array_pixels,double * array_points)
+void SpecificWorker::detectar_Edge(MAPA_LASER *mapa, int contseg, int *breakpoints,double *array_corners, double *array_pixels,double * array_points)
 
 {
 
@@ -903,8 +910,8 @@ void Worker::detectar_Edge(MAPA_LASER *mapa, int contseg, int *breakpoints,doubl
 	      segment_new(segmento,array_pixels,array_points,inicio,fin);
 
 #ifdef __DEBUG__
-		  printf("(alfa,r): (%f,%f)",segmento[_ALFA]*180/PI,segmento[_RO]);
-		  printf("(l,error): (%f,%f)",segmento[_DIST]*180/PI,segmento[_ERROR]);
+		  printf("(alfa,r): (%f,%f)",segmento[_ALFA]*180/M_PI,segmento[_RO]);
+		  printf("(l,error): (%f,%f)",segmento[_DIST]*180/M_PI,segmento[_ERROR]);
 #endif
 
 		  if (segmento[4]>=LONG_SEGMENTO) // && segmento[12]<COEF_MINIMO)
@@ -961,7 +968,7 @@ void Worker::detectar_Edge(MAPA_LASER *mapa, int contseg, int *breakpoints,doubl
 // 
 // ***************************************************************************
 
-void  Worker::matriz_covarianza_circulo(CIRCULO circle, double *matriz, int cont)
+void  SpecificWorker::matriz_covarianza_circulo(CIRCULO circle, double *matriz, int cont)
 {
 	double N,D; 
 	
@@ -1046,15 +1053,15 @@ void  Worker::matriz_covarianza_circulo(CIRCULO circle, double *matriz, int cont
 
 	// Comment: "[LE] parametros para la matriz de covarianza"
 	rho   = sqrt( circle.puntos[0]*circle.puntos[0] + circle.puntos[1]*circle.puntos[1]);
-	theta = atan2(circle.puntos[0],circle.puntos[1])-PI/2;
+	theta = atan2(circle.puntos[0],circle.puntos[1])-M_PI/2;
 	
 #ifdef DEBUG_CR
 	printf("(r,theta): (%f,%f)\n",rho,theta);		
 #endif
-	if (theta < 0) theta+=PI;
+	if (theta < 0) theta+=M_PI;
 
 #ifdef DEBUG_CR
-	printf("(r,theta): (%f,%f)\n",rho,theta*180/PI);		
+	printf("(r,theta): (%f,%f)\n",rho,theta*180/M_PI);		
 #endif
 
 	
@@ -1063,12 +1070,12 @@ void  Worker::matriz_covarianza_circulo(CIRCULO circle, double *matriz, int cont
 	SIGMA_Y1   = SIGMA_R*SIGMA_R*cos(theta)*cos(theta) + rho*rho*SIGMA_THETA*SIGMA_THETA*sin(theta)*sin(theta);
 
 	rho = sqrt(circle.puntos[2]*circle.puntos[2] + circle.puntos[3]*circle.puntos[3]);
-	theta = atan2(circle.puntos[2],circle.puntos[3])-PI/2;
+	theta = atan2(circle.puntos[2],circle.puntos[3])-M_PI/2;
 
-	if (theta < 0) theta+=PI;
+	if (theta < 0) theta+=M_PI;
 
 #ifdef DEBUG_CR
-	printf("(r,theta): (%f,%f)\n",rho,theta*180/PI);
+	printf("(r,theta): (%f,%f)\n",rho,theta*180/M_PI);
 #endif
 
 	SIGMA_X2   = SIGMA_R*SIGMA_R*sin(theta)*sin(theta) + rho*rho*SIGMA_THETA*SIGMA_THETA*cos(theta)*cos(theta);
@@ -1076,11 +1083,11 @@ void  Worker::matriz_covarianza_circulo(CIRCULO circle, double *matriz, int cont
 	SIGMA_Y2   = SIGMA_R*SIGMA_R*cos(theta)*cos(theta) + rho*rho*SIGMA_THETA*SIGMA_THETA*sin(theta)*sin(theta);
 	
 	rho=sqrt(circle.puntos[4]*circle.puntos[4]+circle.puntos[5]*circle.puntos[5]);
-	theta= atan2(circle.puntos[4],circle.puntos[5])-PI/2;
-	if (theta < 0) theta+=PI;
+	theta= atan2(circle.puntos[4],circle.puntos[5])-M_PI/2;
+	if (theta < 0) theta+=M_PI;
 
 #ifdef DEBUG_CR
-	printf("(r,theta): (%f,%f)\n",rho,theta*180/PI);
+	printf("(r,theta): (%f,%f)\n",rho,theta*180/M_PI);
 #endif
 	SIGMA_X3   = SIGMA_R*SIGMA_R*sin(theta)*sin(theta) + rho*rho*SIGMA_THETA*SIGMA_THETA*cos(theta)*cos(theta);
 	SIGMA_XY3   = SIGMA_R*SIGMA_R*sin(theta)*cos(theta) - rho*rho*SIGMA_THETA*SIGMA_THETA*sin(theta)*cos(theta);
@@ -1133,7 +1140,7 @@ void  Worker::matriz_covarianza_circulo(CIRCULO circle, double *matriz, int cont
 // 
 // ***************************************************************************
 
-CIRCULO Worker::circulo_new(double *array_pixels,int inicio,int fin){
+CIRCULO SpecificWorker::circulo_new(double *array_pixels,int inicio,int fin){
 
 	CIRCULO local;
 	local.x=0;local.y=0;local.r=0;
@@ -1143,7 +1150,7 @@ CIRCULO Worker::circulo_new(double *array_pixels,int inicio,int fin){
 	double *x; double *y; double *s;
 	double distance;
 	double min; int indice_s;
-	Circle Ini, circulo;
+	::Circle Ini, circulo;
 	
 	x=(double*) malloc((fin-inicio)*sizeof(double));
 	y=(double*) malloc((fin-inicio)*sizeof(double));
@@ -1165,13 +1172,13 @@ CIRCULO Worker::circulo_new(double *array_pixels,int inicio,int fin){
 	//          --> s[indice]_minima
 	for (int indice=0;indice<IterMAX-1;indice++)
 	{
-	Ini=Circle(data,fin-inicio);
+	Ini= ::Circle(data,fin-inicio);
 	s[indice]= Sigma(data,Ini); 
 					 
 		if	(s[indice]<=min) 
 		{
 		min=s[indice]; indice_s=indice;
-		circulo = Circle(Ini.a, Ini.b,Ini.r,Ini.vector, Ini.puntos);
+		circulo = ::Circle(Ini.a, Ini.b,Ini.r,Ini.vector, Ini.puntos);
 		}															
 	}
 								
@@ -1202,7 +1209,7 @@ CIRCULO Worker::circulo_new(double *array_pixels,int inicio,int fin){
 // 
 // ***************************************************************************
 
-void Worker::incluir_circulo(MAPA_LASER *mapa, CIRCULO *array_circle_local, CIRCULO circle, int cont_circle, double *matriz)
+void SpecificWorker::incluir_circulo(MAPA_LASER *mapa, CIRCULO *array_circle_local, CIRCULO circle, int cont_circle, double *matriz)
 {
 	int i; // Comment: [LE] added by Ricardo Vazquez
 
@@ -1241,7 +1248,7 @@ void Worker::incluir_circulo(MAPA_LASER *mapa, CIRCULO *array_circle_local, CIRC
 // ***************************************************************************
 
 
-void  Worker::matriz_covarianza_virtual(SEGMENTO segmento_2,SEGMENTO segmento_1, double *matriz, int cont)
+void  SpecificWorker::matriz_covarianza_virtual(SEGMENTO segmento_2,SEGMENTO segmento_1, double *matriz, int cont)
 {
 
   // definicion de parametros tmps
@@ -1343,21 +1350,18 @@ void  Worker::matriz_covarianza_virtual(SEGMENTO segmento_2,SEGMENTO segmento_1,
 // OUT:
 //		Actualiza esquina
 // ***************************************************************************
-void Worker::detectar_EsquinaVirtual(SEGMENTO *array_segment_local,double *esquina, int _cont, double *matriz_R)
+void SpecificWorker::detectar_EsquinaVirtual(SEGMENTO *array_segment_local,double *esquina, int _cont, double *matriz_R)
 {
 
 	register int i;			
 	int n_esquina;					// Numero de esquinas virtuales encontradas
 
 	double pc_x,pc_y;				// Punto de corte entre dos rectas
-	int array_c;					// vble. auxiliar
-
+	
 	double inc_angle;
 
 	n_esquina=(int)(esquina[0]);
 
-	array_c=0;
-  
 	pc_x=0; pc_y=0;
 
 	if (_cont!=1) 
@@ -1365,7 +1369,7 @@ void Worker::detectar_EsquinaVirtual(SEGMENTO *array_segment_local,double *esqui
 		for (i=0;i<_cont;i++)
 			{
 			
-				inc_angle=(array_segment_local[_cont-1].lalfa-array_segment_local[i].lalfa)*180/PI;
+				inc_angle=(array_segment_local[_cont-1].lalfa-array_segment_local[i].lalfa)*180/M_PI;
 				
 				if (inc_angle<0)
 					inc_angle=inc_angle+180;
@@ -1391,8 +1395,8 @@ void Worker::detectar_EsquinaVirtual(SEGMENTO *array_segment_local,double *esqui
 
 #ifdef DEBUGVC				
 				  printf("(Xv,Yv) (%f,%f) - punto de corte entre: \n", pc_x,pc_y);
-				  printf("A(rho,theta): (%f,%f) B(rho,theta): (%f,%f) \n",array_segment_local[i].lr,array_segment_local[i].lalfa*180/PI,
-					  array_segment_local[(_cont-1)].lr,array_segment_local[(_cont-1)].lalfa*180/PI); 
+				  printf("A(rho,theta): (%f,%f) B(rho,theta): (%f,%f) \n",array_segment_local[i].lr,array_segment_local[i].lalfa*180/M_PI,
+					  array_segment_local[(_cont-1)].lr,array_segment_local[(_cont-1)].lalfa*180/M_PI); 
 #endif
 			      esquina[n_esquina*offset_corners + _X]= pc_x;
 			      esquina[n_esquina*offset_corners + _Y]= pc_y;
@@ -1431,7 +1435,7 @@ void Worker::detectar_EsquinaVirtual(SEGMENTO *array_segment_local,double *esqui
 // 
 // ***************************************************************************
 
-void Worker::iniciar_mapa_local( MAPA_LASER & mapa)
+void SpecificWorker::iniciar_mapa_local( MAPA_LASER & mapa)
 {
     
 	mapa.n_esquinas=0;
@@ -1448,7 +1452,7 @@ void Worker::iniciar_mapa_local( MAPA_LASER & mapa)
 
 }
 
-void Worker::destruir_mapa_local(MAPA_LASER *mapa) // (added by Ricardo Vazquez)
+void SpecificWorker::destruir_mapa_local(MAPA_LASER *mapa) // (added by Ricardo Vazquez)
 {
   free(mapa->esquinas);
   free(mapa->R_esquinas);
@@ -1458,7 +1462,7 @@ void Worker::destruir_mapa_local(MAPA_LASER *mapa) // (added by Ricardo Vazquez)
   free(mapa->R_circulos);
 }
 
-double Worker::dist_euclidean2D(double x1, double y1, double x2, double y2){
+double SpecificWorker::dist_euclidean2D(double x1, double y1, double x2, double y2){
 
 #ifdef DEBUGCCDA
 	// printf("[DistEuclidea] %f\n",  sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)));
@@ -1481,7 +1485,7 @@ double Worker::dist_euclidean2D(double x1, double y1, double x2, double y2){
 // OUT:
 //	   Actualizar mapa
 // ***************************************************************************
-void Worker::incluir_esquina_virtual(MAPA_LASER *mapa, double *esquinas, double *matriz)
+void SpecificWorker::incluir_esquina_virtual(MAPA_LASER *mapa, double *esquinas, double *matriz)
 {
 	int i,j, cont,indice;
 	bool exit;
@@ -1564,7 +1568,7 @@ void Worker::incluir_esquina_virtual(MAPA_LASER *mapa, double *esquinas, double 
 // OUT:
 // 
 // ***************************************************************************
-void  Worker::obtener_mapa(MAPA_LASER *mapa, SEGMENTO *array_segment_local,int *_cont)
+void  SpecificWorker::obtener_mapa(MAPA_LASER *mapa, SEGMENTO *array_segment_local,int *_cont)
 {
 	int i;
 	int X_INI,Y_INI,X_FIN,Y_FIN;
@@ -1594,7 +1598,7 @@ void  Worker::obtener_mapa(MAPA_LASER *mapa, SEGMENTO *array_segment_local,int *
 		mapa->R_segmentos[i*offset_Rs+3]=array_segment_local[i].longitud;
 		
 // 		std::cout << "----obtener_mapa----" << std::endl;
-// 		std::cout << "segmento: (alfa, d, length)" << mapa->segmentos[i*offset_segments+ALFA] *180/M_PI << ", " << mapa->segmentos[i*offset_segments+R] << ", " << mapa->R_segmentos[i*offset_Rs+3] << std::endl;
+// 		std::cout << "segmento: (alfa, d, length)" << mapa->segmentos[i*offset_segments+ALFA] *180/M_M_PI << ", " << mapa->segmentos[i*offset_segments+R] << ", " << mapa->R_segmentos[i*offset_Rs+3] << std::endl;
 // 		std::cout << "segmento: (calfa, crho, calfarho)" << mapa->R_segmentos[i*offset_Rs] << ", " << mapa->R_segmentos[i*offset_Rs + 1] << ", " << mapa->R_segmentos[i*offset_Rs + 2] << std::endl;
 // 		std::cout << "det2R: " << mapa->R_segmentos[i*offset_Rs]*mapa->R_segmentos[i*offset_Rs + 1] - mapa->R_segmentos[i*offset_Rs + 2] * mapa->R_segmentos[i*offset_Rs + 2] << std::endl;
 // 		std::cout << "-----------" << std::endl;
@@ -1613,7 +1617,7 @@ void  Worker::obtener_mapa(MAPA_LASER *mapa, SEGMENTO *array_segment_local,int *
 // OUT:
 // 
 // ***************************************************************************
-void  Worker::map_copy(MAPA_LASER *mapa, MAPA_LASER *ref)
+void  SpecificWorker::map_copy(MAPA_LASER *mapa, MAPA_LASER *ref)
 {
 	ref->n_segmentos = mapa->n_segmentos;
 	ref->n_esquinas  = mapa->n_esquinas;
@@ -1636,7 +1640,7 @@ void  Worker::map_copy(MAPA_LASER *mapa, MAPA_LASER *ref)
 //
 // OUT:
 // ***************************************************************************
-void Worker::incluir_esquina(MAPA_LASER *mapa, double *esquinas, double *points, int inicio)
+void SpecificWorker::incluir_esquina(MAPA_LASER *mapa, double *esquinas, double *points, int inicio)
 {
   int indice,i;
   int cont=0;	
@@ -1674,7 +1678,7 @@ void Worker::incluir_esquina(MAPA_LASER *mapa, double *esquinas, double *points,
 //
 //   estimate of Sigma = square root of RSS divided by N
 
-double Worker::Sigma (Data data, Circle circle)
+double SpecificWorker::Sigma (Data data, ::Circle circle)
 {
 	double sum = 0.,dx,dy,di;
 
@@ -1690,7 +1694,7 @@ double Worker::Sigma (Data data, Circle circle)
 
 ////////////////////// Interface response
 
-RoboCompCuba2Dnaturallandmarks::Features Worker::computeFeatures(const RoboCompLaser::TLaserData & lData)
+RoboCompCuba2Dnaturallandmarks::Features SpecificWorker::computeFeatures(const RoboCompLaser::TLaserData & lData)
 {
 	features(lData, &scan_mapa, &scan_maparef); 
 	RoboCompCuba2Dnaturallandmarks::Features features;
@@ -1723,7 +1727,7 @@ RoboCompCuba2Dnaturallandmarks::Features Worker::computeFeatures(const RoboCompL
 	return features;
 }
 
-RoboCompCuba2Dnaturallandmarks::Features Worker::getFeatures()
+RoboCompCuba2Dnaturallandmarks::Features SpecificWorker::getFeatures()
 {
   
 	int X_INI,Y_INI,X_FIN,Y_FIN;
@@ -1811,7 +1815,7 @@ RoboCompCuba2Dnaturallandmarks::Features Worker::getFeatures()
 
 }
 
-RoboCompCuba2Dnaturallandmarks::Features Worker::getLocalFeatures()
+RoboCompCuba2Dnaturallandmarks::Features SpecificWorker::getLocalFeatures()
 {
   
 	int X_INI,Y_INI,X_FIN,Y_FIN;
@@ -1892,7 +1896,7 @@ RoboCompCuba2Dnaturallandmarks::Features Worker::getLocalFeatures()
 	  features.s[i].R[3] = scan_mapa.R_segmentos[i*offset_Rs + 3]; // value used for the lenght of the line segment (mm) 
 	  
 // 	  std::cout << "----getLocal----" << std::endl;
-// 	  std::cout << "segmento: (alfa, d, length)" << features.s[i].alpha *180/M_PI << ", " << features.s[i].d << ", " << features.s[i].R[3] << std::endl;
+// 	  std::cout << "segmento: (alfa, d, length)" << features.s[i].alpha *180/M_M_PI << ", " << features.s[i].d << ", " << features.s[i].R[3] << std::endl;
 // 	  std::cout << "segmento: (calfa, crho, calfarho)" << features.s[i].R[0] << ", " << features.s[i].R[1] << ", " << features.s[i].R[2] << std::endl;
 // 	  std::cout << "det2R: " << features.s[i].R[0]*features.s[i].R[0] - features.s[i].R[2]*features.s[i].R[2]  << std::endl;
 // 	  std::cout << "-----------" << std::endl;

@@ -1,0 +1,15 @@
+
+# Sources set
+SET ( SOURCES
+  specificworker.cpp
+  specificmonitor.cpp
+  cdata.cpp
+  circle.cpp
+  curvaturalaser.cpp
+)
+
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+)

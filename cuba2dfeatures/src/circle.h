@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2010 by RoboLab - University of Extremadura
  *
  *    This file is part of RoboComp
  *
@@ -16,29 +16,35 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SPECIFICWORKER_H
-#define SPECIFICWORKER_H
+#ifndef CIRCLE_H
+#define CIRCLE_H
 
-#include <genericworker.h>
+#include <math.h>
+#include "cdata.h"
 
-/**
-       \brief
-       @author authorname
-*/
-
-class SpecificWorker : public GenericWorker
+class Circle
 {
-	Q_OBJECT
 	public:
-		SpecificWorker(MapPrx& mprx);	
-		~SpecificWorker();
-		bool setParams(RoboCompCommonBehavior::ParameterList params);
 
-	public slots:
-		void compute(); 	
-		
-private:
-	RoboCompLaser::TLaserData laserData;
+		// The fields of a Circle
+		double a, b, r, s;
+		float vector[6]; float puntos[6];
+		int i;
+		// constructors
+		Circle();
+		Circle(double aa, double bb, double rr);
+		Circle(double aa, double bb, double rr, int ii);
+		Circle(double aa, double bb, double rr, float *vectorr, float *puntoss);
+		Circle(double aa, double bb, double rr, double ss, int ii);
+		Circle(Data points, int size);
+		// destructor (added by Ricardo Vazquez)
+		~Circle();
+	
+		// routines
+		void print(void);
+		void printOld(void);
+	
+		// no destructor we didn't allocate memory by hand.
 };
 
 #endif

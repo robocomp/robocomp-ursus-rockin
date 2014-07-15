@@ -1,5 +1,6 @@
+
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2010 by RoboLab - University of Extremadura
  *
  *    This file is part of RoboComp
  *
@@ -16,37 +17,29 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
- #include "specificworker.h"
+#ifndef SPECIFICMONITOR_H
+#define SPECIFICMONITOR_H
+
+#include "genericmonitor.h"
 
 /**
-* \brief Default constructor
+       \brief
+       @author authorname
 */
-
-SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)	
+class SpecificMonitor : public GenericMonitor
 {
-}
-
-/**
-* \brief Default destructor
-*/
-SpecificWorker::~SpecificWorker()
-{
-
-}
-void SpecificWorker::compute( )
-{
-	try 
-	{
-		laserData = laser_proxy->getLaserData();
-	} 
-	catch (exception) 
-	{
-		
-	}
-}
-bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
-{
-	timer.start(Period);
-	return true;
+  Q_OBJECT
+  
+  public:
+	SpecificMonitor(GenericWorker *_worker, Ice::CommunicatorPtr _communicator);
+	~SpecificMonitor();
+	
+	void readConfig(RoboCompCommonBehavior::ParameterList &params );
+	void run();
+	void initialize();
+    
+	bool sendParamsToWorker(RoboCompCommonBehavior::ParameterList params);
+	bool checkParams(RoboCompCommonBehavior::ParameterList l);
 };
+
+#endif // GENERICMONITOR_H

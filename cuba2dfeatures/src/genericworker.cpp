@@ -16,37 +16,40 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
- #include "specificworker.h"
-
+#include "genericworker.h"
 /**
 * \brief Default constructor
 */
-
-SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)	
+GenericWorker::GenericWorker(MapPrx& mprx, QObject *parent) : QObject(parent)
 {
+	laser_proxy = (*(LaserPrx*)mprx["LaserProxy"]);
+	differentialrobot_proxy = (*(DifferentialRobotPrx*)mprx["DifferentialRobotProxy"]);
+	cuba2dnaturallandmarks = (*(Cuba2DnaturallandmarksPrx*)mprx["Cuba2DnaturallandmarksPub"]);
+
+	mutex = new QMutex();
+	Period = BASIC_PERIOD;
+	connect(&timer, SIGNAL(timeout()), this, SLOT(compute()));
 }
 
 /**
 * \brief Default destructor
 */
-SpecificWorker::~SpecificWorker()
+GenericWorker::~GenericWorker()
 {
 
 }
-void SpecificWorker::compute( )
+void GenericWorker::killYourSelf()
 {
-	try 
-	{
-		laserData = laser_proxy->getLaserData();
-	} 
-	catch (exception) 
-	{
-		
-	}
+	rDebug("Killing myself");
+	emit kill();
 }
-bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
+/**
+* \brief Change compute period
+* @param per Period in ms
+*/
+void GenericWorker::setPeriod(int p)
 {
+	rDebug("Period changed"+QString::number(p));
+	Period = p;
 	timer.start(Period);
-	return true;
-};
+}
