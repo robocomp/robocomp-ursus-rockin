@@ -305,7 +305,7 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 		post = w+1;
 
 	if( ant == post ) 
-		qFatal("fary");
+		qFatal("fary en compute Tangent");
 	else 
 	{
 // 		ant->pos.print("ant");
@@ -395,7 +395,7 @@ void WayPoints::computeForces()
 	//Compute roadTangent at closestPoint;
 	qDebug() << __FUNCTION__ << "just here" << getCurrentPointIndex() << getRobotDistanceToClosestPoint();
 	if(closestPoint == end())
-		qFatal("fary");
+		qFatal("fary en Compute Forces");
 	QLine2D tangent = computeTangentAt( closestPoint );
 	setTangentAtClosestPoint(tangent);
 	//Compute signed perpenduicular distance from robot to tangent at closest point

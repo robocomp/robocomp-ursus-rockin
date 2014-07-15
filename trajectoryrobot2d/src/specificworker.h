@@ -47,12 +47,13 @@ public:
 	
 public slots:
  	void compute(); 	
+	void computeLuis( );
 	
 private:
 	RoboCompDifferentialRobot::TBaseState bState;
 	TLaserData datos;
 	RoboCompCommonBehavior::ParameterList params;
-	InnerModel *innerModel;
+	InnerModel *innerModel, *innerClon;
 	RoboCompLaser::TLaserData laserData;
 	QVec target;
  	

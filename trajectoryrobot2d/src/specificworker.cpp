@@ -77,7 +77,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	road.print();
 	road.computeForces();
 	road.draw(innermodelmanager_proxy, innerModel);	
-	qFatal("fary2");
+	//qFatal("fary2");
 	
 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
 	elasticband = new ElasticBand(innerModel);	
@@ -93,6 +93,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	sleep(1);
 		
+	//Clon para Luis
+	innerClon = new InnerModel(*innerModel);
+	
 }
 
 /**
@@ -102,12 +105,32 @@ SpecificWorker::~SpecificWorker()
 {
 }
 
+void SpecificWorker::compute( )
+{	
+	try{	differentialrobot_proxy->getBaseState(bState);  }  
+	catch(const Ice::Exception &ex){ cout << ex << endl;}
+	try{	laserData = laser_proxy->getLaserData();}  
+	catch(const Ice::Exception &ex){ cout << ex << endl;}
+	innerModel->update();
+	QVec point = innerModel->transform("world", "robot");
+	point.print("robot segun IM bueno");
+	innerClon->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
+	point = innerClon->transform("world", "robot");
+	point.print("robot segun IM clonado");
+	
+	//OJO con el Inner que se le manda
+	if (planner->collisionDetector(point, innerModel) == true) 
+		qFatal("Fary en compute Luis");
+}
+
+
+
 /**
  * @brief All architecture goes here. 
  * 
  * @return void
  */
-void SpecificWorker::compute( )
+void SpecificWorker::computeLuis( )
 {	
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();

@@ -26,8 +26,11 @@
 		<plane id="ddL" nx="1" px="-3500" py="200" pz="0" size="7000,500,10" texture="#ff0000" />
 			
 		<plane id="ddF" nz="1"  pz="3500" py="200" px="0" size="7000,500,10" texture="#ff0000" />
-		<plane id="ddB" nz="1" pz="-3500" py="200" px="0" size="7000,500,10" texture="#ff0000" />
-			
+		
+		<transform id="ddB-T" tz="-3500" ty="200" tx="0" >
+		<plane id="ddB" nz="1" size="7000,500,10" texture="#ff0000" />
+	</transform>	
+		
 <!--		<plane id="ddR2" nx="1" px="3500" py="200" pz="0" size="7000,500,13" texture="#ff0000" />
 		<plane id="ddL2" nx="1" px="-3500" py="200" pz="0" size="7000,500,13" texture="#ff0000" />-->
 			
@@ -36,8 +39,8 @@
 
 		
 		<!-- Base		 -->
-		<transform id="initialRobotPose" tx="0" tz="-1000">
-			<differentialrobot id="robot" port="10004" ty="10" >
+		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
+			<differentialrobot id="robot" port="10004">
 
 				<translation id="laserPose" tx="0" ty="240" tz="100">
 					<laser id="laser" port="10003" measures="100" min="100" max="6000" angle="3" ifconfig="10000" />

@@ -46,6 +46,8 @@ Q_OBJECT
 		
 		//QVec tryBezierToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec>  *arbol , tree<QVec>::iterator & nodeCurrentPos);
 	 
+			bool collisionDetector( const QVec &point,  InnerModel *innerModel);			
+		
   private:
 		InnerModel *innerModel;
 		tree<QVec> *arbol, *arbolGoal, *aux;
@@ -68,7 +70,7 @@ Q_OBJECT
 		void smoothPathStochastic( QList<QVec> & list);
 		tree<QVec>::iterator findClosestPointInTree( tree<QVec> *arb , const QVec & currentTarget);
 		void getCollisionObjects(InnerModelNode* node); 														// Obtains a list of id's of planes and meshes for collision detection
-		bool collisionDetector( const QVec &point,  InnerModel *innerModel);			
+	
 		QStringList listCollisionObjects, listCollisionRobotParts;												// List of meshes used for collision detection							
 																			
   public:

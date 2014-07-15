@@ -509,17 +509,15 @@ bool Planner::collisionDetector( const QVec &point,  InnerModel *innerModel)
 			//qDebug() << "vertices of" << robotPart << innerModel->getNode(robotPart)->fclMesh->num_vertices;
 			foreach( robotPart, listCollisionRobotParts)
 			{
- 				qDebug() << "Checking" << robotPart << worldPart << "at" << point;
+ 				//qDebug() << "Checking" << robotPart << worldPart << "at" << point;
 				if( innerModel->collide(robotPart, worldPart))
 				{
 // 					printf("%s %s\n", worldPart.toStdString().c_str(), robotPart.toStdString().c_str());
 						hit = true;  
-						qDebug() << "collision between" << robotPart << "and" << worldPart;
-						qDebug() << "dist" << (innerModel->transform("world","base_mesh") - innerModel->transform("world","ddB")).norm2();
-						innerModel->transform("world","ddB").print("ddB");
-						innerModel->getNode("ddB")->getTr().print("ddB2");
+						qDebug() << "collision between" << robotPart << "and" << worldPart << "at" << point;
 						innerModel->transform("world","base_mesh").print("base");
-						innerModel->transform("world","dinin_table").print("table");
+						qDebug() << "dist" << (innerModel->transform("world","base_mesh") - innerModel->transform("world","ddB")).norm2();
+							innerModel->transform("world","dinin_table").print("table");
 						
 						qFatal("fary");
 						break; 
