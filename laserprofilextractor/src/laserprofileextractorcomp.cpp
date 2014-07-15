@@ -63,7 +63,7 @@
 
 // ICE includes
 #include <Ice/Ice.h>
-
+#include <IceStorm/IceStorm.h>
 #include <Ice/Application.h>
 
 #include <rapplication/rapplication.h>
@@ -76,11 +76,12 @@
 #include "specificworker.h"
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
+#include <cuba2dnaturallandmarksI.h>
 
 // Includes for remote proxy example
 // #include <Remote.h>
 #include <ui_guiDlg.h>
-#include <Laser.h>
+#include <InnerModelManager.h>
 
 
 // User includes here
@@ -88,7 +89,8 @@
 // Namespaces
 using namespace std;
 using namespace RoboCompCommonBehavior;
-using namespace RoboCompLaser;
+using namespace RoboCompCuba2Dnaturallandmarks;
+using namespace RoboCompInnerModelManager;
 
 
 class LaserProfileExtractorComp : public RoboComp::Application
@@ -121,7 +123,7 @@ int LaserProfileExtractorComp::run(int argc, char* argv[])
 
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
-	LaserPrx laser_proxy;
+	InnerModelManagerPrx innermodelmanager_proxy;
 
 
 	string proxy;
@@ -152,15 +154,17 @@ int LaserProfileExtractorComp::run(int argc, char* argv[])
 	//Remote server proxy creation example
 	try
 	{
-		laser_proxy = LaserPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("LaserProxy") ) );
+		innermodelmanager_proxy = InnerModelManagerPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("InnerModelManagerProxy") ) );
 	}
 	catch(const Ice::Exception& ex)
 	{
 		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
 		return EXIT_FAILURE;
 	}
-	rInfo("LaserProxy initialized Ok!");
-	mprx["LaserProxy"] = (::IceProxy::Ice::Object*)(&laser_proxy);
+	rInfo("InnerModelManagerProxy initialized Ok!");
+	mprx["InnerModelManagerProxy"] = (::IceProxy::Ice::Object*)(&innermodelmanager_proxy);
+	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
+	
 	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
@@ -179,6 +183,27 @@ int LaserProfileExtractorComp::run(int argc, char* argv[])
 		adapterCommonBehavior->add(commonbehaviorI, communicator()->stringToIdentity("commonbehavior"));
 		adapterCommonBehavior->activate();
 		// Server adapter creation and publication
+    	Ice::ObjectAdapterPtr Cuba2Dnaturallandmarks_adapter = communicator()->createObjectAdapter("Cuba2DnaturallandmarksTopic");
+    	Cuba2DnaturallandmarksPtr cuba2dnaturallandmarksI_ = new Cuba2DnaturallandmarksI(worker);
+    	Ice::ObjectPrx cuba2dnaturallandmarks_proxy = Cuba2Dnaturallandmarks_adapter->addWithUUID(cuba2dnaturallandmarksI_)->ice_oneway();
+    	IceStorm::TopicPrx cuba2dnaturallandmarks_topic;
+    	if(!cuba2dnaturallandmarks_topic){
+	    	try {
+	    		cuba2dnaturallandmarks_topic = topicManager->create("Cuba2Dnaturallandmarks");
+	    	}
+	    	catch (const IceStorm::TopicExists&) {
+	    	  	//Another client created the topic
+	    	  	try{
+	       			cuba2dnaturallandmarks_topic = topicManager->retrieve("Cuba2Dnaturallandmarks");
+	    	  	}catch(const IceStorm::NoSuchTopic&){
+	    	  	  	//Error. Topic does not exist
+				}
+	    	}
+	    	IceStorm::QoS qos;
+	      	cuba2dnaturallandmarks_topic->subscribeAndGetPublisher(qos, cuba2dnaturallandmarks_proxy);
+    	}
+    	Cuba2Dnaturallandmarks_adapter->activate();
+    	// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )

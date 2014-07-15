@@ -4,8 +4,14 @@
 # This property is used to configure the endpoints of the subscriber adapter.
 #
 CommonBehavior.Endpoints=tcp -p 12219
+Cuba2DnaturallandmarksTopic.Endpoints=tcp -p 12221
 
 # Remote servers proxies example
 #RemoteProxy = remote:tcp -h remotehost -p 10001
 
-LaserProxy = laser:tcp -h localhost -p 10003
+InnerModelManagerProxy = innermodelmanager:tcp -h localhost -p 11175
+
+#
+# This property is used by the clients to connect to IceStorm.
+#
+TopicManager.Proxy=DemoIceStorm/TopicManager:default -p 10000

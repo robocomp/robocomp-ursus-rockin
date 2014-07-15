@@ -12,7 +12,8 @@ INCLUDE ( CMakeListsSpecific.txt)
 SET ( SOURCES
   ${SOURCES}
   laserprofileextractorcomp.cpp
-  
+  cuba2dnaturallandmarksI.cpp
+
   genericmonitor.cpp
   commonbehaviorI.cpp
   genericworker.cpp
@@ -23,14 +24,15 @@ SET ( SOURCES
 # Headers set
 SET ( HEADERS
   ${HEADERS}
-  
+  cuba2dnaturallandmarksI.h
+
   genericmonitor.h
   commonbehaviorI.h
   genericworker.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior  Laser  DifferentialRobot)
+ROBOCOMP_WRAP_ICE( CommonBehavior  Cuba2Dnaturallandmarks  InnerModelManager)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

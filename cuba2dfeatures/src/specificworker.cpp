@@ -27,7 +27,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QObject *parent) : GenericWorker(mp
 {
 	height = 200;   //SACAR ESTO DEL InnerModel
 	
-	debug_cont = 0;
 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");	
 
 	// PMNT: Configuración leída por el sensor láser
@@ -80,33 +79,38 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-	static bool baseFunciona = true;
 	try
 	{
 		differentialrobot_proxy->getBaseState ( bState );
 		innerModel->updateTransformValues("base", bState.x, 0, bState.z, 0, bState.alpha, 0);
 	}
 	catch ( const Ice::Exception& ex )
-	{
-		if (baseFunciona)
-		{
-		  std::cout << "cuba2dnaturallandmarksComp: Exception talking to BaseComp. " << std::endl;
-		  baseFunciona = false;
-		}
-	}
+	{  std::cout << "cuba2dnaturallandmarksComp: Exception talking to BaseComp. " << ex << std::endl; }
+	
 	try
 	{
-		debug_cont ++;
 		laserData = laser_proxy->getLaserData( );
 		medianFilter(laserData);
 	}
 	catch ( const Ice::Exception& ex )
 	{
-		std::cout << "cuba2dnaturallandmarksComp: Exception talking to LaserComp. " << std::endl;
+		std::cout << "cuba2dnaturallandmarksComp: Exception talking to LaserComp. " << ex << std::endl;
 	}
 
 	features( laserData, &scan_mapa, &scan_maparef); 
-
+	
+	//PUBLISH RESULTS
+	RoboCompCuba2Dnaturallandmarks::Features featuresList = getFeatures();
+	if( featuresList.p.size() > 0 or featuresList.c.size() > 0 or featuresList.s.size() > 0 )
+	{
+		qDebug() <<__FILE__ << __FUNCTION__<< "Publishing data";
+		try
+		{
+			cuba2dnaturallandmarks->newCubaFeatureList(featuresList);
+		}
+		catch(Ice::Exception ex)
+		{std::cout << "cuba2dnaturallandmarksComp: Exception publishing data. " << ex << std::endl;};
+	}
 }
 
 
@@ -180,7 +184,7 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 	
 	sprintf(nomb1,"scan%d.m",cont);
 	puntMAT=fopen(nomb1,"wb");
-	fprintf(puntMAT,"figure(1);zoom on;grid on; hold on; axis equal\n");
+	//fprintf(puntMAT,"figure(1);zoom on;grid on; hold on; axis equal\n");
 	
 	
 	for ( uint i=0; i < lData.size(); i++ )
@@ -189,7 +193,7 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 		array_pixels[i*offset_points+_X]=  pLaser ( 2 );
 		array_pixels[i*offset_points+_Y]=  pLaser ( 0 );
 		px = round(pLaser(2)); py = round(pLaser(0));
-		if(lData[i].dist < 15000.) fprintf(puntMAT,"plot3(%d,%d,%d,'.k')\n",px, -py, pz);
+		if(lData[i].dist < 15000.) //fprintf(puntMAT,"plot3(%d,%d,%d,'.k')\n",px, -py, pz);
 		
 		// Comment: "[LE] Conversion a polares (no será necesario en el futuro)"
 		array_points[i*offset_points+_R]= lData[i].dist;
@@ -197,7 +201,7 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 
 	}
 	
-	fprintf(puntMAT,"h=circle([0 0],200);set(h,'EdgeColor','r');set(h,'LineWidth',1);h=line([0 200], [0 0]);set(h,'Color','r');set(h,'LineWidth',1);\n");
+	//fprintf(puntMAT,"h=circle([0 0],200);set(h,'EdgeColor','r');set(h,'LineWidth',1);h=line([0 200], [0 0]);set(h,'Color','r');set(h,'LineWidth',1);\n");
 
 	// [breakpoints]
 	MapBreakPoints ( breakpoints,laserData.size(),array_pixels,0,0 );
@@ -225,19 +229,20 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 		
 		px = round(array_pixels[i*offset_points+1]); py = round(array_pixels[i*offset_points+2]);
 		if(abs(py) < 12000 && abs(px) < 12000){
-		fprintf(puntMAT, "figure(1);");
+		//fprintf(puntMAT, "figure(1);");
 		if ((indice_grupo==0) || (indice_grupo==6))
-			fprintf(puntMAT, "plot3(%d,%d,%d,'.r')\n",px,-py,pz);
+			//fprintf(puntMAT, "plot3(%d,%d,%d,'.r')\n",px,-py,pz);
 		if ((indice_grupo==1) || (indice_grupo==7))
-			fprintf(puntMAT, "plot3(%d,%d,%d,'.g')\n",px,-py,pz);
+			//fprintf(puntMAT, "plot3(%d,%d,%d,'.g')\n",px,-py,pz);
 		if (indice_grupo==2)
-			fprintf(puntMAT, "plot3(%d,%d,%d,'.b')\n",px,-py,pz);
+			//fprintf(puntMAT, "plot3(%d,%d,%d,'.b')\n",px,-py,pz);
 		if (indice_grupo==3)
-			fprintf(puntMAT, "plot3(%d,%d,%d,'.y')\n",px,-py,pz);
+			//fprintf(puntMAT, "plot3(%d,%d,%d,'.y')\n",px,-py,pz);
 		if (indice_grupo==4)
-			fprintf(puntMAT, "plot3(%d,%d,%d,'.c')\n",px,-py,pz);
+			//fprintf(puntMAT, "plot3(%d,%d,%d,'.c')\n",px,-py,pz);
 		if (indice_grupo==5)
-			fprintf(puntMAT, "plot3(%d,%d,%d,'.g')\n",px,-py,pz);
+			//fprintf(puntMAT, "plot3(%d,%d,%d,'.g')\n",px,-py,pz);
+			;
 		}
 	  }
 		//[landmark extraction]
@@ -318,8 +323,8 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 				    {
 				      es_circulo = 1;
 				      
-				      fprintf(puntMAT,"figure(1);");
-				      fprintf(puntMAT,"r=%f;v=[%f,%f];circle(v,r,0);",circle.r,circle.x,circle.y);
+				      //fprintf(puntMAT,"figure(1);");
+				      //fprintf(puntMAT,"r=%f;v=[%f,%f];circle(v,r,0);",circle.r,circle.x,circle.y);
 				      
 				      incluir_circulo ( scan_mapa, array_circle_local, circle, cont_circle, matriz_cov_circulos );
 				      cont_circle++;
@@ -342,13 +347,13 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 				      
 				      px = round(segmento[0]); py = round(segmento[1]);
 				      if(abs(py) < 12000 && abs(px) < 12000){
-				      fprintf(puntMAT,"figure(1);");
-				      fprintf(puntMAT,"plot3(%d,%d,%d,'sb')\n",px,-py,pz);
+				      //fprintf(puntMAT,"figure(1);");
+				      //fprintf(puntMAT,"plot3(%d,%d,%d,'sb')\n",px,-py,pz);
 				      }
 				      px = round(segmento[2]); py = round(segmento[3]);
 				      if(abs(py) < 12000 && abs(px) < 12000){
-				      fprintf(puntMAT,"figure(1);");
-				      fprintf(puntMAT,"plot3(%d,%d,%d,'sb')\n",px,-py,pz);
+				      //fprintf(puntMAT,"figure(1);");
+				      //fprintf(puntMAT,"plot3(%d,%d,%d,'sb')\n",px,-py,pz);
 				      }
 				      
 				      
@@ -383,8 +388,8 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 		
 		px = round(punto(2)); py = round(punto(0));
 				      if(abs(py) < 12000 && abs(px) < 12000){
-				      fprintf(puntMAT,"figure(1);");
-				      fprintf(puntMAT,"plot3(%d,%d,%d,'sb')\n",px,-py,pz);
+				      //fprintf(puntMAT,"figure(1);");
+				      //fprintf(puntMAT,"plot3(%d,%d,%d,'sb')\n",px,-py,pz);
 				      }
 		
 		// Comment: "Fin del grupo"
@@ -394,8 +399,8 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 		
 		px = round(punto(2)); py = round(punto(0));
 				      if(abs(py) < 12000 && abs(px) < 12000){
-				      fprintf(puntMAT,"figure(1);");
-				      fprintf(puntMAT,"plot3(%d,%d,%d,'sb')\n",px,-py,pz);
+				      //fprintf(puntMAT,"figure(1);");
+				      //fprintf(puntMAT,"plot3(%d,%d,%d,'sb')\n",px,-py,pz);
 				      }
 		
 	}
@@ -413,7 +418,7 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 	for (int z=0;z<scan_mapa->circulos[0];z++) 
 	  {
 					
-	  fprintf(puntMAT,"figure(1);");
+	  //fprintf(puntMAT,"figure(1);");
 	  printf("[MAP LANDMARK] c=[(%f,%f,%f)]; \nP=[%e %e %e %e %e %e]\n",scan_mapa->circulos[z*3+1],scan_mapa->circulos[z*3+2],
 	  scan_mapa->circulos[z*3+3],scan_mapa->R_circulos[z*offset_Rc],scan_mapa->R_circulos[z*offset_Rc+1],
 	  scan_mapa->R_circulos[z*offset_Rc+2],scan_mapa->R_circulos[z*offset_Rc+3],scan_mapa->R_circulos[z*offset_Rc+4],scan_mapa->R_circulos[z*offset_Rc+5]);
@@ -435,14 +440,14 @@ void SpecificWorker::features ( const RoboCompLaser::TLaserData & lData, MAPA_LA
 	{
   
 	  px = round(-scan_mapa->esquinas[z*4+1]), py = round(scan_mapa->esquinas[z*4]);
-	fprintf(puntMAT,"figure(1);plot(%d,%d,%d,'^b')\n",px,py,pz);
+	//fprintf(puntMAT,"figure(1);plot(%d,%d,%d,'^b')\n",px,py,pz);
 
     	printf("[MAP LANDMARK] x=[%f,%f,(%f)]; \nP=[%e %e;%e %e; %e %e]\n",-scan_mapa->esquinas[z*4+1],scan_mapa->esquinas[z*4],scan_mapa->esquinas[z*4+2],
 		scan_mapa->R_esquinas[z*offset_Rp],scan_mapa->R_esquinas[z*offset_Rp+2],scan_mapa->R_esquinas[z*offset_Rp+1],
 		scan_mapa->R_esquinas[z*offset_Rp+3],scan_mapa->R_esquinas[z*offset_Rp+4],scan_mapa->R_esquinas[z*offset_Rp+5]);
-	fprintf(puntMAT,"figure(1);");
-	fprintf(puntMAT,"x=[%f,%f]; P=[%f %f;%f %f]; L=make_landmark_covariance_ellipse(x,P);x=L(2,:);y=L(1,:);plot(y,x)\n",
-		-scan_mapa->esquinas[z*4+1],scan_mapa->esquinas[z*4],scan_mapa->R_esquinas[z*offset_Rp],scan_mapa->R_esquinas[z*offset_Rp+3],scan_mapa->R_esquinas[z*offset_Rp+3],scan_mapa->R_esquinas[z*offset_Rp+1]);
+	//fprintf(puntMAT,"figure(1);");
+	//fprintf(puntMAT,"x=[%f,%f]; P=[%f %f;%f %f]; L=make_landmark_covariance_ellipse(x,P);x=L(2,:);y=L(1,:);plot(y,x)\n",
+//		-scan_mapa->esquinas[z*4+1],scan_mapa->esquinas[z*4],scan_mapa->R_esquinas[z*offset_Rp],scan_mapa->R_esquinas[z*offset_Rp+3],scan_mapa->R_esquinas[z*offset_Rp+3],scan_mapa->R_esquinas[z*offset_Rp+1]);
 			
 	}
 			
@@ -1355,11 +1360,9 @@ void SpecificWorker::detectar_EsquinaVirtual(SEGMENTO *array_segment_local,doubl
 
 	register int i;			
 	int n_esquina;					// Numero de esquinas virtuales encontradas
-
 	double pc_x,pc_y;				// Punto de corte entre dos rectas
-	
 	double inc_angle;
-
+	
 	n_esquina=(int)(esquina[0]);
 
 	pc_x=0; pc_y=0;
@@ -1691,6 +1694,11 @@ double SpecificWorker::Sigma (Data data, ::Circle circle)
 	}
 	return sqrt(sum/data.n);
 }
+
+////////////////////// publish
+
+
+
 
 ////////////////////// Interface response
 

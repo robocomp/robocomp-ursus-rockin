@@ -28,7 +28,7 @@ QObject()
 #endif
 
 {
-	laser_proxy = (*(LaserPrx*)mprx["LaserProxy"]);
+	innermodelmanager_proxy = (*(InnerModelManagerPrx*)mprx["InnerModelManagerProxy"]);
 
 	mutex = new QMutex();
 	#ifdef USE_QTGUI

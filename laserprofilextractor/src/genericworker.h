@@ -27,7 +27,8 @@
 #include <CommonBehavior.h>
 #include <ui_guiDlg.h>
 #include "config.h"
-#include <Laser.h>
+#include <InnerModelManager.h>
+#include <Cuba2Dnaturallandmarks.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -40,7 +41,8 @@ using namespace std;
        \brief
        @author authorname
 */
-using namespace RoboCompLaser;
+using namespace RoboCompInnerModelManager;
+using namespace RoboCompCuba2Dnaturallandmarks;
 class GenericWorker :
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
@@ -58,7 +60,9 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
-	LaserPrx laser_proxy;
+	InnerModelManagerPrx innermodelmanager_proxy;
+	virtual void  newCubaFeatureList(const Features& featuresList) = 0;
+
 protected:
 	QTimer timer;
 	int Period;

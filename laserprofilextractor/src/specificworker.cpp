@@ -36,17 +36,59 @@ SpecificWorker::~SpecificWorker()
 }
 void SpecificWorker::compute( )
 {
-	try 
-	{
-		laserData = laser_proxy->getLaserData();
-	} 
-	catch (exception) 
-	{
-		
-	}
+// 	static int minX = 0;   	//mm
+// 	static int maxX = 8000;
+// 	static int minZ = -8000;
+// 	static int maxZ = 0;
+// 	static int step = 100;  //mm
+// 	
+// 	for (int x=minX; x<maxX; x+=step) 
+// 	{
+// 		for(int z=minZ; z<maxZ; z+=step)
+// 		{
+// 			//move the robot
+// 			InnerModelManager::Pose3D pose;
+// 			pose.x = x; pose.y = 10; pose.z = z;
+// 			pose.rx = 0; pose.ry = 0; pose.rz = 0;
+// 			innermodelmanager_proxy->setPose("robot", pose);
+// 			//wait for RCIS to update
+// 			usleep(300000);
+// 			//check if we have a reading from Cuba
+// 			
+// 			//if new reading process data and store
+// 			
+// 		}
+// 	}
 }
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-	timer.start(Period);
+	//timer.start(Period);
 	return true;
 };
+
+/**
+ * @brief Merge and store features
+ * 
+ * @return void
+ */
+void SpecificWorker::processFeatures(RoboCompCuba2Dnaturallandmarks::Features features)
+{
+	try
+	{
+		//innermodelmanager_proxy->addCUBAFeature();
+		qDebug() << __FUNCTION__ << "CUBA: " << "Segments:" << features.s.size() << "Circles:" << features.c.size() << "Points:" << features.p.size();
+	}
+	catch(Ice::Exception ex)
+	{}
+}
+
+
+
+/////////////////////////////////////////////////77
+//// SUBSCRIPTION
+//////////////////////////////////////////////////
+
+void SpecificWorker::newCubaFeatureList(const RoboCompCuba2Dnaturallandmarks::Features &features)
+{
+	processFeatures(features);
+}

@@ -1,7 +1,12 @@
-import "/robocomp/interfaces/IDSLs/Laser.idsl";
-Component LaserProfileExtractorComp{
-	Communications{
-		requires Laser;
+import "/robocomp/interfaces/IDSLs/InnerModelManager.idsl";
+import "/robocomp/interfaces/IDSLs/Cuba2Dnaturallandmarks.idsl";
+
+Component LaserProfileExtractorComp
+{
+	Communications
+	{
+		requires InnerModelManager;
+		subscribesTo Cuba2Dnaturallandmarks;
 	};
 	gui Qt(QWidget);
 	language Cpp;

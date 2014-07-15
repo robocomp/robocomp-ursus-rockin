@@ -33,12 +33,15 @@ class SpecificWorker : public GenericWorker
 		SpecificWorker(MapPrx& mprx);	
 		~SpecificWorker();
 		bool setParams(RoboCompCommonBehavior::ParameterList params);
+		void newCubaFeatureList(const Features& featuresList);
 
 	public slots:
 		void compute(); 	
 		
 private:
-	RoboCompLaser::TLaserData laserData;
+	
+		private:
+		void processFeatures(RoboCompCuba2Dnaturallandmarks::Features features);
 };
 
 #endif

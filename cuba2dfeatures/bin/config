@@ -1,6 +1,7 @@
 #
 # This property is used to configure the endpoints of the subscriber adapter.
 #
+#Cuba2Dnaturallandmarks.Endpoints=tcp -p 11220
 CommonBehavior.Endpoints=tcp -p 12220
 
 # Remote servers proxies example
