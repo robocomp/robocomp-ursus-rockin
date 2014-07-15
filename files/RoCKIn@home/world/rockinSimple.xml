@@ -174,8 +174,8 @@
 		
 		
 		<!-- Base		 -->
-		<transform id="initialRobotPose" tx="800" tz="-800" ry="-3.14">
-			<differentialrobot id="robot" port="10004" ty="10" >
+		<transform id="initialRobotPose" tx="800" tz="-800" ry="-3.14" >
+			<differentialrobot id="robot" port="10004" >
 
 				<translation id="laserPose" tx="0" ty="240" tz="100">
 					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" />

@@ -30,8 +30,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	innerModel->setUpdateTranslationPointers("robot", &(bState.x), NULL, &(bState.z));
 	innerModel->setUpdateRotationPointers("robot", NULL, &(bState.alpha), NULL);
 	
@@ -48,8 +48,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
 	//target = QVec::vec3(800,10,-3000);
-//	target = QVec::vec3(6000,10,-8100);
-	target = QVec::vec3(0,0,3000);
+	target = QVec::vec3(6000,10,-8100);
+//	target = QVec::vec3(0,0,3000);
 	
 	
 	//Draw target as red box	
@@ -105,7 +105,7 @@ SpecificWorker::~SpecificWorker()
 {
 }
 
-void SpecificWorker::compute( )
+void SpecificWorker::computeLuis( )
 {	
 	try{	differentialrobot_proxy->getBaseState(bState);  }  
 	catch(const Ice::Exception &ex){ cout << ex << endl;}
@@ -130,7 +130,7 @@ void SpecificWorker::compute( )
  * 
  * @return void
  */
-void SpecificWorker::computeLuis( )
+void SpecificWorker::compute( )
 {	
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
