@@ -29,8 +29,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 	innerModel->setUpdateTranslationPointers("robot", &(bState.x), NULL, &(bState.z));
 	innerModel->setUpdateRotationPointers("robot", NULL, &(bState.alpha), NULL);
@@ -38,9 +38,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//moveBoxes();
  
 	try { differentialrobot_proxy->getBaseState(bState); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; }
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
 	try { laserData = laser_proxy->getLaserData(); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; }
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
 	
 	innerModel->update();
 // 	cleanWorld();
@@ -48,8 +48,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
 	//target = QVec::vec3(800,10,-3000);
-	target = QVec::vec3(6000,10,-8100);
-//	target = QVec::vec3(0,0,3000);
+//	target = QVec::vec3(6000,10,-6000);
+
+	target = QVec::vec3(0,0,3000);
 	
 	
 	//Draw target as red box	
@@ -66,12 +67,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Plan 
 	planner = new Planner(*innerModel);									
 
-/*
- *
- *  QUITAR ESTE BLOQUE DE COMENTARIOS UNA VEZ PILLEMOS EL PROBLEMA
- * 
- * 
- *	qDebug() << __FUNCTION__ << "Planning ...";
+	qDebug() << __FUNCTION__ << "Planning ...";
 	planner->computePath(target, innerModel);
 	if(planner->getPath().size() == 0)
 		qFatal("SpecificWorker: Path NOT found. Aborting");
@@ -95,13 +91,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
 	controller = new Controller(2);
 	qDebug() << __FUNCTION__ << "----- controller set";
-*/	
+	
 	
 	sleep(1);
 		
 	//Clon para Luis
-	innerClon = new InnerModel(*innerModel);
-
+	//innerClon = new InnerModel(*innerModel);
+}
 
 /**
 * \brief Default destructor
@@ -144,8 +140,8 @@ void SpecificWorker::computeLuis( )
  */
 void SpecificWorker::compute( )
 {	
-	computeLuis();
-	return;
+	//computeLuis();
+	//return;
 
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();

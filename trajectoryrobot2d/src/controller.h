@@ -32,7 +32,7 @@ class Controller
 		Controller(int delay); //in secs
 		~Controller();
 	
-		bool update( RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_prx,WayPoints &road);
+		bool update( RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_prx,const WayPoints &road);
 
 private:
 		QTime time;

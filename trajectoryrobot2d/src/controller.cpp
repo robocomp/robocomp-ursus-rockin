@@ -30,9 +30,9 @@ Controller::~Controller()
 {
 }
 
-bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  WayPoints &road)
+bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  const WayPoints &road)
 {	
-	qDebug() << __FILE__ << __FUNCTION__ << "entering update";
+	qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
 	
 	if((road.isBlocked == true) or (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
@@ -53,7 +53,7 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 	
 	if ( time.elapsed() > delay*1000 )   //ojo desbordamientos
 	{
-		const float MAX_ADV_SPEED = 400;
+		const float MAX_ADV_SPEED = 600;
 		const float MAX_ROT_SPEED = 0.7;
 		
 	

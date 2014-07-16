@@ -393,14 +393,18 @@ void WayPoints::computeForces()
 	//Compute closest existing trajectory point to robot
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 	//Compute roadTangent at closestPoint;
-	qDebug() << __FUNCTION__ << "just here" << getCurrentPointIndex() << getRobotDistanceToClosestPoint();
+	qDebug() << __FILE__  << __FUNCTION__ << "just here" << getCurrentPointIndex() << getRobotDistanceToClosestPoint();
 	if(closestPoint == end())
 		qFatal("fary en Compute Forces");
+	
 	QLine2D tangent = computeTangentAt( closestPoint );
 	setTangentAtClosestPoint(tangent);
 	//Compute signed perpenduicular distance from robot to tangent at closest point
 	setRobotPerpendicularDistanceToRoad( tangent.perpendicularDistanceToPoint(robot3DPos) );
- 	setAngleWithTangentAtClosestPoint( nose.signedAngleWithLine2D( tangent ));
+	float ang = nose.signedAngleWithLine2D( tangent );
+	if (isnan(ang))
+		ang = 0;
+ 	setAngleWithTangentAtClosestPoint( ang );
 	//compute distanceToTarget along trajectory
   	setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );
 	

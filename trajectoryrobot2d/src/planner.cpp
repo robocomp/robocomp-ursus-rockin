@@ -449,7 +449,8 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 {
 	std::vector<QString> robotNodes;
 	std::vector<QString> restNodes;
-
+	im->updateTransformValues("robot", position.x(), position.y(), position.z(), 0, 0, 0);
+	
 // 	printf("RECURSIVE MESHES\n");
 	recursiveIncludeMeshes(im->getRoot(), "robot", false, robotNodes, restNodes);
 /*	
@@ -472,7 +473,7 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 // 			printf("%s ", restNodes[out].toStdString().c_str());
 			if (im->collide(robotNodes[in], restNodes[out]))
 			{
-				printf("\ncolisión:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
+				//printf("\ncolisión:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
 				return true;
 			}
 		}

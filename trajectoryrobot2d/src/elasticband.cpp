@@ -111,7 +111,7 @@ void ElasticBand::cleanPoints(WayPoints &road)
  */
 float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserData& laserData)
 {
-	Q_ASSERT( road.size()>3 );  //CHECK THIS TO ALLOW TWO AND ONE POINTS ROADS
+	Q_ASSERT( road.size()>1 );  //CHECK THIS TO ALLOW TWO AND ONE POINTS ROADS
 	
 	QVec atractionForce(3);
 	QVec repulsionForce(3);
@@ -179,8 +179,8 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 // 		computeDistanceField(w1, laserData, FORCE_DISTANCE_LIMIT);
 // 		repulsionForce = w1.minDistPoint * (FORCE_DISTANCE_LIMIT - w1.minDist);
 		
-		float alpha = -0.7;
-		float beta = 0.03;
+		float alpha = -0.6;
+		float beta = 0.09;
 			
 		QVec change = (atractionForce*alpha) + (repulsionForce*beta);		
 		
