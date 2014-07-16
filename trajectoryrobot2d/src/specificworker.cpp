@@ -30,8 +30,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 //	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	innerModel->setUpdateTranslationPointers("robot", &(bState.x), NULL, &(bState.z));
 	innerModel->setUpdateRotationPointers("robot", NULL, &(bState.alpha), NULL);
 	
@@ -101,8 +101,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 		
 	//Clon para Luis
 	innerClon = new InnerModel(*innerModel);
-	
-}
+
 
 /**
 * \brief Default destructor
@@ -131,8 +130,8 @@ void SpecificWorker::computeLuis( )
 	point.print("robot segun IM clonado");
 	
 	// OJO con el Inner que se le manda
-	if (planner->collisionDetector(point, 0, innerClon) == true) 
-		printf("colision\n");
+// 	if (planner->collisionDetector(point, 0, innerClon) == true) 
+// 		printf("colision\n");
 }
 
 
