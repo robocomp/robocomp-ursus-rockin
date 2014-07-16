@@ -39,11 +39,7 @@ Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 	//InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
 	//t->addChild(m);
   
-	//Create list of colision objects;
-	getCollisionObjects(innerModel->getRoot());
-	qDebug() << __FILE__ << __FUNCTION__ << "listaCollision" <<  listCollisionObjects;
-	qDebug() << __FILE__ << __FUNCTION__ << "listaCollision" <<  listCollisionRobotParts;
-	
+
 	//Trees (forward and backward) creation
 	arbol = new tree<QVec>;
 	arbolGoal = new tree<QVec>;
@@ -67,7 +63,7 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	QVec currentTargetGoal = robot;
 
 	//If target on obstacle, abort
-	if(collisionDetector( target, innerModel ) == true)
+	if (collisionDetector(target,0,innerModel) == true)
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";
 		PATH_FOUND = false;
@@ -419,7 +415,7 @@ QVec Planner::chooseRandomPointInFreeSpace(const QVec &currentTarget)
 	{
 		p[0] =  range * rand() -3500;
 		p[2] =  range * rand() -3500;
-		collision = collisionDetector( p, innerModel);	
+		collision = collisionDetector(p, 0, innerModel);	
 //		if( collision == true) qFatal("fary3");
 	}
 	return p;
@@ -448,89 +444,74 @@ QVec Planner::chooseRandomPointInFreeSpace(const QVec &currentTarget)
 /// COLLISION DETECTOR
 ////////////////////////////////////////////////////////////////////////
 
-void Planner::getCollisionObjects(InnerModelNode* node)
-{	
-// 	InnerModelMesh *mesh;
-// 	InnerModelPlane *plane;
-// 	InnerModelTransform *transformation;
-// 	
-// 	// Find out which kind of node are we dealing with
-// 	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))   //Aquí se incluyen Transform, Joint, PrismaticJoint, DifferentialRobot
-// 	{	
-// 		for(int i=0; i<node->children.size(); i++)
-// 		{
-// 			getCollisionObjects(node->children[i]);
-// 		}
-// 	}
-// 	else if ((plane = dynamic_cast<InnerModelPlane *>(node)))
-// 	{
-// 		listCollisionObjects.append(plane->id);
-// 	}
-// 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)))
-// 	{
-// 		listCollisionObjects.append(mesh->id);
-// 	}
-	
-// 	listCollisionObjects <<  "mesacentro" << "sofa0"<< "sofa1"<< "sofaAA"<< "k"<< "r"<< "b"<< 
-// 	"mesanoche1"<< "mesanoche2"<< "macetero1"<< "macetero2"<< "rrr"<< "shelve"<< 
-// 	"shelve2"<< "torchere1"<< "torchere2"<< "chair0"<< "chair1"<< "chair2"<< "chair3"<< 
-// 	"dinin_table"<< "P_Wall_0"<< "P_Door_0"<< "P_Door_0d"<< "door_camera_plane"<< "P_Wall_1"<< 
-// 	"P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< 
-// 	"P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< 
-// 	"P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< 
-// 	"P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< 
-// 	"P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19";
-	
-	listCollisionObjects.clear();
- 	listCollisionObjects <<  "P_Wall_0" << "P_Door_0"<< "P_Door_0d" << "P_Wall_1"<< "P_Wall_2"<< "P_Wall_3"<< "P_Wall_4"<< "P_Wall_5"<< "P_Wall_6"<< "P_Wall_7"<< "P_Door_1"<< "P_Door_1d"<< "P_Wall_8"<< "P_Wall_9"<< "P_Window_0b"<< "M_Window_0c"<< "P_Wall_10"<< "P_Wall_11"<< "P_Window_1a"<< "P_Window_1b"<< "P_Wall_12"<< "P_Window_2b"<< "M_Window_2c"<< "P_Window_3a"<< "P_Window_3b"<< "P_Wall_13"<< "P_Wall_14"<< "P_Window_4b"<< "M_Window_4c"<< "P_Wall_15"<< "P_Door_2"<< "P_Door_2d"<< "P_Wall_16"<< "P_Wall_17"<< "P_Wall_18"<< "P_Wall_19" << "dinin_table";
-//	listCollisionObjects << "wall1" << "wall11" << "wall2" << "wall22" << "ddR" << "ddL" << "ddF" << "ddB" << "ddR2" << "ddL2" << "ddF2" << "ddB2";
-//	listCollisionObjects <<  "dinin_table" << "ddR" << "ddL" << "ddF" << "ddB";
-	
-	listCollisionRobotParts.clear();
-	listCollisionRobotParts << "base_mesh" << "barracolumna" << "tabletMesh" << "arm_right_1_mesh" << "shoulder_right_1_mesh"
-							<< "shoulder_right_2_mesh" << "shoulder_right_3_mesh" << "elbow_right_mesh" << "handMesh1"  
-							<< "arm_left_1_mesh" << "shoulder_left_1_mesh" << "shoulder_left_2_mesh" 
-							<< "shoulder_left_3_mesh" << "elbow_left_mesh" << "handleftMesh1";
-}		
 
-bool Planner::collisionDetector( const QVec &point,  InnerModel *innerModel)
+bool Planner::collisionDetector(const QVec position, const double alpha, InnerModel *im)
 {
-	//Check if the virtual robot collides with any obstacle
-	//innerModel->updateTransformValues("baseT", point.x(), point.y(), point.z(), 0, 0, 0);
-	innerModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
-	bool hit = false;
+	std::vector<QString> robotNodes;
+	std::vector<QString> restNodes;
 
-	QString worldPart, robotPart;
-	try
+	printf("RECURSIVE MESHES\n");
+	recursiveIncludeMeshes(im->getRoot(), "robot", false, robotNodes, restNodes);
+	
+	printf("robot: ");
+	for (uint i=0; i<robotNodes.size(); i++)
+		printf("%s ", robotNodes[i].toStdString().c_str());
+	printf("\n");
+	
+	printf("rest: ");
+	for (uint i=0; i<restNodes.size(); i++)
+		printf("%s ", restNodes[i].toStdString().c_str());
+	printf("\n");
+
+
+	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
-		foreach( worldPart, listCollisionObjects)
+		printf("%s :", robotNodes[in].toStdString().c_str());
+		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
-			//qDebug() << "vertices of" << robotPart << innerModel->getNode(robotPart)->fclMesh->num_vertices;
-			foreach( robotPart, listCollisionRobotParts)
+			printf("%s ", restNodes[out].toStdString().c_str());
+			if (im->collide(robotNodes[in], restNodes[out]))
 			{
- 				//qDebug() << "Checking" << robotPart << worldPart << "at" << point;
-				if( innerModel->collide(robotPart, worldPart))
-				{
-// 					printf("%s %s\n", worldPart.toStdString().c_str(), robotPart.toStdString().c_str());
-						hit = true;  
-						qDebug() << "collision between" << robotPart << "and" << worldPart << "at" << point;
-						//innerModel->transform("world","base_mesh").print("base");
-						//qDebug() << "dist" << (innerModel->transform("world","base_mesh") - innerModel->transform("world","ddB")).norm2();
-						//innerModel->transform("world","dinin_table").print("table");
-						//qFatal("fary");
-						break; 
-				}
-			}	
-			if (hit) break;
+				printf("\ncolisión:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
+				return true;
+			}
+		}
+		printf("\n");
+	}
+
+	return false;
+}
+
+void Planner::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
+{
+	if (node->id == robotId)
+	{
+		inside = true;
+	}
+	
+	InnerModelMesh *mesh;
+	InnerModelPlane *plane;
+	InnerModelTransform *transformation;
+
+	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))
+	{
+		for (int i=0; i<node->children.size(); i++)
+		{
+			recursiveIncludeMeshes(node->children[i], robotId, inside, in, out);
 		}
 	}
-	catch(int ex) 
+	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
 	{
-		if( ex == 1 ) qDebug() << "robotPart" << robotPart << "not found in InnerModel";
-		if( ex == 2 ) qDebug() << "worldPart" << worldPart << "not found in InnerModel";
-		qFatal("Fary");
+		//printf("collidable: %s\n", node->id.toStdString().c_str());
+		if (inside)
+		{
+			in.push_back(node->id);
+		}
+		else
+		{
+			out.push_back(node->id);
+		}
 	}
-	return hit;	
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -576,7 +557,7 @@ QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool
 		point = (origin * (1-landa)) + (target * landa);
 		
 		//Collision detector
-		if (collisionDetector( point, innerModel) == true)
+		if (collisionDetector(point, 0, innerModel) == true)
 		{
 		  reachEnd = false;
 		  return pointAnt;

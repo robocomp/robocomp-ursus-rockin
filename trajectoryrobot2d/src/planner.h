@@ -34,47 +34,43 @@ using namespace RoboCompInnerModelManager;
 class Planner : public QObject
 {
 Q_OBJECT
-	public:
-		Planner(const InnerModel &innerModel_, QObject *parent=0);
-		~Planner(){};
-  
-		void setMaxIter( int v) 						{ MAX_ITER = v;}
-		bool computePath(const QVec &target, InnerModel *inner);
-		WayPoints smoothRoad( WayPoints road);
-		void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
-		QList<QVec> getPath() { return currentSmoothedPath; }; 
-		
-		//QVec tryBezierToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec>  *arbol , tree<QVec>::iterator & nodeCurrentPos);
-	 
-			bool collisionDetector( const QVec &point,  InnerModel *innerModel);			
-		
-  private:
-		InnerModel *innerModel;
-		tree<QVec> *arbol, *arbolGoal, *aux;
-		tree<QVec>::pre_order_iterator CURRENT_LEAF, CURRENT_LEAF_GOAL;
-		QVec fsX, fsZ;
-		int ind;
-		QVec finalTarget;
-		bool  PATH_FOUND;
-		QVec p1,p2,origin,target;
-		int MAX_ITER;
-		QList<QVec> currentPath, currentSmoothedPath, currentAdaptiveSmoothedPath;
-	    QVec trySegmentToTarget(const QVec & origin, const QVec & target, bool & reachEnd, tree<QVec>  *arbol, tree<QVec>::iterator & nodeCurrentPos);
-		QList<QVec> recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal);
-		bool isThereAnObstacleAtPosition(const QVec & pCenter, float rX, float rZ);
+public:
+	Planner(const InnerModel &innerModel_, QObject *parent=0);
+	~Planner(){}
 
-		QVec chooseRandomPointInFreeSpace(const QVec &currentTarget);
-		void computeRandomSequence(const QVec & currentTarget);
-		bool equal(const QVec & p1, const QVec & p2);
-		void smoothPath( const QList< QVec >& list);
-		void smoothPathStochastic( QList<QVec> & list);
-		tree<QVec>::iterator findClosestPointInTree( tree<QVec> *arb , const QVec & currentTarget);
-		void getCollisionObjects(InnerModelNode* node); 														// Obtains a list of id's of planes and meshes for collision detection
+	void setMaxIter( int v) { MAX_ITER = v; }
+	bool computePath(const QVec &target, InnerModel *inner);
+	WayPoints smoothRoad( WayPoints road);
+	void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
+	QList<QVec> getPath() { return currentSmoothedPath; }
 	
-		QStringList listCollisionObjects, listCollisionRobotParts;												// List of meshes used for collision detection							
-																			
-  public:
-		
+	//QVec tryBezierToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec>  *arbol , tree<QVec>::iterator & nodeCurrentPos);
+	
+	bool collisionDetector(const QVec position, const double alpha, InnerModel *im);
+	void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
+	
+private:
+	InnerModel *innerModel;
+	tree<QVec> *arbol, *arbolGoal, *aux;
+	tree<QVec>::pre_order_iterator CURRENT_LEAF, CURRENT_LEAF_GOAL;
+	QVec fsX, fsZ;
+	int ind;
+	QVec finalTarget;
+	bool  PATH_FOUND;
+	QVec p1,p2,origin,target;
+	int MAX_ITER;
+	QList<QVec> currentPath, currentSmoothedPath, currentAdaptiveSmoothedPath;
+	QVec trySegmentToTarget(const QVec & origin, const QVec & target, bool & reachEnd, tree<QVec>  *arbol, tree<QVec>::iterator & nodeCurrentPos);
+	QList<QVec> recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal);
+	bool isThereAnObstacleAtPosition(const QVec & pCenter, float rX, float rZ);
+
+	QVec chooseRandomPointInFreeSpace(const QVec &currentTarget);
+	void computeRandomSequence(const QVec & currentTarget);
+	bool equal(const QVec & p1, const QVec & p2);
+	void smoothPath( const QList< QVec >& list);
+	void smoothPathStochastic( QList<QVec> & list);
+	tree<QVec>::iterator findClosestPointInTree( tree<QVec> *arb , const QVec & currentTarget);
+
 };
 
 #endif // PLANNER_H

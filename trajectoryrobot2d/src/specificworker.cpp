@@ -31,7 +31,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 //	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	innerModel->setUpdateTranslationPointers("robot", &(bState.x), NULL, &(bState.z));
 	innerModel->setUpdateRotationPointers("robot", NULL, &(bState.alpha), NULL);
 	
@@ -43,7 +43,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	catch(const Ice::Exception &ex) { cout << ex << endl; }
 	
 	innerModel->update();
-	cleanWorld();
+// 	cleanWorld();
 	
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
@@ -65,11 +65,16 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	//Plan 
 	planner = new Planner(*innerModel);									
-	qDebug() << __FUNCTION__ << "Planning ...";
+
+/*
+ *
+ *  QUITAR ESTE BLOQUE DE COMENTARIOS UNA VEZ PILLEMOS EL PROBLEMA
+ * 
+ * 
+ *	qDebug() << __FUNCTION__ << "Planning ...";
 	planner->computePath(target, innerModel);
 	if(planner->getPath().size() == 0)
 		qFatal("SpecificWorker: Path NOT found. Aborting");
-	
 	road.setInnerModel(innerModel);
 	road.readRoadFromList( planner->getPath() );
 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
@@ -90,6 +95,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
 	controller = new Controller(2);
 	qDebug() << __FUNCTION__ << "----- controller set";
+*/	
 	
 	sleep(1);
 		
@@ -107,10 +113,16 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::computeLuis( )
 {	
-	try{	differentialrobot_proxy->getBaseState(bState);  }  
-	catch(const Ice::Exception &ex){ cout << ex << endl;}
-	try{	laserData = laser_proxy->getLaserData();}  
-	catch(const Ice::Exception &ex){ cout << ex << endl;}
+	printf("############################################################################\n");
+	try
+	{
+		differentialrobot_proxy->getBaseState(bState);
+	}
+	catch(const Ice::Exception &ex)
+	{
+		cout << ex << endl;
+	}
+
 	innerModel->update();
 	QVec point = innerModel->transform("world", "robot");
 	point.print("robot segun IM bueno");
@@ -118,9 +130,9 @@ void SpecificWorker::computeLuis( )
 	point = innerClon->transform("world", "robot");
 	point.print("robot segun IM clonado");
 	
-	//OJO con el Inner que se le manda
-	if (planner->collisionDetector(point, innerModel) == true) 
-		qFatal("Fary en compute Luis");
+	// OJO con el Inner que se le manda
+	if (planner->collisionDetector(point, 0, innerClon) == true) 
+		printf("colision\n");
 }
 
 
@@ -132,13 +144,16 @@ void SpecificWorker::computeLuis( )
  */
 void SpecificWorker::compute( )
 {	
+	computeLuis();
+	return;
+
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
 	
-	try{	differentialrobot_proxy->getBaseState(bState);  }  
-	catch(const Ice::Exception &ex){ cout << ex << endl;}
-	try{	laserData = laser_proxy->getLaserData();}  
-	catch(const Ice::Exception &ex){ cout << ex << endl;}
+	try { differentialrobot_proxy->getBaseState(bState); }
+	catch(const Ice::Exception &ex) { cout << ex << endl; }
+	try { laserData = laser_proxy->getLaserData(); }
+	catch(const Ice::Exception &ex) { cout << ex << endl; }
 		
 	innerModel->update();
 	
