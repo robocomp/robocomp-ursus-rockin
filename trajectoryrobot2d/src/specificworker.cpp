@@ -29,9 +29,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-
-//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	innerModel->setUpdateTranslationPointers("robot", &(bState.x), NULL, &(bState.z));
 	innerModel->setUpdateRotationPointers("robot", NULL, &(bState.alpha), NULL);
 	
@@ -133,6 +132,7 @@ void SpecificWorker::computeLuis( )
 	// OJO con el Inner que se le manda
 	if (planner->collisionDetector(point, 0, innerClon) == true) 
 		printf("colision\n");
+// 	usleep(500000);
 }
 
 

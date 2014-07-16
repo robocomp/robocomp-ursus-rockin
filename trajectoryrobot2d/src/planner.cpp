@@ -450,9 +450,9 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 	std::vector<QString> robotNodes;
 	std::vector<QString> restNodes;
 
-	printf("RECURSIVE MESHES\n");
+// 	printf("RECURSIVE MESHES\n");
 	recursiveIncludeMeshes(im->getRoot(), "robot", false, robotNodes, restNodes);
-	
+/*	
 	printf("robot: ");
 	for (uint i=0; i<robotNodes.size(); i++)
 		printf("%s ", robotNodes[i].toStdString().c_str());
@@ -462,21 +462,21 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 	for (uint i=0; i<restNodes.size(); i++)
 		printf("%s ", restNodes[i].toStdString().c_str());
 	printf("\n");
-
+*/
 
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
-		printf("%s :", robotNodes[in].toStdString().c_str());
+// 		printf("%s :", robotNodes[in].toStdString().c_str());
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
-			printf("%s ", restNodes[out].toStdString().c_str());
+// 			printf("%s ", restNodes[out].toStdString().c_str());
 			if (im->collide(robotNodes[in], restNodes[out]))
 			{
 				printf("\ncolisión:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
 				return true;
 			}
 		}
-		printf("\n");
+// 		printf("\n");
 	}
 
 	return false;

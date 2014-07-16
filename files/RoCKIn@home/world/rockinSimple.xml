@@ -174,18 +174,18 @@
 		
 		
 		<!-- Base		 -->
-		<transform id="initialRobotPose" tx="800" tz="-800" ry="-3.14" >
+		<transform id="initialRobotPose" tx="0" tz="0" >
 			<differentialrobot id="robot" port="10004" >
 
-				<translation id="laserPose" tx="0" ty="240" tz="100">
-					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" />
+<!-- 				<translation id="laserPose" tx="0" ty="240" tz="100"> -->
+<!-- 					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" /> -->
 <!-- 					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  -->
-				</translation>	-->
+<!-- 				</translation> -->
 				
 				
 				<transform  id="base_trans" >
 					<joint id="base" port="20000" axis="y" home="0">
-						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.ive"  tx="0" ty="0" tz="0" scale="1000"  />
+						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.ive"  tx="0" ty="10" tz="0" scale="1000"  />
 						<transform id="base_body" rx="-1.5707963267948966" ty="0" tz="-100" >
 							<!-- Gira en Z -->
 							<joint id="body" port="20000" min="-1" max="1" axis="z" >
