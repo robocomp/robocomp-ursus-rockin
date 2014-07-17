@@ -92,11 +92,12 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	controller = new Controller(2);
 	qDebug() << __FUNCTION__ << "----- controller set";
 	
+*/
 	//Localizar class
 	localizer = new Localizer(innerModel);
 	
 	sleep(1);
-*/
+
 	//Clon para Luis
 	innerClon = new InnerModel(*innerModel);
 }
@@ -110,27 +111,33 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::computeLuis( )
 {	
-	printf("############################################################################\n");
+	//printf("############################################################################\n");
 	try
 	{
 		differentialrobot_proxy->getBaseState(bState);
+	
 	}
 	catch(const Ice::Exception &ex)
 	{
 		cout << ex << endl;
 	}
+	try { laserData = laser_proxy->getLaserData(); }
+	catch(const Ice::Exception &ex) { cout << ex << endl; }
+
 
 	innerModel->update();
-	QVec point = innerModel->transform("world", "robot");
-	point.print("robot segun IM bueno");
-	innerClon->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
-	point = innerClon->transform("world", "robot");
-	point.print("robot segun IM clonado");
+// 	QVec point = innerModel->transform("world", "robot");
+// 	point.print("robot segun IM bueno");
+// 	innerClon->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
+// 	point = innerClon->transform("world", "robot");
+// 	point.print("robot segun IM clonado");
+// 	
+// 	// OJO con el Inner que se le manda
+// 	if (planner->collisionDetector(point, 0, innerClon) == true) 
+// 		printf("colision\n");
+// // 	usleep(500000);
 	
-	// OJO con el Inner que se le manda
-	if (planner->collisionDetector(point, 0, innerClon) == true) 
-		printf("colision\n");
-// 	usleep(500000);
+	localizer->localize(laserData, innerModel);
 }
 
 /**
@@ -140,8 +147,8 @@ void SpecificWorker::computeLuis( )
  */
 void SpecificWorker::compute( )
 {	
-// 	computeLuis();
-// 	return;
+ 	computeLuis();
+ 	return;
 
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();

@@ -22,6 +22,19 @@
 #include <innermodel/innermodel.h>
 #include <Laser.h>
 
+#include <fcl/collision.h>
+#include <fcl/narrowphase/narrowphase.h>
+#include <fcl/ccd/motion.h>
+#include <fcl/BV/BV.h>
+#include <fcl/shape/geometric_shapes.h>
+#include <fcl/BVH/BVH_model.h>
+#include <fcl/shape/geometric_shapes.h>
+#include <fcl/traversal/traversal_node_setup.h>
+#include <fcl/traversal/traversal_node_bvh_shape.h>
+#include <fcl/traversal/traversal_node_bvhs.h>
+typedef fcl::BVHModel<fcl::OBBRSS> FCLModel;
+typedef boost::shared_ptr<FCLModel> FCLModelPtr;
+
 class Localizer : public QObject
 {
     Q_OBJECT
@@ -36,5 +49,7 @@ class Localizer : public QObject
 		
 		void renderLaser(const QVec &point, float alfa, const QVec &listaAngles);
 		void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
+		std::vector<QString> restNodes;
+		std::vector<QString> robotNodes;
 };
 #endif // LOCALIZER_H
