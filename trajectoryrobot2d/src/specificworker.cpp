@@ -39,8 +39,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
  
 	try { differentialrobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
-	try { laserData = laser_proxy->getLaserData(); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
+// 	try { laserData = laser_proxy->getLaserData(); }
+// 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
 	
 	innerModel->update();
 // 	cleanWorld();
@@ -67,6 +67,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Plan 
 	planner = new Planner(*innerModel);									
 
+/*
 	qDebug() << __FUNCTION__ << "Planning ...";
 	planner->computePath(target, innerModel);
 	if(planner->getPath().size() == 0)
@@ -94,9 +95,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	
 	sleep(1);
-		
+*/
 	//Clon para Luis
-	//innerClon = new InnerModel(*innerModel);
+	innerClon = new InnerModel(*innerModel);
 }
 
 /**
@@ -140,8 +141,8 @@ void SpecificWorker::computeLuis( )
  */
 void SpecificWorker::compute( )
 {	
-	//computeLuis();
-	//return;
+	computeLuis();
+	return;
 
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();

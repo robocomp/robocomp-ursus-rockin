@@ -23,4 +23,4 @@ SET ( HEADERS
   forcefield.h
 )
 
-#SET (LIBS ${LIBS} -losgViewer)
+SET (LIBS ${LIBS} -lfcl )

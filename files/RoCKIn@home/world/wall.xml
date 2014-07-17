@@ -9,15 +9,16 @@
 		
 		<plane id="floor" pz="0" ny="1" py="-10"  size="7000,7000,10" repeat="1" texture="#888888" />
 		
-		<plane id="wall" pz="0" ny="z" py="0" px="500" size="6000,1000,10" repeat="1" texture="#0000aa" />
-		<plane id="wall2" pz="1000" ny="z" px="0" px="-1300" size="4000,1000,10" repeat="1" texture="#0000aa" />
+		<plane id="wall" pz="0" ny="z" py="250" px="500" size="6000,500,100" repeat="1" texture="#0000aa" />
+		<plane id="wall2" pz="1000" ny="z" py="250" px="-1300" size="4000,500,100" repeat="1" texture="#0000aa" />
 		
 		
 		<transform id="dinin_table_t" tx="0" tz="1800" ry="1.57">
-			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Table N250414.3DS" rx="1.57" rz="1.57" scale="20,20,25"  />
+<!-- 			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,250"   /> -->
+			<mesh id="dinin_table" file="/home/robocomp/robocomp/files/osgModels/basics/sphere.ive" ty="700" scale="200,200,200" />
 		</transform>
-	
-		
+
+
 		<!--
 		<plane id="wall1" pz="0" ny="z" py="0" px="1500" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
 		<plane id="wall11" pz="0" ny="z" py="0" px="1550" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
@@ -51,10 +52,10 @@
 						<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850"  />
 					</transform>	
 					
- 				<translation id="laserPose" tx="0" ty="240" tz="100"> -->
- 					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" /> -->
- 					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  -->
- 				</translation>
+<!--  				<translation id="laserPose" tx="0" ty="240" tz="100"> --> -->
+<!--  					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" /> --> -->
+<!--  					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  --> -->
+<!--  				</translation> -->
 		
 		
 				

@@ -467,17 +467,21 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
-// 		printf("%s :", robotNodes[in].toStdString().c_str());
+		printf("%s:", robotNodes[in].toStdString().c_str());
+		im->getNode(robotNodes[in])->collisionObject->computeAABB();
+		fcl::AABB aabb = im->getNode(robotNodes[in])->collisionObject->getAABB();
+		printf("[%f , %f , %f]", aabb.width(), aabb.height(), aabb.depth());
+		printf("\n");
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
-// 			printf("%s ", restNodes[out].toStdString().c_str());
+			printf("%s ", restNodes[out].toStdString().c_str());
 			if (im->collide(robotNodes[in], restNodes[out]))
 			{
-				//printf("\ncolisión:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
+				printf("\ncolision:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
 				return true;
 			}
 		}
-// 		printf("\n");
+		printf("\n");
 	}
 
 	return false;
@@ -503,7 +507,6 @@ void Planner::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 	}
 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
 	{
-		//printf("collidable: %s\n", node->id.toStdString().c_str());
 		if (inside)
 		{
 			in.push_back(node->id);

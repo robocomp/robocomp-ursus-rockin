@@ -76,7 +76,7 @@ void WayPoints::readRoadFromList( QList< QVec > list)
 
 void WayPoints::computeDistancesToNext()
 {
-	for(int i=0; i< this->size()-1; i++) // exlude 0 because it is underneath the robot
+	for(int i=0; i+1<this->size(); i++) // exlude 0 because it is underneath the robot
 	{
 		this->operator[](i).initialDistanceToNext = (this->operator[](i).pos - this->operator[](i+1).pos).norm2();
 	}
@@ -99,7 +99,7 @@ void WayPoints::removeFirst(InnerModelManagerPrx innermodelmanager_proxy)
  */
 QLine2D WayPoints::getRobotZAxis(InnerModel* innerModel)
 {
-	Q_ASSERT(currentPoint<road.size()-1 and road.size()>0);
+	Q_ASSERT(currentPoint+1<road.size() and road.size()>0);
 	
 	QVec robot2DPos = QVec::vec2( innerModel->getBaseX(), innerModel->getBaseZ());
 	QVec nose = innerModel->transform("world", QVec::vec3(0,0,1000), "base");
@@ -120,7 +120,7 @@ float WayPoints::robotDistanceToNextPoint(InnerModel* innerModel)
 
 QLine2D WayPoints::getTangentToCurrentPoint()
 {
-	Q_ASSERT (currentPoint < size()-1 and size()>0);
+	Q_ASSERT (currentPoint+1 < size() and size()>0);
 
 	QVec p1 = QVec::vec2( (*this)[currentPointIndex].pos.x(), (*this)[currentPointIndex].pos.z());
 	QVec p2 = QVec::vec2( (*this)[currentPointIndex+1].pos.x(), (*this)[currentPointIndex+1].pos.z());	
@@ -211,7 +211,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		pose.z = w.pos.z();
 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 		RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 150, 50, "#005500" );
-		if ( (i-1) == currentPointIndex )	//CHANGE TO getIndexOfClosestPointToRobot()
+		if ( i == currentPointIndex+1 )	//CHANGE TO getIndexOfClosestPointToRobot()
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 1000, 30, "#000055" );	
 	/*	else if (i == nextPointIndex )
 		{
@@ -409,7 +409,7 @@ void WayPoints::computeForces()
   	setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );
 	
 	//Check for arrival to target  TOO SIMPLE 
-	if(	( getCurrentPointIndex() == size()-1)  and  
+	if(	( getCurrentPointIndex()+1 == size())  and  
 		( getRobotDistanceToTarget() < 100)) 
 		setFinished(true);
 	
