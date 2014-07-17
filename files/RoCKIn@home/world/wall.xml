@@ -13,7 +13,6 @@
 		<plane id="wall2" pz="1000" ny="z" py="250" px="-1300" size="4000,500,100" repeat="1" texture="#0000aa" />
 		
 		
-<<<<<<< HEAD
 		<!--<transform id="dinin_table_t" tx="0" tz="1800" ry="1.57">
 			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Table N250414.3DS" rx="1.57" rz="1.57" scale="20,20,25"  />
 		</transform>
@@ -22,14 +21,11 @@
 			<mesh id="b" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Alicudi.3ds" rx="1.57" rz="-1.57" scale="1000,1000,1000"  />
 		</transform>-->
 		
-=======
 		<transform id="dinin_table_t" tx="0" tz="1800" ry="1.57">
 <!-- 			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,250"   /> -->
 			<mesh id="dinin_table" file="/home/robocomp/robocomp/files/osgModels/basics/sphere.ive" ty="700" scale="200,200,200" />
 		</transform>
 
-
->>>>>>> 9c8bbe28d9ba868a7f9e4f662c1fd45c0983cbf4
 		<!--
 		<plane id="wall1" pz="0" ny="z" py="0" px="1500" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
 		<plane id="wall11" pz="0" ny="z" py="0" px="1550" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
