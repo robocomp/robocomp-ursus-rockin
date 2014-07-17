@@ -29,6 +29,7 @@
 #include "waypoints.h"
 #include "planner.h"
 #include "forcefield.h"
+#include "localizer.h"
 
 //#include "ParabolicPathSmooth/smoother.h"
 
@@ -63,6 +64,7 @@ private:
 	ElasticBand *elasticband;
 	Planner *planner;
 	ForceField *forcefield;
+	Localizer *localizer;
 	
 	//Smoother smoother;
 	

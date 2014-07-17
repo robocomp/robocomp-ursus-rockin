@@ -51,7 +51,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 //	target = QVec::vec3(6000,10,-6000);
 
 	target = QVec::vec3(0,0,3000);
-	
+	//OJO CHANGE chooseRandomPointInFreeSpace to PLAN IN APARTMENT
 	
 	//Draw target as red box	
 	RoboCompInnerModelManager::Plane3D plane;
@@ -71,14 +71,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	planner->computePath(target, innerModel);
 	if(planner->getPath().size() == 0)
 		qFatal("SpecificWorker: Path NOT found. Aborting");
+	
 	road.setInnerModel(innerModel);
 	road.readRoadFromList( planner->getPath() );
 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
 	
 	road.print();
 	road.computeForces();
-	road.draw(innermodelmanager_proxy, innerModel);	
-	//qFatal("fary2");
 	
 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
 	elasticband = new ElasticBand(innerModel);	
@@ -92,6 +91,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	controller = new Controller(2);
 	qDebug() << __FUNCTION__ << "----- controller set";
 	
+	//Localizar class
+	localizer = new Localizer(innerModel);
 	
 	sleep(1);
 		
@@ -131,8 +132,6 @@ void SpecificWorker::computeLuis( )
 // 	usleep(500000);
 }
 
-
-
 /**
  * @brief All architecture goes here. 
  * 
@@ -162,7 +161,8 @@ void SpecificWorker::compute( )
 
 	controller->update(differentialrobot_proxy, road);
 	
-	
+	road.draw(innermodelmanager_proxy, innerModel);	;
+		
 	if(reloj.elapsed() > 2000) 
 	{
 		road.draw(innermodelmanager_proxy, innerModel);	
@@ -182,7 +182,6 @@ void SpecificWorker::compute( )
 	{
 		qDebug("STUCK, PLANNING REQUIRED");
 		qDebug("Planning ...");
-		//drawThinkingRobot("red");
 		innerModel->update();
 		bool havePlan = planner->computePath(target, innerModel);
 	
@@ -201,6 +200,8 @@ void SpecificWorker::compute( )
 		}
 	}
 
+	localizer->localize( laserData, innerModel );
+	
 	qDebug() << reloj2.elapsed() << "ms"; reloj2.restart();
 }
 

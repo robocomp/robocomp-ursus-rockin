@@ -69,17 +69,15 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
  		if( vrot < -MAX_ROT_SPEED ) 
  			vrot = -MAX_ROT_SPEED;
 		
-		
 		// Factors to be used in speed control when approaching the end of the road
 		float teta;
-		if( road.getRobotDistanceToTarget() < 500)
+		if( road.getRobotDistanceToTarget() < 700)
 			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./200,0.7, 0.1);
 		else
 			teta= 1;
 		
 		//VAdv is computed as a reduction of MAX_ADV_SPEED by two exponential functions: road curvature and VRot, and teta that applies when arriving at target
  		vadvance = MAX_ADV_SPEED * exp(-fabs(2.1* road.getRoadCurvatureAtClosestPoint())) * exp(-fabs(vrot*1.3)) * teta;
-		//vadvance = MAX_ADV_SPEED * teta;
 		
  		// Limiting filter
  		if( vadvance > MAX_ADV_SPEED ) 

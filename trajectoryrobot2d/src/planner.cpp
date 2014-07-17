@@ -53,15 +53,15 @@ Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 */
 bool Planner::computePath(const QVec &target, InnerModel *inner)
 {	
-	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning";
-	QVec currentTarget = target;
+	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning with target" << target;
 	
+	QVec currentTarget = target;  //local variable to get samples from free space
+   
 	//We need to resynchronize here because in subsequent call the robot will be "Dios sabe dónde"
-	QVec robot = inner->transform("world", QVec::zeros(3), "robot");
-	float rYaw =  inner->getRotationMatrixTo("world", "robot").extractAnglesR_min()(1);
+	QVec robot = inner->transform("world", "robot");	
+	float rYaw = inner->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
 	innerModel->updateTransformValues("robot", robot.x(), robot.y(), robot.z(), 0, rYaw, 0);
-	QVec currentTargetGoal = robot;
-
+	
 	//If target on obstacle, abort
 	if (collisionDetector(target,0,innerModel) == true)
 	{
@@ -70,9 +70,7 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 		return false;
 	}
 
-	//Sample R2 space
-	//computeRandomSequence(target);
-	//Init random sequence
+	//Init random sequence generator
 	qsrand ( QTime::currentTime().msec() );
 	
 	//Clean trees
@@ -88,9 +86,9 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	topGoal =arbolGoal->begin();
 	nodeCurrentPos = arbol->insert(top, robot);
 	nodeCurrentPosGoal = arbolGoal->insert(topGoal, target);
-   	CURRENT_LEAF_GOAL = nodeCurrentPosGoal;
-   	CURRENT_LEAF = nodeCurrentPos;
-   
+ 	CURRENT_LEAF_GOAL = nodeCurrentPosGoal;
+ 	CURRENT_LEAF = nodeCurrentPos;
+
 	QVec res(3), resGoal(3);
 	int i;
 	bool reachEnd, success=false;
@@ -98,16 +96,17 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 
 	for(i=0; i< MAX_ITER; i++)
 	{
-		//get new point form random sequence. First point is always the target
+		//get new point from random sequence. First point is always the target
 		if( i>0)
-			currentTarget = chooseRandomPointInFreeSpace(target);
+		{
+			currentTarget = sampleFreeSpaceR2(target, innerModel);
+		}
+
 		// find closest point from random point to tree
 		nodeCurrentPos = findClosestPointInTree( arbol, currentTarget);	
 		
 		//copy nodeCurrentPos to aux so nodeCurrentPos is not modified when calling trySegmentToTarget
 		auxNode = nodeCurrentPos;
-		// Local navigation. Find Bezier trajectory from closespoint in tree to random point from sequence. res is the closest point to currentTarget through Bezier route
-		//res = tryBezierToTarget( *nodeCurrentPos, currentTarget, reachEnd, arbol, auxNode);		
 		res = trySegmentToTarget( *nodeCurrentPos, currentTarget, reachEnd, arbol, auxNode);		
 		// Can  only be equal if random point accidentally falls on tree
 		if (equal(res, *nodeCurrentPos) == false) //Not achieved goal
@@ -364,35 +363,8 @@ void Planner::smoothPathStochastic(QList< QVec >& list)
 }
 
 /////////////////////////////////////////////////////
-/// Sampler. This baby here admits a lot of improvements!
+/// Samplers. This baby here admits a lot of improvements!
 ////////////////////////////////////////////////////
-
-/**
- * @brief Samples poses in SE(2)
- * 
- * @param target ...
- * @return void
- */
-void Planner::computeRandomSequence(const QVec& currentTarget)
-{
- 	//QRect floorRect(6000,-12000, 12000,-12000);  ///OJO GET THIS FROM INNERMODEL
-	//qDebug() << floorRect.left() << floorRect.right() << floorRect.bottom() << floorRect.top();	
-	
-//	this->fsX = QVec::uniformVector(MAX_ITER , floorRect.left()+1, floorRect.right()-1);
-// 	this->fsZ = QVec::uniformVector(MAX_ITER , floorRect.bottom()+1, floorRect.top()-1);
-	
-// 	this->fsX = QVec::uniformVector(MAX_ITER , 0, 12000);									/////////OJO GET THIS FROM INNERMODEL
-//  	this->fsZ = QVec::uniformVector(MAX_ITER , -12000, 0);
-
-	this->fsX = QVec::uniformVector(MAX_ITER , -5000, 5000);									/////////OJO GET THIS FROM INNERMODEL
- 	this->fsZ = QVec::uniformVector(MAX_ITER , -5000, 5000);
-
-	
-	this->fsX(0) = 	currentTarget.x();
- 	this->fsZ(0) = 	currentTarget.z();
- 	this->ind = 0;
-}
-
 
 /**
 * @brief Picks a random point of the list created by the sampler and checks that it is out of obstacles (Free Space)
@@ -401,7 +373,7 @@ void Planner::computeRandomSequence(const QVec& currentTarget)
 * @return RMat::QVec
 */
 
-QVec Planner::chooseRandomPointInFreeSpace(const QVec &currentTarget)
+QVec Planner::sampleFreeSpaceR2(const QVec &currentTarget,  InnerModel *inner)
 {
 	bool collision = true;
 	float range = 8000.f / RAND_MAX;
@@ -415,33 +387,13 @@ QVec Planner::chooseRandomPointInFreeSpace(const QVec &currentTarget)
 	{
 		p[0] =  range * rand() -3500;
 		p[2] =  range * rand() -3500;
-		collision = collisionDetector(p, 0, innerModel);	
-//		if( collision == true) qFatal("fary3");
+		collision = collisionDetector(p, 0, inner);	
 	}
 	return p;
-
-	
-// 	QVec p(3,0.f),x(3);
-// 	bool collision=true;
-// 
-// 	//Inject goal position to bias the distribution
-// 	if (ind > 0 and (float)qrand()*100/RAND_MAX > 80)
-// 		return(currentTarget);
-//  
-// 	while( (collision = true) and (ind < fsX.size))   //CHANGE THIS TO ADMIT NON-SQUARE REGIONS
-// 	{
-// 		p[0] = fsX[ind];
-// 		p[2] = fsZ[ind];
-// 		collision = collisionDetector( p, innerModel);	
-// 		ind++;
-// 	}
-// 	while (collision and ind < fsX.size());
-// 	if(ind >= fsX.size()) 
-// 		qDebug() << __FILE__ << __FUNCTION__ << "no se encuentra posición libre";
-// 		return p;	
 }
+
 ////////////////////////////////////////////////////////////////////////
-/// COLLISION DETECTOR
+/// COLLISION DETECTOR - FCL -
 ////////////////////////////////////////////////////////////////////////
 
 
@@ -465,19 +417,19 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 	printf("\n");
 */
 
+	//qDebug() << "checking at " << position;
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
-// 		printf("%s :", robotNodes[in].toStdString().c_str());
+ 		//qDebug() << robotNodes[in];
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
-// 			printf("%s ", restNodes[out].toStdString().c_str());
+ 			//qDebug() << robotNodes[in] << restNodes[out];
 			if (im->collide(robotNodes[in], restNodes[out]))
 			{
 				//printf("\ncolisión:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
 				return true;
 			}
 		}
-// 		printf("\n");
 	}
 
 	return false;

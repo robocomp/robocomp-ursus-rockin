@@ -64,8 +64,7 @@ private:
 	QList<QVec> recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal);
 	bool isThereAnObstacleAtPosition(const QVec & pCenter, float rX, float rZ);
 
-	QVec chooseRandomPointInFreeSpace(const QVec &currentTarget);
-	void computeRandomSequence(const QVec & currentTarget);
+	QVec sampleFreeSpaceR2(const QVec &currentTarget, InnerModel *inner);
 	bool equal(const QVec & p1, const QVec & p2);
 	void smoothPath( const QList< QVec >& list);
 	void smoothPathStochastic( QList<QVec> & list);
