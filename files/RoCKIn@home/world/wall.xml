@@ -22,8 +22,8 @@
 		</transform>-->
 		
 		<transform id="dinin_table_t" tx="0" tz="1800" ry="1.57">
-<!-- 			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,250"   /> -->
-			<mesh id="dinin_table" file="/home/robocomp/robocomp/files/osgModels/basics/sphere.ive" ty="700" scale="200,200,200" />
+			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,250"   />
+<!-- 			<mesh id="dinin_table" file="/home/robocomp/robocomp/files/osgModels/basics/sphere.ive" ty="700" scale="200,200,200" /> -->
 		</transform>
 
 		<!--
@@ -59,10 +59,12 @@
 						<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850"  />
 					</transform>	
 					
-  				<translation id="laserPose" tx="0" ty="240" tz="100"> 
+<!--
+				<translation id="laserPose" tx="0" ty="240" tz="100"> 
   					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" /> 
--  					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  
-  				</translation> 
+  					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  
+  				</translation>
+-->
 		
 		
 				

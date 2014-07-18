@@ -401,7 +401,7 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 {
 	std::vector<QString> robotNodes;
 	std::vector<QString> restNodes;
-	im->updateTransformValues("robot", position.x(), position.y(), position.z(), 0, 0, 0);
+	im->updateTransformValues("robot", position.x(), position.y(), position.z(), 0, alpha, 0);
 	
 // 	printf("RECURSIVE MESHES\n");
 	recursiveIncludeMeshes(im->getRoot(), "robot", false, robotNodes, restNodes);
@@ -417,21 +417,17 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 	printf("\n");
 */
 
-	//qDebug() << "checking at " << position;
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
- 		//qDebug() << robotNodes[in];
+		printf("%s:", robotNodes[in].toStdString().c_str());
+		im->getNode(robotNodes[in])->collisionObject->computeAABB();
+		fcl::AABB aabb = im->getNode(robotNodes[in])->collisionObject->getAABB();
+		fcl::Vec3f v1 = aabb.center();
+// 		printf("--  (%f,  %f,  %f) [%f , %f , %f]", v1[0], v1[1], v1[2], aabb.width(), aabb.height(), aabb.depth());
+// 		printf("\n");
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
- 			//qDebug() << robotNodes[in] << restNodes[out];
-// 		printf("%s:", robotNodes[in].toStdString().c_str());
-// 		im->getNode(robotNodes[in])->collisionObject->computeAABB();
-// 		fcl::AABB aabb = im->getNode(robotNodes[in])->collisionObject->getAABB();
-// 		printf("[%f , %f , %f]", aabb.width(), aabb.height(), aabb.depth());
-// 		printf("\n");
-// 		for (uint32_t out=0; out<restNodes.size(); out++)
-// 		{
-// 			printf("%s ", restNodes[out].toStdString().c_str());
+			printf("%s ", restNodes[out].toStdString().c_str());
 			if (im->collide(robotNodes[in], restNodes[out]))
 			{
 				printf("\ncolision:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());

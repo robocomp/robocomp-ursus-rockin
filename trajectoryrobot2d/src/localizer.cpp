@@ -66,9 +66,9 @@ void Localizer::renderLaser(const QVec &point, float alfa, const QVec &angleList
 			fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 			fcl::CollisionObject laserBoxCol(laserBox, R1, T1);
 			
-			for (uint32_t out=0; out<restNodes.size(); out++)
+			for (int32_t out=0; out<restNodes.size(); out++)
 			{
-				hit = clonModel->collide(restNodes[out], &laserBoxCol );
+// 				hit = clonModel->collide(restNodes[out], &laserBoxCol );
 			}
 		}
 		//fill the new laser
