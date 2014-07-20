@@ -39,7 +39,6 @@ Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 	//InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
 	//t->addChild(m);
   
-
 	//Trees (forward and backward) creation
 	arbol = new tree<QVec>;
 	arbolGoal = new tree<QVec>;
@@ -61,6 +60,9 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	QVec robot = inner->transform("world", "robot");	
 	float rYaw = inner->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
 	innerModel->updateTransformValues("robot", robot.x(), robot.y(), robot.z(), 0, rYaw, 0);
+	
+	robotNodes.clear(); restNodes.clear();
+	recursiveIncludeMeshes(innerModel->getRoot(), "robot", false, robotNodes, restNodes);
 	
 	//If target on obstacle, abort
 	if (collisionDetector(target,0,innerModel) == true)
@@ -375,8 +377,10 @@ void Planner::smoothPathStochastic(QList< QVec >& list)
 
 QVec Planner::sampleFreeSpaceR2(const QVec &currentTarget,  InnerModel *inner)
 {
+	const float widthX = 10000;
+	const float widthZ = 10000;
 	bool collision = true;
-	float range = 8000.f / RAND_MAX;
+	float range = widthX / RAND_MAX;
 	QVec p(3,0.f);
 	
 	//Inject goal position to bias the distribution
@@ -385,8 +389,11 @@ QVec Planner::sampleFreeSpaceR2(const QVec &currentTarget,  InnerModel *inner)
 	
 	while( collision == true )
 	{
-		p[0] =  range * rand() -3500;
-		p[2] =  range * rand() -3500;
+//		p[0] =  range * rand() -3500;
+//		p[2] =  range * rand() -3500;
+		p[0] =  range * rand();
+		p[2] =  -range * rand();
+
 		collision = collisionDetector(p, 0, inner);	
 	}
 	return p;
@@ -399,13 +406,14 @@ QVec Planner::sampleFreeSpaceR2(const QVec &currentTarget,  InnerModel *inner)
 
 bool Planner::collisionDetector(const QVec position, const double alpha, InnerModel *im)
 {
-	std::vector<QString> robotNodes;
-	std::vector<QString> restNodes;
+// 	std::vector<QString> robotNodes;
+// 	std::vector<QString> restNodes;
 	im->updateTransformValues("robot", position.x(), position.y(), position.z(), 0, alpha, 0);
 	
 // 	printf("RECURSIVE MESHES\n");
-	recursiveIncludeMeshes(im->getRoot(), "robot", false, robotNodes, restNodes);
-/*	
+//	recursiveIncludeMeshes(im->getRoot(), "robot", false, robotNodes, restNodes);
+
+	/*	
 	printf("robot: ");
 	for (uint i=0; i<robotNodes.size(); i++)
 		printf("%s ", robotNodes[i].toStdString().c_str());
@@ -419,18 +427,18 @@ bool Planner::collisionDetector(const QVec position, const double alpha, InnerMo
 
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
-		printf("%s:", robotNodes[in].toStdString().c_str());
-		im->getNode(robotNodes[in])->collisionObject->computeAABB();
-		fcl::AABB aabb = im->getNode(robotNodes[in])->collisionObject->getAABB();
-		fcl::Vec3f v1 = aabb.center();
+		//printf("%s:", robotNodes[in].toStdString().c_str());
+		//im->getNode(robotNodes[in])->collisionObject->computeAABB();
+		//fcl::AABB aabb = im->getNode(robotNodes[in])->collisionObject->getAABB();
+		//fcl::Vec3f v1 = aabb.center();
 // 		printf("--  (%f,  %f,  %f) [%f , %f , %f]", v1[0], v1[1], v1[2], aabb.width(), aabb.height(), aabb.depth());
 // 		printf("\n");
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
-			printf("%s ", restNodes[out].toStdString().c_str());
+			//printf("%s ", restNodes[out].toStdString().c_str());
 			if (im->collide(robotNodes[in], restNodes[out]))
 			{
-				printf("\ncolision:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
+				//printf("\ncolision:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
 				return true;
 			}
 		}

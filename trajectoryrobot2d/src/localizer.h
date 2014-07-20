@@ -43,7 +43,6 @@ class Localizer : public QObject
 		Localizer(InnerModel *inner);
 		void localize(const RoboCompLaser::TLaserData &laser, InnerModel *inner);
 		
-
 	private:
 		InnerModel *clonModel;
 		

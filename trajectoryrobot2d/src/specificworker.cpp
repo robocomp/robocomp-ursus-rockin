@@ -29,27 +29,34 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
+	//Move Robot to Hall
+	//setRobotInitialPose(800,-1000,M_PI);
 	
-	//moveBoxes();
- 
+	//Update InnerModel from robot
 	try { differentialrobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
-// 	try { laserData = laser_proxy->getLaserData(); }
-// 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
+	try { laserData = laser_proxy->getLaserData(); }
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
 	
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
+	
+	innerModel->transform("world","robot").print("Robot  in world");
+	qDebug() << "bState.x" << bState.x << "bState.z" << bState.z << "bState.alpha" << bState.alpha;
+	//qFatal("fary");
 // 	cleanWorld();
 	
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
-	//target = QVec::vec3(800,10,-3000);
-//	target = QVec::vec3(6000,10,-6000);
+	target = QVec::vec3(7000,10,-1500);	// dormitorio
+//	target = QVec::vec3(6000,10,-9100);   //detrás de la mesa
+//	target = QVec::vec3(3000,10,-8100);   //detrás del sofá
+	
 
-	target = QVec::vec3(0,0,3000);
+//	target = QVec::vec3(0,22,3000);
 	//OJO CHANGE chooseRandomPointInFreeSpace to PLAN IN APARTMENT
 	
 	//Draw target as red box	
@@ -66,7 +73,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Plan 
 	planner = new Planner(*innerModel);									
 
-/*
 	qDebug() << __FUNCTION__ << "Planning ...";
 	planner->computePath(target, innerModel);
 	if(planner->getPath().size() == 0)
@@ -83,15 +89,11 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	elasticband = new ElasticBand(innerModel);	
 	qDebug() << __FUNCTION__ << "----- elasticband set";
 	
-	//Computes de scalar magnitudes of the Forcefield
-	//forcefield = new ForceField(innerModel, innermodelmanager_proxy);
-	//qDebug() << __FUNCTION__ << "----- forcefield set";
-	
 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
 	controller = new Controller(2);
 	qDebug() << __FUNCTION__ << "----- controller set";
 	
-*/
+
 	//Localizar class
 	localizer = new Localizer(innerModel);
 	
@@ -147,8 +149,8 @@ void SpecificWorker::computeLuis( )
  */
 void SpecificWorker::compute( )
 {	
- 	computeLuis();
- 	return;
+//  	computeLuis();
+//  	return;
 
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
@@ -158,56 +160,54 @@ void SpecificWorker::compute( )
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; }
 		
-	innerModel->update();
-	
-	elasticband->update( road, laserData );
-	
-	//forcefield->update(road);
-	road.computeForces();
-
-	road.printRobotState( innerModel);
-
-	controller->update(differentialrobot_proxy, road);
-	
-	road.draw(innermodelmanager_proxy, innerModel);	;
-		
-	if(reloj.elapsed() > 2000) 
-	{
-		road.draw(innermodelmanager_proxy, innerModel);	
-		reloj.restart();
-	}
-	
-	if (road.isFinished() == true)
-	{
-		RoboCompInnerModelManager::Plane3D plane;
-		plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
-		plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
-		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
-		qFatal("GOODBYE, FINISHED ROAD");
-	}
-	
-	if(road.requiresReplanning == true)
-	{
-		qDebug("STUCK, PLANNING REQUIRED");
-		qDebug("Planning ...");
-		innerModel->update();
-		bool havePlan = planner->computePath(target, innerModel);
-	
-		if(havePlan == false or planner->getPath().size() == 0)
-			qFatal("NO PLAN AVAILABLE");
-		else
-		{
-			//drawThinkingRobot("green");
-			//road.readRoadFromList( planner->getPath() );
-			road.clear();
-			road.readRoadFromList( planner->getPath() );
-			road.requiresReplanning = false;
-			//elasticband->addPoints(road);  //SEND THIS TO A RESET
-			//elasticband->adjustPoints(road);  //SEND THIS TO A RESET
-			road.computeDistancesToNext();
-		}
-	}
-
+	//innerModel->update();
+	innerModel->updateTransformValues("robot",bState.x, 10, bState.z, 0, bState.alpha,0);
+	//qDebug() << "bState" << bState.x << bState.z;
+// 	elasticband->update( road, laserData );
+// 	
+// 	road.computeForces();
+// 
+// 	road.printRobotState( innerModel);
+// 
+// 	controller->update(differentialrobot_proxy, road);
+// 			
+// 	if(reloj.elapsed() > 2000) 
+// 	{
+// 		road.draw(innermodelmanager_proxy, innerModel);	
+// 		reloj.restart();
+// 	}
+// 	
+// 	if (road.isFinished() == true)
+// 	{
+// 		RoboCompInnerModelManager::Plane3D plane;
+// 		plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
+// 		plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
+// 		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+// 		qFatal("GOODBYE, FINISHED ROAD");
+// 	}
+// 	
+// 	if(road.requiresReplanning == true)
+// 	{
+// 		qDebug("STUCK, PLANNING REQUIRED");
+// 		qDebug("Planning ...");
+// 		innerModel->update();
+// 		bool havePlan = planner->computePath(target, innerModel);
+// 	
+// 		if(havePlan == false or planner->getPath().size() == 0)
+// 			qFatal("NO PLAN AVAILABLE");
+// 		else
+// 		{
+// 			//drawThinkingRobot("green");
+// 			//road.readRoadFromList( planner->getPath() );
+// 			road.clear();
+// 			road.readRoadFromList( planner->getPath() );
+// 			road.requiresReplanning = false;
+// 			//elasticband->addPoints(road);  //SEND THIS TO A RESET
+// 			//elasticband->adjustPoints(road);  //SEND THIS TO A RESET
+// 			road.computeDistancesToNext();
+// 		}
+// 	}
+// 
 	localizer->localize( laserData, innerModel );
 	
 	qDebug() << reloj2.elapsed() << "ms"; reloj2.restart();
@@ -224,17 +224,23 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	return true;
 };
 
-void SpecificWorker::sendRobotHome()
+void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 {
-	qDebug()<< __FUNCTION__ << "Sending robot home";
+	qDebug()<< __FUNCTION__ << "Sending robot to initial position";
 	try
 	{
-		RoboCompInnerModelManager::Pose3D pose;
-		pose.x= 0; pose.y=0; pose.z=0;pose.rx=0; pose.ry=0; pose.rz=0;
-		innermodelmanager_proxy->setPoseFromParent("robot", pose);
-	} 
-	catch (const RoboCompInnerModelManager::InnerModelManagerError &e)
-	{ std::cout << e << std::endl; }
+		RoboCompInnerModelManager::Pose3D p;
+		p.x=x; p.y=10; p.z=z;
+		p.rx=0;p.ry=alpha;p.rz=0;
+		innermodelmanager_proxy->setPoseFromParent("robotInitialPose",p);			;
+		differentialrobot_proxy->setOdometerPose(x,z,alpha);
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
+	{
+		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error sendong robot to intial position";
+		qFatal("Aborting");
+	}
+	usleep(500000);	
 }
 
 void SpecificWorker::cleanWorld()

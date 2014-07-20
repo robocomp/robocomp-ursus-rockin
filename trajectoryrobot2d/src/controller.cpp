@@ -56,6 +56,9 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		const float MAX_ADV_SPEED = 600;
 		const float MAX_ROT_SPEED = 0.7;
 		
+		/////////////////////////////////////////////////
+		//////   ROTATION SPEED
+		////////////////////////////////////////////////
 	
 		// VRot is computed as the sum of three terms: angle with tangent to road + atan(perp. distance to road) + road curvature
 		// as descirbed in Thrun's paper on DARPA challenge
@@ -69,20 +72,38 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
  		if( vrot < -MAX_ROT_SPEED ) 
  			vrot = -MAX_ROT_SPEED;
 		
-		// Factors to be used in speed control when approaching the end of the road
+		/////////////////////////////////////////////////
+		//////   ADVANCE SPEED
+		////////////////////////////////////////////////
+		
+		// Factor to be used in speed control when approaching the end of the road
 		float teta;
 		if( road.getRobotDistanceToTarget() < 700)
 			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./200,0.7, 0.1);
 		else
 			teta= 1;
 		
-		//VAdv is computed as a reduction of MAX_ADV_SPEED by two exponential functions: road curvature and VRot, and teta that applies when arriving at target
- 		vadvance = MAX_ADV_SPEED * exp(-fabs(2.1* road.getRoadCurvatureAtClosestPoint())) * exp(-fabs(vrot*1.3)) * teta;
+		//VAdv is computed as a reduction of MAX_ADV_SPEED by three functions: 
+		//				* road curvature reduces forward speed
+		//				* VRot reduces forward speed
+		//				* teta that applies when getting close to the target (1/roadGetCurvature)
+		
+		vadvance = MAX_ADV_SPEED * exp(-fabs(2.1* road.getRoadCurvatureAtClosestPoint())) * exponentialFunction(vrot, 1, 0.1) * teta;
 		
  		// Limiting filter
  		if( vadvance > MAX_ADV_SPEED ) 
  			vadvance = MAX_ADV_SPEED;
  		
+		/////////////////////////////////////////////////
+		//////  ULTIMATE COLLISION AVOIDANCE CONTROL
+		////////////////////////////////////////////////
+		
+		//The idea here is to turn away from obstacles or even stop if neccessary
+		
+		/////////////////////////////////////////////////
+		//////   EXECUTION
+		////////////////////////////////////////////////
+		
  		qDebug() << "Controller::update - VAdv = " << vadvance << " VRot = " << vrot << "teta" << teta << "atan term" << atan( road.getRobotPerpendicularDistanceToRoad() )*0.2;
  
    		try {	differentialrobot_proxy->setSpeedBase( vadvance, vrot);	} 
@@ -102,6 +123,15 @@ void Controller::stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx di
 	catch (const Ice::Exception &e) { std::cout << e << std::endl;}	
 }
 
+/**
+ * @brief ...
+ * 
+ * @param value quantity to be tranformed
+ * @param xValue for a point with xValue in X axis
+ * @param yValue we want an yValue in Y axis
+ * @param min ad if the result is less than min then the result is min
+ * @return float
+ */
 float Controller::exponentialFunction(float value, float xValue, float yValue, float min)
 {
 	Q_ASSERT( yValue>0 );

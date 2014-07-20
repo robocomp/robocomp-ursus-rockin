@@ -13,9 +13,6 @@
 			<mesh id="b" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Alicudi.3ds" rx="1.57" rz="-1.57" scale="1000,1000,1000"  />
 		</transform>-->
 		
-		<transform id="dinin_table_t" tx="6400" tz="-7700" ry="1.57">
-			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Table N250414.3DS" rx="1.57" rz="1.57" scale="20,20,25"  />
-		</transform>
 	
 		
 		<transform id="floor">
@@ -170,11 +167,35 @@
 				</transform>
 			</transform>
 			
+			
+			<!--<transform id="torchere_1_t" tx="500" tz="-5400">
+				<mesh id="torchere1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Torchere 2.3DS"  rx="1.57" rz="1.57"  scale="1,1,1"  />
+			</transform>
+			<transform id="torchere_2_t" tx="4200" tz="-8300">
+				<mesh id="torchere2" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Torchere 2.3DS"  rx="1.57" rz="1.57"  scale="1,1,1"  />
+			</transform>-->
+			<transform id="dinin_table_t" tx="6400" tz="-7700" ry="1.57">
+				<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,25"  />
+			</transform>
+			<transform id="k_t" tx="5600" tz="-4300" ty="0">
+				<mesh id="k" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/komplekt5.3DS" rx="1.57" scale="6.6,9,9"  />
+			</transform>
+
+			<transform id="sofa0_t" tx="1800" tz="-7600">
+				<mesh id="sofa0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="1.57"  scale="20,20,20"  />
+			</transform>
+			<transform id="sofa1_t" tx="1800" tz="-5200">
+				<mesh id="sofa1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="-1.57" scale="20,20,20"  />
+			</transform>
+			<transform id="sofaAA_t" tx="3100" tz="-6300" >
+				<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="8,6.5,9"  />
+			</transform>
+			
 		</transform>
 		
 		
 		<!-- Base		 -->
-		<transform id="initialRobotPose" tx="0" tz="0" >
+		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
 			<differentialrobot id="robot" port="10004" >
 
  				<translation id="laserPose" tx="0" ty="240" tz="100"> -->

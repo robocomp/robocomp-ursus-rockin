@@ -206,7 +206,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
  */
 bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
 {	
-	Q_ASSERT(road.size()>1);
+	Q_ASSERT(road.size()>1 and laserData.size() > 0);
 	
 	float maxAngle, minAngle;
 	if(laserData[0].angle > laserData.back().angle)

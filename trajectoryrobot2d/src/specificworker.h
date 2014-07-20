@@ -72,7 +72,7 @@ private:
 	void cleanWorld();
 	void moveBoxes();
 	void drawThinkingRobot(const QString &color);
-	void sendRobotHome();
+	void setRobotInitialPose(float x, float z, float alpha);
 };
 
 #endif

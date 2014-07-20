@@ -26,6 +26,24 @@
 <!-- 			<mesh id="dinin_table" file="/home/robocomp/robocomp/files/osgModels/basics/sphere.ive" ty="700" scale="200,200,200" /> -->
 		</transform>
 
+		<transform id="mesacentro_t" tx="-1500" tz="-1000">
+			<mesh id="mesacentro" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/mesa_centro_larga.osg"  rx="1.57" rz="1.57"  scale="110,140,150"  />
+			<plane id="carpet" ny="1" size="1800,2500,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/carpet.png" />
+		</transform>
+
+		<transform id="sofa0_t" tx="-1500" tz="-2000">
+			<mesh id="sofa0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="1.57"  scale="20,20,20"  />
+		</transform>
+		<transform id="sofa1_t" tx="1500" tz="1000">
+			<mesh id="sofa1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="-1.57" scale="20,20,20"  />
+		</transform>
+
+		<transform id="sofaAA_t" tx="3100" tz="-6300" >
+			<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="8,6.5,9"  />
+		</transform>
+
+		
+		
 		<!--
 		<plane id="wall1" pz="0" ny="z" py="0" px="1500" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
 		<plane id="wall11" pz="0" ny="z" py="0" px="1550" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
@@ -59,12 +77,12 @@
 						<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850"  />
 					</transform>	
 					
-<!--
+
 				<translation id="laserPose" tx="0" ty="240" tz="100"> 
   					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" /> 
   					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  
   				</translation>
--->
+
 		
 		
 				

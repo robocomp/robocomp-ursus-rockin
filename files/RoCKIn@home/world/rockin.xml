@@ -84,7 +84,7 @@
 		</transform>
 		
 		<transform id="dinin_table_t" tx="6400" tz="-7700" ry="1.57">
-			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Table N250414.3DS" rx="1.57" rz="1.57" scale="20,20,25"  />
+			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="20,20,25"  />
 		</transform>
 		
 		
@@ -245,8 +245,8 @@
 		
 		
 		<!-- Base		 -->
-		<transform id="initialRobotPose" tx="800" tz="-800" ry="-3.14">
-			<differentialrobot id="robot" port="10004" ty="10" >
+		<transform id="initialRobotPose" tx="0" tz="0" ry="-3.14" ty="10">
+			<differentialrobot id="robot" port="10004"  >
 
 				<translation id="laserPose" tx="0" ty="40" tz="100">
 					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" />

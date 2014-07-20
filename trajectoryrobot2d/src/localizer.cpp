@@ -19,30 +19,29 @@
 
 Localizer::Localizer(InnerModel *inner)
 {
-	
 	clonModel = new InnerModel( *inner );
 	recursiveIncludeMeshes( clonModel->getRoot(), "robot", false, robotNodes, restNodes);
 }
 
 void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inner)
 {
-	
 	QVec point = inner->transform("world","robot");
 	float alfa = inner->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
 	QVec angleList(1,0.f);
+	
 // 	for( int i=0; i<10; i++)
 // 	{
 // 		angleList[i] = laser[i].angle;
 // 	}
 	
 	renderLaser( point , alfa, angleList);
-	
 }
 
 void Localizer::renderLaser(const QVec &point, float alfa, const QVec &angleList)
 {
-	const float MAX_LENGTH_ALONG_RAY = 4000;    //GET FROM VISTUAL LASER ESPECIFICATION	
+	const float MAX_LENGTH_ALONG_RAY = 4000;    							//GET FROM VISTUAL LASER ESPECIFICATION	
 	RoboCompLaser::TLaserData virtualLaser(angleList.size());
+	
 	//move robot to position
 	clonModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, alfa, 0);
 
@@ -52,8 +51,7 @@ void Localizer::renderLaser(const QVec &point, float alfa, const QVec &angleList
 		
 	for(uint32_t i=0; i<angleList.size(); i++)
 	{
-		//Create laserLine as an FCL CollisionObject made of a long thin Triangle
-		fcl::Vec3f a(laser.x(), laser.y(), laser.z());		// peak of the triangle
+		//Create laserLine as an FCL CollisionObject made of a fcl::Box
 		int hitDistance = 0;
 		bool hit = false;
 		
@@ -62,13 +60,13 @@ void Localizer::renderLaser(const QVec &point, float alfa, const QVec &angleList
 			//stretch the stick
 			hitDistance += 10;
 			boost::shared_ptr<fcl::Box> laserBox( new fcl::Box( 5, 5, hitDistance));	
-			r1q = r1q * RMat::Rot3DOY(angleList[i]);
+			//r1q = r1q * RMat::Rot3DOY(angleList[i]);
 			fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 			fcl::CollisionObject laserBoxCol(laserBox, R1, T1);
 			
 			for (int32_t out=0; out<restNodes.size(); out++)
 			{
-// 				hit = clonModel->collide(restNodes[out], &laserBoxCol );
+ 				hit = clonModel->collide(restNodes[out], &laserBoxCol );
 			}
 		}
 		//fill the new laser

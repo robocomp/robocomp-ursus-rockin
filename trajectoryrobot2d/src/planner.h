@@ -51,6 +51,8 @@ public:
 	
 private:
 	InnerModel *innerModel;
+	std::vector<QString> robotNodes;
+	std::vector<QString> restNodes;
 	tree<QVec> *arbol, *arbolGoal, *aux;
 	tree<QVec>::pre_order_iterator CURRENT_LEAF, CURRENT_LEAF_GOAL;
 	QVec fsX, fsZ;
