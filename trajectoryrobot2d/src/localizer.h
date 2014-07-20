@@ -35,6 +35,8 @@
 typedef fcl::BVHModel<fcl::OBBRSS> FCLModel;
 typedef boost::shared_ptr<FCLModel> FCLModelPtr;
 
+#include <pointmatcher/PointMatcher.h>
+
 class Localizer : public QObject
 {
     Q_OBJECT
@@ -46,9 +48,18 @@ class Localizer : public QObject
 	private:
 		InnerModel *clonModel;
 		
-		void renderLaser(const QVec &point, float alfa, const QVec &listaAngles);
+		void laserRender(const QVec &point, float alfa, const QVec &listaAngles);
 		void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
+		void estimatePoseWithICP(const RoboCompLaser::TLaserData& laserData, const QVec& robotT, float ang);
 		std::vector<QString> restNodes;
 		std::vector<QString> robotNodes;
+		
+		//ICP
+		typedef PointMatcher<float> PM;
+		typedef PM::DataPoints DP;
+		typedef PM::Parameters Parameters;
+		Eigen::MatrixXf refM;
+		Eigen::MatrixXf dataM;
+		PM::ICP icp;
 };
 #endif // LOCALIZER_H

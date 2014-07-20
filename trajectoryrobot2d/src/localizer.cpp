@@ -21,6 +21,9 @@ Localizer::Localizer(InnerModel *inner)
 {
 	clonModel = new InnerModel( *inner );
 	recursiveIncludeMeshes( clonModel->getRoot(), "robot", false, robotNodes, restNodes);
+
+	icp.setDefault();
+	
 }
 
 void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inner)
@@ -34,10 +37,13 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 // 		angleList[i] = laser[i].angle;
 // 	}
 	
-	renderLaser( point , alfa, angleList);
+	//renderLaser( point , alfa, angleList);
+	
+	estimatePoseWithICP(laser, point, alfa);
+	
 }
 
-void Localizer::renderLaser(const QVec &point, float alfa, const QVec &angleList)
+void Localizer::laserRender(const QVec &point, float alfa, const QVec &angleList)
 {
 	const float MAX_LENGTH_ALONG_RAY = 4000;    							//GET FROM VISTUAL LASER ESPECIFICATION	
 	RoboCompLaser::TLaserData virtualLaser(angleList.size());
@@ -49,7 +55,7 @@ void Localizer::renderLaser(const QVec &point, float alfa, const QVec &angleList
 	QVec laser = clonModel->getTranslationVectorTo("world","laser");
 	fcl::Vec3f T1( laser(0), laser(1), laser(2) );
 		
-	for(uint32_t i=0; i<angleList.size(); i++)
+	for(uint i=0; i<angleList.size(); i++)
 	{
 		//Create laserLine as an FCL CollisionObject made of a fcl::Box
 		int hitDistance = 0;
@@ -64,7 +70,7 @@ void Localizer::renderLaser(const QVec &point, float alfa, const QVec &angleList
 			fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 			fcl::CollisionObject laserBoxCol(laserBox, R1, T1);
 			
-			for (int32_t out=0; out<restNodes.size(); out++)
+			for (uint out=0; out<restNodes.size(); out++)
 			{
  				hit = clonModel->collide(restNodes[out], &laserBoxCol );
 			}
@@ -114,3 +120,45 @@ void Localizer::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bo
 			fcl::Vec3f c(C.x(),C.y(),C.z());
 	*/		//boost::shared_ptr<fcl::TriangleP> laserTrg( new fcl::TriangleP( a, b, c));	
 	
+
+void Localizer::estimatePoseWithICP(const RoboCompLaser::TLaserData &laserData, const QVec &robotT, float ang)
+{
+	static bool firstTime = true;
+	float x,y;
+	
+	//CHECK IF SOME DISPLACEMENT HAS OCCURED
+	
+	refM.resize(3,laserData.size());
+	dataM.resize(3,laserData.size());
+	
+	for(uint i=0; i< laserData.size(); i++)
+	{
+		x = laserData[i].dist * sin( laserData[i].angle );
+		y = laserData[i].dist * cos( laserData[i].angle );
+		if (firstTime == true)
+		{
+			refM(0,i) = x;
+			refM(1,i) = y;
+			refM(2,1) = 1.f;
+			firstTime = false;
+		}
+		else
+		{
+			refM(0,i) = dataM(0,i);
+			refM(1,i) = dataM(1,i);
+		}
+		dataM(0,i) = x;
+		dataM(1,i) = y;
+		dataM(2,i) = 1.f;
+	}
+	const DP::Labels l;
+	const DP ref(refM, l);
+	const DP data(dataM, l);
+	// Compute the transformation to express data in ref
+	PM::TransformationParameters T = icp(data, ref);
+	std::cout << "Final transformation:" << std::endl << T << std::endl;
+	
+	//Now we compute the new pose to obtain an estimated bState.
+	
+	
+}

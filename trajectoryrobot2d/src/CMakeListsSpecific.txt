@@ -25,4 +25,4 @@ SET ( HEADERS
   localizer.h
 )
 
-SET (LIBS ${LIBS} -lfcl )
+SET (LIBS ${LIBS} -lfcl -lpointmatcher -lnabo -lboost_system  -lboost_filesystem -lrt)
