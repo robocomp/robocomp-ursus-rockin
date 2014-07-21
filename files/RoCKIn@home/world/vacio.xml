@@ -1,0 +1,27 @@
+<!-- Aqui hay bastantes modelos 3D bajo Creative Commons http://3dmodels.katorlegaz.com/ -->
+
+<innerModel>
+	<transform id="world">
+	
+		<plane id="floor" pz="0" ny="1" py="-10"  size="10000,10000,100" repeat="1" texture="#888888" />
+		<plane id="floorH" pz="0" ny="1" py="6000"  size="10000,10000,100" repeat="1" texture="#888888" />
+		
+		<plane id="ddR" nx="1"  px="3000" py="200" pz="0" size="10000,10000,100" texture="#ff0000" />
+		<plane id="ddL" nx="1" px="-1000" py="200" pz="0" size="10000,10000,100" texture="#ff0000" />	
+		<plane id="ddF" nz="1"  pz="2000" py="200" px="0" size="10000,10000,100" texture="#ff0000" />
+		<plane id="ddB" nz="1" pz="-4000" py="200" size="10000,10000,100" texture="#ff0000" />
+
+		<plane id="floordsdsd" pz="0" ny="1" py="-1000"  size="10000,10000,100" repeat="1" texture="#888888" />
+		
+		<!-- Base		 -->
+		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
+			<differentialrobot id="robot" port="10004">
+				<translation id="laserPose" tx="0" ty="240" tz="100"> 
+  					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" /> 
+ 				</translation>
+			</differentialrobot> <!--base -->
+		</transform>
+	</transform>
+	
+</innerModel>
+

@@ -29,8 +29,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 //	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 	//Move Robot to Hall
 	//setRobotInitialPose(800,-1000,M_PI);
@@ -71,33 +72,33 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 	
 	//Plan 
-	planner = new Planner(*innerModel);									
-
-	qDebug() << __FUNCTION__ << "Planning ...";
-	planner->computePath(target, innerModel);
-	if(planner->getPath().size() == 0)
-		qFatal("SpecificWorker: Path NOT found. Aborting");
-	
-	road.setInnerModel(innerModel);
-	road.readRoadFromList( planner->getPath() );
-	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
-	
-	road.print();
-	road.computeForces();
-	
-	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
-	elasticband = new ElasticBand(innerModel);	
-	qDebug() << __FUNCTION__ << "----- elasticband set";
-	
-	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
-	controller = new Controller(2);
-	qDebug() << __FUNCTION__ << "----- controller set";
-	
-
-	//Localizar class
-	localizer = new Localizer(innerModel);
-	
-	sleep(1);
+// 	planner = new Planner(*innerModel);									
+// 
+// 	qDebug() << __FUNCTION__ << "Planning ...";
+// 	planner->computePath(target, innerModel);
+// 	if(planner->getPath().size() == 0)
+// 		qFatal("SpecificWorker: Path NOT found. Aborting");
+// 	
+// 	road.setInnerModel(innerModel);
+// 	road.readRoadFromList( planner->getPath() );
+// 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
+// 	
+// 	road.print();
+// 	road.computeForces();
+// 	
+// 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
+// 	elasticband = new ElasticBand(innerModel);	
+// 	qDebug() << __FUNCTION__ << "----- elasticband set";
+// 	
+// 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
+// 	controller = new Controller(2);
+// 	qDebug() << __FUNCTION__ << "----- controller set";
+// 	
+// 
+// 	//Localizar class
+ 	localizer = new Localizer(innerModel);
+// 	
+// 	sleep(1);
 
 	//Clon para Luis
 // 	innerClon = new InnerModel(*innerModel);
