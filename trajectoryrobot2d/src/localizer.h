@@ -48,11 +48,13 @@ class Localizer : public QObject
 	private:
 		InnerModel *clonModel;
 		RoboCompLaser::TLaserData virtualLaser;
-		void laserRender(const QVec &point, float alfa, const QVec &angleList);
+		RoboCompLaser::TLaserData subsampledLaser;
+		void laserRender(const QVec &point, float alfa);
 		void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
 		void estimatePoseWithICP(const RoboCompLaser::TLaserData& laserData, const QVec& robotT, float ang);
 		std::vector<QString> restNodes;
 		std::vector<QString> robotNodes;
+		void localizeInMap();
 		
 		//ICP
 		typedef PointMatcher<float> PM;

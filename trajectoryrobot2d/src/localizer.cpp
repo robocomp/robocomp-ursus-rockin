@@ -22,10 +22,7 @@ Localizer::Localizer(InnerModel *inner)
 	clonModel = new InnerModel( *inner );
 	recursiveIncludeMeshes( clonModel->getRoot(), "robot", false, robotNodes, restNodes);
 
-	icp.setDefault();
-	
-	
-	
+	icp.setDefault();	
 }
 
 void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inner, int nLaserRays)
@@ -34,57 +31,69 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 	float alfa = inner->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
 	int step = floor(laser.size() / nLaserRays);
 	virtualLaser.resize(nLaserRays);
-	QVec angleList(nLaserRays,0.f);
+	subsampledLaser.resize(nLaserRays);
 	
  	for( int i=0, k=0; k<nLaserRays; i+=step, k++)
  	{
- 		angleList[k] = laser[i].angle;
+ 		virtualLaser[k].angle = laser[i].angle;
+		subsampledLaser[k].dist = laser[i].dist;
+		subsampledLaser[k].angle = laser[i].angle;
  	}
-
-	laserRender( point , alfa, angleList);
+		
+	laserRender( point , alfa);	
 	qDebug() << "VLaser:" ;
 	for (uint i=0; i<virtualLaser.size(); i++)
+	{
 		qDebug() << "	dist:" << virtualLaser[i].dist << "	angle" << virtualLaser[i].angle;
+		qDebug() << "	distD:" << subsampledLaser[i].dist << "	angleS" << subsampledLaser[i].angle;
+	}
 	//estimatePoseWithICP(laser, point, alfa);
+	
+	localizeInMap();
 	
 }
 
-void Localizer::laserRender(const QVec& point, float alfa, const QVec& angleList)
+void Localizer::laserRender(const QVec& point, float alfa)
 {
 	// TODO: GET FROM VISTUAL LASER SPECIFICATION	
 	const float MAX_LENGTH_ALONG_RAY = 4000;
+	
 	// Update robot's position
 	clonModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0., alfa, 0.);
+	
 	// Compute rotation matrix between laser and world
 	QMat r1q1 = clonModel->getRotationMatrixTo("world", "laser");
+	
 	// Create hitting appex
 	boost::shared_ptr<fcl::Box> laserBox(new fcl::Box(10, 10, 10));
 	fcl::CollisionObject laserBoxCol(laserBox);
 	
-	for (int i=0; i<angleList.size(); i++)
+	for (int i=0; i<virtualLaser.size(); i++)
 	{
 		bool hit = false;
 		//Rotation of appex
-		const QMat r1q = r1q1 * RMat::Rot3DOY(angleList[i]);
+		const QMat r1q = r1q1 * RMat::Rot3DOY(virtualLaser[i].angle);
 		const fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
+		
 		// Check collision at maximum distance
 		float hitDistance = MAX_LENGTH_ALONG_RAY;
 		laserBox->side = fcl::Vec3f(1, 1, hitDistance);
 		const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
 		laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+		
 		for (uint out=0; out<restNodes.size(); out++)
 		{
 			hit = clonModel->collide(restNodes[out], &laserBoxCol);
 			if (hit) break;
 		}
 		
+		//Binary search
 		if (hit)
 		{
 			hit = false;
 			float min=0;
 			float max=MAX_LENGTH_ALONG_RAY;
 
-			// Create laserLine as an FCL CollisionObject made of a fcl::Box
 			while (max-min>10)
 			{
 				// Stretch and create the stick
@@ -92,6 +101,7 @@ void Localizer::laserRender(const QVec& point, float alfa, const QVec& angleList
 				laserBox->side = fcl::Vec3f(1,1,hitDistance);
 				const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
 				laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+				
 				// Check collision using current ray length
 				for (uint out=0; out<restNodes.size(); out++)
 				{
@@ -114,7 +124,6 @@ void Localizer::laserRender(const QVec& point, float alfa, const QVec& angleList
 		}
 		// Fill the laser's structure
 		virtualLaser[i].dist = hitDistance;
-		virtualLaser[i].angle = angleList[i];
 	}
 }
 
@@ -198,3 +207,40 @@ void Localizer::estimatePoseWithICP(const RoboCompLaser::TLaserData &laserData, 
 	
 	
 }
+
+void Localizer::localizeInMap()
+{
+	float xV,yV,xR,yR;
+	
+	//CHECK IF SOME DISPLACEMENT HAS OCCURED
+	
+	refM.resize(3,virtualLaser.size());
+	dataM.resize(3,subsampledLaser.size());
+	
+	for(uint i=0; i<virtualLaser.size(); i++)
+	{
+		xV = virtualLaser[i].dist * sin( virtualLaser[i].angle );
+		yV = virtualLaser[i].dist * cos( virtualLaser[i].angle );
+		xR = subsampledLaser[i].dist * sin( subsampledLaser[i].angle);
+		yR = subsampledLaser[i].dist * cos( subsampledLaser[i].angle);
+		
+		refM(0,i) = xV;
+		refM(1,i) = yV;
+		refM(2,i) = 1.f;
+		dataM(0,i) = xR;
+		dataM(1,i) = yR;
+		dataM(2,i) = 1.f;
+	}
+	
+	const DP::Labels l;
+	const DP ref(refM, l);
+	const DP data(dataM, l);
+	// Compute the transformation to express data in ref
+	PM::TransformationParameters T = icp(data, ref);
+	std::cout << "Final transformation:" << std::endl << T << std::endl;
+	
+	//Now we compute the new pose to obtain an estimated bState.
+	
+	
+}
+
