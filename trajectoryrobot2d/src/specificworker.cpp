@@ -220,7 +220,7 @@ void SpecificWorker::compute( )
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	//qDebug() << QString::fromStdString(params["PointsFile"].value);
-	timer.start(40);
+	timer.start(20);
 	
 	return true;
 };
