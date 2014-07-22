@@ -43,7 +43,7 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 
 	laserRender( point , alfa, angleList);
 	qDebug() << "VLaser:" ;
-	for(int i=0; i<virtualLaser.size(); i++)
+	for (uint i=0; i<virtualLaser.size(); i++)
 		qDebug() << "	dist:" << virtualLaser[i].dist << "	angle" << virtualLaser[i].angle;
 	//estimatePoseWithICP(laser, point, alfa);
 	
@@ -53,39 +53,64 @@ void Localizer::laserRender(const QVec& point, float alfa, const QVec& angleList
 {
 	// TODO: GET FROM VISTUAL LASER SPECIFICATION	
 	const float MAX_LENGTH_ALONG_RAY = 4000;
-	
 	// Update robot's position
 	clonModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0., alfa, 0.);
 	// Compute rotation matrix between laser and world
 	QMat r1q1 = clonModel->getRotationMatrixTo("world", "laser");
-	
-	//Create hitting appex
+	// Create hitting appex
 	boost::shared_ptr<fcl::Box> laserBox(new fcl::Box(10, 10, 10));
 	fcl::CollisionObject laserBoxCol(laserBox);
 	
 	for (int i=0; i<angleList.size(); i++)
 	{
-		// Create laserLine as an FCL CollisionObject made of a fcl::Box
-		int hitDistance = 0;
 		bool hit = false;
 		//Rotation of appex
 		const QMat r1q = r1q1 * RMat::Rot3DOY(angleList[i]);
 		const fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
-		
-		while (hit==false and hitDistance<MAX_LENGTH_ALONG_RAY)
+		// Check collision at maximum distance
+		float hitDistance = MAX_LENGTH_ALONG_RAY;
+		laserBox->side = fcl::Vec3f(1, 1, hitDistance);
+		const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+		laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+		for (uint out=0; out<restNodes.size(); out++)
 		{
-			// Stretch and create the stick
-			hitDistance += 10;
-			laserBox->side = fcl::Vec3f(10,10,hitDistance);
-			const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
-			laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
-			
-			for (uint out=0; out<restNodes.size(); out++)
+			hit = clonModel->collide(restNodes[out], &laserBoxCol);
+			if (hit) break;
+		}
+		
+		if (hit)
+		{
+			hit = false;
+			float min=0;
+			float max=MAX_LENGTH_ALONG_RAY;
+
+			// Create laserLine as an FCL CollisionObject made of a fcl::Box
+			while (max-min>10)
 			{
- 				hit = clonModel->collide(restNodes[out], &laserBoxCol);
+				// Stretch and create the stick
+				hitDistance = (max+min)/2.;
+				laserBox->side = fcl::Vec3f(1,1,hitDistance);
+				const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+				laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+				// Check collision using current ray length
+				for (uint out=0; out<restNodes.size(); out++)
+				{
+					hit = clonModel->collide(restNodes[out], &laserBoxCol);
+					if (hit)
+						break;
+				}
+				// Manage next min-max range
 				if (hit)
-					break;
+				{
+					max = hitDistance;
+				}
+				else
+				{
+					min = hitDistance;
+				}
 			}
+			// Set final hit distance
+			hitDistance = (max+min)/2.;
 		}
 		// Fill the laser's structure
 		virtualLaser[i].dist = hitDistance;

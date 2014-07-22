@@ -153,7 +153,7 @@ void SpecificWorker::compute( )
 //  	computeLuis();
 //  	return;
 
-	static QTime reloj = QTime::currentTime();
+// 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
 	
 	try { differentialrobot_proxy->getBaseState(bState); }
@@ -162,7 +162,7 @@ void SpecificWorker::compute( )
 	catch(const Ice::Exception &ex) { cout << ex << endl; }
 		
 	//innerModel->update();
-	innerModel->updateTransformValues("robot",bState.x, 0, bState.z, 0, bState.alpha,0);
+	innerModel->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
 	//qDebug() << "bState" << bState.x << bState.z;
 // 	elasticband->update( road, laserData );
 // 	
@@ -209,7 +209,7 @@ void SpecificWorker::compute( )
 // 		}
 // 	}
 // 
-	localizer->localize( laserData, innerModel );
+	localizer->localize(laserData, innerModel);
 	
 	qDebug() << reloj2.elapsed() << "ms"; reloj2.restart();
 }
