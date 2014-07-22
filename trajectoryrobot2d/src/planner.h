@@ -46,7 +46,7 @@ public:
 	
 	//QVec tryBezierToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec>  *arbol , tree<QVec>::iterator & nodeCurrentPos);
 	
-	bool collisionDetector(const QVec position, const double alpha, InnerModel *im);
+	bool collisionDetector(const QVec &position, const QVec &rotation, InnerModel *im);
 	void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
 	
 private:

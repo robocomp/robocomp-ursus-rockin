@@ -29,10 +29,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel->transform("world","robot").print("Robot  in world");
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 	//Move Robot to Hall
 	//setRobotInitialPose(800,-1000,M_PI);
@@ -45,62 +44,51 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
-
-	innerModel->transform("world","robot").print("Robot  in world");	
-	qDebug() << "bState.x" << bState.x << "bState.z" << bState.z << "bState.alpha" << bState.alpha;
 	
-	//qFatal("fary");
-// 	cleanWorld();
+ 	cleanWorld();
 	
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
-// 	target = QVec::vec3(7000,10,-1500);	// dormitorio
+ 	target = QVec::vec3(7000,10,-1500);	// dormitorio
 //	target = QVec::vec3(6000,10,-9100);   //detrás de la mesa
-//	target = QVec::vec3(3000,10,-8100);   //detrás del sofá
-	
-
+//	target = QVec::vec3(3000,10,-8100);   //detrás del sofá	
 //	target = QVec::vec3(0,22,3000);
+	
 	//OJO CHANGE chooseRandomPointInFreeSpace to PLAN IN APARTMENT
 	
 	//Draw target as red box	
-// 	RoboCompInnerModelManager::Plane3D plane;
-// 	plane.px = target.x();
-// 	plane.py = 10;
-// 	plane.pz = target.z();
-// 	plane.nx = 1;
-// 	plane.texture = "#990000";
-// 	plane.thickness = 150;
-// 	plane.height = plane.width = 100;
-// 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
-// 	
-	//Plan 
-// 	planner = new Planner(*innerModel);									
-// 
-// 	qDebug() << __FUNCTION__ << "Planning ...";
-// 	planner->computePath(target, innerModel);
-// 	if(planner->getPath().size() == 0)
-// 		qFatal("SpecificWorker: Path NOT found. Aborting");
-// 	
-// 	road.setInnerModel(innerModel);
-// 	road.readRoadFromList( planner->getPath() );
-// 	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
-// 	
-// 	road.print();
-// 	road.computeForces();
-// 	
-// 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
-// 	elasticband = new ElasticBand(innerModel);	
-// 	qDebug() << __FUNCTION__ << "----- elasticband set";
-// 	
-// 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
-// 	controller = new Controller(2);
-// 	qDebug() << __FUNCTION__ << "----- controller set";
-// 	
-// 
+	RoboCompInnerModelManager::Plane3D plane;
+	plane.px = target.x();	plane.py = 10; plane.pz = target.z();
+	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 150;
+	plane.height = plane.width = 100;
+	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+	 
+	//Planning
+	planner = new Planner(*innerModel);									
+	qDebug() << __FUNCTION__ << "Planning ...";
+	planner->computePath(target, innerModel);
+	if(planner->getPath().size() == 0)
+		qFatal("SpecificWorker: Path NOT found. Aborting");
+	
+	//Init road
+	road.setInnerModel(innerModel);
+	road.readRoadFromList( planner->getPath() );
+	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
+	road.print();
+	road.computeForces();
+	
+	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
+	elasticband = new ElasticBand(innerModel);	
+	qDebug() << __FUNCTION__ << "----- elasticband set";
+	
+	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
+	controller = new Controller(2);
+	qDebug() << __FUNCTION__ << "----- controller set";
+	
 // 	//Localizar class
- 	localizer = new Localizer(innerModel);
+// 	localizer = new Localizer(innerModel);
 // 	
-// 	sleep(1);
+ 	sleep(1);
 
 	//Clon para Luis
 //	innerClon = new InnerModel(*innerModel);
@@ -155,7 +143,7 @@ void SpecificWorker::compute( )
 //  	computeLuis();
 //  	return;
 
-// 	static QTime reloj = QTime::currentTime();
+ 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
 	
 	try { differentialrobot_proxy->getBaseState(bState); }
@@ -166,52 +154,51 @@ void SpecificWorker::compute( )
 	//innerModel->update();
 	innerModel->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
 	//qDebug() << "bState" << bState.x << bState.z;
-// 	elasticband->update( road, laserData );
-// 	
-// 	road.computeForces();
-// 
-// 	road.printRobotState( innerModel);
-// 
-// 	controller->update(differentialrobot_proxy, road);
-// 			
-// 	if(reloj.elapsed() > 2000) 
-// 	{
-// 		road.draw(innermodelmanager_proxy, innerModel);	
-// 		reloj.restart();
-// 	}
-// 	
-// 	if (road.isFinished() == true)
-// 	{
-// 		RoboCompInnerModelManager::Plane3D plane;
-// 		plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
-// 		plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
-// 		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
-// 		qFatal("GOODBYE, FINISHED ROAD");
-// 	}
-// 	
-// 	if(road.requiresReplanning == true)
-// 	{
-// 		qDebug("STUCK, PLANNING REQUIRED");
-// 		qDebug("Planning ...");
-// 		innerModel->update();
-// 		bool havePlan = planner->computePath(target, innerModel);
-// 	
-// 		if(havePlan == false or planner->getPath().size() == 0)
-// 			qFatal("NO PLAN AVAILABLE");
-// 		else
-// 		{
-// 			//drawThinkingRobot("green");
-// 			//road.readRoadFromList( planner->getPath() );
-// 			road.clear();
-// 			road.readRoadFromList( planner->getPath() );
-// 			road.requiresReplanning = false;
-// 			//elasticband->addPoints(road);  //SEND THIS TO A RESET
-// 			//elasticband->adjustPoints(road);  //SEND THIS TO A RESET
-// 			road.computeDistancesToNext();
-// 		}
-// 	}
-// 
-	localizer->localize(laserData, innerModel, 100);
+	elasticband->update( road, laserData );
+	
+	road.computeForces();
+
+	road.printRobotState( innerModel);
+
+	controller->update(differentialrobot_proxy, road);
+			
+	if(reloj.elapsed() > 2000) 
+	{
+		road.draw(innermodelmanager_proxy, innerModel);	
+		reloj.restart();
+	}
+	
+	if (road.isFinished() == true)
+	{
+		RoboCompInnerModelManager::Plane3D plane;
+		plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
+		plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
+		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+		qFatal("GOODBYE, FINISHED ROAD");
+	}
+	
+	if(road.requiresReplanning == true)
+	{
+		qDebug("STUCK, PLANNING REQUIRED");
+		qDebug("Planning ...");
+		innerModel->update();
+		bool havePlan = planner->computePath(target, innerModel);
+	
+		if(havePlan == false or planner->getPath().size() == 0)
+			qFatal("NO PLAN AVAILABLE");
+		else
+		{
+			//drawThinkingRobot("green");
+			//road.readRoadFromList( planner->getPath() );
+			road.clear();
+			road.readRoadFromList( planner->getPath() );
+			road.requiresReplanning = false;
+			//elasticband->addPoints(road);  //SEND THIS TO A RESET
+			//elasticband->adjustPoints(road);  //SEND THIS TO A RESET
+			road.computeDistancesToNext();
+		}
+	}
+	//localizer->localize(laserData, innerModel, 100);
 	
 	qDebug() << reloj2.elapsed() << "ms"; reloj2.restart();
 }
