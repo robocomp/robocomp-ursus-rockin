@@ -246,12 +246,12 @@ void Localizer::localizeInMapWithICP()
 	
 	//Now we compute the new pose to obtain an estimated bState.
 	
-	DP data_out(data);
-	icp.transformations.apply(data_out, T);
-	ref.save("test_ref.vtk");
-	data.save("test_data_in.vtk");
-	data_out.save("test_data_out.vtk");
-	
-	qFatal("fary");
+// 	DP data_out(data);
+// 	icp.transformations.apply(data_out, T);
+// 	ref.save("test_ref.vtk");
+// 	data.save("test_data_in.vtk");
+// 	data_out.save("test_data_out.vtk");
+// 	
+// 	qFatal("fary");
 }
 
