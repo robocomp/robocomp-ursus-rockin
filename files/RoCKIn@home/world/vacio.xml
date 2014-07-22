@@ -3,24 +3,35 @@
 <innerModel>
 	<transform id="world">
 	
-		<plane id="floor" pz="0" ny="1" py="-10"  size="10000,10000,100" repeat="1" texture="#888888" />
-		<plane id="floorH" pz="0" ny="1" py="6000"  size="10000,10000,100" repeat="1" texture="#888888" />
-		
-		<plane id="ddR" nx="1"  px="3000" py="200" pz="0" size="10000,10000,100" texture="#ff0000" />
-		<plane id="ddL" nx="1" px="-1000" py="200" pz="0" size="10000,10000,100" texture="#ff0000" />	
-		<plane id="ddF" nz="1"  pz="2000" py="200" px="0" size="10000,10000,100" texture="#ff0000" />
-		<plane id="ddB" nz="1" pz="-4000" py="200" size="10000,10000,100" texture="#ff0000" />
+		<plane id="floor" ny="1" py="-100" size="10000,10000,10" repeat="1" texture="#888888" />
+	
+		<plane id="ddB"   nz="1"  pz="-1000" py="1000" size="10000,2000,10" texture="#ff0000" />
+		<plane id="ddR"   nx="1"  px="+2000" py="1000" size="10000,2000,10" texture="#ff0000" />
+		<plane id="ddF"   nz="1"  pz="+3000" py="1000" size="10000,2000,10" texture="#ff0000" />
+		<plane id="ddL"   nx="1"  px="-4000" py="1000" size="10000,2000,10" texture="#ff0000" />	
 
-		<plane id="floordsdsd" pz="0" ny="1" py="-1000"  size="10000,10000,100" repeat="1" texture="#888888" />
-		
-		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
 			<differentialrobot id="robot" port="10004">
+				<transform  id="base_trans" >
+					<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.ive"  tx="0" ty="0" tz="0" scale="1000"  />
+					<transform id="base_body" rx="-1.5707963267948966" ty="0" tz="-100" >
+						<mesh id="barrahombro" file="/home/robocomp/robocomp/files/osgModels/robexarm/barrahombro.3ds" tx="-150" ty="0" tz="945" ry="-1.5707963267948966" scale="1000"  />
+						<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850"  />
+					</transform>	
+					
+
 				<translation id="laserPose" tx="0" ty="240" tz="100"> 
   					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" /> 
- 				</translation>
+  					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" />  
+  				</translation>
+
+		
+		
+				
+				</transform> <!-- cambiocoordenadas -->
 			</differentialrobot> <!--base -->
 		</transform>
+
 	</transform>
 	
 </innerModel>

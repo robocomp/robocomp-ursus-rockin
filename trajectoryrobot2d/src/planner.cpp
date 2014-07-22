@@ -378,7 +378,7 @@ void Planner::smoothPathStochastic(QList< QVec >& list)
 QVec Planner::sampleFreeSpaceR2(const QVec &currentTarget,  InnerModel *inner)
 {
 	const float widthX = 10000;
-	const float widthZ = 10000;
+// 	const float widthZ = 10000;
 	bool collision = true;
 	float range = widthX / RAND_MAX;
 	QVec p(3,0.f);

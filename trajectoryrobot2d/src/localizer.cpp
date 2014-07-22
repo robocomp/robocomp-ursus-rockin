@@ -46,59 +46,44 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 
 void Localizer::laserRender(const QVec &point, float alfa, const QVec &angleList)
 {
-	const float MAX_LENGTH_ALONG_RAY = 40000;    							//GET FROM VISTUAL LASER ESPECIFICATION	
+	// TODO: GET FROM VISTUAL LASER SPECIFICATION	
+	const float MAX_LENGTH_ALONG_RAY = 50000;
 	RoboCompLaser::TLaserData virtualLaser(angleList.size());
-	
-	//move robot to position
-	clonModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, alfa, 0);
 
-	//QMat r1q = clonModel->getRotationMatrixTo("world", "laser") ;	
-	QMat r1q = QMat::identity(3);
-	
-	QVec laser = clonModel->getTranslationVectorTo("world","laser").fromHomogeneousCoordinates();
-	laser.print("laser en clon");
-	fcl::Vec3f T1( laser(0), laser(1), laser(2) );
-		
-	for(uint i=0; i<angleList.size(); i++)
+	// Update robot's position
+	clonModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0., alfa, 0.);
+
+	QMat r1q1 = clonModel->getRotationMatrixTo("world", "laser");
+
+	for (int i=0; i<angleList.size(); i++)
 	{
-		//Create laserLine as an FCL CollisionObject made of a fcl::Box
+		// Create laserLine as an FCL CollisionObject made of a fcl::Box
 		int hitDistance = 0;
 		bool hit = false;
 		
-		while( (hit == false ) and (hitDistance < MAX_LENGTH_ALONG_RAY))
+		const QMat r1q = r1q1 * RMat::Rot3DOY(angleList[i]);
+		const fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
+
+		while (hit==false and hitDistance<MAX_LENGTH_ALONG_RAY)
 		{
-			//stretch the stick
-			hitDistance += 1000;
-			boost::shared_ptr<fcl::Box> laserBox( new fcl::Box(5,5,5));
-			//laserBox->side = fcl::Vec3f(5,5,hitDistance);
-			laserBox->computeLocalAABB();
-			//r1q = r1q * RMat::Rot3DOY(angleList[i]);
-			fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
-			
-			//fcl::Vec3f T2( T(0), T(1), T(2) + hitDistance/2);
-			fcl::Vec3f T2(0,0,hitDistance/2);
-			
+			// Stretch and create the stick
+			hitDistance += 10;
+			boost::shared_ptr<fcl::Box> laserBox(new fcl::Box(10, 10, hitDistance));
 			fcl::CollisionObject laserBoxCol(laserBox);
+
+			const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+			laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 			
-			fcl::AABB aabb = laserBoxCol.getAABB();
-			qDebug() << aabb.center()[0] << aabb.center()[1] << aabb.center()[2];
-			qDebug() << aabb.width()  << aabb.height() << aabb.depth();
-			
-			fcl::CollisionRequest request;
-			fcl::CollisionResult result;
-			boost::shared_ptr<fcl::Box> laserBox2( new fcl::Box(5,5,5));
-			fcl::CollisionObject laserBoxCol2(laserBox2, fcl::Vec3f(0,0,6));
-		
-			fcl::collide(&laserBoxCol2, &laserBoxCol, request, result);
-			if( result.isCollision() )
-				qFatal("Fary");
-			
-// 			for (uint out=0; out<restNodes.size(); out++)
-// 			{
-//  				hit = clonModel->collide(restNodes[out], &laserBoxCol );
-// 			}
+			for (uint out=0; out<restNodes.size(); out++)
+			{
+ 				hit = clonModel->collide(restNodes[out], &laserBoxCol);
+				if (hit)
+				{
+					break;
+				}
+			}
 		}
-		//fill the new laser
+		// Fill the laser's structure
 		virtualLaser[i].dist = hitDistance;
 		virtualLaser[i].angle = angleList[i];
 		qDebug() << "VLaser:" << virtualLaser[0].dist << virtualLaser[0].angle;

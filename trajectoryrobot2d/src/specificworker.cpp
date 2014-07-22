@@ -29,9 +29,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
-//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 	//Move Robot to Hall
 	//setRobotInitialPose(800,-1000,M_PI);
@@ -52,7 +52,7 @@ innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-r
 	
 	//Set target
 	//target = QVec::vec3(8000,10,-1000);
-	target = QVec::vec3(7000,10,-1500);	// dormitorio
+// 	target = QVec::vec3(7000,10,-1500);	// dormitorio
 //	target = QVec::vec3(6000,10,-9100);   //detrás de la mesa
 //	target = QVec::vec3(3000,10,-8100);   //detrás del sofá
 	
@@ -61,16 +61,16 @@ innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-r
 	//OJO CHANGE chooseRandomPointInFreeSpace to PLAN IN APARTMENT
 	
 	//Draw target as red box	
-	RoboCompInnerModelManager::Plane3D plane;
-	plane.px = target.x();
-	plane.py = 10;
-	plane.pz = target.z();
-	plane.nx = 1;
-	plane.texture = "#990000";
-	plane.thickness = 150;
-	plane.height = plane.width = 100;
-	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
-	
+// 	RoboCompInnerModelManager::Plane3D plane;
+// 	plane.px = target.x();
+// 	plane.py = 10;
+// 	plane.pz = target.z();
+// 	plane.nx = 1;
+// 	plane.texture = "#990000";
+// 	plane.thickness = 150;
+// 	plane.height = plane.width = 100;
+// 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+// 	
 	//Plan 
 // 	planner = new Planner(*innerModel);									
 // 
@@ -101,7 +101,7 @@ innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-r
 // 	sleep(1);
 
 	//Clon para Luis
-// 	innerClon = new InnerModel(*innerModel);
+	innerClon = new InnerModel(*innerModel);
 }
 
 /**
@@ -162,7 +162,7 @@ void SpecificWorker::compute( )
 	catch(const Ice::Exception &ex) { cout << ex << endl; }
 		
 	//innerModel->update();
-	innerModel->updateTransformValues("robot",bState.x, 10, bState.z, 0, bState.alpha,0);
+	innerModel->updateTransformValues("robot",bState.x, 0, bState.z, 0, bState.alpha,0);
 	//qDebug() << "bState" << bState.x << bState.z;
 // 	elasticband->update( road, laserData );
 // 	
@@ -233,7 +233,7 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 		RoboCompInnerModelManager::Pose3D p;
 		p.x=x; p.y=10; p.z=z;
 		p.rx=0;p.ry=alpha;p.rz=0;
-		innermodelmanager_proxy->setPoseFromParent("robotInitialPose",p);			;
+		innermodelmanager_proxy->setPoseFromParent("robotInitialPose",p);
 		differentialrobot_proxy->setOdometerPose(x,z,alpha);
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
