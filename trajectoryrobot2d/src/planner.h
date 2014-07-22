@@ -63,6 +63,7 @@ private:
 	int MAX_ITER;
 	QList<QVec> currentPath, currentSmoothedPath, currentAdaptiveSmoothedPath;
 	QVec trySegmentToTarget(const QVec & origin, const QVec & target, bool & reachEnd, tree<QVec>  *arbol, tree<QVec>::iterator & nodeCurrentPos);
+	QVec trySegmentToTargetBinarySearch(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec> * arbol , tree<QVec>::iterator & nodeCurrentPos);
 	QList<QVec> recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal);
 	bool isThereAnObstacleAtPosition(const QVec & pCenter, float rX, float rZ);
 

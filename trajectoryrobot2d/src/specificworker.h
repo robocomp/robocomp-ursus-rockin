@@ -71,7 +71,6 @@ private:
 	void readRoadFromFile(string name, WayPoints *road);
 	void cleanWorld();
 	void moveBoxes();
-	void drawThinkingRobot(const QString &color);
 	void setRobotInitialPose(float x, float z, float alpha);
 };
 

@@ -33,13 +33,17 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 	virtualLaser.resize(nLaserRays);
 	subsampledLaser.resize(nLaserRays);
 	
+	qDebug() << laser[0].angle << laser[laser.size()-1].angle << step;
+	
  	for( int i=0, k=0; k<nLaserRays; i+=step, k++)
  	{
  		virtualLaser[k].angle = laser[i].angle;
 		subsampledLaser[k].dist = laser[i].dist;
 		subsampledLaser[k].angle = laser[i].angle;
  	}
-		
+	
+	inner->transform("world", "robot").print("laser");
+	
 	laserRender( point , alfa);	
 	qDebug() << "VLaser:" ;
 	for (uint i=0; i<virtualLaser.size(); i++)
@@ -49,7 +53,7 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 	}
 	//estimatePoseWithICP(laser, point, alfa);
 	
-	localizeInMap();
+	localizeInMapWithICP();
 	
 }
 
@@ -59,7 +63,8 @@ void Localizer::laserRender(const QVec& point, float alfa)
 	const float MAX_LENGTH_ALONG_RAY = 4000;
 	
 	// Update robot's position
-	clonModel->updateTransformValues("robot", point.x(), point.y(), point.z(), 0., alfa, 0.);
+	clonModel->updateTransformValues("robot", point.x(), 0, point.z(), 0., alfa, 0.);
+	clonModel->transform("world", "robot").print("laserclon");
 	
 	// Compute rotation matrix between laser and world
 	QMat r1q1 = clonModel->getRotationMatrixTo("world", "laser");
@@ -208,7 +213,7 @@ void Localizer::estimatePoseWithICP(const RoboCompLaser::TLaserData &laserData, 
 	
 }
 
-void Localizer::localizeInMap()
+void Localizer::localizeInMapWithICP()
 {
 	float xV,yV,xR,yR;
 	
@@ -241,6 +246,12 @@ void Localizer::localizeInMap()
 	
 	//Now we compute the new pose to obtain an estimated bState.
 	
+	DP data_out(data);
+	icp.transformations.apply(data_out, T);
+	ref.save("test_ref.vtk");
+	data.save("test_data_in.vtk");
+	data_out.save("test_data_out.vtk");
 	
+	qFatal("fary");
 }
 

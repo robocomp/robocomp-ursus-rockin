@@ -32,6 +32,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel->transform("world","robot").print("Robot  in world");
 
 	//Move Robot to Hall
 	//setRobotInitialPose(800,-1000,M_PI);
@@ -44,9 +45,10 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
-	
-	innerModel->transform("world","robot").print("Robot  in world");
+
+	innerModel->transform("world","robot").print("Robot  in world");	
 	qDebug() << "bState.x" << bState.x << "bState.z" << bState.z << "bState.alpha" << bState.alpha;
+	
 	//qFatal("fary");
 // 	cleanWorld();
 	
@@ -101,7 +103,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 // 	sleep(1);
 
 	//Clon para Luis
-	innerClon = new InnerModel(*innerModel);
+//	innerClon = new InnerModel(*innerModel);
 }
 
 /**
@@ -126,7 +128,7 @@ void SpecificWorker::computeLuis( )
 	catch(const Ice::Exception &ex) { cout << ex << endl; }
 
 
-	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
+	innerModel->updateTranslationValues("robot", bState.x, 10, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
 
 	QVec point = innerModel->transform("world", "robot");
@@ -209,7 +211,7 @@ void SpecificWorker::compute( )
 // 		}
 // 	}
 // 
-	localizer->localize(laserData, innerModel);
+	localizer->localize(laserData, innerModel, 100);
 	
 	qDebug() << reloj2.elapsed() << "ms"; reloj2.restart();
 }
@@ -260,25 +262,4 @@ void SpecificWorker::cleanWorld()
 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i)));
 		RcisDraw::removeObject(innermodelmanager_proxy, QString("t_" + QString::number(i)));
 	}
-}
-
-void SpecificWorker::drawThinkingRobot(const QString &color)
-{
-	RoboCompInnerModelManager::Plane3D p;
-	p.px = 0;
-	p.py = 10;
-	p.pz = -200;
-	p.nx = 0;
-	p.ny = 1;
-	p.nz = 0;
-	p.height = 250;
-	p.width = 250;
-	p.thickness = 20;
-	if(color == "red")
-		p.texture = "#FF0000";
-	else if (color == "green")
-		p.texture = "#00FF00";
-		
-	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "redHat", "base",p);
-	
 }

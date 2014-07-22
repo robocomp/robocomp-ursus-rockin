@@ -479,7 +479,7 @@ void Planner::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 }
 
 ////////////////////////////////////////////////////////////////////////
-/// LOCAL CONTROLLER. Also a lot of improvements fit here
+/// LOCAL CONTROLLER. Also a lot of improvements fit here    												USE BINARY SEARCH!!!!!!!!!!!!!!!!!!!
 ////////////////////////////////////////////////////////////////////////
 
 
@@ -535,6 +535,87 @@ QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool
 	}
 	reachEnd= true;
 	return target;
+}
+
+/**
+ * @brief Version using binary search
+ * 
+ * @param origin ...
+ * @param target ...
+ * @param reachEnd ...
+ * @param arbol ...
+ * @param nodeCurrentPos ...
+ * @return RMat::QVec
+ */
+QVec Planner::trySegmentToTargetBinarySearch(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec> * arbol , tree<QVec>::iterator & nodeCurrentPos)
+{
+	const float MAX_LENGTH_ALONG_RAY = 10000;
+	bool hit = false;
+
+	// Update robot's position and align it so it looks at the TARGET point   OJO METER ALPHA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	innerModel->updateTransformValues("robot", origin.x(), origin.y(), origin.z(), 0., 0, 0.);
+	//innerModel->transform("world", "robot").print("laserclon");
+	
+	// Compute rotation matrix between laser and world
+	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");
+	
+	// Create a tall box for robot body with center at zero and sides:
+	boost::shared_ptr<fcl::Box> robotBox(new fcl::Box(60, 160, 60));
+	// Create a collision object
+	fcl::CollisionObject robotBoxCol(robotBox);
+	//Create and fcl rotation matrix to orient the box with the robot
+	const fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
+		
+	//Check collision at maximum distance
+	float hitDistance = MAX_LENGTH_ALONG_RAY;
+	//Resize big box to enlarge it along the ray direction
+	robotBox->side = fcl::Vec3f(60, 160, hitDistance);
+	//Compute the coord of the tip of a "nose" going away from the robot (Z dir) up to hitDistance/2
+	const QVec boxBack = innerModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "robot");
+	//move the big box so it is aligned with the robot and placed along the nose
+	robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+		
+	for (uint out=0; out<restNodes.size(); out++)
+	{
+		hit = innerModel->collide(restNodes[out], &robotBoxCol);
+		if (hit) break;
+	}	
+	//Binary search
+	if (hit)
+	{
+		hit = false;
+		float min=0;
+		float max=MAX_LENGTH_ALONG_RAY;
+		while (max-min>10)
+		{
+			// Stretch and create the stick
+			hitDistance = (max+min)/2.;
+			robotBox->side = fcl::Vec3f(1,1,hitDistance);
+			const QVec boxBack = innerModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+			robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+			
+			// Check collision using current ray length
+			for (uint out=0; out<restNodes.size(); out++)
+			{
+				hit = innerModel->collide(restNodes[out], &robotBoxCol);
+				if (hit)
+					break;
+			}
+			// Manage next min-max range
+			if (hit)
+			{
+				max = hitDistance;
+			}
+			else
+			{
+				min = hitDistance;
+			}
+		}
+		// Set final hit distance
+		hitDistance = (max+min)/2.;
+	}
+	// Now we should return the point in space corresponding to hitDistance
+	// also we need to insert a few nodes in the tree covering from origin to hitDistance
 }
 
 //////////////////////////////////////////////

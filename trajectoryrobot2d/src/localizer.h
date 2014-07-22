@@ -54,7 +54,7 @@ class Localizer : public QObject
 		void estimatePoseWithICP(const RoboCompLaser::TLaserData& laserData, const QVec& robotT, float ang);
 		std::vector<QString> restNodes;
 		std::vector<QString> robotNodes;
-		void localizeInMap();
+		void localizeInMapWithICP();
 		
 		//ICP
 		typedef PointMatcher<float> PM;
