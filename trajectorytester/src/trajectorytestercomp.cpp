@@ -76,14 +76,11 @@
 #include "specificworker.h"
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
-#include <trajectoryrobot2dI.h>
 
 // Includes for remote proxy example
 // #include <Remote.h>
 #include <ui_guiDlg.h>
-#include <Laser.h>
-#include <InnerModelManager.h>
-#include <DifferentialRobot.h>
+#include <TrajectoryRobot2D.h>
 
 
 // User includes here
@@ -92,12 +89,9 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 using namespace RoboCompTrajectoryRobot2D;
-using namespace RoboCompLaser;
-using namespace RoboCompInnerModelManager;
-using namespace RoboCompDifferentialRobot;
 
 
-class TrajectoryRobot2DComp : public RoboComp::Application
+class TrajectoryTesterComp : public RoboComp::Application
 {
 private:
 	// User private data here
@@ -109,14 +103,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void TrajectoryRobot2DComp::initialize()
+void TrajectoryTesterComp::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int TrajectoryRobot2DComp::run(int argc, char* argv[])
+int TrajectoryTesterComp::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -127,9 +121,7 @@ int TrajectoryRobot2DComp::run(int argc, char* argv[])
 
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
-	LaserPrx laser_proxy;
-InnerModelManagerPrx innermodelmanager_proxy;
-DifferentialRobotPrx differentialrobot_proxy;
+	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
 
 
 	string proxy;
@@ -160,37 +152,15 @@ DifferentialRobotPrx differentialrobot_proxy;
 	//Remote server proxy creation example
 	try
 	{
-		laser_proxy = LaserPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("LaserProxy") ) );
+		trajectoryrobot2d_proxy = TrajectoryRobot2DPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("TrajectoryRobot2DProxy") ) );
 	}
 	catch(const Ice::Exception& ex)
 	{
 		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
 		return EXIT_FAILURE;
 	}
-	rInfo("LaserProxy initialized Ok!");
-	mprx["LaserProxy"] = (::IceProxy::Ice::Object*)(&laser_proxy);//Remote server proxy creation example
-	try
-	{
-		innermodelmanager_proxy = InnerModelManagerPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("InnerModelManagerProxy") ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("InnerModelManagerProxy initialized Ok!");
-	mprx["InnerModelManagerProxy"] = (::IceProxy::Ice::Object*)(&innermodelmanager_proxy);//Remote server proxy creation example
-	try
-	{
-		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("DifferentialRobotProxy") ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("DifferentialRobotProxy initialized Ok!");
-	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);
+	rInfo("TrajectoryRobot2DProxy initialized Ok!");
+	mprx["TrajectoryRobot2DProxy"] = (::IceProxy::Ice::Object*)(&trajectoryrobot2d_proxy);
 	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
@@ -209,11 +179,6 @@ DifferentialRobotPrx differentialrobot_proxy;
 		adapterCommonBehavior->add(commonbehaviorI, communicator()->stringToIdentity("commonbehavior"));
 		adapterCommonBehavior->activate();
 		// Server adapter creation and publication
-		Ice::ObjectAdapterPtr adapterTrajectoryRobot2D = communicator()->createObjectAdapter("TrajectoryRobot2DComp");
-		TrajectoryRobot2DI *trajectoryrobot2d = new TrajectoryRobot2DI(worker);
-		adapterTrajectoryRobot2D->add(trajectoryrobot2d, communicator()->stringToIdentity("trajectoryrobot2d"));
-
-		adapterTrajectoryRobot2D->activate();
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )
@@ -246,7 +211,7 @@ int main(int argc, char* argv[])
 {
 	bool hasConfig = false;
 	string arg;
-	TrajectoryRobot2DComp app;
+	TrajectoryTesterComp app;
 
 	// Search in argument list for --Ice.Config= argument
 	for (int i = 1; i < argc; ++i)

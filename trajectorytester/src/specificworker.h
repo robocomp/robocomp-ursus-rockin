@@ -20,21 +20,9 @@
 #define SPECIFICWORKER_H
 
 #include <genericworker.h>
-#include <iostream>
-#include <fstream>
-//#include <boost/concept_check.hpp>
-//#include "pointstoroad.h"
-#include "controller.h"
-#include "elasticband.h"
-#include "waypoints.h"
-#include "planner.h"
-#include "forcefield.h"
-#include "localizer.h"
-
-//#include "ParabolicPathSmooth/smoother.h"
 
 /**
-       \brief Algorithm to control de robot along a trajectory defined by a set of points
+       \brief
        @author authorname
 */
 
@@ -42,37 +30,12 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx, QWidget *parent = 0);
+	SpecificWorker(MapPrx& mprx, QObject *parent = 0);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	void  go(const TargetPose& target){};
-	
+
 public slots:
  	void compute(); 	
-	void computeLuis( );
-	
-private:
-	RoboCompDifferentialRobot::TBaseState bState;
-	TLaserData datos;
-	RoboCompCommonBehavior::ParameterList params;
-	InnerModel *innerModel, *innerClon;
-	RoboCompLaser::TLaserData laserData;
-	QVec target;
- 	
-	QVec P;
-	WayPoints road;
-	Controller *controller;
-	ElasticBand *elasticband;
-	Planner *planner;
-	ForceField *forcefield;
-	Localizer *localizer;
-	
-	//Smoother smoother;
-	
-	void readRoadFromFile(string name, WayPoints *road);
-	void cleanWorld();
-	void moveBoxes();
-	void setRobotInitialPose(float x, float z, float alpha);
 };
 
 #endif

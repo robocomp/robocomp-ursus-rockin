@@ -3,6 +3,7 @@
 #
 # This property is used to configure the endpoints of the subscriber adapter.
 #
+TrajectoryRobot2DComp.Endpoints=tcp -p 12204
 CommonBehavior.Endpoints=tcp -p 12204
 
 # Remote servers proxies example

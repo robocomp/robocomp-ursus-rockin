@@ -27,9 +27,6 @@
 #include <CommonBehavior.h>
 #include <ui_guiDlg.h>
 #include "config.h"
-#include <Laser.h>
-#include <InnerModelManager.h>
-#include <DifferentialRobot.h>
 #include <TrajectoryRobot2D.h>
 
 #define CHECK_PERIOD 5000
@@ -43,9 +40,6 @@ using namespace std;
        \brief
        @author authorname
 */
-using namespace RoboCompLaser;
-using namespace RoboCompInnerModelManager;
-using namespace RoboCompDifferentialRobot;
 using namespace RoboCompTrajectoryRobot2D;
 class GenericWorker :
 #ifdef USE_QTGUI
@@ -64,10 +58,7 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
-	LaserPrx laser_proxy;
-	InnerModelManagerPrx innermodelmanager_proxy;
-	DifferentialRobotPrx differentialrobot_proxy;
-	virtual void  go(const TargetPose& target) = 0;
+	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
 protected:
 	QTimer timer;
 	int Period;

@@ -1,0 +1,11 @@
+import "/robocomp/interfaces/IDSLs/TrajectoryRobot2D.idsl";
+
+Component TrajectoryTesterComp
+{
+	Communications
+	{
+		requires TrajectoryRobot2D;
+	};
+	gui Qt(QWidget);
+	language Cpp;
+};
