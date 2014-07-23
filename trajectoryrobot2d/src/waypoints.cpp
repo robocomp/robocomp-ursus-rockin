@@ -211,7 +211,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		pose.z = w.pos.z();
 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
 		RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 150, 50, "#005500" );
-		if ( i == currentPointIndex+1 )	//CHANGE TO getIndexOfClosestPointToRobot()
+		if ( (int)i == (int)currentPointIndex+1 )	//CHANGE TO getIndexOfClosestPointToRobot()
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 1000, 30, "#000055" );	
 	/*	else if (i == nextPointIndex )
 		{
