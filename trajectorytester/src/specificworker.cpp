@@ -18,6 +18,7 @@
  */
  
  #include "specificworker.h"
+#include <boost/graph/graph_concepts.hpp>
 
 /**
 * \brief Default constructor
@@ -26,6 +27,12 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mprx)
 {
 	connect(goPushButton, SIGNAL(clicked()), this, SLOT(go()));
+	connect(bedroomPushButton, SIGNAL(clicked()), this, SLOT(goBedRoom()));
+	connect(kitchenPushButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
+	connect(hallPushButton, SIGNAL(clicked()), this, SLOT(goHALL()));
+	connect(diningPushButton, SIGNAL(clicked()), this, SLOT(goDining()));
+	connect(livingPushButton, SIGNAL(clicked()), this, SLOT(goLiving()));
+	
 }
 
 /**
@@ -60,4 +67,95 @@ void SpecificWorker::go()
 	{
 		std::cout << ex << std::endl;
 	}
+}
+
+
+void SpecificWorker::goDining()
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.y=0;
+	tp.x = 6000;
+	tp.z = -9100;
+	
+	try
+	{
+		trajectoryrobot2d_proxy->go(tp);
+		qDebug() << __FUNCTION__ << "Target sent";
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}		
+}
+
+void SpecificWorker::goLiving()
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.y=0;
+	tp.x = 3000;
+	tp.z = -8100;
+	
+	try
+	{
+		trajectoryrobot2d_proxy->go(tp);
+		qDebug() << __FUNCTION__ << "Target sent";
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}		
+}
+
+void SpecificWorker::goKitchen()
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.y=0;
+	tp.x = 6000;
+	tp.z = -9100;
+	
+	try
+	{
+		trajectoryrobot2d_proxy->go(tp);
+		qDebug() << __FUNCTION__ << "Target sent";
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}		
+}
+
+void SpecificWorker::goBedRoom()
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.y=0;
+	tp.x = 7000;
+	tp.z = -1500;
+	
+	try
+	{
+		trajectoryrobot2d_proxy->go(tp);
+		qDebug() << __FUNCTION__ << "Target sent";
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}		
+}
+
+void SpecificWorker::goHall()
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.y=0;
+	tp.x = 6000;
+	tp.z = -9100;
+	
+	try
+	{
+		trajectoryrobot2d_proxy->go(tp);
+		qDebug() << __FUNCTION__ << "Target sent";
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}		
 }

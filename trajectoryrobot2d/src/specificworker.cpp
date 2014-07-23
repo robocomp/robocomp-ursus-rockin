@@ -54,7 +54,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 //	target = QVec::vec3(3000,10,-8100);   //detrás del sofá	
 //	target = QVec::vec3(0,22,3000);
 	
-	currentTarget.targetTr = QVec::vec3(7000,10,-1500);
 	
 	
 	//OJO CHANGE chooseRandomPointInFreeSpace to PLAN IN APARTMENT
@@ -150,62 +149,48 @@ void SpecificWorker::compute( )
 	static QTime reloj2 = QTime::currentTime();
 	
 	updateInnerModel(innerModel);
+
+	if (currentTarget.active == true)
 	{
-// 	if (currentTarget.active == true)
-// 	{
-// 		elasticband->update( road, laserData );
-// 		
-// 		road.computeForces();
-// 
-// 		road.printRobotState( innerModel);
-// 
-// 		controller->update(differentialrobot_proxy, road);
-// 				
-// 		if(reloj.elapsed() > 2000) 
-// 		{
-// 			road.draw(innermodelmanager_proxy, innerModel);	
-// 			reloj.restart();
-// 		}
-// 		
-// 		if (road.isFinished() == true)
-// 		{
-// 			RoboCompInnerModelManager::Plane3D plane;
-// 			plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
-// 			plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
-// 			RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
-// 			currentTarget.active = false;
-// 		}
-// 		
-// 		if(road.requiresReplanning == true)
-// 		{
-// 			qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
-// 			computePlan(innerModel);
-// 	//		qDebug("Planning ...");
-// // 			innerModel->update();
-// // 			bool havePlan = planner->computePath(target, innerModel);
-// // 		
-// // 			if(havePlan == false or planner->getPath().size() == 0)
-// // 				qFatal("NO PLAN AVAILABLE");
-// // 			else
-// // 			{
-// // 				//drawThinkingRobot("green");
-// // 				//road.readRoadFromList( planner->getPath() );
-// // 				road.clear();
-// // 				road.readRoadFromList( planner->getPath() );
-// // 				road.requiresReplanning = false;
-// // 				//elasticband->addPoints(road);  //SEND THIS TO A RESET
-// // 				//elasticband->adjustPoints(road);  //SEND THIS TO A RESET
-// // 				road.computeDistancesToNext();
-// // 			}
-// 		}
-// 		
-		localizer->localize(laserData, innerModel, 20);
-	}
+		if( currentTarget.withoutPlan == true)
+			computePlan(innerModel);
 		
-	qDebug() << reloj2.elapsed() << "ms"; reloj2.restart();
+		elasticband->update( road, laserData );
+		
+		road.computeForces();
+
+		road.printRobotState( innerModel);
+
+		controller->update(differentialrobot_proxy, road);
+		
+		if (road.isFinished() == true)
+		{
+			RoboCompInnerModelManager::Plane3D plane;
+			plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
+			plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
+			RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+			currentTarget.active = false;
+			currentTarget.withoutPlan = true;
+		}
+		
+		if(road.requiresReplanning == true)
+		{
+			qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
+			computePlan(innerModel);
+		}
+		
+	//	localizer->localize(laserData, innerModel, 20);
+	}
+	
+	if(reloj.elapsed() > 2000) 
+	{
+		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
+		road.draw(innermodelmanager_proxy, innerModel);	
+		reloj.restart();
+	}
+	reloj2.restart();
 }
-
-
+	
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -223,6 +208,8 @@ void SpecificWorker::computePlan( InnerModel *inner)
 	
 	updateInnerModel(inner);
 	planner->computePath(currentTarget.targetTr, inner);
+	currentTarget.withoutPlan = false;
+	
 	if(planner->getPath().size() == 0)
 		qFatal("SpecificWorker: Path NOT found. Aborting");
 	
@@ -293,7 +280,10 @@ void SpecificWorker::cleanWorld()
 
 void SpecificWorker::go(const TargetPose& target)
 {
+	QMutexLocker ml(mutex);
+	
 	currentTarget.active = true;
 	currentTarget.targetTr = QVec::vec3(target.x, target.y, target.z);
+	qDebug() << __FUNCTION__ << "Curent target received:" << currentTarget.targetTr;
 }
 

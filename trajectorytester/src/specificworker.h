@@ -37,6 +37,11 @@ public:
 public slots:
  	void compute(); 	
 	void go();
+	void goBedRoom();
+	void goLiving();
+	void goKitchen();
+	void goHall();
+	void goDining();
 };
 
 #endif

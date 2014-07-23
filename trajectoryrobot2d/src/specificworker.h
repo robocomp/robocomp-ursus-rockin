@@ -53,12 +53,13 @@ public slots:
 	
 private:
 	
-	struct CurrentTarget
+	struct CurrentTarget   ///METER MUTEX AQUI
 	{
 		QVec targetTr;
 		QVec targetRot;
 		bool active;
-		CurrentTarget() {active = false; targetTr = QVec::zeros(3); targetRot = QVec::zeros(3); };
+		bool withoutPlan;
+		CurrentTarget() {active = false; targetTr = QVec::zeros(3); targetRot = QVec::zeros(3); withoutPlan = true;};
 	} ;
 	
 	CurrentTarget currentTarget;
