@@ -111,8 +111,8 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 		
 		//copy nodeCurrentPos to aux so nodeCurrentPos is not modified when calling trySegmentToTarget
 		auxNode = nodeCurrentPos;
-		//res = trySegmentToTarget( *nodeCurrentPos, currentTarget, reachEnd, arbol, auxNode);
-		res = trySegmentToTargetBinarySearch( *nodeCurrentPos, currentTarget, reachEnd, arbol, auxNode);		
+		res = trySegmentToTarget( *nodeCurrentPos, currentTarget, reachEnd, arbol, auxNode);
+		//res = trySegmentToTargetBinarySearch( *nodeCurrentPos, currentTarget, reachEnd, arbol, auxNode);		
 		// Can  only be equal if random point accidentally falls on tree
 		if (equal(res, *nodeCurrentPos) == false) //Not achieved goal
 			//appends res to tree at auxNode position
@@ -126,8 +126,8 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 		//resGoal = tryBezierToTarget( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, nodeCurrentPosGoal);
 		//copy nodeCurrentPos to aux so nodeCurrentPos is not modified when calling trySegmentToTarget
 		auxNodeGoal = nodeCurrentPosGoal;
-		//resGoal = trySegmentToTarget( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, auxNodeGoal);		
-		resGoal = trySegmentToTargetBinarySearch( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, auxNodeGoal);		
+		resGoal = trySegmentToTarget( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, auxNodeGoal);		
+		//resGoal = trySegmentToTargetBinarySearch( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, auxNodeGoal);		
 
 		// if origin and goal are not the same point, add resGoal to tree
  		if (equal(resGoal, *nodeCurrentPosGoal) == false)

@@ -23,8 +23,9 @@
 * \brief Default constructor
 */
 
-SpecificWorker::SpecificWorker(MapPrx& mprx, QObject *parent) : GenericWorker(mprx, parent)	
+SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mprx)
 {
+	connect(goPushButton, SIGNAL(clicked()), this, SLOT(go()));
 }
 
 /**
@@ -42,3 +43,21 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	timer.start(Period);
 	return true;
 };
+
+void SpecificWorker::go()
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.x = xSpinBox->value();
+	tp.z = zSpinBox->value();
+	tp.y = 0;
+	
+	try
+	{
+		trajectoryrobot2d_proxy->go(tp);
+		qDebug() << __FUNCTION__ << "Target sent";
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
+}

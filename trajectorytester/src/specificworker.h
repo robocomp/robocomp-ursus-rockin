@@ -30,12 +30,13 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx, QObject *parent = 0);	
+	SpecificWorker(MapPrx& mprx, QWidget *parent = 0);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
 public slots:
  	void compute(); 	
+	void go();
 };
 
 #endif

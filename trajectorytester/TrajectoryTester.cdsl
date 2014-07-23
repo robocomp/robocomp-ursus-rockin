@@ -6,6 +6,6 @@ Component TrajectoryTesterComp
 	{
 		requires TrajectoryRobot2D;
 	};
-	gui Qt(QWidget);
 	language Cpp;
+	gui Qt(QWidget);
 };

@@ -48,30 +48,29 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 		k++;
  	}
 	
-	inner->transform("world", "robot").print("laser");
 	laserRender(point, alfa);
 
 
-	std::ofstream outputFileVS;
-	outputFileVS.open("laserVirtualS.csv");
-	std::ofstream outputFileNS;
-	outputFileNS.open("laserNormalS.csv");
-	for (size_t i=0; i<virtualLaser.size(); i++)
-	{
-		outputFileVS <<    virtualLaser[i].angle << "," <<    virtualLaser[i].dist << "\n";
-		outputFileNS << subsampledLaser[i].angle << "," << subsampledLaser[i].dist << "\n";
-	}
-	outputFileVS.close();
-	outputFileNS.close();
-
-	sleep(3);
-	
+// 	std::ofstream outputFileVS;
+// 	outputFileVS.open("laserVirtualS.csv");
+// 	std::ofstream outputFileNS;
+// 	outputFileNS.open("laserNormalS.csv");
+// 	for (size_t i=0; i<virtualLaser.size(); i++)
+// 	{
+// 		outputFileVS <<    virtualLaser[i].angle << "," <<    virtualLaser[i].dist << "\n";
+// 		outputFileNS << subsampledLaser[i].angle << "," << subsampledLaser[i].dist << "\n";
+// 	}
+// 	outputFileVS.close();
+// 	outputFileNS.close();
+// 
+// 	sleep(3);
+// 	
 
 	qDebug() << "VLaser:" ;
 	for (uint i=0; i<virtualLaser.size(); i++)
 	{
-		qDebug() << "	dist:" << virtualLaser[i].dist << "	angle" << virtualLaser[i].angle;
-		qDebug() << "	distD:" << subsampledLaser[i].dist << "	angleS" << subsampledLaser[i].angle;
+		qDebug() << "	Dist:" << virtualLaser[i].dist << ". DistSub:" << subsampledLaser[i].dist << ". Angle" << virtualLaser[i].angle
+							<< ". Diff: " << subsampledLaser[i].dist - virtualLaser[i].dist;
 	}
 	//estimatePoseWithICP(laser, point, alfa);
 	
@@ -83,10 +82,13 @@ void Localizer::laserRender(const QVec& point, float alfa)
 {
 	// TODO: GET FROM VISTUAL LASER SPECIFICATION	
 	const float MAX_LENGTH_ALONG_RAY = 4000;
+	
 	// Update robot's position
 	clonModel->updateTransformValues("robot", point.x(), 0, point.z(), 0., alfa, 0.);
+	
 	// Compute rotation matrix between laser and world
 	QMat r1q1 = clonModel->getRotationMatrixTo("world", "laser");
+	
 	// Create hitting appex
 	boost::shared_ptr<fcl::Box> laserBox(new fcl::Box(0.1, 0.1, 0.1));
 	fcl::CollisionObject laserBoxCol(laserBox);
@@ -97,22 +99,24 @@ void Localizer::laserRender(const QVec& point, float alfa)
 		// Rotation of appex
 		const QMat r1q = r1q1 * RMat::Rot3DOY(virtualLaser[i].angle);
 		const fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
+		
 		// Check collision at maximum distance
 		float hitDistance = MAX_LENGTH_ALONG_RAY;
-
-// 		clonModel->updateRotationValues("laser", 0, virtualLaser[i].angle, 0);
-// 		const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
-// 		clonModel->updateRotationValues("laser", 0,0,0);
-// 		laserBoxCol.setTransform(R1, fcl::Vec3f(0,0,0));
-// 		laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
-// 		for (uint out=0; out<restNodes.size(); out++)
-// 		{
-// 			hit = clonModel->collide(restNodes[out], &laserBoxCol);
-// 			if (hit) break;
-// 		}
+		laserBox->side = fcl::Vec3f(0.1, 0.1, hitDistance);
+ 		clonModel->updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
+ 		const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+ 		clonModel->updateRotationValues("laserPose", 0, 0, 0);
+ 		laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 		
-		// Binary search
-// 		if (hit)
+ 		for (uint out=0; out<restNodes.size(); out++)
+ 		{
+ 			hit = clonModel->collide(restNodes[out], &laserBoxCol);
+ 			if (hit) 
+				break;
+ 		}
+ 		
+ 		// Binary search
+ 		if (hit)
 		{
 			hit = false;
 			float min=0;
@@ -137,13 +141,9 @@ void Localizer::laserRender(const QVec& point, float alfa)
 				}
 				// Manage next min-max range
 				if (hit)
-				{
 					max = hitDistance;
-				}
 				else
-				{
 					min = hitDistance;
-				}
 			}
 			// Set final hit distance
 			hitDistance = (max+min)/2.;

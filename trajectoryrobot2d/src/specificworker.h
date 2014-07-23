@@ -45,13 +45,24 @@ public:
 	SpecificWorker(MapPrx& mprx, QWidget *parent = 0);
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	void  go(const TargetPose& target){};
+	void  go(const TargetPose& target);
 	
 public slots:
  	void compute(); 	
 	void computeLuis( );
 	
 private:
+	
+	struct CurrentTarget
+	{
+		QVec targetTr;
+		QVec targetRot;
+		bool active;
+		CurrentTarget() {active = false; targetTr = QVec::zeros(3); targetRot = QVec::zeros(3); };
+	} ;
+	
+	CurrentTarget currentTarget;
+	
 	RoboCompDifferentialRobot::TBaseState bState;
 	TLaserData datos;
 	RoboCompCommonBehavior::ParameterList params;
@@ -73,6 +84,8 @@ private:
 	void cleanWorld();
 	void moveBoxes();
 	void setRobotInitialPose(float x, float z, float alpha);
+	void updateInnerModel(InnerModel *inner);
+	void computePlan(InnerModel *inner);
 };
 
 #endif
