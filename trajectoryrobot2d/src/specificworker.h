@@ -87,6 +87,7 @@ private:
 	void setRobotInitialPose(float x, float z, float alpha);
 	void updateInnerModel(InnerModel *inner);
 	void computePlan(InnerModel *inner);
+	void drawTarget(const QVec &target);
 };
 
 #endif

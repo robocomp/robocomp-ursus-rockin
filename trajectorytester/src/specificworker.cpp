@@ -29,7 +29,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	connect(goPushButton, SIGNAL(clicked()), this, SLOT(go()));
 	connect(bedroomPushButton, SIGNAL(clicked()), this, SLOT(goBedRoom()));
 	connect(kitchenPushButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
-	connect(hallPushButton, SIGNAL(clicked()), this, SLOT(goHALL()));
+	connect(hallPushButton, SIGNAL(clicked()), this, SLOT(goHall()));
 	connect(diningPushButton, SIGNAL(clicked()), this, SLOT(goDining()));
 	connect(livingPushButton, SIGNAL(clicked()), this, SLOT(goLiving()));
 	
@@ -111,7 +111,7 @@ void SpecificWorker::goKitchen()
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.y=0;
 	tp.x = 6000;
-	tp.z = -9100;
+	tp.z = -6100;
 	
 	try
 	{
@@ -146,8 +146,8 @@ void SpecificWorker::goHall()
 {
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.y=0;
-	tp.x = 6000;
-	tp.z = -9100;
+	tp.x = 800;
+	tp.z = -1000;
 	
 	try
 	{

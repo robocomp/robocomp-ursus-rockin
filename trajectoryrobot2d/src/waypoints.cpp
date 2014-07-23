@@ -43,6 +43,28 @@ WayPoints::~WayPoints()
 {
 }
 
+void WayPoints::reset()
+{
+	clear();
+	indexOfClosestPointToRobot = 0;
+	robotDistanceToClosestPoint = 0;
+	robotPerpendicularDistanceToRoad = 0;
+	indexOfClosestPointToRobot = 0;
+	currentPointIndex = 0;
+	angleWithTangentAtClosestPoint = 0;
+	roadCurvatureAtClosestPoint = 0;
+	robotDistanceToTarget = 0;
+	robotDistanceToLastVisible = 0;
+	currentPointIndex = 0;
+	nextPointIndex = 1;
+	finish = false;
+	isBlocked = false;
+	isLost = false;
+	currentCollisionIndex = 0;
+	currentDistanceToFrontier = 0;
+	requiresReplanning = false;
+}
+
 void WayPoints::readRoadFromFile(InnerModel *innerModel, std::string name)
 {
 	clear();

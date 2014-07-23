@@ -36,6 +36,7 @@ class WayPoint
 		WayPoint(QVec p) 	{ pos = p; minDist = ROBOT_RADIUS; minDistAnt = 0.f; isVisible = true; minDistPoint = QVec::zeros(3);};
 		~WayPoint()			{};
 	
+	
 		//For ElasticBand
 		QVec pos;								// 3D point (x,y,z)
 		float minDist, minDistAnt;
@@ -56,6 +57,7 @@ class WayPoints : public QList< WayPoint >
 	public:
 		WayPoints();
 		~WayPoints();
+		void reset();
 		void setInnerModel( InnerModel *inner) 												{ innerModel = inner;};
 		void readRoadFromFile(InnerModel *innerModel, std::string name);
 		void readRoadFromList(QList<QVec> list);

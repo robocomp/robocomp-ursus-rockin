@@ -58,12 +58,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	//OJO CHANGE chooseRandomPointInFreeSpace to PLAN IN APARTMENT
 	
-	//Draw target as red box	
-	RoboCompInnerModelManager::Plane3D plane;
-	plane.px = target.x();	plane.py = 10; plane.pz = target.z();
-	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 150;
-	plane.height = plane.width = 100;
-	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+	//drawTargeT(target);
 	 
 	//Planning
 	planner = new Planner(*innerModel);									
@@ -171,6 +166,7 @@ void SpecificWorker::compute( )
 			RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 			currentTarget.active = false;
 			currentTarget.withoutPlan = true;
+			road.reset();
 		}
 		
 		if(road.requiresReplanning == true)
@@ -214,7 +210,7 @@ void SpecificWorker::computePlan( InnerModel *inner)
 		qFatal("SpecificWorker: Path NOT found. Aborting");
 	
 	//Init road
-	road.clear();
+	road.reset();
 	road.readRoadFromList( planner->getPath() );
 	road.requiresReplanning = false;
 	road.computeDistancesToNext();
@@ -273,6 +269,17 @@ void SpecificWorker::cleanWorld()
 	}
 }
 
+void SpecificWorker::drawTarget(const QVec &target)
+{
+	//Draw target as red box	
+	RoboCompInnerModelManager::Plane3D plane;
+	plane.px = target.x();	plane.py = 10; plane.pz = target.z();
+	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 150;
+	plane.height = plane.width = 100;
+	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+		
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////777
 ////    SERVANTS
@@ -284,6 +291,7 @@ void SpecificWorker::go(const TargetPose& target)
 	
 	currentTarget.active = true;
 	currentTarget.targetTr = QVec::vec3(target.x, target.y, target.z);
+	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	qDebug() << __FUNCTION__ << "Curent target received:" << currentTarget.targetTr;
 }
 
