@@ -3,69 +3,70 @@
 <innerModel>
 	<transform id="world">
 
-		<!--<transform id="b_t" tx="8500" tz="-2300" ty="0">
-			<mesh id="b" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Alicudi.3ds" rx="1.57" rz="-1.57" scale="1000,1000,1000"  />
-		</transform>-->
-		
-		<plane id="floor" pz="0" ny="1" py="-10"  size="7000,7000,10" repeat="1" texture="#888888" />
-		
-		<plane id="wall" pz="0" ny="z" py="250" px="500" size="6000,500,100" repeat="1" texture="#0000aa" />
-		<plane id="wall2" pz="1000" ny="z" py="250" px="-1300" size="4000,500,100" repeat="1" texture="#0000aa" />
-		
-		
-		<!--<transform id="dinin_table_t" tx="0" tz="1800" ry="1.57">
-			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Table N250414.3DS" rx="1.57" rz="1.57" scale="20,20,25"  />
-		</transform>
-	-->
-	<!--	<transform id="b_t" tx="0" tz="1800" ty="0">
-			<mesh id="b" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Alicudi.3ds" rx="1.57" rz="-1.57" scale="1000,1000,1000"  />
-		</transform>-->
-		
-		<transform id="dinin_table_t" tx="0" tz="1800" ry="1.57">
-			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,250"   />
-<!-- 			<mesh id="dinin_table" file="/home/robocomp/robocomp/files/osgModels/basics/sphere.ive" ty="700" scale="200,200,200" /> -->
-		</transform>
-
-		<transform id="mesacentro_t" tx="-1500" tz="-1000">
-			<mesh id="mesacentro" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/mesa_centro_larga.osg"  rx="1.57" rz="1.57"  scale="110,140,150"  />
-			<plane id="carpet" ny="1" size="1800,2500,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/carpet.png" />
-		</transform>
-
-		<transform id="sofa0_t" tx="-1500" tz="-2000">
-			<mesh id="sofa0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="1.57"  scale="20,20,20"  />
-		</transform>
-		<transform id="sofa1_t" tx="1500" tz="1000">
-			<mesh id="sofa1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="-1.57" scale="20,20,20"  />
-		</transform>
-
-		<transform id="sofaAA_t" tx="3100" tz="-6300" >
-			<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="8,6.5,9"  />
-		</transform>
-
-		
-		
-		<!--
-		<plane id="wall1" pz="0" ny="z" py="0" px="1500" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
-		<plane id="wall11" pz="0" ny="z" py="0" px="1550" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
-		
-		<plane id="wall2" pz="0" ny="z" py="0" px="-1500" pz="2000" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
-		<plane id="wall22" pz="0" ny="z" py="0" px="-1500" pz="2050" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
+	<transform id="scene" tx="0" tz="1000" ry="0" >
+			<!--<transform id="b_t" tx="8500" tz="-2300" ty="0">
+				<mesh id="b" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Alicudi.3ds" rx="1.57" rz="-1.57" scale="1000,1000,1000"  />
+			</transform>-->
+			
+			<plane id="floor" pz="0" ny="1" py="-10"  size="7000,7000,10" repeat="1" texture="#888888" />
+			
+			<plane id="wall" pz="0" ny="z" py="250" px="500" size="6000,500,100" repeat="1" texture="#0000aa" />
+			<plane id="wall2" pz="1000" ny="z" py="250" px="-1300" size="4000,500,100" repeat="1" texture="#0000aa" />
+			
+			
+			<!--<transform id="dinin_table_t" tx="0" tz="1800" ry="1.57">
+				<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Table N250414.3DS" rx="1.57" rz="1.57" scale="20,20,25"  />
+			</transform>
 		-->
-		<plane id="ddR" nx="1"  px="3500" py="200" pz="0" size="7000,500,10" texture="#ff0000" />
-		<plane id="ddL" nx="1" px="-3500" py="200" pz="0" size="7000,500,10" texture="#ff0000" />
+		<!--	<transform id="b_t" tx="0" tz="1800" ty="0">
+				<mesh id="b" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Alicudi.3ds" rx="1.57" rz="-1.57" scale="1000,1000,1000"  />
+			</transform>-->
 			
-		<plane id="ddF" nz="1"  pz="3500" py="200" px="0" size="7000,500,10" texture="#ff0000" />
-		
-		<transform id="ddB-T" tz="-3500" ty="200" tx="0" >
-		<plane id="ddB" nz="1" size="7000,500,10" texture="#ff0000" />
-	</transform>	
-		
-<!--		<plane id="ddR2" nx="1" px="3500" py="200" pz="0" size="7000,500,13" texture="#ff0000" />
-		<plane id="ddL2" nx="1" px="-3500" py="200" pz="0" size="7000,500,13" texture="#ff0000" />-->
-			
-<!--		<plane id="ddF2" nz="1" pz="3500" py="200" px="0" size="7000,500,13" texture="#ff0000" />
-		<plane id="ddB2" nz="1" pz="-3500" py="200" px="0" size="7000,500,13" texture="#ff0000" />-->
+			<transform id="dinin_table_t" tx="0" tz="1800" ry="1.57">
+				<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,250"   />
+	<!-- 			<mesh id="dinin_table" file="/home/robocomp/robocomp/files/osgModels/basics/sphere.ive" ty="700" scale="200,200,200" /> -->
+			</transform>
 
+			<transform id="mesacentro_t" tx="-1500" tz="-1000">
+				<mesh id="mesacentro" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/mesa_centro_larga.osg"  rx="1.57" rz="1.57"  scale="110,140,150"  />
+				<plane id="carpet" ny="1" size="1800,2500,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/carpet.png" />
+			</transform>
+
+			<transform id="sofa0_t" tx="-1500" tz="-2000">
+				<mesh id="sofa0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="1.57"  scale="20,20,20"  />
+			</transform>
+			<transform id="sofa1_t" tx="1500" tz="1000">
+				<mesh id="sofa1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="-1.57" scale="20,20,20"  />
+			</transform>
+
+			<transform id="sofaAA_t" tx="3100" tz="-6300" >
+				<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="8,6.5,9"  />
+			</transform>
+
+			
+			
+			<!--
+			<plane id="wall1" pz="0" ny="z" py="0" px="1500" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
+			<plane id="wall11" pz="0" ny="z" py="0" px="1550" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
+			
+			<plane id="wall2" pz="0" ny="z" py="0" px="-1500" pz="2000" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
+			<plane id="wall22" pz="0" ny="z" py="0" px="-1500" pz="2050" size="6000,1000,10" repeat="1" texture="#aaaaaa" />
+			-->
+			<plane id="ddR" nx="1"  px="3500" py="200" pz="0" size="7000,500,10" texture="#ff0000" />
+			<plane id="ddL" nx="1" px="-3500" py="200" pz="0" size="7000,500,10" texture="#ff0000" />
+				
+			<plane id="ddF" nz="1"  pz="3500" py="200" px="0" size="7000,500,10" texture="#ff0000" />
+			
+			<transform id="ddB-T" tz="-3500" ty="200" tx="0" >
+			<plane id="ddB" nz="1" size="7000,500,10" texture="#ff0000" />
+		</transform>	
+			
+	<!--		<plane id="ddR2" nx="1" px="3500" py="200" pz="0" size="7000,500,13" texture="#ff0000" />
+			<plane id="ddL2" nx="1" px="-3500" py="200" pz="0" size="7000,500,13" texture="#ff0000" />-->
+				
+	<!--		<plane id="ddF2" nz="1" pz="3500" py="200" px="0" size="7000,500,13" texture="#ff0000" />
+			<plane id="ddB2" nz="1" pz="-3500" py="200" px="0" size="7000,500,13" texture="#ff0000" />-->
+	</transform>
 		
 		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >

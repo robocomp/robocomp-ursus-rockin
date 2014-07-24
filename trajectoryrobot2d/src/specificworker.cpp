@@ -33,8 +33,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
-	//Move Robot to Hall
-	//setRobotInitialPose(800,-1000,M_PI);
+	// Move Robot to Hall
+	setRobotInitialPose(800, -1000, M_PI);
 	
 	//Update InnerModel from robot
 	try { differentialrobot_proxy->getBaseState(bState); }
