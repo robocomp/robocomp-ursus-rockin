@@ -160,12 +160,8 @@ void SpecificWorker::compute( )
 		
 		if (road.isFinished() == true)
 		{
-			RoboCompInnerModelManager::Plane3D plane;
-			plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
-			plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
-			RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
-			currentTarget.active = false;
-			currentTarget.withoutPlan = true;
+			drawGreenBoxOnTarget( currentTarget.targetTr );
+			currentTarget.reset();
 			road.reset();
 		}
 		
@@ -312,6 +308,14 @@ void SpecificWorker::drawTarget(const QVec &target)
 	plane.height = plane.width = 100;
 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 		
+}
+
+void SpecificWorker::drawGreenBoxOnTarget(const QVec& target)
+{
+	RoboCompInnerModelManager::Plane3D plane;
+	plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
+	plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
+	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 }
 
 

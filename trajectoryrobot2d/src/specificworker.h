@@ -60,6 +60,7 @@ private:
 		bool active;
 		bool withoutPlan;
 		CurrentTarget() {active = false; targetTr = QVec::zeros(3); targetRot = QVec::zeros(3); withoutPlan = true;};
+		void reset() { active = false; withoutPlan = true; targetTr = QVec::zeros(3); targetRot = QVec::zeros(3);};
 	} ;
 	
 	CurrentTarget currentTarget;
@@ -88,6 +89,7 @@ private:
 	void updateInnerModel(InnerModel *inner);
 	void computePlan(InnerModel *inner);
 	void drawTarget(const QVec &target);
+	void drawGreenBoxOnTarget(const QVec &target);
 };
 
 #endif
