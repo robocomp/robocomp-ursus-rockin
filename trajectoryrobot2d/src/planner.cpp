@@ -557,7 +557,7 @@ QVec Planner::trySegmentToTargetBinarySearch(const QVec & origin , const QVec & 
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
 	bool hit = false;
 	QVec finalPoint;
-	int securityOffset = 0;
+// 	int securityOffset = 0;
 	
 // 	if( MAX_LENGTH_ALONG_RAY < 10) 
 // 	{
@@ -642,8 +642,6 @@ QVec Planner::trySegmentToTargetBinarySearch(const QVec & origin , const QVec & 
 		reachEnd = true;
 		return target;
 	}
-	qDebug() << "		hitDistance" << hitDistance << "MAX_LENGTH_ALONG_RAY" << MAX_LENGTH_ALONG_RAY;
-	
 	// also we might need to insert a few nodes in the tree covering from origin to hitDistance
 }
 

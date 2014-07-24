@@ -78,6 +78,7 @@ RMat::T QLine2D::perpendicularDistanceToPoint(const RMat::QVec& point)
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << "Size of vector not 2 or 3";
 		qFatal("Aborting");
+		return 0;
 	}
 }
 

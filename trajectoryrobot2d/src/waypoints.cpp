@@ -326,14 +326,13 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 	else
 		post = w+1;
 
-	if( ant == post ) 
-		qFatal("fary en compute Tangent");
-	else 
+	if( ant == post )
 	{
+		qFatal("fary en compute Tangent");
+	}
 // 		ant->pos.print("ant");
 // 		post->pos.print("post");
-		return QLine2D( ant->pos , post->pos );
-	}
+	return QLine2D( ant->pos , post->pos );
 }
 
 /**
@@ -431,7 +430,7 @@ void WayPoints::computeForces()
   	setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );
 	
 	//Check for arrival to target  TOO SIMPLE 
-	if(	( getCurrentPointIndex()+1 == size())  and  
+	if(	( (int)getCurrentPointIndex()+1 == (int)size())  and  
 		( getRobotDistanceToTarget() < 100)) 
 		setFinished(true);
 	

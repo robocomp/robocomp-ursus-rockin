@@ -64,8 +64,7 @@ bool ForceField::update(WayPoints &road)
   	road.setRobotDistanceToTarget( distanceToTarget(road, closestPoint, robot3DPos) );
 	
 	//Check for arrival to target  TOO SIMPLE 
-	if(	( road.getCurrentPointIndex() == road.size()-1)  and  
-		( road.getRobotDistanceToTarget() < 100)) 
+	if(	(int)road.getCurrentPointIndex()==(int)road.size()-1 and (int)road.getRobotDistanceToTarget()<100) 
 		road.setFinished(true);
 	
 	//compute curvature of trajectory at closest point to robot

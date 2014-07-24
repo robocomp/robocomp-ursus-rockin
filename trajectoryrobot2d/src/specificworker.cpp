@@ -29,12 +29,12 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+// 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 	// Move Robot to Hall
-	setRobotInitialPose(800, -1000, M_PI);
+	setRobotInitialPose(800, -10000, M_PI);
 	
 	//Update InnerModel from robot
 	try { differentialrobot_proxy->getBaseState(bState); }
@@ -238,17 +238,51 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	try
 	{
 		RoboCompInnerModelManager::Pose3D p;
-		p.x=x; p.y=10; p.z=z;
-		p.rx=0;p.ry=alpha;p.rz=0;
-		innermodelmanager_proxy->setPoseFromParent("robotInitialPose",p);
-		differentialrobot_proxy->setOdometerPose(x,z,alpha);
+		p.x =  0;
+		p.y =  0;
+		p.z =  0;
+		p.rx = 0;
+		p.ry = 0;
+		p.rz = 0;
+		innermodelmanager_proxy->setPoseFromParent("initialRobotPose", p);
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
-		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error sendong robot to intial position";
+		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting initialRobotPose";
 		qFatal("Aborting");
 	}
-	usleep(500000);	
+
+	usleep(125000);	
+
+	try
+	{
+		RoboCompInnerModelManager::Pose3D p;
+		p.x =  x;
+		p.y =  0;
+		p.z =  z;
+		p.rx = 0;
+		p.ry = alpha;
+		p.rz = 0;
+		innermodelmanager_proxy->setPoseFromParent("robot", p);
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
+	{
+		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot pose";
+		qFatal("Aborting");
+	}
+	usleep(125000);	
+
+	try
+	{
+		differentialrobot_proxy->setOdometerPose(x, z, alpha);
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
+	{
+		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot odometer";
+		qFatal("Aborting");
+	}
+
+	usleep(125000);	
 }
 
 void SpecificWorker::cleanWorld()
