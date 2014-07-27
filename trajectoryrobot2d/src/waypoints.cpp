@@ -154,6 +154,7 @@ void WayPoints::printRobotState(InnerModel* innerModel)
 {
 		QVec robot3DPos = innerModel->transform("world", "robot");
 		qDebug() << "Scalar magnitudes ---------------------";
+		qDebug() << "	Robot position:" << robot3DPos;
 		qDebug() << "	Num points:" << this->size();
 		qDebug() << "	Robot dist to closest point in road:" << getRobotDistanceToClosestPoint();
 		qDebug() << "	Robot perp. dist to road tangent at closest point:" << getRobotPerpendicularDistanceToRoad();
@@ -162,16 +163,13 @@ void WayPoints::printRobotState(InnerModel* innerModel)
 		qDebug() << "	Road curvature:" << getRoadCurvatureAtClosestPoint();
 		qDebug() << "	Index of closest point:" << getIndexOfClosestPointToRobot();
 		qDebug() << "	Closest point:" << (*this)[getIndexOfClosestPointToRobot()].pos;
-		qDebug() << "	Robot position:" << robot3DPos;
 		qDebug() << "	Tangent at closest point:" << getTangentAtClosestPoint();
 		qDebug() << "	Current point index: " << currentPointIndex;
-		
-		//qDebug() << "	Current point" << getCurrentPoint().pos;		
-		//qDebug() << "	next point index" << this->nextPointIndex;
-		//qDebug() << "	dist to current " << robotDistanceToCurrentPoint(innerModel);
-		//qDebug() << "	dist to next " << robotDistanceToNextPoint(innerModel);
-		//qDebug() << "	distance to frontier " << currentDistanceToFrontier;
-		//qDebug() << "	Next Point" << getNextPoint().pos;
+		qDebug() << "	Is Blocked:" << isBlocked;
+		qDebug() << "	Is Lost:" << isLost;
+		qDebug() << "	Is Finished:" << isFinished();
+		qDebug() << "	Requires replanning:" << requiresReplanning;
+	
 		qDebug();		
 }
 

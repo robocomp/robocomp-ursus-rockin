@@ -20,6 +20,7 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
+//#include <nabo/nabo.h>
 #include <QtCore>
 #include <qmat/QMatAll>
 #include "tree.hh"
@@ -28,6 +29,9 @@
 #include "rcisdraw.h"
 #include "qline2d.h"
 #include "waypoints.h"
+//#include <nabo/nabo.h>
+
+#define MAX_WAYPOINT_CACHE 1000
 
 using namespace RoboCompInnerModelManager;
 
@@ -43,9 +47,7 @@ public:
 	WayPoints smoothRoad( WayPoints road);
 	void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
 	QList<QVec> getPath() { return currentSmoothedPath; }
-	
-	//QVec tryBezierToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec>  *arbol , tree<QVec>::iterator & nodeCurrentPos);
-	
+
 	bool collisionDetector(const QVec &position, const QVec &rotation, InnerModel *im);
 	void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
 	
@@ -61,7 +63,10 @@ private:
 	bool  PATH_FOUND;
 	QVec p1,p2,origin,target;
 	int MAX_ITER;
-	QList<QVec> currentPath, currentSmoothedPath, currentAdaptiveSmoothedPath;
+	QList<QVec> currentSmoothedPath;
+	QList<QVec> wayPointCache;									// To store succesful plans
+	void initializeCache();
+	
 	QVec trySegmentToTarget(const QVec & origin, const QVec & target, bool & reachEnd, tree<QVec>  *arbol, tree<QVec>::iterator & nodeCurrentPos);
 	QVec trySegmentToTargetBinarySearch(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec> * arbol , tree<QVec>::iterator & nodeCurrentPos);
 	QList<QVec> recoverPath(tree<QVec> *arbol , const tree<QVec>::pre_order_iterator & _current, tree<QVec> *arbolGoal, const tree<QVec>::pre_order_iterator & _currentGoal);
@@ -72,6 +77,7 @@ private:
 	void smoothPath( const QList< QVec >& list);
 	void smoothPathStochastic( QList<QVec> & list);
 	tree<QVec>::iterator findClosestPointInTree( tree<QVec> *arb , const QVec & currentTarget);
+	void storePlanInCache(QList< QVec > currentPath);
 
 };
 

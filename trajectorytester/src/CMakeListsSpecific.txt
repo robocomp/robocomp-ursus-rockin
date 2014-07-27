@@ -3,10 +3,13 @@
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
+  plantwidget.cpp
 )
 
 # Headers set
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
+  plantwidget.h
 )
+

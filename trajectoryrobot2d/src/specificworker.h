@@ -30,6 +30,7 @@
 #include "planner.h"
 #include "forcefield.h"
 #include "localizer.h"
+#include "plannerompl.h"
 
 //#include "ParabolicPathSmooth/smoother.h"
 
@@ -46,6 +47,7 @@ public:
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void  go(const TargetPose& target);
+	RoboCompTrajectoryRobot2D::NavState getState();
 	
 public slots:
  	void compute(); 	
@@ -71,12 +73,15 @@ private:
 	InnerModel *innerModel, *innerClon;
 	RoboCompLaser::TLaserData laserData;
 	QVec target;
+	RoboCompTrajectoryRobot2D::NavState compState;
+	QTime taskReloj;
  	
 	QVec P;
 	WayPoints road;
 	Controller *controller;
 	ElasticBand *elasticband;
 	Planner *planner;
+	PlannerOMPL *plannerOMPL;
 	ForceField *forcefield;
 	Localizer *localizer;
 	

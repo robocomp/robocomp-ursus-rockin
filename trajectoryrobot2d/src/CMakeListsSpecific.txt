@@ -11,6 +11,7 @@ SET ( SOURCES
   planner.cpp
   forcefield.cpp
   localizer.cpp
+  plannerompl.cpp
   #ParabolicPathSmooth/smoother.cpp
 )
 
@@ -23,6 +24,8 @@ SET ( HEADERS
   planner.h
   forcefield.h
   localizer.h
+  plannerompl.h
 )
 
-SET (LIBS ${LIBS} -lfcl -lpointmatcher -lnabo -lboost_system  -lboost_filesystem -lrt)
+find_package(OMPL)
+SET (LIBS ${LIBS} -lfcl -lpointmatcher -lnabo -lboost_system  -lboost_filesystem -lrt -lompl)

@@ -26,12 +26,18 @@
 
 SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mprx)
 {
-	connect(goPushButton, SIGNAL(clicked()), this, SLOT(go()));
+	connect(goPushButton, SIGNAL(clicked()), this, SLOT(goButton()));
 	connect(bedroomPushButton, SIGNAL(clicked()), this, SLOT(goBedRoom()));
 	connect(kitchenPushButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
 	connect(hallPushButton, SIGNAL(clicked()), this, SLOT(goHall()));
 	connect(diningPushButton, SIGNAL(clicked()), this, SLOT(goDining()));
 	connect(livingPushButton, SIGNAL(clicked()), this, SLOT(goLiving()));
+	
+	plantWidget = new PlantWidget(frame);
+	plantWidget->show();
+	
+	connect(plantWidget, SIGNAL(mouseMove(QVec)), this, SLOT(setTargetCoorFromPlant(QVec)));
+	connect(plantWidget, SIGNAL(mousePress(QVec)), this, SLOT(setNewTargetFromPlant(QVec)));
 	
 }
 
@@ -44,118 +50,89 @@ SpecificWorker::~SpecificWorker()
 }
 void SpecificWorker::compute( )
 {
+	//segsLcdNumber->display(reloj.elapsed());	
+	try
+	{
+		RoboCompTrajectoryRobot2D::NavState state = trajectoryrobot2d_proxy->getState();
+		if( state.planning == true )
+		{
+			segsLcd->display(reloj.elapsed() );
+		}
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
 }
+
+
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	timer.start(Period);
 	return true;
 };
 
-void SpecificWorker::go()
+void SpecificWorker::go(const QVec& t)
 {
 	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.x = xSpinBox->value();
-	tp.z = zSpinBox->value();
+	tp.x = t.x();
+	tp.z = t.z();
 	tp.y = 0;
 	
 	try
 	{
 		trajectoryrobot2d_proxy->go(tp);
-		qDebug() << __FUNCTION__ << "Target sent";
+		qDebug() << __FUNCTION__ << "Target " << t << " sent";
+		reloj.restart();
 	}
 	catch(const Ice::Exception &ex)
 	{
 		std::cout << ex << std::endl;
-	}
+	}	
 }
 
+void SpecificWorker::goButton()
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	go(QVec::vec3(xSpinBox->value(),0, zSpinBox->value()));
+}
 
 void SpecificWorker::goDining()
 {
-	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.y=0;
-	tp.x = 6000;
-	tp.z = -9100;
-	
-	try
-	{
-		trajectoryrobot2d_proxy->go(tp);
-		qDebug() << __FUNCTION__ << "Target sent";
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << std::endl;
-	}		
+	go(QVec::vec3(6000,0,-9100));
 }
 
 void SpecificWorker::goLiving()
 {
-	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.y=0;
-	tp.x = 3000;
-	tp.z = -8100;
-	
-	try
-	{
-		trajectoryrobot2d_proxy->go(tp);
-		qDebug() << __FUNCTION__ << "Target sent";
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << std::endl;
-	}		
+	go(QVec::vec3(3000,0,-8100));
 }
 
 void SpecificWorker::goKitchen()
 {
-	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.y=0;
-	tp.x = 6000;
-	tp.z = -6100;
-	
-	try
-	{
-		trajectoryrobot2d_proxy->go(tp);
-		qDebug() << __FUNCTION__ << "Target sent";
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << std::endl;
-	}		
+	go(QVec::vec3(6000,0,-6100));
 }
 
 void SpecificWorker::goBedRoom()
 {
-	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.y=0;
-	tp.x = 7000;
-	tp.z = -1500;
-	
-	try
-	{
-		trajectoryrobot2d_proxy->go(tp);
-		qDebug() << __FUNCTION__ << "Target sent";
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << std::endl;
-	}		
+	go(QVec::vec3(7000,0,-1500));
+
 }
 
 void SpecificWorker::goHall()
 {
-	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.y=0;
-	tp.x = 800;
-	tp.z = -1000;
-	
-	try
-	{
-		trajectoryrobot2d_proxy->go(tp);
-		qDebug() << __FUNCTION__ << "Target sent";
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << std::endl;
-	}		
+	go(QVec::vec3(800,0,-1000));
+}
+
+void SpecificWorker::setTargetCoorFromPlant(QVec t)
+{
+	xSpinBox->setValue(t.x());
+	zSpinBox->setValue(t.z());
+}
+
+
+void SpecificWorker::setNewTargetFromPlant(QVec t)
+{
+	xLcd->display(t.x());
+	yLcd->display(t.z());
+	go(t);
 }

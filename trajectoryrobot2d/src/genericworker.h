@@ -68,6 +68,7 @@ public:
 	InnerModelManagerPrx innermodelmanager_proxy;
 	DifferentialRobotPrx differentialrobot_proxy;
 	virtual void  go(const TargetPose& target) = 0;
+	virtual NavState getState() = 0;
 protected:
 	QTimer timer;
 	int Period;

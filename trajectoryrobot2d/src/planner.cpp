@@ -28,18 +28,13 @@
  */
 Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 {
-	
-	// 	innerModel = innerModel_;
 	//Clone innermodel
 	innerModel = new InnerModel(innerModel_);
-	//Add a fake robot (transform and mesh) to Innermodel to emulate paths with it. OJOOOO Se necesita un clon completo con brazos, etc para las colisiones
+
+	//Init initializeCache
+	initializeCache();
 	
-	//InnerModelTransform *t = innerModel->newTransform("baseT", "static", innerModel->getNode("floor"), 0, 0, 0, 0, 0, 0);
-	//innerModel->getNode("floor")->addChild(t);
-	//InnerModelMesh *m = innerModel->newMesh ("baseFake", t, "/home/robocomp/robocomp/files/osgModels/robex/robex.ive", 1000, 0, 0, 0, -181, 0, 0, 0);
-	//t->addChild(m);
-  
-	//Trees (forward and backward) creation
+	//Trees (forwardand backward) creation
 	arbol = new tree<QVec>;
 	arbolGoal = new tree<QVec>;
 	PATH_FOUND = false;
@@ -52,7 +47,7 @@ Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 */
 bool Planner::computePath(const QVec &target, InnerModel *inner)
 {	
-	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning with target" << target;
+	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning with target at:" << target << "and robot at:" << inner->transform("world","robot");
 	
 	QVec currentTarget = target;  //local variable to get samples from free space
    
@@ -60,7 +55,9 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	QVec robot = inner->transform("world", "robot");	
 	QVec robotRotation = inner->getRotationMatrixTo("world", "robot").extractAnglesR_min();
 	innerModel->updateTransformValues("robot", robot.x(), robot.y(), robot.z(), robotRotation.x(), robotRotation.y(), robotRotation.z());
-	//qDebug() << "rYaw clone" << innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
+
+	QList<QVec> currentPath;   			//Results will be saved here
+	currentSmoothedPath.clear();
 	
 	//Build list of colision meshes
 	robotNodes.clear(); restNodes.clear();
@@ -69,7 +66,7 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	//If target on obstacle, abort.  OJO targetRotation is not specified, Using robot initial orientation
 	if (collisionDetector(target,robotRotation,innerModel) == true)
 	{
-		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";
+		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		PATH_FOUND = false;
 		return false;
 	}
@@ -102,10 +99,8 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	{
 		//get new point from random sequence. First point is always the target
 		if( i>0)
-		{
 			currentTarget = sampleFreeSpaceR2(target, innerModel);
-		}
-
+		
 		// find closest point from random point to tree
 		nodeCurrentPos = findClosestPointInTree( arbol, currentTarget);	
 		
@@ -122,11 +117,11 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 		
 		//search for closest point to res un goal tree
 		nodeCurrentPosGoal = findClosestPointInTree( arbolGoal, res);		
-		//Local navigation from nodeCurrentPosGoal to res using Bezier trajectories. Returns closest point in trajectory
-		//resGoal = tryBezierToTarget( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, nodeCurrentPosGoal);
+	
 		//copy nodeCurrentPos to aux so nodeCurrentPos is not modified when calling trySegmentToTarget
 		auxNodeGoal = nodeCurrentPosGoal;
 		resGoal = trySegmentToTarget( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, auxNodeGoal);		
+	
 		//resGoal = trySegmentToTargetBinarySearch( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, auxNodeGoal);		
 
 		// if origin and goal are not the same point, add resGoal to tree
@@ -134,7 +129,6 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 			CURRENT_LEAF_GOAL = arbolGoal->append_child( auxNodeGoal, resGoal);		
 		else
 			CURRENT_LEAF_GOAL=nodeCurrentPosGoal;
-
 			
 		// if the result on localnavigation in both trees meet then we have found a way from robot to target
 		if (equal(res, resGoal))
@@ -177,8 +171,9 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
  		currentPath = recoverPath(arbol,CURRENT_LEAF, arbolGoal,CURRENT_LEAF_GOAL);
 		if (currentPath.size()>0)
 		{
-			qDebug() << __FUNCTION__ << "Starting smother with a " << currentPath.size() << "elements";
+			qDebug() << __FILE__ << __FUNCTION__ << "Starting smother with a plan of " << currentPath.size() << "elements";
 		    smoothPath(currentPath);
+			storePlanInCache(currentPath);
 			//smoothPathStochastic(currentPath);
 		    //currentSmoothedPath = currentPath;
 			return true;
@@ -190,6 +185,7 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	{
 		PATH_FOUND = false;
 		return false;
+		
 	}
 }
 
@@ -207,6 +203,33 @@ bool Planner::equal(const QVec & p1, const QVec & p2)
 	else
 		return false;
 }
+
+	
+/**
+ * @brief Stores good plans as in Bruce & Velose paper
+ * 
+ * @param currentPath ...
+ * @return void
+ */
+void Planner::storePlanInCache(QList< QVec > currentPath)
+{
+	//insert
+	for(int i=0; i<currentPath.size(); i++)
+	{
+		int a = qrand() * MAX_WAYPOINT_CACHE / RAND_MAX; 
+		wayPointCache[a] = currentPath[i];
+	}
+}
+
+
+void Planner::initializeCache()
+{
+	for(int i=0; i<MAX_WAYPOINT_CACHE; i++)
+	{
+		wayPointCache.append(QVec::vec3( qrand()*10000.f/RAND_MAX, 0, -qrand()*10000.f/RAND_MAX));
+	}
+}
+
 
 	
 /**
@@ -235,6 +258,8 @@ tree<QVec>::iterator Planner::findClosestPointInTree( tree<QVec> * arb, const QV
 	}
    return nodeCurrentPos;
 }
+
+
 	
 /**
  * @brief Recovers the path between current and currentGoal
@@ -382,26 +407,36 @@ void Planner::smoothPathStochastic(QList< QVec >& list)
 
 QVec Planner::sampleFreeSpaceR2(const QVec &currentTarget,  InnerModel *inner)
 {
+	float probTarget = 10;
+	float probCache = 40;
+	
 	const float widthX = 10000;
-// 	const float widthZ = 10000;
+ 	const float widthZ = -10000;
+	const QVec zeros(3,0.f);
 	bool collision = true;
-	float range = widthX / RAND_MAX;
+	float rangeX = widthX / RAND_MAX;
+	float rangeZ = widthZ / RAND_MAX;
+	
 	QVec p(3,0.f);
-	
-	//Inject goal position to bias the distribution
-	if ( qrand()*100.f/RAND_MAX > 80)
-		return(currentTarget);
-	
-	while( collision == true )
-	{
-//		p[0] =  range * rand() -3500;
-//		p[2] =  range * rand() -3500;
-		p[0] =  range * rand();
-		p[2] =  -range * rand();
 
-		collision = collisionDetector(p, 0, inner);	
+	float prob = qrand()*100.f/RAND_MAX;
+	if( prob < probTarget) 
+		return currentTarget;
+	else if (prob >= probTarget and prob < probTarget+probCache) 
+	{	
+		int a = floor(qrand() * (wayPointCache.size()-1) / RAND_MAX);
+		return wayPointCache[a];
 	}
-	return p;
+	else
+	{
+		while( collision == true )
+		{
+			p[0] =  rangeX * qrand();
+			p[2] =  rangeZ * qrand();
+			collision = collisionDetector(p, zeros, inner);	
+		}
+		return p;
+	}	
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -411,39 +446,13 @@ QVec Planner::sampleFreeSpaceR2(const QVec &currentTarget,  InnerModel *inner)
 
 bool Planner::collisionDetector(const QVec &position, const QVec &rotation, InnerModel *im)
 {
-// 	std::vector<QString> robotNodes;
-// 	std::vector<QString> restNodes;
 	im->updateTransformValues("robot", position.x(), position.y(), position.z(), rotation.x(), rotation.y(), rotation.z());
-	
-// 	printf("RECURSIVE MESHES\n");
-//	recursiveIncludeMeshes(im->getRoot(), "robot", false, robotNodes, restNodes);
-
-	/*	
-	printf("robot: ");
-	for (uint i=0; i<robotNodes.size(); i++)
-		printf("%s ", robotNodes[i].toStdString().c_str());
-	printf("\n");
-	
-	printf("rest: ");
-	for (uint i=0; i<restNodes.size(); i++)
-		printf("%s ", restNodes[i].toStdString().c_str());
-	printf("\n");
-*/
-
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
-		//printf("%s:", robotNodes[in].toStdString().c_str());
-		//im->getNode(robotNodes[in])->collisionObject->computeAABB();
-		//fcl::AABB aabb = im->getNode(robotNodes[in])->collisionObject->getAABB();
-		//fcl::Vec3f v1 = aabb.center();
-// 		printf("--  (%f,  %f,  %f) [%f , %f , %f]", v1[0], v1[1], v1[2], aabb.width(), aabb.height(), aabb.depth());
-// 		printf("\n");
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
-			//printf("%s ", restNodes[out].toStdString().c_str());
 			if (im->collide(robotNodes[in], restNodes[out]))
 			{
-				//printf("\ncolision:   %s <--> %s\n", robotNodes[in].toStdString().c_str(), restNodes[out].toStdString().c_str());
 				return true;
 			}
 		}
@@ -500,6 +509,8 @@ void Planner::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
  */
 QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec> * arbol , tree<QVec>::iterator & nodeCurrentPos)
 {
+	//return trySegmentToTargetBinarySearch(origin, target, reachEnd, arbol, nodeCurrentPos);
+	
 	float stepSize = 100.f; //100 mms chunks
 	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
 	float step;
@@ -526,6 +537,7 @@ QVec Planner::trySegmentToTarget(const QVec & origin , const QVec & target, bool
 		point = (origin * (1-landa)) + (target * landa);
 		
 		//Collision detector
+		//qDebug() << point << origin << target << innerModel->transform("world","robot");
 		if (collisionDetector(point, 0, innerModel) == true)
 		{
 		  reachEnd = false;
@@ -557,59 +569,71 @@ QVec Planner::trySegmentToTargetBinarySearch(const QVec & origin , const QVec & 
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
 	bool hit = false;
 	QVec finalPoint;
-// 	int securityOffset = 0;
-	
-// 	if( MAX_LENGTH_ALONG_RAY < 10) 
-// 	{
-// 		qFatal("Fary. Too close origin and target");
-// 	}
-	
-	// Update robot's position and align it so it looks at the TARGET point 
+	float wRob=600, hRob=1600;
+
+	if( MAX_LENGTH_ALONG_RAY < 50) 
+	{
+		qDebug() << __FUNCTION__ << "target y origin too close";
+		return target;
+	}
+		
+	//Compute angle between origin-target line and world Zaxis
 	float alfa1 = QLine2D(target,origin).getAngleWithZAxis();
-	//float alfa = atan2( (target-origin).x(), (target-origin).z()); 
-	float alfa3 = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
 	
+	// Update robot's position and align it with alfa1 so it looks at the TARGET point 	
 	innerModel->updateTransformValues("robot", origin.x(), origin.y(), origin.z(), 0., alfa1, 0.);
-	qDebug() << alfa1 << alfa3;
 	
 	// Compute rotation matrix between robot and world. Should be the same as alfa
-	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");
+	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");	
 	
 	// Create a tall box for robot body with center at zero and sides:
-	boost::shared_ptr<fcl::Box> robotBox(new fcl::Box(60, 160, 60));
+	boost::shared_ptr<fcl::Box> robotBox(new fcl::Box(wRob, hRob, wRob));
+	
 	// Create a collision object
 	fcl::CollisionObject robotBoxCol(robotBox);
+	
 	//Create and fcl rotation matrix to orient the box with the robot
 	const fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 		
 	//Check collision at maximum distance
 	float hitDistance = MAX_LENGTH_ALONG_RAY;
+	
 	//Resize big box to enlarge it along the ray direction
-	robotBox->side = fcl::Vec3f(60, 160, hitDistance);
+	robotBox->side = fcl::Vec3f(wRob, hRob, hitDistance);
+		
 	//Compute the coord of the tip of a "nose" going away from the robot (Z dir) up to hitDistance/2
-	const QVec boxBack = innerModel->transform("world", QVec::vec3(0, 160/2, hitDistance/2.), "robot");
+	const QVec boxBack = innerModel->transform("world", QVec::vec3(0, hRob/2, hitDistance/2.), "robot");
+	
 	//move the big box so it is aligned with the robot and placed along the nose
 	robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 		
+	//qDebug() << "checking ang" << r1q.extractAnglesR_min().y() << "and size " << boxBack;
+	
+	//Check collision of the box with the world
 	for (uint out=0; out<restNodes.size(); out++)
 	{
 		hit = innerModel->collide(restNodes[out], &robotBoxCol);
 		if (hit) break;
 	}	
-	//Binary search
+	
+	//Binary search. If not free way do a binary search
 	if (hit)
-	{
+	{	
 		hit = false;
 		float min=0;
 		float max=MAX_LENGTH_ALONG_RAY;
+		
 		while (max-min>10)
 		{
-			// Stretch and create the stick
+			//set hitDistance half way
 			hitDistance = (max+min)/2.;
-			robotBox->side = fcl::Vec3f(60,160,hitDistance);
-			const QVec boxBack = innerModel->transform("world", QVec::vec3(0, 160/2, hitDistance/2.), "robot");
+			// Stretch and create the stick
+			robotBox->side = fcl::Vec3f(wRob,hRob,hitDistance);
+			const QVec boxBack = innerModel->transform("world", QVec::vec3(0, hRob/2, hitDistance/2.), "robot");
 			robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 			
+			//qDebug() << "checking ang" << r1q.extractAnglesR_min().y() << "and size " << boxBack << hitDistance;
+
 			// Check collision using current ray length
 			for (uint out=0; out<restNodes.size(); out++)
 			{
@@ -617,29 +641,30 @@ QVec Planner::trySegmentToTargetBinarySearch(const QVec & origin , const QVec & 
 				if (hit)
 					break;
 			}
+			
 			// Manage next min-max range
 			if (hit)
-			{
 				max = hitDistance;
-			}
 			else
-			{
 				min = hitDistance;
-			}
 		}
 		// Set final hit distance
 		hitDistance = (max+min)/2.;
+		
 		reachEnd = false;
-		if( hitDistance < 100) 
+		if( hitDistance < 50) 
 			return origin;
+		
 		finalPoint = innerModel->transform("world", QVec::vec3(0, 0, hitDistance-10), "robot");
 		//nodeCurrentPos = arbol->append_child( nodeCurrentPos, innerModel->transform("world", QVec::vec3(0, 0, hitDistance/2), "robot")); 
 		//nodeCurrentPos = arbol->append_child( nodeCurrentPos, finalPoint);			
+		//qDebug() << "No.." << finalPoint;
 		return finalPoint;
 	}
 	else  //we made it up to the Target!
 	{
 		reachEnd = true;
+		//qDebug() << "Yes.." << target;
 		return target;
 	}
 	// also we might need to insert a few nodes in the tree covering from origin to hitDistance

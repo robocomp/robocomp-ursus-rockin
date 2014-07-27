@@ -20,6 +20,7 @@
 #define SPECIFICWORKER_H
 
 #include <genericworker.h>
+#include "plantwidget.h"
 
 /**
        \brief
@@ -36,12 +37,20 @@ public:
 
 public slots:
  	void compute(); 	
-	void go();
+	void goButton();
 	void goBedRoom();
 	void goLiving();
 	void goKitchen();
 	void goHall();
 	void goDining();
+	void setNewTargetFromPlant(QVec);
+	void setTargetCoorFromPlant(QVec t);
+	
+private:
+	PlantWidget *plantWidget;
+	void go(const QVec &t);
+	QTime reloj;
+	
 };
 
 #endif

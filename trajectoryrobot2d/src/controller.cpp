@@ -32,6 +32,8 @@ Controller::~Controller()
 
 bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  const WayPoints &road)
 {	
+	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive)
+	
 	qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
 	
 	if((road.isBlocked == true) or (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
@@ -66,7 +68,7 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/350.) + 0.8 * road.getRoadCurvatureAtClosestPoint() ;
 		//vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/350. * 0.8);
 	
-		// Limiting filter
+	// Limiting filter
  		if( vrot > MAX_ROT_SPEED ) 
  			vrot = MAX_ROT_SPEED;
  		if( vrot < -MAX_ROT_SPEED ) 
@@ -78,8 +80,8 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		
 		// Factor to be used in speed control when approaching the end of the road
 		float teta;
-		if( road.getRobotDistanceToTarget() < 700)
-			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./200,0.7, 0.1);
+		if( road.getRobotDistanceToTarget() < 1000)
+			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
 		else
 			teta= 1;
 		
@@ -90,6 +92,10 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		
 		vadvance = MAX_ADV_SPEED * exp(-fabs(2.1* road.getRoadCurvatureAtClosestPoint())) * exponentialFunction(vrot, 1, 0.1) * teta;
 		
+		//Pre-limiting filter to avoid displacements in very closed turns
+		if( fabs(vrot) > 1)
+			vadvance = 0.1;
+	
  		// Limiting filter
  		if( vadvance > MAX_ADV_SPEED ) 
  			vadvance = MAX_ADV_SPEED;

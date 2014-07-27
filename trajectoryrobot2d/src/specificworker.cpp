@@ -29,12 +29,12 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-// 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+ 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 	// Move Robot to Hall
-	setRobotInitialPose(800, -10000, M_PI);
+	//setRobotInitialPose(800, -10000, M_PI);
 	
 	//Update InnerModel from robot
 	try { differentialrobot_proxy->getBaseState(bState); }
@@ -45,6 +45,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
 	
+	qDebug() << innerModel->transform("world","robot") << bState.x << bState.z;
+	
+	
  	cleanWorld();
 	
 	//Set target
@@ -53,26 +56,16 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 //	target = QVec::vec3(6000,10,-9100);   //detrás de la mesa
 //	target = QVec::vec3(3000,10,-8100);   //detrás del sofá	
 //	target = QVec::vec3(0,22,3000);
-	
-	
-	
 	//OJO CHANGE chooseRandomPointInFreeSpace to PLAN IN APARTMENT
 	
-	//drawTargeT(target);
 	 
 	//Planning
-	planner = new Planner(*innerModel);									
+	planner = new Planner(*innerModel);					
+	//plannerOMPL = new PlannerOMPL(*innerModel);					
 	qDebug() << __FUNCTION__ << "Planning ...";
-	//planner->computePath(target, innerModel);
-	//if(planner->getPath().size() == 0)
-		//qFatal("SpecificWorker: Path NOT found. Aborting");
 	
 	//Init road
 	road.setInnerModel(innerModel);
-	//road.readRoadFromList( planner->getPath() );
-	//qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
-	//road.print();
-	//road.computeForces();
 	
 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
 	elasticband = new ElasticBand(innerModel);	
@@ -82,7 +75,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	controller = new Controller(2);
 	qDebug() << __FUNCTION__ << "----- controller set";
 	
-// 	//Localizar class
+// 	//Localizer stuff
  	localizer = new Localizer(innerModel);
 // 	
  	sleep(1);
@@ -163,6 +156,7 @@ void SpecificWorker::compute( )
 			drawGreenBoxOnTarget( currentTarget.targetTr );
 			currentTarget.reset();
 			road.reset();
+			compState.elapsedTime = taskReloj.elapsed();
 		}
 		
 		if(road.requiresReplanning == true)
@@ -196,26 +190,40 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 void SpecificWorker::computePlan( InnerModel *inner)
 {
 	QTime reloj = QTime::currentTime();
-	qDebug() << "Computing plan... ";
+	qDebug() << __FUNCTION__ << "Computing plan... ";
+	compState.planning = true;
 	
+	cleanWorld();
 	updateInnerModel(inner);
+	
 	planner->computePath(currentTarget.targetTr, inner);
-	currentTarget.withoutPlan = false;
+	//plannerOMPL->computePath(currentTarget.targetTr, inner);
 	
 	if(planner->getPath().size() == 0)
-		qFatal("SpecificWorker: Path NOT found. Aborting");
+	{
+	//if(plannerOMPL->getPath().size() == 0)
+		qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Aborting";
+		currentTarget.withoutPlan = true;
+	}
+	else
+	{
+		currentTarget.withoutPlan = false;
 	
-	//Init road
-	road.reset();
-	road.readRoadFromList( planner->getPath() );
-	road.requiresReplanning = false;
-	road.computeDistancesToNext();
-	qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
-	road.print();
-	road.computeForces();  //NOT SURE IF NEEDED HERE
-	
-	qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan lenght: " << planner->getPath().size();
-	
+		//Init road
+		road.reset();
+		road.readRoadFromList( planner->getPath() );
+		//road.readRoadFromList( plannerOMPL->getPath() );
+		road.requiresReplanning = false;
+		road.computeDistancesToNext();
+		qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
+		road.print();
+		road.computeForces();  //NOT SURE IF NEEDED HERE
+		
+		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan lenght: " << planner->getPath().size();
+		
+		compState.planningTime = reloj.elapsed();
+		compState.planning = false;
+	}
 }
 
 void SpecificWorker::updateInnerModel(InnerModel *inner)
@@ -330,6 +338,13 @@ void SpecificWorker::go(const TargetPose& target)
 	currentTarget.active = true;
 	currentTarget.targetTr = QVec::vec3(target.x, target.y, target.z);
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
+	taskReloj.restart();
 	qDebug() << __FUNCTION__ << "Curent target received:" << currentTarget.targetTr;
 }
 
+RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
+{
+	QMutexLocker ml(mutex);
+	
+	return compState;
+}
