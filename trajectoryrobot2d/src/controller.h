@@ -33,12 +33,11 @@ class Controller
 		~Controller();
 	
 		bool update( RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_prx,const WayPoints &road);
+		void stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy);
 
 private:
 		QTime time;
 		int delay;
-		float vadvance, vrot;
-		void stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy);
 		float exponentialFunction(float value, float xValue, float yValue, float min = 0.f);
 };
 

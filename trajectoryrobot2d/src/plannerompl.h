@@ -29,6 +29,7 @@
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/LBTRRT.h>
+#include <ompl/base/samplers/ObstacleBasedValidStateSampler.h>
 #include <ompl/config.h>
 //#include <../tests/resources/config.h>
 #include <boost/filesystem.hpp>
@@ -58,6 +59,7 @@ class PlannerOMPL : public QObject
 		std::vector<QString> robotNodes;
 		std::vector<QString> restNodes;
 		float xMin, xMax, zMin, zMax; 		//Limits of environmnent
+		static ob::ValidStateSamplerPtr allocOBValidStateSampler(const ob::SpaceInformation *si);
 };
 
 #endif // PLANNEROMPL_H

@@ -17,18 +17,27 @@
 
 #include "plannerompl.h"
 
+
+
 PlannerOMPL::PlannerOMPL(const InnerModel &innerModel_, QObject *parent)
 {
 	xMin = 0.;
-	xMax = 9000.;
-	zMin = -9600.;
+	xMax = 10000.;
+	zMin = -10000.;
 	zMax = 0.;
 	
 	innerModel = new InnerModel(innerModel_);
+	
+	//Create state space as R2
 	ob::RealVectorStateSpace *space = new ob::RealVectorStateSpace();
 	space->addDimension(xMin, xMax);
 	space->addDimension(zMin, zMax);
+	
+	//Setup class
 	simpleSetUp.reset(new og::SimpleSetup(ob::StateSpacePtr(space)));
+	
+	//set Sampler
+	simpleSetUp->getSpaceInformation()->setValidStateSamplerAllocator(allocOBValidStateSampler);
 	
 	// set state validity checking for this space
 	simpleSetUp->setStateValidityChecker(boost::bind(&PlannerOMPL::isStateValid, this, _1));
@@ -36,10 +45,16 @@ PlannerOMPL::PlannerOMPL(const InnerModel &innerModel_, QObject *parent)
 	simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(0.01);
 	//simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(100 / space->getMaximumExtent());
 	simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRTConnect(simpleSetUp->getSpaceInformation())));
+	simpleSetUp->getPlanner()->as<og::RRTConnect>()->setRange(2000);
 	//simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRT(simpleSetUp->getSpaceInformation())));
 	//simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRTstar(simpleSetUp->getSpaceInformation())));
 	//simpleSetUp->setPlanner(ob::PlannerPtr(new og::PRMstar(simpleSetUp->getSpaceInformation())));
 	//simpleSetUp->setPlanner(ob::PlannerPtr(new og::LBTRRT(simpleSetUp->getSpaceInformation())));
+}
+
+ob::ValidStateSamplerPtr PlannerOMPL::allocOBValidStateSampler(const ob::SpaceInformation *si)
+{
+	return ob::ValidStateSamplerPtr(new ob::ObstacleBasedValidStateSampler(si));
 }
 
 void PlannerOMPL::setInnerModel(const InnerModel& innerModel_)
@@ -52,8 +67,6 @@ bool PlannerOMPL::isStateValid(const ompl::base::State* state) const
 {
 	const float x = std::min((int)state->as<ob::RealVectorStateSpace::StateType>()->values[0], (int)xMax);
 	const float z = std::max((int)state->as<ob::RealVectorStateSpace::StateType>()->values[1], (int)zMin);
-	
-	//qDebug() << "state " << x << z;
 	
 	innerModel->updateTransformValues("robot", x, 0, z, 0, 0, 0);
 	
@@ -101,7 +114,7 @@ bool PlannerOMPL::computePath(const QVec& target, InnerModel* inner)
 	simpleSetUp->setStartAndGoalStates(start, goal);
 	simpleSetUp->getProblemDefinition()->print(std::cout);
 	
-	ob::PlannerStatus solved = simpleSetUp->solve(50);
+	ob::PlannerStatus solved = simpleSetUp->solve(300);
 	
 
 	if (solved)

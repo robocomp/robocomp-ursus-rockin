@@ -48,6 +48,7 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void  go(const TargetPose& target);
 	RoboCompTrajectoryRobot2D::NavState getState();
+	void stop();
 	
 public slots:
  	void compute(); 	
@@ -80,8 +81,8 @@ private:
 	WayPoints road;
 	Controller *controller;
 	ElasticBand *elasticband;
-	Planner *planner;
-	PlannerOMPL *plannerOMPL;
+	Planner *plannerRC;
+	PlannerOMPL *plannerOMPL, *planner;;
 	ForceField *forcefield;
 	Localizer *localizer;
 	
@@ -92,7 +93,7 @@ private:
 	void moveBoxes();
 	void setRobotInitialPose(float x, float z, float alpha);
 	void updateInnerModel(InnerModel *inner);
-	void computePlan(InnerModel *inner);
+	bool computePlan(InnerModel* inner);
 	void drawTarget(const QVec &target);
 	void drawGreenBoxOnTarget(const QVec &target);
 };

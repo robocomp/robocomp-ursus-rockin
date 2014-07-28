@@ -21,6 +21,7 @@
 
 #include <genericworker.h>
 #include "plantwidget.h"
+#include <boost/graph/graph_concepts.hpp>
 
 /**
        \brief
@@ -43,6 +44,12 @@ public slots:
 	void goKitchen();
 	void goHall();
 	void goDining();
+	void goDining2();
+	void goLiving2();
+	void goLiving3();
+	void goDoor();
+	void goEntrance();
+	void stopRobot();
 	void setNewTargetFromPlant(QVec);
 	void setTargetCoorFromPlant(QVec t);
 	

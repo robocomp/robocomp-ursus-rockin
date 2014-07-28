@@ -93,6 +93,8 @@ class WayPoints : public QList< WayPoint >
 		void setRobotDistanceToLastVisible( float dist)										{ robotDistanceToLastVisible = dist;};
 		void setFinished( bool b)															{ finish = b; }
 		bool isFinished() const 															{ return finish;};
+		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
+		float getRobotDistanceVariationToTarget() const 									{ return robotDistanceVariationToTarget;};
 		
 		int nextPointIndex;
 	//	float distanceToLastVisible;
@@ -119,9 +121,11 @@ class WayPoints : public QList< WayPoint >
 		float angleWithTangentAtClosestPoint;
 		float roadCurvatureAtClosestPoint;
 		float robotDistanceToTarget;
+		float robotDistanceVariationToTarget;
 		float robotDistanceToLastVisible;
 		bool finish;
 		InnerModel *innerModel;
+		
 		
 };
 

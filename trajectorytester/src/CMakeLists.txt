@@ -30,7 +30,7 @@ SET ( HEADERS
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior   TrajectoryRobot2D)
+ROBOCOMP_WRAP_ICE( CommonBehavior  TrajectoryRobot2D  DifferentialRobot)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

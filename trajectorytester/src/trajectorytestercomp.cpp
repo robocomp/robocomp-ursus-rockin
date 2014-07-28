@@ -81,6 +81,7 @@
 // #include <Remote.h>
 #include <ui_guiDlg.h>
 #include <TrajectoryRobot2D.h>
+#include <DifferentialRobot.h>
 
 
 // User includes here
@@ -89,6 +90,7 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 using namespace RoboCompTrajectoryRobot2D;
+using namespace RoboCompDifferentialRobot;
 
 
 class TrajectoryTesterComp : public RoboComp::Application
@@ -122,6 +124,7 @@ int TrajectoryTesterComp::run(int argc, char* argv[])
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
+DifferentialRobotPrx differentialrobot_proxy;
 
 
 	string proxy;
@@ -160,7 +163,18 @@ int TrajectoryTesterComp::run(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 	rInfo("TrajectoryRobot2DProxy initialized Ok!");
-	mprx["TrajectoryRobot2DProxy"] = (::IceProxy::Ice::Object*)(&trajectoryrobot2d_proxy);
+	mprx["TrajectoryRobot2DProxy"] = (::IceProxy::Ice::Object*)(&trajectoryrobot2d_proxy);//Remote server proxy creation example
+	try
+	{
+		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("DifferentialRobotProxy") ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("DifferentialRobotProxy initialized Ok!");
+	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);
 	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread

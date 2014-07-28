@@ -30,15 +30,19 @@ Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 {
 	//Clone innermodel
 	innerModel = new InnerModel(innerModel_);
+	MAX_ITER = MAX_ITER_INIT;
+	
+	//Init random sequence generator
+	qsrand ( QTime::currentTime().msec() );
 
 	//Init initializeCache
-	initializeCache();
-	
+	initializeWayPointsCache();
+	initializeRandomR2Cache();
+
 	//Trees (forwardand backward) creation
 	arbol = new tree<QVec>;
 	arbolGoal = new tree<QVec>;
 	PATH_FOUND = false;
-	MAX_ITER = 5000;
 }
 
 /**
@@ -47,6 +51,8 @@ Planner::Planner(const InnerModel &innerModel_, QObject *parent)
 */
 bool Planner::computePath(const QVec &target, InnerModel *inner)
 {	
+	//static QTime reloj = QTime::currentTime();
+	
 	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning with target at:" << target << "and robot at:" << inner->transform("world","robot");
 	
 	QVec currentTarget = target;  //local variable to get samples from free space
@@ -71,8 +77,6 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 		return false;
 	}
 		
-	//Init random sequence generator
-	qsrand ( QTime::currentTime().msec() );
 	
 	//Clean trees
  	arbol->clear();
@@ -98,15 +102,17 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 	for(i=0; i< MAX_ITER; i++)
 	{
 		//get new point from random sequence. First point is always the target
-		if( i>0)
-			currentTarget = sampleFreeSpaceR2(target, innerModel);
+		currentTarget = sampleFreeSpaceR2(target, innerModel);
 		
+		//qDebug() << "in sampleFreeSpaceR2: " << reloj.restart();
 		// find closest point from random point to tree
 		nodeCurrentPos = findClosestPointInTree( arbol, currentTarget);	
 		
+		//qDebug() << "findClosestPointInTree: " << reloj.restart();
 		//copy nodeCurrentPos to aux so nodeCurrentPos is not modified when calling trySegmentToTarget
 		auxNode = nodeCurrentPos;
 		res = trySegmentToTarget( *nodeCurrentPos, currentTarget, reachEnd, arbol, auxNode);
+		//qDebug() << "trySegmentToTarget First Tree: " << reloj.restart();
 		//res = trySegmentToTargetBinarySearch( *nodeCurrentPos, currentTarget, reachEnd, arbol, auxNode);		
 		// Can  only be equal if random point accidentally falls on tree
 		if (equal(res, *nodeCurrentPos) == false) //Not achieved goal
@@ -117,11 +123,11 @@ bool Planner::computePath(const QVec &target, InnerModel *inner)
 		
 		//search for closest point to res un goal tree
 		nodeCurrentPosGoal = findClosestPointInTree( arbolGoal, res);		
-	
+		//qDebug() << "findClosestPointInTree Second Tree: " << reloj.restart();
 		//copy nodeCurrentPos to aux so nodeCurrentPos is not modified when calling trySegmentToTarget
 		auxNodeGoal = nodeCurrentPosGoal;
 		resGoal = trySegmentToTarget( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, auxNodeGoal);		
-	
+		//qDebug() << "trySegmentToTarget Second Tree: " << reloj.restart();
 		//resGoal = trySegmentToTargetBinarySearch( *nodeCurrentPosGoal, res, reachEnd, arbolGoal, auxNodeGoal);		
 
 		// if origin and goal are not the same point, add resGoal to tree
@@ -221,8 +227,7 @@ void Planner::storePlanInCache(QList< QVec > currentPath)
 	}
 }
 
-
-void Planner::initializeCache()
+void Planner::initializeWayPointsCache()
 {
 	for(int i=0; i<MAX_WAYPOINT_CACHE; i++)
 	{
@@ -230,6 +235,26 @@ void Planner::initializeCache()
 	}
 }
 
+void Planner::initializeRandomR2Cache()
+{
+	randomR2Cache.resize(MAX_RANDOM_R2_CACHE);
+	for(int i=0; i<MAX_RANDOM_R2_CACHE; i++)
+	{
+		randomR2Cache[i] = QVec::vec3( qrand()*10000.f/RAND_MAX, 0, -qrand()*10000.f/RAND_MAX );
+	}
+}
+
+QVec Planner::getPointFromRandomR2Cache()
+{
+	static int i=0;
+	
+	if(i == MAX_RANDOM_R2_CACHE )
+	{
+		initializeRandomR2Cache();
+		i=0;
+	}
+	return randomR2Cache[i++];
+}
 
 	
 /**
@@ -407,36 +432,42 @@ void Planner::smoothPathStochastic(QList< QVec >& list)
 
 QVec Planner::sampleFreeSpaceR2(const QVec &currentTarget,  InnerModel *inner)
 {
+	static bool firstTime = true;
 	float probTarget = 10;
 	float probCache = 40;
 	
-	const float widthX = 10000;
- 	const float widthZ = -10000;
-	const QVec zeros(3,0.f);
-	bool collision = true;
-	float rangeX = widthX / RAND_MAX;
-	float rangeZ = widthZ / RAND_MAX;
-	
+// 	const float widthX = 10000;
+//  	const float widthZ = -10000;
+ 	const QVec zeros(3,0.f);
+ 	bool collision = true;
+// 	float rangeX = widthX / RAND_MAX;
+// 	float rangeZ = widthZ / RAND_MAX;
+// 	
 	QVec p(3,0.f);
 
 	float prob = qrand()*100.f/RAND_MAX;
+	
+	if( firstTime == true)
+	{
+		return currentTarget;
+		firstTime = false;
+	}
+	
 	if( prob < probTarget) 
 		return currentTarget;
-	else if (prob >= probTarget and prob < probTarget+probCache) 
+	
+	if (prob >= probTarget and prob < probTarget+probCache) 
 	{	
 		int a = floor(qrand() * (wayPointCache.size()-1) / RAND_MAX);
 		return wayPointCache[a];
 	}
-	else
+	
+	while( collision == true )
 	{
-		while( collision == true )
-		{
-			p[0] =  rangeX * qrand();
-			p[2] =  rangeZ * qrand();
-			collision = collisionDetector(p, zeros, inner);	
-		}
-		return p;
-	}	
+		p = getPointFromRandomR2Cache();	
+		collision = collisionDetector(p, zeros, inner);	
+	}
+	return p;
 }
 
 ////////////////////////////////////////////////////////////////////////

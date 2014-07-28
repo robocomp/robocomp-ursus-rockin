@@ -22,17 +22,23 @@
 #include <QMouseEvent>
 #include <QGraphicsView>
 #include <qmat/QMatAll>
+ #include <QGraphicsPixmapItem>
 
 class PlantWidget : public QGraphicsView
  {
 	Q_OBJECT
 
 	public:
-		PlantWidget(QFrame *parent);
+		PlantWidget(QFrame* parent, QPointF pxCorner_, QPointF RXCorner_, QPointF pzCorner_, QPointF PZCorner_);
+		void moveRobot(float x, float y, float alfa);
 
 	private:
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent *event);
+		QPointF pxCorner, pzCorner, RXCorner, RZCorner;
+		QGraphicsPixmapItem *robPtr;
+		QList<QPair<QPointF,QPointF> > intervals, intervalsI;
+		QMat m, mI;
 		
 	signals:
 		void mouseMove(QVec);

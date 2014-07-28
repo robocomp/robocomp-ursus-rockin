@@ -60,8 +60,10 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	 
 	//Planning
-	planner = new Planner(*innerModel);					
-	//plannerOMPL = new PlannerOMPL(*innerModel);					
+	//planner = new Planner(*innerModel);					
+	plannerOMPL = new PlannerOMPL(*innerModel);			
+	plannerRC = new Planner(*innerModel);
+	planner = plannerOMPL;
 	qDebug() << __FUNCTION__ << "Planning ...";
 	
 	//Init road
@@ -93,32 +95,32 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::computeLuis( )
 {	
-	printf("############################################################################\n");
-	try
-	{
-		differentialrobot_proxy->getBaseState(bState);
-	}
-	catch(const Ice::Exception &ex)
-	{
-		cout << ex << endl;
-	}
-	try { laserData = laser_proxy->getLaserData(); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; }
-
-
-	innerModel->updateTranslationValues("robot", bState.x, 10, bState.z);
-	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
-
-	QVec point = innerModel->transform("world", "robot");
-	point.print("robot segun IM bueno");
-// 	innerClon->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
-// 	point = innerClon->transform("world", "robot");
-// 	point.print("robot segun IM clonado");
-	
-	// OJO con el Inner que se le manda
-	if (planner->collisionDetector(point, 0, innerModel) == true) 
-		printf("colision\n");
-	usleep(500000);
+// 	printf("############################################################################\n");
+// 	try
+// 	{
+// 		differentialrobot_proxy->getBaseState(bState);
+// 	}
+// 	catch(const Ice::Exception &ex)
+// 	{
+// 		cout << ex << endl;
+// 	}
+// 	try { laserData = laser_proxy->getLaserData(); }
+// 	catch(const Ice::Exception &ex) { cout << ex << endl; }
+// 
+// 
+// 	innerModel->updateTranslationValues("robot", bState.x, 10, bState.z);
+// 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
+// 
+// 	QVec point = innerModel->transform("world", "robot");
+// 	point.print("robot segun IM bueno");
+// // 	innerClon->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
+// // 	point = innerClon->transform("world", "robot");
+// // 	point.print("robot segun IM clonado");
+// 	
+// 	// OJO con el Inner que se le manda
+// 	if (planner->collisionDetector(point, 0, innerModel) == true) 
+// 		printf("colision\n");
+// 	usleep(500000);
 	
 // 	localizer->localize(laserData, innerModel);
 }
@@ -138,11 +140,12 @@ void SpecificWorker::compute( )
 	
 	updateInnerModel(innerModel);
 
-	if (currentTarget.active == true)
+	mutex->lock();
+		bool doIt = (currentTarget.active == true) and computePlan(innerModel);
+	mutex->unlock();
+	
+	if ( doIt )
 	{
-		if( currentTarget.withoutPlan == true)
-			computePlan(innerModel);
-		
 		elasticband->update( road, laserData );
 		
 		road.computeForces();
@@ -167,7 +170,10 @@ void SpecificWorker::compute( )
 		
 	//	localizer->localize(laserData, innerModel, 20);
 	}
+	else
+		controller->stopTheRobot(differentialrobot_proxy);
 	
+	//Draw in RCIS
 	if(reloj.elapsed() > 2000) 
 	{
 		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
@@ -187,8 +193,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	return true;
 };
 
-void SpecificWorker::computePlan( InnerModel *inner)
+bool SpecificWorker::computePlan( InnerModel *inner)
 {
+	if( currentTarget.withoutPlan == false) 
+		return true;
+		
 	QTime reloj = QTime::currentTime();
 	qDebug() << __FUNCTION__ << "Computing plan... ";
 	compState.planning = true;
@@ -197,13 +206,12 @@ void SpecificWorker::computePlan( InnerModel *inner)
 	updateInnerModel(inner);
 	
 	planner->computePath(currentTarget.targetTr, inner);
-	//plannerOMPL->computePath(currentTarget.targetTr, inner);
 	
 	if(planner->getPath().size() == 0)
 	{
-	//if(plannerOMPL->getPath().size() == 0)
 		qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Aborting";
-		currentTarget.withoutPlan = true;
+		currentTarget.reset();
+		return false;
 	}
 	else
 	{
@@ -212,18 +220,18 @@ void SpecificWorker::computePlan( InnerModel *inner)
 		//Init road
 		road.reset();
 		road.readRoadFromList( planner->getPath() );
-		//road.readRoadFromList( plannerOMPL->getPath() );
 		road.requiresReplanning = false;
 		road.computeDistancesToNext();
 		qDebug() << __FUNCTION__ << "----- Plan obtained with elements" << road.size();	
 		road.print();
 		road.computeForces();  //NOT SURE IF NEEDED HERE
 		
-		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan lenght: " << planner->getPath().size();
+		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
 		
 		compState.planningTime = reloj.elapsed();
 		compState.planning = false;
 	}
+	return true;
 }
 
 void SpecificWorker::updateInnerModel(InnerModel *inner)
@@ -344,7 +352,12 @@ void SpecificWorker::go(const TargetPose& target)
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 {
-	QMutexLocker ml(mutex);
-	
+	//QMutexLocker ml(mutex);  //We need a compState class threadsafe!!!!
 	return compState;
+}
+
+void SpecificWorker::stop()
+{
+	QMutexLocker ml(mutex);
+	currentTarget.reset();
 }

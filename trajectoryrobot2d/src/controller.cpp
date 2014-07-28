@@ -20,10 +20,10 @@
 
 #include "controller.h"
 
-Controller::Controller(int delay)
+Controller::Controller(int delay)  //in secs
 {
 	time = QTime::currentTime();
-	this->delay = delay;
+	this->delay = delay*1000;
 }
 
 Controller::~Controller()
@@ -32,7 +32,10 @@ Controller::~Controller()
 
 bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  const WayPoints &road)
 {	
-	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive)
+	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive). 
+	static long epoch = 100;
+	
+	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	
 	qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
 	
@@ -53,10 +56,19 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 // 		return false;
 // 	}
 	
-	if ( time.elapsed() > delay*1000 )   //ojo desbordamientos
+	if ( time.elapsed() > delay )   //Initial wait in secs
 	{
-		const float MAX_ADV_SPEED = 600;
-		const float MAX_ROT_SPEED = 0.7;
+		//qDebug() << "epoch" << epoch;
+		float MAX_ADV_SPEED = 600.f;
+		float MAX_ROT_SPEED = 0.7;
+		if( (epoch-100) > 0 )				//Damp max speeds if elapsed time is too long
+		{
+			MAX_ADV_SPEED = 600 * exponentialFunction(epoch-100, 200, 0.2);
+			MAX_ROT_SPEED = 0.7 * exponentialFunction(epoch-100, 200, 0.2);
+		}	
+		
+		float vadvance = 0;
+		float vrot = 0;
 		
 		/////////////////////////////////////////////////
 		//////   ROTATION SPEED
@@ -66,7 +78,6 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		// as descirbed in Thrun's paper on DARPA challenge
 		
 		vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/350.) + 0.8 * road.getRoadCurvatureAtClosestPoint() ;
-		//vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/350. * 0.8);
 	
 	// Limiting filter
  		if( vrot > MAX_ROT_SPEED ) 
@@ -85,12 +96,23 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		else
 			teta= 1;
 		
-		//VAdv is computed as a reduction of MAX_ADV_SPEED by three functions: 
+// 		if( (road.getRobotDistanceToTarget() < 1000) and (derRobotDistanceToTarget < 0) and (vadvance > 0))
+// 		{
+// 			sunk = 0;
+// 			road.
+// 		}
+		
+		//VAdv is computed as a reduction of MAX_ADV_SPEED by three computed functions: 
 		//				* road curvature reduces forward speed
 		//				* VRot reduces forward speed
 		//				* teta that applies when getting close to the target (1/roadGetCurvature)
+		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
 		
-		vadvance = MAX_ADV_SPEED * exp(-fabs(2.1* road.getRoadCurvatureAtClosestPoint())) * exponentialFunction(vrot, 1, 0.1) * teta;
+		vadvance = MAX_ADV_SPEED * exp(-fabs(2.1* road.getRoadCurvatureAtClosestPoint())) 
+								 * exponentialFunction(vrot, 0.8, 0.1)
+								 * teta;
+								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1) 
+								 //* sunk;
 		
 		//Pre-limiting filter to avoid displacements in very closed turns
 		if( fabs(vrot) > 1)
@@ -113,18 +135,20 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
  		qDebug() << "Controller::update - VAdv = " << vadvance << " VRot = " << vrot << "teta" << teta << "atan term" << atan( road.getRobotPerpendicularDistanceToRoad() )*0.2;
  
    		try {	differentialrobot_proxy->setSpeedBase( vadvance, vrot);	} 
-   		catch (const Ice::Exception &e) { std::cout << e << std::endl;		}	
+   		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl;		}	
 	}
 	else
 		try {	differentialrobot_proxy->setSpeedBase( 0, 0);	} 
-		catch (const Ice::Exception &e) { std::cout << e << std::endl;		}	
+		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl;		}	
 	
+	epoch = reloj.restart();  //epcoh time in ms
 	return false;
 		
 }
 
 void Controller::stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy)
 {
+	///CHECK IF ROBOT IS MOVING BEFORE
 	try {	differentialrobot_proxy->setSpeedBase( 0.f, 0.f);	} 
 	catch (const Ice::Exception &e) { std::cout << e << std::endl;}	
 }

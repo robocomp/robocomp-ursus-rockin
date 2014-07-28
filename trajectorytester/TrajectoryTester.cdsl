@@ -1,10 +1,11 @@
+import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
 import "/robocomp/interfaces/IDSLs/TrajectoryRobot2D.idsl";
 
 Component TrajectoryTesterComp
 {
 	Communications
 	{
-		requires TrajectoryRobot2D;
+		requires TrajectoryRobot2D, DifferentialRobot;
 	};
 	language Cpp;
 	gui Qt(QWidget);

@@ -28,6 +28,7 @@
 #include <ui_guiDlg.h>
 #include "config.h"
 #include <TrajectoryRobot2D.h>
+#include <DifferentialRobot.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -41,6 +42,7 @@ using namespace std;
        @author authorname
 */
 using namespace RoboCompTrajectoryRobot2D;
+using namespace RoboCompDifferentialRobot;
 class GenericWorker :
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
@@ -59,6 +61,7 @@ public:
 	QMutex *mutex;                //Shared mutex with servant
 
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
+	DifferentialRobotPrx differentialrobot_proxy;
 protected:
 	QTimer timer;
 	int Period;

@@ -7,3 +7,4 @@ CommonBehavior.Endpoints=tcp -p 12222
 #RemoteProxy = remote:tcp -h remotehost -p 10001
 
 TrajectoryRobot2DProxy = trajectoryrobot2d:tcp -h localhost -p 12204
+DifferentialRobotProxy = differentialrobot:tcp -h localhost -p 10004

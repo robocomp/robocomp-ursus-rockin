@@ -40,4 +40,8 @@ NavState TrajectoryRobot2DI::getState(const Ice::Current&){
 	return worker->getState();
 }
 
+void TrajectoryRobot2DI::stop(const Ice::Current&){
+	worker->stop();
+}
+
 

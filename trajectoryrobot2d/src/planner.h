@@ -31,7 +31,10 @@
 #include "waypoints.h"
 //#include <nabo/nabo.h>
 
-#define MAX_WAYPOINT_CACHE 1000
+#define MAX_WAYPOINT_CACHE 500
+#define MAX_RANDOM_R2_CACHE 10000
+#define MAX_ITER_INIT 5000
+
 
 using namespace RoboCompInnerModelManager;
 
@@ -59,13 +62,18 @@ private:
 	tree<QVec>::pre_order_iterator CURRENT_LEAF, CURRENT_LEAF_GOAL;
 	QVec fsX, fsZ;
 	int ind;
+	int MAX_ITER;
 	QVec finalTarget;
 	bool  PATH_FOUND;
 	QVec p1,p2,origin,target;
-	int MAX_ITER;
 	QList<QVec> currentSmoothedPath;
+	
+	//Caches
 	QList<QVec> wayPointCache;									// To store succesful plans
-	void initializeCache();
+	void initializeWayPointsCache();
+	QVector<QVec> randomR2Cache;
+	void initializeRandomR2Cache();
+	QVec getPointFromRandomR2Cache();
 	
 	QVec trySegmentToTarget(const QVec & origin, const QVec & target, bool & reachEnd, tree<QVec>  *arbol, tree<QVec>::iterator & nodeCurrentPos);
 	QVec trySegmentToTargetBinarySearch(const QVec & origin , const QVec & target, bool & reachEnd, tree<QVec> * arbol , tree<QVec>::iterator & nodeCurrentPos);

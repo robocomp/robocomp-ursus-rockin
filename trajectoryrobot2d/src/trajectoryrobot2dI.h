@@ -38,7 +38,8 @@ public:
 	TrajectoryRobot2DI( GenericWorker *_worker, QObject *parent = 0 );
 	~TrajectoryRobot2DI();
 	void  go(const TargetPose& target, const Ice::Current& = Ice::Current());
-	NavState getState(const Ice::Current& = Ice::Current());
+NavState getState(const Ice::Current& = Ice::Current());
+void  stop(const Ice::Current& = Ice::Current());
 
 
 	QMutex *mutex;

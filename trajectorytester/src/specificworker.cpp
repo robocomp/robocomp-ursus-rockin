@@ -32,12 +32,20 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	connect(hallPushButton, SIGNAL(clicked()), this, SLOT(goHall()));
 	connect(diningPushButton, SIGNAL(clicked()), this, SLOT(goDining()));
 	connect(livingPushButton, SIGNAL(clicked()), this, SLOT(goLiving()));
+	connect(entrancePushButton, SIGNAL(clicked()), this, SLOT(goEntrance()));
+	connect(livingPushButton_2, SIGNAL(clicked()), this, SLOT(goLiving2()));
+	connect(livingPushButton_3, SIGNAL(clicked()), this, SLOT(goLiving3()));
+	connect(doorPushButton, SIGNAL(clicked()), this, SLOT(goDoor()));
+	connect(diningPushButton_2, SIGNAL(clicked()), this, SLOT(goDining2()));
+	connect(stopButton, SIGNAL(clicked()), this, SLOT(stopRobot()));
 	
-	plantWidget = new PlantWidget(frame);
+	plantWidget = new PlantWidget(frame, QPointF(82,457), QPointF(0,10000), QPointF(65,387), QPointF(0,-10000));
 	plantWidget->show();
 	
 	connect(plantWidget, SIGNAL(mouseMove(QVec)), this, SLOT(setTargetCoorFromPlant(QVec)));
 	connect(plantWidget, SIGNAL(mousePress(QVec)), this, SLOT(setNewTargetFromPlant(QVec)));
+	
+	
 	
 }
 
@@ -50,7 +58,6 @@ SpecificWorker::~SpecificWorker()
 }
 void SpecificWorker::compute( )
 {
-	//segsLcdNumber->display(reloj.elapsed());	
 	try
 	{
 		RoboCompTrajectoryRobot2D::NavState state = trajectoryrobot2d_proxy->getState();
@@ -61,8 +68,20 @@ void SpecificWorker::compute( )
 	}
 	catch(const Ice::Exception &ex)
 	{
-		std::cout << ex << std::endl;
+		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
 	}
+	try
+	{
+		RoboCompDifferentialRobot::TBaseState bState;
+		differentialrobot_proxy->getBaseState(bState);
+		plantWidget->moveRobot( bState.x, bState.z, bState.alpha);
+		
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << "Error talking to Differentialrobot" << std::endl;
+	}
+
 }
 
 
@@ -93,7 +112,6 @@ void SpecificWorker::go(const QVec& t)
 
 void SpecificWorker::goButton()
 {
-	RoboCompTrajectoryRobot2D::TargetPose tp;
 	go(QVec::vec3(xSpinBox->value(),0, zSpinBox->value()));
 }
 
@@ -102,9 +120,34 @@ void SpecificWorker::goDining()
 	go(QVec::vec3(6000,0,-9100));
 }
 
+void SpecificWorker::goDining2()
+{
+	go(QVec::vec3(4600,0,-7800));
+}
+
 void SpecificWorker::goLiving()
 {
 	go(QVec::vec3(3000,0,-8100));
+}
+
+void SpecificWorker::goLiving2()
+{
+	go(QVec::vec3(666,0,-7861));
+}
+
+void SpecificWorker::goLiving3()
+{
+	go(QVec::vec3(790,0,-5062));
+}
+
+void SpecificWorker::goEntrance()
+{
+	go(QVec::vec3(2700,0,-4000));
+}
+
+void SpecificWorker::goDoor()
+{
+	go(QVec::vec3(4500,0,-3200));
 }
 
 void SpecificWorker::goKitchen()
@@ -135,4 +178,12 @@ void SpecificWorker::setNewTargetFromPlant(QVec t)
 	xLcd->display(t.x());
 	yLcd->display(t.z());
 	go(t);
+}
+
+void SpecificWorker::stopRobot()
+{
+	try
+	{	trajectoryrobot2d_proxy->stop();	}
+	catch(const Ice::Exception &ex)
+	{		std::cout << ex << "Error talking to TrajectoryRobot2D" << std::endl;	}
 }

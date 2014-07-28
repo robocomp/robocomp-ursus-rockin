@@ -160,6 +160,7 @@ void WayPoints::printRobotState(InnerModel* innerModel)
 		qDebug() << "	Robot perp. dist to road tangent at closest point:" << getRobotPerpendicularDistanceToRoad();
 		qDebug() << "	Angle with road:" << getAngleWithTangentAtClosestPoint();
 		qDebug() << "	Dist to target:" << getRobotDistanceToTarget();
+		qDebug() << "	Distance variation to target:" << getRobotDistanceVariationToTarget();
 		qDebug() << "	Road curvature:" << getRoadCurvatureAtClosestPoint();
 		qDebug() << "	Index of closest point:" << getIndexOfClosestPointToRobot();
 		qDebug() << "	Closest point:" << (*this)[getIndexOfClosestPointToRobot()].pos;
@@ -364,12 +365,17 @@ float WayPoints::computeDistanceToLastVisible(WayPoints::iterator closestPoint, 
  */
 float WayPoints::computeDistanceToTarget(WayPoints::iterator closestPoint, const QVec &robotPos)
 {
+	static  float antDist = (robotPos - closestPoint->pos).norm2();
+	
 	float dist = (robotPos - closestPoint->pos).norm2();
 	WayPoints::iterator it;
 	for(it = closestPoint; it != end()-1; ++it)
 	{
 		dist += (it->pos - (it+1)->pos).norm2();
 	}
+	float distE = (robotPos - it->pos).norm2();
+	robotDistanceVariationToTarget = distE - antDist;
+	antDist = distE;
 	return dist;
 }
 
@@ -404,6 +410,7 @@ float WayPoints::computeRoadCurvature(WayPoints::iterator closestPoint, uint poi
  */
 void WayPoints::computeForces()
 {
+	
 	//Get robot's position in world and create robot's nose
 	QVec robot3DPos = innerModel->transform("world", "robot");
 	QVec noseInRobot = innerModel->transform("world", QVec::vec3(0,0,1000), "robot");
@@ -418,18 +425,21 @@ void WayPoints::computeForces()
 	
 	QLine2D tangent = computeTangentAt( closestPoint );
 	setTangentAtClosestPoint(tangent);
+	
 	//Compute signed perpenduicular distance from robot to tangent at closest point
 	setRobotPerpendicularDistanceToRoad( tangent.perpendicularDistanceToPoint(robot3DPos) );
 	float ang = nose.signedAngleWithLine2D( tangent );
 	if (isnan(ang))
 		ang = 0;
  	setAngleWithTangentAtClosestPoint( ang );
-	//compute distanceToTarget along trajectory
-  	setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );
+	
+	//Compute distanceToTarget along trajectory
+  	setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );  //computes robotDistanceVariationToTarget
+	setRobotDistanceVariationToTarget( robotDistanceVariationToTarget);
 	
 	//Check for arrival to target  TOO SIMPLE 
-	if(	( (int)getCurrentPointIndex()+1 == (int)size())  and  
-		( getRobotDistanceToTarget() < 100)) 
+	if(	( ((int)getCurrentPointIndex()+1 == (int)size())  and  ( getRobotDistanceToTarget() < 100) )
+		or ( (getRobotDistanceToTarget() < 1000) and ( getRobotDistanceVariationToTarget() > 0) ) )
 		setFinished(true);
 	
 	//compute curvature of trajectory at closest point to robot
