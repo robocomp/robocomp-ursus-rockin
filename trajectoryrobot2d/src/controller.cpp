@@ -115,8 +115,8 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 								 //* sunk;
 		
 		//Pre-limiting filter to avoid displacements in very closed turns
-		if( fabs(vrot) > 1)
-			vadvance = 0.1;
+		if( fabs(vrot) > 0.8)
+			vadvance = 0;
 	
  		// Limiting filter
  		if( vadvance > MAX_ADV_SPEED ) 
@@ -132,7 +132,7 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		//////   EXECUTION
 		////////////////////////////////////////////////
 		
- 		qDebug() << "Controller::update - VAdv = " << vadvance << " VRot = " << vrot << "teta" << teta << "atan term" << atan( road.getRobotPerpendicularDistanceToRoad() )*0.2;
+ 		qDebug() << __FUNCTION__ << "VAdv = " << vadvance << " VRot = " << vrot;
  
    		try {	differentialrobot_proxy->setSpeedBase( vadvance, vrot);	} 
    		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl;		}	

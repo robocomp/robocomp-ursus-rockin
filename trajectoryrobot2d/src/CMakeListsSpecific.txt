@@ -12,6 +12,7 @@ SET ( SOURCES
   forcefield.cpp
   localizer.cpp
   plannerompl.cpp
+  currenttarget.cpp
   #ParabolicPathSmooth/smoother.cpp
 )
 

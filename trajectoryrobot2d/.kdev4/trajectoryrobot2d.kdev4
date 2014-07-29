@@ -34,4 +34,4 @@ isExecutable=true
 VersionControlSupport=kdevgit
 
 [SourceFileTemplates]
-LastUsedTemplate=/home/pbustos/.kde/share/apps/kdevfiletemplates/template_descriptions/qobject.desktop
+LastUsedTemplate=/home/pbustos/.kde/share/apps/kdevfiletemplates/template_descriptions/cpp_basic.desktop

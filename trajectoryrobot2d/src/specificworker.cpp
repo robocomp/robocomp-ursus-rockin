@@ -45,22 +45,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
 	
-	qDebug() << innerModel->transform("world","robot") << bState.x << bState.z;
-	
-	
  	cleanWorld();
-	
-	//Set target
-	//target = QVec::vec3(8000,10,-1000);
- //	target = QVec::vec3(7000,10,-1500);	// dormitorio
-//	target = QVec::vec3(6000,10,-9100);   //detrás de la mesa
-//	target = QVec::vec3(3000,10,-8100);   //detrás del sofá	
-//	target = QVec::vec3(0,22,3000);
-	//OJO CHANGE chooseRandomPointInFreeSpace to PLAN IN APARTMENT
-	
-	 
+		 
 	//Planning
-	//planner = new Planner(*innerModel);					
 	plannerOMPL = new PlannerOMPL(*innerModel);			
 	plannerRC = new Planner(*innerModel);
 	planner = plannerOMPL;
@@ -140,12 +127,10 @@ void SpecificWorker::compute( )
 	
 	updateInnerModel(innerModel);
 
-	mutex->lock();
-		bool doIt = (currentTarget.active == true) and computePlan(innerModel);
-	mutex->unlock();
-	
-	if ( doIt )
+	if ( currentTarget.isActive() )
 	{
+		computePlan(innerModel);
+	
 		elasticband->update( road, laserData );
 		
 		road.computeForces();
@@ -156,7 +141,7 @@ void SpecificWorker::compute( )
 		
 		if (road.isFinished() == true)
 		{
-			drawGreenBoxOnTarget( currentTarget.targetTr );
+			drawGreenBoxOnTarget( currentTarget.getTranslation() );
 			currentTarget.reset();
 			road.reset();
 			compState.elapsedTime = taskReloj.elapsed();
@@ -170,8 +155,6 @@ void SpecificWorker::compute( )
 		
 	//	localizer->localize(laserData, innerModel, 20);
 	}
-	else
-		controller->stopTheRobot(differentialrobot_proxy);
 	
 	//Draw in RCIS
 	if(reloj.elapsed() > 2000) 
@@ -195,7 +178,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 bool SpecificWorker::computePlan( InnerModel *inner)
 {
-	if( currentTarget.withoutPlan == false) 
+	if( currentTarget.isWithoutPlan() == false) 
 		return true;
 		
 	QTime reloj = QTime::currentTime();
@@ -205,7 +188,7 @@ bool SpecificWorker::computePlan( InnerModel *inner)
 	cleanWorld();
 	updateInnerModel(inner);
 	
-	planner->computePath(currentTarget.targetTr, inner);
+	planner->computePath(currentTarget.getTranslation(), inner);
 	
 	if(planner->getPath().size() == 0)
 	{
@@ -215,7 +198,7 @@ bool SpecificWorker::computePlan( InnerModel *inner)
 	}
 	else
 	{
-		currentTarget.withoutPlan = false;
+		currentTarget.setWithoutPlan( false );
 	
 		//Init road
 		road.reset();
@@ -341,23 +324,21 @@ void SpecificWorker::drawGreenBoxOnTarget(const QVec& target)
 
 void SpecificWorker::go(const TargetPose& target)
 {
-	QMutexLocker ml(mutex);
-	
-	currentTarget.active = true;
-	currentTarget.targetTr = QVec::vec3(target.x, target.y, target.z);
+	currentTarget.setActive(true);
+	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
-	qDebug() << __FUNCTION__ << "Curent target received:" << currentTarget.targetTr;
+	qDebug() << __FUNCTION__ << "Curent target received:" << currentTarget.getTranslation();
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 {
-	//QMutexLocker ml(mutex);  //We need a compState class threadsafe!!!!
 	return compState;
 }
 
 void SpecificWorker::stop()
 {
-	QMutexLocker ml(mutex);
 	currentTarget.reset();
+	controller->stopTheRobot(differentialrobot_proxy);
+
 }

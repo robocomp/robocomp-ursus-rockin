@@ -167,13 +167,24 @@
 				</transform>
 			</transform>
 			
-			
-			<!--<transform id="torchere_1_t" tx="500" tz="-5400">
+			<transform id="mesanoche1_t" tx="9400" tz="-1200">
+				<mesh id="mesanoche1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/mesa_centro_larga.osg" rx="1.57" scale="29,58,200"  />
+			</transform>
+			<transform id="mesanoche2_t" tx="9400" tz="-3400">
+				<mesh id="mesanoche2" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/mesa_centro_larga.osg" rx="1.57" scale="29,58,200"  />
+			</transform>
+			<transform id="macetero1_t" tx="4000" tz="-4500" ty="70">
+				<mesh id="macetero1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/macetero.osg" rx="1.57" rz="-1.57" scale="7,7,7"  />
+			</transform>
+			<transform id="macetero2_t" tx="9600" tz="-600" ty="70">
+				<mesh id="macetero2" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/macetero.osg" rx="1.57" scale="7,7,7"  />
+			</transform>
+			<transform id="torchere_1_t" tx="500" tz="-5400">
 				<mesh id="torchere1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Torchere 2.3DS"  rx="1.57" rz="1.57"  scale="1,1,1"  />
 			</transform>
 			<transform id="torchere_2_t" tx="4200" tz="-8300">
 				<mesh id="torchere2" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Torchere 2.3DS"  rx="1.57" rz="1.57"  scale="1,1,1"  />
-			</transform>-->
+			</transform>
 			<transform id="dinin_table_t" tx="6400" tz="-7700" ry="1.57">
 				<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,200"  />
 			</transform>

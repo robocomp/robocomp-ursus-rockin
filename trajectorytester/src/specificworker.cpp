@@ -87,7 +87,7 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-	timer.start(Period);
+	timer.start(250);
 	return true;
 };
 
@@ -147,12 +147,12 @@ void SpecificWorker::goEntrance()
 
 void SpecificWorker::goDoor()
 {
-	go(QVec::vec3(4500,0,-3200));
+	go(QVec::vec3(4500,0,-3300));
 }
 
 void SpecificWorker::goKitchen()
 {
-	go(QVec::vec3(6000,0,-6100));
+	go(QVec::vec3(6000,0,-5300));
 }
 
 void SpecificWorker::goBedRoom()

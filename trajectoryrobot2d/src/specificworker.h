@@ -31,6 +31,7 @@
 #include "forcefield.h"
 #include "localizer.h"
 #include "plannerompl.h"
+#include "currenttarget.h"
 
 //#include "ParabolicPathSmooth/smoother.h"
 
@@ -56,18 +57,7 @@ public slots:
 	
 private:
 	
-	struct CurrentTarget   ///METER MUTEX AQUI
-	{
-		QVec targetTr;
-		QVec targetRot;
-		bool active;
-		bool withoutPlan;
-		CurrentTarget() {active = false; targetTr = QVec::zeros(3); targetRot = QVec::zeros(3); withoutPlan = true;};
-		void reset() { active = false; withoutPlan = true; targetTr = QVec::zeros(3); targetRot = QVec::zeros(3);};
-	} ;
-	
 	CurrentTarget currentTarget;
-	
 	RoboCompDifferentialRobot::TBaseState bState;
 	TLaserData datos;
 	RoboCompCommonBehavior::ParameterList params;
