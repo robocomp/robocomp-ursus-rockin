@@ -74,19 +74,6 @@
 
 	<!--
    ##
-   ## G R A N N Y
-   ##
-   -->
-	<symbol id="22" type="person">
-	</symbol>
-	<symbol id="23" type="status">
-	</symbol>
-	<link src="22" dst="23" label="granny" />
-	<link src="22" dst="7" label="in" />
-
-
-	<!--
-   ##
    ## O B J E C T S    I N    B E D R O O M
    ##
    -->
@@ -134,8 +121,44 @@
 	<link src="21" dst="5" label="in" />
 
 	
-	
 
 		
+	<!--
+   ##
+   ## P E R S O N S
+   ##
+   -->
+	<symbol id="22" type="person">
+	</symbol>
+	<symbol id="23" type="status">
+	</symbol>
+	<link src="22" dst="23" label="granny" />
+	<link src="22" dst="23" label="noLocalized" />
+	<link src="1" dst="22" label="know" />
+
+	<symbol id="24" type="person">
+	</symbol>
+	<symbol id="25" type="status">
+	</symbol>
+	<link src="24" dst="25" label="deliGuy" />
+	<link src="24" dst="25" label="noLocalized" />
+	<link src="1" dst="24" label="know" />
+
+	<symbol id="26" type="person">
+	</symbol>
+	<symbol id="27" type="status">
+	</symbol>
+	<link src="26" dst="27" label="doctor" />
+	<link src="26" dst="27" label="noLocalized" />
+	<link src="1" dst="26" label="know" />
+
+	<symbol id="28" type="person">
+	</symbol>
+	<symbol id="29" type="status">
+	</symbol>
+	<link src="28" dst="29" label="mailman" />
+	<link src="28" dst="29" label="noLocalized" />
+	<link src="1" dst="28" label="know" />
+
 
 </AGMModel>
