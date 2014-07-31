@@ -31,6 +31,7 @@
 #include "forcefield.h"
 #include "localizer.h"
 #include "plannerompl.h"
+#include "plannerprm.h"
 #include "currenttarget.h"
 
 //#include "ParabolicPathSmooth/smoother.h"
@@ -72,7 +73,8 @@ private:
 	Controller *controller;
 	ElasticBand *elasticband;
 	Planner *plannerRC;
-	PlannerOMPL *plannerOMPL, *planner;;
+	PlannerOMPL *plannerOMPL;
+	PlannerPRM *plannerPRM, *planner;
 	ForceField *forcefield;
 	Localizer *localizer;
 	

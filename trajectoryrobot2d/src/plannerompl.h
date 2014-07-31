@@ -31,9 +31,8 @@
 #include <ompl/geometric/planners/rrt/LBTRRT.h>
 #include <ompl/base/samplers/ObstacleBasedValidStateSampler.h>
 #include <ompl/config.h>
-//#include <../tests/resources/config.h>
-#include <boost/filesystem.hpp>
 #include <iostream>
+
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
@@ -60,6 +59,8 @@ class PlannerOMPL : public QObject
 		std::vector<QString> restNodes;
 		float xMin, xMax, zMin, zMax; 		//Limits of environmnent
 		static ob::ValidStateSamplerPtr allocOBValidStateSampler(const ob::SpaceInformation *si);
+		
+		
 };
 
 #endif // PLANNEROMPL_H

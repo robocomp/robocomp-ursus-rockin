@@ -50,7 +50,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Planning
 	plannerOMPL = new PlannerOMPL(*innerModel);			
 	plannerRC = new Planner(*innerModel);
-	planner = plannerOMPL;
+	plannerPRM = new PlannerPRM(*innerModel);
+	planner = plannerPRM;
 	qDebug() << __FUNCTION__ << "Planning ...";
 	
 	//Init road
@@ -189,6 +190,8 @@ bool SpecificWorker::computePlan( InnerModel *inner)
 	updateInnerModel(inner);
 	
 	planner->computePath(currentTarget.getTranslation(), inner);
+	
+	qFatal("fary");
 	
 	if(planner->getPath().size() == 0)
 	{

@@ -20,7 +20,6 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
-//#include <nabo/nabo.h>
 #include <QtCore>
 #include <qmat/QMatAll>
 #include "tree.hh"
@@ -29,7 +28,6 @@
 #include "rcisdraw.h"
 #include "qline2d.h"
 #include "waypoints.h"
-//#include <nabo/nabo.h>
 
 #define MAX_WAYPOINT_CACHE 500
 #define MAX_RANDOM_R2_CACHE 10000
