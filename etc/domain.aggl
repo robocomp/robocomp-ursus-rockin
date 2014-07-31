@@ -1,29 +1,290 @@
 spacePattern=3
-lineThickness=2.0
+lineThickness=2
 fontName=Arial
 name=domain
-vertexDiameter=40.0
+vertexDiameter=40
 shortPattern=1
-nodeThickness=2.0
+nodeThickness=2
 fontSize=14
 longPattern=3
 ===
 changeRoom : active(1)
 {
 	{
-		r:robot(-95,-145)
-		r2:room(25,-35)
 		r1:room(-200,-35)
-		r->r1(in)
+		r2:room(25,-35)
+		robot:robot(-95,-145)
+		robot->r1(in)
 		r1->r2(connected)
 	}
 	=>
 	{
-		r:robot(-120,-175)
 		r1:room(-200,-50)
 		r2:room(0,-45)
-		r->r2(in)
+		robot:robot(-120,-175)
+		robot->r2(in)
 		r1->r2(connected)
+	}
+}
+
+findObjectVisually : active(1)
+{
+	{
+		robot:robot(-300,-140)
+	}
+	=>
+	{
+		status:status(200,-75)
+		object:object(-15,-75)
+		robot:robot(-180,-75)
+		robot->object(know)
+		object->status(see)
+		object->status(noClass)
+		object->status(noReach)
+		object->status(pose)
+	}
+}
+
+findGranny : active(1)
+{
+	{
+		status:status(200,-75)
+		person:person(-15,-75)
+		r:robot(-190,-75)
+		r->person(know)
+		person->status(granny)
+		person->status(noLocalized)
+	}
+	=>
+	{
+		status:status(200,-75)
+		person:person(-15,-75)
+		r:robot(-190,-75)
+		room:room(-15,55)
+		r->person(know)
+		person->status(granny)
+		person->room(link)
+		person->status(localized)
+	}
+}
+
+recognizeObjMug : active(1)
+{
+	{
+		s:status(200,-75)
+		r:robot(-180,-75)
+		other:table(-15,30)
+		o:object(-15,-75)
+		r->o(know)
+		o->s(see)
+		o->s(noClass)
+		o->s(pose)
+	}
+	=>
+	{
+		s:status(155,-75)
+		r:robot(-180,-75)
+		other:table(-15,30)
+		o:object(-15,-75)
+		r->o(know)
+		o->other(in)
+		o->s(see)
+		o->s(class)
+		o->s(pose)
+		o->s(mug)
+	}
+}
+
+recognizeObjGlasses : active(1)
+{
+	{
+		s:status(200,-75)
+		r:robot(-180,-75)
+		other:table(-15,30)
+		o:object(-15,-75)
+		r->o(know)
+		o->s(see)
+		o->s(noClass)
+		o->s(pose)
+	}
+	=>
+	{
+		s:status(155,-75)
+		r:robot(-180,-75)
+		other:table(-15,30)
+		o:object(-15,-75)
+		r->o(know)
+		o->other(in)
+		o->s(see)
+		o->s(class)
+		o->s(pose)
+		o->s(glasses)
+	}
+}
+
+recognizeObjTable : active(1)
+{
+	{
+		s:status(200,-75)
+		r:robot(-180,-75)
+		other:room(-15,30)
+		o:object(-15,-75)
+		r->o(know)
+		o->s(see)
+		o->s(noClass)
+		o->s(pose)
+	}
+	=>
+	{
+		s:status(155,-75)
+		r:robot(-180,-75)
+		other:room(-15,30)
+		o:object(-15,-75)
+		r->o(know)
+		o->other(in)
+		o->s(see)
+		o->s(class)
+		o->s(pose)
+		o->s(table)
+	}
+}
+
+setObjectReach : active(1)
+{
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(noReach)
+	}
+	=>
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(reach)
+	}
+}
+
+setObjectNotReach : passive(1)
+{
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(reach)
+	}
+	=>
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(noReach)
+	}
+}
+
+setObjectSee : active(1)
+{
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(noSee)
+	}
+	=>
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(see)
+	}
+}
+
+setObjectNotSee : passive(1)
+{
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(see)
+	}
+	=>
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(noSee)
+	}
+}
+
+setObjectPosition : active(1)
+{
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(noPose)
+	}
+	=>
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(pose)
+	}
+}
+
+setObjectNotPosition : passive(1)
+{
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(pose)
+	}
+	=>
+	{
+		s:status(250,0)
+		o:object(0,0)
+		o->s(noPose)
+	}
+}
+
+robotMovesObjectFromContainer : active(1)
+{
+	{
+		b:box(-80,-5)
+		r1:reach(-80,-200)
+		m:mug(-80,-140)
+		rc1:reach(-80,-335)
+		rc2:reach(-80,-65)
+		r:robot(-625,-175)
+		o:object(-425,-175)
+		c2:object(-385,-45)
+		c1:object(-390,-305)
+		t:table(-80,-275)
+		r->o(know)
+		r->c2(know)
+		o->r1(prop)
+		o->m(prop)
+		c2->rc2(prop)
+		c2->b(prop)
+		r->c1(know)
+		c1->rc1(prop)
+		c1->t(prop)
+		o->c1(in)
+	}
+	=>
+	{
+		b:box(-80,-5)
+		r1:reach(-80,-200)
+		m:mug(-80,-140)
+		rc1:reach(-80,-335)
+		rc2:reach(-80,-65)
+		r:robot(-625,-175)
+		o:object(-425,-175)
+		c2:object(-385,-45)
+		c1:object(-390,-305)
+		t:table(-80,-275)
+		r->o(know)
+		r->c2(know)
+		o->r1(prop)
+		o->m(prop)
+		c2->rc2(prop)
+		c2->b(prop)
+		r->c1(know)
+		c1->rc1(prop)
+		c1->t(prop)
+		o->c2(in)
 	}
 }
 
