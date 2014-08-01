@@ -24,10 +24,17 @@
 #include <iostream>
 #include <deque>
 #include <iterator>
+#include <iostream>
+#include <vector>
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/topological_sort.hpp"
 #include <boost/property_map/property_map.hpp>
+#include <boost/foreach.hpp>
+#include <boost/graph/graph_utility.hpp>
+#include <boost/graph/incremental_components.hpp>
+#include <boost/pending/disjoint_sets.hpp>
 #include <boost/graph/graphviz.hpp>
+
 #include "nabo/nabo.h"
 
 struct Payload
@@ -39,8 +46,10 @@ struct Payload
 		};		
 typedef boost::adjacency_list<boost::vecS,boost::vecS, boost::undirectedS, Payload, boost::no_property, boost::listS> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+typedef boost::graph_traits<Graph>::vertices_size_type VertexIndex;
 typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
 typedef boost::iterator_property_map < Vertex*, IndexMap, Vertex, Vertex& > IndexIteratorMap;
+typedef boost::component_index<VertexIndex> Components;
 
 class PlannerPRM : public QObject
 {

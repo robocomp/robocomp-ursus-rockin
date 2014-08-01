@@ -81,11 +81,11 @@ void PlannerPRM::createGraph(InnerModel *inner)
 {
 	qDebug() << __FUNCTION__ << "Creating grpah";
 	
-	const int NUM_POINTS = 100;
-	const int NEIGHBOORS = 8;
+	const int NUM_POINTS = 500;
+	const int NEIGHBOORS = 10;
 	const int MAX_DISTANTE_TO_CHECK_SQR = 9000*9000;
 	bool reachEnd;
-	QHash<int,int> indexMap;
+	QHash<int,Vertex> vertexMap;
 	
 	Eigen::MatrixXf data(2,NUM_POINTS);
 	
@@ -103,64 +103,88 @@ void PlannerPRM::createGraph(InnerModel *inner)
 	distsTo.resize(NEIGHBOORS, data.cols());
 
 	nabo->knn(data, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
+	
 	Vertex vertex, vertexN;
 	
 	QVec point;
 	Graph::vertex_iterator vertexIterator;
 	for(uint i=0; i<NUM_POINTS; i++)
 	{
-		point = QVec::vec3(data.coeff(0,i), 0, data.coeff(1,i));
-		for(uint k=0; k<NEIGHBOORS; k++)
+		if( vertexMap.contains(i))
 		{
-			std::pair<Graph::vertex_iterator, Graph::vertex_iterator> vertexIteratorRange = boost::vertices(graph);				
-			for(vertexIterator = vertexIteratorRange.first; vertexIterator != vertexIteratorRange.second; ++vertexIterator)
-			{
-				if ( graph[*vertexIterator].index == i )  
-				{
-					vertex =  *vertexIterator;
-					break;
-				}
-			}
-			if( vertexIterator == vertexIteratorRange.second )  //Does not exist. Let's create one
-			{
-				indexMap.insert(i,0);
-				vertex = boost::add_vertex(graph);
-				graph[vertex].pose = point;
-				graph[vertex].index = i;
-			}
-			
-			if(distsTo(k,i) < MAX_DISTANTE_TO_CHECK_SQR ) 
+			vertex = vertexMap.value(i);
+			qDebug() << "Recovered vertex " << i;
+		}
+		else
+		{
+			vertex = boost::add_vertex(graph);
+			vertexMap.insert(i,vertex);
+			graph[vertex].pose = QVec::vec3(data(0,i), 0, data(1,i));
+			graph[vertex].index = i;
+			qDebug() << "Insert vertex " << i;
+		}
+		
+		for(uint k=0; k<NEIGHBOORS; k++)
+		{	
+			if(distsTo(k,i) < MAX_DISTANTE_TO_CHECK_SQR )  //check if distance is lower that threshold
 			{
 				trySegmentToTarget(point, QVec::vec3(data(0,indices(k,i)), 0, data(1,indices(k,i))), reachEnd);
-				qDebug() << "i" << i << "k" << k << indices(k,i);
+				qDebug() << "i" << i << "k" << k << indices(k,i) << distsTo(k,i);
 				
 				//if free path to neighboor, insert in graph an the nodes and edges
-				if( reachEnd == true )
+				if( reachEnd == true)
 				{
-					std::pair<Graph::vertex_iterator, Graph::vertex_iterator> vertexIteratorRange2 = boost::vertices(graph);				
-					for(vertexIterator = vertexIteratorRange2.first; vertexIterator != vertexIteratorRange2.second; ++vertexIterator)
+					if( vertexMap.contains(indices(k,i)))
 					{
-						if ( graph[*vertexIterator].index == (uint)indices(k,i) )  
-						{
-							vertexN =  *vertexIterator;
-							break;
-						}
+						vertexN = vertexMap.value(indices(k,i));
+						qDebug() << "Recovered vertex " << indices(k,i);
 					}
-					if( vertexIterator == vertexIteratorRange2.second)  //Does not exist. Let's create one
+					else
 					{
 						vertexN = boost::add_vertex(graph);
-						graph[vertexN].pose = point;
-						graph[vertexN].index = indices(k,i);
-					}
+						vertexMap.insert(indices(k,i),vertexN);
+						graph[vertexN].pose = QVec::vec3(data(0,indices(k,i)), 0, data(1,indices(k,i)));
+						graph[vertexN].index = indices(k,i);	
+						qDebug() << "Insert vertex " << indices(k,i);
+					}			
+
+					//compute connected components
+					std::vector<VertexIndex> rank(boost::num_vertices(graph));
+					std::vector<Vertex> parent(boost::num_vertices(graph));
+					typedef VertexIndex* Rank;
+					typedef Vertex* Parent;
+					boost::disjoint_sets<Rank, Parent> ds(&rank[0], &parent[0]);
+					boost::initialize_incremental_components(graph, ds);
+					boost::incremental_components(graph, ds);
+ 					Components components(parent.begin(),parent.end());
+			
+// 					BOOST_FOREACH(VertexIndex current_index, components) 
+// 					{
+// 						std::cout << "component " << current_index << " contains: ";
+// 						// Iterate through the child vertex indices for [current_index]
+// 						BOOST_FOREACH(VertexIndex child_index,components[current_index]) 
+// 						{
+// 							std::cout << child_index << " {" << graph[child_index].index<< "} ";
+// 						}
+// 					std::cout << std::endl;
+// 					}
+					bool sameComp;
+					sameComp = boost::same_component(vertex,vertexN,ds);
+
+					qDebug() << "probamos de" << graph[vertex].index << "a" << graph[vertexN].index;
+					qDebug() << "already exists" << (boost::edge(vertex,vertexN,graph).second == true) << "same" << sameComp;
 					
-					//Check if vertex already exits before adding
-					if( boost::edge(vertex,vertexN,graph).second == false)
+					if( (boost::edge(vertex,vertexN,graph).second == false ) and (sameComp == false) )
+					{
 						boost::add_edge(vertex,vertexN,graph);
-					qDebug() << "insertamos de" << graph[vertex].index << "a" << graph[vertexN].index;
+						qDebug() << "insertamos de" << graph[vertex].index << "a" << graph[vertexN].index;
+					}
 				}
 			}
 			else
+			{
 				break;
+			}
 		}
 	}
 	//boost::dynamic_properties dp;
@@ -168,13 +192,14 @@ void PlannerPRM::createGraph(InnerModel *inner)
 	//boost::write_graphviz_dp(std::cout, graph, dp);
 	std::ofstream fout("grafo.dot");
 	boost::write_graphviz(fout, graph);
+	boost::print_graph(graph);
 	
 }
 
-void SpecificWorker::readGraphFromFile(QString name)
+void PlannerPRM::readGraphFromFile(QString name)
 {
-	 std::ifstream fin(name.toStdString().c_str());
-	 bool status = boost::read_graphviz(fin,graph);
+// 	 std::ifstream fin(name.toStdString().c_str());
+// 	 bool status = boost::read_graphviz(fin,graph);
 }
 
 void PlannerPRM::setInnerModel(const InnerModel& innerModel_)
