@@ -25,6 +25,7 @@
 #include <deque>
 #include <iterator>
 #include <iostream>
+#include <ostream>
 #include <vector>
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/topological_sort.hpp"
@@ -34,22 +35,37 @@
 #include <boost/graph/incremental_components.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/property_map/dynamic_property_map.hpp> 
+#include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <boost/graph/iteration_macros.hpp>
 
 #include "nabo/nabo.h"
 
-struct Payload
-		{	
-			QVec pose; 
-			uint32_t index;
-			Payload(){};
-			Payload(uint i, const QVec &point){ index = i; pose = point; };
-		};		
-typedef boost::adjacency_list<boost::vecS,boost::vecS, boost::undirectedS, Payload, boost::no_property, boost::listS> Graph;
+
+struct VertexPayload
+{	
+	QVec pose; //3D
+	//Point3D pose;
+	uint32_t index;
+	VertexPayload(){};
+	VertexPayload(uint i, const QVec &p){ index = i; pose=p; };
+	//VertexPayload(uint i, const Point3D &p){ index = i; pose= p; };
+};	
+struct EdgePayload
+{
+	float dist;
+	EdgePayload(){ dist = -1;};
+	EdgePayload(float d) { dist = d;};
+};
+typedef boost::adjacency_list<boost::vecS,boost::vecS, boost::undirectedS, VertexPayload, EdgePayload, boost::listS> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+typedef boost::graph_traits<Graph>::edge_descriptor Edge;
 typedef boost::graph_traits<Graph>::vertices_size_type VertexIndex;
 typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
-typedef boost::iterator_property_map < Vertex*, IndexMap, Vertex, Vertex& > IndexIteratorMap;
+typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
+//typedef boost::iterator_property_map < Vertex*, IndexMap, Vertex, Vertex& > IndexIteratorMap;
 typedef boost::component_index<VertexIndex> Components;
+typedef std::vector<Graph::edge_descriptor> PathType;
 
 class PlannerPRM : public QObject
 {
@@ -57,7 +73,7 @@ class PlannerPRM : public QObject
     
 	public:
 		PlannerPRM(){};
-		PlannerPRM(const InnerModel &innerModel_, QObject *parent=0);
+		PlannerPRM(const InnerModel &innerModel_, uint nPoints=300, uint neigh=30, QObject *parent=0);
 		bool computePath(const QVec &target, InnerModel *inner);
 		void setInnerModel(const InnerModel &innerModel_);
 		QList<QVec> getPath() { return currentPath; }
@@ -66,7 +82,8 @@ class PlannerPRM : public QObject
 	private:
 		Graph graph;
 		void addPointToGraph(const QVec &point);
-		void createGraph(InnerModel *inner);
+		void createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK);
+		bool searchGraph(const QVec &origin, const QVec &target);
 		QVec sampleFreeSpaceR2(const QPointF& XZLimits);
 		void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
 		InnerModel *innerModel;
@@ -78,9 +95,86 @@ class PlannerPRM : public QObject
 		bool collisionDetector(const QVec &position, const QVec &rotation, InnerModel *im);
 		QVec trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd);
 		void readGraphFromFile(QString name);
+		void writeGraphToStream(std::ostream &stream);
+		
 		//Libnabo fast KDTree for low dimension
 		Nabo::NNSearchF *nabo;
-
+		//Hash mapping nodes index in MatrixXf and vertex_descriptor in the graph
+		QHash<int,Vertex> vertexMap;
+		//Eigen matrix holding the initial points: size(2,NUM_POINTS)
+		Eigen::MatrixXf data;
+		//number of points given in constructor
+		uint NUM_POINTS;
+		uint NEIGHBOORS;
 };
 
+//Graph writing classes
+template <class IndexMap,class PoseMap> class vertex_writer 
+{
+	public:
+		vertex_writer(IndexMap i, PoseMap p) : indexMap(i),poseMap(p) {}
+		template <class VertexPayload> void operator()(std::ostream &out, const VertexPayload& vertex) const 
+		{
+ 			out << "[Index=\"" << indexMap[vertex] << "\", Pose=\"" << poseMap[vertex] << "\"]";		
+		}
+	private:
+		IndexMap indexMap;
+		PoseMap poseMap;
+};
+
+template <class IndexMap, class PoseMap> inline vertex_writer<IndexMap,PoseMap> make_vertex_writer(IndexMap i,PoseMap p) 
+{  
+	return vertex_writer<IndexMap,PoseMap>(i,p);
+}
+
+template <class DistanceMap> class edge_writer 
+{
+	public:
+		edge_writer(DistanceMap d) : distanceMap(d) {}
+		template <class EdgePayload> void operator()(std::ostream &out, const EdgePayload& edge) const 
+		{
+ 			out << "[Distance=\"" << distanceMap[edge] <<  "\"]";		
+		}
+	private:
+		DistanceMap distanceMap;
+};
+
+template <class DistanceMap> inline edge_writer<DistanceMap> make_edge_writer(DistanceMap d) 
+{  
+	return edge_writer<DistanceMap>(d);
+}
 #endif // PLANNERPRM_H
+// struct Point3D
+// {
+// 	float x;
+// 	float y;
+// 	float z;
+// 	Point3D(){};
+// 	Point3D(const Point3D &p) { x = p.x; y = p.y; z=p.z;};
+// 	Point3D(float i, float j, float k) { x = i; y = j; z = k;};
+// 	operator QVec() const { return QVec::vec3(x,y,z);}
+// 	Point3D operator =(const QVec &v) const { return Point3D(v.x(),v.y(),v.z()); };		
+// 	inline friend std::istream& operator >> ( std::istream& i, Point3D& p )
+//     {
+//         i >> p.x;
+// 		if((i.flags() & std::ios_base::skipws) == 0) 
+// 		{
+// 			char whitespace;
+// 			i >> whitespace;
+// 		}
+// 		i >> p.y;
+// 		if((i.flags() & std::ios_base::skipws) == 0)
+// 		{
+// 			char whitespace;
+// 			i >> whitespace;
+// 		}
+// 		i >> p.z; 	
+//         return i;
+//     }
+// 
+//     inline friend std::ostream& operator << ( std::ostream& o, const Point3D& p )
+//     {
+//         o << p.x << " " << p.y << " " << p.z;
+//         return o;
+//     } 
+// };

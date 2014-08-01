@@ -27,11 +27,14 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
 	this->params = params;
+
+// 	QVec shit = boost::lexical_cast<QVec>("23.1 34.2 45.5");
+// 	shit.print("shit");
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
  	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 //	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
+//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
 	// Move Robot to Hall
 	//setRobotInitialPose(800, -10000, M_PI);
@@ -50,7 +53,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Planning
 	plannerOMPL = new PlannerOMPL(*innerModel);			
 	plannerRC = new Planner(*innerModel);
-	plannerPRM = new PlannerPRM(*innerModel);
+	plannerPRM = new PlannerPRM(*innerModel, 200, 30);
 	planner = plannerPRM;
 	qDebug() << __FUNCTION__ << "Planning ...";
 	

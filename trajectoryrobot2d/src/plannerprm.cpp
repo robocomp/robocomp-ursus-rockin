@@ -17,25 +17,37 @@
 
 #include "plannerprm.h"
 
-PlannerPRM::PlannerPRM(const InnerModel& innerModel_, QObject* parent)
+PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh,  QObject *parent)
 {
 	xMin = 0.;
 	xMax = 10000.;
 	zMin = -10000.;
 	zMax = 0.;
-	
+			
 	innerModel = new InnerModel(innerModel_);
 	
 	//Init random sequence generator
 	qsrand ( QTime::currentTime().msec() );
-
 	
+	//Eigen matrix for libanabo
+	NUM_POINTS = nPoints;
+	NEIGHBOORS = neigh;
+	data.resize(3,NUM_POINTS);		//ONLY 3D POINTS SO FAR
+
+	if( QFile("grafo.dot").exists())
+	{
+		readGraphFromFile("grafo.dot");
+		searchGraph(QVec(),QVec());
+		
+		qFatal("fary");
+	}
+	else
+		createGraph(innerModel, NUM_POINTS, NEIGHBOORS, 2500.f);
+		
 }
 
 bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
-{
-	static bool firstTime = true;
-	
+{	
 	qDebug() << __FILE__ << __FUNCTION__ << "Starting planning with target at:" << target << "and robot at:" << inner->transform("world","robot");
 	
 	QVec currentTarget = target;  //local variable to get samples from free space
@@ -59,13 +71,8 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	}
 		
 	
-	if(firstTime == true)
-	{
-		createGraph(inner);
-		firstTime = false;
-	}
-	
 	//search in graph closest point to origin
+	searchGraph(robot,target);
 	
 	//connect to graph
 	
@@ -77,23 +84,93 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	
 }
 
-void PlannerPRM::createGraph(InnerModel *inner)
+bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
 {
+	//prepare the query
+	Eigen::MatrixXi indices;
+	Eigen::MatrixXf distsTo;
+	Eigen::MatrixXf query(3,2);
+	indices.resize(2, query.cols());
+	distsTo.resize(2, query.cols());
+	query(0,0) = origin.x();query(1,0) = origin.y();query(2,0) = origin.z();
+	query(0,1) = target.x();query(1,1) = target.y();query(2,1) = target.z();
+	
+	nabo->knn(query, indices, distsTo, 2, 0, 0);
+	
+	Vertex vertexOrigin = vertexMap.value(indices(0));
+	Vertex vertexTarget = vertexMap.value(indices(1));
+	
+	// Create things for Dijkstra
+	std::vector<Vertex> predecessors(boost::num_vertices(graph)); // To store parents
+	std::vector<float> distances(boost::num_vertices(graph));    // To store distances
+	std::vector<int> vertex_index_map(boost::num_vertices(graph));
+ 
+	IndexMap indexMap = boost::get(boost::vertex_index, graph);
+	auto predecessorMap = boost::make_iterator_property_map(&predecessors[0], indexMap);
+	auto distanceMap = boost::make_iterator_property_map(&distances[0], indexMap);
+
+	boost::dijkstra_shortest_paths(graph, vertexOrigin, boost::weight_map(boost::get(&EdgePayload::dist, graph))
+												.predecessor_map(predecessorMap)
+												.distance_map(distanceMap));
+
+	// Output results
+	std::cout << "distances and parents:" << std::endl;
+	auto nameMap( boost::get(&VertexPayload::index, graph) );
+	auto poseMap( boost::get(&VertexPayload::pose, graph) );
+ 
+	BGL_FORALL_VERTICES(v, graph, Graph)
+	{
+		std::cout << "distance(" << nameMap[vertexOrigin] << ", " << nameMap[v] << ") = " << distanceMap[v] << ", ";
+		std::cout << "predecessor(" << nameMap[v] << ") = " << nameMap[predecessorMap[v]] << std::endl;
+	}
+
+	// Extract a shortest path
+ 
+	PathType path;
+	Vertex v = vertexTarget;
+	
+	// Start by setting 'u' to the destintaion node's predecessor   |||// Keep tracking the path until we get to the source
+	for( Vertex u = predecessorMap[v]; u != v; v = u, u = predecessorMap[v]) // Set the current vertex to the current predecessor, and the predecessor to one level up
+	{
+		std::pair<Graph::edge_descriptor, bool> edgePair = boost::edge(u, v, graph);
+		Graph::edge_descriptor edge = edgePair.first;
+		path.push_back( edge );
+	}
+ 
+	if(path.size() > 0)
+	{
+		// Write shortest path
+		currentPath.clear();
+		std::cout << "Shortest path from origin to target:" << std::endl;
+		float totalDistance = 0;
+		for(PathType::reverse_iterator pathIterator = path.rbegin(); pathIterator != path.rend(); ++pathIterator)
+		{
+			std::cout << nameMap[boost::source(*pathIterator, graph)] << " -> " << nameMap[boost::target(*pathIterator, graph)]
+					<< " = " << boost::get( &EdgePayload::dist, graph, *pathIterator ) << std::endl;
+			currentPath.append(poseMap[boost::source(*pathIterator, graph)]);
+		}
+		std::cout << std::endl;
+		std::cout << "Distance: " << distanceMap[vertexTarget] << std::endl;
+		return true;
+	}
+	else
+		return false;
+}
+
+void PlannerPRM::createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK)
+{
+	
 	qDebug() << __FUNCTION__ << "Creating grpah";
 	
-	const int NUM_POINTS = 500;
-	const int NEIGHBOORS = 10;
-	const int MAX_DISTANTE_TO_CHECK_SQR = 9000*9000;
+	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
 	bool reachEnd;
-	QHash<int,Vertex> vertexMap;
 	
-	Eigen::MatrixXf data(2,NUM_POINTS);
-	
-	for(int i=0; i<NUM_POINTS; i++)
+	for(uint i=0; i<NUM_POINTS; i++)
 	{
 		QVec point = sampleFreeSpaceR2(inner, QPointF(xMax, zMin));
 		data(0,i) = point.x();
-		data(1,i) = point.z();
+		data(1,i) = point.y();
+		data(2,i) = point.z();
 	}
 	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
 	
@@ -102,14 +179,14 @@ void PlannerPRM::createGraph(InnerModel *inner)
 	indices.resize(NEIGHBOORS, data.cols());
 	distsTo.resize(NEIGHBOORS, data.cols());
 
+	//Query for sorted distances to NEIGHBOORS neighboors  
 	nabo->knn(data, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
 	
 	Vertex vertex, vertexN;
 	
-	QVec point;
-	Graph::vertex_iterator vertexIterator;
 	for(uint i=0; i<NUM_POINTS; i++)
 	{
+		//Add new vertex if not present
 		if( vertexMap.contains(i))
 		{
 			vertex = vertexMap.value(i);
@@ -119,7 +196,7 @@ void PlannerPRM::createGraph(InnerModel *inner)
 		{
 			vertex = boost::add_vertex(graph);
 			vertexMap.insert(i,vertex);
-			graph[vertex].pose = QVec::vec3(data(0,i), 0, data(1,i));
+			graph[vertex].pose = QVec::vec3(data(0,i), data(1,i), data(2,i));
 			graph[vertex].index = i;
 			qDebug() << "Insert vertex " << i;
 		}
@@ -128,10 +205,10 @@ void PlannerPRM::createGraph(InnerModel *inner)
 		{	
 			if(distsTo(k,i) < MAX_DISTANTE_TO_CHECK_SQR )  //check if distance is lower that threshold
 			{
-				trySegmentToTarget(point, QVec::vec3(data(0,indices(k,i)), 0, data(1,indices(k,i))), reachEnd);
+				trySegmentToTarget(QVec::vec3(data(0,i), 0, data(1,i)), QVec::vec3(data(0,indices(k,i)), 0, data(1,indices(k,i))), reachEnd);
 				qDebug() << "i" << i << "k" << k << indices(k,i) << distsTo(k,i);
 				
-				//if free path to neighboor, insert in graph an the nodes and edges
+				//if free path to neighboor, insert it in the graph if does not exist
 				if( reachEnd == true)
 				{
 					if( vertexMap.contains(indices(k,i)))
@@ -148,35 +225,24 @@ void PlannerPRM::createGraph(InnerModel *inner)
 						qDebug() << "Insert vertex " << indices(k,i);
 					}			
 
-					//compute connected components
+					//compute connected components to reject same isle elements
 					std::vector<VertexIndex> rank(boost::num_vertices(graph));
 					std::vector<Vertex> parent(boost::num_vertices(graph));
-					typedef VertexIndex* Rank;
-					typedef Vertex* Parent;
-					boost::disjoint_sets<Rank, Parent> ds(&rank[0], &parent[0]);
+					boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
 					boost::initialize_incremental_components(graph, ds);
 					boost::incremental_components(graph, ds);
  					Components components(parent.begin(),parent.end());
 			
-// 					BOOST_FOREACH(VertexIndex current_index, components) 
-// 					{
-// 						std::cout << "component " << current_index << " contains: ";
-// 						// Iterate through the child vertex indices for [current_index]
-// 						BOOST_FOREACH(VertexIndex child_index,components[current_index]) 
-// 						{
-// 							std::cout << child_index << " {" << graph[child_index].index<< "} ";
-// 						}
-// 					std::cout << std::endl;
-// 					}
-					bool sameComp;
-					sameComp = boost::same_component(vertex,vertexN,ds);
+					bool sameComp = boost::same_component(vertex,vertexN,ds);
 
-					qDebug() << "probamos de" << graph[vertex].index << "a" << graph[vertexN].index;
-					qDebug() << "already exists" << (boost::edge(vertex,vertexN,graph).second == true) << "same" << sameComp;
+					qDebug() << "Try to create and edge from" << graph[vertex].index << "a" << graph[vertexN].index;
+					qDebug() << "true if already exists" << (boost::edge(vertex,vertexN,graph).second == true) << "same" << sameComp;
 					
 					if( (boost::edge(vertex,vertexN,graph).second == false ) and (sameComp == false) )
 					{
-						boost::add_edge(vertex,vertexN,graph);
+						EdgePayload edge;
+						edge.dist = (QVec(graph[vertex].pose) - QVec(graph[vertexN].pose)).norm2();
+						boost::add_edge(vertex, vertexN, edge, graph);	
 						qDebug() << "insertamos de" << graph[vertex].index << "a" << graph[vertexN].index;
 					}
 				}
@@ -187,19 +253,48 @@ void PlannerPRM::createGraph(InnerModel *inner)
 			}
 		}
 	}
-	//boost::dynamic_properties dp;
-	//dp.property("node_id",get(boost::vertex_index, graph));
-	//boost::write_graphviz_dp(std::cout, graph, dp);
-	std::ofstream fout("grafo.dot");
-	boost::write_graphviz(fout, graph);
-	boost::print_graph(graph);
 	
+	//print and save the graph with payloads
+	writeGraphToStream(std::cout);
+	std::ofstream fout("grafo.dot");
+	writeGraphToStream(fout);
+		
+}
+
+void PlannerPRM::writeGraphToStream(std::ostream &stream)
+{
+	boost::write_graphviz(stream, graph, make_vertex_writer(boost::get(&VertexPayload::index, graph),boost::get(&VertexPayload::pose, graph)),
+										 make_edge_writer(boost::get(&EdgePayload::dist, graph)));
 }
 
 void PlannerPRM::readGraphFromFile(QString name)
 {
-// 	 std::ifstream fin(name.toStdString().c_str());
-// 	 bool status = boost::read_graphviz(fin,graph);
+ 	std::ifstream fin(name.toStdString().c_str());
+	boost::dynamic_properties dynamicProperties; 
+	dynamicProperties.property("Index", boost::get(&VertexPayload::index, graph));
+    dynamicProperties.property("Pose", boost::get(&VertexPayload::pose, graph));
+    dynamicProperties.property("Distance", boost::get(&EdgePayload::dist, graph)); 
+ 	try
+    {
+		bool status = boost::read_graphviz(fin, graph, dynamicProperties, "Index" );
+    }
+    catch (std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+    } 
+    writeGraphToStream(std::cout);
+	
+	int i=0;
+	BGL_FORALL_VERTICES(v, graph, Graph)
+    {
+		data(0,i) = graph[v].pose.x();
+		data(1,i) = graph[v].pose.y();
+		data(2,i) = graph[v].pose.z();
+		vertexMap.insert(i,v);
+	}
+	
+	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
+	
 }
 
 void PlannerPRM::setInnerModel(const InnerModel& innerModel_)
@@ -342,3 +437,16 @@ QVec PlannerPRM::trySegmentToTarget(const QVec & origin , const QVec & target, b
 	reachEnd= true;
 	return target;
 }
+
+
+// 					BOOST_FOREACH(VertexIndex current_index, components) 
+// 					{
+// 						std::cout << "component " << current_index << " contains: ";
+// 						// Iterate through the child vertex indices for [current_index]
+// 						BOOST_FOREACH(VertexIndex child_index,components[current_index]) 
+// 						{
+// 							std::cout << child_index << " {" << graph[child_index].index<< "} ";
+// 						}
+// 					std::cout << std::endl;
+// 					}
+	
