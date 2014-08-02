@@ -26,24 +26,27 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
 			
 	innerModel = new InnerModel(innerModel_);
 	
+	//Build list of colision meshes
+	robotNodes.clear(); restNodes.clear();
+	recursiveIncludeMeshes(innerModel->getRoot(), "robot", false, robotNodes, restNodes);
+
 	//Init random sequence generator
 	qsrand ( QTime::currentTime().msec() );
 	
 	//Eigen matrix for libanabo
 	NUM_POINTS = nPoints;
 	NEIGHBOORS = neigh;
-	data.resize(3,NUM_POINTS);		//ONLY 3D POINTS SO FAR
 
 	if( QFile("grafo.dot").exists())
 	{
+		qDebug() << __FUNCTION__ << "Graph file exits. Loading";
 		readGraphFromFile("grafo.dot");
-		searchGraph(QVec(),QVec());
-		
-		qFatal("fary");
 	}
 	else
+	{
+		qDebug() << __FUNCTION__ << "Graph file DOES NOT exit. Creating with " << NUM_POINTS << "nodes and " << NEIGHBOORS << "neighboors";
 		createGraph(innerModel, NUM_POINTS, NEIGHBOORS, 2500.f);
-		
+	}	
 }
 
 bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
@@ -70,7 +73,6 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 		return false;
 	}
 		
-	
 	//search in graph closest point to origin
 	searchGraph(robot,target);
 	
@@ -86,25 +88,29 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 
 bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
 {
+	qDebug() << __FUNCTION__ << "Searching from " << origin << "to " << target;
+	
 	//prepare the query
 	Eigen::MatrixXi indices;
 	Eigen::MatrixXf distsTo;
 	Eigen::MatrixXf query(3,2);
-	indices.resize(2, query.cols());
-	distsTo.resize(2, query.cols());
+	indices.resize(1, query.cols());
+	distsTo.resize(1, query.cols());
 	query(0,0) = origin.x();query(1,0) = origin.y();query(2,0) = origin.z();
 	query(0,1) = target.x();query(1,1) = target.y();query(2,1) = target.z();
 	
-	nabo->knn(query, indices, distsTo, 2, 0, 0);
+	nabo->knn(query, indices, distsTo, 1);
 	
-	Vertex vertexOrigin = vertexMap.value(indices(0));
-	Vertex vertexTarget = vertexMap.value(indices(1));
+	Vertex vertexOrigin = vertexMap.value(indices(0,0));
+	Vertex vertexTarget = vertexMap.value(indices(0,1));
+	
+	qDebug() << __FUNCTION__ << "Closest point to origin is at" << data(0,indices(0,0)) << data(1,indices(0,0)) << data(2,indices(0,0)) << " and corresponds to " << graph[vertexOrigin].pose;
+	qDebug() << __FUNCTION__ << "Closest point to target is at" << data(0,indices(0,1)) << data(1,indices(0,1)) << data(2,indices(0,1)) << " and corresponds to " << graph[vertexTarget].pose;
 	
 	// Create things for Dijkstra
 	std::vector<Vertex> predecessors(boost::num_vertices(graph)); // To store parents
 	std::vector<float> distances(boost::num_vertices(graph));    // To store distances
-	std::vector<int> vertex_index_map(boost::num_vertices(graph));
- 
+
 	IndexMap indexMap = boost::get(boost::vertex_index, graph);
 	auto predecessorMap = boost::make_iterator_property_map(&predecessors[0], indexMap);
 	auto distanceMap = boost::make_iterator_property_map(&distances[0], indexMap);
@@ -118,11 +124,11 @@ bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
 	auto nameMap( boost::get(&VertexPayload::index, graph) );
 	auto poseMap( boost::get(&VertexPayload::pose, graph) );
  
-	BGL_FORALL_VERTICES(v, graph, Graph)
-	{
-		std::cout << "distance(" << nameMap[vertexOrigin] << ", " << nameMap[v] << ") = " << distanceMap[v] << ", ";
-		std::cout << "predecessor(" << nameMap[v] << ") = " << nameMap[predecessorMap[v]] << std::endl;
-	}
+// 	BGL_FORALL_VERTICES(v, graph, Graph)
+// 	{
+// 		std::cout << "distance(" << nameMap[vertexOrigin] << ", " << nameMap[v] << ") = " << distanceMap[v] << ", ";
+// 		std::cout << "predecessor(" << nameMap[v] << ") = " << nameMap[predecessorMap[v]] << std::endl;
+// 	}
 
 	// Extract a shortest path
  
@@ -136,12 +142,13 @@ bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
 		Graph::edge_descriptor edge = edgePair.first;
 		path.push_back( edge );
 	}
- 
+	
+ 	std::cout << __FUNCTION__ << "Path found with length: " << path.size() <<std::endl;
 	if(path.size() > 0)
 	{
 		// Write shortest path
 		currentPath.clear();
-		std::cout << "Shortest path from origin to target:" << std::endl;
+		std::cout << __FUNCTION__ << "Shortest path from origin to target:" << std::endl;
 		float totalDistance = 0;
 		for(PathType::reverse_iterator pathIterator = path.rbegin(); pathIterator != path.rend(); ++pathIterator)
 		{
@@ -164,7 +171,7 @@ void PlannerPRM::createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS
 	
 	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
 	bool reachEnd;
-	
+		
 	for(uint i=0; i<NUM_POINTS; i++)
 	{
 		QVec point = sampleFreeSpaceR2(inner, QPointF(xMax, zMin));
@@ -270,13 +277,14 @@ void PlannerPRM::writeGraphToStream(std::ostream &stream)
 void PlannerPRM::readGraphFromFile(QString name)
 {
  	std::ifstream fin(name.toStdString().c_str());
+	
 	boost::dynamic_properties dynamicProperties; 
 	dynamicProperties.property("Index", boost::get(&VertexPayload::index, graph));
     dynamicProperties.property("Pose", boost::get(&VertexPayload::pose, graph));
     dynamicProperties.property("Distance", boost::get(&EdgePayload::dist, graph)); 
  	try
     {
-		bool status = boost::read_graphviz(fin, graph, dynamicProperties, "Index" );
+		boost::read_graphviz(fin, graph, dynamicProperties, "Index" );
     }
     catch (std::exception& e)
     {
@@ -284,14 +292,19 @@ void PlannerPRM::readGraphFromFile(QString name)
     } 
     writeGraphToStream(std::cout);
 	
+	data.resize(3,boost::num_vertices(graph));		//ONLY 3D POINTS SO FAR
+	qDebug() << "grh size" << boost::num_vertices(graph);
 	int i=0;
 	BGL_FORALL_VERTICES(v, graph, Graph)
     {
 		data(0,i) = graph[v].pose.x();
 		data(1,i) = graph[v].pose.y();
 		data(2,i) = graph[v].pose.z();
+		qDebug() << graph[v].pose;
 		vertexMap.insert(i,v);
+		i++;
 	}
+	
 	
 	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
 	

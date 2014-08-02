@@ -31,6 +31,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 // 	QVec shit = boost::lexical_cast<QVec>("23.1 34.2 45.5");
 // 	shit.print("shit");
 	
+
+	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
  	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 //	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
@@ -194,7 +196,7 @@ bool SpecificWorker::computePlan( InnerModel *inner)
 	
 	planner->computePath(currentTarget.getTranslation(), inner);
 	
-	qFatal("fary");
+	//qFatal("Fa");
 	
 	if(planner->getPath().size() == 0)
 	{

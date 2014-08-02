@@ -45,11 +45,9 @@
 struct VertexPayload
 {	
 	QVec pose; //3D
-	//Point3D pose;
 	uint32_t index;
 	VertexPayload(){};
 	VertexPayload(uint i, const QVec &p){ index = i; pose=p; };
-	//VertexPayload(uint i, const Point3D &p){ index = i; pose= p; };
 };	
 struct EdgePayload
 {
@@ -63,7 +61,6 @@ typedef boost::graph_traits<Graph>::edge_descriptor Edge;
 typedef boost::graph_traits<Graph>::vertices_size_type VertexIndex;
 typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
 typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
-//typedef boost::iterator_property_map < Vertex*, IndexMap, Vertex, Vertex& > IndexIteratorMap;
 typedef boost::component_index<VertexIndex> Components;
 typedef std::vector<Graph::edge_descriptor> PathType;
 
