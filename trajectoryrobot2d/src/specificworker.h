@@ -22,8 +22,6 @@
 #include <genericworker.h>
 #include <iostream>
 #include <fstream>
-//#include <boost/concept_check.hpp>
-//#include "pointstoroad.h"
 #include "controller.h"
 #include "elasticband.h"
 #include "waypoints.h"

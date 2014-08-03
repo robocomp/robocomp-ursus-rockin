@@ -32,7 +32,7 @@
 #include <ompl/base/samplers/ObstacleBasedValidStateSampler.h>
 #include <ompl/config.h>
 #include <iostream>
-
+#include "sampler.h"
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
@@ -44,15 +44,16 @@ class PlannerOMPL : public QObject
 	public:
 		PlannerOMPL(){};
 		PlannerOMPL(const InnerModel &innerModel_, QObject *parent=0);
-		bool computePath(const QVec &target, InnerModel *inner);
-		void setInnerModel(const InnerModel &innerModel_);
+		//bool computePath(const QVec &target, InnerModel *inner);
+		bool computePath(const QVec& origin, const QVec& target, int maxTime);
+		void initialize(Sampler *sampler);
 		QList<QVec> getPath() { return currentPath; }
 		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax)		{xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;};
 
 	private:
-		bool isStateValid(const ob::State *state) const;
-		void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
-		InnerModel *innerModel;
+		//bool isStateValid(const ob::State *state) const;
+		//void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
+		
 		QList<QVec> currentPath;   			//Results will be saved here
 		og::SimpleSetupPtr simpleSetUp;
 		std::vector<QString> robotNodes;
@@ -60,7 +61,7 @@ class PlannerOMPL : public QObject
 		float xMin, xMax, zMin, zMax; 		//Limits of environmnent
 		static ob::ValidStateSamplerPtr allocOBValidStateSampler(const ob::SpaceInformation *si);
 		
-		
+	
 };
 
 #endif // PLANNEROMPL_H

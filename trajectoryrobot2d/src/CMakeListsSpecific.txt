@@ -14,7 +14,7 @@ SET ( SOURCES
   plannerompl.cpp
   currenttarget.cpp
   plannerprm.cpp
-  #ParabolicPathSmooth/smoother.cpp
+  sampler.cpp
 )
 
 # Headers set

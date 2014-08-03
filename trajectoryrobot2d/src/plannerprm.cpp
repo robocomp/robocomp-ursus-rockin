@@ -26,17 +26,12 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
 			
 	innerModel = new InnerModel(innerModel_);
 	
-	//Build list of colision meshes
-	robotNodes.clear(); restNodes.clear();
-	recursiveIncludeMeshes(innerModel->getRoot(), "robot", false, robotNodes, restNodes);
-
-	//Init random sequence generator
-	qsrand ( QTime::currentTime().msec() );
+	QList<QRectF> innerRegions;
+	innerRegions.append(QRectF(1500, 0, 4000, -3000));	innerRegions.append(QRectF(0, -8500, 4000, -1500)); 	innerRegions.append(QRectF(7500, -4000, 2500, -6000));
+	QRectF outerRegion(0, 0, 10000, -10000);
 	
-	//Eigen matrix for libanabo
-	NUM_POINTS = nPoints;
-	NEIGHBOORS = neigh;
-
+	sampler.initialize(*innerModel, outerRegion, innerRegions);
+	
 	if( QFile("grafo.dot").exists())
 	{
 		qDebug() << __FUNCTION__ << "Graph file exits. Loading";
@@ -44,8 +39,8 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
 	}
 	else
 	{
-		qDebug() << __FUNCTION__ << "Graph file DOES NOT exit. Creating with " << NUM_POINTS << "nodes and " << NEIGHBOORS << "neighboors";
-		createGraph(innerModel, NUM_POINTS, NEIGHBOORS, 2500.f);
+		qDebug() << __FUNCTION__ << "Graph file DOES NOT exit. Creating with " << nPoints << "nodes and " << neigh << "neighboors";
+		createGraph(innerModel, nPoints, neigh, 2500.f);  //MAX distance apart for two points to be considered.
 	}	
 }
 
@@ -55,38 +50,108 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	
 	QVec currentTarget = target;  //local variable to get samples from free space
    
-	//We need to resynchronize here because in subsequent call the robot will be "Dios sabe dónde"
+	//We need to resynchronize here with calling version of IM because in subsequent call the robot will be "Dios sabe dónde"
 	QVec robot = inner->transform("world", "robot");	
 	QVec robotRotation = inner->getRotationMatrixTo("world", "robot").extractAnglesR_min();
 	innerModel->updateTransformValues("robot", robot.x(), robot.y(), robot.z(), robotRotation.x(), robotRotation.y(), robotRotation.z());
-
-	QList<QVec> currentPath;   			//Results will be saved here
 	
-	//Build list of colision meshes
-	robotNodes.clear(); restNodes.clear();
-	recursiveIncludeMeshes(innerModel->getRoot(), "robot", false, robotNodes, restNodes);
-		
-	//If target on obstacle, abort.  OJO targetRotation is not specified, Using robot initial orientation
-	if (collisionDetector(target,robotRotation,innerModel) == true)
+	currentPath.clear();	
+	
+	//If target on obstacle, abort.  OJO targetRotation is not specified, Using robot zero orientation
+	if( sampler.checkRobotValidStateAtTarget(innerModel,target) == false )
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		return false;
 	}
-		
-	//search in graph closest point to origin
-	searchGraph(robot,target);
 	
-	//connect to graph
+	//search in KD-tree closest points to origin and target
+	Vertex robotVertex, targetVertex;
+	searchClosestPoints(robot, target, robotVertex, targetVertex);
 	
-	//search in graph closest point to target
+	//obtain a free path from [robot] to [robotVertex] using RRTConnect
+	QList<QVec> path;
+	if (planWithRRT(robot, graph[robotVertex].pose, path) )
+	{	
+ 		currentPath += path;
+		qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan";
+		qDebug() << "So far" << path;
+	}
+	else
+		 return false;
 	
-	//connect to graph 
+	//search in graph minimun path
+	std::vector<Vertex> vertexPath;
+	bool cool = searchGraph(robotVertex,targetVertex, vertexPath);  //results saved in currentPath
+	for( Vertex v : vertexPath )
+		currentPath.append(graph[v].pose);
+	
+	//obtain a free path from [robot] to [robotVertex] using RRTConnect
+	path.clear();
+	if (planWithRRT(graph[targetVertex].pose, target, path) )
+	{
+		currentPath += path;
+		qDebug() << __FUNCTION__ << "RRTConnect succeeded for TARGET with a " << path.size() << "plan";
+		qDebug() << "So end" << path;
+	}
+	else
+		 return false;
+	
+	//add both points to the graph
+	//addPointToGraphAndConnect( robot, robotVertex );
+	//addPointToGraphAndConnect( target, targetVertex );
 	
 	return true;
 	
 }
 
-bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
+////////////////////////////////////////////////////////////////////////
+/// One query planner to be used when no path found un PRM
+////////////////////////////////////////////////////////////////////////
+
+
+bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec> &path)
+{
+	qDebug() << __FILE__ << __FUNCTION__ << "RRTConnect start...";
+	
+	bool reachEnd;
+	qDebug()<< "diff"  << (origin-target).norm2() << origin << target;
+	if( (origin-target).norm2() < 300 )
+		return true;
+	
+	QVec p = trySegmentToTarget(origin, target, reachEnd);
+	if( reachEnd )
+	{
+		path += p;
+		qDebug() << __FUNCTION__ << "Found ORIGIN to first directly";
+		return true;
+	}
+	else
+	{
+		plannerRRT.initialize(&sampler);  //QUITAR DE AQUI
+		if (plannerRRT.computePath(origin, target, 30))
+		{
+			path += plannerRRT.getPath();
+			return true;
+		}
+		else
+			return false;
+	}
+}
+
+/**
+ * @brief Adds a (set of) connectable point to the graph
+ * 
+ * @param point ...
+ * @return void
+ */
+void PlannerPRM::addPointToGraphAndConnect(const QVec& point, const Vertex &vertex)
+{
+	
+
+}
+
+
+void PlannerPRM::searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex)
 {
 	qDebug() << __FUNCTION__ << "Searching from " << origin << "to " << target;
 	
@@ -101,11 +166,18 @@ bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
 	
 	nabo->knn(query, indices, distsTo, 1);
 	
-	Vertex vertexOrigin = vertexMap.value(indices(0,0));
-	Vertex vertexTarget = vertexMap.value(indices(0,1));
+	originVertex = vertexMap.value(indices(0,0));
+	targetVertex = vertexMap.value(indices(0,1));
 	
-	qDebug() << __FUNCTION__ << "Closest point to origin is at" << data(0,indices(0,0)) << data(1,indices(0,0)) << data(2,indices(0,0)) << " and corresponds to " << graph[vertexOrigin].pose;
-	qDebug() << __FUNCTION__ << "Closest point to target is at" << data(0,indices(0,1)) << data(1,indices(0,1)) << data(2,indices(0,1)) << " and corresponds to " << graph[vertexTarget].pose;
+	qDebug() << __FUNCTION__ << "Closest point to origin is at" << data(0,indices(0,0)) << data(1,indices(0,0)) << data(2,indices(0,0)) << " and corresponds to " << graph[originVertex].pose;
+	qDebug() << __FUNCTION__ << "Closest point to target is at" << data(0,indices(0,1)) << data(1,indices(0,1)) << data(2,indices(0,1)) << " and corresponds to " << graph[targetVertex].pose;
+
+}
+
+
+bool PlannerPRM::searchGraph(const Vertex &originVertex, const Vertex &targetVertex, std::vector<Vertex> &vertexPath)
+{
+	qDebug() << __FUNCTION__ << "Searching Graph from " << graph[originVertex].index << "to " << graph[targetVertex].index;
 	
 	// Create things for Dijkstra
 	std::vector<Vertex> predecessors(boost::num_vertices(graph)); // To store parents
@@ -115,25 +187,18 @@ bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
 	auto predecessorMap = boost::make_iterator_property_map(&predecessors[0], indexMap);
 	auto distanceMap = boost::make_iterator_property_map(&distances[0], indexMap);
 
-	boost::dijkstra_shortest_paths(graph, vertexOrigin, boost::weight_map(boost::get(&EdgePayload::dist, graph))
-												.predecessor_map(predecessorMap)
-												.distance_map(distanceMap));
+	boost::dijkstra_shortest_paths(graph, originVertex, boost::weight_map(boost::get(&EdgePayload::dist, graph))
+															.predecessor_map(predecessorMap)
+															.distance_map(distanceMap));
 
 	// Output results
-	std::cout << "distances and parents:" << std::endl;
 	auto nameMap( boost::get(&VertexPayload::index, graph) );
 	auto poseMap( boost::get(&VertexPayload::pose, graph) );
  
-// 	BGL_FORALL_VERTICES(v, graph, Graph)
-// 	{
-// 		std::cout << "distance(" << nameMap[vertexOrigin] << ", " << nameMap[v] << ") = " << distanceMap[v] << ", ";
-// 		std::cout << "predecessor(" << nameMap[v] << ") = " << nameMap[predecessorMap[v]] << std::endl;
-// 	}
-
 	// Extract a shortest path
  
 	PathType path;
-	Vertex v = vertexTarget;
+	Vertex v = targetVertex;
 	
 	// Start by setting 'u' to the destintaion node's predecessor   |||// Keep tracking the path until we get to the source
 	for( Vertex u = predecessorMap[v]; u != v; v = u, u = predecessorMap[v]) // Set the current vertex to the current predecessor, and the predecessor to one level up
@@ -144,20 +209,22 @@ bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
 	}
 	
  	std::cout << __FUNCTION__ << "Path found with length: " << path.size() <<std::endl;
+	Vertex lastVertex;
 	if(path.size() > 0)
 	{
 		// Write shortest path
-		currentPath.clear();
+		vertexPath.clear();
 		std::cout << __FUNCTION__ << "Shortest path from origin to target:" << std::endl;
-		float totalDistance = 0;
 		for(PathType::reverse_iterator pathIterator = path.rbegin(); pathIterator != path.rend(); ++pathIterator)
 		{
 			std::cout << nameMap[boost::source(*pathIterator, graph)] << " -> " << nameMap[boost::target(*pathIterator, graph)]
 					<< " = " << boost::get( &EdgePayload::dist, graph, *pathIterator ) << std::endl;
-			currentPath.append(poseMap[boost::source(*pathIterator, graph)]);
+			vertexPath.push_back(boost::source(*pathIterator, graph));
+			lastVertex = boost::target(*pathIterator, graph);
 		}
+		vertexPath.push_back(lastVertex);
 		std::cout << std::endl;
-		std::cout << "Distance: " << distanceMap[vertexTarget] << std::endl;
+		std::cout << "Distance: " << distanceMap[targetVertex] << std::endl;
 		return true;
 	}
 	else
@@ -166,15 +233,17 @@ bool PlannerPRM::searchGraph(const QVec& origin, const QVec& target)
 
 void PlannerPRM::createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK)
 {
+	const int ROBOT_SIZE_SQR = 400*400; //mm
 	
-	qDebug() << __FUNCTION__ << "Creating grpah";
+	qDebug() << __FUNCTION__ << "Creating graph";
 	
 	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
-	bool reachEnd;
-		
+	
+	data.resize(3,NUM_POINTS);
+	
 	for(uint i=0; i<NUM_POINTS; i++)
 	{
-		QVec point = sampleFreeSpaceR2(inner, QPointF(xMax, zMin));
+		QVec point = sampler.sampleFreeSpaceR2(inner);
 		data(0,i) = point.x();
 		data(1,i) = point.y();
 		data(2,i) = point.z();
@@ -207,29 +276,30 @@ void PlannerPRM::createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS
 			graph[vertex].index = i;
 			qDebug() << "Insert vertex " << i;
 		}
-		
+		bool reachEnd;
 		for(uint k=0; k<NEIGHBOORS; k++)
 		{	
-			if(distsTo(k,i) < MAX_DISTANTE_TO_CHECK_SQR )  //check if distance is lower that threshold
+			int indKI = indices(k,i);
+			if( (distsTo(k,i) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,i) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
 			{
-				trySegmentToTarget(QVec::vec3(data(0,i), 0, data(1,i)), QVec::vec3(data(0,indices(k,i)), 0, data(1,indices(k,i))), reachEnd);
-				qDebug() << "i" << i << "k" << k << indices(k,i) << distsTo(k,i);
+				trySegmentToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
+				qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,i) << "reaches the end:" << reachEnd;
 				
 				//if free path to neighboor, insert it in the graph if does not exist
 				if( reachEnd == true)
 				{
-					if( vertexMap.contains(indices(k,i)))
+					if( vertexMap.contains(indKI))
 					{
 						vertexN = vertexMap.value(indices(k,i));
-						qDebug() << "Recovered vertex " << indices(k,i);
+						qDebug() << __FUNCTION__ << "Recovered vertex " << indKI;
 					}
 					else
 					{
 						vertexN = boost::add_vertex(graph);
 						vertexMap.insert(indices(k,i),vertexN);
-						graph[vertexN].pose = QVec::vec3(data(0,indices(k,i)), 0, data(1,indices(k,i)));
-						graph[vertexN].index = indices(k,i);	
-						qDebug() << "Insert vertex " << indices(k,i);
+						graph[vertexN].pose = QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI));
+						graph[vertexN].index = indKI;	
+						qDebug() << __FUNCTION__ << "Insert vertex " << indKI;
 					}			
 
 					//compute connected components to reject same isle elements
@@ -242,15 +312,16 @@ void PlannerPRM::createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS
 			
 					bool sameComp = boost::same_component(vertex,vertexN,ds);
 
-					qDebug() << "Try to create and edge from" << graph[vertex].index << "a" << graph[vertexN].index;
-					qDebug() << "true if already exists" << (boost::edge(vertex,vertexN,graph).second == true) << "same" << sameComp;
+					qDebug() << __FUNCTION__<< "Try to create and edge from" << graph[vertex].index << "a" << graph[vertexN].index;
+					qDebug() << __FUNCTION__<< "Already exists: " << (boost::edge(vertex,vertexN,graph).second == true);
+					qDebug() << __FUNCTION__<< "In the same component as initia: " << sameComp;
 					
 					if( (boost::edge(vertex,vertexN,graph).second == false ) and (sameComp == false) )
 					{
 						EdgePayload edge;
 						edge.dist = (QVec(graph[vertex].pose) - QVec(graph[vertexN].pose)).norm2();
 						boost::add_edge(vertex, vertexN, edge, graph);	
-						qDebug() << "insertamos de" << graph[vertex].index << "a" << graph[vertexN].index;
+						qDebug() << __FUNCTION__<< "Insertamos de" << graph[vertex].index << "a" << graph[vertexN].index;
 					}
 				}
 			}
@@ -293,21 +364,19 @@ void PlannerPRM::readGraphFromFile(QString name)
     writeGraphToStream(std::cout);
 	
 	data.resize(3,boost::num_vertices(graph));		//ONLY 3D POINTS SO FAR
-	qDebug() << "grh size" << boost::num_vertices(graph);
+	qDebug() << "graph size" << boost::num_vertices(graph);
 	int i=0;
+	
 	BGL_FORALL_VERTICES(v, graph, Graph)
     {
 		data(0,i) = graph[v].pose.x();
 		data(1,i) = graph[v].pose.y();
 		data(2,i) = graph[v].pose.z();
-		qDebug() << graph[v].pose;
+		//qDebug() << graph[v].pose;
 		vertexMap.insert(i,v);
 		i++;
 	}
-	
-	
 	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
-	
 }
 
 void PlannerPRM::setInnerModel(const InnerModel& innerModel_)
@@ -315,82 +384,6 @@ void PlannerPRM::setInnerModel(const InnerModel& innerModel_)
 	innerModel = new InnerModel(innerModel_);
 }
 
-////////////////////////////////////////////////////////////////////////
-/// COLLISION DETECTOR - FCL -
-////////////////////////////////////////////////////////////////////////
-
-
-bool PlannerPRM::collisionDetector(const QVec &position, const QVec &rotation, InnerModel *inner)
-{
-	inner->updateTransformValues("robot", position.x(), position.y(), position.z(), rotation.x(), rotation.y(), rotation.z());
-	for (uint32_t in=0; in<robotNodes.size(); in++)
-	{
-		for (uint32_t out=0; out<restNodes.size(); out++)
-		{
-			if (inner->collide(robotNodes[in], restNodes[out]))
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-void PlannerPRM::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
-{
-	if (node->id == robotId)
-	{
-		inside = true;
-	}
-	
-	InnerModelMesh *mesh;
-	InnerModelPlane *plane;
-	InnerModelTransform *transformation;
-
-	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))
-	{
-		for (int i=0; i<node->children.size(); i++)
-		{
-			recursiveIncludeMeshes(node->children[i], robotId, inside, in, out);
-		}
-	}
-	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
-	{
-		if (inside)
-		{
-			in.push_back(node->id);
-		}
-		else
-		{
-			out.push_back(node->id);
-		}
-	}
-}
-
-/////////////////////////////////////////////////////
-/// Samplers. This baby here admits a lot of improvements!
-////////////////////////////////////////////////////
-
-/**
-* @brief Picks a random point of the list created by the sampler and checks that it is out of obstacles (Free Space)
-* 
-* @param currentTarget Current target provided to bias the sample. 20% of the times the target is returned.
-* @return RMat::QVec
-*/
-
-QVec PlannerPRM::sampleFreeSpaceR2(InnerModel *inner, const QPointF &XZLimits)  //ÑAPA!!!! meter los cuatro valores 
-{
- 	const QVec zeros(3,0.f);
- 	bool collision = true;
-	QVec p;
-	while( collision == true )
-	{
-		p =	QVec::vec3( qrand()*XZLimits.x()/RAND_MAX, 0, qrand()*XZLimits.y()/RAND_MAX );
-		collision = collisionDetector(p, zeros, inner);	
-	}
-	return p;
-}
 
 ////////////////////////////////////////////////////////////////////////
 /// LOCAL CONTROLLER. Also a lot of improvements fit here    												USE BINARY SEARCH!!!!!!!!!!!!!!!!!!!
@@ -438,7 +431,7 @@ QVec PlannerPRM::trySegmentToTarget(const QVec & origin , const QVec & target, b
 		
 		//Collision detector
 		//qDebug() << point << origin << target << innerModel->transform("world","robot");
-		if (collisionDetector(point, 0, innerModel) == true)
+		if (sampler.checkRobotValidStateAtTarget(innerModel, point) == false )
 		{
 		  reachEnd = false;
 		  return pointAnt;
@@ -450,6 +443,45 @@ QVec PlannerPRM::trySegmentToTarget(const QVec & origin , const QVec & target, b
 	reachEnd= true;
 	return target;
 }
+
+
+
+
+///////////////////////////////////////////////////////////////////////
+/// DRAW
+////////////////////////////////////////////////////////////////////////
+
+void PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy)
+{
+
+	RoboCompInnerModelManager::Pose3D pose;
+	pose.rx = pose.ry = pose.z = 0.;
+	RoboCompInnerModelManager::meshType mesh;
+	mesh.pose = pose;
+	mesh.scaleX = mesh.scaleY = mesh.scaleZ = 100;
+	mesh.meshPath = "/home/robocomp/robocomp/components/";
+	RoboCompInnerModelManager::Plane3D plane;
+	plane.height = 100; plane.width = 100; plane.thickness = 10;
+	plane.px = plane.py = plane.pz = 0;
+	plane.nx = 0; plane.ny = 1; plane.nz = 0;
+	plane.texture = "#0000F0";
+	
+	QString item;
+	int i=0;
+	BGL_FORALL_VERTICES(v, graph, Graph)
+    {
+		item = "g_" + QString::number(i++);		
+		pose.x = graph[v].pose.x();
+		pose.y = 10;
+		pose.z = graph[v].pose.z();
+		qDebug() << "adding item " << item << "at " << pose.x << pose.y << pose.z;
+		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
+		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, item + "_plane", item, plane);
+	}
+}
+
+
+
 
 
 // 					BOOST_FOREACH(VertexIndex current_index, components) 

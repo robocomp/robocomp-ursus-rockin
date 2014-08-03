@@ -38,9 +38,11 @@
 #include <boost/property_map/dynamic_property_map.hpp> 
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/iteration_macros.hpp>
-
+#include <InnerModelManager.h>
 #include "nabo/nabo.h"
-
+#include "rcisdraw.h"
+#include "sampler.h"
+#include "plannerompl.h"
 
 struct VertexPayload
 {	
@@ -75,24 +77,23 @@ class PlannerPRM : public QObject
 		void setInnerModel(const InnerModel &innerModel_);
 		QList<QVec> getPath() { return currentPath; }
 		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax)		{xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;};
+		void drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
 		
 	private:
 		Graph graph;
-		void addPointToGraph(const QVec &point);
+		void addPointToGraphAndConnect(const QVec& point, const Vertex &vertex);
 		void createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK);
-		bool searchGraph(const QVec &origin, const QVec &target);
-		QVec sampleFreeSpaceR2(const QPointF& XZLimits);
-		void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
+		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
+		QVec trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd);
+		void readGraphFromFile(QString name);
+		void writeGraphToStream(std::ostream &stream);
+		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);
+
 		InnerModel *innerModel;
 		QList<QVec> currentPath;   			//Results will be saved here
 		std::vector<QString> robotNodes;
 		std::vector<QString> restNodes;
 		float xMin, xMax, zMin, zMax; 		//Limits of environmnent
-		QVec sampleFreeSpaceR2(InnerModel *inner, const QPointF &XZLimits);
-		bool collisionDetector(const QVec &position, const QVec &rotation, InnerModel *im);
-		QVec trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd);
-		void readGraphFromFile(QString name);
-		void writeGraphToStream(std::ostream &stream);
 		
 		//Libnabo fast KDTree for low dimension
 		Nabo::NNSearchF *nabo;
@@ -103,6 +104,13 @@ class PlannerPRM : public QObject
 		//number of points given in constructor
 		uint NUM_POINTS;
 		uint NEIGHBOORS;
+		
+		//Sampler
+		Sampler sampler;
+		
+		//embedded RRTConnect Planner
+		PlannerOMPL plannerRRT;
+		bool planWithRRT(const QVec& origin, const QVec& target, QList<QVec> &path);
 };
 
 //Graph writing classes
