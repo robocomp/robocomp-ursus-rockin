@@ -37,6 +37,7 @@ WayPoints::WayPoints()
 	currentDistanceToFrontier = 0;
 	requiresReplanning = false;
 
+	meanSpeed = 300.f;  //Initial speed. Should be read from disk
 }
 
 WayPoints::~WayPoints()
@@ -63,6 +64,21 @@ void WayPoints::reset()
 	currentCollisionIndex = 0;
 	currentDistanceToFrontier = 0;
 	requiresReplanning = false;
+	
+}
+
+void WayPoints::startRoad()
+{
+	reloj.restart();
+	setETA();
+	initialDurationEstimation = getETA();
+}
+
+void WayPoints::endRoad()
+{
+	elapsedTime = reloj.restart();
+	meanSpeed = 0.5 * meanSpeed + 0.5 * (getRobotDistanceToTarget() / elapsedTime);
+	//We should save it now to disk
 }
 
 void WayPoints::readRoadFromFile(InnerModel *innerModel, std::string name)
@@ -153,7 +169,7 @@ QLine2D WayPoints::getTangentToCurrentPoint()
 void WayPoints::printRobotState(InnerModel* innerModel)
 {
 		QVec robot3DPos = innerModel->transform("world", "robot");
-		qDebug() << "Scalar magnitudes ---------------------";
+		qDebug() << "-------Road status report  ---------------------";
 		qDebug() << "	Robot position:" << robot3DPos;
 		qDebug() << "	Num points:" << this->size();
 		qDebug() << "	Robot dist to closest point in road:" << getRobotDistanceToClosestPoint();
@@ -170,8 +186,12 @@ void WayPoints::printRobotState(InnerModel* innerModel)
 		qDebug() << "	Is Lost:" << isLost;
 		qDebug() << "	Is Finished:" << isFinished();
 		qDebug() << "	Requires replanning:" << requiresReplanning;
-	
-		qDebug();		
+		qDebug() << "	ETA:" << estimatedTimeOfArrival << " sg";
+		qDebug() << "	ElapsedTime:" << elapsedTime/1000 << " sg";
+		qDebug() << "	Duration estimation:" << initialDurationEstimation << " sg";
+		qDebug() << "	Estimation error:" << initialDurationEstimation - elapsedTime/1000 << " sg";
+		
+		qDebug() << "----------------------------------------------------";
 }
 
 void WayPoints::print()
@@ -314,7 +334,11 @@ WayPoints::iterator WayPoints::computeClosestPointToRobot(const QVec& robot)
  */
 QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 {
+	static QLine2D antLine = QLine2D(QVec::zeros(3), QVec::vec3(0,0,1));  //Initial well formed tangent
+	
 	WayPoints::iterator ant,post;
+	const float MIN_DISTANCE_ALLOWED = 10.f;
+	
 	if( w == this->begin())
 		ant = w;
 	else
@@ -324,14 +348,27 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 		post = w;
 	else
 		post = w+1;
-
-	if( ant == post )
+	
+	if( (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED)  //Too close to compute a a line
+		while ( post++ != this->end() and (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED);
+	
+	if( (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED) //Still to close 
 	{
-		qFatal("fary en compute Tangent");
+		 if( post==ant ) //but only one point in road
+			return antLine;
+		 else
+			qDebug() << __FUNCTION__ << "fary en compute Tangent. Looks like road's size is 1";
 	}
-// 		ant->pos.print("ant");
-// 		post->pos.print("post");
-	return QLine2D( ant->pos , post->pos );
+	
+	QLine2D l( ant->pos , post->pos );
+	if( isnan(l[0]) or isnan(l[1]) or isnan(l[2]))
+	{
+		ant->pos.print("ant");
+ 		post->pos.print("post");
+		l.print("line");
+		qFatal("Fary in tg");
+	}
+	return  l;
 }
 
 /**
@@ -403,6 +440,12 @@ float WayPoints::computeRoadCurvature(WayPoints::iterator closestPoint, uint poi
 		return 0;
 }
 
+void WayPoints::setETA()
+{
+	estimatedTimeOfArrival = getRobotDistanceToTarget() / meanSpeed;
+	elapsedTime = reloj.elapsed();
+}
+
 /**
  * @brief Computes all scalar values used by the Controller to obtain the force field that acts on the robot
  * 
@@ -418,8 +461,9 @@ void WayPoints::computeForces()
 	
 	//Compute closest existing trajectory point to robot
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
+	
 	//Compute roadTangent at closestPoint;
-	qDebug() << __FILE__  << __FUNCTION__ << "just here" << getCurrentPointIndex() << getRobotDistanceToClosestPoint();
+	qDebug() << __FILE__  << __FUNCTION__ << "just here" << getIndexOfClosestPointToRobot() << getRobotDistanceToClosestPoint();
 	if(closestPoint == end())
 		qFatal("fary en Compute Forces");
 	
@@ -436,6 +480,9 @@ void WayPoints::computeForces()
 	//Compute distanceToTarget along trajectory
   	setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );  //computes robotDistanceVariationToTarget
 	setRobotDistanceVariationToTarget( robotDistanceVariationToTarget);
+	
+	//Update estimated time of arrival
+	setETA();
 	
 	//Check for arrival to target  TOO SIMPLE 
 	if(	( ((int)getCurrentPointIndex()+1 == (int)size())  and  ( getRobotDistanceToTarget() < 100) )

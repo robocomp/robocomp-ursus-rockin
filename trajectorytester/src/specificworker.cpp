@@ -29,6 +29,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	connect(goPushButton, SIGNAL(clicked()), this, SLOT(goButton()));
 	connect(bedroomPushButton, SIGNAL(clicked()), this, SLOT(goBedRoom()));
 	connect(kitchenPushButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
+	connect(stopButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
 	connect(hallPushButton, SIGNAL(clicked()), this, SLOT(goHall()));
 	connect(diningPushButton, SIGNAL(clicked()), this, SLOT(goDining()));
 	connect(livingPushButton, SIGNAL(clicked()), this, SLOT(goLiving()));
@@ -44,9 +45,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	
 	connect(plantWidget, SIGNAL(mouseMove(QVec)), this, SLOT(setTargetCoorFromPlant(QVec)));
 	connect(plantWidget, SIGNAL(mousePress(QVec)), this, SLOT(setNewTargetFromPlant(QVec)));
-	
-	
-	
 }
 
 /**
@@ -153,6 +151,11 @@ void SpecificWorker::goDoor()
 void SpecificWorker::goKitchen()
 {
 	go(QVec::vec3(6000,0,-5300));
+}
+
+void SpecificWorker::goKitchen2()
+{
+	go(QVec::vec3(5800,0,-4400));
 }
 
 void SpecificWorker::goBedRoom()

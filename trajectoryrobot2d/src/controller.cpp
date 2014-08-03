@@ -37,7 +37,7 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 	
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	
-	qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
+	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
 	
 	if((road.isBlocked == true) or (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
@@ -108,7 +108,7 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		//				* teta that applies when getting close to the target (1/roadGetCurvature)
 		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
 		
-		vadvance = MAX_ADV_SPEED * exp(-fabs(2.1* road.getRoadCurvatureAtClosestPoint())) 
+		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint())) 
 								 * exponentialFunction(vrot, 0.8, 0.1)
 								 * teta;
 								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1) 
@@ -132,7 +132,10 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 		//////   EXECUTION
 		////////////////////////////////////////////////
 		
- 		qDebug() << __FUNCTION__ << "VAdv = " << vadvance << " VRot = " << vrot;
+		qDebug() << "------------------Controller Report ---------------;";
+ 		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+		qDebug() << "---------------------------------------------------;";
+ 		
  
    		try {	differentialrobot_proxy->setSpeedBase( vadvance, vrot);	} 
    		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl;		}	

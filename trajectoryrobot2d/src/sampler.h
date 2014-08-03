@@ -28,10 +28,10 @@ class Sampler
 	public:
 		Sampler();
 		void initialize(InnerModel &inner, const QRectF& outerRegion_, const QList< QRectF >& innerRegions_);
-		QVec sampleFreeSpaceR2(InnerModel *inner);
-		bool checkRobotValidStateAtTarget(InnerModel* inner,  const QVec &targetPos, const QVec &targetRot = QVec::zeros(3)) ;
+		QVec sampleFreeSpaceR2();
+		bool checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot = QVec::zeros(3)) ;
 		bool isStateValid(const ompl::base::State *state) ;
-		bool checkRobotValidDirectionToTarget(const QVec & origin , const QVec & target, QList<QVec> &path);
+		bool checkRobotValidDirectionToTarget(const QVec & origin , const QVec & target, QVec &path);
 	private:
 		std::vector<QString> robotNodes;
 		std::vector<QString> restNodes;

@@ -34,6 +34,8 @@ class CurrentTarget
 		void setActive(bool a);
 		bool isWithoutPlan() const ;
 		void setWithoutPlan(bool w); 
+		void print();
+		ulong getElapsedTime() const;  //ms
 		
 	private:
 		mutable QMutex mutex;
@@ -41,6 +43,7 @@ class CurrentTarget
 		QVec targetRot;
 		bool active;
 		bool withoutPlan;
+		QTime reloj;
 		
 };
 

@@ -29,6 +29,7 @@ void CurrentTarget::reset()
 	withoutPlan = true; 
 	targetTr = QVec::zeros(3); 
 	targetRot = QVec::zeros(3);
+	reloj.start();
 }
 
 QVec CurrentTarget::getTranslation() const
@@ -76,5 +77,16 @@ void CurrentTarget::setWithoutPlan(bool w)
 	QMutexLocker ml(&mutex);
 	withoutPlan = w;
 }
-
-
+void CurrentTarget::print()
+{
+	QMutexLocker ml(&mutex);
+	qDebug() << "------------------------------------";
+	qDebug() << "CurrentTarget  ---------------------";
+	qDebug() << "	Active:" << active;
+	qDebug() << "	Translation:" << targetTr;
+	qDebug() << "	Rotation:" << targetRot;
+	qDebug() << "	WithoutPlan" << withoutPlan;
+	qDebug() << "	ElapsedTime" << reloj.elapsed();
+	
+	qDebug() << "------------------------------------";
+}

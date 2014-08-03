@@ -57,41 +57,60 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	
 	currentPath.clear();	
 	
-	//If target on obstacle, abort.  OJO targetRotation is not specified, Using robot zero orientation
-	if( sampler.checkRobotValidStateAtTarget(innerModel,target) == false )
+	//If target on obstacle, abort.  IMPROVE THIS SO TARGET REGIONS ARE HANDLED
+	if( sampler.checkRobotValidStateAtTarget(target) == false )
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		return false;
 	}
 	
-	//search in KD-tree closest points to origin and target
+	//Search in KD-tree closest points to origin and target
 	Vertex robotVertex, targetVertex;
 	searchClosestPoints(robot, target, robotVertex, targetVertex);
 	
-	//obtain a free path from [robot] to [robotVertex] using RRTConnect
+	//Obtain a free path from [robot] to [robotVertex] using RRTConnect. Return if fail.
 	QList<QVec> path;
 	if (planWithRRT(robot, graph[robotVertex].pose, path) )
 	{	
- 		currentPath += path;
-		qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan";
-		qDebug() << "So far" << path;
+		if(path.size() > 1)  //has to be. We trim the last element to avoid duplicating it
+		{
+			path.removeLast();
+			currentPath += path;
+			qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan." << " So far" << path;
+		}
+		else 
+			if (path.size() == 1)
+				qFatal("Fary en path");
 	}
 	else
 		 return false;
 	
-	//search in graph minimun path
-	std::vector<Vertex> vertexPath;
-	bool cool = searchGraph(robotVertex,targetVertex, vertexPath);  //results saved in currentPath
-	for( Vertex v : vertexPath )
-		currentPath.append(graph[v].pose);
+	//Search in graph minimun path. Return if fail
+	if( robotVertex != targetVertex )  //Same node for both. We should skip searchGraph
+	{
+		std::vector<Vertex> vertexPath;
+		if ( searchGraph(robotVertex, targetVertex, vertexPath) )
+			for( Vertex v : vertexPath )
+				currentPath.append(graph[v].pose);
+		else //No path found
+			return false;
+	}
+	else	//add the only node
+		currentPath += graph[robotVertex].pose;
 	
-	//obtain a free path from [robot] to [robotVertex] using RRTConnect
+	//Obtain a free path from [target] to [targetVertex] using RRTConnect. Return if fail.
 	path.clear();
 	if (planWithRRT(graph[targetVertex].pose, target, path) )
 	{
-		currentPath += path;
-		qDebug() << __FUNCTION__ << "RRTConnect succeeded for TARGET with a " << path.size() << "plan";
-		qDebug() << "So end" << path;
+		if( path.size() > 1) //Should be !!  We trimm the first elemen to avoid duplicating it since it already came in searchGraph
+		{
+			path.removeFirst();
+			currentPath += path;
+			qDebug() << __FUNCTION__ << "RRTConnect succeeded for TARGET with a " << path.size() << "plan" << ". So end" << path;
+		}
+		else
+			if(path.size() == 1)
+				qFatal("Fary en path target");
 	}
 	else
 		 return false;
@@ -100,6 +119,11 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	//addPointToGraphAndConnect( robot, robotVertex );
 	//addPointToGraphAndConnect( target, targetVertex );
 	
+	//currentSmoothedPath.clear();
+	//qDebug() << __FUNCTION__ << "Smoothing a " << currentPath.size() << "path"; 
+	//smoothPathIter(currentPath);
+	//currentPath = currentSmoothedPath;
+	//qDebug() << __FUNCTION__ << "Done smoothing. Result: " << currentPath.size() << "path"; 
 	return true;
 	
 }
@@ -111,22 +135,28 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 
 bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec> &path)
 {
-	qDebug() << __FILE__ << __FUNCTION__ << "RRTConnect start...";
+	qDebug() << __FUNCTION__ << "RRTConnect start...";
 	
 	bool reachEnd;
-	qDebug()<< "diff"  << (origin-target).norm2() << origin << target;
-	if( (origin-target).norm2() < 300 )
+	if( (origin-target).norm2() < 200 )  //HALF ROBOT RADIOUS
+	{
+		qDebug() << __FUNCTION__ << "Origin and target too close. Diff: "  << (origin-target).norm2() << origin << target << ". Returning void";
 		return true;
+	}
 	
-	QVec p = trySegmentToTarget(origin, target, reachEnd);
+	//QVec p = trySegmentToTarget(origin, target, reachEnd);
+	QVec point;
+	reachEnd = sampler.checkRobotValidDirectionToTarget( origin, target, point);
+	
 	if( reachEnd )
 	{
-		path += p;
-		qDebug() << __FUNCTION__ << "Found ORIGIN to first directly";
+		path << origin << target;
+		qDebug() << __FUNCTION__ << "Found target directly in line of sight";
 		return true;
 	}
 	else
 	{
+		qDebug() << __FUNCTION__ << "Calling RRTConnect OMPL planner. This may take a while";
 		plannerRRT.initialize(&sampler);  //QUITAR DE AQUI
 		if (plannerRRT.computePath(origin, target, 30))
 		{
@@ -208,7 +238,7 @@ bool PlannerPRM::searchGraph(const Vertex &originVertex, const Vertex &targetVer
 		path.push_back( edge );
 	}
 	
- 	std::cout << __FUNCTION__ << "Path found with length: " << path.size() <<std::endl;
+ 	std::cout << __FUNCTION__ << " Path found with length: " << path.size() <<std::endl;
 	Vertex lastVertex;
 	if(path.size() > 0)
 	{
@@ -243,7 +273,7 @@ void PlannerPRM::createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS
 	
 	for(uint i=0; i<NUM_POINTS; i++)
 	{
-		QVec point = sampler.sampleFreeSpaceR2(inner);
+		QVec point = sampler.sampleFreeSpaceR2();
 		data(0,i) = point.x();
 		data(1,i) = point.y();
 		data(2,i) = point.z();
@@ -431,7 +461,7 @@ QVec PlannerPRM::trySegmentToTarget(const QVec & origin , const QVec & target, b
 		
 		//Collision detector
 		//qDebug() << point << origin << target << innerModel->transform("world","robot");
-		if (sampler.checkRobotValidStateAtTarget(innerModel, point) == false )
+		if (sampler.checkRobotValidStateAtTarget(point) == false )
 		{
 		  reachEnd = false;
 		  return pointAnt;
@@ -444,8 +474,56 @@ QVec PlannerPRM::trySegmentToTarget(const QVec & origin , const QVec & target, b
 	return target;
 }
 
+////////////////////////////////////////////////////////////////////////
+/// SMOOTHERS
+////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Fast recursive smoother that takes a list of poses and returns a safe shorter path free of collisions.
+ * 
+ * @param list List of poses comprising the path
+ * @return void
+ */
+void PlannerPRM::smoothPath( const QList<QVec> & list)
+{
+	bool reachEnd;
 
+	trySegmentToTarget( list.first(), list.last(), reachEnd);
+
+	if (reachEnd == true) 
+	{
+		if(currentSmoothedPath.contains(list.first()) == false)
+		  currentSmoothedPath.append(list.first());
+		if(currentSmoothedPath.contains(list.last()) == false)
+		  currentSmoothedPath.append(list.last());
+
+		return;
+	}
+	else		//call again with the first half first and the second half later
+	{
+		if(list.size()>2)	   
+		{
+		      smoothPath( list.mid(0,list.size()/2 +1));
+		      smoothPath( list.mid( list.size()/2 , -1 ));
+		}
+	}
+}
+
+void PlannerPRM::smoothPathIter(QList<QVec> & list)
+{
+	bool reachEnd;
+
+	int i=2;
+	for(int i=2; i<list.size(); i++)
+	{
+		trySegmentToTarget( list.first(), list[i], reachEnd);
+		if( reachEnd == false)
+			break;
+	}
+	//delete intermediate points
+	for(int k=1; k<i-1; k++)
+		list.removeAt(k);
+}
 
 ///////////////////////////////////////////////////////////////////////
 /// DRAW

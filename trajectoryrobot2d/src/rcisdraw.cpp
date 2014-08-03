@@ -70,7 +70,6 @@ void RcisDraw::addTransform_ignoreExisting(InnerModelManagerPrx innermodelmanage
 		{
 			qDebug() << __FILE__ << __FUNCTION__<< "Error adding transform";
 			qDebug() << QString::fromStdString(e.text);
-			qFatal("Aborting...");
 		}
 	}
 }
@@ -94,7 +93,6 @@ void RcisDraw::addPlane_ignoreExisting(InnerModelManagerPrx innermodelmanager_pr
 		{
 			qDebug() << __FUNCTION__ << "Probably the parent does not exist!";
 			qDebug() << QString::fromStdString(e.text);
-			qFatal("Aborting...");
 		}
 	}
 }

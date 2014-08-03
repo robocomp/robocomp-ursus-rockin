@@ -82,8 +82,8 @@ private:
 	void cleanWorld();
 	void moveBoxes();
 	void setRobotInitialPose(float x, float z, float alpha);
-	void updateInnerModel(InnerModel *inner);
-	bool computePlan(InnerModel* inner);
+	bool updateInnerModel(InnerModel* inner);
+	bool targetHasAPlan(InnerModel* inner);
 	void drawTarget(const QVec &target);
 	void drawGreenBoxOnTarget(const QVec &target);
 };

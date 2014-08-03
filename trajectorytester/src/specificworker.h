@@ -42,6 +42,7 @@ public slots:
 	void goBedRoom();
 	void goLiving();
 	void goKitchen();
+	void goKitchen2();
 	void goHall();
 	void goDining();
 	void goDining2();

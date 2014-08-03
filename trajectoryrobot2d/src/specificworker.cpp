@@ -127,39 +127,45 @@ void SpecificWorker::compute( )
  	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
 	
-	updateInnerModel(innerModel);
-
-	if ( currentTarget.isActive() and computePlan(innerModel))
+	if ( updateInnerModel(innerModel) )
 	{
-		//computePlan(innerModel);
-	
-		elasticband->update( road, laserData );
-		
-		road.computeForces();
-
-		road.printRobotState( innerModel);
-
-		controller->update(differentialrobot_proxy, road);
-		
-		if (road.isFinished() == true)
+		if ( currentTarget.isActive() and targetHasAPlan(innerModel))
 		{
-			drawGreenBoxOnTarget( currentTarget.getTranslation() );
-			currentTarget.reset();
-			road.reset();
-			compState.elapsedTime = taskReloj.elapsed();
-			//planner->drawGraph(innermodelmanager_proxy);
+		
+			elasticband->update( road, laserData );
+			
+			road.computeForces();
+		
+			road.printRobotState( innerModel);
+
+			controller->update(differentialrobot_proxy, road);
+			
+			if (road.isFinished() == true)
+			{		
+				drawGreenBoxOnTarget( currentTarget.getTranslation() );
+				currentTarget.print();
+				currentTarget.reset();
+				road.reset();
+				road.endRoad();
+				compState.elapsedTime = taskReloj.elapsed();
+				//planner->drawGraph(innermodelmanager_proxy);
+			}
+			
+			if(road.requiresReplanning == true)
+			{
+				//qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
+				//computePlan(innerModel);
+			}
+			
+		//	localizer->localize(laserData, innerModel, 20);
 		}
 		
-		if(road.requiresReplanning == true)
-		{
-			qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
-			computePlan(innerModel);
-		}
-		
-	//	localizer->localize(laserData, innerModel, 20);
+	}	
+	else //LOST connection to robot
+	{
+		currentTarget.reset();
+		road.reset();
 	}
-	
-	//Draw in RCIS
 	if(reloj.elapsed() > 2000) 
 	{
 		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
@@ -179,9 +185,9 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	return true;
 };
 
-bool SpecificWorker::computePlan( InnerModel *inner)
+bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 {
-	if( currentTarget.isWithoutPlan() == false) 
+	if( currentTarget.isWithoutPlan() == false ) 
 		return true;
 		
 	QTime reloj = QTime::currentTime();
@@ -190,39 +196,53 @@ bool SpecificWorker::computePlan( InnerModel *inner)
 	compState.planning = true;
 	
 	cleanWorld();
-	updateInnerModel(inner);
+	if (updateInnerModel(inner))
+	{	
 	
-	planner->computePath(currentTarget.getTranslation(), inner);
-	qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
-	
-	if(planner->getPath().size() == 0)
-	{
-		qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
-		currentTarget.reset();
-		return false;
+		planner->computePath(currentTarget.getTranslation(), inner);
+		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
+		
+		if(planner->getPath().size() == 0)
+		{
+			qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
+			currentTarget.reset();
+			return false;
+		}
+		currentTarget.setWithoutPlan( false );
+		currentTarget.print();
+		
+		//Init road
+		road.reset();
+		road.readRoadFromList( planner->getPath() );
+		//road.last() = currentTarget.getRotation();
+		road.requiresReplanning = false;
+		road.computeDistancesToNext();
+		road.print();
+		road.computeForces();  //NOT SURE IF NEEDED HERE
+		road.startRoad();
+		
+		compState.planningTime = reloj.elapsed();
+		compState.planning = false;
+		return true;
 	}
-	currentTarget.setWithoutPlan( false );
-	
-	//Init road
-	road.reset();
-	road.readRoadFromList( planner->getPath() );
-	road.requiresReplanning = false;
-	road.computeDistancesToNext();
-	road.print();
-	road.computeForces();  //NOT SURE IF NEEDED HERE
-	compState.planningTime = reloj.elapsed();
-	compState.planning = false;
-	return true;
+	else 
+		return false;
 }
 
-void SpecificWorker::updateInnerModel(InnerModel *inner)
+bool SpecificWorker::updateInnerModel(InnerModel *inner)
 {
-	try { differentialrobot_proxy->getBaseState(bState); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; }
-	try { laserData = laser_proxy->getLaserData(); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; }
-	
-	inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+	try 
+	{ 
+		differentialrobot_proxy->getBaseState(bState); 
+		inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+	}
+	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
+	try 
+	{ 
+		laserData = laser_proxy->getLaserData(); 
+	}
+	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
+	return true;
 }
 
 void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
@@ -242,7 +262,6 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting initialRobotPose";
-		qFatal("Aborting");
 	}
 
 	usleep(125000);	
@@ -261,7 +280,6 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot pose";
-		qFatal("Aborting");
 	}
 	usleep(125000);	
 
@@ -272,7 +290,6 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot odometer";
-		qFatal("Aborting");
 	}
 
 	usleep(125000);	
@@ -326,9 +343,10 @@ void SpecificWorker::go(const TargetPose& target)
 {
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
+	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
-	qDebug() << __FUNCTION__ << "Curent target received:" << currentTarget.getTranslation();
+	qDebug() << __FUNCTION__ << "GO command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -340,5 +358,6 @@ void SpecificWorker::stop()
 {
 	currentTarget.reset();
 	controller->stopTheRobot(differentialrobot_proxy);
+	qDebug() << __FUNCTION__ << "STOP command received";
 
 }

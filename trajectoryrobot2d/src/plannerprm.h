@@ -88,7 +88,10 @@ class PlannerPRM : public QObject
 		void readGraphFromFile(QString name);
 		void writeGraphToStream(std::ostream &stream);
 		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);
-
+		void smoothPath( const QList<QVec> & list);
+		void smoothPathIter( QList<QVec> & list);
+		QList<QVec> currentSmoothedPath;
+		
 		InnerModel *innerModel;
 		QList<QVec> currentPath;   			//Results will be saved here
 		std::vector<QString> robotNodes;

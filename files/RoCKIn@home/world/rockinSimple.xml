@@ -179,26 +179,26 @@
 			<transform id="macetero2_t" tx="9600" tz="-600" ty="70">
 				<mesh id="macetero2" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/macetero.osg" rx="1.57" scale="7,7,7"  />
 			</transform>
-			<transform id="torchere_1_t" tx="500" tz="-5400">
+		<!--	<transform id="torchere_1_t" tx="500" tz="-5400">
 				<mesh id="torchere1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Torchere 2.3DS"  rx="1.57" rz="1.57"  scale="1,1,1"  />
 			</transform>
 			<transform id="torchere_2_t" tx="4200" tz="-8300">
 				<mesh id="torchere2" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Torchere 2.3DS"  rx="1.57" rz="1.57"  scale="1,1,1"  />
 			</transform>
-			<transform id="dinin_table_t" tx="6400" tz="-7700" ry="1.57">
+		-->	<transform id="dinin_table_t" tx="6400" tz="-7700" ry="1.57">
 				<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="200,200,200"  />
 			</transform>
 			<transform id="k_t" tx="5600" tz="-4300" ty="0">
 				<mesh id="k" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/komplekt5.3DS" rx="1.57" scale="6.6,9,9"  />
 			</transform>
 
-			<transform id="sofa0_t" tx="1800" tz="-7600">
+		<!--	<transform id="sofa0_t" tx="1800" tz="-7600">
 				<mesh id="sofa0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="1.57"  scale="20,20,20"  />
 			</transform>
 			<transform id="sofa1_t" tx="1800" tz="-5200">
 				<mesh id="sofa1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="-1.57" scale="20,20,20"  />
 			</transform>
-			<transform id="sofaAA_t" tx="3100" tz="-6300" >
+	-->		<transform id="sofaAA_t" tx="3100" tz="-6300" >
 				<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="800,600.5,600"  />
 			</transform>
 			

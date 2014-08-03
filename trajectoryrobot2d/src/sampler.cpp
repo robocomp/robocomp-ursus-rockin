@@ -39,7 +39,7 @@ void Sampler::initialize(InnerModel &inner, const QRectF& outerRegion_, const QL
 * @param currentTarget Current target provided to bias the sample. 20% of the times the target is returned.
 * @return RMat::QVec
 */
-QVec Sampler::sampleFreeSpaceR2(InnerModel *inner)  //ÑAPA!!!! meter los cuatro valores 
+QVec Sampler::sampleFreeSpaceR2()  //ÑAPA!!!! meter los cuatro valores 
 {
  	bool validState = false;
 	QVec p;
@@ -56,20 +56,21 @@ QVec Sampler::sampleFreeSpaceR2(InnerModel *inner)  //ÑAPA!!!! meter los cuatro
 				break;
 			}
 		if( in == false) 
-			validState = checkRobotValidStateAtTarget(inner, p);
+			validState = checkRobotValidStateAtTarget(p);
 	}
 	return p;
 }
 
 //Does not return IM to its original state
-bool Sampler::checkRobotValidStateAtTarget(InnerModel* inner, const QVec &targetPos, const QVec &targetRot) 
+bool Sampler::checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot) 
 {
-	inner->updateTransformValues("robot", targetPos.x(), targetPos.y(), targetPos.z(), targetRot.x(), targetRot.y(), targetRot.z());
+	innerModel.updateTransformValues("robot", targetPos.x(), targetPos.y(), targetPos.z(), targetRot.x(), targetRot.y(), targetRot.z());
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
-			if (inner->collide(robotNodes[in], restNodes[out]))
+			//if (inner->collide(robotNodes[in], restNodes[out]))
+			if (innerModel.collide(robotNodes[in], restNodes[out]))
 			{
 				return false;
 			}
@@ -133,10 +134,6 @@ void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 	}
 }
 
-
-
-
-
 /**
  * @brief Local controller. Goes along a straight line connecting the current robot pose and target pose in world coordinates
  * checking collisions with the environment
@@ -147,50 +144,40 @@ void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
  * @param nodeCurrentPos ...
  * @return RMat::QVec final pose reached
  */
-bool Sampler::checkRobotValidDirectionToTarget(const QVec & origin , const QVec & target, QList<QVec> &path)
+bool Sampler::checkRobotValidDirectionToTarget(const QVec & origin , const QVec & target, QVec &lastPoint)
 {
 	//return trySegmentToTargetBinarySearch(origin, target, reachEnd, arbol, nodeCurrentPos);
 	
-// 	float stepSize = 100.f; //100 mms chunks  SHOULD BE RELATED TO THE ACTUAL SIZE OF THE ROBOT!!!!!
-// 	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
-// 	float step;
-// 	
-// 	//if too close return target
-// 	if (nSteps == 0) 
-// 	{
-// 		return false;
-// 	}
-// 	step = 1./nSteps;
-// 	
-// 	//go along visual ray connecting robot pose and target pos in world coordinates
-// 	// l*robot + (1-r)*roiPos = 0
-// 	
-// 	QVec point(3), pointAnt(3);
-// 	float landa = step;
-// 	QVec pos(3), front(3);
-// 	
-// 	pointAnt=origin;
-// 	for(uint i=1 ; i<=nSteps; i++)
-// 	{
-// 		// center of robot position
-// 		point = (origin * (1-landa)) + (target * landa);
-// 		
-// 		//Collision detector
-// 		//qDebug() << point << origin << target << innerModel->transform("world","robot");
-// 		if (checkRobotValidStateAtTarget(innerModel, point) == false )
-// 		{
-// 		  path.append(pointAnt);
-// 		  return false;
-// 		}
-// 		 
-// 		landa = landa + step;
-// 		pointAnt = point;
-// 	}
-// 	path.append(target);
+	float stepSize = 100.f; //100 mms chunks  SHOULD BE RELATED TO THE ACTUAL SIZE OF THE ROBOT!!!!!
+	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
+	float step;
+	
+	//if too close return target
+	if (nSteps == 0) 
+	{
+		lastPoint = target;
+		return false;
+	}
+	step = 1./nSteps;
+
+	//go along visual ray connecting robot pose and target pos in world coordinates. l*robot + (1-r)*roiPos = 0
+	QVec point(3);
+	float landa = step;
+	
+	lastPoint = origin;
+	for(uint i=1 ; i<=nSteps; i++)
+	{
+		point = (origin * (1-landa)) + (target * landa);
+		if (checkRobotValidStateAtTarget(point) ) 
+		{
+			lastPoint  = point;
+			landa = landa + step;
+		}
+		else
+			break;
+	}
 	return true;
 }
-
-
 
 
 

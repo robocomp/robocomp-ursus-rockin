@@ -136,7 +136,7 @@ bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTim
 		std::cout << __FILE__ << __FUNCTION__ << "Solution after simplify: " << p. getStateCount() << ". Path length: " << p.length() << std::endl;
 		p.print(std::cout);
 
- 		//simpleSetUp->getPathSimplifier()->simplifyMax(p);
+ 		simpleSetUp->getPathSimplifier()->simplify(p,5);
  		//simpleSetUp->getPathSimplifier()->smoothBSpline(p);
 //		p.interpolate();
 		

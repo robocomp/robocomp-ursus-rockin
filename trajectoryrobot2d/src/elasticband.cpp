@@ -179,8 +179,8 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 // 		computeDistanceField(w1, laserData, FORCE_DISTANCE_LIMIT);
 // 		repulsionForce = w1.minDistPoint * (FORCE_DISTANCE_LIMIT - w1.minDist);
 		
-		float alpha = -0.6;
-		float beta = 0.09;
+		float alpha = -0.4;//0.6
+		float beta = 0.15; //0.09
 			
 		QVec change = (atractionForce*alpha) + (repulsionForce*beta);		
 		
@@ -188,9 +188,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 		//QVec pp = road.getTangentToCurrentPoint().getPerpendicularVector();
 		//QVec nChange = pp * (pp * change);
 		
-		w1.pos = w1.pos - change;
-		//w1.pos = w1.pos - nChange;
-		
+		w1.pos = w1.pos - change;		
 		totalChange = totalChange + change.norm2();
 	}
 	return totalChange;
