@@ -1,57 +1,51 @@
 <AGMModel>
 
 	<!--
-   ##
-   ## R O O M S
-   ##
-   -->
+	##
+	## R O O M S
+	##
+	-->
 	<symbol id="3" type="room">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="4" type="roomSt" />
+	<symbol id="4" type="status" />
 	<link src="3" dst="4" label="isHall" />
-	<link src="3" dst="4" label="explored" />
 
 	<symbol id="5" type="room">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="6" type="roomSt" />
+	<symbol id="6" type="status" />
 	<link src="5" dst="6" label="isLivingRoom" />
-	<link src="5" dst="6" label="explored" />
 
 	<symbol id="7" type="room">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="8" type="roomSt" />
+	<symbol id="8" type="status" />
 	<link src="7" dst="8" label="isBedroom" />
-	<link src="7" dst="8" label="noExplored" />
 
 	<symbol id="9" type="room">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="10" type="roomSt" />
+	<symbol id="10" type="status" />
 	<link src="9" dst="10" label="isKitchen" />
-	<link src="9" dst="10" label="explored" />
 
 	<symbol id="11" type="room">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="12" type="roomSt" />
+	<symbol id="12" type="status" />
 	<link src="11" dst="12" label="isDiningRoom" />
-	<link src="11" dst="12" label="explored" />
 
 	<symbol id="13" type="room">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="14" type="roomSt" />
+	<symbol id="14" type="status" />
 	<link src="13" dst="14" label="isPatio" />
-	<link src="13" dst="14" label="explored" />
 
 	<link src="3" dst="5" label="connected" />
 	<link src="5" dst="3" label="connected" />
@@ -72,10 +66,23 @@
    -->
 	<symbol id="1" type="robot">
 	</symbol>
-	<symbol id="2" type="robotSt">
+	<symbol id="2" type="status">
 	</symbol>
 	<link src="1" dst="2" label="free" />
 	<link src="1" dst="3" label="in" />
+
+
+	<!--
+   ##
+   ## G R A N N Y
+   ##
+   -->
+	<symbol id="22" type="person">
+	</symbol>
+	<symbol id="23" type="status">
+	</symbol>
+	<link src="22" dst="23" label="granny" />
+	<link src="22" dst="7" label="in" />
 
 
 	<!--
@@ -127,44 +134,12 @@
 	<link src="21" dst="5" label="in" />
 
 	
+	<symbol id="24" type="object">
+	</symbol>
+	<symbol id="25" type="status">
+	</symbol>
+
 
 		
-	<!--
-   ##
-   ## P E R S O N S
-   ##
-   -->
-	<symbol id="22" type="person">
-	</symbol>
-	<symbol id="23" type="personSt">
-	</symbol>
-	<link src="22" dst="23" label="granny" />
-	<link src="22" dst="23" label="noLocalized" />
-	<link src="1" dst="22" label="know" />
-
-	<symbol id="24" type="person">
-	</symbol>
-	<symbol id="25" type="personSt">
-	</symbol>
-	<link src="24" dst="25" label="deliGuy" />
-	<link src="24" dst="25" label="noLocalized" />
-	<link src="1" dst="24" label="know" />
-
-	<symbol id="26" type="person">
-	</symbol>
-	<symbol id="27" type="personSt">
-	</symbol>
-	<link src="26" dst="27" label="doctor" />
-	<link src="26" dst="27" label="noLocalized" />
-	<link src="1" dst="26" label="know" />
-
-	<symbol id="28" type="person">
-	</symbol>
-	<symbol id="29" type="personSt">
-	</symbol>
-	<link src="28" dst="29" label="mailman" />
-	<link src="28" dst="29" label="noLocalized" />
-	<link src="1" dst="28" label="know" />
-
 
 </AGMModel>
