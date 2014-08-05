@@ -30,6 +30,9 @@ Use External Terminal=false
 Working Directory=.
 isExecutable=true
 
+[MakeBuilder]
+Number Of Jobs=1
+
 [Project]
 VersionControlSupport=kdevgit
 
