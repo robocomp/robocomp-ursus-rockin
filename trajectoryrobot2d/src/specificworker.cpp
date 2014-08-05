@@ -50,7 +50,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	//Planning
 	plannerOMPL = new PlannerOMPL(*innerModel);			
 	plannerRC = new Planner(*innerModel);
-	plannerPRM = new PlannerPRM(*innerModel, 100, 30);
+	plannerPRM = new PlannerPRM(*innerModel, 50, 20);
 	planner = plannerPRM;
 	planner->drawGraph(innermodelmanager_proxy);
 	qDebug() << __FUNCTION__ << "----- planner set";
@@ -199,15 +199,13 @@ bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 	if (updateInnerModel(inner))
 	{	
 	
-		planner->computePath(currentTarget.getTranslation(), inner);
-		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
-		
-		if(planner->getPath().size() == 0)
+		if ( planner->computePath(currentTarget.getTranslation(), inner) == false)
 		{
 			qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
 			currentTarget.reset();
 			return false;
 		}
+		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
 		currentTarget.setWithoutPlan( false );
 		currentTarget.print();
 		

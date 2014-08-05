@@ -86,7 +86,7 @@ void CurrentTarget::print()
 	qDebug() << "	Translation:" << targetTr;
 	qDebug() << "	Rotation:" << targetRot;
 	qDebug() << "	WithoutPlan" << withoutPlan;
-	qDebug() << "	ElapsedTime" << reloj.elapsed();
+	qDebug() << "	ElapsedTime" << reloj.elapsed()/1000 << "sg";
 	
 	qDebug() << "------------------------------------";
 }

@@ -29,20 +29,24 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
 	QList<QRectF> innerRegions;
 	innerRegions.append(QRectF(1500, 0, 4000, -3000));	innerRegions.append(QRectF(0, -8500, 4000, -1500)); 	innerRegions.append(QRectF(7500, -4000, 2500, -6000));
 	QRectF outerRegion(0, 0, 10000, -10000);
-	
 	sampler.initialize(*innerModel, outerRegion, innerRegions);
 	
 	if( QFile("grafo.dot").exists())
 	{
 		qDebug() << __FUNCTION__ << "Graph file exits. Loading";
 		readGraphFromFile("grafo.dot");
+		
+// 		connectedComponents();
+//  	removeSmallComponents();
+//  	connectedComponents();
+// 		
 	}
 	else
 	{
 		qDebug() << __FUNCTION__ << "Graph file DOES NOT exit. Creating with " << nPoints << "nodes and " << neigh << "neighboors";
 		//createGraph(nPoints, neigh, 2500.f);  //MAX distance apart for two points to be considered.
 		QList<QVec> pointList;
-		for(int i=0;i<nPoints;i++)
+		for(uint i=0;i<nPoints;i++)
 			pointList.append(sampler.sampleFreeSpaceR2());
 		constructGraph(pointList, neigh, 2500.f, 400);
 	}	
@@ -62,10 +66,23 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	currentPath.clear();	
 	
 	//If target on obstacle, abort.  IMPROVE THIS SO TARGET REGIONS ARE HANDLED
+	
 	if( sampler.checkRobotValidStateAtTarget(target) == false )
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		return false;
+	}
+	
+	//Check if the target is in "plain sight"
+	QVec point;
+	bool reachEnd;
+	QVec p = trySegmentToTarget(robot, target, reachEnd);
+	//if ( sampler.checkRobotValidDirectionToTarget( robot, target, point) )
+	if( reachEnd == true )
+	{
+		qDebug() << __FILE__ << __FUNCTION__ << "Target on sight. Proceeding";  
+		currentPath << robot << target;
+		return true;
 	}
 	
 	//Search in KD-tree closest points to origin and target
@@ -89,6 +106,7 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	else
 		 return false;
 	
+	//Now we are in the graph
 	//Search in graph minimun path. Return if fail
 	if( robotVertex != targetVertex )  //Same node for both. We should skip searchGraph
 	{
@@ -96,8 +114,17 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 		if ( searchGraph(robotVertex, targetVertex, vertexPath) )
 			for( Vertex v : vertexPath )
 				currentPath.append(graph[v].pose);
-		else //No path found
-			return false;
+		else //No path found. The path does not connect to target's closest point in graph
+		{
+			qDebug() << __FUNCTION__ << "No path through graph. Starting RRTConnect from " << graph[robotVertex].pose << " to" <<  target;
+			if ( planWithRRT(graph[robotVertex].pose, target, path) )
+			{
+				path.removeFirst();
+				currentPath += path;
+			}
+			else
+				return false;
+		}
 	}
 	else	//add the only node
 		currentPath += graph[robotVertex].pose;
@@ -128,7 +155,12 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	//smoothPathIter(currentPath);
 	//currentPath = currentSmoothedPath;
 	//qDebug() << __FUNCTION__ << "Done smoothing. Result: " << currentPath.size() << "path"; 
-	return true;
+	
+	qDebug() << __FUNCTION__ << "Final path size " << currentPath.size(); 
+	if( currentPath.size() < 2 )
+		return false;
+	else
+		return true;
 	
 }
 
@@ -148,9 +180,9 @@ bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec>
 		return true;
 	}
 	
-	//QVec p = trySegmentToTarget(origin, target, reachEnd);
-	QVec point;
-	reachEnd = sampler.checkRobotValidDirectionToTarget( origin, target, point);
+	QVec p = trySegmentToTarget(origin, target, reachEnd);
+	//QVec point;
+	//reachEnd = sampler.checkRobotValidDirectionToTarget( origin, target, point);
 	
 	if( reachEnd )
 	{
@@ -202,7 +234,7 @@ bool PlannerPRM::searchGraph(const Vertex &originVertex, const Vertex &targetVer
 	// Create things for Dijkstra
 	std::vector<Vertex> predecessors(boost::num_vertices(graph)); // To store parents
 	std::vector<float> distances(boost::num_vertices(graph));    // To store distances
-
+	
 	IndexMap indexMap = boost::get(boost::vertex_index, graph);
 	auto predecessorMap = boost::make_iterator_property_map(&predecessors[0], indexMap);
 	auto distanceMap = boost::make_iterator_property_map(&distances[0], indexMap);
@@ -249,6 +281,67 @@ bool PlannerPRM::searchGraph(const Vertex &originVertex, const Vertex &targetVer
 	}
 	else
 		return false;
+}
+
+/**
+ * @brief Compute a set of points to be used in the constructGraph step
+ * Different heuristics should be used to access narrow pasages, high clearance areas and spaces connecting separated isles.
+ * 
+ * @return void
+ */
+void PlannerPRM::expandGraph()
+{
+	
+	
+}
+
+/**
+ * @brief Remove all small components in the graph.
+ * 
+ * @return void
+ */
+void PlannerPRM::removeSmallComponents()
+{
+	qDebug() << __FUNCTION__;
+	
+	const int MIN_COMPONENT_SIZE = 6;
+	
+	std::vector<VertexIndex> rank(boost::num_vertices(graph));
+	std::vector<Vertex> parent(boost::num_vertices(graph));
+	boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
+	boost::initialize_incremental_components(graph, ds);
+	boost::incremental_components(graph, ds);
+	
+ 	Components components(parent.begin(),parent.end());
+	
+	for(auto p : components)
+		{
+			auto pair = components[p];
+			VertexIndex cT = 0;
+			auto it = pair.first;
+			for( it = pair.first; it != pair.second; ++it)
+				cT++;
+			if( cT < MIN_COMPONENT_SIZE )
+			{
+				it = pair.first; 
+				auto next = it; 
+				auto it_end = pair.second;
+				
+				//for( next = it; it != it_end; it = next)	
+				for( it = pair.first; it != it_end; ++it )	
+				{
+					//++next;
+					qDebug() << "graph before removing" << boost::num_vertices(graph);
+					qDebug() << "removing" << *it;
+					
+					boost::clear_vertex( *it, graph);
+					boost::remove_vertex(*it, graph);
+					
+					qDebug() << "graph after removing" << boost::num_vertices(graph);
+				}
+			}
+			std::cout << std::endl;
+		}
 }
 
 /**
@@ -307,7 +400,9 @@ void PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS, f
 			qDebug() << __FUNCTION__ << "Trying" << i << j <<k << "dist" << distsTo(k,j) << "indKI" << indKI;
 			if( (distsTo(k,j) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,j) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
 			{
-				trySegmentToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
+				//trySegmentToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
+				QVec lastPoint;
+				reachEnd = sampler.checkRobotValidDirectionToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
 				qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
 				
 				//if free path to neighboor, insert it in the graph if does not exist
@@ -346,122 +441,34 @@ void PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS, f
 	qDebug() << "Number of components:" << connectedComponents().size();
 }
 
-// void PlannerPRM::createGraph(uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK)
-// {
-// 	const int ROBOT_SIZE_SQR = 400*400; //mm  OBTAIN FROM ROBOT'S BOUNDING BOX!!!!!
-// 	
-// 	qDebug() << __FUNCTION__ << "Creating graph...";
-// 	
-// 	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
-// 	
-// 	data.resize(3,NUM_POINTS);
-// 	
-// 	for(uint i=0; i<NUM_POINTS; i++)
-// 	{
-// 		QVec point = sampler.sampleFreeSpaceR2();
-// 		data(0,i) = point.x();
-// 		data(1,i) = point.y();
-// 		data(2,i) = point.z();
-// 	}
-// 	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
-// 	
-// 	Eigen::MatrixXi indices;
-// 	Eigen::MatrixXf distsTo;
-// 	indices.resize(NEIGHBOORS, data.cols());
-// 	distsTo.resize(NEIGHBOORS, data.cols());
-// 
-// 	//Query for sorted distances to NEIGHBOORS neighboors  
-// 	nabo->knn(data, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
-// 	
-// 	Vertex vertex, vertexN;
-// 	
-// 	for(uint i=0; i<NUM_POINTS; i++)
-// 	{
-// 		//Add new vertex if not present
-// 		if( vertexMap.contains(i))
-// 		{
-// 			vertex = vertexMap.value(i);
-// 			qDebug() << "Recovered vertex " << i;
-// 		}
-// 		else
-// 		{
-// 			vertex = boost::add_vertex(graph);
-// 			vertexMap.insert(i,vertex);
-// 			graph[vertex].pose = QVec::vec3(data(0,i), data(1,i), data(2,i));
-// 			//graph[vertex].index = i;
-// 			qDebug() << "Insert vertex " << i;
-// 		}
-// 		bool reachEnd;
-// 		for(uint k=0; k<NEIGHBOORS; k++)
-// 		{	
-// 			int indKI = indices(k,i);
-// 			if( (distsTo(k,i) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,i) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
-// 			{
-// 				trySegmentToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
-// 				qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,i) << "reaches the end:" << reachEnd;
-// 				
-// 				//if free path to neighboor, insert it in the graph if does not exist
-// 				if( reachEnd == true)
-// 				{
-// 					if( vertexMap.contains(indKI))
-// 					{
-// 						vertexN = vertexMap.value(indices(k,i));
-// 						qDebug() << __FUNCTION__ << "Recovered vertex " << indKI;
-// 					}
-// 					else
-// 					{
-// 						vertexN = boost::add_vertex(graph);
-// 						vertexMap.insert(indices(k,i),vertexN);
-// 						graph[vertexN].pose = QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI));
-// 						//graph[vertexN].index = indKI;	
-// 						qDebug() << __FUNCTION__ << "Insert vertex " << indKI;
-// 					}			
-// 
-// 					//compute connected components to reject same isle elements
-// 					std::vector<VertexIndex> rank(boost::num_vertices(graph));
-// 					std::vector<Vertex> parent(boost::num_vertices(graph));
-// 					boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
-// 					boost::initialize_incremental_components(graph, ds);
-// 					boost::incremental_components(graph, ds);
-//  					Components components(parent.begin(),parent.end());
-// 
-// 					bool sameComp = boost::same_component(vertex,vertexN,ds);
-// 
-// 					//qDebug() << __FUNCTION__<< "Try to create and edge from" << graph[vertex].index << "a" << graph[vertexN].index;
-// 					//qDebug() << __FUNCTION__<< "Already exists: " << (boost::edge(vertex,vertexN,graph).second == true);
-// 					//qDebug() << __FUNCTION__<< "In the same component as initia: " << sameComp;
-// 					
-// 					if( (boost::edge(vertex,vertexN,graph).second == false ) and (sameComp == false) )
-// 					{
-// 						EdgePayload edge;
-// 						edge.dist = (QVec(graph[vertex].pose) - QVec(graph[vertexN].pose)).norm2();
-// 						boost::add_edge(vertex, vertexN, edge, graph);	
-// 						//qDebug() << __FUNCTION__<< "Insertamos de" << graph[vertex].index << "a" << graph[vertexN].index;
-// 					}
-// 				}
-// 			}
-// 			else
-// 			{
-// 				break;
-// 			}
-// 		}
-// 	}
-// 	
-// 	//print and save the graph with payloads
-// 	writeGraphToStream(std::cout);
-// 	std::ofstream fout("grafo.dot");
-// 	writeGraphToStream(fout);
-// 		
-// }
-
 Components PlannerPRM::connectedComponents()
 {
+	qDebug() << __FUNCTION__;
+
 	std::vector<VertexIndex> rank(boost::num_vertices(graph));
 	std::vector<Vertex> parent(boost::num_vertices(graph));
 	boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
 	boost::initialize_incremental_components(graph, ds);
 	boost::incremental_components(graph, ds);
+	
  	Components components(parent.begin(),parent.end());
+	
+	// get the property map for vertex indices
+    typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
+    IndexMap index = boost::get(boost::vertex_index, graph);
+
+	std::cout << "Number of connected components " << components.size() << std::endl;
+	for(auto p : components)
+		{
+			std::cout << "Component " << p << " contains: " << std::endl;
+			auto pair = components[p];
+			for( auto it = pair.first; it != pair.second; ++it)
+			{
+				qDebug() << "By order in graph container " << *it << ". Its Index number: " << graph[*it].index << "IndexMap" << index[*it];
+			}
+			std::cout << std::endl;
+		}
+
 	return components;
 }
 
@@ -669,3 +676,118 @@ void PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx inner
 // 					std::cout << std::endl;
 // 					}
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	// void PlannerPRM::createGraph(uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK)
+// {
+// 	const int ROBOT_SIZE_SQR = 400*400; //mm  OBTAIN FROM ROBOT'S BOUNDING BOX!!!!!
+// 	
+// 	qDebug() << __FUNCTION__ << "Creating graph...";
+// 	
+// 	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
+// 	
+// 	data.resize(3,NUM_POINTS);
+// 	
+// 	for(uint i=0; i<NUM_POINTS; i++)
+// 	{
+// 		QVec point = sampler.sampleFreeSpaceR2();
+// 		data(0,i) = point.x();
+// 		data(1,i) = point.y();
+// 		data(2,i) = point.z();
+// 	}
+// 	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
+// 	
+// 	Eigen::MatrixXi indices;
+// 	Eigen::MatrixXf distsTo;
+// 	indices.resize(NEIGHBOORS, data.cols());
+// 	distsTo.resize(NEIGHBOORS, data.cols());
+// 
+// 	//Query for sorted distances to NEIGHBOORS neighboors  
+// 	nabo->knn(data, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
+// 	
+// 	Vertex vertex, vertexN;
+// 	
+// 	for(uint i=0; i<NUM_POINTS; i++)
+// 	{
+// 		//Add new vertex if not present
+// 		if( vertexMap.contains(i))
+// 		{
+// 			vertex = vertexMap.value(i);
+// 			qDebug() << "Recovered vertex " << i;
+// 		}
+// 		else
+// 		{
+// 			vertex = boost::add_vertex(graph);
+// 			vertexMap.insert(i,vertex);
+// 			graph[vertex].pose = QVec::vec3(data(0,i), data(1,i), data(2,i));
+// 			//graph[vertex].index = i;
+// 			qDebug() << "Insert vertex " << i;
+// 		}
+// 		bool reachEnd;
+// 		for(uint k=0; k<NEIGHBOORS; k++)
+// 		{	
+// 			int indKI = indices(k,i);
+// 			if( (distsTo(k,i) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,i) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
+// 			{
+// 				trySegmentToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
+// 				qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,i) << "reaches the end:" << reachEnd;
+// 				
+// 				//if free path to neighboor, insert it in the graph if does not exist
+// 				if( reachEnd == true)
+// 				{
+// 					if( vertexMap.contains(indKI))
+// 					{
+// 						vertexN = vertexMap.value(indices(k,i));
+// 						qDebug() << __FUNCTION__ << "Recovered vertex " << indKI;
+// 					}
+// 					else
+// 					{
+// 						vertexN = boost::add_vertex(graph);
+// 						vertexMap.insert(indices(k,i),vertexN);
+// 						graph[vertexN].pose = QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI));
+// 						//graph[vertexN].index = indKI;	
+// 						qDebug() << __FUNCTION__ << "Insert vertex " << indKI;
+// 					}			
+// 
+// 					//compute connected components to reject same isle elements
+// 					std::vector<VertexIndex> rank(boost::num_vertices(graph));
+// 					std::vector<Vertex> parent(boost::num_vertices(graph));
+// 					boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
+// 					boost::initialize_incremental_components(graph, ds);
+// 					boost::incremental_components(graph, ds);
+//  					Components components(parent.begin(),parent.end());
+// 
+// 					bool sameComp = boost::same_component(vertex,vertexN,ds);
+// 
+// 					//qDebug() << __FUNCTION__<< "Try to create and edge from" << graph[vertex].index << "a" << graph[vertexN].index;
+// 					//qDebug() << __FUNCTION__<< "Already exists: " << (boost::edge(vertex,vertexN,graph).second == true);
+// 					//qDebug() << __FUNCTION__<< "In the same component as initia: " << sameComp;
+// 					
+// 					if( (boost::edge(vertex,vertexN,graph).second == false ) and (sameComp == false) )
+// 					{
+// 						EdgePayload edge;
+// 						edge.dist = (QVec(graph[vertex].pose) - QVec(graph[vertexN].pose)).norm2();
+// 						boost::add_edge(vertex, vertexN, edge, graph);	
+// 						//qDebug() << __FUNCTION__<< "Insertamos de" << graph[vertex].index << "a" << graph[vertexN].index;
+// 					}
+// 				}
+// 			}
+// 			else
+// 			{
+// 				break;
+// 			}
+// 		}
+// 	}
+// 	
+// 	//print and save the graph with payloads
+// 	writeGraphToStream(std::cout);
+// 	std::ofstream fout("grafo.dot");
+// 	writeGraphToStream(fout);
+// 		
+// }

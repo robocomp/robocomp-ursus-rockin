@@ -335,7 +335,15 @@ WayPoints::iterator WayPoints::computeClosestPointToRobot(const QVec& robot)
 QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 {
 	static QLine2D antLine = QLine2D(QVec::zeros(3), QVec::vec3(0,0,1));  //Initial well formed tangent
+
+	qDebug() << "HERE " << w->pos;
 	
+	if( size() <2) 
+	{
+		qDebug() << __FUNCTION__ << "Warning. A size 1 road got into here!";
+		return antLine;
+	}
+
 	WayPoints::iterator ant,post;
 	const float MIN_DISTANCE_ALLOWED = 10.f;
 	
@@ -343,23 +351,23 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 		ant = w;
 	else
 		ant = w-1;
-
+	
 	if( w+1 == this->end())
 		post = w;
 	else
 		post = w+1;
-	
+		
 	if( (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED)  //Too close to compute a a line
-		while ( post++ != this->end() and (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED);
+		while ( post != this->end() and (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED)
+		{ post++; };
 	
+	if (post == this->end()) post--;
 	if( (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED) //Still to close 
 	{
-		 if( post==ant ) //but only one point in road
-			return antLine;
-		 else
-			qDebug() << __FUNCTION__ << "fary en compute Tangent. Looks like road's size is 1";
+		qDebug() << __FUNCTION__ << "this should not happen. Looks like the last tow points are the same";
+		return antLine;
 	}
-	
+		
 	QLine2D l( ant->pos , post->pos );
 	if( isnan(l[0]) or isnan(l[1]) or isnan(l[2]))
 	{

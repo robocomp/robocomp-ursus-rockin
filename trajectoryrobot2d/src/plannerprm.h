@@ -92,6 +92,8 @@ class PlannerPRM : public QObject
 		void smoothPath( const QList<QVec> & list);
 		void smoothPathIter( QList<QVec> & list);
 		QList<QVec> currentSmoothedPath;
+		void removeSmallComponents();
+		void expandGraph();
 		
 		InnerModel *innerModel;
 		QList<QVec> currentPath;   			//Results will be saved here
