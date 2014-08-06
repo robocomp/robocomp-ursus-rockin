@@ -52,7 +52,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	plannerRC = new Planner(*innerModel);
 	plannerPRM = new PlannerPRM(*innerModel, 100, 30);
 	planner = plannerPRM;
-	//planner->drawGraph(innermodelmanager_proxy);
+	planner->drawGraph(innermodelmanager_proxy);
 	qDebug() << __FUNCTION__ << "----- planner set";
 	
 	//Init road
@@ -341,6 +341,11 @@ void SpecificWorker::drawGreenBoxOnTarget(const QVec& target)
 
 void SpecificWorker::go(const TargetPose& target)
 {
+// 	QList<QVec> pointList;
+// 		for(int i=0;i<10;i++)
+// 			pointList.append(planner->sampler.sampleFreeSpaceR2());			
+// 	planner->graphConstruct(pointList,5,2000,400);
+// 	planner->drawGraph(innermodelmanager_proxy);
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );

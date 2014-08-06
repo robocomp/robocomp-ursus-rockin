@@ -81,13 +81,14 @@ class PlannerPRM : public QObject
 		
 	private:
 		Graph graph;
-		void addPointToGraphAndConnect(const QVec& point, const Vertex &vertex);
-		void createGraph(InnerModel *inner, uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK);
+		void constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK, uint robotSize);
+		//void PlannerPRM::createGraph(uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK);
 		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
 		QVec trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd);
 		void readGraphFromFile(QString name);
 		void writeGraphToStream(std::ostream &stream);
 		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);
+		Components connectedComponents();
 		void smoothPath( const QList<QVec> & list);
 		void smoothPathIter( QList<QVec> & list);
 		QList<QVec> currentSmoothedPath;
@@ -114,6 +115,8 @@ class PlannerPRM : public QObject
 		//embedded RRTConnect Planner
 		PlannerOMPL plannerRRT;
 		bool planWithRRT(const QVec& origin, const QVec& target, QList<QVec> &path);
+		
+		//void graphConstruct(const QList<QVec> &pointList, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK, uint robotSize);
 };
 
 //Graph writing classes
