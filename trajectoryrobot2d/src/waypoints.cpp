@@ -64,7 +64,7 @@ void WayPoints::reset()
 	currentCollisionIndex = 0;
 	currentDistanceToFrontier = 0;
 	requiresReplanning = false;
-	
+	backList.clear();
 }
 
 void WayPoints::startRoad()
@@ -335,8 +335,6 @@ WayPoints::iterator WayPoints::computeClosestPointToRobot(const QVec& robot)
 QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 {
 	static QLine2D antLine = QLine2D(QVec::zeros(3), QVec::vec3(0,0,1));  //Initial well formed tangent
-
-	qDebug() << "HERE " << w->pos;
 	
 	if( size() <2) 
 	{

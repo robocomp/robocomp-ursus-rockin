@@ -52,7 +52,11 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	plannerRC = new Planner(*innerModel);
 	plannerPRM = new PlannerPRM(*innerModel, 50, 20);
 	planner = plannerPRM;
+	
+	qDebug() << "----------------inserting" ;
+	
 	planner->drawGraph(innermodelmanager_proxy);
+		
 	qDebug() << __FUNCTION__ << "----- planner set";
 	
 	//Init road
@@ -145,10 +149,12 @@ void SpecificWorker::compute( )
 				drawGreenBoxOnTarget( currentTarget.getTranslation() );
 				currentTarget.print();
 				currentTarget.reset();
+				planner->learnPath( road.backList );
 				road.reset();
 				road.endRoad();
 				compState.elapsedTime = taskReloj.elapsed();
-				//planner->drawGraph(innermodelmanager_proxy);
+				planner->drawGraph(innermodelmanager_proxy);
+				
 			}
 			
 			if(road.requiresReplanning == true)
@@ -196,6 +202,8 @@ bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 	compState.planning = true;
 	
 	cleanWorld();
+	planner->cleanGraph(innermodelmanager_proxy);
+	
 	if (updateInnerModel(inner))
 	{	
 	
@@ -208,6 +216,7 @@ bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
 		currentTarget.setWithoutPlan( false );
 		currentTarget.print();
+		planner->cleanGraph(innermodelmanager_proxy);
 		
 		//Init road
 		road.reset();
@@ -308,8 +317,6 @@ void SpecificWorker::cleanWorld()  ///CAMBIAR ESTO PARA QUE TODO CUELGUE DE "MAR
 		RcisDraw::removeObject(innermodelmanager_proxy, QString("b_" + QString::number(i)));
 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i)));
 		RcisDraw::removeObject(innermodelmanager_proxy, QString("t_" + QString::number(i)));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("g_" + QString::number(i)));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("g_" + QString::number(i) + "_plane"));
 	}
 }
 

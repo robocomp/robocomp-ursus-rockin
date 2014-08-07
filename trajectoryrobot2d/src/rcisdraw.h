@@ -40,6 +40,7 @@ public:
 	static void addTransform_ignoreExisting(InnerModelManagerPrx innermodelmanager_proxy, QString a, QString b, const RoboCompInnerModelManager::Pose3D & m);
 	static void addPlane_ignoreExisting(InnerModelManagerPrx innermodelmanager_proxy, QString a, QString b, const RoboCompInnerModelManager::Plane3D &p);
 	static void drawLine(InnerModelManagerPrx innermodelmanager_proxy, QString name, QString parent, const QVec &normalVector, float length, float width, QString texture = "#550000");
+	static void drawLine2Points(InnerModelManagerPrx innermodelmanager_proxy, QString name, QString parent, const QVec& p1, const QVec& p2, QString texture);
 	static void removeObject(InnerModelManagerPrx innermodelmanager_proxy, QString name);
 
 };

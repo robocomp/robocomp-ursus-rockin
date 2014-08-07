@@ -29,6 +29,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	connect(goPushButton, SIGNAL(clicked()), this, SLOT(goButton()));
 	connect(bedroomPushButton, SIGNAL(clicked()), this, SLOT(goBedRoom()));
 	connect(kitchenPushButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
+	connect(kitchenPushButton, SIGNAL(clicked()), this, SLOT(goKitchen2()));
 	connect(stopButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
 	connect(hallPushButton, SIGNAL(clicked()), this, SLOT(goHall()));
 	connect(diningPushButton, SIGNAL(clicked()), this, SLOT(goDining()));
@@ -148,14 +149,14 @@ void SpecificWorker::goDoor()
 	go(QVec::vec3(4500,0,-3300));
 }
 
-void SpecificWorker::goKitchen()
+void SpecificWorker::goKitchen()  //Stove table
 {
-	go(QVec::vec3(6000,0,-5300));
+	go(QVec::vec3(5800,0,-5200));
 }
 
 void SpecificWorker::goKitchen2()
 {
-	go(QVec::vec3(5800,0,-4400));
+	go(QVec::vec3(6000,0,-5900));
 }
 
 void SpecificWorker::goBedRoom()

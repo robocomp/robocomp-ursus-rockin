@@ -29,7 +29,7 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
 	QList<QRectF> innerRegions;
 	innerRegions.append(QRectF(1500, 0, 4000, -3000));	innerRegions.append(QRectF(0, -8500, 4000, -1500)); 	innerRegions.append(QRectF(7500, -4000, 2500, -6000));
 	QRectF outerRegion(0, 0, 10000, -10000);
-	sampler.initialize(*innerModel, outerRegion, innerRegions);
+	sampler.initialize(innerModel, outerRegion, innerRegions);
 	
 	if( QFile("grafo.dot").exists())
 	{
@@ -76,9 +76,9 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	//Check if the target is in "plain sight"
 	QVec point;
 	bool reachEnd;
-	QVec p = trySegmentToTarget(robot, target, reachEnd);
-	//if ( sampler.checkRobotValidDirectionToTarget( robot, target, point) )
-	if( reachEnd == true )
+	//QVec p = trySegmentToTarget(robot, target, reachEnd);
+	if ( sampler.checkRobotValidDirectionToTargetBinarySearch( robot, target, point) )
+	//if( reachEnd == true )
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << "Target on sight. Proceeding";  
 		currentPath << robot << target;
@@ -164,6 +164,49 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	
 }
 
+
+/**
+ * @brief Points of a real path to be added to the graph
+ * 
+ * @param path ...
+ * @return void
+ */
+bool PlannerPRM::learnPath(const QList< QVec >& path)
+{
+	qDebug() << __FUNCTION__ << "Learning the path with" << path.size() << " points";
+	
+	const int nWays=10;
+
+	if( path.size() < 2) 
+		return false;
+	
+	QList<QVec> sList;
+	float dist =0;
+	
+	//Trim the path to a fixed number of waypoints
+	for(int i=0; i<path.size()-1; i++)
+		dist += (path[i]-path[i+1]).norm2();			
+	
+	float step = dist / nWays;
+
+	dist = 0;
+	for(int i=0; i<path.size()-1; i++)
+	{
+		dist += (path[i]-path[i+1]).norm2();			
+		if( dist > step )
+		{
+			sList << path[i];
+			dist = 0;
+		}
+	}
+
+	qDebug() << __FUNCTION__ << "Learning with shortened path of" << sList.size() << " points";
+	constructGraph( sList, 10, 2000, 400);
+	
+	return true;
+}
+
+///PRIVATE
 ////////////////////////////////////////////////////////////////////////
 /// One query planner to be used when no path found un PRM
 ////////////////////////////////////////////////////////////////////////
@@ -180,11 +223,10 @@ bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec>
 		return true;
 	}
 	
-	QVec p = trySegmentToTarget(origin, target, reachEnd);
-	//QVec point;
-	//reachEnd = sampler.checkRobotValidDirectionToTarget( origin, target, point);
-	
-	if( reachEnd )
+	//QVec p = trySegmentToTarget(origin, target, reachEnd);
+	QVec point;
+	if( sampler.checkRobotValidDirectionToTargetBinarySearch( origin, target, point) )
+	//if( reachEnd )
 	{
 		path << origin << target;
 		qDebug() << __FUNCTION__ << "Found target directly in line of sight";
@@ -295,54 +337,7 @@ void PlannerPRM::expandGraph()
 	
 }
 
-/**
- * @brief Remove all small components in the graph.
- * 
- * @return void
- */
-void PlannerPRM::removeSmallComponents()
-{
-	qDebug() << __FUNCTION__;
-	
-	const int MIN_COMPONENT_SIZE = 6;
-	
-	std::vector<VertexIndex> rank(boost::num_vertices(graph));
-	std::vector<Vertex> parent(boost::num_vertices(graph));
-	boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
-	boost::initialize_incremental_components(graph, ds);
-	boost::incremental_components(graph, ds);
-	
- 	Components components(parent.begin(),parent.end());
-	
-	for(auto p : components)
-		{
-			auto pair = components[p];
-			VertexIndex cT = 0;
-			auto it = pair.first;
-			for( it = pair.first; it != pair.second; ++it)
-				cT++;
-			if( cT < MIN_COMPONENT_SIZE )
-			{
-				it = pair.first; 
-				auto next = it; 
-				auto it_end = pair.second;
-				
-				//for( next = it; it != it_end; it = next)	
-				for( it = pair.first; it != it_end; ++it )	
-				{
-					//++next;
-					qDebug() << "graph before removing" << boost::num_vertices(graph);
-					qDebug() << "removing" << *it;
-					
-					boost::clear_vertex( *it, graph);
-					boost::remove_vertex(*it, graph);
-					
-					qDebug() << "graph after removing" << boost::num_vertices(graph);
-				}
-			}
-			std::cout << std::endl;
-		}
-}
+
 
 /**
  * @brief Given a new free space point, connects it to graph
@@ -400,9 +395,10 @@ void PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS, f
 			qDebug() << __FUNCTION__ << "Trying" << i << j <<k << "dist" << distsTo(k,j) << "indKI" << indKI;
 			if( (distsTo(k,j) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,j) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
 			{
-				//trySegmentToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
+				//trySegmentToTargetBinarySearch(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
 				QVec lastPoint;
-				reachEnd = sampler.checkRobotValidDirectionToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
+				reachEnd = sampler.checkRobotValidDirectionToTargetBinarySearch(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
+			//	reachEnd = sampler.checkRobotValidDirectionToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
 				qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
 				
 				//if free path to neighboor, insert it in the graph if does not exist
@@ -454,8 +450,8 @@ Components PlannerPRM::connectedComponents()
  	Components components(parent.begin(),parent.end());
 	
 	// get the property map for vertex indices
-    typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
-    IndexMap index = boost::get(boost::vertex_index, graph);
+//     typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
+//     IndexMap index = boost::get(boost::vertex_index, graph);
 
 	std::cout << "Number of connected components " << components.size() << std::endl;
 	for(auto p : components)
@@ -464,12 +460,61 @@ Components PlannerPRM::connectedComponents()
 			auto pair = components[p];
 			for( auto it = pair.first; it != pair.second; ++it)
 			{
-				qDebug() << "By order in graph container " << *it << ". Its Index number: " << graph[*it].index << "IndexMap" << index[*it];
+				//qDebug() << "By order in graph container " << *it << ". Its Index number: " << graph[*it].index << "IndexMap" << index[*it];
 			}
 			std::cout << std::endl;
 		}
 
 	return components;
+}
+
+/**
+ * @brief Remove all small components in the graph.
+ * 
+ * @return void
+ */
+void PlannerPRM::removeSmallComponents()
+{
+	qDebug() << __FUNCTION__;
+	
+	const int MIN_COMPONENT_SIZE = 6;
+	
+	std::vector<VertexIndex> rank(boost::num_vertices(graph));
+	std::vector<Vertex> parent(boost::num_vertices(graph));
+	boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
+	boost::initialize_incremental_components(graph, ds);
+	boost::incremental_components(graph, ds);
+	
+ 	Components components(parent.begin(),parent.end());
+	
+	for(auto p : components)
+		{
+			auto pair = components[p];
+			VertexIndex cT = 0;
+			auto it = pair.first;
+			for( it = pair.first; it != pair.second; ++it)
+				cT++;
+			if( cT < MIN_COMPONENT_SIZE )
+			{
+				it = pair.first; 
+				auto next = it; 
+				auto it_end = pair.second;
+				
+				//for( next = it; it != it_end; it = next)	
+				for( it = pair.first; it != it_end; ++it )	
+				{
+					//++next;
+					qDebug() << "graph before removing" << boost::num_vertices(graph);
+					qDebug() << "removing" << *it;
+					
+					boost::clear_vertex( *it, graph);
+					boost::remove_vertex(*it, graph);
+					
+					qDebug() << "graph after removing" << boost::num_vertices(graph);
+				}
+			}
+			std::cout << std::endl;
+		}
 }
 
 void PlannerPRM::writeGraphToStream(std::ostream &stream)
@@ -628,6 +673,8 @@ void PlannerPRM::smoothPathIter(QList<QVec> & list)
 		list.removeAt(k);
 }
 
+////////////////////////////////////////////////////////////////////////
+
 ///////////////////////////////////////////////////////////////////////
 /// DRAW
 ////////////////////////////////////////////////////////////////////////
@@ -636,32 +683,99 @@ void PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx inner
 {
 
 	RoboCompInnerModelManager::Pose3D pose;
-	pose.rx = pose.ry = pose.z = 0.;
-	RoboCompInnerModelManager::meshType mesh;
-	mesh.pose = pose;
-	mesh.scaleX = mesh.scaleY = mesh.scaleZ = 100;
-	mesh.meshPath = "/home/robocomp/robocomp/components/";
+	pose.rx = pose.ry = pose.z = 0.;pose.x = pose.y = pose.z = 0.;
 	RoboCompInnerModelManager::Plane3D plane;
 	plane.height = 100; plane.width = 100; plane.thickness = 10;
-	plane.px = plane.py = plane.pz = 0;
-	plane.nx = 0; plane.ny = 1; plane.nz = 0;
+	plane.px = plane.py = plane.pz = 0; plane.nx = 0; plane.ny = 1; plane.nz = 0;
 	plane.texture = "#0000F0";
+	
+	try
+	{	std::string  parentAll = "graph";
+		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);		
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ std::cout << ex << std::endl;}
 	
 	QString item;
 	int i=0;
 	BGL_FORALL_VERTICES(v, graph, Graph)
     {
-		item = "g_" + QString::number(i++);		
-		pose.x = graph[v].pose.x();
-		pose.y = 10;
-		pose.z = graph[v].pose.z();
-		//qDebug() << "adding item " << item << "at " << pose.x << pose.y << pose.z;
-		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
-		RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, item + "_plane", item, plane);
+		item = "g_" + QString::number(i);		
+		pose.x = graph[v].pose.x();	pose.y = 10; pose.z = graph[v].pose.z();
+		try
+		{	std::string  parentT = QString("g_" + QString::number(i)).toStdString();
+			innermodelmanager_proxy->addTransform(parentT,"static","graph", pose);		
+			innermodelmanager_proxy->addPlane(QString("g_" + QString::number(i) + "_plane").toStdString(), parentT, plane);				
+			//qDebug() << "Vertices inserted " << item << item + "_plane";
+		}
+		catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+		{ std::cout << ex << std::endl;}
+		i++;
+	}
+	i=0;
+	BGL_FORALL_EDGES(e, graph, Graph)
+    {
+		item = "ge_" + QString::number(i);	
+		QVec p1 = graph[boost::source(e,graph)].pose;
+		QVec p2 = graph[boost::target(e,graph)].pose;
+		QVec center = (p2-p1)/(T)2.f;
+		pose.x = p1.x() + center.x(); pose.y = p1.y() + center.y(); pose.z = p1.z() + center.z();
+		pose.rx = pose.rz = 0; pose.ry = QLine2D(p1,p2).getAngleWithZAxis()+M_PI/2;
+		try
+		{	plane.thickness = 15;	plane.width = (p1-p2).norm2();	plane.height = 15;
+			std::string  parentTE = QString("ge_" + QString::number(i)).toStdString();
+			innermodelmanager_proxy->addTransform(parentTE,"static","graph", pose);		
+			innermodelmanager_proxy->addPlane(QString("ge_" + QString::number(i) + "_plane").toStdString(), parentTE, plane);				
+			//qDebug() << "Edges inserted " << item << item + "_plane";
+		}
+		catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+		{ std::cout << ex.text  << std::endl;}	
+		i++;
 	}
 }
 
-
+void PlannerPRM::cleanGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy)
+{
+// 	bool fin = true;
+// 	int i=0;
+// 	for( auto v = boost::vertices(graph).first; v != boost::vertices(graph).second; ++v, ++i)
+// 	{
+// 		try
+// 		{
+// 			qDebug() << "deleting" <<  QString("g_" + QString::number(i)) << QString("g_" + QString::number(i));
+// 			innermodelmanager_proxy->removeNode(QString("g_" + QString::number(i)).toStdString());
+// 			qDebug() << "Removed g number" << i ;
+// 		} 
+// 		catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
+// 		{	std::cout << e.text << std::endl;	}
+// 	}
+// 	i=0;
+// 	for (EdgePair ep = boost::edges(graph); ep.first != ep.second; ++ep.first, ++i)
+// 	{
+// 		try
+// 		{
+// 			qDebug() << "deleting edge" <<  QString("ge_" + QString::number(i)) << QString("ge_" + QString::number(i));
+// 			innermodelmanager_proxy->removeNode(QString("ge_" + QString::number(i)).toStdString());
+// 			qDebug() << "Removed g number" << i ;
+// 		}
+// 		catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
+// 		{	std::cout << e.text << std::endl;	}
+// 	}
+	
+	try
+	{
+ 		qDebug() << "deleting GRAPH";
+ 		innermodelmanager_proxy->removeNode("graph");
+ 	} 
+	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
+	{	std::cout << e.text << std::endl;	}
+	
+// 	std::vector<RoboCompInnerModelManager::NodeInformation> nodes;
+// 	try{	innermodelmanager_proxy->getAllNodeInformation(nodes);}
+// 	catch( const Ice::Exception &ex ){ std::cout << ex <<std::endl;}
+// 	for( auto n : nodes)
+// 		std::cout  << n.id << std::endl;
+}
 
 
 
@@ -676,13 +790,7 @@ void PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx inner
 // 					std::cout << std::endl;
 // 					}
 	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	// void PlannerPRM::createGraph(uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK)
 // {

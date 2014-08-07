@@ -48,7 +48,8 @@ class WayPoint
 		float initialDistanceToNext;
 		float visibleLaserAngle;
 		float visibleLaserDist;
-		QVec posInRobotFrame;		
+		QVec posInRobotFrame;
+		
 }; 
 
 class WayPoints : public QList< WayPoint >
@@ -72,6 +73,7 @@ class WayPoints : public QList< WayPoint >
 		WayPoint const getNextPoint() const 												{return (*this)[nextPointIndex];};
 		QLine2D getRobotZAxis(InnerModel* innerModel);
 		void computeDistancesToNext();
+		QList<QVec> backList;
 		
 		//GOOD ONES
 		QLine2D getTangentToCurrentPoint();
@@ -105,6 +107,7 @@ class WayPoints : public QList< WayPoint >
 		int currentCollisionIndex;
 		float currentDistanceToFrontier;
 		bool requiresReplanning;
+		
 		
 		void computeForces();
 		float computeRoadCurvature(WayPoints::iterator closestPoint, uint pointsAhead);

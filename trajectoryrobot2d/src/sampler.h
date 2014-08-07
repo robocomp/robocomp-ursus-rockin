@@ -22,22 +22,24 @@
 #include <innermodel/innermodel.h>
 #include <QtCore>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+#include "qline2d.h"
 
 class Sampler
 {
 	public:
 		Sampler();
-		void initialize(InnerModel &inner, const QRectF& outerRegion_, const QList< QRectF >& innerRegions_);
+		void initialize(InnerModel *inner, const QRectF& outerRegion_, const QList< QRectF >& innerRegions_);
 		QVec sampleFreeSpaceR2();
 		bool checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot = QVec::zeros(3)) ;
 		bool isStateValid(const ompl::base::State *state) ;
 		bool checkRobotValidDirectionToTarget(const QVec & origin , const QVec & target, QVec &path);
+		bool checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint);
 	private:
 		std::vector<QString> robotNodes;
 		std::vector<QString> restNodes;
 		QList<QRectF> innerRegions;
 		QRectF outerRegion;
-		InnerModel innerModel;
+		InnerModel *innerModel;
 		
 		void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
 		

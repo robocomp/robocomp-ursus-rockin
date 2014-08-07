@@ -65,6 +65,8 @@ typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
 typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
 typedef boost::component_index<VertexIndex> Components;
 typedef std::vector<Graph::edge_descriptor> PathType;
+typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
+typedef std::pair<EdgeIterator, EdgeIterator> EdgePair;
 
 class PlannerPRM : public QObject
 {
@@ -78,6 +80,8 @@ class PlannerPRM : public QObject
 		QList<QVec> getPath() { return currentPath; }
 		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax)		{xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;};
 		void drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
+		void cleanGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
+		bool learnPath(const QList<QVec> &path);
 		
 	private:
 		Graph graph;
@@ -85,6 +89,7 @@ class PlannerPRM : public QObject
 		//void PlannerPRM::createGraph(uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK);
 		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
 		QVec trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd);
+		QVec trySegmentToTargetBinarySearch(const QVec & origin , const QVec & target, bool & reachEnd);
 		void readGraphFromFile(QString name);
 		void writeGraphToStream(std::ostream &stream);
 		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);

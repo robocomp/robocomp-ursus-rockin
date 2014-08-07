@@ -21,13 +21,14 @@ Sampler::Sampler()
 {
 }
 
-void Sampler::initialize(InnerModel &inner, const QRectF& outerRegion_, const QList< QRectF> &innerRegions_)
+void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QList< QRectF> &innerRegions_)
 {
 	innerModel = inner;
+	qDebug() << "gola";
 	innerRegions = innerRegions_;
 	outerRegion = outerRegion_;
 	robotNodes.clear(); restNodes.clear();
-	recursiveIncludeMeshes(inner.getRoot(), "robot", false, robotNodes, restNodes);
+	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes);
 	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );
@@ -64,13 +65,13 @@ QVec Sampler::sampleFreeSpaceR2()  //ÑAPA!!!! meter los cuatro valores
 //Does not return IM to its original state
 bool Sampler::checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot) 
 {
-	innerModel.updateTransformValues("robot", targetPos.x(), targetPos.y(), targetPos.z(), targetRot.x(), targetRot.y(), targetRot.z());
+	innerModel->updateTransformValues("robot", targetPos.x(), targetPos.y(), targetPos.z(), targetRot.x(), targetRot.y(), targetRot.z());
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
 			//if (inner->collide(robotNodes[in], restNodes[out]))
-			if (innerModel.collide(robotNodes[in], restNodes[out]))
+			if (innerModel->collide(robotNodes[in], restNodes[out]))
 			{
 				return false;
 			}
@@ -84,13 +85,13 @@ bool Sampler::isStateValid(const ompl::base::State *state)
 	const float x = state->as<ompl::base::RealVectorStateSpace::StateType>()->values[0];
 	const float z = state->as<ompl::base::RealVectorStateSpace::StateType>()->values[1];
 	
-	innerModel.updateTransformValues("robot", x, 0, z, 0, 0, 0);
+	innerModel->updateTransformValues("robot", x, 0, z, 0, 0, 0);
 	
 	for (uint32_t in=0; in<robotNodes.size(); in++)
 	{
 		for (uint32_t out=0; out<restNodes.size(); out++)
 		{
-			if (innerModel.collide(robotNodes[in], restNodes[out]))
+			if (innerModel->collide(robotNodes[in], restNodes[out]))
 			{
 				return false;
 			}
@@ -179,23 +180,104 @@ bool Sampler::checkRobotValidDirectionToTarget(const QVec & origin , const QVec 
 	return true;
 }
 
+bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint)
+{
+	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
+	bool hit = false;
+	QVec finalPoint;
+	float wRob=600, hRob=1600;
 
+	
+	if( MAX_LENGTH_ALONG_RAY < 50) 
+	{
+		qDebug() << __FUNCTION__ << "target y origin too close";
+		lastPoint = target;
+		return false;
+	}
+		
+	//Compute angle between origin-target line and world Zaxis
+	float alfa1 = QLine2D(target,origin).getAngleWithZAxis();
+	
+	// Update robot's position and align it with alfa1 so it looks at the TARGET point 	
+	innerModel->updateTransformValues("robot", origin.x(), origin.y(), origin.z(), 0., alfa1, 0.);
+	
+	// Compute rotation matrix between robot and world. Should be the same as alfa
+	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");	
+	
+	// Create a tall box for robot body with center at zero and sides:
+	boost::shared_ptr<fcl::Box> robotBox(new fcl::Box(wRob, hRob, wRob));
+	
+	// Create a collision object
+	fcl::CollisionObject robotBoxCol(robotBox);
+	
+	//Create and fcl rotation matrix to orient the box with the robot
+	const fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
+		
+	//Check collision at maximum distance
+	float hitDistance = MAX_LENGTH_ALONG_RAY;
+	
+	//Resize big box to enlarge it along the ray direction
+	robotBox->side = fcl::Vec3f(wRob, hRob, hitDistance);
+		
+	//Compute the coord of the tip of a "nose" going away from the robot (Z dir) up to hitDistance/2
+	const QVec boxBack = innerModel->transform("world", QVec::vec3(0, hRob/2, hitDistance/2.), "robot");
+	
+	//move the big box so it is aligned with the robot and placed along the nose
+	robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+		
+	//qDebug() << "checking ang" << r1q.extractAnglesR_min().y() << "and size " << boxBack;
+	
+	//Check collision of the box with the world
+	for (uint out=0; out<restNodes.size(); out++)
+	{
+		hit = innerModel->collide(restNodes[out], &robotBoxCol);
+		if (hit) break;
+	}	
+	
+	//Binary search. If not free way do a binary search
+	if (hit)
+	{	
+		hit = false;
+		float min=0;
+		float max=MAX_LENGTH_ALONG_RAY;
+		
+		while (max-min>10)
+		{
+			//set hitDistance half way
+			hitDistance = (max+min)/2.;
+			// Stretch and create the stick
+			robotBox->side = fcl::Vec3f(wRob,hRob,hitDistance);
+			const QVec boxBack = innerModel->transform("world", QVec::vec3(0, hRob/2, hitDistance/2.), "robot");
+			robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+			
+			//qDebug() << "checking ang" << r1q.extractAnglesR_min().y() << "and size " << boxBack << hitDistance;
 
-// bool Sampler::checkRobotValidStateReturnIMToOriginal(InnerModel* innerModel, QVec target)  //Does not return IM to its original state
-// {
-// 	QVec tr = innerModel->transform(robotName,worldName);
-// 	innerModel->updateTranslationValues("robot", target.x(), target.y(), target.z());
-// 	for (uint32_t in=0; in<robotNodes.size(); in++)
-// 	{
-// 		for (uint32_t out=0; out<restNodes.size(); out++)
-// 		{
-// 			if (innerModel->collide(robotNodes[in], restNodes[out]))
-// 			{	
-// 				innerModel->updateTranslationValues(robotName, tr.x(), tr.y(), tr.z());
-// 				return true;
-// 			}
-// 		}
-// 	}
-// 	innerModel->updateTranslationValues(robotName, tr.x(), tr.y(), tr.z());
-// 	return false;
-// }
+			// Check collision using current ray length
+			for (uint out=0; out<restNodes.size(); out++)
+			{
+				hit = innerModel->collide(restNodes[out], &robotBoxCol);
+				if (hit)
+					break;
+			}
+			
+			// Manage next min-max range
+			if (hit)
+				max = hitDistance;
+			else
+				min = hitDistance;
+		}
+		// Set final hit distance
+		hitDistance = (max+min)/2.;
+		
+		if( hitDistance < 50) 
+			lastPoint = origin;
+		else
+			lastPoint = innerModel->transform("world", QVec::vec3(0, 0, hitDistance-10), "robot");
+		return false;;
+	}
+	else  //we made it up to the Target!
+	{
+		lastPoint = target;
+		return true;
+	}
+}

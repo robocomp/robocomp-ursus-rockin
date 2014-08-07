@@ -42,7 +42,11 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 	
 	//Delete half the tail behind, if greater than 6, to release resources
 	if( road.getIndexOfClosestPointToRobot() > 6)
+	{
+		for(auto it = road.begin(); it != road.begin() + (road.getIndexOfClosestPointToRobot() / 2); ++it)
+			road.backList.append(it->pos);
 		road.erase(road.begin(), road.begin() + (road.getIndexOfClosestPointToRobot() / 2));
+	}
 	
 	return true;
 }

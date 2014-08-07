@@ -112,6 +112,21 @@ void RcisDraw::drawLine(InnerModelManagerPrx innermodelmanager_proxy, QString na
 	
 }
 
+void RcisDraw::drawLine2Points(InnerModelManagerPrx innermodelmanager_proxy, QString name, QString parent, const QVec& p1, const QVec& p2, QString texture)
+{
+	RoboCompInnerModelManager::Plane3D plane;
+	plane.px = 0;	plane.py = 0;	plane.pz = 0;	
+	plane.thickness = 15;	
+	plane.width = (p1-p2).norm2();	
+	plane.height = 15;
+	plane.nx = 0; plane.ny = 1; plane.nz = 0;
+	plane.texture = texture.toStdString();
+	addPlane_ignoreExisting(innermodelmanager_proxy, name, parent, plane);
+	//qDebug() << "Inserting line and transform" << name <<" in RCIS";
+	
+}
+
+
 void RcisDraw::removeObject(InnerModelManagerPrx innermodelmanager_proxy, QString name)
 {
 	try
