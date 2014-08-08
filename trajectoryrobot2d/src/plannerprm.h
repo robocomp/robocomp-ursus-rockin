@@ -85,26 +85,26 @@ class PlannerPRM : public QObject
 		
 	private:
 		Graph graph;
-		void constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK, uint robotSize);
+		void constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS=20, float MAX_DISTANTE_TO_CHECK=2000.f, uint robotSize=400);
 		//void PlannerPRM::createGraph(uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK);
 		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
-		QVec trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd);
-		QVec trySegmentToTargetBinarySearch(const QVec & origin , const QVec & target, bool & reachEnd);
+		//QVec trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd);
+		//QVec trySegmentToTargetBinarySearch(const QVec & origin , const QVec & target, bool & reachEnd);
 		void readGraphFromFile(QString name);
 		void writeGraphToStream(std::ostream &stream);
 		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);
-		Components connectedComponents();
+		std::tuple< std::vector< Vertex > , QMap<u_int32_t, VertexIndex> > connectedComponents();
 		void smoothPath( const QList<QVec> & list);
 		void smoothPathIter( QList<QVec> & list);
 		QList<QVec> currentSmoothedPath;
 		void removeSmallComponents();
-		void expandGraph();
+		bool expandGraph();
 		
 		InnerModel *innerModel;
 		QList<QVec> currentPath;   			//Results will be saved here
 		std::vector<QString> robotNodes;
 		std::vector<QString> restNodes;
-		float xMin, xMax, zMin, zMax; 		//Limits of environmnent
+		float xMin, xMax, zMin, zMax; 		//Limits of environmnent QUITAR
 		
 		//Libnabo fast KDTree for low dimension
 		Nabo::NNSearchF *nabo;

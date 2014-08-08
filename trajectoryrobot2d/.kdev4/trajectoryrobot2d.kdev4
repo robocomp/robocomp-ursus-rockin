@@ -31,7 +31,7 @@ Working Directory=.
 isExecutable=true
 
 [MakeBuilder]
-Number Of Jobs=1
+Number Of Jobs=4
 
 [Project]
 VersionControlSupport=kdevgit

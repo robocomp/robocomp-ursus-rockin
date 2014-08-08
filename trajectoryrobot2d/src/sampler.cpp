@@ -35,23 +35,25 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 	
 }
 /**
-* @brief Picks a random point of the list created by the sampler and checks that it is out of obstacles (Free Space)
+* @brief Picks a random point within the limits of outerRegion and innerRegions and checks that it is out of obstacles (Free Space)
 * 
-* @param currentTarget Current target provided to bias the sample. 20% of the times the target is returned.
-* @return RMat::QVec
+* @return RMat::QVec, a 3D vector with 0 in the Y coordinate
 */
-QVec Sampler::sampleFreeSpaceR2()  //ÑAPA!!!! meter los cuatro valores 
+QVec Sampler::sampleFreeSpaceR2()  
 {
  	bool validState = false;
-	QVec p;
+	QVec p,q;
 
 	while( validState == false )
 	{
-		p =	QVec::vec3( qrand() * outerRegion.right() / RAND_MAX, 0, qrand() * outerRegion.bottom() / RAND_MAX );  //ÑAPA BRUTAL
-		QPointF s(p.x(),p.z());
+		//p =	QVec::vec3( qrand() * .right() / RAND_MAX, 0, qrand() * outerRegion.bottom() / RAND_MAX );  //ÑAPA BRUTAL
+		p =	QVec::uniformVector(1,outerRegion.left(), outerRegion.right());
+		q =	QVec::uniformVector(1,outerRegion.top(), outerRegion.bottom());
+		
+		QPointF s(p.x(),q.x());
 		bool in = false;
-		foreach(QRectF q, innerRegions)
-			if( q.contains(s))
+		foreach(QRectF rect, innerRegions)
+			if( rect.contains(s))
 			{
 				in = true;
 				break;
@@ -59,7 +61,75 @@ QVec Sampler::sampleFreeSpaceR2()  //ÑAPA!!!! meter los cuatro valores
 		if( in == false) 
 			validState = checkRobotValidStateAtTarget(p);
 	}
-	return p;
+	return QVec::vec3(p.x(),0.f,q.x());
+}
+
+/**
+* @brief Picks a (list of) random point within the limits of a given box and checks that it is out of obstacles (Free Space)
+* 
+* @return RMat::QVec, a 3D vector with 0 in the Y coordinate
+*/
+QList<QVec> Sampler::sampleFreeSpaceR2Uniform( const QRectF &box, uint32_t nPoints)  
+{
+ 	bool validState = false;
+	QVec p,q;
+	QList<QVec> list;
+
+	for(uint32_t i=0; i<nPoints;i++)
+	{
+		while( validState == false )
+		{
+			p =	QVec::uniformVector(1,box.left(), box.right());
+			q =	QVec::uniformVector(1,box.top(), box.bottom());
+			QPointF s(p.x(),q.x());
+			bool in = false;
+			foreach(QRectF rect, innerRegions)
+				if( rect.contains(s))
+				{
+					in = true;
+					break;
+				}
+			if( in == false) 
+				validState = checkRobotValidStateAtTarget(p);
+		}
+		list.append(QVec::vec3(p.x(),0.f,q.x()));
+	}
+	return list;
+}
+
+
+/**
+* @brief Picks a (list of) random point within the limits of a given box and checks that it is out of obstacles (Free Space)
+* 
+* @return RMat::QVec, a 3D vector with 0 in the Y coordinate
+*/
+QList<QVec> Sampler::sampleFreeSpaceR2Gaussian(float meanX, float meanY, float sigma1, float sigma2, uint32_t nPoints)  
+{
+ 	bool validState = false;
+	QVec p,q;
+	QList<QVec> list;
+
+	for(uint32_t i=0; i<nPoints;i++)
+	{
+		while( validState == false )
+		{
+			p =	QVec::gaussianSamples(1, meanX, sigma1);
+			q =	QVec::gaussianSamples(1, meanY, sigma2);
+			QPointF s(p.x(),q.x());
+			qDebug() << s;
+			bool in = false;
+			foreach(QRectF rect, innerRegions)
+				if( rect.contains(s))
+				{
+					in = true;
+					break;
+				}
+			if( in == false) 
+				validState = checkRobotValidStateAtTarget(p);
+		}
+		list.append(QVec::vec3(p.x(),0.f,q.x()));
+	}
+	return list;
 }
 
 //Does not return IM to its original state
