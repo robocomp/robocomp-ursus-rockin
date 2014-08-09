@@ -33,6 +33,7 @@
 #include <boost/foreach.hpp>
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/incremental_components.hpp>
+#include <boost/graph/connected_components.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/property_map/dynamic_property_map.hpp> 
@@ -47,9 +48,9 @@
 struct VertexPayload
 {	
 	QVec pose; //3D
-	uint32_t index;
+	std::size_t index;
 	VertexPayload(){};
-	VertexPayload(uint i, const QVec &p){ index = i; pose=p; };
+	VertexPayload(std::size_t i, const QVec &p){ index = i; pose=p; };
 };	
 struct EdgePayload
 {
@@ -57,16 +58,19 @@ struct EdgePayload
 	EdgePayload(){ dist = -1;};
 	EdgePayload(float d) { dist = d;};
 };
-typedef boost::adjacency_list<boost::vecS,boost::vecS, boost::undirectedS, VertexPayload, EdgePayload, boost::listS> Graph;
+typedef boost::adjacency_list<boost::listS,boost::listS, boost::undirectedS, VertexPayload, EdgePayload, boost::listS> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<Graph>::edge_descriptor Edge;
 typedef boost::graph_traits<Graph>::vertices_size_type VertexIndex;
-typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
+//typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
+
 typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
 typedef boost::component_index<VertexIndex> Components;
 typedef std::vector<Graph::edge_descriptor> PathType;
 typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
 typedef std::pair<EdgeIterator, EdgeIterator> EdgePair;
+typedef std::vector<std::pair<int, std::vector<Vertex> > > ConnectedComponents;
+typedef std::pair<int,std::vector<Vertex> > CComponent;
 
 class PlannerPRM : public QObject
 {
@@ -94,6 +98,7 @@ class PlannerPRM : public QObject
 		void writeGraphToStream(std::ostream &stream);
 		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);
 		std::tuple< std::vector< Vertex > , QMap<u_int32_t, VertexIndex> > connectedComponents();
+		ConnectedComponents connectedComponents2();
 		void smoothPath( const QList<QVec> & list);
 		void smoothPathIter( QList<QVec> & list);
 		QList<QVec> currentSmoothedPath;

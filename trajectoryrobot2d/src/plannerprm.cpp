@@ -36,8 +36,10 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
 		qDebug() << __FUNCTION__ << "Graph file exits. Loading";
 		readGraphFromFile("grafo.dot");
 	
-		expandGraph();
-		qFatal("fary");
+		//connectedComponents2();
+// 		removeSmallComponents();
+// 		connectedComponents2();
+// 		expandGraph();
 // 		connectedComponents();
 //  	removeSmallComponents();
 //  	connectedComponents();
@@ -288,20 +290,30 @@ bool PlannerPRM::searchGraph(const Vertex &originVertex, const Vertex &targetVer
 	std::vector<Vertex> predecessors(boost::num_vertices(graph)); // To store parents
 	std::vector<float> distances(boost::num_vertices(graph));    // To store distances
 	
-	IndexMap indexMap = boost::get(boost::vertex_index, graph);
-	auto predecessorMap = boost::make_iterator_property_map(&predecessors[0], indexMap);
-	auto distanceMap = boost::make_iterator_property_map(&distances[0], indexMap);
+	//IndexMap indexMap = boost::get(boost::vertex_index, graph);
+	
+	//create a vertex_index property map, since VertexList is listS
+	typedef std::map<Vertex, size_t>IndexMap;
+	IndexMap indexMap;
+	boost::associative_property_map<IndexMap> propmapIndex(indexMap);
+    //indexing the vertices
+	int i=0;
+	BGL_FORALL_VERTICES(v, graph, Graph)
+		boost::put(propmapIndex, v, i++);
+	
+	auto predecessorMap = boost::make_iterator_property_map(&predecessors[0], propmapIndex);
+	auto distanceMap = boost::make_iterator_property_map(&distances[0], propmapIndex);
 
 	boost::dijkstra_shortest_paths(graph, originVertex, boost::weight_map(boost::get(&EdgePayload::dist, graph))
+															.vertex_index_map(propmapIndex)
 															.predecessor_map(predecessorMap)
-															.distance_map(distanceMap));
-
+ 															.distance_map(distanceMap));
+	
 	// Output results
 	//auto nameMap( boost::get(&VertexPayload::index, graph) );
 	auto poseMap( boost::get(&VertexPayload::pose, graph) );
  
 	// Extract a shortest path
- 
 	PathType path;
 	Vertex v = targetVertex;
 	
@@ -347,89 +359,86 @@ bool PlannerPRM::expandGraph()
 	qDebug() << __FUNCTION__ << "Expanding graph...";
 	//compute connected components
 	
-	//map with key= size of the component and value = index to container holding the members
-	QMap<u_int32_t, VertexIndex>  sCompsMap;
-	//Parents structure returned by connectedComponents
-	std::vector<Vertex> parents;
+	// 	//map with key= size of the component and value = index to container holding the members
+	// 	QMap<u_int32_t, VertexIndex>  sCompsMap;
+	// 	//Parents structure returned by connectedComponents
+	// 	std::vector<Vertex> parents;
 	
-	std::tie(parents, sCompsMap)  = connectedComponents();
-	Components components(parents.begin(),parents.end());
+	//std::tie(parents, sCompsMap)  = connectedComponents();
+	//Components components(parents.begin(),parents.end());
+	ConnectedComponents components = connectedComponents2();
 	
 	//If only one component, ntohing to do here
 	if( components.size() < 2)
 		return false;
 
-	//select the two largest comps. First, get the list of keys in the map
-	QList<uint32_t> ss = sCompsMap.keys();
-	//sort them from greatest to smallest
-	qStableSort(ss.begin(), ss.end(), qGreater<uint32_t>() );
-	//recover the two first indexes
-	uint32_t largestSize  = ss.takeFirst();
-	uint32_t largest2Size  = ss.first();
-	VertexIndex largest =  sCompsMap.value( largestSize );
-	VertexIndex largest2 = sCompsMap.value( largest2Size );
+	//Sort the components by size
+	std::sort( components.begin(), components.end(), 
+			   []( CComponent a, CComponent b){ return a.first > b.first; });
+	
+	//Recover the two first indexes
+	uint32_t largestSize  = components.front().first;
+	uint32_t largest2Size = (*(components.cbegin() + 1)).first;
+// 	VertexIndex largest =  components.front().;
+// 	VertexIndex largest2 = sCompsMap.value( largest2Size );
 
 	//Print
-// 	auto pair = components[largest];	
-// 	for( auto it = pair.first; it != pair.second; ++it)
-// 		qDebug() << __FUNCTION__ << "second largest components: "<< graph[*it].index;
-// 	pair = components[largest];
-// 	qDebug() << "-----------------------------------------";
-// 	for( auto it = pair.first; it != pair.second; ++it)
-// 		qDebug() << __FUNCTION__ << "largest components: " << graph[*it].index;
-// 	
+	// 	auto pair = components[largest];	
+	// 	for( auto it = pair.first; it != pair.second; ++it)
+	// 		qDebug() << __FUNCTION__ << "second largest components: "<< graph[*it].index;
+	// 	pair = components[largest];
+	// 	qDebug() << "-----------------------------------------";
+	// 	for( auto it = pair.first; it != pair.second; ++it)
+	// 		qDebug() << __FUNCTION__ << "largest components: " << graph[*it].index;
+	// 	
 
 	// Compute closest points between both comps using KdTree.
 	// Fist, build a Matrix with the elements of the largest to create a KdTree
-	qDebug() << "dists" << largestSize << largest2Size;
+	
+	qDebug() << __FUNCTION__ << "Sizes: " << largestSize << largest2Size;
 	const uint32_t neighboors = 1;
 	Eigen::MatrixXf dataL( 3 , largestSize );   //Watch R3 dependant
 	Eigen::MatrixXf queryL(3 , largest2Size );
 	Eigen::MatrixXi indicesL(neighboors, largest2Size );
 	Eigen::MatrixXf distsToL(neighboors, largest2Size );
-	auto pair = components[largest];
-	
-	QHash<uint32_t,Vertex> vertexMapL, vertexMapLL;
+ 	
+ 	QHash<uint32_t,Vertex> vertexMapL, vertexMapLL;
 	uint32_t i = 0;
-	qDebug() << "comps in C1";
-	for( auto it = pair.first; it != pair.second; ++it)
+	//qDebug()  << __FUNCTION__ << "comps in C1";
+	for( auto it : components[0].second)
 	{
-		dataL(0,i) = graph[*it].pose.x();
-		dataL(1,i) = graph[*it].pose.y();
-		dataL(2,i) = graph[*it].pose.z();
-		vertexMapL.insert(i,*it);
+		dataL(0,i) = graph[it].pose.x();
+		dataL(1,i) = graph[it].pose.y();
+		dataL(2,i) = graph[it].pose.z();
+		vertexMapL.insert(i,it);
 		i++;
-		//qDebug() << graph[*it].pose;
+		//qDebug() << graph[it].pose;
 	}
 	//build the query matrix qith the second comp
-	pair = components[largest2];
-	qDebug() << "comps in C2";
+	//pair = components[largest2];
+	//qDebug()  << __FUNCTION__ << "comps in C2";
 	i=0;
-	for( auto it = pair.first; it != pair.second; ++it)
+	for( auto it : components[1].second)
 	{
-		queryL(0,i) = graph[*it].pose.x();
-		queryL(1,i) = graph[*it].pose.y();
-		queryL(2,i) = graph[*it].pose.z();
-		vertexMapLL.insert(i,*it);	
+		queryL(0,i) = graph[it].pose.x();
+		queryL(1,i) = graph[it].pose.y();
+		queryL(2,i) = graph[it].pose.z();
+		vertexMapLL.insert(i,it);	
 		i++;	
-		//qDebug() << graph[*it].pose;
+		//qDebug() << graph[it].pose;
 	}
 	// Build the KdTree is valid here. 
 	Nabo::NNSearchF *naboL = Nabo::NNSearchF::createKDTreeTreeHeap(dataL);
 	
 	// Query for sorted distances from one elements in C2  to elements in C1
 	naboL->knn(queryL, indicesL, distsToL, neighboors, 0, 0);
-	
-	//get the point of the smallest comp at smallest distance to any of the elements of the big comp
-	//Eigen::MatrixXf::Index minCol;
-	//float minDist = sqrt(distsToL.row(0).minCoeff(&minCol));
-	//QVec closestPose = graph[vertexMapL.value(indicesL(0,minCol))].pose;
-	//qDebug() << "Closest point from C2 to C1" << closestPose << sqrt(distsToL(0,minCol));
-	
-	//pick 5 elements from indicesa and try to connect them
+		
+	// Pick 5 elements from indicesa and try to connect them
 	QVec inds = QVec::uniformVector(largest2Size, 0, largest2Size-1);
+	
 	QVec lastPoint;
-	for (int i=0; i<largest2Size; i++)
+	int nExit = 0;
+	for (uint i=0; i<largest2Size; i++)
 	{
 		Vertex v = vertexMapL.value(indicesL(0,i));
 		Vertex vv = vertexMapLL.value(i);
@@ -439,14 +448,12 @@ bool PlannerPRM::expandGraph()
 			edge.dist = distsToL(i);
 			boost::add_edge(v, vv, edge, graph);	
 			qDebug() << "Exito" << graph[v].index << "to " << graph[vv].index;
+			nExit++;
 		}
 	}
 	
-	qDebug() << "After leear -------------------------";
-	connectedComponents();
-	removeSmallComponents();
-	qDebug() << "After remove -------------------------";
-	connectedComponents();
+	qDebug() << __FUNCTION__  << "After expand, " << nExit << " new connections";
+	connectedComponents2();
 	
 // 	//sample a few points aronud closestPose. a Gaussian sample would be better
 // 	const uint32_t MAX_POINTS = 5;
@@ -471,132 +478,203 @@ bool PlannerPRM::expandGraph()
  */
 void PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK, uint robotSize)
 {
-	qDebug() << __FUNCTION__ << "Constructing graph...";
-	int ROBOT_SIZE_SQR = robotSize*robotSize; //mm  OBTAIN FROM ROBOT'S BOUNDING BOX!!!!!
-	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
-	
-	//Expand the matrix with new points, insert new vertices and update de <int,vertex> map
-	int lastCol = data.cols();
-	data.conservativeResize(3, data.cols() + pointList.size() );
-	Eigen::MatrixXf query(data.rows(), pointList.size());
-	qDebug() << __FUNCTION__ << "Data matrix resized" << data.rows() << data.cols() << "lastCol" << lastCol;
-	
-	for(int i=lastCol, k=0; i< data.cols(); i++, k++)
-	{
-		data(0,i) = pointList[k].x();
-		data(1,i) = pointList[k].y();
-		data(2,i) = pointList[k].z();
-		query(0,k) = pointList[k].x();
-		query(1,k) = pointList[k].y();
-		query(2,k) = pointList[k].z();
-		Vertex vertex = boost::add_vertex(graph);
-		vertexMap.insert(i,vertex);   		//Hash<row,Vertex> to go back and forth between data matrix and graph
-		graph[vertex].pose = QVec::vec3(data(0,i), data(1,i), data(2,i));
-		graph[vertex].index = i;  
-		qDebug() << __FUNCTION__ << "Inserted vertex " << i;
-	}
-
-	//Compute KdTree
-	if (nabo != nullptr) 
-		delete nabo;
-	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
-	
-	//Query for sorted distances to NEIGHBOORS neighboors  
-	Eigen::MatrixXi indices(NEIGHBOORS, pointList.size() );
-	Eigen::MatrixXf distsTo(NEIGHBOORS, pointList.size() );
-	nabo->knn(query, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
-	
-	//Connect the new points
-	bool reachEnd;
-	qDebug() << __FUNCTION__ << lastCol + pointList.size() << indices.rows() << indices.cols();
-	for(int i=lastCol, j=0; i<lastCol+pointList.size(); i++, j++)
-	{
-		Vertex vertex = vertexMap.value(i);
-		for(uint k=0; k<NEIGHBOORS; k++)
-		{	
-			int indKI = indices(k,j);
-			Vertex vertexN = vertexMap.value(indKI);
-			qDebug() << __FUNCTION__ << "Trying" << i << j <<k << "dist" << distsTo(k,j) << "indKI" << indKI;
-			if( (distsTo(k,j) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,j) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
-			{
-				//trySegmentToTargetBinarySearch(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
-				QVec lastPoint;
-				reachEnd = sampler.checkRobotValidDirectionToTargetBinarySearch(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
-			//	reachEnd = sampler.checkRobotValidDirectionToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
-				qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
-				
-				//if free path to neighboor, insert it in the graph if does not exist
-				if( reachEnd == true)
-				{
-					//compute connected components to reject same isle elements
-					std::vector<VertexIndex> rank(boost::num_vertices(graph));
-					std::vector<Vertex> parent(boost::num_vertices(graph));
-					boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
-					boost::initialize_incremental_components(graph, ds);
-					boost::incremental_components(graph, ds);
- 					Components components(parent.begin(),parent.end());
-			
-					bool sameComp = boost::same_component(vertex,vertexN,ds);
-
-// 					qDebug() << __FUNCTION__<< "Try to create and edge from" << graph[vertex].index << "a" << graph[vertexN].index;
-// 					qDebug() << __FUNCTION__<< "Already exists: " << (boost::edge(vertex,vertexN,graph).second == true);
-// 					qDebug() << __FUNCTION__<< "In the same component as initia: " << sameComp;
-					
-					if( (boost::edge(vertex,vertexN,graph).second == false ) and (sameComp == false) )
-					{
-						EdgePayload edge;
-						edge.dist = (QVec(graph[vertex].pose) - QVec(graph[vertexN].pose)).norm2();
-						boost::add_edge(vertex, vertexN, edge, graph);	
-					}
-				}
-			}
-		}
-	}
-	
-	//print and save the graph with payloads
-	
-	writeGraphToStream(std::cout);
-	std::ofstream fout("grafo.dot");
-	writeGraphToStream(fout);
-	
-	connectedComponents();
+// 	qDebug() << __FUNCTION__ << "Constructing graph...";
+// 	int ROBOT_SIZE_SQR = robotSize*robotSize; //mm  OBTAIN FROM ROBOT'S BOUNDING BOX!!!!!
+// 	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
+// 	
+// 	//Expand the matrix with new points, insert new vertices and update de <int,vertex> map
+// 	int lastCol = data.cols();
+// 	data.conservativeResize(3, data.cols() + pointList.size() );
+// 	Eigen::MatrixXf query(data.rows(), pointList.size());
+// 	qDebug() << __FUNCTION__ << "Data matrix resized" << data.rows() << data.cols() << "lastCol" << lastCol;
+// 	
+// 	for(int i=lastCol, k=0; i< data.cols(); i++, k++)
+// 	{
+// 		data(0,i) = pointList[k].x();
+// 		data(1,i) = pointList[k].y();
+// 		data(2,i) = pointList[k].z();
+// 		query(0,k) = pointList[k].x();
+// 		query(1,k) = pointList[k].y();
+// 		query(2,k) = pointList[k].z();
+// 		Vertex vertex = boost::add_vertex(graph);
+// 		vertexMap.insert(i,vertex);   		//Hash<row,Vertex> to go back and forth between data matrix and graph
+// 		graph[vertex].pose = QVec::vec3(data(0,i), data(1,i), data(2,i));
+// 		graph[vertex].index = i;  
+// 		qDebug() << __FUNCTION__ << "Inserted vertex " << i;
+// 	}
+// 
+// 	//Compute KdTree
+// 	if (nabo != nullptr) 
+// 		delete nabo;
+// 	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
+// 	
+// 	//Query for sorted distances to NEIGHBOORS neighboors  
+// 	Eigen::MatrixXi indices(NEIGHBOORS, pointList.size() );
+// 	Eigen::MatrixXf distsTo(NEIGHBOORS, pointList.size() );
+// 	nabo->knn(query, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
+// 	
+// 	//Connect the new points
+// 	bool reachEnd;
+// 	qDebug() << __FUNCTION__ << lastCol + pointList.size() << indices.rows() << indices.cols();
+// 	for(int i=lastCol, j=0; i<lastCol+pointList.size(); i++, j++)
+// 	{
+// 		Vertex vertex = vertexMap.value(i);
+// 		for(uint k=0; k<NEIGHBOORS; k++)
+// 		{	
+// 			int indKI = indices(k,j);
+// 			Vertex vertexN = vertexMap.value(indKI);
+// 			qDebug() << __FUNCTION__ << "Trying" << i << j <<k << "dist" << distsTo(k,j) << "indKI" << indKI;
+// 			if( (distsTo(k,j) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,j) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
+// 			{
+// 				//trySegmentToTargetBinarySearch(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), reachEnd);
+// 				QVec lastPoint;
+// 				reachEnd = sampler.checkRobotValidDirectionToTargetBinarySearch(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
+// 			//	reachEnd = sampler.checkRobotValidDirectionToTarget(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
+// 				qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
+// 				
+// 				//if free path to neighboor, insert it in the graph if does not exist
+// 				if( reachEnd == true)
+// 				{
+// 					//compute connected components to reject same isle elements
+// 					std::vector<VertexIndex> rank(boost::num_vertices(graph));
+// 					std::vector<Vertex> parent(boost::num_vertices(graph));
+// 					boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
+// 					boost::initialize_incremental_components(graph, ds);
+// 					boost::incremental_components(graph, ds);
+//  					Components components(parent.begin(),parent.end());
+// 			
+// 					bool sameComp = boost::same_component(vertex,vertexN,ds);
+// 
+// // 					qDebug() << __FUNCTION__<< "Try to create and edge from" << graph[vertex].index << "a" << graph[vertexN].index;
+// // 					qDebug() << __FUNCTION__<< "Already exists: " << (boost::edge(vertex,vertexN,graph).second == true);
+// // 					qDebug() << __FUNCTION__<< "In the same component as initia: " << sameComp;
+// 					
+// 					if( (boost::edge(vertex,vertexN,graph).second == false ) and (sameComp == false) )
+// 					{
+// 						EdgePayload edge;
+// 						edge.dist = (QVec(graph[vertex].pose) - QVec(graph[vertexN].pose)).norm2();
+// 						boost::add_edge(vertex, vertexN, edge, graph);	
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	
+// 	//print and save the graph with payloads
+// 	
+// 	writeGraphToStream(std::cout);
+// 	std::ofstream fout("grafo.dot");
+// 	writeGraphToStream(fout);
+// 	
+// 	connectedComponents();
 }
 
-
-std::tuple<std::vector<Vertex>, QMap<u_int32_t, VertexIndex> > PlannerPRM::connectedComponents()
+ConnectedComponents PlannerPRM::connectedComponents2()
 {
 	qDebug() << __FUNCTION__;
 
-	std::vector<VertexIndex> rank(boost::num_vertices(graph));
-	std::vector<Vertex> parent(boost::num_vertices(graph));
-	boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
-	boost::initialize_incremental_components(graph, ds);
-	boost::incremental_components(graph, ds);
+	//create a vertex_index property map, since VertexList is listS and the graph does not have a "natural" index 
+ 	typedef std::map<Vertex, size_t> IMap;
+ 	typedef boost::associative_property_map<IMap> IndexMap;
+	IMap indexMap;
+	IndexMap index( indexMap );
+	   
+ 	//indexing the vertices
+ 	int i=0;
+ 	BGL_FORALL_VERTICES(v, graph, Graph)
+ 		boost::put(index, v, i++);
 	
-	QMap<u_int32_t, VertexIndex> sizeComps;
- 	Components components(parent.begin(),parent.end());
+	std::vector<int> components(boost::num_vertices(graph));	
+	boost::iterator_property_map< std::vector<int>::iterator, IndexMap> compIterMap( components.begin(), index );
 	
-	// get the property map for vertex indices
-//     typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
-//     IndexMap index = boost::get(boost::vertex_index, graph);
+    int numComps = boost::connected_components(graph, compIterMap, vertex_index_map(index));
 	
-	std::cout << "Number of connected components " << components.size() << std::endl;
-	for(auto p : components)
+	std::cout << "Number of connected components " << numComps << std::endl;
+	
+	//We need a structure to delete small comps
+	std::vector<std::pair<int, std::vector<Vertex> > > compList(numComps);
+	for(auto it : compList)
+		it = std::make_pair(0, std::vector<Vertex>());
+
+	BGL_FORALL_VERTICES(v, graph, Graph)
 	{
-		std::cout << "Component " << p << " contains: " << std::endl;
-		auto pair = components[p];
-		uint32_t sizeC = 0;
-		for( auto it = pair.first; it != pair.second; ++it)
-		{	sizeC++;
-			std::cout << graph[*it].index << " ";
-		}
-		//sizeComps.push_back(sizeC);
-		sizeComps.insert(sizeC, p);
-		std::cout << std::endl << "Total: " << sizeC << " nodes" << std::endl;
+		//qDebug() << graph[v].index << "is in comp" << get(compIterMap, v);
+		compList[get(compIterMap, v)].second.push_back( v );
+		compList[get(compIterMap, v)].first++;
 	}
-	std::cout  << "--------------------------------" << std::endl;
 	
-	return std::make_tuple(parent, sizeComps);
+	for(auto it : compList)
+	{	
+		qDebug() << "Num comps: " << it.first ;
+		for(auto itt : it.second)
+			std::cout <<  graph[itt].index << " " ;
+		std::cout << std::endl;
+	}
+	
+	return compList;
+// 	{
+// 		std::cout << "Component " << p << " contains: " << std::endl;
+// 		auto pair = components[p];
+// 		uint32_t sizeC = 0;
+// 		for( auto it = pair.first; it != pair.second; ++it)
+// 		{	sizeC++;
+// 		//	std::cout << graph[*it].index << " ";
+// 		}
+// 		//sizeComps.push_back(sizeC);
+// 		sizeComps.insert(sizeC, p);
+// 		std::cout << std::endl << "Total: " << sizeC << " nodes" << std::endl;
+// 	}
+// 	std::cout  << "--------------------------------" << std::endl;
+// 	
+// 	return std::make_tuple(parent, sizeComps);
+}
+
+std::tuple<std::vector<Vertex>, QMap<u_int32_t, VertexIndex> > PlannerPRM::connectedComponents()
+{
+// 	qDebug() << __FUNCTION__;
+// 
+// 	//create a vertex_index property map, since VertexList is listS and the graph does not have a "natural" index 
+// 	typedef std::map<Vertex, size_t>IndexMap;
+// 	IndexMap indexMap;
+// 	boost::associative_property_map<IndexMap> propmapIndex(indexMap);
+//     //indexing the vertices
+// 	int i=0;
+// 	BGL_FORALL_VERTICES(v, graph, Graph)
+// 		boost::put(propmapIndex, v, i++);
+// 	
+// 	std::vector<VertexIndex> rank(boost::num_vertices(graph));
+// 	std::vector<Vertex> parent(boost::num_vertices(graph));
+// 	boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
+// 	
+// 	boost::initialize_incremental_components(graph, ds);
+// 	boost::incremental_components(graph, ds);
+// 	
+// 	QMap<u_int32_t, VertexIndex> sizeComps;
+//  	Components components(parent.begin(),parent.end(), propmapIndex);
+// //	Components components(propmapIndex);
+// 
+// 	
+// 	// get the property map for vertex indices
+// //     typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
+// //     IndexMap index = boost::get(boost::vertex_index, graph);
+// 	
+// 	std::cout << "Number of connected components " << components.size() << std::endl;
+// 	for(auto p : components)
+// 	{
+// 		std::cout << "Component " << p << " contains: " << std::endl;
+// 		auto pair = components[p];
+// 		uint32_t sizeC = 0;
+// 		for( auto it = pair.first; it != pair.second; ++it)
+// 		{	sizeC++;
+// 		//	std::cout << graph[*it].index << " ";
+// 		}
+// 		//sizeComps.push_back(sizeC);
+// 		sizeComps.insert(sizeC, p);
+// 		std::cout << std::endl << "Total: " << sizeC << " nodes" << std::endl;
+// 	}
+// 	std::cout  << "--------------------------------" << std::endl;
+// 	
+// 	return std::make_tuple(parent, sizeComps);
 }
 
 /**
@@ -610,54 +688,24 @@ void PlannerPRM::removeSmallComponents()
 	
 	const int MIN_COMPONENT_SIZE = 6;
 	
-	std::vector<VertexIndex> rank(boost::num_vertices(graph));
-	std::vector<Vertex> parent(boost::num_vertices(graph));
-	boost::disjoint_sets<VertexIndex*, Vertex*> ds(&rank[0], &parent[0]);
-	boost::initialize_incremental_components(graph, ds);
-	boost::incremental_components(graph, ds);
+	ConnectedComponents components = connectedComponents2();
 	
- 	Components components(parent.begin(),parent.end());
-	std::vector<Vertex> sacoVertex;
-	
-	for(auto p : components)
-		{
-			auto pair = components[p];
-			VertexIndex cT = 0;
-			auto it = pair.first;
-			for( it = pair.first; it != pair.second; ++it)
-				cT++;
-			if( cT < MIN_COMPONENT_SIZE )
-			{
-				it = pair.first; 
-				//auto next = it; 
-				auto it_end = pair.second;
-				
-				//for( next = it; it != it_end; it = next)	
-				for( it = pair.first; it != it_end; ++it )	
-				{
-					//++next;
-					//sacoVertex.push_back(*it);
-					//qDebug() << "metiendo " << graph[*it].index;
-			//		qDebug() << "removing" << *it;
-					
-					boost::clear_vertex( *it, graph);
-					boost::remove_vertex(*it, graph);
-					
-		//			qDebug() << "graph after removing" << boost::num_vertices(graph);
-				}
-			}
-			std::cout << std::endl;
+ 	for( auto p : components )
+	{
+		if( p.first < MIN_COMPONENT_SIZE )
+		for( auto q : p.second )
+		{			
+			boost::clear_vertex( q, graph);
+ 			boost::remove_vertex(q, graph);
 		}
-// 	for(auto s : sacoVertex)
-// 	{
-// 		boost::clear_vertex( s, graph);
-// 		boost::remove_vertex(s, graph);
-// 	}
+	}
+	qDebug() << "Graph after removing has " << boost::num_vertices(graph);
 }
+
 void PlannerPRM::writeGraphToStream(std::ostream &stream)
 {
-	boost::write_graphviz(stream, graph, make_vertex_writer(boost::get(&VertexPayload::index, graph),boost::get(&VertexPayload::pose, graph)),
-										 make_edge_writer(boost::get(&EdgePayload::dist, graph)));
+//  	boost::write_graphviz(stream, graph, make_vertex_writer(boost::get(&VertexPayload::index, graph),boost::get(&VertexPayload::pose, graph)),
+//  										 make_edge_writer(boost::get(&EdgePayload::dist, graph)));
 }
 
 void PlannerPRM::readGraphFromFile(QString name)
