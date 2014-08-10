@@ -86,6 +86,7 @@ private:
 	bool targetHasAPlan(InnerModel* inner);
 	void drawTarget(const QVec &target);
 	void drawGreenBoxOnTarget(const QVec &target);
+	void printNumberOfElementsInRCIS();
 };
 
 #endif

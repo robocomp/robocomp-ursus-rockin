@@ -56,7 +56,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	qDebug() << "----------------inserting" ;
 	
-	planner->drawGraph(innermodelmanager_proxy);
+	//planner->drawGraph(innermodelmanager_proxy);
 		
 	qDebug() << __FUNCTION__ << "----- planner set";
 	
@@ -181,6 +181,8 @@ void SpecificWorker::compute( )
 	{
 		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 		road.draw(innermodelmanager_proxy, innerModel);	
+	//	planner->drawGraph(innermodelmanager_proxy);
+		printNumberOfElementsInRCIS();
 		reloj.restart();
 	}
 	reloj2.restart();
@@ -247,6 +249,9 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner)
 	{ 
 		differentialrobot_proxy->getBaseState(bState); 
 		inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+	/*	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");	
+		qDebug() << __FUNCTION__ << "robot state" << bState.x << bState.z << bState.alpha << r1q.extractAnglesR_min().y();
+	*/	
 	}
 	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
 	try 
@@ -344,6 +349,16 @@ void SpecificWorker::drawGreenBoxOnTarget(const QVec& target)
 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 }
 
+void SpecificWorker::printNumberOfElementsInRCIS()
+{
+	try
+	{	RoboCompInnerModelManager::NodeInformationSequence ni;
+		innermodelmanager_proxy->getAllNodeInformation(ni);
+		qDebug() << __FUNCTION__ << "..............Number of elements in: " << ni.size();
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ std::cout << ex << std::endl;}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////777
 ////    SERVANTS

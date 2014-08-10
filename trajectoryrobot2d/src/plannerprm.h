@@ -85,7 +85,7 @@ class PlannerPRM : public QObject
 		void setInnerModel(const InnerModel &innerModel_);
 		QList<QVec> getPath() { return currentPath; }
 		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax)		{xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;};
-		void drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
+		bool drawGraph(InnerModelManagerPrx innermodelmanager_proxy);
 		void cleanGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
 		bool learnPath(const QList<QVec> &path);
 		bool learnForAWhile();
@@ -93,8 +93,6 @@ class PlannerPRM : public QObject
 	private:
 		Graph graph;
 		int32_t constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS=20, float MAX_DISTANTE_TO_CHECK=2000.f, uint robotSize=400);
-		int32_t constructGraph2(const QList<QVec> &pointList, uint NEIGHBOORS=20, float MAX_DISTANTE_TO_CHECK=2000.f, uint robotSize=400);
-		//void PlannerPRM::createGraph(uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK);
 		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
 		bool rebuildExternalData();
 		void readGraphFromFile(QString name);
@@ -132,7 +130,7 @@ class PlannerPRM : public QObject
 		PlannerOMPL plannerRRT;
 		bool planWithRRT(const QVec& origin, const QVec& target, QList<QVec> &path);
 		
-		
+		bool graphDirtyBit;
 };
 
 //Graph writing classes

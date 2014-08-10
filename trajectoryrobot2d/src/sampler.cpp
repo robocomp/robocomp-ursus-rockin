@@ -24,7 +24,6 @@ Sampler::Sampler()
 void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QList< QRectF> &innerRegions_)
 {
 	innerModel = inner;
-	qDebug() << "gola";
 	innerRegions = innerRegions_;
 	outerRegion = outerRegion_;
 	robotNodes.clear(); restNodes.clear();
@@ -148,17 +147,11 @@ QList<QVec> Sampler::sampleFreeSpaceR2Gaussian(float meanX, float meanY, float s
 bool Sampler::checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot) 
 {
 	innerModel->updateTransformValues("robot", targetPos.x(), targetPos.y(), targetPos.z(), targetRot.x(), targetRot.y(), targetRot.z());
-	for (uint32_t in=0; in<robotNodes.size(); in++)
-	{
-		for (uint32_t out=0; out<restNodes.size(); out++)
-		{
-			//if (inner->collide(robotNodes[in], restNodes[out]))
-			if (innerModel->collide(robotNodes[in], restNodes[out]))
-			{
+	for ( auto in : robotNodes )
+		for ( auto out : restNodes )
+			if ( innerModel->collide( in, out))
 				return false;
-			}
-		}
-	}
+
 	return true;
 }
 
@@ -197,7 +190,7 @@ void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 	InnerModelPlane *plane;
 	InnerModelTransform *transformation;
 
-	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))
+	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))  
 	{
 		for (int i=0; i<node->children.size(); i++)
 		{
@@ -267,10 +260,10 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
 	bool hit = false;
 	QVec finalPoint;
-	float wRob=600, hRob=1600;
+	float wRob=600, hRob=1600;  //GET FROM INNERMODEL!!!
 
 	
-	if( MAX_LENGTH_ALONG_RAY < 50) 
+	if( MAX_LENGTH_ALONG_RAY < 50)   //FRACTION OF ROBOT SIZE
 	{
 		qDebug() << __FUNCTION__ << "target y origin too close";
 		lastPoint = target;
@@ -279,13 +272,14 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 		
 	//Compute angle between origin-target line and world Zaxis
 	float alfa1 = QLine2D(target,origin).getAngleWithZAxis();
+	qDebug() << "Angle with Z axis" << origin << target << alfa1;
 	
 	// Update robot's position and align it with alfa1 so it looks at the TARGET point 	
 	innerModel->updateTransformValues("robot", origin.x(), origin.y(), origin.z(), 0., alfa1, 0.);
 	
 	// Compute rotation matrix between robot and world. Should be the same as alfa
 	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");	
-	
+
 	// Create a tall box for robot body with center at zero and sides:
 	boost::shared_ptr<fcl::Box> robotBox(new fcl::Box(wRob, hRob, wRob));
 	
@@ -306,8 +300,6 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 	
 	//move the big box so it is aligned with the robot and placed along the nose
 	robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
-		
-	//qDebug() << "checking ang" << r1q.extractAnglesR_min().y() << "and size " << boxBack;
 	
 	//Check collision of the box with the world
 	for (uint out=0; out<restNodes.size(); out++)
@@ -362,4 +354,82 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 		lastPoint = target;
 		return true;
 	}
+}
+
+bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target)
+{
+	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
+	bool hit = false;
+	QVec finalPoint;
+//	float wRob=420, hRob=1600;  //GET FROM INNERMODEL!!!
+	float wRob=0.1, hRob=0.1;  //GET FROM INNERMODEL!!!
+
+	
+	if( MAX_LENGTH_ALONG_RAY < 50)   //FRACTION OF ROBOT SIZE
+	{
+		qDebug() << __FUNCTION__ << "target y origin too close";
+		return false;
+	}
+		
+	//Compute angle between origin-target line and world Zaxis
+	float alfa1 = QLine2D(target,origin).getAngleWithZAxis();
+	qDebug() << "Angle with Z axis" << origin << target << alfa1;
+	
+	// Update robot's position and align it with alfa1 so it looks at the TARGET point 	
+	innerModel->updateTransformValues("robot", origin.x(), origin.y(), origin.z(), 0., alfa1, 0.);
+	
+	// Compute rotation matrix between robot and world. Should be the same as alfa
+	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");	
+	
+	//qDebug()<< "alfa1" << alfa1 << r1q.extractAnglesR_min().y() << "robot" << innerModel->transform("world","robot"); 
+	
+	// Create a tall box for robot body with center at zero and sides:
+	boost::shared_ptr<fcl::Box> robotBox(new fcl::Box(wRob, hRob, wRob));
+	
+	// Create a collision object
+	fcl::CollisionObject robotBoxCol(robotBox);
+	
+	//Create and fcl rotation matrix to orient the box with the robot
+	const fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
+		
+	//Check collision at maximum distance
+	float hitDistance = MAX_LENGTH_ALONG_RAY;
+	
+	//Resize big box to enlarge it along the ray direction
+	robotBox->side = fcl::Vec3f(wRob, hRob, hitDistance);
+	qDebug() << __FUNCTION__ << robotBox->side[0] << robotBox->side[1] << robotBox->side[2];
+	robotBox->computeLocalAABB();
+
+	fcl::AABB aabb = robotBoxCol.getAABB();
+
+	qDebug() << __FUNCTION__ << "aabb" << aabb.width() << aabb.height() << aabb.depth();
+	
+	//Compute the coord of the tip of a "nose" going away from the robot (Z dir) up to hitDistance/2
+	const QVec boxBack = innerModel->transform("world", QVec::vec3(0, 0, hitDistance/2), "robot");
+	
+	qDebug()<< "box size" << wRob << hRob << hitDistance << "boxBack" << boxBack << "hitDistance" << hitDistance << hRob; 
+
+	//move the big box so it is aligned with the robot and placed along the nose
+	robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
+	
+	robotBoxCol.computeAABB();
+	aabb = robotBoxCol.getAABB();
+	qDebug() << __FUNCTION__ << "aabb" << aabb.width() << aabb.height() << aabb.depth();
+	
+	std::cout << "trans " << robotBoxCol.getTranslation()<< std::endl;
+	std::cout << "rot " << robotBoxCol.getRotation()<< std::endl;
+	
+// 	for( auto it : restNodes)
+// 		qDebug() << it;
+// 	
+	//Check collision of the box with the world
+	for (auto it : restNodes)
+	{
+		if ( innerModel->collide(it, &robotBoxCol))
+		{
+			qDebug() << "Choque con" << it;
+			return false;
+		}
+	}
+	return true;
 }

@@ -23,6 +23,8 @@
 #include <QtCore>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include "qline2d.h"
+#include <assert.h>
+#include <stdio.h>    
 
 class Sampler
 {
@@ -36,6 +38,7 @@ class Sampler
 		bool isStateValid(const ompl::base::State *state) ;
 		bool checkRobotValidDirectionToTarget(const QVec & origin , const QVec & target, QVec &path);
 		bool checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint);
+		bool checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target);
 	private:
 		std::vector<QString> robotNodes;
 		std::vector<QString> restNodes;
