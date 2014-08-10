@@ -27,7 +27,8 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
 	this->params = params;
-
+	planner->cleanGraph(innermodelmanager_proxy);
+	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
  	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
 //	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
@@ -71,7 +72,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	qDebug() << __FUNCTION__ << "----- controller set";
 	
 // 	//Localizer stuff
- 	localizer = new Localizer(innerModel);
+ //	localizer = new Localizer(innerModel);
 // 	
  	sleep(1);
 
@@ -153,7 +154,7 @@ void SpecificWorker::compute( )
 				road.reset();
 				road.endRoad();
 				compState.elapsedTime = taskReloj.elapsed();
-				planner->drawGraph(innermodelmanager_proxy);
+				//planner->drawGraph(innermodelmanager_proxy);
 				
 			}
 			
@@ -166,6 +167,10 @@ void SpecificWorker::compute( )
 		//	localizer->localize(laserData, innerModel, 20);
 		}
 		
+		//Give planner an slot to learn
+		//planner->learnForAWhile();
+		//planner->drawGraph(innermodelmanager_proxy);
+	
 	}	
 	else //LOST connection to robot
 	{

@@ -29,7 +29,7 @@ class Sampler
 	public:
 		Sampler();
 		void initialize(InnerModel *inner, const QRectF& outerRegion_, const QList< QRectF >& innerRegions_);
-		QVec sampleFreeSpaceR2();
+		QList<QVec> sampleFreeSpaceR2(uint nPoints = 1);
 		QList<QVec> sampleFreeSpaceR2Uniform(const QRectF &box, uint32_t i=1);
 		QList<QVec> sampleFreeSpaceR2Gaussian(float meanX, float meanY, float sigma1, float sigma2, uint32_t nPoints = 1);
 		bool checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot = QVec::zeros(3)) ;

@@ -48,9 +48,9 @@
 struct VertexPayload
 {	
 	QVec pose; //3D
-	std::size_t index;
+	std::size_t vertex_id;
 	VertexPayload(){};
-	VertexPayload(std::size_t i, const QVec &p){ index = i; pose=p; };
+	VertexPayload(std::size_t i, const QVec &p){ vertex_id = i; pose=p; };
 };	
 struct EdgePayload
 {
@@ -69,8 +69,10 @@ typedef boost::component_index<VertexIndex> Components;
 typedef std::vector<Graph::edge_descriptor> PathType;
 typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
 typedef std::pair<EdgeIterator, EdgeIterator> EdgePair;
-typedef std::vector<std::pair<int, std::vector<Vertex> > > ConnectedComponents;
-typedef std::pair<int,std::vector<Vertex> > CComponent;
+typedef std::pair<int,std::vector<Vertex> > CComponent; //Size of comp and correspondng list of vertices
+typedef std::map<Vertex, int32_t> ComponentMap; 
+typedef std::vector<CComponent> ConnectedComponents;
+
 
 class PlannerPRM : public QObject
 {
@@ -86,29 +88,31 @@ class PlannerPRM : public QObject
 		void drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
 		void cleanGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
 		bool learnPath(const QList<QVec> &path);
+		bool learnForAWhile();
 		
 	private:
 		Graph graph;
-		void constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS=20, float MAX_DISTANTE_TO_CHECK=2000.f, uint robotSize=400);
+		int32_t constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS=20, float MAX_DISTANTE_TO_CHECK=2000.f, uint robotSize=400);
+		int32_t constructGraph2(const QList<QVec> &pointList, uint NEIGHBOORS=20, float MAX_DISTANTE_TO_CHECK=2000.f, uint robotSize=400);
 		//void PlannerPRM::createGraph(uint NUM_POINTS, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK);
 		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
-		//QVec trySegmentToTarget(const QVec & origin , const QVec & target, bool & reachEnd);
-		//QVec trySegmentToTargetBinarySearch(const QVec & origin , const QVec & target, bool & reachEnd);
+		bool rebuildExternalData();
 		void readGraphFromFile(QString name);
 		void writeGraphToStream(std::ostream &stream);
 		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);
-		std::tuple< std::vector< Vertex > , QMap<u_int32_t, VertexIndex> > connectedComponents();
-		ConnectedComponents connectedComponents2();
+	//	std::tuple< std::vector< Vertex > , QMap<u_int32_t, VertexIndex> > connectedComponents();
+		ConnectedComponents connectedComponents( ComponentMap& componentMap, bool print = false);
 		void smoothPath( const QList<QVec> & list);
 		void smoothPathIter( QList<QVec> & list);
+		int32_t removeSmallComponents(int32_t minSize = 5);
+		bool connectIsolatedComponents(int32_t& numConnections);
+		int32_t removeTooCloseElements(int32_t maxDist = 500);
+	
 		QList<QVec> currentSmoothedPath;
-		void removeSmallComponents();
-		bool expandGraph();
-		
 		InnerModel *innerModel;
 		QList<QVec> currentPath;   			//Results will be saved here
-		std::vector<QString> robotNodes;
-		std::vector<QString> restNodes;
+// 		std::vector<QString> robotNodes;
+// 		std::vector<QString> restNodes;
 		float xMin, xMax, zMin, zMax; 		//Limits of environmnent QUITAR
 		
 		//Libnabo fast KDTree for low dimension
@@ -128,7 +132,7 @@ class PlannerPRM : public QObject
 		PlannerOMPL plannerRRT;
 		bool planWithRRT(const QVec& origin, const QVec& target, QList<QVec> &path);
 		
-		//void graphConstruct(const QList<QVec> &pointList, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK, uint robotSize);
+		
 };
 
 //Graph writing classes

@@ -39,29 +39,37 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 * 
 * @return RMat::QVec, a 3D vector with 0 in the Y coordinate
 */
-QVec Sampler::sampleFreeSpaceR2()  
+QList<QVec> Sampler::sampleFreeSpaceR2(uint nPoints)  
 {
  	bool validState = false;
-	QVec p,q;
-
-	while( validState == false )
+	QVec p,q,res(3,0.f);
+	QList<QVec> list;
+	
+	for(uint32_t i=0; i<nPoints;i++)
 	{
-		//p =	QVec::vec3( qrand() * .right() / RAND_MAX, 0, qrand() * outerRegion.bottom() / RAND_MAX );  //ÑAPA BRUTAL
-		p =	QVec::uniformVector(1,outerRegion.left(), outerRegion.right());
-		q =	QVec::uniformVector(1,outerRegion.top(), outerRegion.bottom());
-		
-		QPointF s(p.x(),q.x());
-		bool in = false;
-		foreach(QRectF rect, innerRegions)
-			if( rect.contains(s))
+		while( validState == false )   ///CHECK ALSO FOR TIMEOUT
+		{
+			p =	QVec::uniformVector(1,outerRegion.left(), outerRegion.right());
+			q =	QVec::uniformVector(1,outerRegion.top(), outerRegion.bottom());
+			
+			QPointF s(p.x(),q.x());
+			bool in = false;
+			foreach(QRectF rect, innerRegions)
+				if( rect.contains(s))
+				{
+					in = true;
+					break;
+				}
+			if( in == false) 
 			{
-				in = true;
-				break;
+				res[0] = p.x(); res[2] = q.x();
+				validState = checkRobotValidStateAtTarget(res);
 			}
-		if( in == false) 
-			validState = checkRobotValidStateAtTarget(p);
+		}
+		list.append(res);
+		validState = false;
 	}
-	return QVec::vec3(p.x(),0.f,q.x());
+	return list;
 }
 
 /**
@@ -72,7 +80,7 @@ QVec Sampler::sampleFreeSpaceR2()
 QList<QVec> Sampler::sampleFreeSpaceR2Uniform( const QRectF &box, uint32_t nPoints)  
 {
  	bool validState = false;
-	QVec p,q;
+	QVec p,q, res(3,0.f);;
 	QList<QVec> list;
 
 	for(uint32_t i=0; i<nPoints;i++)
@@ -90,9 +98,13 @@ QList<QVec> Sampler::sampleFreeSpaceR2Uniform( const QRectF &box, uint32_t nPoin
 					break;
 				}
 			if( in == false) 
-				validState = checkRobotValidStateAtTarget(p);
+			{
+				res[0] = p.x(); res[2] = q.x();
+				validState = checkRobotValidStateAtTarget(res);
+			}
 		}
-		list.append(QVec::vec3(p.x(),0.f,q.x()));
+		list.append(res);
+		validState = false;
 	}
 	return list;
 }
@@ -245,7 +257,7 @@ bool Sampler::checkRobotValidDirectionToTarget(const QVec & origin , const QVec 
 			landa = landa + step;
 		}
 		else
-			break;
+			return false;
 	}
 	return true;
 }
