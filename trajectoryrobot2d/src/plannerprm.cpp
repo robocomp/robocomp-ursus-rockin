@@ -86,11 +86,7 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 		currentPath << robot << target;
 		return true;
 	}
-	
-	
-	return false;
-	
-	
+
 	//Now search in KD-tree for closest points to origin and target
 	Vertex robotVertex, targetVertex;
 	searchClosestPoints(robot, target, robotVertex, targetVertex);
@@ -151,27 +147,17 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	}
 	else
 		 return false;
-	
-	//add both points to the graph
-	//addPointToGraphAndConnect( robot, robotVertex );
-	//addPointToGraphAndConnect( target, targetVertex );
-	
-	//currentSmoothedPath.clear();
-	//qDebug() << __FUNCTION__ << "Smoothing a " << currentPath.size() << "path"; 
-	//smoothPathIter(currentPath);
-	//currentPath = currentSmoothedPath;
-	//qDebug() << __FUNCTION__ << "Done smoothing. Result: " << currentPath.size() << "path"; 
-	
-	qDebug() << __FUNCTION__ << "Final path size " << currentPath.size(); 
-	
+		
 	if( currentPath.size() < 2 )
 		return false;
 	else
 	{
+		currentSmoothedPath.clear();
 		qDebug() << __FUNCTION__ << "Smoothing";
-// 		currentSmoothedPath.clear();
-// 		smoothPath(currentPath);
-// 		currentPath = currentSmoothedPath;
+		smoothPath(currentPath);
+		currentPath = currentSmoothedPath;
+		qDebug() << __FUNCTION__ << "Final path size " << currentPath.size(); 
+
 		return true;
 	}
 	
@@ -188,7 +174,7 @@ bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec>
 	qDebug() << __FUNCTION__ << "RRTConnect start...";
 	
 	//bool reachEnd;
-	if( (origin-target).norm2() < 200 )  //HALF ROBOT RADIOUS
+	if( (origin-target).norm2() < 200 )  //HALF ROBOT RADIOUS. GET FORM INNERMODEL !!!!
 	{
 		qDebug() << __FUNCTION__ << "Origin and target too close. Diff: "  << (origin-target).norm2() << origin << target << ". Returning void";
 		return true;
@@ -203,14 +189,14 @@ bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec>
 	}
 	else
 	{
-// 		qDebug() << __FUNCTION__ << "Calling RRTConnect OMPL planner. This may take a while";
-// 		plannerRRT.initialize(&sampler);  //QUITAR DE AQUI
-// 		if (plannerRRT.computePath(origin, target, 60))
-// 		{
-// 			path += plannerRRT.getPath();
-// 			return true;
-// 		}
-// 		else
+		qDebug() << __FUNCTION__ << "Calling Full Power of RRTConnect OMPL planner. This may take a while";
+		plannerRRT.initialize(&sampler);  //QUITAR DE AQUI
+		if (plannerRRT.computePath(origin, target, 60))
+		{
+			path += plannerRRT.getPath();
+			return true;
+		}
+		else
 			return false;
 	}
 }
@@ -393,15 +379,19 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 	}
 
 	//Compute KdTre
-	if(nabo != nullptr)
-		delete nabo;
-	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
+	
+	try{ nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data); }
+	catch(std::exception &ex){ std::cout << ex.what() << std::endl; qFatal("fary en Nabo");}
+
+	qDebug() << __FUNCTION__ << "hola";
 	
 	//Query for sorted distances to NEIGHBOORS neighboors  
 	Eigen::MatrixXi indices(NEIGHBOORS, pointList.size() );
 	Eigen::MatrixXf distsTo(NEIGHBOORS, pointList.size() );
+	if( NEIGHBOORS >= data.cols())
+		NEIGHBOORS = data.cols()-1;
 	nabo->knn(query, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
-	
+
 	//Connect the new points
 	bool reachEnd;
 	int32_t numExit = 0;
@@ -418,11 +408,11 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 			if( (distsTo(k,j) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,j) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
 			{
 				QVec lastPoint;
-				reachEnd = sampler.checkRobotValidDirectionToTargetBinarySearch(QVec::vec3(data(0,i), data(1,i), data(2,i)), QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)), lastPoint);
+				reachEnd = sampler.checkRobotValidDirectionToTargetOneShot(QVec::vec3(data(0,i), data(1,i), data(2,i)), 
+																					   QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)));
 				//qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
 				
 				// If free path to neighboor, insert it in the graph if does not exist
-				bool sameComp = false;
 				if( reachEnd == true)
 				{
 					//Compute con comps to check it tne vertices belong to the same comp.
@@ -524,13 +514,12 @@ bool PlannerPRM::connectIsolatedComponents(int32_t &numConnections)
 	// Pick 5 elements from indicesa and try to connect them
 	QVec inds = QVec::uniformVector(largest2Size, 0, largest2Size-1);
 	
-	QVec lastPoint;
 	int nExit = 0;
 	for (uint i=0; i<largest2Size; i++)
 	{
 		Vertex v = vertexMapL.value(indicesL(0,i));
 		Vertex vv = vertexMapLL.value(i);
-		if( sampler.checkRobotValidDirectionToTargetBinarySearch( graph[v].pose , graph[vv].pose, lastPoint) )
+		if( sampler.checkRobotValidDirectionToTargetOneShot( graph[v].pose , graph[vv].pose) )
 		{
 			EdgePayload edge;
 			edge.dist = distsToL(i);
@@ -619,7 +608,7 @@ int32_t PlannerPRM::removeTooCloseElements( int32_t maxDist)
 		if( distsTo(0,i) < maxDist )
 			toDelete.push_back( vertexMap.value(i) );
 	
-	for( auto it : toDelete )
+	for( auto it : toDelete )				//CHECK THAT NO NEW DISC COMPS ARE CREATED
 	{
 		boost::clear_vertex( it, graph);
  		boost::remove_vertex(it, graph);
@@ -757,9 +746,18 @@ bool PlannerPRM::learnForAWhile()
 	int32_t connected, pointsAdded, deles;
 	QList<QVec> points;
 	int32_t removed=0;
-	QVector<int> cola = {0, 0, 1, 0, 0, 1, 0, 0, 1, 2};   //relative ratios of primitive execution
-	int ind;
+	QVector<int> cola;
 	
+	if( verticesAnt > 100) 
+	{
+		qDebug() << __FUNCTION__ << "Graph with 100 nodes. Only CONNECTING, REMOVE Y TOOCLOSE";
+		cola << 1 << 1 << 1 << 2 << 1 << 1 << 2 << 1 << 2 << 3;   //relative ratios of primitive execution
+	}
+	else
+	{
+		cola << 0 << 0 << 1 << 0 << 0 << 1 << 0 << 0 << 2 << 0;   //relative ratios of primitive execution
+	}
+	int ind;
 	ind  = cola[iter++%10];
 	switch (ind) {
  		case 0:
@@ -831,30 +829,42 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
 {
 	qDebug() << __FUNCTION__ << "Learning the path with" << path.size() << " points";
 	
-	const int nWays=10;   //Max number of point to be inserted
+//	const int nWays=10;   //Max number of point to be inserted
+	const int MIN_STEP = 550;
 
 	if( path.size() < 2) 
 		return false;
 	
 	QList<QVec> sList;
 	float dist =0;
-	
-	//Trim the path to a fixed number of waypoints
-	for(int i=0; i<path.size()-1; i++)
-		dist += (path[i]-path[i+1]).norm2();			
-	
-	float step = dist / nWays;
 
-	dist = 0;
+	//Trim the path to a fixed number of waypoints
 	for(int i=0; i<path.size()-1; i++)
 	{
 		dist += (path[i]-path[i+1]).norm2();			
-		if( dist > step )
+		if( dist > MIN_STEP)
 		{
 			sList << path[i];
 			dist = 0;
 		}
 	}
+		
+// 	//Trim the path to a fixed number of waypoints
+// 	for(int i=0; i<path.size()-1; i++)
+// 		dist += (path[i]-path[i+1]).norm2();			
+	
+// 	float step = dist / nWays;
+// 
+// 	dist = 0;
+// 	for(int i=0; i<path.size()-1; i++)
+// 	{
+// 		dist += (path[i]-path[i+1]).norm2();			
+// 		if( dist > step )
+// 		{
+// 			sList << path[i];
+// 			dist = 0;
+// 		}
+// 	}
 
 	qDebug() << __FUNCTION__ << "Learning with shortened path of" << sList.size() << " points";
 	constructGraph( sList, 10, 2000, 400);
@@ -876,8 +886,7 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
  */
 void PlannerPRM::smoothPath( const QList<QVec> & list)
 {
-	QVec lastPoint;
-	if ( sampler.checkRobotValidDirectionToTargetBinarySearch( list.first(), list.last(), lastPoint) )
+	if ( sampler.checkRobotValidDirectionToTargetOneShot( list.first(), list.last()) )
 	{
 		if(currentSmoothedPath.contains(list.first()) == false)
 		  currentSmoothedPath.append(list.first());
@@ -898,14 +907,11 @@ void PlannerPRM::smoothPath( const QList<QVec> & list)
 
 void PlannerPRM::smoothPathIter(QList<QVec> & list)  //CASTAÑA, hay que hacerlo estocástico
 {
-	//bool reachEnd;
-	QVec lastPoint;
-	
 	int i=2;
 	
 	for(int i=2; i<list.size(); i++)
 	{
-		if ( sampler.checkRobotValidDirectionToTargetBinarySearch( list.first(), list.last(), lastPoint) == false )
+		if ( sampler.checkRobotValidDirectionToTargetOneShot( list.first(), list.last()) == false )
 			break;
 	}
 	//delete intermediate points
@@ -921,7 +927,8 @@ void PlannerPRM::smoothPathIter(QList<QVec> & list)  //CASTAÑA, hay que hacerlo
 
 bool PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy)
 {
-
+	qDebug() << __FUNCTION__;
+	
 	if( graphDirtyBit == false) 
 		return false;
 	
@@ -983,15 +990,13 @@ bool PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx inner
 
 void PlannerPRM::cleanGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy)
 {
-
 	try
 	{
  		qDebug() << __FUNCTION__ << "deleting GRAPH";
  		innermodelmanager_proxy->removeNode("graph");
  	} 
 	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
-	{	std::cout << e.text << std::endl;	}
-	
+	{	std::cout << e.text << std::endl;	}	
 }
 
 // std::tuple<std::vector<Vertex>, QMap<u_int32_t, VertexIndex> > PlannerPRM::connectedComponents()

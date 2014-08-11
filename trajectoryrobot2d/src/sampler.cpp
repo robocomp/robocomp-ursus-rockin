@@ -272,7 +272,7 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 		
 	//Compute angle between origin-target line and world Zaxis
 	float alfa1 = QLine2D(target,origin).getAngleWithZAxis();
-	qDebug() << "Angle with Z axis" << origin << target << alfa1;
+	//qDebug() << "Angle with Z axis" << origin << target << alfa1;
 	
 	// Update robot's position and align it with alfa1 so it looks at the TARGET point 	
 	innerModel->updateTransformValues("robot", origin.x(), origin.y(), origin.z(), 0., alfa1, 0.);
@@ -361,8 +361,8 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
 	bool hit = false;
 	QVec finalPoint;
-//	float wRob=420, hRob=1600;  //GET FROM INNERMODEL!!!
-	float wRob=0.1, hRob=0.1;  //GET FROM INNERMODEL!!!
+	float wRob=420, hRob=1600;  //GET FROM INNERMODEL!!!
+//	float wRob=0.1, hRob=0.1;  //GET FROM INNERMODEL!!!
 
 	
 	if( MAX_LENGTH_ALONG_RAY < 50)   //FRACTION OF ROBOT SIZE
@@ -373,7 +373,7 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 		
 	//Compute angle between origin-target line and world Zaxis
 	float alfa1 = QLine2D(target,origin).getAngleWithZAxis();
-	qDebug() << "Angle with Z axis" << origin << target << alfa1;
+	//qDebug() << "Angle with Z axis" << origin << target << alfa1;
 	
 	// Update robot's position and align it with alfa1 so it looks at the TARGET point 	
 	innerModel->updateTransformValues("robot", origin.x(), origin.y(), origin.z(), 0., alfa1, 0.);
@@ -397,39 +397,20 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 	
 	//Resize big box to enlarge it along the ray direction
 	robotBox->side = fcl::Vec3f(wRob, hRob, hitDistance);
-	qDebug() << __FUNCTION__ << robotBox->side[0] << robotBox->side[1] << robotBox->side[2];
-	robotBox->computeLocalAABB();
-
-	fcl::AABB aabb = robotBoxCol.getAABB();
-
-	qDebug() << __FUNCTION__ << "aabb" << aabb.width() << aabb.height() << aabb.depth();
 	
 	//Compute the coord of the tip of a "nose" going away from the robot (Z dir) up to hitDistance/2
-	const QVec boxBack = innerModel->transform("world", QVec::vec3(0, 0, hitDistance/2), "robot");
+	const QVec boxBack = innerModel->transform("world", QVec::vec3(0, hRob/2, hitDistance/2), "robot");
 	
-	qDebug()<< "box size" << wRob << hRob << hitDistance << "boxBack" << boxBack << "hitDistance" << hitDistance << hRob; 
-
 	//move the big box so it is aligned with the robot and placed along the nose
 	robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
-	
-	robotBoxCol.computeAABB();
-	aabb = robotBoxCol.getAABB();
-	qDebug() << __FUNCTION__ << "aabb" << aabb.width() << aabb.height() << aabb.depth();
-	
-	std::cout << "trans " << robotBoxCol.getTranslation()<< std::endl;
-	std::cout << "rot " << robotBoxCol.getRotation()<< std::endl;
-	
-// 	for( auto it : restNodes)
-// 		qDebug() << it;
-// 	
+		
 	//Check collision of the box with the world
 	for (auto it : restNodes)
-	{
 		if ( innerModel->collide(it, &robotBoxCol))
 		{
-			qDebug() << "Choque con" << it;
+			qDebug() << __FUNCTION__ << "collide with " << it;
 			return false;
 		}
-	}
+		
 	return true;
 }

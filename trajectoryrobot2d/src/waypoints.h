@@ -66,6 +66,8 @@ class WayPoints : public QList< WayPoint >
 		void printRobotState(InnerModel* innerModel);
 		void print();
 		bool draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo = -1);  //Default in upTo means all list
+		bool draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo = -1);  //Default in upTo means all list
+		void clearDraw(InnerModelManagerPrx innermodelmanager_proxy);
 		void removeFirst(InnerModelManagerPrx innermodelmanager_proxy);
 		float robotDistanceToCurrentPoint(InnerModel *innerModel);
 		float robotDistanceToNextPoint(InnerModel *innerModel);
@@ -74,6 +76,7 @@ class WayPoints : public QList< WayPoint >
 		QLine2D getRobotZAxis(InnerModel* innerModel);
 		void computeDistancesToNext();
 		QList<QVec> backList;
+		QMutex mutex;
 		
 		//GOOD ONES
 		QLine2D getTangentToCurrentPoint();
@@ -94,7 +97,7 @@ class WayPoints : public QList< WayPoint >
 		void setRobotDistanceToTarget( float dist)											{ robotDistanceToTarget = dist;};
 		float getRobotDistanceToLastVisible() const											{ return robotDistanceToLastVisible;};
 		void setRobotDistanceToLastVisible( float dist)										{ robotDistanceToLastVisible = dist;};
-		void setFinished( bool b)															{ finish = b; }
+		void setFinished( bool b)															{ QMutexLocker ml(&mutex); finish = b; }
 		bool isFinished() const 															{ return finish;};
 		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
 		float getRobotDistanceVariationToTarget() const 									{ return robotDistanceVariationToTarget;};
@@ -109,7 +112,7 @@ class WayPoints : public QList< WayPoint >
 		bool requiresReplanning;
 		
 		
-		void computeForces();
+		bool computeForces();
 		float computeRoadCurvature(WayPoints::iterator closestPoint, uint pointsAhead);
 		float computeDistanceToTarget(WayPoints::iterator closestPoint, const QVec &robotPos);
 		float computeDistanceToLastVisible(WayPoints::iterator closestPoint, const QVec &robotPos);

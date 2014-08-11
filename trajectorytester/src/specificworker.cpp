@@ -26,23 +26,25 @@
 
 SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mprx)
 {
-	connect(goPushButton, SIGNAL(clicked()), this, SLOT(goButton()));
+//	connect(goPushButton, SIGNAL(clicked()), this, SLOT(goButton()));
 	connect(bedroomPushButton, SIGNAL(clicked()), this, SLOT(goBedRoom()));
 	connect(kitchenPushButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
-	connect(kitchenPushButton, SIGNAL(clicked()), this, SLOT(goKitchen2()));
+	connect(kitchenPushButton_2, SIGNAL(clicked()), this, SLOT(goKitchen2()));
 	connect(stopButton, SIGNAL(clicked()), this, SLOT(goKitchen()));
 	connect(hallPushButton, SIGNAL(clicked()), this, SLOT(goHall()));
-	connect(diningPushButton, SIGNAL(clicked()), this, SLOT(goDining()));
 	connect(livingPushButton, SIGNAL(clicked()), this, SLOT(goLiving()));
 	connect(entrancePushButton, SIGNAL(clicked()), this, SLOT(goEntrance()));
 	connect(livingPushButton_2, SIGNAL(clicked()), this, SLOT(goLiving2()));
 	connect(livingPushButton_3, SIGNAL(clicked()), this, SLOT(goLiving3()));
 	connect(doorPushButton, SIGNAL(clicked()), this, SLOT(goDoor()));
+	connect(diningPushButton, SIGNAL(clicked()), this, SLOT(goDining()));
 	connect(diningPushButton_2, SIGNAL(clicked()), this, SLOT(goDining2()));
+	connect(diningPushButton_3, SIGNAL(clicked()), this, SLOT(goDining3()));
 	connect(stopButton, SIGNAL(clicked()), this, SLOT(stopRobot()));
 	
 	plantWidget = new PlantWidget(frame, QPointF(82,457), QPointF(0,10000), QPointF(65,387), QPointF(0,-10000));
 	plantWidget->show();
+	statusLabel->setText("");
 	
 	connect(plantWidget, SIGNAL(mouseMove(QVec)), this, SLOT(setTargetCoorFromPlant(QVec)));
 	connect(plantWidget, SIGNAL(mousePress(QVec)), this, SLOT(setNewTargetFromPlant(QVec)));
@@ -60,9 +62,17 @@ void SpecificWorker::compute( )
 	try
 	{
 		RoboCompTrajectoryRobot2D::NavState state = trajectoryrobot2d_proxy->getState();
-		if( state.planning == true )
+		statusLabel->setText(QString::fromStdString( state.state ));
+		if( state.state == "PLANNING" )
 		{
 			segsLcd->display(reloj.elapsed() );
+		}
+		if( state.state == "EXECUTING" )
+		{
+			float distance = (target - current).norm2();
+			//estimatedDurationLcd->display((int)state.estimatedTime);
+			estimatedDurationLcd->display(distance);
+			executionTimeLcd->display(distance / 300);			
 		}
 	}
 	catch(const Ice::Exception &ex)
@@ -73,8 +83,8 @@ void SpecificWorker::compute( )
 	{
 		RoboCompDifferentialRobot::TBaseState bState;
 		differentialrobot_proxy->getBaseState(bState);
-		plantWidget->moveRobot( bState.x, bState.z, bState.alpha);
-		
+		current = QVec::vec3(bState.x, 0, bState.z);
+		plantWidget->moveRobot( bState.x, bState.z, bState.alpha);	
 	}
 	catch(const Ice::Exception &ex)
 	{
@@ -96,7 +106,7 @@ void SpecificWorker::go(const QVec& t)
 	tp.x = t.x();
 	tp.z = t.z();
 	tp.y = 0;
-	
+	target = t;
 	try
 	{
 		trajectoryrobot2d_proxy->go(tp);
@@ -124,6 +134,11 @@ void SpecificWorker::goDining2()
 	go(QVec::vec3(4600,0,-7800));
 }
 
+void SpecificWorker::goDining3()
+{
+	go(QVec::vec3(6200,0,-7100));
+}
+
 void SpecificWorker::goLiving()
 {
 	go(QVec::vec3(3000,0,-8100));
@@ -149,14 +164,14 @@ void SpecificWorker::goDoor()
 	go(QVec::vec3(4500,0,-3300));
 }
 
-void SpecificWorker::goKitchen()  //Stove table
+void SpecificWorker::goKitchen()  
 {
-	go(QVec::vec3(5800,0,-5200));
+	go(QVec::vec3(6000,0,-5900));	
 }
 
-void SpecificWorker::goKitchen2()
+void SpecificWorker::goKitchen2()//Stove table
 {
-	go(QVec::vec3(6000,0,-5900));
+	go(QVec::vec3(5500,0,-4700));
 }
 
 void SpecificWorker::goBedRoom()
@@ -172,8 +187,8 @@ void SpecificWorker::goHall()
 
 void SpecificWorker::setTargetCoorFromPlant(QVec t)
 {
-	xSpinBox->setValue(t.x());
-	zSpinBox->setValue(t.z());
+	xSpinBox->display(t.x());
+	zSpinBox->display(t.z());
 }
 
 

@@ -8,7 +8,6 @@ SET ( SOURCES
   elasticband.cpp
   rcisdraw.cpp
   waypoints.cpp
-  planner.cpp
   forcefield.cpp
   localizer.cpp
   plannerompl.cpp
@@ -23,7 +22,6 @@ SET ( HEADERS
   specificmonitor.h
   #pointstoroad.h
   controller.h
-  planner.h
   forcefield.h
   localizer.h
   plannerprm.h

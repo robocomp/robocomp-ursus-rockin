@@ -205,9 +205,43 @@ void WayPoints::print()
 	}
 }
 
+bool WayPoints::draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo)
+{
+	RoboCompInnerModelManager::Pose3D pose;
+	pose.y = 0;	pose.x = 0;	pose.z = 0;
+	pose.rx = pose.ry = pose.z = 0.;
+	
+	try
+	{	std::string  parentAll = "road";
+		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);		
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ std::cout << ex << std::endl;}
+	
+	for(int i=1; i<size(); i++)
+	{
+		WayPoint &w = (*this)[i];
+		WayPoint &wAnt = (*this)[i-1];
+		QLine2D l(wAnt.pos, w.pos);
+		QLine2D lp = l.getPerpendicularLineThroughPoint( QVec::vec2(w.pos.x(), w.pos.z()));
+		QVec normal = lp.getNormalForOSGLineDraw();  //3D vector
+		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();		//OJO, PETA SI NO ESTA LA TG CALCULADA ANTES
+		QString item = "p_" + QString::number(i);		
+		pose.x = w.pos.x();	pose.y = 10; pose.z = w.pos.z();
+		
+		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "road", pose);	
+		if ( (int)i == (int)currentPointIndex+1 )	//CHANGE TO getIndexOfClosestPointToRobot()
+			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 1000, 30, "#000055" );	
+		if (w.isVisible)
+			RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#005500" );
+		else
+			RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#550099" );  //Morado
+	}
+}
+
 bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo)
 {
-	static int nPoints=0;
+	return draw2(innermodelmanager_proxy, innerModel, upTo);
 	
 	RoboCompInnerModelManager::Pose3D pose;
 	pose.y = 0;
@@ -219,8 +253,9 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 	if( this->isEmpty() )
 		return false;
 	
-	QString item;
+	//clearDraw(innermodelmanager_proxy);
 	
+	QString item;
 	if( upTo == -1) 
 		upTo = this->size();  
 	if( upTo < 0 ) 
@@ -228,12 +263,20 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 	if( upTo > this->size() ) 
 		upTo = this->size();
 	
+	
+	try
+	{	std::string  parentAll = "road";
+		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);		
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ std::cout << ex << std::endl;}
+	
 	WayPoint &w = (*this)[0];
 	item = "p_" + QString::number(0);		
 	pose.x = w.pos.x();
 	pose.y = 10;
 	pose.z = w.pos.z();
-	RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
+	RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "road", pose);
 	RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, QVec::vec3(0,0,1), 50, 50, "#335577" );
 	
 	for(int i=1; i<upTo; i++)
@@ -250,7 +293,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		pose.x = w.pos.x();
 		pose.y = 10;
 		pose.z = w.pos.z();
-		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "world", pose);
+		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "road", pose);
 		RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 150, 50, "#005500" );
 		if ( (int)i == (int)currentPointIndex+1 )	//CHANGE TO getIndexOfClosestPointToRobot()
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 1000, 30, "#000055" );	
@@ -271,22 +314,22 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		w.centerPointName = item + "_point";
 	}
 	
-	//Cleanup 
-	for(int i=upTo; i<nPoints; i++)
-	{
-		try
-		{
-			QString obj = QString("p_" + QString::number(i));
-			//qDebug() << "RCDRaw::removing " << obj;
-			innermodelmanager_proxy->removeNode(obj.toStdString());
-		}
-		catch(const Ice::Exception &ex){ std::cout << __FILE__ << __FUNCTION__ << "Shit removinh" << ex << std::endl;};	
-	}
-	nPoints = upTo;
-	
 	return true;
 }
 
+
+void WayPoints::clearDraw(InnerModelManagerPrx innermodelmanager_proxy)
+{
+	try
+	{
+ 		//qDebug() << __FUNCTION__ << "deleting ROAD";
+ 		innermodelmanager_proxy->removeNode("road");
+ 	} 
+	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
+	{	
+		//std::cout << e.text << std::endl;		
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////COMPUTATION OF SCALAR MAGNITUDES OF FORCEFIELD
@@ -457,7 +500,7 @@ void WayPoints::setETA()
  * 
  * @return void
  */
-void WayPoints::computeForces()
+bool WayPoints::computeForces()
 {
 	
 	//Get robot's position in world and create robot's nose
@@ -471,7 +514,10 @@ void WayPoints::computeForces()
 	//Compute roadTangent at closestPoint;
 	qDebug() << __FILE__  << __FUNCTION__ << "just here" << getIndexOfClosestPointToRobot() << getRobotDistanceToClosestPoint();
 	if(closestPoint == end())
-		qFatal("fary en Compute Forces");
+	{
+		qDebug("fary en Compute Forces");
+		return false;
+	}
 	
 	QLine2D tangent = computeTangentAt( closestPoint );
 	setTangentAtClosestPoint(tangent);
@@ -498,5 +544,6 @@ void WayPoints::computeForces()
 	//compute curvature of trajectory at closest point to robot
   	setRoadCurvatureAtClosestPoint( computeRoadCurvature(closestPoint, 3) );
 	setRobotDistanceToLastVisible( computeDistanceToLastVisible(closestPoint, robot3DPos ) );
+	return true;
 }
 

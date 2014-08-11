@@ -46,6 +46,7 @@ public slots:
 	void goHall();
 	void goDining();
 	void goDining2();
+	void goDining3();
 	void goLiving2();
 	void goLiving3();
 	void goDoor();
@@ -57,8 +58,8 @@ public slots:
 private:
 	PlantWidget *plantWidget;
 	void go(const QVec &t);
-	QTime reloj;
-	
+	QTime reloj, relojE;
+	QVec target, current;
 };
 
 #endif

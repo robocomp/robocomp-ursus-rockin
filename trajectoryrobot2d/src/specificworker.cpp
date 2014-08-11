@@ -27,7 +27,6 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
 	this->params = params;
-	planner->cleanGraph(innermodelmanager_proxy);
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
  	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
@@ -45,15 +44,14 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
-	
- 	cleanWorld();
 		 
 	//Planning
 	plannerOMPL = new PlannerOMPL(*innerModel);			
-	plannerRC = new Planner(*innerModel);
-	plannerPRM = new PlannerPRM(*innerModel, 50, 20);
+	plannerPRM = new PlannerPRM(*innerModel, 50, 10);
 	planner = plannerPRM;
 	
+	//planner->drawGraph(innermodelmanager_proxy);
+
 	qDebug() << "----------------inserting" ;
 	
 	//planner->drawGraph(innermodelmanager_proxy);
@@ -155,7 +153,7 @@ void SpecificWorker::compute( )
 				road.endRoad();
 				compState.elapsedTime = taskReloj.elapsed();
 				//planner->drawGraph(innermodelmanager_proxy);
-				
+				compState.state = "IDLE";
 			}
 			
 			if(road.requiresReplanning == true)
@@ -164,24 +162,28 @@ void SpecificWorker::compute( )
 				//computePlan(innerModel);
 			}
 			
+			compState.planningTime = road.getETA();
 		//	localizer->localize(laserData, innerModel, 20);
 		}
 		
-		//Give planner an slot to learn
-		//planner->learnForAWhile();
-		//planner->drawGraph(innermodelmanager_proxy);
-	
 	}	
 	else //LOST connection to robot
 	{
 		currentTarget.reset();
 		road.reset();
+		compState.state = "DISCONNECTED";
 	}
 	if(reloj.elapsed() > 2000) 
 	{
 		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
-		road.draw(innermodelmanager_proxy, innerModel);	
-	//	planner->drawGraph(innermodelmanager_proxy);
+		if( reloj2.elapsed() < 100 )
+		{
+			road.clearDraw(innermodelmanager_proxy);
+			//try {	
+			road.draw(innermodelmanager_proxy, innerModel);
+			//
+			//	planner->drawGraph(innermodelmanager_proxy);
+		}
 		printNumberOfElementsInRCIS();
 		reloj.restart();
 	}
@@ -206,14 +208,9 @@ bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 	QTime reloj = QTime::currentTime();
 	qDebug() << __FUNCTION__ << "Computing plan... ";
 	
-	compState.planning = true;
-	
-	cleanWorld();
-	planner->cleanGraph(innermodelmanager_proxy);
-	
 	if (updateInnerModel(inner))
 	{	
-	
+		compState.state = "PLANNING";
 		if ( planner->computePath(currentTarget.getTranslation(), inner) == false)
 		{
 			qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
@@ -223,8 +220,8 @@ bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
 		currentTarget.setWithoutPlan( false );
 		currentTarget.print();
-		planner->cleanGraph(innermodelmanager_proxy);
-		
+		//planner->cleanGraph(innermodelmanager_proxy);
+		compState.state = "EXECUTING";	
 		//Init road
 		road.reset();
 		road.readRoadFromList( planner->getPath() );
@@ -234,9 +231,9 @@ bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 		road.print();
 		road.computeForces();  //NOT SURE IF NEEDED HERE
 		road.startRoad();
-		
-		compState.planningTime = reloj.elapsed();
-		compState.planning = false;
+		compState.planningTime = road.getETA();
+		//compState.planningTime = reloj.elapsed();
+	
 		return true;
 	}
 	else 
@@ -312,23 +309,23 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	usleep(125000);	
 }
 
-void SpecificWorker::cleanWorld()  ///CAMBIAR ESTO PARA QUE TODO CUELGUE DE "MARCAS" y de pueda borrar marcas de golpe.
-{
-	qDebug() << __FUNCTION__ << "SpecificWorker::CleaningWorld()";
-	//RcisDraw::removeObject(innermodelmanager_proxy, "nose");
-	for (int i = 0 ; i < 150; i++) 
-	{
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_line"));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_lineA"));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_mesh"));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_point"));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("b_" + QString::number(i) + "_mesh"));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("b_" + QString::number(i) + "_line"));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("b_" + QString::number(i)));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i)));
-		RcisDraw::removeObject(innermodelmanager_proxy, QString("t_" + QString::number(i)));
-	}
-}
+// void SpecificWorker::cleanWorld()  ///CAMBIAR ESTO PARA QUE TODO CUELGUE DE "MARCAS" y de pueda borrar marcas de golpe.
+// {
+// 	qDebug() << __FUNCTION__ << "SpecificWorker::CleaningWorld()";
+// 	//RcisDraw::removeObject(innermodelmanager_proxy, "nose");
+// 	for (int i = 0 ; i < 150; i++) 
+// 	{
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_line"));
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_lineA"));
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_mesh"));
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_point"));
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("b_" + QString::number(i) + "_mesh"));
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("b_" + QString::number(i) + "_line"));
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("b_" + QString::number(i)));
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i)));
+// 		RcisDraw::removeObject(innermodelmanager_proxy, QString("t_" + QString::number(i)));
+// 	}
+// }
 
 void SpecificWorker::drawTarget(const QVec &target)
 {
@@ -366,11 +363,6 @@ void SpecificWorker::printNumberOfElementsInRCIS()
 
 void SpecificWorker::go(const TargetPose& target)
 {
-// 	QList<QVec> pointList;
-// 		for(int i=0;i<10;i++)
-// 			pointList.append(planner->sampler.sampleFreeSpaceR2());			
-// 	planner->graphConstruct(pointList,5,2000,400);
-// 	planner->drawGraph(innermodelmanager_proxy);
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
@@ -386,7 +378,7 @@ RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 
 void SpecificWorker::stop()
 {
-	currentTarget.reset();
+	road.setFinished(true);		//make threadsafe
 	controller->stopTheRobot(differentialrobot_proxy);
 	qDebug() << __FUNCTION__ << "STOP command received";
 

@@ -25,7 +25,6 @@
 #include "controller.h"
 #include "elasticband.h"
 #include "waypoints.h"
-#include "planner.h"
 #include "forcefield.h"
 #include "localizer.h"
 #include "plannerompl.h"
@@ -70,7 +69,6 @@ private:
 	WayPoints road;
 	Controller *controller;
 	ElasticBand *elasticband;
-	Planner *plannerRC;
 	PlannerOMPL *plannerOMPL;
 	PlannerPRM *plannerPRM, *planner;
 	ForceField *forcefield;
@@ -79,7 +77,7 @@ private:
 	//Smoother smoother;
 	
 	void readRoadFromFile(string name, WayPoints *road);
-	void cleanWorld();
+//	void cleanWorld();
 	void moveBoxes();
 	void setRobotInitialPose(float x, float z, float alpha);
 	bool updateInnerModel(InnerModel* inner);
