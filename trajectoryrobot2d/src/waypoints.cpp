@@ -178,8 +178,8 @@ void WayPoints::printRobotState(InnerModel* innerModel)
 		qDebug() << "	Dist to target:" << getRobotDistanceToTarget();
 		qDebug() << "	Distance variation to target:" << getRobotDistanceVariationToTarget();
 		qDebug() << "	Road curvature:" << getRoadCurvatureAtClosestPoint();
-		qDebug() << "	Index of closest point:" << getIndexOfClosestPointToRobot();
-		qDebug() << "	Closest point:" << (*this)[getIndexOfClosestPointToRobot()].pos;
+		//qDebug() << "	Index of closest point:" << getIndexOfClosestPointToRobot();
+		qDebug() << "	Closest point:" << getIndexOfClosestPointToRobot()->pos;
 		qDebug() << "	Tangent at closest point:" << getTangentAtClosestPoint();
 		qDebug() << "	Current point index: " << currentPointIndex;
 		qDebug() << "	Is Blocked:" << isBlocked;
@@ -331,6 +331,7 @@ void WayPoints::clearDraw(InnerModelManagerPrx innermodelmanager_proxy)
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////
 ///////COMPUTATION OF SCALAR MAGNITUDES OF FORCEFIELD
 //////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +364,8 @@ WayPoints::iterator WayPoints::computeClosestPointToRobot(const QVec& robot)
 	
 	robotDistanceToClosestPoint = min;
 	currentPointIndex = index;   //DEPRECATED
-	indexOfClosestPointToRobot = index;
+	orderOfClosestPointToRobot = index;
+	indexOfClosestPointToRobot = res;  // INDICES SHOULD NOT BE USED WITH LISTS
 	return res;
 }
 
@@ -431,14 +433,15 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 float WayPoints::computeDistanceToLastVisible(WayPoints::iterator closestPoint, const QVec &robotPos)
 {
 	float dist = (robotPos - closestPoint->pos).norm2();
-	WayPoints::const_iterator it;
+	WayPoints::iterator it;
 	for(it = closestPoint; it != end()-1; ++it)
 	{
 		if(it->isVisible == true )
 			dist += (it->pos - (it+1)->pos).norm2();
 		else 
 			break;
-	}
+	} 
+	indexOfLastVisiblePoint = it;
 	return dist;
 }
 
@@ -512,8 +515,8 @@ bool WayPoints::computeForces()
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 	
 	//Compute roadTangent at closestPoint;
-	qDebug() << __FILE__  << __FUNCTION__ << "just here" << getIndexOfClosestPointToRobot() << getRobotDistanceToClosestPoint();
-	if(closestPoint == end())
+	qDebug() << __FILE__  << __FUNCTION__ << "just here"  << getRobotDistanceToClosestPoint();
+	if(closestPoint == this->end())
 	{
 		qDebug("fary en Compute Forces");
 		return false;

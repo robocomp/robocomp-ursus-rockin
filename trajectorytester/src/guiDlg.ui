@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>929</width>
-    <height>511</height>
+    <height>619</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -189,7 +189,7 @@
    <property name="geometry">
     <rect>
      <x>390</x>
-     <y>16</y>
+     <y>30</y>
      <width>511</width>
      <height>441</height>
     </rect>
@@ -204,9 +204,9 @@
   <widget class="QGroupBox" name="groupBox_3">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>19</x>
      <y>10</y>
-     <width>300</width>
+     <width>321</width>
      <height>111</height>
     </rect>
    </property>
@@ -483,6 +483,71 @@
    <property name="text">
     <string>Living</string>
    </property>
+  </widget>
+  <widget class="Line" name="line_3">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>510</y>
+     <width>861</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>530</y>
+     <width>871</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Task</string>
+   </property>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>71</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1. Kitchen</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>30</y>
+      <width>71</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>2. Search</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>30</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>3. Repos</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

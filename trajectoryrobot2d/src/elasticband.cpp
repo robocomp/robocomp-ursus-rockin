@@ -17,9 +17,9 @@
 
 #include "elasticband.h"
 
-ElasticBand::ElasticBand(InnerModel *_innermodel):
-	innermodel(_innermodel)
+ElasticBand::ElasticBand(InnerModel *_innermodel)
 {
+	innermodel = _innermodel;
 }
 
 ElasticBand::~ElasticBand()
@@ -34,20 +34,46 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 	if( road.isFinished() == true )
 			return false;
 
-	//Tags all points in the road as visible or blocked, depending on laser visibility. Only visible points are processed in this iteration
+	//Tags all points in the road ar visible or blocked, depending on laser visibility. Only visible points are processed in this iteration
 	checkVisiblePoints(road, laserData);	
+	
+	//shortCut(road);
+	
+	//Add points to achieve a homogenoeus chain
  	addPoints(road);
+	
+	//Remove point too close to each other
  	cleanPoints(road);
+	
+	//Compute the scalar magnitudes
 	computeForces(road, laserData); 	 
 	
 	//Delete half the tail behind, if greater than 6, to release resources
-	if( road.getIndexOfClosestPointToRobot() > 6)
+	if( road.getOrderOfClosestPointToRobot() > 6)
 	{
-		for(auto it = road.begin(); it != road.begin() + (road.getIndexOfClosestPointToRobot() / 2); ++it)
+		for(auto it = road.begin(); it != road.begin() + (road.getOrderOfClosestPointToRobot() / 2); ++it)
 			road.backList.append(it->pos);
-		road.erase(road.begin(), road.begin() + (road.getIndexOfClosestPointToRobot() / 2));
+		road.erase(road.begin(), road.begin() + (road.getOrderOfClosestPointToRobot() / 2));
 	}
 	
+	return true;
+}
+
+bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
+{
+	// Check if the target is visible and go straight to it
+	static bool inhibit = false;
+	static int veces = 0;
+	
+	if( road.last().isVisible and (inhibit == false ))
+	{
+		for( WayPoints::iterator it = road.begin()+1; it != road.end()-1; it = road.erase(it));
+		inhibit = true;
+	}
+	if( inhibit )
+		veces = (veces++)%50;  //aprox 5 segs
+	if( veces == 0 )
+		inhibit = false;
 	return true;
 }
 
@@ -86,13 +112,13 @@ void ElasticBand::addPoints(WayPoints &road)
  */
 void ElasticBand::cleanPoints(WayPoints &road)
 {
-	Q_ASSERT( road.size()>1 );
+	assert( road.size()>1 );
 	
 	int i;
 	for(i=1; i< road.size()-2; i++) // exlude 1 to avoid deleting the nextPoint and last to avoid deleting the target
 	{
 		//qDebug() << "i" << i << "visible in clean" << road[i].isVisible;
-		if( i>0 and road[i].isVisible == false )
+		if( road[i].isVisible == false )
 			break;
 		WayPoint &w = road[i];
 		WayPoint &wNext = road[i+1];
@@ -115,7 +141,7 @@ void ElasticBand::cleanPoints(WayPoints &road)
  */
 float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserData& laserData)
 {
-	Q_ASSERT( road.size()>1 );  //CHECK THIS TO ALLOW TWO AND ONE POINTS ROADS
+	assert( road.size()>1 );  //CHECK THIS TO ALLOW TWO AND ONE POINTS ROADS
 	
 	QVec atractionForce(3);
 	QVec repulsionForce(3);
@@ -184,7 +210,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 // 		repulsionForce = w1.minDistPoint * (FORCE_DISTANCE_LIMIT - w1.minDist);
 		
 		float alpha = -0.4;//0.6
-		float beta = 0.15; //0.09
+		float beta = 0.20; //0.09
 			
 		QVec change = (atractionForce*alpha) + (repulsionForce*beta);		
 		
@@ -208,7 +234,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
  */
 bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
 {	
-	Q_ASSERT(road.size()>1 and laserData.size() > 0);
+	assert(road.size()>1 and laserData.size() > 0);
 	
 	float maxAngle, minAngle;
 	if(laserData[0].angle > laserData.back().angle)

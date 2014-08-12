@@ -25,6 +25,7 @@
 #include <Laser.h>
 #include <limits>       // std::numeric_limits
 #include "waypoints.h"
+#include <assert.h>
 
 #define FORCE_DISTANCE_LIMIT 500  //mm
 #define ROBOT_STEP 50
@@ -35,8 +36,6 @@ class ElasticBand
 	public:
 		ElasticBand(InnerModel *_innermodel);
 		~ElasticBand();
-		
-		//void setRoad(WayPoints *_road, const RoboCompLaser::TLaserData &laserData);
 		bool update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, uint iter = 1);
 		void addPoints(WayPoints &road);
 
@@ -51,6 +50,7 @@ class ElasticBand
 		float computeForces(WayPoints &road, const RoboCompLaser::TLaserData& laserData);
 		void cleanPoints(WayPoints &road);
 		bool checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData);
+		bool shortCut(WayPoints& road);
 };
 
 #endif // ELASTICBAND_H

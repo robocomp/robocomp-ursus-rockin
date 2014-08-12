@@ -47,7 +47,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 		 
 	//Planning
 	plannerOMPL = new PlannerOMPL(*innerModel);			
-	plannerPRM = new PlannerPRM(*innerModel, 50, 10);
+	plannerPRM = new PlannerPRM(*innerModel, 100, 30);
 	planner = plannerPRM;
 	
 	//planner->drawGraph(innermodelmanager_proxy);
@@ -178,9 +178,9 @@ void SpecificWorker::compute( )
 		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 		if( reloj2.elapsed() < 100 )
 		{
-			road.clearDraw(innermodelmanager_proxy);
+			//road.clearDraw(innermodelmanager_proxy);
 			//try {	
-			road.draw(innermodelmanager_proxy, innerModel);
+			//road.draw(innermodelmanager_proxy, innerModel);
 			//
 			//	planner->drawGraph(innermodelmanager_proxy);
 		}
@@ -218,6 +218,9 @@ bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 			return false;
 		}
 		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
+		
+		// take inner to current values
+		updateInnerModel(inner);
 		currentTarget.setWithoutPlan( false );
 		currentTarget.print();
 		//planner->cleanGraph(innermodelmanager_proxy);

@@ -163,15 +163,11 @@ bool Sampler::isStateValid(const ompl::base::State *state)
 	innerModel->updateTransformValues("robot", x, 0, z, 0, 0, 0);
 	
 	for (uint32_t in=0; in<robotNodes.size(); in++)
-	{
 		for (uint32_t out=0; out<restNodes.size(); out++)
-		{
 			if (innerModel->collide(robotNodes[in], restNodes[out]))
 			{
 				return false;
 			}
-		}
-	}
 	return true;
 }
 
@@ -356,7 +352,14 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 	}
 }
 
-bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target)
+/**
+ * @brief ...
+ * 
+ * @param origin ...
+ * @param target ...
+ * @return bool
+ */
+bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target) 
 {
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
 	bool hit = false;

@@ -33,7 +33,7 @@ class WayPoint
 {
 	public:
 		WayPoint()			{};
-		WayPoint(QVec p) 	{ pos = p; minDist = ROBOT_RADIUS; minDistAnt = 0.f; isVisible = true; minDistPoint = QVec::zeros(3);};
+		WayPoint(QVec p) 	{ pos = p; minDist = ROBOT_RADIUS; minDistAnt = 0.f; isVisible = false; minDistPoint = QVec::zeros(3);};
 		~WayPoint()			{};
 	
 		//For ElasticBand
@@ -80,8 +80,8 @@ class WayPoints : public QList< WayPoint >
 		
 		//GOOD ONES
 		QLine2D getTangentToCurrentPoint();
-		void setIndexOfClosestPointToRobot(uint index) 										{ indexOfClosestPointToRobot = index;};
-		float getIndexOfClosestPointToRobot() const 										{ return indexOfClosestPointToRobot;};
+		void setIndexOfClosestPointToRobot(WayPoints::iterator it) 							{ indexOfClosestPointToRobot = it;};
+		WayPoints::iterator getIndexOfClosestPointToRobot() const 							{ return indexOfClosestPointToRobot;};
 		void setTangentAtClosestPoint(const QLine2D &tangent) 								{ roadTangentAtClosestPoint = tangent;};
 		QLine2D getTangentAtClosestPoint() const											{ return roadTangentAtClosestPoint;};
 		void setRobotDistanceToClosestPoint(float dist) 									{ robotDistanceToClosestPoint = dist;};
@@ -102,6 +102,8 @@ class WayPoints : public QList< WayPoint >
 		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
 		float getRobotDistanceVariationToTarget() const 									{ return robotDistanceVariationToTarget;};
 		ulong getETA() const 																{ return estimatedTimeOfArrival;};
+		WayPoints::iterator getIndexOfLastVisiblePoint() const								{ return indexOfLastVisiblePoint;};
+		uint32_t getOrderOfClosestPointToRobot() const										{ return orderOfClosestPointToRobot;};
 		
 		int nextPointIndex;
 	//	float distanceToLastVisible;
@@ -126,7 +128,9 @@ class WayPoints : public QList< WayPoint >
 		float robotDistanceToClosestPoint;
 		float robotPerpendicularDistanceToRoad;
 		QLine2D roadTangentAtClosestPoint;
-		uint indexOfClosestPointToRobot, currentPointIndex;
+		WayPoints::iterator indexOfClosestPointToRobot, indexOfLastVisiblePoint;
+		uint32_t orderOfClosestPointToRobot;
+		uint currentPointIndex;
 		float angleWithTangentAtClosestPoint;
 		float roadCurvatureAtClosestPoint;
 		float robotDistanceToTarget;

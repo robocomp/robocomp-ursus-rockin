@@ -27,7 +27,7 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
 	innerModel = new InnerModel(innerModel_);
 	
 	QList<QRectF> innerRegions;
-	innerRegions.append(QRectF(1500, 0, 4000, -3000));	innerRegions.append(QRectF(0, -8500, 4000, -1500)); 	innerRegions.append(QRectF(7500, -4000, 2500, -6000));
+	innerRegions << QRectF(1500, 0, 4000, -3000) <<	QRectF(0, -8500, 4000, -1500) << QRectF(7500, -4000, 2500, -6000);
 	QRectF outerRegion(0, 0, 10000, -10000);
 	
 	sampler.initialize(innerModel, outerRegion, innerRegions);
@@ -156,6 +156,10 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 		qDebug() << __FUNCTION__ << "Smoothing";
 		smoothPath(currentPath);
 		currentPath = currentSmoothedPath;
+		//smoothPathIter(currentPath);
+		smoothPath(currentPath);
+		currentPath = currentSmoothedPath;
+	
 		qDebug() << __FUNCTION__ << "Final path size " << currentPath.size(); 
 
 		return true;
@@ -412,7 +416,7 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 																					   QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)));
 				//qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
 				
-				// If free path to neighboor, insert it in the graph if does not exist
+				// If free path to neighboor, insert it in the graph 
 				if( reachEnd == true)
 				{
 					//Compute con comps to check it tne vertices belong to the same comp.
@@ -905,18 +909,30 @@ void PlannerPRM::smoothPath( const QList<QVec> & list)
 	}
 }
 
-void PlannerPRM::smoothPathIter(QList<QVec> & list)  //CASTAÑA, hay que hacerlo estocástico
+void PlannerPRM::smoothPathIter(QList<QVec> & list)  
 {
-	int i=2;
 	
-	for(int i=2; i<list.size(); i++)
-	{
-		if ( sampler.checkRobotValidDirectionToTargetOneShot( list.first(), list.last()) == false )
-			break;
+	//pick two ordered points and check free path between them
+	int tam = list.size()*3;
+	int i=0;
+	while( i< tam and list.size() > 4)
+	{	
+		int first = (int)QVec::uniformVector(1,0, list.size()-2)[0];
+		int second = (int)QVec::uniformVector(1,first+2,list.size()-1)[0];
+	
+		QList<QVec>::iterator it = list.begin()+first;
+		QList<QVec>::iterator itt = list.begin()+second;
+	
+		if ( sampler.checkRobotValidDirectionToTargetOneShot( *it, *itt )) 
+		{
+			for(QList<QVec>::iterator ir = it + 1; ir != itt-1; ++ir)
+			{	
+				list.erase(ir);
+				qDebug() << __FUNCTION__ << "list size" << list.size();
+			}
+		}
+		i++;
 	}
-	//delete intermediate points
-	for(int k=1; k<i-1; k++)
-		list.removeAt(k);
 }
 
 ////////////////////////////////////////////////////////////////////////
