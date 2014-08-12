@@ -414,3 +414,12 @@ robotMovesObjectFromContainer : active(1)
 	}
 }
 
+findGrannyAndDeliver : active(1)
+{
+	findGranny as find
+	deliverObject as deliver
+	where:
+	deliver.r = find.r
+	deliver.room = find.room
+	deliver.p = find.person
+}
