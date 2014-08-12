@@ -526,7 +526,7 @@ bool WayPoints::computeForces()
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 	
 	//Compute roadTangent at closestPoint;
-	qDebug() << __FILE__  << __FUNCTION__ << "just here"  << getRobotDistanceToClosestPoint();
+	//qDebug() << __FILE__  << __FUNCTION__ << "just here"  << getRobotDistanceToClosestPoint();
 // 	if(closestPoint == this->end())
 // 	{
 // 		qDebug("fary en Compute Forces");

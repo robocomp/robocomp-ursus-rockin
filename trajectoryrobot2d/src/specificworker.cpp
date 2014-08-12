@@ -139,7 +139,7 @@ void SpecificWorker::compute( )
 			
 			road.computeForces();
 		
-			road.printRobotState( innerModel, currentTarget);
+			//road.printRobotState( innerModel, currentTarget);
 
 			controller->update(differentialrobot_proxy, road);
 			

@@ -112,7 +112,7 @@ bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
  */
 void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 {		
-	qDebug() << __FUNCTION__ ;
+	//qDebug() << __FUNCTION__ ;
 	for(int i=0; i< road.size()-1; i++) 
 	{
 		if( i>0 and road[i].isVisible == false )
@@ -121,13 +121,11 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 		WayPoint &w = road[i];
 		WayPoint &wNext = road[i+1];
 		float dist = (w.pos-wNext.pos).norm2();
-		qDebug() << "----------------------------addPoints" << "cur" << w.pos << "ant" << wNext.pos << dist;
 		if( dist > ROBOT_RADIUS)  //SHOULD GET FROM IM
 		{
-			float l = ROBOT_RADIUS/dist;
+			float l = 0.9*ROBOT_RADIUS/dist;   //Crucial que el punto se ponga mas cerca que la condición de entrada
 			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
 			road.insert(i+1,wNew);
-			qDebug() << "----------------------------addPoints" << "new" << wNew.pos << "cur" << w.pos << "ant" << wNext.pos << "index" << i+1;
 		}
 	}
 	//Move point before last to orient the robot
@@ -164,20 +162,16 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 void ElasticBand::cleanPoints(WayPoints &road)
 {
 	int i;
-
 	for(i=1; i< road.size()-2; i++) // exlude 1 to avoid deleting the nextPoint and the last two to avoid deleting the target rotation
 	{
-		//qDebug() << "i" << i << "visible in clean" << road[i].isVisible;
 		if( road[i].isVisible == false )
 			break;
 		WayPoint &w = road[i];
 		WayPoint &wNext = road[i+1];
-		qDebug() << "Cleaning" << "current" << i << "road size" << road.size() << "dist" << (w.pos-wNext.pos).norm2();
 		
 		float dist = (w.pos-wNext.pos).norm2();
 		if( dist < ROBOT_RADIUS/3. )
 		{
-			qDebug() << __FILE__<< __FUNCTION__ << "removed from" << i+1 << "dist" << dist << wNext.pos;
 			road.removeAt(i+1);
 		}
 	}
