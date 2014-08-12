@@ -16,6 +16,7 @@
  */
 
 #include "elasticband.h"
+#include <boost/graph/graph_concepts.hpp>
 
 ElasticBand::ElasticBand(InnerModel *_innermodel)
 {
@@ -26,7 +27,7 @@ ElasticBand::~ElasticBand()
 {
 }
 
-bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, uint iter)
+bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, const CurrentTarget &currentTarget, uint iter)
 {
 	
 	qDebug() << __FILE__ << __FUNCTION__ << "road size"<<  road.size();
@@ -39,12 +40,12 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 	
 	//shortCut(road);
 	
-	//Add points to achieve a homogenoeus chain
- 	addPoints(road);
+	//Add points to achieve an homogenoeus chain
+ 	addPoints(road, currentTarget);
 	
 	//Remove point too close to each other
  	cleanPoints(road);
-	
+
 	//Compute the scalar magnitudes
 	computeForces(road, laserData); 	 
 	
@@ -59,16 +60,19 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 	return true;
 }
 
+
+
 bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
 {
 	// Check if the target is visible and go straight to it
 	static bool inhibit = false;
 	static int veces = 0;
+	int offset = road.size()/3;
 	
-	if( road.last().isVisible and (inhibit == false ))
+	if( road.last().isVisible and (inhibit == false ))   //Probar a borrar fr 2/3 para alante
 	{
-		for( WayPoints::iterator it = road.begin()+1; it != road.end()-1; it = road.erase(it));
-		inhibit = true;
+		for( WayPoints::iterator it = road.begin()+offset; it != road.end()-1; it = road.erase(it));
+		inhibit = true;  //periodo refractario
 	}
 	if( inhibit )
 		veces = (veces++)%50;  //aprox 5 segs
@@ -83,7 +87,7 @@ bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
  * @param road ...
  * @return void
  */
-void ElasticBand::addPoints(WayPoints &road)
+void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 {		
 	for(int i=0; i< road.size()-1; i++) 
 	{
@@ -99,9 +103,26 @@ void ElasticBand::addPoints(WayPoints &road)
 			float l = ROBOT_RADIUS/dist;
 			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
 			road.insert(i+1,wNew);
-		//	qDebug() << __FILE__ << __FUNCTION__ << "addPoints:: inserted at" << i+1 << dist;
 		}
 	}
+	//Move point before last to orient the robot
+	//The angle formed by this point and the last one has to be the same es specified in the target
+	//We solve this equations for (x,z)
+	// (x' -x)/(z'-z) = tg(a) = t
+	// sqr(x'-x) + sqr(z'-z) = sqr(r)
+	// z = z' - (r/(sqrt(t*t -1)))
+	// x = x' - r(sqrt(1-(1/t*t+1)))
+	if( (currentTarget.doRotation == true) and (road.last().hasRotation == false) )
+	{
+		float radius = 400;
+		float ta = tan(currentTarget.getRotation().y());
+		float xx = road.last().pos.x() - radius*sqrt(1.f - (1.f/(ta*ta+1)));
+		float zz = road.last().pos.z() - (radius/sqrt(ta*ta+1));
+		WayPoint wNew( QVec::vec3(xx,road.last().pos.y(),zz) );
+		road.insert(road.end()-1,wNew);
+		road.last().hasRotation == true;
+	}
+	
 }
 
 /**

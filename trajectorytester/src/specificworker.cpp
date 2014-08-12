@@ -100,12 +100,19 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	return true;
 };
 
-void SpecificWorker::go(const QVec& t)
+void SpecificWorker::go(const QVec& t, const QVec &r)
 {
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.x = t.x();
 	tp.z = t.z();
 	tp.y = 0;
+	if( r.size() == 3 )
+	{
+		tp.rx = r.x(); tp.ry = r.y(); tp.rz = r.z();
+		tp.onlyRot = true;
+	}
+	else
+		tp.onlyRot = false;
 	target = t;
 	try
 	{
@@ -166,7 +173,7 @@ void SpecificWorker::goDoor()
 
 void SpecificWorker::goKitchen()  
 {
-	go(QVec::vec3(6000,0,-5900));	
+	go(QVec::vec3(6000,0,-5900), QVec::vec3(0,M_PI/2,0));	
 }
 
 void SpecificWorker::goKitchen2()//Stove table

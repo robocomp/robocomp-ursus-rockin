@@ -36,6 +36,7 @@ class CurrentTarget
 		void setWithoutPlan(bool w); 
 		void print();
 		ulong getElapsedTime() const;  //ms
+		bool doRotation;
 		
 	private:
 		mutable QMutex mutex;

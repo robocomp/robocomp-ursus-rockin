@@ -135,7 +135,7 @@ void SpecificWorker::compute( )
 		if ( currentTarget.isActive() and targetHasAPlan(innerModel))
 		{
 		
-			elasticband->update( road, laserData );
+			elasticband->update( road, laserData, currentTarget );
 			
 			road.computeForces();
 		
@@ -145,6 +145,7 @@ void SpecificWorker::compute( )
 			
 			if (road.isFinished() == true)
 			{		
+				//if( currentTarget.hasRotation )
 				drawGreenBoxOnTarget( currentTarget.getTranslation() );
 				currentTarget.print();
 				currentTarget.reset();
@@ -369,6 +370,8 @@ void SpecificWorker::go(const TargetPose& target)
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+	if( target.onlyRot == true) 
+		currentTarget.doRotation = true;
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
 	qDebug() << __FUNCTION__ << "GO command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();

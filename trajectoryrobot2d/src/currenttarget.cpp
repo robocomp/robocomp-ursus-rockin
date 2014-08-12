@@ -30,6 +30,7 @@ void CurrentTarget::reset()
 	targetTr = QVec::zeros(3); 
 	targetRot = QVec::zeros(3);
 	reloj.start();
+	doRotation = false;
 }
 
 QVec CurrentTarget::getTranslation() const

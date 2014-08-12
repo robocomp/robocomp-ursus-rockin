@@ -57,7 +57,7 @@ public slots:
 	
 private:
 	PlantWidget *plantWidget;
-	void go(const QVec &t);
+	void go(const QVec& t, const QVec& r=QVec());
 	QTime reloj, relojE;
 	QVec target, current;
 };

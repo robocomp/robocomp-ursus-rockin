@@ -32,8 +32,8 @@
 class WayPoint
 {
 	public:
-		WayPoint()			{};
-		WayPoint(QVec p) 	{ pos = p; minDist = ROBOT_RADIUS; minDistAnt = 0.f; isVisible = false; minDistPoint = QVec::zeros(3);};
+		WayPoint()			{ pos = QVec::zeros(3); minDist = ROBOT_RADIUS; minDistAnt = 0.f; isVisible = false; minDistPoint = QVec::zeros(3); hasRotation = false;};
+		WayPoint(QVec p) 	{ pos = p; minDist = ROBOT_RADIUS; minDistAnt = 0.f; isVisible = false; minDistPoint = QVec::zeros(3); hasRotation = false;};
 		~WayPoint()			{};
 	
 		//For ElasticBand
@@ -49,6 +49,7 @@ class WayPoint
 		float visibleLaserAngle;
 		float visibleLaserDist;
 		QVec posInRobotFrame;
+		bool hasRotation;
 		
 }; 
 
@@ -80,30 +81,31 @@ class WayPoints : public QList< WayPoint >
 		
 		//GOOD ONES
 		QLine2D getTangentToCurrentPoint();
-		void setIndexOfClosestPointToRobot(WayPoints::iterator it) 							{ indexOfClosestPointToRobot = it;};
 		WayPoints::iterator getIndexOfClosestPointToRobot() const 							{ return indexOfClosestPointToRobot;};
-		void setTangentAtClosestPoint(const QLine2D &tangent) 								{ roadTangentAtClosestPoint = tangent;};
 		QLine2D getTangentAtClosestPoint() const											{ return roadTangentAtClosestPoint;};
-		void setRobotDistanceToClosestPoint(float dist) 									{ robotDistanceToClosestPoint = dist;};
 		float getRobotDistanceToClosestPoint() 	const										{ return robotDistanceToClosestPoint;};
-		void setRobotPerpendicularDistanceToRoad(float dist) 								{ robotPerpendicularDistanceToRoad = dist;};
 		float getRobotPerpendicularDistanceToRoad()	const									{ return robotPerpendicularDistanceToRoad;};
-		void setAngleWithTangentAtClosestPoint( float ang)									{ angleWithTangentAtClosestPoint = ang;};
 		float getAngleWithTangentAtClosestPoint() const										{ return angleWithTangentAtClosestPoint;};
 		uint getCurrentPointIndex() const													{ return currentPointIndex;};  //DEPRECATED
 		float getRoadCurvatureAtClosestPoint() const										{ return roadCurvatureAtClosestPoint;};
-		void setRoadCurvatureAtClosestPoint( float c)										{ roadCurvatureAtClosestPoint = c;};
 		float getRobotDistanceToTarget() const												{ return robotDistanceToTarget;};
-		void setRobotDistanceToTarget( float dist)											{ robotDistanceToTarget = dist;};
 		float getRobotDistanceToLastVisible() const											{ return robotDistanceToLastVisible;};
-		void setRobotDistanceToLastVisible( float dist)										{ robotDistanceToLastVisible = dist;};
-		void setFinished( bool b)															{ QMutexLocker ml(&mutex); finish = b; }
-		bool isFinished() const 															{ return finish;};
-		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
 		float getRobotDistanceVariationToTarget() const 									{ return robotDistanceVariationToTarget;};
 		ulong getETA() const 																{ return estimatedTimeOfArrival;};
 		WayPoints::iterator getIndexOfLastVisiblePoint() const								{ return indexOfLastVisiblePoint;};
 		uint32_t getOrderOfClosestPointToRobot() const										{ return orderOfClosestPointToRobot;};
+		
+		void setIndexOfClosestPointToRobot(WayPoints::iterator it) 							{ indexOfClosestPointToRobot = it;};
+		void setTangentAtClosestPoint(const QLine2D &tangent) 								{ roadTangentAtClosestPoint = tangent;};
+		void setRobotDistanceToClosestPoint(float dist) 									{ robotDistanceToClosestPoint = dist;};
+		void setRobotPerpendicularDistanceToRoad(float dist) 								{ robotPerpendicularDistanceToRoad = dist;};
+		void setAngleWithTangentAtClosestPoint( float ang)									{ angleWithTangentAtClosestPoint = ang;};
+		void setRoadCurvatureAtClosestPoint( float c)										{ roadCurvatureAtClosestPoint = c;};
+		void setRobotDistanceToTarget( float dist)											{ robotDistanceToTarget = dist;};
+		void setRobotDistanceToLastVisible( float dist)										{ robotDistanceToLastVisible = dist;};
+		void setFinished( bool b)															{ QMutexLocker ml(&mutex); finish = b; }
+		bool isFinished() const 															{ return finish;};
+		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
 		
 		int nextPointIndex;
 	//	float distanceToLastVisible;
