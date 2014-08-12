@@ -230,10 +230,10 @@ setObjectNotReach : passive(1)
 graspObject : active(1)
 {
 	{
-		room:room(-220,-5)
-		o:object(95,0)
 		s:objectSt(280,0)
 		r:robot(5,-110)
+		room:room(-220,-5)
+		o:object(95,0)
 		t:object(-5,115)
 		o->s(reach)
 		r->o(know)
@@ -243,16 +243,41 @@ graspObject : active(1)
 	}
 	=>
 	{
-		room:room(-145,-15)
-		o:object(120,-20)
 		s:objectSt(320,0)
 		r:robot(-5,-120)
+		room:room(-145,-15)
+		o:object(120,-20)
 		t:object(5,105)
 		o->s(reach)
 		r->o(know)
 		o->r(in)
 		r->room(in)
 		t->room(in)
+	}
+}
+
+deliverObject : active(1)
+{
+	{
+		room:room(-160,0)
+		p:person(0,115)
+		o:object(160,0)
+		r:robot(0,-115)
+		r->o(know)
+		o->r(in)
+		r->room(in)
+		p->room(in)
+	}
+	=>
+	{
+		room:room(-160,0)
+		p:person(0,115)
+		o:object(160,0)
+		r:robot(0,-115)
+		r->o(know)
+		o->p(in)
+		r->room(in)
+		p->room(in)
 	}
 }
 
