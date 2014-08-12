@@ -372,7 +372,7 @@ WayPoints::iterator WayPoints::computeClosestPointToRobot(const QVec& robot)
 
 
 /**
- * @brief Computes the road tangent at point pointed by iterator w
+ * @brief Computes the road tangent at point pointed by iterator w. 
  * 
  * @param w WayPoints::iterator pointing to the point of interest
  * @return QLine2D
@@ -400,14 +400,20 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 	else
 		post = w+1;
 		
-	if( (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED)  //Too close to compute a a line
-		while ( post != this->end() and (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED)
-		{ post++; };
+	//Now check if the points are too close
+	float dist = (post->pos - ant->pos).norm2();
+	if(dist < MIN_DISTANCE_ALLOWED and ((post+1) != this->end()))  //Search by the end side
+		while ( post != this->end() and (dist < MIN_DISTANCE_ALLOWED))
+		{ ++post; };
 	
-	if (post == this->end()) post--;
-	if( (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED) //Still to close 
+	if (post == this->end()) --post;
+	if( dist < MIN_DISTANCE_ALLOWED and (post != this->begin())) //Search by the begin side
+		while ( post != this->begin() and (dist < MIN_DISTANCE_ALLOWED))
+		{ --post; };
+	
+	if( dist < MIN_DISTANCE_ALLOWED )
 	{
-		qDebug() << __FUNCTION__ << "this should not happen. Looks like the last tow points are the same";
+		qDebug() << __FUNCTION__ << "Warning. This should not happen. Looks like the all remaining points are the same";
 		return antLine;
 	}
 		
@@ -419,6 +425,7 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 		l.print("line");
 		qFatal("Fary in tg");
 	}
+	antLine = l;
 	return  l;
 }
 
@@ -516,11 +523,11 @@ bool WayPoints::computeForces()
 	
 	//Compute roadTangent at closestPoint;
 	qDebug() << __FILE__  << __FUNCTION__ << "just here"  << getRobotDistanceToClosestPoint();
-	if(closestPoint == this->end())
-	{
-		qDebug("fary en Compute Forces");
-		return false;
-	}
+// 	if(closestPoint == this->end())
+// 	{
+// 		qDebug("fary en Compute Forces");
+// 		return false;
+// 	}
 	
 	QLine2D tangent = computeTangentAt( closestPoint );
 	setTangentAtClosestPoint(tangent);

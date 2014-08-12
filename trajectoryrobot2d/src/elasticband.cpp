@@ -114,13 +114,15 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 	// x = x' - r(sqrt(1-(1/t*t+1)))
 	if( (currentTarget.doRotation == true) and (road.last().hasRotation == false) )
 	{
+		qDebug() << __FUNCTION__ << "computing rotation" << road.last().pos;
 		float radius = 400;
 		float ta = tan(currentTarget.getRotation().y());
 		float xx = road.last().pos.x() - radius*sqrt(1.f - (1.f/(ta*ta+1)));
 		float zz = road.last().pos.z() - (radius/sqrt(ta*ta+1));
 		WayPoint wNew( QVec::vec3(xx,road.last().pos.y(),zz) );
 		road.insert(road.end()-1,wNew);
-		road.last().hasRotation == true;
+		road.last().hasRotation = true;
+		qDebug() << __FUNCTION__ << "after rotation" << wNew.pos;
 	}
 	
 }
