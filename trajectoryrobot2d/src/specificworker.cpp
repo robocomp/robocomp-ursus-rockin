@@ -135,11 +135,11 @@ void SpecificWorker::compute( )
 		if ( currentTarget.isActive() and targetHasAPlan(innerModel))
 		{
 		
-			elasticband->update( road, laserData, currentTarget );
+			elasticband->update( road, laserData , currentTarget);
 			
 			road.computeForces();
 		
-			road.printRobotState( innerModel);
+			road.printRobotState( innerModel, currentTarget);
 
 			controller->update(differentialrobot_proxy, road);
 			

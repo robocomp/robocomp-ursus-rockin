@@ -51,6 +51,7 @@ class ElasticBand
 		void cleanPoints(WayPoints &road);
 		bool checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData);
 		bool shortCut(WayPoints& road);
+		bool checkIfNAN(const WayPoints &road);
 };
 
 #endif // ELASTICBAND_H

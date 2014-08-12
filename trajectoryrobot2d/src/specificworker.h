@@ -25,7 +25,7 @@
 #include "controller.h"
 #include "elasticband.h"
 #include "waypoints.h"
-#include "forcefield.h"
+//#include "forcefield.h"
 #include "localizer.h"
 #include "plannerompl.h"
 #include "plannerprm.h"
@@ -71,7 +71,7 @@ private:
 	ElasticBand *elasticband;
 	PlannerOMPL *plannerOMPL;
 	PlannerPRM *plannerPRM, *planner;
-	ForceField *forcefield;
+	//ForceField *forcefield;
 	Localizer *localizer;
 	
 	//Smoother smoother;

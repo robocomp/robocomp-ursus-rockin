@@ -2,13 +2,11 @@
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
-  #pointstoroad.cpp
   controller.cpp
   qline2d.cpp
   elasticband.cpp
   rcisdraw.cpp
   waypoints.cpp
-  forcefield.cpp
   localizer.cpp
   plannerompl.cpp
   currenttarget.cpp
@@ -20,9 +18,7 @@ SET ( SOURCES
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
-  #pointstoroad.h
   controller.h
-  forcefield.h
   localizer.h
   plannerprm.h
   plannerompl.h

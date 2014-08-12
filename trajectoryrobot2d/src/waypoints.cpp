@@ -166,11 +166,12 @@ QLine2D WayPoints::getTangentToCurrentPoint()
 	return line;
 }
 
-void WayPoints::printRobotState(InnerModel* innerModel)
+void WayPoints::printRobotState(InnerModel* innerModel, const CurrentTarget &currentTarget)
 {
 		QVec robot3DPos = innerModel->transform("world", "robot");
 		qDebug() << "-------Road status report  ---------------------";
 		qDebug() << "	Robot position:" << robot3DPos;
+		qDebug() << "	Target:" << currentTarget.getTranslation();
 		qDebug() << "	Num points:" << this->size();
 		qDebug() << "	Robot dist to closest point in road:" << getRobotDistanceToClosestPoint();
 		qDebug() << "	Robot perp. dist to road tangent at closest point:" << getRobotPerpendicularDistanceToRoad();
@@ -194,12 +195,12 @@ void WayPoints::printRobotState(InnerModel* innerModel)
 		qDebug() << "----------------------------------------------------";
 }
 
-void WayPoints::print()
+void WayPoints::print() const
 {
 	qDebug() << "Printing Road";
 	for(int i=0; i<this->size(); i++)
 	{
-		WayPoint &w = (*this)[i];
+		const WayPoint &w = (*this)[i];
 		qDebug() << "		" << w.pos << i << "Visible" << w.isVisible << "MinDist" << w.minDist << "MinDistVector" << w.minDistPoint 
 							<< "visibilityAngle" << w.visibleLaserAngle << "visibilityDistance" << w.visibleLaserDist << "in robot frame" << w.posInRobotFrame;
 	}
@@ -401,21 +402,23 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 		post = w+1;
 		
 	//Now check if the points are too close
-	float dist = (post->pos - ant->pos).norm2();
-	if(dist < MIN_DISTANCE_ALLOWED and ((post+1) != this->end()))  //Search by the end side
-		while ( post != this->end() and (dist < MIN_DISTANCE_ALLOWED))
+	if((post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED )
+		return antLine;
+	
+		/*and ((post+1) != this->end()))  //Search by the end side
+		while ( post != this->end() and ((post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED))
 		{ ++post; };
 	
 	if (post == this->end()) --post;
-	if( dist < MIN_DISTANCE_ALLOWED and (post != this->begin())) //Search by the begin side
-		while ( post != this->begin() and (dist < MIN_DISTANCE_ALLOWED))
+	if( (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED and (post != this->begin())) //Search by the begin side
+		while ( post != this->begin() and ((post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED))
 		{ --post; };
 	
-	if( dist < MIN_DISTANCE_ALLOWED )
+	if( (post->pos - ant->pos).norm2() < MIN_DISTANCE_ALLOWED )
 	{
-		qDebug() << __FUNCTION__ << "Warning. This should not happen. Looks like the all remaining points are the same";
-		return antLine;
-	}
+		qDebug() << __FUNCTION__ << "Warning. This should not happen. Looks like the all remaining points are the same";*/
+	//	return antLine;
+	//}
 		
 	QLine2D l( ant->pos , post->pos );
 	if( isnan(l[0]) or isnan(l[1]) or isnan(l[2]))
@@ -423,6 +426,7 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 		ant->pos.print("ant");
  		post->pos.print("post");
 		l.print("line");
+		print();
 		qFatal("Fary in tg");
 	}
 	antLine = l;

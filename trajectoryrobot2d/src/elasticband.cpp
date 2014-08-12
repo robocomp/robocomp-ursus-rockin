@@ -37,18 +37,24 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 
 	//Tags all points in the road ar visible or blocked, depending on laser visibility. Only visible points are processed in this iteration
 	checkVisiblePoints(road, laserData);	
+	 
+	if ( checkIfNAN(road) ) qFatal("fary1");
 	
 	//shortCut(road);
 	
 	//Add points to achieve an homogenoeus chain
  	addPoints(road, currentTarget);
-	
+	if ( checkIfNAN(road) ) qFatal("fary2");
+
 	//Remove point too close to each other
  	cleanPoints(road);
+	if ( checkIfNAN(road) ) qFatal("fary3");
 
 	//Compute the scalar magnitudes
 	computeForces(road, laserData); 	 
-	
+		
+	if ( checkIfNAN(road) ) qFatal("fary4");
+
 	//Delete half the tail behind, if greater than 6, to release resources
 	if( road.getOrderOfClosestPointToRobot() > 6)
 	{
@@ -57,10 +63,27 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 		road.erase(road.begin(), road.begin() + (road.getOrderOfClosestPointToRobot() / 2));
 	}
 	
+	//Check for NAN
+	for(auto it = road.begin(); it != road.end(); ++it)
+		if( isnan(it->pos.x()) or isnan(it->pos.y()) or isnan(it->pos.z()) )
+		{
+			road.print();
+			break;
+		}
+	
 	return true;
 }
 
-
+bool ElasticBand::checkIfNAN(const WayPoints &road)
+{
+	for(auto it = road.begin(); it != road.end(); ++it)
+		if( isnan(it->pos.x()) or isnan(it->pos.y()) or isnan(it->pos.z()) )
+		{
+			road.print();
+			return true;
+		}
+	return false;
+}
 
 bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
 {
@@ -89,6 +112,7 @@ bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
  */
 void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 {		
+	qDebug() << __FUNCTION__ ;
 	for(int i=0; i< road.size()-1; i++) 
 	{
 		if( i>0 and road[i].isVisible == false )
@@ -97,12 +121,13 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 		WayPoint &w = road[i];
 		WayPoint &wNext = road[i+1];
 		float dist = (w.pos-wNext.pos).norm2();
-		
-		if( dist > ROBOT_RADIUS)
+		qDebug() << "----------------------------addPoints" << "cur" << w.pos << "ant" << wNext.pos << dist;
+		if( dist > ROBOT_RADIUS)  //SHOULD GET FROM IM
 		{
 			float l = ROBOT_RADIUS/dist;
 			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
 			road.insert(i+1,wNew);
+			qDebug() << "----------------------------addPoints" << "new" << wNew.pos << "cur" << w.pos << "ant" << wNext.pos << "index" << i+1;
 		}
 	}
 	//Move point before last to orient the robot
@@ -112,18 +137,21 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 	// sqr(x'-x) + sqr(z'-z) = sqr(r)
 	// z = z' - (r/(sqrt(t*t -1)))
 	// x = x' - r(sqrt(1-(1/t*t+1)))
-	if( (currentTarget.doRotation == true) and (road.last().hasRotation == false) )
-	{
-		qDebug() << __FUNCTION__ << "computing rotation" << road.last().pos;
-		float radius = 400;
-		float ta = tan(currentTarget.getRotation().y());
-		float xx = road.last().pos.x() - radius*sqrt(1.f - (1.f/(ta*ta+1)));
-		float zz = road.last().pos.z() - (radius/sqrt(ta*ta+1));
-		WayPoint wNew( QVec::vec3(xx,road.last().pos.y(),zz) );
-		road.insert(road.end()-1,wNew);
-		road.last().hasRotation = true;
-		qDebug() << __FUNCTION__ << "after rotation" << wNew.pos;
-	}
+// 	if( (currentTarget.doRotation == true) and (road.last().hasRotation == false) )
+// 	{
+// 		qDebug() << __FUNCTION__ << "computing rotation" << road.last().pos;
+// 		float radius = 500;
+// 		float ta = tan(currentTarget.getRotation().y());
+// 		float xx = road.last().pos.x() - radius*sqrt(1.f - (1.f/(ta*ta+1)));
+// 		float zz = road.last().pos.z() - (radius/sqrt(ta*ta+1));
+// 		WayPoint wNew( QVec::vec3(xx,road.last().pos.y(),zz) );
+// 		road.insert(road.end()-1,wNew);
+// 		road.last().hasRotation = true;
+// 		qDebug() << __FUNCTION__ << "after rotation" << wNew.pos << currentTarget.getRotation().y() << ta;
+// 	
+// 	}
+	//else
+		//qDebug() << road.last().hasRotation << road.last().pos << (road.end()-2)->pos << currentTarget.getRotation().y();
 	
 }
 
@@ -135,22 +163,22 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
  */
 void ElasticBand::cleanPoints(WayPoints &road)
 {
-	assert( road.size()>1 );
-	
 	int i;
-	for(i=1; i< road.size()-2; i++) // exlude 1 to avoid deleting the nextPoint and last to avoid deleting the target
+
+	for(i=1; i< road.size()-2; i++) // exlude 1 to avoid deleting the nextPoint and the last two to avoid deleting the target rotation
 	{
 		//qDebug() << "i" << i << "visible in clean" << road[i].isVisible;
 		if( road[i].isVisible == false )
 			break;
 		WayPoint &w = road[i];
 		WayPoint &wNext = road[i+1];
-		//qDebug() << "i" << i << "dist" << (w.pos-wNext.pos).norm2();
+		qDebug() << "Cleaning" << "current" << i << "road size" << road.size() << "dist" << (w.pos-wNext.pos).norm2();
+		
 		float dist = (w.pos-wNext.pos).norm2();
 		if( dist < ROBOT_RADIUS/3. )
 		{
+			qDebug() << __FILE__<< __FUNCTION__ << "removed from" << i+1 << "dist" << dist << wNext.pos;
 			road.removeAt(i+1);
-		//	qDebug() << __FILE__<< __FUNCTION__ << "removed from" << i+1 << dist;
 		}
 	}
 }
@@ -164,7 +192,8 @@ void ElasticBand::cleanPoints(WayPoints &road)
  */
 float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserData& laserData)
 {
-	assert( road.size()>1 );  //CHECK THIS TO ALLOW TWO AND ONE POINTS ROADS
+	if(road.size() < 3 )
+		return 0;
 	
 	QVec atractionForce(3);
 	QVec repulsionForce(3);
@@ -174,9 +203,13 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 	
 	QVec jacobian(3);
 	float totalChange=0.f;
-	
-	for(int i=1; i< road.size()-1; i++)  //We need to exclude the current and next points to keep them within robot reach
-	{		
+	int lastP;					// To avoid moving the rotation element attached to the last
+	if( road.last().hasRotation )
+		lastP = road.size()-2;
+	else
+		lastP = road.size()-1;
+	for(int i=1; i< lastP; i++) 
+	{
 		if( road[i].isVisible == false )
 			break;
 		
@@ -233,10 +266,16 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 // 		repulsionForce = w1.minDistPoint * (FORCE_DISTANCE_LIMIT - w1.minDist);
 		
 		float alpha = -0.4;//0.6
-		float beta = 0.20; //0.09
+		float beta = 0.30; //0.09
 			
 		QVec change = (atractionForce*alpha) + (repulsionForce*beta);		
 		
+		if(isnan(change.x()) or isnan(change.y()) or isnan(change.z()))
+		{
+			road.print();
+			qDebug() << atractionForce << repulsionForce;
+			qFatal("change");	
+		}
 		//Now we remove the tangencial component of the force to avoid recirculation of band points
 		//QVec pp = road.getTangentToCurrentPoint().getPerpendicularVector();
 		//QVec nChange = pp * (pp * change);

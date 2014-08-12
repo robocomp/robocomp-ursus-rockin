@@ -26,6 +26,7 @@
 #include "rcisdraw.h"
 #include <float.h>
 #include "qline2d.h"
+#include "currenttarget.h"
 
 #define ROBOT_RADIUS 250
 
@@ -64,8 +65,8 @@ class WayPoints : public QList< WayPoint >
 		void setInnerModel( InnerModel *inner) 												{ innerModel = inner;};
 		void readRoadFromFile(InnerModel *innerModel, std::string name);
 		void readRoadFromList(QList<QVec> list);
-		void printRobotState(InnerModel* innerModel);
-		void print();
+		void printRobotState(InnerModel* innerModel, const CurrentTarget& currentTarget);
+		void print() const;
 		bool draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo = -1);  //Default in upTo means all list
 		bool draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo = -1);  //Default in upTo means all list
 		void clearDraw(InnerModelManagerPrx innermodelmanager_proxy);
