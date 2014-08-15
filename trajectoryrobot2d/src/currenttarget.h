@@ -37,6 +37,8 @@ class CurrentTarget
 		void print();
 		ulong getElapsedTime() const;  //ms
 		bool doRotation;
+		enum class Command { GOTO, SETHEADING, STOP};
+		Command command;
 		
 	private:
 		mutable QMutex mutex;

@@ -113,7 +113,11 @@ bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
 void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 {		
 	//qDebug() << __FUNCTION__ ;
-	for(int i=0; i< road.size()-1; i++) 
+	//for(int i=0; i< road.size()-1; i++)
+	int offset;
+	if( road.last().hasRotation ) offset = 2; else offset = 1;
+	
+	for(int i=0; i< road.size()-offset; i++)	
 	{
 		if( i>0 and road[i].isVisible == false )
 			break;
@@ -121,33 +125,33 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 		WayPoint &w = road[i];
 		WayPoint &wNext = road[i+1];
 		float dist = (w.pos-wNext.pos).norm2();
-		if( dist > ROBOT_RADIUS)  //SHOULD GET FROM IM
+		if( dist > ROAD_STEP_SEPARATION)  //SHOULD GET FROM IM
 		{
-			float l = 0.9*ROBOT_RADIUS/dist;   //Crucial que el punto se ponga mas cerca que la condición de entrada
+			float l = 0.9*ROAD_STEP_SEPARATION/dist;   //Crucial que el punto se ponga mas cerca que la condición de entrada
 			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
 			road.insert(i+1,wNew);
 		}
 	}
-	//Move point before last to orient the robot
+	//Move point before last to orient the robot. This works but only if the robots approaches from the lower quadrants
 	//The angle formed by this point and the last one has to be the same es specified in the target
 	//We solve this equations for (x,z)
 	// (x' -x)/(z'-z) = tg(a) = t
 	// sqr(x'-x) + sqr(z'-z) = sqr(r)
 	// z = z' - (r/(sqrt(t*t -1)))
 	// x = x' - r(sqrt(1-(1/t*t+1)))
-// 	if( (currentTarget.doRotation == true) and (road.last().hasRotation == false) )
-// 	{
-// 		qDebug() << __FUNCTION__ << "computing rotation" << road.last().pos;
-// 		float radius = 500;
-// 		float ta = tan(currentTarget.getRotation().y());
-// 		float xx = road.last().pos.x() - radius*sqrt(1.f - (1.f/(ta*ta+1)));
-// 		float zz = road.last().pos.z() - (radius/sqrt(ta*ta+1));
-// 		WayPoint wNew( QVec::vec3(xx,road.last().pos.y(),zz) );
-// 		road.insert(road.end()-1,wNew);
-// 		road.last().hasRotation = true;
-// 		qDebug() << __FUNCTION__ << "after rotation" << wNew.pos << currentTarget.getRotation().y() << ta;
-// 	
-// 	}
+	if( (currentTarget.doRotation == true) and (road.last().hasRotation == false) )
+	{
+		qDebug() << __FUNCTION__ << "computing rotation" << road.last().pos;
+		float radius = 500;
+		float ta = tan(currentTarget.getRotation().y());
+		float xx = road.last().pos.x() - radius*sqrt(1.f - (1.f/(ta*ta+1)));
+		float zz = road.last().pos.z() - (radius/sqrt(ta*ta+1));
+		WayPoint wNew( QVec::vec3(xx,road.last().pos.y(),zz) );
+		road.insert(road.end()-1,wNew);
+		road.last().hasRotation = true;
+		qDebug() << __FUNCTION__ << "after rotation" << wNew.pos << currentTarget.getRotation().y() << ta;
+	
+	}
 	//else
 		//qDebug() << road.last().hasRotation << road.last().pos << (road.end()-2)->pos << currentTarget.getRotation().y();
 	
@@ -162,7 +166,11 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 void ElasticBand::cleanPoints(WayPoints &road)
 {
 	int i;
-	for(i=1; i< road.size()-2; i++) // exlude 1 to avoid deleting the nextPoint and the last two to avoid deleting the target rotation
+	int offset;
+	if( road.last().hasRotation ) offset = 3; else offset = 2;
+	
+// 	for(i=1; i< road.size()-2; i++) // exlude 1 to avoid deleting the nextPoint and the last two to avoid deleting the target rotation
+	for(i=1; i< road.size()-offset; i++) // exlude 1 to avoid deleting the nextPoint and the last two to avoid deleting the target rotation
 	{
 		if( road[i].isVisible == false )
 			break;
@@ -170,7 +178,7 @@ void ElasticBand::cleanPoints(WayPoints &road)
 		WayPoint &wNext = road[i+1];
 		
 		float dist = (w.pos-wNext.pos).norm2();
-		if( dist < ROBOT_RADIUS/3. )
+		if( dist < ROAD_STEP_SEPARATION/3. )
 		{
 			road.removeAt(i+1);
 		}

@@ -30,7 +30,8 @@ Controller::~Controller()
 {
 }
 
-bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  const WayPoints &road)
+bool Controller::update(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData,
+						RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  WayPoints &road)
 {	
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive). 
 	static long epoch = 100;
@@ -123,10 +124,10 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
  			vadvance = MAX_ADV_SPEED;
  		
 		/////////////////////////////////////////////////
-		//////  ULTIMATE COLLISION AVOIDANCE CONTROL
+		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
 		
-		//The idea here is to turn away from obstacles or even stop if neccessary
+		avoidanceControl(innerModel, road, laserData, vadvance, vrot);
 		
 		/////////////////////////////////////////////////
 		//////   EXECUTION
@@ -148,6 +149,51 @@ bool Controller::update(RoboCompDifferentialRobot::DifferentialRobotPrx differen
 	return false;
 		
 }
+
+
+/**
+ * @brief Lowest level of movement control
+ * 
+ * @param innerModel ...
+ * @param road ...
+ * @param laserData ...
+ * @param vadvance ...
+ * @param vrot ...
+ * @return void
+ */
+void Controller::avoidanceControl(InnerModel& innerModel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot)
+{
+	//compute repulsive forces from laser
+	QVec res = QVec::zeros(3);
+	float distN, laserMin;
+	for(auto i : laserData)
+	{
+		//non-linear (exponential) transformation of the magnitude
+		distN = exponentialFunction(i.dist, 500, 0.1, 0);
+		//qDebug() << __FUNCTION__ << i.dist << distN;
+		QVec p = innerModel.laserTo("laser", "laser" , distN, i.angle);
+		p[0]=-p[0]; p[1]=0; p[2]=-p[2];
+		if (laserMin < i.dist)
+			laserMin = i.dist;
+		//p.print("p");
+		res = res + p;
+	}
+	qDebug() << __FUNCTION__ << "Resultant:" << res;
+	
+	//Combine p with vadvance, vrot to obtain the final control
+	if( laserMin < 25 )
+	{ 
+		vadvance = 0; vrot = 0;
+		qDebug() << __FUNCTION__ << "STOP due to inmminent risk of collision";
+	//	return true;
+	}
+	
+	{
+			
+	}
+	
+}
+
 
 void Controller::stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy)
 {

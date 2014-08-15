@@ -61,7 +61,7 @@ ob::ValidStateSamplerPtr PlannerOMPL::allocOBValidStateSampler(const ob::SpaceIn
 void PlannerOMPL::initialize(Sampler *sampler )
 {
 	
-	xMin = 0.;
+	xMin = 0.;      ////OJO ARREGLAR ESTO
 	xMax = 10000.;
 	zMin = -10000.;
 	zMax = 0.;

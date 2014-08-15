@@ -156,10 +156,6 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 		qDebug() << __FUNCTION__ << "Smoothing";
 		smoothPath(currentPath);
 		currentPath = currentSmoothedPath;
-		//smoothPathIter(currentPath);
-		smoothPath(currentPath);
-		currentPath = currentSmoothedPath;
-	
 		qDebug() << __FUNCTION__ << "Final path size " << currentPath.size(); 
 
 		return true;
@@ -896,15 +892,14 @@ void PlannerPRM::smoothPath( const QList<QVec> & list)
 		  currentSmoothedPath.append(list.first());
 		if(currentSmoothedPath.contains(list.last()) == false)
 		  currentSmoothedPath.append(list.last());
-
 		return;
 	}
 	else		//call again with the first half first and the second half later
 	{
 		if(list.size()>2)	   
 		{
-		      smoothPath( list.mid(0,list.size()/2 +1));
-		      smoothPath( list.mid( list.size()/2 , -1 ));
+			smoothPath( list.mid(0,list.size()/2 +1));
+		    smoothPath( list.mid( list.size()/2 , -1 ));
 		}
 	}
 }

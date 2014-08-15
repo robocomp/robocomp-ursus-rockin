@@ -25,6 +25,8 @@
 #include "pointstoroad.h"
 #include <DifferentialRobot.h>
 #include "waypoints.h"
+#include <innermodel/innermodel.h>
+#include <Laser.h>
 
 class Controller
 {
@@ -32,13 +34,14 @@ class Controller
 		Controller(int delay); //in secs
 		~Controller();
 	
-		bool update( RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_prx,const WayPoints &road);
+		bool update(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy, WayPoints& road);
 		void stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy);
-
+float exponentialFunction(float value, float xValue, float yValue, float min = 0.f);
 private:
 		QTime time;
 		int delay;
-		float exponentialFunction(float value, float xValue, float yValue, float min = 0.f);
+		
+		void avoidanceControl(InnerModel &innerModel, WayPoints &road, const RoboCompLaser::TLaserData &laserData, float &vadvance, float &vrot);
 };
 
 #endif // CONTROLLER_H

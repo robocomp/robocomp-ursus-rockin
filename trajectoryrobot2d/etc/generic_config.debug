@@ -5,6 +5,7 @@
 #
 TrajectoryRobot2DComp.Endpoints=tcp -p 12204
 CommonBehavior.Endpoints=tcp -p 12204
+JoystickAdapterTopic.Endpoints=tcp -p 12226
 
 # Remote servers proxies example
 #RemoteProxy = remote:tcp -h remotehost -p 10001
@@ -12,3 +13,8 @@ CommonBehavior.Endpoints=tcp -p 12204
 LaserProxy = laser:tcp -h localhost -p 10003
 InnerModelManagerProxy = innermodelmanager:tcp -h localhost -p 11175
 DifferentialRobotProxy = differentialrobot:tcp -h localhost -p 10004
+
+#
+# This property is used by the clients to connect to IceStorm.
+#
+TopicManager.Proxy=DemoIceStorm/TopicManager:default -p 10000

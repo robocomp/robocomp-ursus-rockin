@@ -1,3 +1,4 @@
+import "/robocomp/interfaces/IDSLs/JoystickAdapter.idsl";
 import "/robocomp/interfaces/IDSLs/TrajectoryRobot2D.idsl";
 import "/robocomp/interfaces/IDSLs/InnerModelManager.idsl";
 import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
@@ -9,6 +10,7 @@ Component TrajectoryRobot2DComp
 	{
 		requires Laser, DifferentialRobot, InnerModelManager;
 		implements TrajectoryRobot2D;
+		subscribesTo JoystickAdapter;
 	};
 	language Cpp;
 	gui Qt(QWidget);

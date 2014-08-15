@@ -45,9 +45,11 @@ public:
 	SpecificWorker(MapPrx& mprx, QWidget *parent = 0);
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	void  go(const TargetPose& target);
+	void go(const TargetPose& target);
+	void setHeadingTo(const TargetPose& target);
 	RoboCompTrajectoryRobot2D::NavState getState();
 	void stop();
+	void sendData(const RoboCompJoystickAdapter::TData& data);
 	
 public slots:
  	void compute(); 	
@@ -77,14 +79,20 @@ private:
 	//Smoother smoother;
 	
 	void readRoadFromFile(string name, WayPoints *road);
-//	void cleanWorld();
-	void moveBoxes();
 	void setRobotInitialPose(float x, float z, float alpha);
 	bool updateInnerModel(InnerModel* inner);
 	bool targetHasAPlan(InnerModel* inner);
 	void drawTarget(const QVec &target);
 	void drawGreenBoxOnTarget(const QVec &target);
 	void printNumberOfElementsInRCIS();
+	bool gotoCommand(InnerModel *innerModel);
+	bool setHeadingCommand(InnerModel *innerModel, float alfa);
+	bool avoidanceControl(InnerModel& innerModel, WayPoints& road, const TLaserData& laserData, float& vadvance, float& vrot);
+	std::vector<float> computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData);
+	std::vector<float> baseOffsets;
+	bool robotLaserCollision(const QVec& p1, const QVec& p2, const QVec& p3, const QVec& p);
+	void filter(float &vadvance, float &vrot);
+	QVec repulsionVector;
 };
 
 #endif
