@@ -423,3 +423,13 @@ findGrannyAndDeliver : active(1)
 	deliver.room = find.room
 	deliver.p = find.person
 }
+
+reachAndGrasp : active(1)
+{
+	setObjectReach as reach
+	graspObject as grasp
+	where:
+	reach.o = grasp.o
+	reach.s = grasp.s
+}
+
