@@ -35,6 +35,7 @@ public:
 	SpecificWorker(MapPrx& mprx, QWidget *parent = 0);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
+	void  newAprilTag(const tagsList& tags); 
 
 public slots:
  	void compute(); 	
@@ -54,6 +55,9 @@ public slots:
 	void stopRobot();
 	void setNewTargetFromPlant(QVec);
 	void setTargetCoorFromPlant(QVec t);
+	void step1();
+	void step2();
+	void step3();
 	
 private:
 	PlantWidget *plantWidget;

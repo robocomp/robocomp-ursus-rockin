@@ -36,7 +36,8 @@ class CurrentTarget
 		void setWithoutPlan(bool w); 
 		void print();
 		ulong getElapsedTime() const;  //ms
-		bool doRotation;
+		bool hasRotation() const;
+		void setHasRotation(bool a);
 		enum class Command { GOTO, SETHEADING, STOP};
 		Command command;
 		
@@ -47,6 +48,7 @@ class CurrentTarget
 		bool active;
 		bool withoutPlan;
 		QTime reloj;
+		bool doRotation;
 		
 };
 

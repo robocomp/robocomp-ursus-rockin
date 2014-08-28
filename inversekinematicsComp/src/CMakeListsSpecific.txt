@@ -1,0 +1,22 @@
+
+# Sources set
+SET ( SOURCES
+  specificworker.cpp
+  specificmonitor.cpp
+  cinematica_inversa.cpp
+  target.cpp
+  planner.cpp
+  reflexx.cpp
+)
+
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+  planner.h
+  reflexx.h
+  
+)
+
+SET ( LIBS ${LIBS} -lReflexxesTypeIV )
+ADD_DEFINITIONS( -I/usr/local/include/Reflexxes )

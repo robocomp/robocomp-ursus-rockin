@@ -238,6 +238,7 @@ bool WayPoints::draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *
 		else
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#550099" );  //Morado
 	}
+	return false;
 }
 
 bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo)

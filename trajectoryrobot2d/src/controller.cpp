@@ -44,7 +44,7 @@ bool Controller::update(InnerModel &innerModel, const RoboCompLaser::TLaserData 
 	
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
 	
-	if((road.isBlocked()) or (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
+	if( (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << "Robot blocked,  target reached or road lost";
 		stopTheRobot(differentialrobot_proxy);
@@ -131,8 +131,8 @@ bool Controller::update(InnerModel &innerModel, const RoboCompLaser::TLaserData 
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
 		
-		//bool collision = avoidanceControl(innerModel, road, laserData, vadvance, vrot);
-
+		bool collision = avoidanceControl(innerModel, road, laserData, vadvance, vrot);
+	
 		/////////////////////////////////////////////////
 		//////   EXECUTION
 		////////////////////////////////////////////////
@@ -169,26 +169,27 @@ bool Controller::avoidanceControl(InnerModel& innerModel, WayPoints& road, const
 {
 	//compute repulsive forces from laser
 	QVec res = QVec::zeros(3);
-	float distN, laserMin;
+	float distN, distNorm;
 	int k=0;
 	bool collision = false;
 	for(auto i : laserData)
 	{
 		//non-linear (exponential) transformation of the magnitude
-		//distN = exponentialFunction(i.dist, 500, 0.1, 0);
 		distN = std::max<float>(i.dist - baseOffsets[k], 0);
-		qDebug() << __FUNCTION__ << i.dist << distN;
 		k++;
-		//QVec p = innerModel.laserTo("laser", "laser" , distN, i.angle);
-		if( distN < 0) 
+		distNorm = exponentialFunction(distN, 300, 0.1, 0);
+		//qDebug() << distNorm;
+		QVec p = innerModel.laserTo("laser", "laser" , distNorm, i.angle);  //Watch the laser to tobot offset to compute final corrections
+		res += (p * (T)(-1));
+		if( distN < 3) 
 		{
 			collision = true;
 			vadvance = 0;
 			vrot = 0;
-			road.setBlocked(true);
-			break;
 		}
 	}
+	qDebug() << __FUNCTION__ << res;
+	road.setBlocked(collision);
 	return collision;
 }
 

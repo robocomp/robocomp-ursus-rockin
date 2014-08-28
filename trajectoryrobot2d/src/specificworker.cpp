@@ -90,6 +90,37 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::computeLuis( )
 {	
+	
+	RoboCompInnerModelManager::Pose3D pose;
+	pose.y = 0;
+	pose.x = 0;
+	pose.z = 0;
+	pose.rx = pose.ry = pose.z = 0.;	
+	RoboCompInnerModelManager::Plane3D plane;
+	plane.px = target.x();	plane.py = 10; plane.pz = target.z();
+	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 150;
+	plane.height = plane.width = 100;
+	
+	try
+	{	
+		innermodelmanager_proxy->addTransform("shit","static","floor", pose);		
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ 
+		std::cout << ex << std::endl;
+		innermodelmanager_proxy->removeNode("shit");
+		innermodelmanager_proxy->addTransform("shit","static","floor", pose);		
+	}
+	
+	for( int i=0; i<50; i++)
+	{
+		string item = "t_" + QString::number(i).toStdString();
+		pose.x += i*10;
+		innermodelmanager_proxy->addTransform(item,"static","shit", pose);				
+		
+		innermodelmanager_proxy->addPlane(item + "_p", item, plane);
+	}
+	printNumberOfElementsInRCIS();
 // 	printf("############################################################################\n");
 // 	try
 // 	{
@@ -126,8 +157,7 @@ void SpecificWorker::computeLuis( )
  * @return void
  */
 void SpecificWorker::compute( )
-{	
-
+{		
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
 	
@@ -158,13 +188,13 @@ void SpecificWorker::compute( )
 		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 		if( reloj2.elapsed() < 100 )
 		{
-			road.clearDraw(innermodelmanager_proxy);
+			//road.clearDraw(innermodelmanager_proxy);
 			//try {	
-			road.draw(innermodelmanager_proxy, innerModel);
+			//road.draw(innermodelmanager_proxy, innerModel);
 			//
 			//	planner->drawGraph(innermodelmanager_proxy);
 		}
-		printNumberOfElementsInRCIS();
+		//printNumberOfElementsInRCIS();
 		reloj.restart();
 	}
 	reloj2.restart();
@@ -196,16 +226,24 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 		
 		if (road.isFinished() == true)
 		{		
-			//if( currentTarget.hasRotation )
-			drawGreenBoxOnTarget( currentTarget.getTranslation() );
-			currentTarget.print();
-			currentTarget.reset();
-			planner->learnPath( road.backList );
-			road.reset();
-			road.endRoad();
-			compState.elapsedTime = taskReloj.elapsed();
-			//planner->drawGraph(innermodelmanager_proxy);
-			compState.state = "IDLE";
+			if( currentTarget.hasRotation() )
+			{
+				qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
+				road.setFinished(false);
+				currentTarget.command = CurrentTarget::Command::SETHEADING;
+			}
+			else
+			{
+				drawGreenBoxOnTarget( currentTarget.getTranslation() );
+				currentTarget.print();
+				currentTarget.reset();
+				planner->learnPath( road.backList );
+				road.reset();
+				road.endRoad();
+				compState.elapsedTime = taskReloj.elapsed();
+				//planner->drawGraph(innermodelmanager_proxy);
+				compState.state = "IDLE";
+			}
 		}
 		
 		if(road.requiresReplanning == true)
@@ -222,7 +260,35 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 
 bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 {
+	const float MAX_ORIENTATION_ERROR  = 0.05;
 	
+	float angRobot = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
+	qDebug() << __FUNCTION__ << fabs(angRobot-alfa);
+	if( fabs(angRobot - alfa) < MAX_ORIENTATION_ERROR)
+	{
+		currentTarget.setHasRotation(false);
+		road.setFinished(true);
+		drawGreenBoxOnTarget( currentTarget.getTranslation() );
+		currentTarget.print();
+		currentTarget.reset();
+		road.reset();
+		road.endRoad();
+		compState.elapsedTime = taskReloj.elapsed();
+		compState.state = "IDLE";
+		try 
+		{
+		  differentialrobot_proxy->setSpeedBase(0, 0);	
+		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+	}
+	else
+	{
+		float vrot = -0.8 * (angRobot-alfa);
+		try 
+		{
+		  differentialrobot_proxy->setSpeedBase(0, vrot);	
+		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+	}
+		
 	return true;
 }
 
@@ -399,7 +465,7 @@ void SpecificWorker::go(const TargetPose& target)
 	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
 	currentTarget.command = CurrentTarget::Command::GOTO;
 	if( target.onlyRot == true) 
-		currentTarget.doRotation = true;
+		currentTarget.setHasRotation(true);
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
 	qDebug() << __FUNCTION__ << "GO command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
@@ -459,6 +525,11 @@ void SpecificWorker::sendData(const RoboCompJoystickAdapter::TData& data)
 	} 
    	catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	
 }
+
+///////////////////////////////////////7
+/// PRUEBAS DEL CONTROLADOR
+///////////////////////////////////////
+
 
 // void SpecificWorker::filter(float& vadvance, float& vrot)
 // {	

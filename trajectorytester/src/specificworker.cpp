@@ -42,6 +42,10 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	connect(diningPushButton_3, SIGNAL(clicked()), this, SLOT(goDining3()));
 	connect(stopButton, SIGNAL(clicked()), this, SLOT(stopRobot()));
 	
+	connect(t1Button, SIGNAL(clicked()), this, SLOT(step1()));
+	connect(t2Button, SIGNAL(clicked()), this, SLOT(step2()));
+	connect(t3Button, SIGNAL(clicked()), this, SLOT(step3()));
+	
 	plantWidget = new PlantWidget(frame, QPointF(82,457), QPointF(0,10000), QPointF(65,387), QPointF(0,-10000));
 	plantWidget->show();
 	statusLabel->setText("");
@@ -117,7 +121,7 @@ void SpecificWorker::go(const QVec& t, const QVec &r)
 	try
 	{
 		trajectoryrobot2d_proxy->go(tp);
-		qDebug() << __FUNCTION__ << "Target " << t << " sent";
+		//qDebug() << __FUNCTION__ << "Target " << t << " sent";
 		reloj.restart();
 	}
 	catch(const Ice::Exception &ex)
@@ -178,7 +182,7 @@ void SpecificWorker::goKitchen()
 
 void SpecificWorker::goKitchen2()//Stove table
 {
-	go(QVec::vec3(5500,0,-4800));
+	go(QVec::vec3(5500,0,-5000), QVec::vec3(0,0,0));
 }
 
 void SpecificWorker::goBedRoom()
@@ -213,3 +217,61 @@ void SpecificWorker::stopRobot()
 	catch(const Ice::Exception &ex)
 	{		std::cout << ex << "Error talking to TrajectoryRobot2D" << std::endl;	}
 }
+
+
+/////////////////////////////////////////////////////////////
+///  TASK DEVELOPMENT
+////////////////////////////////////////////////////////////
+
+void SpecificWorker::step1()
+{
+	try 
+	{
+		bodyinversekinematics_proxy->setRobot(0);	
+	} catch (const Ice::Exception &ex) { std::cout << ex << "in setRobot" << std::endl;}
+	
+	try 
+	{
+		RoboCompBodyInverseKinematics::Pose6D target;
+		target.x = 0; target.y=10; target.z = 1000; target.rx=0; target.ry=0; target.rz=0;
+		RoboCompBodyInverseKinematics::Axis axis;
+		axis.x = 0; axis.y = 0; axis.z = 1;
+		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, false, false);
+		
+	} catch (const RoboCompBodyInverseKinematics::BIKException &ex) { std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+	
+	goKitchen2();
+}
+
+/**
+ * @brief Reposition de robot servoing the mark
+ * 
+ * @return void
+ */
+
+void SpecificWorker::step2()
+{
+	
+	
+}
+
+void SpecificWorker::step3()
+{
+
+}
+
+/////////////////////////////////////////////////////////////////
+//// AprilTags subscription
+/////////////////////////////////////////////////////////////////
+
+void SpecificWorker::newAprilTag(const tagsList& tags)
+{
+	for(auto i: tags)
+	{
+		if( i.id == 10) 
+			tag1LineEdit->setText("Id: " + QString::number(i.id));	
+	}
+}
+
+
+

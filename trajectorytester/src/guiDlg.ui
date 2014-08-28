@@ -509,7 +509,7 @@
    <property name="title">
     <string>Task</string>
    </property>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="t1Button">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -522,10 +522,10 @@
      <string>1. Kitchen</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="t2Button">
     <property name="geometry">
      <rect>
-      <x>90</x>
+      <x>210</x>
       <y>30</y>
       <width>71</width>
       <height>27</height>
@@ -535,17 +535,37 @@
      <string>2. Search</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="t3Button">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>290</x>
       <y>30</y>
       <width>81</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>3. Repos</string>
+     <string>3. Approach</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="tag1LineEdit">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>10</y>
+      <width>113</width>
+      <height>27</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="tag2LineEdit">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>40</y>
+      <width>113</width>
+      <height>27</height>
+     </rect>
     </property>
    </widget>
   </widget>

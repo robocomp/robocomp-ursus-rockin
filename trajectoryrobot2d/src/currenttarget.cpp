@@ -68,6 +68,19 @@ void CurrentTarget::setActive(bool a)
 	QMutexLocker ml(&mutex);
 	active = a;
 }
+
+void CurrentTarget::setHasRotation(bool a)
+{
+	QMutexLocker ml(&mutex);
+	doRotation = a;
+}
+
+bool CurrentTarget::hasRotation() const
+{
+	QMutexLocker ml(&mutex);
+	return doRotation;
+}
+
 bool CurrentTarget::isWithoutPlan() const
 {
 	QMutexLocker ml(&mutex);

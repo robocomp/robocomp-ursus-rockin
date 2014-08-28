@@ -155,9 +155,11 @@
 					<plane id="P_Floor_LivingRoom_0" px="2700" pz="-3300" ny="1" size="5200,1200,20" texture="living1.png" />
 					<plane id="P_Floor_LivingRoom_1" px="2200" pz="-6300" ny="1" size="4200,4800,20" texture="living2.png" />
 				</transform>
+				
 				<transform id="T_Floor_KitchenDining" tx="5900" tz="-6900">
 					<plane id="P_Floor_KitchenDining_0" ny="1" size="3200,6000,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/kitchendining.png" />
 				</transform>
+				
 				<transform id="T_Floor_Bedroom" tx="7500" tz="-2000">
 					<plane id="P_Floor_Bedroom_0" ny="1" size="4400,3800,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/bedroom.png" />
 				</transform>
@@ -189,6 +191,7 @@
 			</transform>
 			<transform id="k_t" tx="5600" tz="-4300" ty="0">
 				<mesh id="k" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/komplekt5.3DS" rx="1.57" scale="6.6,9,9"  />
+				<plane id="mugTag" py="900" px="-200" ny="1" size="170,170,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-10.png" />
 			</transform>
 		<!--	<transform id="sofa0_t" tx="1800" tz="-7600">
 				<mesh id="sofa0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="1.57"  scale="20,20,20"  />

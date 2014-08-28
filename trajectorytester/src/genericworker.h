@@ -29,6 +29,8 @@
 #include "config.h"
 #include <TrajectoryRobot2D.h>
 #include <DifferentialRobot.h>
+#include <BodyInverseKinematics.h>
+#include <AprilTags.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -43,6 +45,8 @@ using namespace std;
 */
 using namespace RoboCompTrajectoryRobot2D;
 using namespace RoboCompDifferentialRobot;
+using namespace RoboCompBodyInverseKinematics;
+using namespace RoboCompAprilTags;
 class GenericWorker :
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
@@ -62,6 +66,9 @@ public:
 
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
 	DifferentialRobotPrx differentialrobot_proxy;
+	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
+	virtual void  newAprilTag(const tagsList& tags) = 0;
+
 protected:
 	QTimer timer;
 	int Period;

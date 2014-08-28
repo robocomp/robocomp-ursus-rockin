@@ -139,7 +139,7 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 	// sqr(x'-x) + sqr(z'-z) = sqr(r)
 	// z = z' - (r/(sqrt(t*t -1)))
 	// x = x' - r(sqrt(1-(1/t*t+1)))
-	if( (currentTarget.doRotation == true) and (road.last().hasRotation == false) )
+	if( (currentTarget.hasRotation() == true) and (road.last().hasRotation == false) )
 	{
 		qDebug() << __FUNCTION__ << "computing rotation" << road.last().pos;
 		float radius = 500;

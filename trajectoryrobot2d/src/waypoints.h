@@ -108,7 +108,7 @@ class WayPoints : public QList< WayPoint >
 		void setFinished( bool b)															{ QMutexLocker ml(&mutex); finish = b; }
 		bool isFinished() const 															{ return finish;};
 		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
-		void setBlocked(bool b)																{ blockedRoad = true;};
+		void setBlocked(bool b)																{ blockedRoad = b;};
 		
 		int nextPointIndex;
 	//	float distanceToLastVisible;

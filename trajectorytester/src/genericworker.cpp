@@ -30,6 +30,7 @@ QObject()
 {
 	trajectoryrobot2d_proxy = (*(TrajectoryRobot2DPrx*)mprx["TrajectoryRobot2DProxy"]);
 	differentialrobot_proxy = (*(DifferentialRobotPrx*)mprx["DifferentialRobotProxy"]);
+	bodyinversekinematics_proxy = (*(BodyInverseKinematicsPrx*)mprx["BodyInverseKinematicsProxy"]);
 
 	mutex = new QMutex();
 	#ifdef USE_QTGUI

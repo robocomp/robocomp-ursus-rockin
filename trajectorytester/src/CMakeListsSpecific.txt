@@ -13,3 +13,4 @@ SET ( HEADERS
   plantwidget.h
 )
 
+ADD_DEFINITIONS( -std=c++11 )
