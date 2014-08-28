@@ -69,7 +69,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	qDebug() << __FUNCTION__ << "----- elasticband set";
 	
 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
-	controller = new Controller(2);
+	controller = new Controller(*innerModel, laserData, 2);
 	qDebug() << __FUNCTION__ << "----- controller set";
 	
 // 	//Localizer stuff
@@ -127,14 +127,16 @@ void SpecificWorker::computeLuis( )
  */
 void SpecificWorker::compute( )
 {	
-//  	computeLuis();
-//  	return;
 
-	float a;
-	avoidanceControl(*innerModel, road, laserData, a, a);
-	
- 	static QTime reloj = QTime::currentTime();
+	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
+	
+// 	float a=0;
+// 	if( newData )
+// 	{
+// 		avoidanceControl(*innerModel, laserData, ad, ro, reloj2.elapsed());
+// 		newData = false;
+// 	}
 	
 	if ( updateInnerModel(innerModel) )
 	{
@@ -162,7 +164,7 @@ void SpecificWorker::compute( )
 			//
 			//	planner->drawGraph(innermodelmanager_proxy);
 		}
-		//printNumberOfElementsInRCIS();
+		printNumberOfElementsInRCIS();
 		reloj.restart();
 	}
 	reloj2.restart();
@@ -450,72 +452,111 @@ void SpecificWorker::sendData(const RoboCompJoystickAdapter::TData& data)
 		QMat m = QMat::afinTransformFromIntervals( intervals );
 		float vadvance = (m * QVec::vec2(data.axes[data.dirAxisIndex].value, 1))[0];
 		float vrot = data.axes[data.velAxisIndex].value;
-		//filter(vadvance, vrot);
-		differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
+		newData = true;
+		ad = vadvance; ro = vrot;
+		//avoidanceControl(*innerModel, laserData, vadvance, vrot);
+		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
 	} 
    	catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	
 }
 
-void SpecificWorker::filter(float& vadvance, float& vrot)
-{	
-	if( repulsionVector != QVec::zeros(3))
- 	{
- 		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector; 
- 		vadvance = -fabs(vadvance);
- 	}
+// void SpecificWorker::filter(float& vadvance, float& vrot)
+// {	
+// 	if( repulsionVector != QVec::zeros(3))
+//  	{
+//  		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector; 
+//  		vadvance = -fabs(vadvance);
+//  	}
+// 	
+// }
+
+
+/**
+ * @brief To go in Controller class or as a separate class with soft real time restrictions.
+ * Keeps the robot safe but, being the last level of control, should try to compute a safe diverging trajectory to keep things moving on the road.
+ * 
+ * @param innerModel ...
+ * @param road ...
+ * @param laserData ...
+ * @param vadvance ...
+ * @param vrot ...
+ * @return bool
+ */
+bool SpecificWorker::avoidanceControl(InnerModel& innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed)
+{
+	const float MAX_ADV_ACC = 400;
+	const float MAX_ROT_ACC = 0.5;
+	//if( bState.advV == 0 and bState.rotV == 0 )
+	//	return false;
 	
+	//check collision for a future potential position
+	//given current speed and maximun acceleration, compute the minimun time to stop
+	//float time = std::min<float>( fabs((vadvance + bState.advV) / 400.f), 0.1); // mm/sg2
+	//float time = std::max<float>( (fabs(bState.advV) / 400.f), fabs(bState.rotV / 2.));
+	float time = fabs(bState.advV + vadvance) / 400.f;
+	//float time = elapsed / 1000.f;
+	//we want to decide here if the next movement will cause a collision
+	QVec repulsionVector;
+	bool collision;
+	std::tie(repulsionVector, collision) = checkInminentCollision( innerModel, laserData, 
+																   bState.advV + vadvance, 
+																   bState.rotV + vrot, time);
+	
+	//if( repulsionVector != QVec::zeros(3))
+	if( collision )	
+	{
+		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector; 
+		
+		//compute a <vadv,vrot> command to save the situation
+		//check the outcome of all possible velocities to find one that saves the obstacle or else stop the robot
+		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
+		differentialrobot_proxy->setSpeedBase( 0, 0);		
+	}
+	else
+		try 
+		{
+			differentialrobot_proxy->setSpeedBase( vadvance, vrot);
+		}
+		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	 
+	
+	return true;
 }
 
-
-bool SpecificWorker::avoidanceControl(InnerModel& innerModel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot)
+std::tuple<QVec, bool> SpecificWorker::checkInminentCollision(InnerModel& innerModel, const RoboCompLaser::TLaserData& laserData, float vadv, float vrot, float delta)
 {
-	if( bState.advV == 0 and bState.rotV == 0 )
-		return false;
-	
 	//integrate speed to obtain base next position using Borenstein's approximation
-	float deltaT = 500 / 1000.f;
-	float xN = bState.x + (bState.advV * deltaT) * sin(bState.rotV * deltaT);  //sgs to ms
-	float zN = bState.z + (bState.advV * deltaT) * cos(bState.rotV * deltaT);
-	float angN = bState.alpha + (bState.rotV * deltaT);
-// 	qDebug() << __FUNCTION__ << bState.x << bState.z << bState.alpha << deltaT << bState.advV << bState.rotV;
-// 	qDebug() << __FUNCTION__ << xN << zN << angN;
-// 	
-	//now check if there will be collision in the future position using current laserData check if collides
+	float deltaT = delta; // / 1000.f;
+	float xN = bState.x + (vadv * deltaT) * sin(vrot * deltaT);
+	float zN = bState.z + (vadv * deltaT) * cos(vrot * deltaT);
+	float angN = bState.alpha + (vrot * deltaT);
+	qDebug() << vadv << vrot << deltaT << "now" << bState.x << bState.z << bState.alpha << "new" << xN << zN << angN;
+	
+	//now check if there will be collision in the future position using current laserData
 	innerModel.updateTransformValues("robot", xN, 0, zN, 0, angN, 0);
-	QVec p1 = innerModel.transform("world", QVec::vec3(200,0,200), "robot" );
-	QVec p2 = innerModel.transform("world", QVec::vec3(200,0,-200), "robot" );
-	QVec p3 = innerModel.transform("world", QVec::vec3(-200,0,200), "robot" );
+	// Three points of rectangle approximating the robot base 
+	QVec p1 = innerModel.transform("world", QVec::vec3(220,0,220), "robot" );
+	QVec p2 = innerModel.transform("world", QVec::vec3(220,0,-220), "robot" );
+	QVec p3 = innerModel.transform("world", QVec::vec3(-220,0,220), "robot" );
 	innerModel.updateTransformValues("robot", bState.x, 10, bState.z, 0, bState.alpha, 0);
 	
 	QVec p(3,0.f);
-	//QVec sum(3,0.f);
 	int k=0;
-	repulsionVector = QVec::zeros(3);
+	bool collision = false;
+	QVec repulsionVector = QVec::zeros(3);
 	for(auto i : laserData)
 	{
 		p = innerModel.laserTo("world","laser",i.dist,i.angle);
 		if( robotLaserCollision( p1, p2, p3, p ))
 		{
-			p = innerModel.laserTo("robot","laser",i.dist,i.angle);
-			p = p.normalize() * (T)(-1);
-			repulsionVector += p;
+			//p = p * (T)(-1);
+			repulsionVector += ( p * (T)(-1));
+			collision = true;
 		}	
 	}
-	
-	// Combine repulsionVector with (vadvance, vrot) and (VAdv,VRot) to whether stop or compute a safe deviation	
-	
-	//sum = (sum * QVec::vec3(vrot, 0, vadvance).norm2()) + QVec::vec3(vrot, 0, vadvance);
-	if( repulsionVector != QVec::zeros(3))
-	{
-		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector; 
-		vadvance = -fabs(vadvance);
-		differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
-	}
-
-	//vadvance = sum.z();
-	//vrot = sum.x();
-	return true;
+	return std::make_tuple(repulsionVector, collision);
 }
+
+
 
 bool SpecificWorker::robotLaserCollision( const QVec &p1, const QVec &p2, const QVec &p3,  const QVec &p)
 {

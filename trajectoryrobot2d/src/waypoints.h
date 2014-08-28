@@ -95,6 +95,7 @@ class WayPoints : public QList< WayPoint >
 		ulong getETA() const 																{ return estimatedTimeOfArrival;};
 		WayPoints::iterator getIndexOfLastVisiblePoint() const								{ return indexOfLastVisiblePoint;};
 		uint32_t getOrderOfClosestPointToRobot() const										{ return orderOfClosestPointToRobot;};
+		bool isBlocked() const																{ return blockedRoad;};
 		
 		void setIndexOfClosestPointToRobot(WayPoints::iterator it) 							{ indexOfClosestPointToRobot = it;};
 		void setTangentAtClosestPoint(const QLine2D &tangent) 								{ roadTangentAtClosestPoint = tangent;};
@@ -107,10 +108,12 @@ class WayPoints : public QList< WayPoint >
 		void setFinished( bool b)															{ QMutexLocker ml(&mutex); finish = b; }
 		bool isFinished() const 															{ return finish;};
 		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
+		void setBlocked(bool b)																{ blockedRoad = true;};
 		
 		int nextPointIndex;
 	//	float distanceToLastVisible;
-		bool isBlocked;
+	//	bool isBlocked;
+		bool blockedRoad;
 		bool isLost;
 		int currentCollisionIndex;
 		float currentDistanceToFrontier;

@@ -424,7 +424,7 @@ void ElasticBand::checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData 
 	else 
 	{		minAngle = laserData[0].angle;	maxAngle = laserData.back().angle;	}
 		
-	road.isBlocked = false;
+	road.setBlocked( false );
 	for(int i=0; i< road.size()-1; i++)
 	{
 		WayPoint &w1 = road[i];
@@ -474,7 +474,7 @@ void ElasticBand::checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData 
 			//now we have the laser index we check if point is before or after the laser reading
 			if( pr.norm2() > laserData[j].dist ) // laser beam is smaller than p distance to robot. The path is crossed by an obstacle
 			{
-				road.isBlocked = true;
+				road.setBlocked(true);
 				qDebug() << __FILE__ << "Blocked index" << i << "dist robot2point" << pr.norm2() << "laser" << laserData[j].dist << "k" << k << pr 
 									<< "laserIndex" << j << "laserAngle" << laserData[j].angle << "angle" << angle;;
 				break;

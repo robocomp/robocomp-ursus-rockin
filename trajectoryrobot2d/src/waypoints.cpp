@@ -31,7 +31,7 @@ WayPoints::WayPoints()
 	currentPointIndex = 0;
 	nextPointIndex = 1;
 	finish = false;
-	isBlocked = false;
+	blockedRoad = false;
 	isLost = false;
 	currentCollisionIndex = 0;
 	currentDistanceToFrontier = 0;
@@ -59,7 +59,7 @@ void WayPoints::reset()
 	currentPointIndex = 0;
 	nextPointIndex = 1;
 	finish = false;
-	isBlocked = false;
+	blockedRoad = false;
 	isLost = false;
 	currentCollisionIndex = 0;
 	currentDistanceToFrontier = 0;
@@ -183,7 +183,7 @@ void WayPoints::printRobotState(InnerModel* innerModel, const CurrentTarget &cur
 		qDebug() << "	Closest point:" << getIndexOfClosestPointToRobot()->pos;
 		qDebug() << "	Tangent at closest point:" << getTangentAtClosestPoint();
 		qDebug() << "	Current point index: " << currentPointIndex;
-		qDebug() << "	Is Blocked:" << isBlocked;
+		qDebug() << "	Is Blocked:" << isBlocked();
 		qDebug() << "	Is Lost:" << isLost;
 		qDebug() << "	Is Finished:" << isFinished();
 		qDebug() << "	Requires replanning:" << requiresReplanning;

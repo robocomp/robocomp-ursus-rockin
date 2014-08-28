@@ -178,7 +178,7 @@ void SpecificWorker::goKitchen()
 
 void SpecificWorker::goKitchen2()//Stove table
 {
-	go(QVec::vec3(5500,0,-4700));
+	go(QVec::vec3(5500,0,-4800));
 }
 
 void SpecificWorker::goBedRoom()
