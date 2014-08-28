@@ -131,7 +131,7 @@ bool Controller::update(InnerModel &innerModel, const RoboCompLaser::TLaserData 
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
 		
-		bool collision = avoidanceControl(innerModel, road, laserData, vadvance, vrot);
+		//bool collision = avoidanceControl(innerModel, road, laserData, vadvance, vrot);
 
 		/////////////////////////////////////////////////
 		//////   EXECUTION
