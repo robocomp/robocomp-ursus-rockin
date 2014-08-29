@@ -191,7 +191,7 @@
 			</transform>
 			<transform id="k_t" tx="5600" tz="-4300" ty="0">
 				<mesh id="k" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/komplekt5.3DS" rx="1.57" scale="6.6,9,9"  />
-				<plane id="mugTag" py="900" px="-200" ny="1" size="170,170,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-10.png" />
+				<plane id="mugTag" py="900" px="-200" ny="1" size="170,170,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
 			</transform>
 		<!--	<transform id="sofa0_t" tx="1800" tz="-7600">
 				<mesh id="sofa0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="1.57"  scale="20,20,20"  />

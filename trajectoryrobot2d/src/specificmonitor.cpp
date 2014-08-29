@@ -90,8 +90,8 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 	//Example
 	    RoboCompCommonBehavior::Parameter aux;
 	    aux.editable = true;
-	    configGetString( "PointsFile", aux.value,"points.txt");
-	    params["PointsFile"] = aux;
+	    configGetString( "InnerModel", aux.value,"/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
+	    params["InnerModel"] = aux;
 }
 
 //comprueba que los parametros sean correctos y los transforma a la estructura del worker

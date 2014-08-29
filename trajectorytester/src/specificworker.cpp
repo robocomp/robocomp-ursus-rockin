@@ -18,6 +18,8 @@
  */
  
  #include "specificworker.h"
+#include </home/pbustos/robocomp/components/robocomp-ursus-rockin/trajectoryrobot2d/src/specificworker.h>
+#include <TrajectoryRobot2D.ice>
 #include <boost/graph/graph_concepts.hpp>
 
 /**
@@ -49,6 +51,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	plantWidget = new PlantWidget(frame, QPointF(82,457), QPointF(0,10000), QPointF(65,387), QPointF(0,-10000));
 	plantWidget->show();
 	statusLabel->setText("");
+	tag11 = false;
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
 	
 	connect(plantWidget, SIGNAL(mouseMove(QVec)), this, SLOT(setTargetCoorFromPlant(QVec)));
 	connect(plantWidget, SIGNAL(mousePress(QVec)), this, SLOT(setNewTargetFromPlant(QVec)));
@@ -59,19 +63,26 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 */
 SpecificWorker::~SpecificWorker()
 {
-
+	state = State::IDLE;
 }
+
+bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
+{
+	timer.start(250);
+	return true;
+};
+
 void SpecificWorker::compute( )
 {
 	try
 	{
-		RoboCompTrajectoryRobot2D::NavState state = trajectoryrobot2d_proxy->getState();
-		statusLabel->setText(QString::fromStdString( state.state ));
-		if( state.state == "PLANNING" )
+		planningState = trajectoryrobot2d_proxy->getState();
+		statusLabel->setText(QString::fromStdString( planningState.state ));
+		if( planningState.state == "PLANNING" )
 		{
 			segsLcd->display(reloj.elapsed() );
 		}
-		if( state.state == "EXECUTING" )
+		if( planningState.state == "EXECUTING" )
 		{
 			float distance = (target - current).norm2();
 			//estimatedDurationLcd->display((int)state.estimatedTime);
@@ -85,24 +96,138 @@ void SpecificWorker::compute( )
 	}
 	try
 	{
-		RoboCompDifferentialRobot::TBaseState bState;
 		differentialrobot_proxy->getBaseState(bState);
 		current = QVec::vec3(bState.x, 0, bState.z);
 		plantWidget->moveRobot( bState.x, bState.z, bState.alpha);	
+		innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
+		innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
 	}
 	catch(const Ice::Exception &ex)
 	{
 		std::cout << ex << "Error talking to Differentialrobot" << std::endl;
 	}
 
+	
+	doStateMachine();
+	
+}
+
+void SpecificWorker::doStateMachine()
+{
+	switch (state) 
+	{
+		case State::IDLE:
+				qDebug() << "IDLE";
+			break;
+		case State::GO_KITCHEN:
+				qDebug() << "GO_KITCHEN";
+				state = go_kitchen();
+			break;
+		case State::SERVOING:
+			qDebug() << "SERVOING";
+			state = servoing();
+			break;
+		default:
+			break;
+	}
+}
+
+SpecificWorker::State SpecificWorker::go_kitchen()
+{
+	static bool initiated = false;
+	
+	if( planningState.state == "IDLE" and not initiated)
+	{
+		try 
+		{	
+			RoboCompBodyInverseKinematics::Pose6D target;
+			target.x = 0; target.y=10; target.z = 1000; target.rx=0; target.ry=0; target.rz=0;
+			RoboCompBodyInverseKinematics::Axis axis;
+			axis.x = 0; axis.y = 0; axis.z = 1;
+			bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, false, false);
+		} 
+		catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+			{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+	
+		go(QVec::vec3(5500,0,-5000), QVec::vec3(0,0,0));
+		initiated = true;
+		return State::GO_KITCHEN;
+	}
+	if( planningState.state == "IDLE" and (QVec::vec3(5500,0,-5000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 100)
+	{
+		qDebug() << "Made it...";
+		initiated = false;
+		stopRobot();
+		return State::SERVOING;
+	}
+	if( tag11 == true) 
+	{
+		qDebug() << "TAG11";
+		initiated = false;
+		stopRobot();
+		return State::SERVOING;
+	}
+	if( planningState.state == "EXECUTING" )
+	{
+			qDebug() << "Working...";
+			return State::GO_KITCHEN;
+	}
+}
+
+SpecificWorker::State SpecificWorker::servoing()
+{
+	qDebug() << tag.id << tag.tx << tag.ty << tag.tz;
+	//compute new final target 
+	
+	go(QVec::vec3(,0,), QVec::vec3(0,0,0));
+	return State::IDLE;
+}
+
+/////////////////////////////////////////////////////////////
+///  TASK DEVELOPMENT
+////////////////////////////////////////////////////////////
+
+void SpecificWorker::step1()
+{
+	state = State::GO_KITCHEN;
+	
+// 	try 
+// 	{
+// 		bodyinversekinematics_proxy->setRobot(0);	
+// 	} catch (const Ice::Exception &ex) { std::cout << ex << "in setRobot" << std::endl;}
+// 	
+// 	try 
+// 	{
+// 		RoboCompBodyInverseKinematics::Pose6D target;
+// 		target.x = 0; target.y=10; target.z = 1000; target.rx=0; target.ry=0; target.rz=0;
+// 		RoboCompBodyInverseKinematics::Axis axis;
+// 		axis.x = 0; axis.y = 0; axis.z = 1;
+// 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, false, false);
+// 		
+// 	} catch (const RoboCompBodyInverseKinematics::BIKException &ex) { std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+// 	
+// 	goKitchen2();
+}
+
+/**
+ * @brief Reposition de robot servoing the mark
+ * 
+ * @return void
+ */
+
+void SpecificWorker::step2()
+{
+	
+	
+}
+
+void SpecificWorker::step3()
+{
+
 }
 
 
-bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
-{
-	timer.start(250);
-	return true;
-};
+////////////////////////////////////////////////////////////////////
 
 void SpecificWorker::go(const QVec& t, const QVec &r)
 {
@@ -219,47 +344,6 @@ void SpecificWorker::stopRobot()
 }
 
 
-/////////////////////////////////////////////////////////////
-///  TASK DEVELOPMENT
-////////////////////////////////////////////////////////////
-
-void SpecificWorker::step1()
-{
-	try 
-	{
-		bodyinversekinematics_proxy->setRobot(0);	
-	} catch (const Ice::Exception &ex) { std::cout << ex << "in setRobot" << std::endl;}
-	
-	try 
-	{
-		RoboCompBodyInverseKinematics::Pose6D target;
-		target.x = 0; target.y=10; target.z = 1000; target.rx=0; target.ry=0; target.rz=0;
-		RoboCompBodyInverseKinematics::Axis axis;
-		axis.x = 0; axis.y = 0; axis.z = 1;
-		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, false, false);
-		
-	} catch (const RoboCompBodyInverseKinematics::BIKException &ex) { std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
-	
-	goKitchen2();
-}
-
-/**
- * @brief Reposition de robot servoing the mark
- * 
- * @return void
- */
-
-void SpecificWorker::step2()
-{
-	
-	
-}
-
-void SpecificWorker::step3()
-{
-
-}
-
 /////////////////////////////////////////////////////////////////
 //// AprilTags subscription
 /////////////////////////////////////////////////////////////////
@@ -268,8 +352,18 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 {
 	for(auto i: tags)
 	{
-		if( i.id == 10) 
+		if( i.id == 11) 
+		{
 			tag1LineEdit->setText("Id: " + QString::number(i.id));	
+			//qDebug() << __FUNCTION__ << "God damn got it!";
+			tag11 = true;
+			tag = i;
+		}
+		else
+		{
+			tag1LineEdit->setText("");
+			tag11 = false;
+		}
 	}
 }
 

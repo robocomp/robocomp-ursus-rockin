@@ -29,14 +29,41 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
- 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
-//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
+	//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
 
-	// Move Robot to Hall
-	//setRobotInitialPose(800, -10000, M_PI);
+}
+
+/**
+* \brief Default destructor
+*/
+SpecificWorker::~SpecificWorker()
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
+{
+	//qDebug() << QString::fromStdString(params["PointsFile"].value);
 	
-	//Update InnerModel from robot
+	try
+	{
+		RoboCompCommonBehavior::Parameter par = params.at("InnerModel");
+		if( QFile::exists(QString::fromStdString(par.value)) )
+			innerModel = new InnerModel(par.value);
+		else
+		{
+			std::cout << "Innermodel path " << par.value << " not found. "; qFatal("Abort");
+		}
+	}
+	catch(std::exception e)
+	{
+		qFatal("Error reading config params");
+	}
+
+		//Update InnerModel from robot
 	try { differentialrobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
 	try { laserData = laser_proxy->getLaserData(); }
@@ -75,19 +102,14 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 // 	//Localizer stuff
  //	localizer = new Localizer(innerModel);
 // 	
- 	sleep(1);
+// 	sleep(1);
 
 	//Clon para Luis
 //	innerClon = new InnerModel(*innerModel);
-}
-
-/**
-* \brief Default destructor
-*/
-SpecificWorker::~SpecificWorker()
-{
-}
-
+	
+	timer.start(20);	
+	return true;
+};
 void SpecificWorker::computeLuis( )
 {	
 	
@@ -200,15 +222,7 @@ void SpecificWorker::compute( )
 	reloj2.restart();
 }
 	
-////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
-{
-	//qDebug() << QString::fromStdString(params["PointsFile"].value);
-	timer.start(20);
-	
-	return true;
-};
 
 /////////////////////////////////////////////////////////
 

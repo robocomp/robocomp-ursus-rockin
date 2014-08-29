@@ -21,7 +21,7 @@
 
 #include <genericworker.h>
 #include "plantwidget.h"
-#include <boost/graph/graph_concepts.hpp>
+#include <innermodel/innermodel.h>
 
 /**
        \brief
@@ -37,6 +37,8 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void  newAprilTag(const tagsList& tags); 
 
+	enum class State {IDLE, GO_KITCHEN, SERVOING} ;
+	
 public slots:
  	void compute(); 	
 	void goButton();
@@ -64,6 +66,15 @@ private:
 	void go(const QVec& t, const QVec& r=QVec());
 	QTime reloj, relojE;
 	QVec target, current;
+	void doStateMachine();
+	State go_kitchen();
+	State servoing();
+	State state;
+	RoboCompTrajectoryRobot2D::NavState planningState;
+	RoboCompDifferentialRobot::TBaseState bState;
+	bool tag11;
+	RoboCompAprilTags::tag tag;
+	InnerModel *innerModel;
 };
 
 #endif
