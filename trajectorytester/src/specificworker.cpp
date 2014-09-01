@@ -163,26 +163,7 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 	
 	if( planningState.state == "IDLE" and not initiated)
 	{
-		qDebug() << __FUNCTION__ << "sending command";
-// 		try 
-// 		{	
-// 			RoboCompBodyInverseKinematics::Pose6D target;
-// 			target.rx=0; target.ry=0; target.rz=0; 
-// 			
-// 			//compute estimated distance from robot to kitchen to position the head
-// 			//target.z = (innerModel->transform("world", "robot") - innerModel->transform("world","k_t")).norm2();
-// 			//target.x = 0; target.y=10;
-// 			QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
-// 			tagInWorld.print("tagInWorld");
-// 			target.x = tagInWorld.x(); target.y=tagInWorld.y(); target.z = tagInWorld.z();
-// 
-// 			RoboCompBodyInverseKinematics::Axis axis;
-// 			axis.x = 0; axis.y = 0; axis.z = 1;
-// 			bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, true);
-// 		} 
-// 		catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-// 			{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
-	
+		qDebug() << __FUNCTION__ << "sending command";	
 		go(QVec::vec3(5500,0,-5100), QVec::vec3(0,0,0));
 		initiated = true;
 		return State::GO_KITCHEN;
@@ -200,6 +181,11 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		initiated = false;
 		stopRobot();
 		tag11 = false;
+		
+		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
+		tagInWorld(1) = innerModel->transform("world","robot").y();
+		go(tagInWorld, QVec::vec3(0,0,0));  //Should be perpendicular to table long side
+		
 		return State::SERVOING;
 	}
 	if( planningState.state == "EXECUTING" )
@@ -235,6 +221,9 @@ SpecificWorker::State SpecificWorker::go_kitchen()
  * 
  * @return SpecificWorker::State
  */
+
+
+	
 SpecificWorker::State SpecificWorker::servoing()
 {
 	static QVec ant = innerModel->transform("world", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
@@ -252,20 +241,6 @@ SpecificWorker::State SpecificWorker::servoing()
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 		{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
-	
-	
-	QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
-	qDebug() << "Robot heading direction would be: " << tagInWorld.x() << 0 << tagInWorld.z();
-	
-	//qDebug() << tag.id << tag.tx << tag.ty << tag.tz;
-	tagInWorld.print("tag in world");
-	QVec newRobotTarget;
-	newRobotTarget = tagInWorld;
-	newRobotTarget(1) = 0;	
-	//newRobotTarget(2) -= 300;
-	newRobotTarget.print("new target");
-	innerModel->transform("world","robot").print("robot in world");	
-	//ant = tagInWorld;
 		
  	//if( planningState.state == "IDLE" and (newRobotTarget - QVec::vec3(bState.x,0,bState.z)).norm2() < 40)
 //  	{
@@ -275,8 +250,17 @@ SpecificWorker::State SpecificWorker::servoing()
 //  	}
  	
 	
-
-	go(newRobotTarget, QVec::vec3(0,0,0));  //Should be perpendicular to table long side
+	QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
+	tagInWorld(1) = innerModel->transform("world","robot").y();
+	try 
+	{	
+		RoboCompTrajectoryRobot2D::TargetPose tp;
+		tp.x = tagInWorld.x(); tp.y = tagInWorld.y(); tp.z = tagInWorld.z();
+		trajectoryrobot2d_proxy->changeTarget( tp );
+	} 
+	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+		{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+		
 	return State::SERVOING;
 	//return State::IDLE;
 	

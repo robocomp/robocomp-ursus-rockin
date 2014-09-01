@@ -36,6 +36,10 @@ void TrajectoryRobot2DI::go(const TargetPose& target, const Ice::Current&){
 	worker->go(target);
 }
 
+void TrajectoryRobot2DI::changeTarget(const TargetPose& target, const Ice::Current&){
+	worker->changeTarget(target);
+}
+
 NavState TrajectoryRobot2DI::getState(const Ice::Current&){
 	return worker->getState();
 }

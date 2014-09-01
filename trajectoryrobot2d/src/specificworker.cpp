@@ -193,14 +193,17 @@ void SpecificWorker::compute( )
 	
 	if ( updateInnerModel(innerModel) )
 	{
-		if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::GOTO)
+		if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::STOP)
+			stopCommand();
+		
+		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::CHANGETARGET)
+			changeTargetCommand(innerModel);
+		
+		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::GOTO)
 			gotoCommand(innerModel);
 		
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::SETHEADING)
-			setHeadingCommand(innerModel, currentTarget.getRotation().y());
-		
-		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::STOP)
-			stopCommand();
+			setHeadingCommand(innerModel, currentTarget.getRotation().y()); 
 	}	
 	else //LOST connection to robot
 	{
@@ -240,6 +243,18 @@ bool SpecificWorker::stopCommand()
 	road.reset();
 	road.endRoad();
 	compState.elapsedTime = taskReloj.elapsed();
+	return true;
+}
+
+/**
+ * @brief Changes current target without interrupting the ongoing process. Introduced to support visual-servoing
+ * 
+ * @param innerModel ...
+ * @return bool
+ */
+bool SpecificWorker::changeTargetCommand(InnerModel *innerModel)
+{
+	road.changeTarget( currentTarget.getTranslation());
 	return true;
 }
 
@@ -329,6 +344,12 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 
 /////////////////////////////////////////////////////////
 
+/**
+ * @brief If there is no plan, this method computes a plan to achieve the current target
+ * 
+ * @param inner ...
+ * @return true if a plan has been obtained
+ */
 bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 {
 	if( currentTarget.isWithoutPlan() == false ) 
@@ -496,7 +517,32 @@ void SpecificWorker::printNumberOfElementsInRCIS()
 /////////////////////////////////////////////////////////////////////////////////////////////////////777
 ////    SERVANTS
 //////////////////////////////////////////////////////////////////////////////////////////////////////777
+void SpecificWorker::changeTarget(const TargetPose& target)
+{
+	QVec t = QVec::vec3((T)target.x, (T)target.y, (T)target.z);
+	QVec tt = innerModel->transform("world","robot") ;
+	searchRobotValidStateCloseToTarget(*innerModel, laserData, tt);
+	
+// 	if ( searchRobotValidStateCloseToTarget(*innerModel, laserData, t ))
+// 	{
+// 		currentTarget.setTranslation( t );
+// 		currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+// 		currentTarget.command = CurrentTarget::Command::CHANGETARGET;
+// 		if( target.onlyRot == true) 
+// 			currentTarget.setHasRotation(true);
+// 		else
+// 			currentTarget.setHasRotation(false);
+// 	}
+// 	else
+// 		qDebug() << __FUNCTION__ << "No valid target reposition found!";
+}
 
+/**
+ * @brief Sends the robot to the target position. the state of the process is recorded in the NavState structure that cnan be accessed through the getState() method
+ * 
+ * @param target ...
+ * @return void
+ */
 void SpecificWorker::go(const TargetPose& target)
 {
 	stop();
@@ -545,25 +591,25 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
  * @param data ...
  * @return void
  */
-void SpecificWorker::sendData(const RoboCompJoystickAdapter::TData& data)
-{
-	//qDebug() << __FUNCTION__ << "Data from Joy";
-	try 
-	{	
-		QList<QPair<QPointF,QPointF> > intervals;
-		intervals.append(QPair<QPointF,QPointF>(QPointF(-1,1),QPointF(-600,600))); 
-	
-		//qDebug() << __FUNCTION__ << intervals << "X" << X;
-		QMat m = QMat::afinTransformFromIntervals( intervals );
-		float vadvance = (m * QVec::vec2(data.axes[data.dirAxisIndex].value, 1))[0];
-		float vrot = data.axes[data.velAxisIndex].value;
-		newData = true;
-		ad = vadvance; ro = vrot;
-		//avoidanceControl(*innerModel, laserData, vadvance, vrot);
-		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
-	} 
-   	catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	
-}
+// void SpecificWorker::sendData(const RoboCompJoystickAdapter::TData& data)
+// {
+// 	//qDebug() << __FUNCTION__ << "Data from Joy";
+// 	try 
+// 	{	
+// 		QList<QPair<QPointF,QPointF> > intervals;
+// 		intervals.append(QPair<QPointF,QPointF>(QPointF(-1,1),QPointF(-600,600))); 
+// 	
+// 		//qDebug() << __FUNCTION__ << intervals << "X" << X;
+// 		QMat m = QMat::afinTransformFromIntervals( intervals );
+// 		float vadvance = (m * QVec::vec2(data.axes[data.dirAxisIndex].value, 1))[0];
+// 		float vrot = data.axes[data.velAxisIndex].value;
+// 		newData = true;
+// 		ad = vadvance; ro = vrot;
+// 		//avoidanceControl(*innerModel, laserData, vadvance, vrot);
+// 		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
+// 	} 
+//    	catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	
+// }
 
 ///////////////////////////////////////7
 /// PRUEBAS DEL CONTROLADOR
@@ -706,11 +752,89 @@ std::vector<float> SpecificWorker::computeRobotOffsets(InnerModel& innerModel, c
 		}
 		baseOffsets.push_back(k);
 	}
-	/*qDebug() << __FUNCTION__ << "BaseOffsets";
-	for(auto i : baseOffsets)
-		qDebug() << i;
-	*/		
 	return baseOffsets;
+}
+
+
+
+bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, QVec &target)
+{
+	//now check if there will be collision in the future position using current laserData
+	float height = innerModel.transform("world","robot").y();
+	innerModel.updateTransformValues("robot", target.x(), 10, target.z(), 0, 0, 0);
+
+	// Three points of rectangle approximating the robot base 
+	QVec p1 = innerModel.transform("world", QVec::vec3(-220,10,220), "robot" );
+	QVec p2 = innerModel.transform("world", QVec::vec3(220,10,220), "robot" );
+	QVec p3 = innerModel.transform("world", QVec::vec3(-220,10,-220), "robot" );
+	//QVec p4 = innerModel.transform("world", QVec::vec3(220,0,-220), "robot" );
+	
+	QVec p21 = p2-p1;
+	QVec p31 = p3-p1;
+	//put back the robot to where it was
+	innerModel.updateTransformValues("robot", bState.x, 10, bState.z, 0, bState.alpha, 0);
+
+// 	target.print("target");
+// 	p1.print("p1");
+// 	p2.print("p2");
+// 	p3.print("p3");
+	
+	//Check if any laser point falls inside the rectangle using an angle criterium
+	QVec p(3,0.f);
+	for(auto i : laserData)
+	{
+		p = innerModel.laserTo("world","laser",i.dist,i.angle);
+		if ((p-p1) * p21 > 0 and (p-p1) * p21 < p21 * p21 and (p-p1) * p31 > 0 and (p-p1) * p31 < p31*p31 )
+		return false;
+// 		if ((p.x() - p1.x()) * p21.x() + (p.z() - p1.z()) * p21.z() < 0.0) return false;
+// 		if ((p.x() - p2.x()) * p21.x() + (p.z() - p2.z()) * p21.z() > 0.0) return false;
+// 		if ((p.x() - p1.x()) * p31.x() + (p.z() - p1.z()) * p31.z() < 0.0) return false;
+// 		if ((p.x() - p3.x()) * p31.x() + (p.z() - p3.z()) * p31.z() > 0.0) return false;
+	}
+	return true;
+}
+
+bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, QVec& target)
+{
+	//If current is good, return
+	if( checkRobotValidStateAtTarget(innerModel, laserData, target) )
+		return true;
+	
+	//Start searching radially from target to origin and adding the vertices of a n regular polygon of radius 1000 and center "target"
+	const int nVertices = 12;
+	const float radius = 1000.f;
+	QVec lastPoint, minVertex, vertex;
+	float fi,vert;
+	float dist, minDist = radius;
+	
+	for(int i=0; i< nVertices; i++)
+	{
+		fi = (2.f*M_PI/nVertices) * i;
+		int k;
+		bool free;
+		for(k=100; k<radius; k=k+100)
+		{
+			vertex = QVec::vec3(target.x() + k*sin(fi), target.y(), target.z() + k*cos(fi));
+			free = checkRobotValidStateAtTarget(innerModel, laserData, vertex);
+			if (free == true) 
+				break;
+		}
+		if( free and k < minDist )
+		{
+			minVertex = vertex;
+			minDist = k;	
+			vert = fi;
+		}
+	}
+	if( minDist < radius)
+	{
+		target = minVertex;
+		target.print("new target");
+		qDebug() << minDist << vert;
+		return true;
+	}
+	else
+		return false;
 }
 
 ///////////////// AUX /////////////

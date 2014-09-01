@@ -63,7 +63,7 @@
 
 // ICE includes
 #include <Ice/Ice.h>
-#include <IceStorm/IceStorm.h>
+
 #include <Ice/Application.h>
 
 #include <rapplication/rapplication.h>
@@ -77,7 +77,6 @@
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
 #include <trajectoryrobot2dI.h>
-#include <joystickadapterI.h>
 
 // Includes for remote proxy example
 // #include <Remote.h>
@@ -93,7 +92,6 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 using namespace RoboCompTrajectoryRobot2D;
-using namespace RoboCompJoystickAdapter;
 using namespace RoboCompLaser;
 using namespace RoboCompInnerModelManager;
 using namespace RoboCompDifferentialRobot;
@@ -193,8 +191,6 @@ DifferentialRobotPrx differentialrobot_proxy;
 	}
 	rInfo("DifferentialRobotProxy initialized Ok!");
 	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);
-	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
-	
 	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
@@ -213,27 +209,6 @@ DifferentialRobotPrx differentialrobot_proxy;
 		adapterCommonBehavior->add(commonbehaviorI, communicator()->stringToIdentity("commonbehavior"));
 		adapterCommonBehavior->activate();
 		// Server adapter creation and publication
-    	Ice::ObjectAdapterPtr JoystickAdapter_adapter = communicator()->createObjectAdapter("JoystickAdapterTopic");
-    	JoystickAdapterPtr joystickadapterI_ = new JoystickAdapterI(worker);
-    	Ice::ObjectPrx joystickadapter_proxy = JoystickAdapter_adapter->addWithUUID(joystickadapterI_)->ice_oneway();
-    	IceStorm::TopicPrx joystickadapter_topic;
-    	if(!joystickadapter_topic){
-	    	try {
-	    		joystickadapter_topic = topicManager->create("JoystickAdapter");
-	    	}
-	    	catch (const IceStorm::TopicExists&) {
-	    	  	//Another client created the topic
-	    	  	try{
-	       			joystickadapter_topic = topicManager->retrieve("JoystickAdapter");
-	    	  	}catch(const IceStorm::NoSuchTopic&){
-	    	  	  	//Error. Topic does not exist
-				}
-	    	}
-	    	IceStorm::QoS qos;
-	      	joystickadapter_topic->subscribeAndGetPublisher(qos, joystickadapter_proxy);
-    	}
-    	JoystickAdapter_adapter->activate();
-    	// Server adapter creation and publication
 		Ice::ObjectAdapterPtr adapterTrajectoryRobot2D = communicator()->createObjectAdapter("TrajectoryRobot2DComp");
 		TrajectoryRobot2DI *trajectoryrobot2d = new TrajectoryRobot2DI(worker);
 		adapterTrajectoryRobot2D->add(trajectoryrobot2d, communicator()->stringToIdentity("trajectoryrobot2d"));

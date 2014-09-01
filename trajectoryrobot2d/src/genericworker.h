@@ -31,7 +31,6 @@
 #include <InnerModelManager.h>
 #include <DifferentialRobot.h>
 #include <TrajectoryRobot2D.h>
-#include <JoystickAdapter.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -48,7 +47,6 @@ using namespace RoboCompLaser;
 using namespace RoboCompInnerModelManager;
 using namespace RoboCompDifferentialRobot;
 using namespace RoboCompTrajectoryRobot2D;
-using namespace RoboCompJoystickAdapter;
 class GenericWorker :
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
@@ -70,10 +68,9 @@ public:
 	InnerModelManagerPrx innermodelmanager_proxy;
 	DifferentialRobotPrx differentialrobot_proxy;
 	virtual void  go(const TargetPose& target) = 0;
+	virtual void  changeTarget(const TargetPose& target) = 0;
 	virtual NavState getState() = 0;
 	virtual void  stop() = 0;
-	virtual void  sendData(const RoboCompJoystickAdapter::TData& data) = 0;
-
 protected:
 	QTimer timer;
 	int Period;

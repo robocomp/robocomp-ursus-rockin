@@ -13,7 +13,6 @@ SET ( SOURCES
   ${SOURCES}
   trajectoryrobot2dcomp.cpp
   trajectoryrobot2dI.cpp
-joystickadapterI.cpp
 
   genericmonitor.cpp
   commonbehaviorI.cpp
@@ -26,7 +25,6 @@ joystickadapterI.cpp
 SET ( HEADERS
   ${HEADERS}
   trajectoryrobot2dI.h
-joystickadapterI.h
 
   genericmonitor.h
   commonbehaviorI.h
@@ -34,7 +32,7 @@ joystickadapterI.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior  TrajectoryRobot2D JoystickAdapter Laser DifferentialRobot  InnerModelManager)
+ROBOCOMP_WRAP_ICE( CommonBehavior  TrajectoryRobot2D Laser DifferentialRobot  InnerModelManager)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

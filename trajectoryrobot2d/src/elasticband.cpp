@@ -38,23 +38,18 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 	//Tags all points in the road ar visible or blocked, depending on laser visibility. Only visible points are processed in this iteration
 	checkVisiblePoints(road, laserData);	
 	 
-	if ( checkIfNAN(road) ) qFatal("fary1");
-	
 	//shortCut(road);
 	
 	//Add points to achieve an homogenoeus chain
  	addPoints(road, currentTarget);
-	if ( checkIfNAN(road) ) qFatal("fary2");
 
 	//Remove point too close to each other
  	cleanPoints(road);
-	if ( checkIfNAN(road) ) qFatal("fary3");
-
+	
 	//Compute the scalar magnitudes
 	computeForces(road, laserData); 	 
 		
-	if ( checkIfNAN(road) ) qFatal("fary4");
-
+	
 	//Delete half the tail behind, if greater than 6, to release resources
 	if( road.getOrderOfClosestPointToRobot() > 6)
 	{
@@ -62,15 +57,7 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 			road.backList.append(it->pos);
 		road.erase(road.begin(), road.begin() + (road.getOrderOfClosestPointToRobot() / 2));
 	}
-	
-	//Check for NAN
-	for(auto it = road.begin(); it != road.end(); ++it)
-		if( isnan(it->pos.x()) or isnan(it->pos.y()) or isnan(it->pos.z()) )
-		{
-			road.print();
-			break;
-		}
-	
+		
 	return true;
 }
 

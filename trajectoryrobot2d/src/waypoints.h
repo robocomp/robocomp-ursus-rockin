@@ -78,7 +78,7 @@ class WayPoints : public QList< WayPoint >
 		QLine2D getRobotZAxis(InnerModel* innerModel);
 		void computeDistancesToNext();
 		QList<QVec> backList;
-		QMutex mutex;
+		
 		
 		//GOOD ONES
 		QLine2D getTangentToCurrentPoint();
@@ -109,6 +109,7 @@ class WayPoints : public QList< WayPoint >
 		bool isFinished() const 															{ return finish;};
 		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
 		void setBlocked(bool b)																{ blockedRoad = b;};
+		void changeTarget(const QVec &target)												{ QMutexLocker ml(&mutex); replace(length()-1, target);};
 		
 		int nextPointIndex;
 	//	float distanceToLastVisible;
@@ -150,6 +151,8 @@ class WayPoints : public QList< WayPoint >
 		long elapsedTime;
 		int initialDurationEstimation;
 		float antDist; //To be used in robotDistanceVariationToTarget computation
+		
+		QMutex mutex;
 	
 };
 
