@@ -87,6 +87,7 @@ private:
 	void printNumberOfElementsInRCIS();
 	bool gotoCommand(InnerModel *innerModel);
 	bool setHeadingCommand(InnerModel *innerModel, float alfa);
+	bool stopCommand();
 	bool avoidanceControl(InnerModel& innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed);
 	std::vector<float> computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData);
 	std::vector<float> baseOffsets;
@@ -96,6 +97,7 @@ private:
 	tuple< QVec, bool > checkInminentCollision(InnerModel& innerModel, const TLaserData& laserData, float vadv, float vrot, float delta);
 	float ad,ro;
 	bool newData;
+	void calcularModuloFloat(QVec &angles, float mod);
 };
 
 #endif

@@ -149,6 +149,8 @@ class WayPoints : public QList< WayPoint >
 		float meanSpeed;  
 		long elapsedTime;
 		int initialDurationEstimation;
+		float antDist; //To be used in robotDistanceVariationToTarget computation
+	
 };
 
 #endif // WAYPOINTS_H

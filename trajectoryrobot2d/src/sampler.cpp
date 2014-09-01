@@ -144,7 +144,7 @@ QList<QVec> Sampler::sampleFreeSpaceR2Gaussian(float meanX, float meanY, float s
 }
 
 //Does not return IM to its original state
-bool Sampler::checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot) 
+bool Sampler::checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot) const 
 {
 	innerModel->updateTransformValues("robot", targetPos.x(), targetPos.y(), targetPos.z(), targetRot.x(), targetRot.y(), targetRot.z());
 	for ( auto in : robotNodes )
@@ -251,7 +251,7 @@ bool Sampler::checkRobotValidDirectionToTarget(const QVec & origin , const QVec 
 	return true;
 }
 
-bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint)
+bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint) const
 {
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
 	bool hit = false;
@@ -359,10 +359,9 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
  * @param target ...
  * @return bool
  */
-bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target) 
+bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target) const
 {
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
-	bool hit = false;
 	QVec finalPoint;
 	float wRob=420, hRob=1600;  //GET FROM INNERMODEL!!!
 //	float wRob=0.1, hRob=0.1;  //GET FROM INNERMODEL!!!
@@ -416,4 +415,48 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 		}
 		
 	return true;
+}
+
+bool Sampler::searchRobotValidStateCloseToTarget(QVec& target)
+{
+	//If current is good, return
+	if( checkRobotValidStateAtTarget(target) == true)
+		return true;
+	
+	target.print("target");
+	//Start searching radially from target to origin and adding the vertices of a n regular polygon of radius 1000 and center "target"
+	const int nVertices = 12;
+	const float radius = 1000.f;
+	QVec lastPoint, minVertex, vertex;
+	float fi,vert;
+	float dist, minDist = radius;
+	
+	for(int i=0; i< nVertices; i++)
+	{
+		fi = (2.f*M_PI/nVertices) * i;
+		int k;
+		bool free;
+		for(k=100; k<radius; k=k+100)
+		{
+			vertex = QVec::vec3(target.x() + k*sin(fi), target.y(), target.z() + k*cos(fi));
+			free = checkRobotValidStateAtTarget(vertex);
+			if (free == true) 
+				break;
+		}
+		if( free and k < minDist )
+		{
+			minVertex = vertex;
+			minDist = k;	
+			vert = fi;
+		}
+	}
+	if( minDist < radius)
+	{
+		target = minVertex;
+		target.print("new target");
+		qDebug() << minDist << vert;
+		return true;
+	}
+	else
+		return false;
 }

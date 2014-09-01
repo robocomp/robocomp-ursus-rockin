@@ -81,7 +81,7 @@ class PlannerPRM : public QObject
 	public:
 		PlannerPRM(){};
 		PlannerPRM(const InnerModel &innerModel_, uint nPoints=300, uint neigh=30, QObject *parent=0);
-		bool computePath(const QVec &target, InnerModel *inner);
+		bool computePath(QVec &target, InnerModel *inner);
 		void setInnerModel(const InnerModel &innerModel_);
 		QList<QVec> getPath() { return currentPath; }
 		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax)		{xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;};

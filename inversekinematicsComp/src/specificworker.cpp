@@ -110,7 +110,9 @@ void SpecificWorker::init()
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
 	QString tipLeft = "grabPositionHandL";
-	QString nose = "head3";  //OJO PROV
+	//QString nose = "head3";  //OJO PROV
+	QString nose = "nose";  //OJO PROV
+	
 	
 	IK_BrazoDerecho = new Cinematica_Inversa(innerModel, listaBrazoDerecho, tipRight);
 	IK_BrazoIzquierdo = new Cinematica_Inversa(innerModel, listaBrazoIzquierdo, tipLeft);

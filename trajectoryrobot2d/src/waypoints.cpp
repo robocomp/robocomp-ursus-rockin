@@ -65,6 +65,7 @@ void WayPoints::reset()
 	currentDistanceToFrontier = 0;
 	requiresReplanning = false;
 	backList.clear();
+	antDist = std::numeric_limits< float >::max();
 }
 
 void WayPoints::startRoad()
@@ -466,8 +467,6 @@ float WayPoints::computeDistanceToLastVisible(WayPoints::iterator closestPoint, 
  */
 float WayPoints::computeDistanceToTarget(WayPoints::iterator closestPoint, const QVec &robotPos)
 {
-	static  float antDist = (robotPos - closestPoint->pos).norm2();
-	
 	float dist = (robotPos - closestPoint->pos).norm2();
 	WayPoints::iterator it;
 	for(it = closestPoint; it != end()-1; ++it)
@@ -552,9 +551,14 @@ bool WayPoints::computeForces()
 	setETA();
 	
 	//Check for arrival to target  TOO SIMPLE 
-	if(	( ((int)getCurrentPointIndex()+1 == (int)size())  and  ( getRobotDistanceToTarget() < 100) )
+// 	if(	( ((int)getCurrentPointIndex()+1 == (int)size())  and  ( (int)getCurrentPointIndex()+1< 80) )
+	if((((int)getCurrentPointIndex()+1 == (int)size())  and  ( getRobotDistanceToTarget()< 80) )
 		or ( (getRobotDistanceToTarget() < 1000) and ( getRobotDistanceVariationToTarget() > 0) ) )
+	{
 		setFinished(true);
+		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
+		getIndexOfClosestPointToRobot()->pos.print("closest point");
+	}
 	
 	//compute curvature of trajectory at closest point to robot
   	setRoadCurvatureAtClosestPoint( computeRoadCurvature(closestPoint, 3) );

@@ -27,6 +27,7 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
 	this->params = params;
+	compState.state = "IDLE";
 	
 	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
 	//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
@@ -197,6 +198,9 @@ void SpecificWorker::compute( )
 		
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::SETHEADING)
 			setHeadingCommand(innerModel, currentTarget.getRotation().y());
+		
+		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::STOP)
+			stopCommand();
 	}	
 	else //LOST connection to robot
 	{
@@ -225,6 +229,19 @@ void SpecificWorker::compute( )
 
 
 /////////////////////////////////////////////////////////
+
+bool SpecificWorker::stopCommand()
+{
+	road.setFinished(true);	
+	currentTarget.reset();
+	controller->stopTheRobot(differentialrobot_proxy);
+	compState.state = "IDLE";
+	//drawGreenBoxOnTarget( currentTarget.getTranslation() );
+	road.reset();
+	road.endRoad();
+	compState.elapsedTime = taskReloj.elapsed();
+	return true;
+}
 
 bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 {
@@ -277,8 +294,12 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 	const float MAX_ORIENTATION_ERROR  = 0.05;
 	
 	float angRobot = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
-	qDebug() << __FUNCTION__ << fabs(angRobot-alfa);
-	if( fabs(angRobot - alfa) < MAX_ORIENTATION_ERROR)
+	QVec v(1); 
+	v[0] = (angRobot -alfa);
+	calcularModuloFloat(v , M_PI);
+	qDebug() << __FUNCTION__ << (angRobot-alfa) << v[0];
+
+	if( fabs(v[0]) < MAX_ORIENTATION_ERROR)
 	{
 		currentTarget.setHasRotation(false);
 		road.setFinished(true);
@@ -296,7 +317,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 	}
 	else
 	{
-		float vrot = -0.8 * (angRobot-alfa);
+		float vrot = -0.8 * v[0];
 		try 
 		{
 		  differentialrobot_proxy->setSpeedBase(0, vrot);	
@@ -319,12 +340,14 @@ bool SpecificWorker::targetHasAPlan( InnerModel *inner)
 	if (updateInnerModel(inner))
 	{	
 		compState.state = "PLANNING";
-		if ( planner->computePath(currentTarget.getTranslation(), inner) == false)
+		QVec localTarget = currentTarget.getTranslation();
+		if ( planner->computePath(localTarget, inner) == false)
 		{
 			qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
 			currentTarget.reset();
 			return false;
 		}
+		currentTarget.setTranslation( localTarget );
 		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
 		
 		// take inner to current values
@@ -367,6 +390,8 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner)
 		laserData = laser_proxy->getLaserData(); 
 	}
 	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
+	if( compState.state == "DISCONNECTED")
+		compState.state = "IDLE";
 	return true;
 }
 
@@ -474,6 +499,7 @@ void SpecificWorker::printNumberOfElementsInRCIS()
 
 void SpecificWorker::go(const TargetPose& target)
 {
+	stop();
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
@@ -492,10 +518,8 @@ RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 
 void SpecificWorker::stop()
 {
-	road.setFinished(true);		//make threadsafe
-	controller->stopTheRobot(differentialrobot_proxy);
-	currentTarget.command = CurrentTarget::Command::STOP;
 	qDebug() << __FUNCTION__ << "STOP command received";
+	currentTarget.command = CurrentTarget::Command::STOP;
 }
 
 /**
@@ -506,6 +530,7 @@ void SpecificWorker::stop()
  */
 void SpecificWorker::setHeadingTo(const TargetPose& target)
 {
+	stop();
 	currentTarget.command = CurrentTarget::Command::SETHEADING;	
 	qDebug() << __FUNCTION__ << "SETHEADING command received";
 }
@@ -688,4 +713,24 @@ std::vector<float> SpecificWorker::computeRobotOffsets(InnerModel& innerModel, c
 	return baseOffsets;
 }
 
+///////////////// AUX /////////////
 
+/*
+* Metodo moduloFloat
+* Devuelve el modulo entre dos numeros reales.   ///HAS PROBADO FMOD?
+* FUNCIONA.
+*/ 
+void SpecificWorker::calcularModuloFloat(QVec &angles, float mod)
+{
+	for(int i=0; i<angles.size(); i++)
+	{
+		int cociente = (int)(angles[i] / mod);
+		angles[i] = angles[i] -(cociente*mod);
+		
+		if(angles[i] > M_PI)
+			angles[i] = angles[i]- M_PI;
+		else
+			if(angles[i] < -M_PI)
+				angles[i] = angles[i] + M_PI;
+	}
+}

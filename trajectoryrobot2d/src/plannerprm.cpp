@@ -58,7 +58,7 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
  * @return true if a path of at least two waypoints have been found. Path is written to class variable currentPath. 
  * Additional chekcs on max and min lenght for the path should be applied
  */
-bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
+bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 {	
 	qDebug() << __FUNCTION__ << "Starting planning with robot at:" << inner->transform("world","robot") <<  "and target at:" << target;
 	
@@ -72,12 +72,12 @@ bool PlannerPRM::computePath(const QVec& target, InnerModel* inner)
 	currentPath.clear();	
 	
 	//If target on obstacle, abort.  IMPROVE THIS TO INCLUDE closest VALID POINT TO TARGET
-	if( sampler.checkRobotValidStateAtTarget(target) == false )
+	//if( sampler.checkRobotValidStateAtTarget(target) == false )
+	if( sampler.searchRobotValidStateCloseToTarget(target) == false )	
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		return false;
 	}
-	
 	//Check if the target is in "plain sight"
 	QVec point;
 	if ( sampler.checkRobotValidDirectionToTargetOneShot( robot, target) )
