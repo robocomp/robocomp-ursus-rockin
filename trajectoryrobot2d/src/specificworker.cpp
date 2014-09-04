@@ -254,12 +254,16 @@ bool SpecificWorker::stopCommand()
  */
 bool SpecificWorker::changeTargetCommand(InnerModel *innerModel)
 {
+	qDebug() << __FUNCTION__ << "with robot at" << innerModel->transform("world","robot");; 
 	road.changeTarget( currentTarget.getTranslation());
+	//drawTarget(currentTarget.getTranslation());
+	currentTarget.command = CurrentTarget::Command::GOTO;
 	return true;
 }
 
 bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 {
+	qDebug() << __FUNCTION__;
 	if( targetHasAPlan(innerModel))
 	{
 		elasticband->update( road, laserData, currentTarget);
@@ -306,6 +310,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 
 bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 {
+	qDebug() << __FUNCTION__;
 	const float MAX_ORIENTATION_ERROR  = 0.05;
 	
 	float angRobot = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
@@ -521,20 +526,31 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 {
 	QVec t = QVec::vec3((T)target.x, (T)target.y, (T)target.z);
 	QVec tt = innerModel->transform("world","robot") ;
-	searchRobotValidStateCloseToTarget(*innerModel, laserData, tt);
+	//searchRobotValidStateCloseToTarget(*innerModel, laserData, tt);
 	
-// 	if ( searchRobotValidStateCloseToTarget(*innerModel, laserData, t ))
-// 	{
-// 		currentTarget.setTranslation( t );
-// 		currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
-// 		currentTarget.command = CurrentTarget::Command::CHANGETARGET;
-// 		if( target.onlyRot == true) 
-// 			currentTarget.setHasRotation(true);
-// 		else
-// 			currentTarget.setHasRotation(false);
-// 	}
-// 	else
-// 		qDebug() << __FUNCTION__ << "No valid target reposition found!";
+	qDebug() << __FUNCTION__ << "CHANGE TARGET command received, with target" << t << "and robot at" << innerModel->transform("world","robot") ; 
+
+	if ( searchRobotValidStateCloseToTarget(*innerModel, laserData, t ))
+	{
+		if( (currentTarget.getTranslation() - t).norm2() > 30 )
+		{
+			currentTarget.setActive(true)
+			currentTarget.setTranslation( t );
+			currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+			if( target.onlyRot == true) 
+				currentTarget.setHasRotation(true);
+			else
+				currentTarget.setHasRotation(false);
+			currentTarget.command = CurrentTarget::Command::CHANGETARGET;
+		}
+	}
+	else
+	{
+		qDebug() << __FUNCTION__ << "No valid target reposition found!";
+		currentTarget.command = CurrentTarget::Command::STOP;
+	}
+	t.print("t");
+		//qFatal("fary");
 }
 
 /**
@@ -545,6 +561,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
  */
 void SpecificWorker::go(const TargetPose& target)
 {
+	
 	stop();
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
@@ -554,7 +571,7 @@ void SpecificWorker::go(const TargetPose& target)
 		currentTarget.setHasRotation(true);
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
-	qDebug() << __FUNCTION__ << "GO command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
+	qDebug() << __FUNCTION__ << "-------------------------------------------------------------------------GO command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -576,7 +593,7 @@ void SpecificWorker::stop()
  */
 void SpecificWorker::setHeadingTo(const TargetPose& target)
 {
-	stop();
+	//stop();
 	currentTarget.command = CurrentTarget::Command::SETHEADING;	
 	qDebug() << __FUNCTION__ << "SETHEADING command received";
 }
@@ -774,16 +791,17 @@ bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel &innerModel, const 
 	//put back the robot to where it was
 	innerModel.updateTransformValues("robot", bState.x, 10, bState.z, 0, bState.alpha, 0);
 
-// 	target.print("target");
-// 	p1.print("p1");
-// 	p2.print("p2");
-// 	p3.print("p3");
+	// 	target.print("target");
+	// 	p1.print("p1");
+	// 	p2.print("p2");
+	// 	p3.print("p3");
 	
 	//Check if any laser point falls inside the rectangle using an angle criterium
 	QVec p(3,0.f);
 	for(auto i : laserData)
 	{
 		p = innerModel.laserTo("world","laser",i.dist,i.angle);
+		//Check if inside
 		if ((p-p1) * p21 > 0 and (p-p1) * p21 < p21 * p21 and (p-p1) * p31 > 0 and (p-p1) * p31 < p31*p31 )
 		return false;
 // 		if ((p.x() - p1.x()) * p21.x() + (p.z() - p1.z()) * p21.z() < 0.0) return false;
@@ -796,46 +814,85 @@ bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel &innerModel, const 
 
 bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, QVec& target)
 {
-	//If current is good, return
-	if( checkRobotValidStateAtTarget(innerModel, laserData, target) )
-		return true;
+	QVec lastPoint;
+
+	QVec origin = innerModel.transform("world","robot");
+	float stepSize = 100.f; //100 mms chunks  SHOULD BE RELATED TO THE ACTUAL SIZE OF THE ROBOT!!!!!
+	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
+	float step;
 	
-	//Start searching radially from target to origin and adding the vertices of a n regular polygon of radius 1000 and center "target"
-	const int nVertices = 12;
-	const float radius = 1000.f;
-	QVec lastPoint, minVertex, vertex;
-	float fi,vert;
-	float dist, minDist = radius;
-	
-	for(int i=0; i< nVertices; i++)
+	//if too close return target
+	if (nSteps == 0) 
 	{
-		fi = (2.f*M_PI/nVertices) * i;
-		int k;
-		bool free;
-		for(k=100; k<radius; k=k+100)
-		{
-			vertex = QVec::vec3(target.x() + k*sin(fi), target.y(), target.z() + k*cos(fi));
-			free = checkRobotValidStateAtTarget(innerModel, laserData, vertex);
-			if (free == true) 
-				break;
-		}
-		if( free and k < minDist )
-		{
-			minVertex = vertex;
-			minDist = k;	
-			vert = fi;
-		}
-	}
-	if( minDist < radius)
-	{
-		target = minVertex;
-		target.print("new target");
-		qDebug() << minDist << vert;
-		return true;
-	}
-	else
 		return false;
+	}
+	step = 1./nSteps;
+
+	//go along visual ray connecting robot pose and target pos in world coordinates. l*robot + (1-r)*roiPos = 0
+	QVec point(3);
+	float landa = step;
+	
+	lastPoint = origin;
+	for(uint i=1 ; i<=nSteps; i++)
+	{
+		point = (origin * (1-landa)) + (target * landa);
+		if (checkRobotValidStateAtTarget(innerModel, laserData, point) ) 
+		{
+			lastPoint  = point;
+			landa = landa + step;
+		}
+		else
+		{
+			target = lastPoint;
+			return true;
+		}
+	}
+	return true;
 }
+
+// bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, QVec& target)
+// {
+// 	//If current is good, return
+// 	if( checkRobotValidStateAtTarget(innerModel, laserData, target) )
+// 		return true;
+// 	
+// 	//Start searching radially from target to origin and adding the vertices of a n regular polygon of radius 1000 and center "target"
+// 	const int nVertices = 12;
+// 	const float radius = 1000.f;
+// 	QVec lastPoint, minVertex, vertex;
+// 	float fi,vert;
+// 	float dist, minDist = radius;
+// 	
+// 	for(int i=0; i< nVertices; i++)
+// 	{
+// 		fi = (2.f*M_PI/nVertices) * i;
+// 		int k;
+// 		bool free;
+// 		for(k=100; k<radius; k=k+100)
+// 		{
+// 			vertex = QVec::vec3(target.x() + k*sin(fi), target.y(), target.z() + k*cos(fi));
+// 			free = checkRobotValidStateAtTarget(innerModel, laserData, vertex);
+// 			if (free == true) 
+// 				break;
+// 		}
+// 		if( free and k < minDist )
+// 		{
+// 			minVertex = vertex;
+// 			minDist = k;	
+// 			vert = fi;
+// 		}
+// 	}
+// 	if( minDist < radius)
+// 	{
+// 		target = minVertex;
+// 		target.print("new target");
+// 		qDebug() << minDist << vert;
+// 		qFatal("fary");
+// 		return true;
+// 	}
+// 	else
+// 		return false;
+// }
 
 ///////////////// AUX /////////////
 

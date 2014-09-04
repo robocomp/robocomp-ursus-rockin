@@ -185,7 +185,8 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
 		tagInWorld(1) = innerModel->transform("world","robot").y();
 		go(tagInWorld, QVec::vec3(0,0,0));  //Should be perpendicular to table long side
-		
+		qDebug() << "send to tag location " << tagInWorld;
+		sleep(1);
 		return State::SERVOING;
 	}
 	if( planningState.state == "EXECUTING" )
