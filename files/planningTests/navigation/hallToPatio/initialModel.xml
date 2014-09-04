@@ -5,58 +5,64 @@
 	## R O O M S
 	##
 	-->
-	<symbol id="3" type="room">
+	<symbol id="3" type="object">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="4" type="status" />
+	<symbol id="4" type="roomSt" />
+	<link src="3" dst="4" label="room" />
 	<link src="3" dst="4" label="isHall" />
 
-	<symbol id="5" type="room">
+	<symbol id="5" type="object">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="6" type="status" />
+	<symbol id="6" type="roomSt" />
+	<link src="5" dst="6" label="room" />
 	<link src="5" dst="6" label="isLivingRoom" />
 
-	<symbol id="7" type="room">
+	<symbol id="7" type="object">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="8" type="status" />
-	<link src="7" dst="8" label="isBedroom" />
+	<symbol id="8" type="roomSt" />
+	<link src="7" dst="8" label="room" />
+	<link src="7" dst="8" label="isBedobject" />
 
-	<symbol id="9" type="room">
+	<symbol id="9" type="object">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="10" type="status" />
+	<symbol id="10" type="roomSt" />
+	<link src="9" dst="10" label="room" />
 	<link src="9" dst="10" label="isKitchen" />
 
-	<symbol id="11" type="room">
+	<symbol id="11" type="object">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="12" type="status" />
+	<symbol id="12" type="roomSt" />
+	<link src="11" dst="12" label="room" />
 	<link src="11" dst="12" label="isDiningRoom" />
 
-	<symbol id="13" type="room">
+	<symbol id="13" type="object">
 		<attribute key="x" value="-2000" />
 		<attribute key="z" value="-2000" />
 	</symbol>
-	<symbol id="14" type="status" />
+	<symbol id="14" type="roomSt" />
+	<link src="13" dst="14" label="room" />
 	<link src="13" dst="14" label="isPatio" />
 
-	<link src="3" dst="5" label="connected" />
-	<link src="5" dst="3" label="connected" />
-	<link src="7" dst="5" label="connected" />
-	<link src="5" dst="7" label="connected" />
-	<link src="9" dst="5" label="connected" />
-	<link src="5" dst="9" label="connected" />
-	<link src="11" dst="5" label="connected" />
-	<link src="5" dst="11" label="connected" />
-	<link src="11" dst="13" label="connected" />
-	<link src="13" dst="11" label="connected" />
+	<link src="3" dst="5" label="transitable" />
+	<link src="5" dst="3" label="transitable" />
+	<link src="7" dst="5" label="transitable" />
+	<link src="5" dst="7" label="transitable" />
+	<link src="9" dst="5" label="transitable" />
+	<link src="5" dst="9" label="transitable" />
+	<link src="11" dst="5" label="transitable" />
+	<link src="5" dst="11" label="transitable" />
+	<link src="11" dst="13" label="transitable" />
+	<link src="13" dst="11" label="transitable" />
 
 	
 	<!--
