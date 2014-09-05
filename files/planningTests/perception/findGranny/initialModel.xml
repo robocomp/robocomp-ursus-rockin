@@ -193,6 +193,7 @@
 	</symbol>
 	<link src="1" dst="30" label="know" />
 	<link src="30" dst="20" label="in" />
+	<link src="30" dst="5" label="in" />
 	<symbol id="31" type="objectSt">
 	</symbol>
 	<link src="30" dst="31" label="noSee" />
