@@ -11,10 +11,10 @@ longPattern=3
 changeRoom : active(1)
 {
 	{
+		s2:roomSt(25,75)
+		s1:roomSt(-200,75)
 		r1:object(-200,-35)
 		r2:object(25,-35)
-		s1:roomSt(-200,75)
-		s2:roomSt(25,75)
 		robot:robot(-95,-145)
 		robot->r1(in)
 		r1->r2(transitable)
@@ -23,15 +23,28 @@ changeRoom : active(1)
 	}
 	=>
 	{
+		s2:roomSt(25,75)
+		s1:roomSt(-200,75)
 		r1:object(-200,-35)
 		r2:object(25,-35)
-		s1:roomSt(-200,75)
-		s2:roomSt(25,75)
 		robot:robot(-95,-145)
 		robot->r2(in)
 		r1->r2(transitable)
 		r1->s1(room)
 		r2->s2(room)
+	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in something robot)
+				(and
+					(not ((in something s1)))
+					(in something s2)
+				)
+			)
+		)
 	}
 }
 
@@ -42,9 +55,9 @@ findObjectVisually : active(1)
 	}
 	=>
 	{
-		robot:robot(-305,0)
 		status:objectSt(95,0)
 		object:object(-130,0)
+		robot:robot(-305,0)
 		robot->object(know)
 		object->status(see)
 		object->status(unclassified)
@@ -62,9 +75,9 @@ findObjectTold : active(4)
 	}
 	=>
 	{
-		robot:robot(-305,0)
 		status:objectSt(95,0)
 		object:object(-130,0)
+		robot:robot(-305,0)
 		robot->object(know)
 		object->status(notSee)
 		object->status(unclassified)
@@ -78,10 +91,10 @@ findObjectTold : active(4)
 findGranny : active(2)
 {
 	{
-		personSt:personSt(200,-75)
 		person:person(-15,-75)
 		roomSt:roomSt(200,50)
 		robot:robot(-190,-75)
+		personSt:personSt(200,-75)
 		room:object(-15,50)
 		robot->person(know)
 		person->personSt(granny)
@@ -92,10 +105,10 @@ findGranny : active(2)
 	}
 	=>
 	{
-		personSt:personSt(200,-75)
 		person:person(-15,-75)
 		roomSt:roomSt(200,55)
 		robot:robot(-190,-75)
+		personSt:personSt(200,-75)
 		room:object(-15,55)
 		robot->person(know)
 		person->personSt(granny)
@@ -108,7 +121,7 @@ findGranny : active(2)
 	effect
 	{
 		(forall
-			aRoom:room
+			aRoom:object
 			aRoomSt:roomSt
 			(and
 				(not (explored aRoom aRoomSt))
@@ -122,7 +135,7 @@ recognizeObjMug : active(1)
 {
 	{
 		status:objectSt(65,-75)
-		other:object(195,-75)
+		other:object(-130,35)
 		robot:robot(-290,-75)
 		object:object(-130,-75)
 		robot->object(know)
@@ -134,16 +147,26 @@ recognizeObjMug : active(1)
 	=>
 	{
 		status:objectSt(60,-75)
+		other:object(-130,35)
 		robot:robot(-290,-75)
-		other:object(200,-75)
 		object:object(-130,-75)
 		robot->object(know)
 		object->status(hasStatus)
-		status->other(in)
 		object->status(see)
 		object->status(position)
 		object->status(classified)
 		object->status(mug)
+		object->other(in)
+	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in other something)
+				(in object something)
+			)
+		)
 	}
 }
 
@@ -151,7 +174,7 @@ recognizeObjGlasses : active(1)
 {
 	{
 		status:objectSt(65,-75)
-		other:object(195,-75)
+		other:object(-130,35)
 		robot:robot(-290,-75)
 		object:object(-130,-75)
 		robot->object(know)
@@ -163,16 +186,26 @@ recognizeObjGlasses : active(1)
 	=>
 	{
 		status:objectSt(60,-75)
+		other:object(-130,35)
 		robot:robot(-290,-75)
-		other:object(200,-75)
 		object:object(-130,-75)
 		robot->object(know)
 		object->status(hasStatus)
-		status->other(in)
+		object->other(in)
 		object->status(see)
 		object->status(position)
 		object->status(classified)
 		object->status(glasses)
+	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in other something)
+				(in object something)
+			)
+		)
 	}
 }
 
@@ -180,7 +213,7 @@ recognizeObjTable : active(1)
 {
 	{
 		status:objectSt(65,-75)
-		other:object(195,-75)
+		other:object(-130,35)
 		robot:robot(-290,-75)
 		object:object(-130,-75)
 		robot->object(know)
@@ -192,16 +225,26 @@ recognizeObjTable : active(1)
 	=>
 	{
 		status:objectSt(60,-75)
+		other:object(-130,35)
 		robot:robot(-290,-75)
-		other:object(200,-75)
 		object:object(-130,-75)
 		robot->object(know)
 		object->status(hasStatus)
-		status->other(in)
+		object->other(in)
 		object->status(see)
 		object->status(position)
 		object->status(classified)
 		object->status(table)
+	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in other something)
+				(in object something)
+			)
+		)
 	}
 }
 
@@ -209,8 +252,8 @@ recognizeObjFails : active(1)
 {
 	{
 		status:objectSt(105,-80)
-		robot:robot(-290,-80)
 		object:object(-135,-80)
+		robot:robot(-290,-80)
 		robot->object(know)
 		object->status(hasStatus)
 		object->status(see)
@@ -220,8 +263,8 @@ recognizeObjFails : active(1)
 	=>
 	{
 		status:objectSt(95,-75)
-		robot:robot(-295,-75)
 		object:object(-130,-75)
+		robot:robot(-295,-75)
 		robot->object(know)
 		object->status(hasStatus)
 		object->status(see)
@@ -334,10 +377,10 @@ graspObject : active(1)
 {
 	{
 		status:objectSt(300,0)
+		table:object(0,110)
+		object:object(130,0)
 		robot:robot(0,-110)
 		room:object(-130,0)
-		object:object(130,0)
-		table:object(0,110)
 		object->status(reach)
 		robot->object(know)
 		object->table(in)
@@ -347,10 +390,10 @@ graspObject : active(1)
 	=>
 	{
 		status:objectSt(300,0)
+		table:object(0,110)
+		object:object(130,0)
 		robot:robot(0,-110)
 		room:object(-130,0)
-		object:object(130,0)
-		table:object(0,110)
 		object->status(reach)
 		robot->object(know)
 		object->robot(in)
@@ -362,9 +405,9 @@ graspObject : active(1)
 deliverObject : active(1)
 {
 	{
-		room:object(-160,0)
 		person:person(0,115)
 		object:object(160,0)
+		room:object(-160,0)
 		robot:robot(0,-115)
 		robot->object(know)
 		object->robot(in)
@@ -373,9 +416,9 @@ deliverObject : active(1)
 	}
 	=>
 	{
-		room:object(-160,0)
 		person:person(0,115)
 		object:object(160,0)
+		room:object(-160,0)
 		robot:robot(0,-115)
 		robot->object(know)
 		object->person(in)
@@ -522,12 +565,12 @@ robotMovesObjectFromContainer : active(1)
 tellHumanAboutMug : active(1)
 {
 	{
-		person:person(45,-135)
-		cont2:object(-45,120)
-		objectr:object(-235,-30)
-		robot:robot(-295,-135)
-		cont1:object(-180,125)
 		statusr:objectSt(-425,55)
+		robot:robot(-295,-135)
+		person:person(45,-135)
+		objectr:object(-235,-30)
+		cont1:object(-180,125)
+		cont2:object(-45,120)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -539,14 +582,14 @@ tellHumanAboutMug : active(1)
 	}
 	=>
 	{
-		objecth:object(0,-10)
-		person:person(45,-135)
-		cont2:object(-45,175)
-		objectr:object(-235,-10)
-		statush:objectSt(205,85)
-		cont1:object(-185,175)
 		statusr:objectSt(-445,70)
+		objecth:object(0,-10)
 		robot:robot(-295,-135)
+		person:person(45,-135)
+		objectr:object(-235,-10)
+		cont1:object(-185,175)
+		cont2:object(-45,175)
+		statush:objectSt(205,85)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -571,12 +614,12 @@ tellHumanAboutMug : active(1)
 tellHumanAboutTable : active(1)
 {
 	{
-		person:person(45,-135)
-		cont2:object(-45,120)
-		objectr:object(-235,-30)
-		robot:robot(-295,-135)
-		cont1:object(-180,125)
 		statusr:objectSt(-425,55)
+		robot:robot(-295,-135)
+		person:person(45,-135)
+		objectr:object(-235,-30)
+		cont1:object(-180,125)
+		cont2:object(-45,120)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -588,14 +631,14 @@ tellHumanAboutTable : active(1)
 	}
 	=>
 	{
-		objecth:object(0,-10)
-		person:person(45,-135)
-		cont2:object(-45,175)
-		objectr:object(-235,-10)
-		statush:objectSt(205,85)
-		cont1:object(-185,175)
 		statusr:objectSt(-445,70)
+		objecth:object(0,-10)
 		robot:robot(-295,-135)
+		person:person(45,-135)
+		objectr:object(-235,-10)
+		cont1:object(-185,175)
+		cont2:object(-45,175)
+		statush:objectSt(205,85)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -632,12 +675,12 @@ tellHumanAboutUnknownObject : active(3)
 	}
 	=>
 	{
+		statusr:objectSt(-490,-25)
+		objecth:object(-100,-25)
 		robot:robot(-295,-135)
 		person:person(-100,-135)
-		objecth:object(-100,-25)
 		objectr:object(-295,-25)
 		statush:objectSt(100,-25)
-		statusr:objectSt(-490,-25)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -655,11 +698,11 @@ tellHumanAboutUnknownObject : active(3)
 makeHumanLook : active(2)
 {
 	{
-		robot:robot(-90,-75)
-		objectr:object(-90,40)
 		statusr:status(-90,180)
-		person:person(155,-75)
 		objecth:object(150,40)
+		robot:robot(-90,-75)
+		person:person(155,-75)
+		objectr:object(-90,40)
 		statush:status(145,180)
 		objectr->objecth(eq)
 		robot->person(interacting)
@@ -672,11 +715,11 @@ makeHumanLook : active(2)
 	}
 	=>
 	{
-		robot:robot(-90,-75)
-		objectr:object(-90,40)
 		statusr:status(-90,180)
-		person:person(155,-75)
 		objecth:object(150,40)
+		robot:robot(-90,-75)
+		person:person(155,-75)
+		objectr:object(-90,40)
 		statush:status(145,180)
 		objectr->objecth(eq)
 		robot->person(interacting)
@@ -692,12 +735,12 @@ makeHumanLook : active(2)
 personClassifiesMug : active(2)
 {
 	{
-		person:person(100,-75)
-		statush:status(300,35)
-		objectr:object(-100,35)
-		robot:robot(-100,-75)
-		cont2:object(100,140)
 		objecth:object(100,35)
+		robot:robot(-100,-75)
+		person:person(100,-75)
+		objectr:object(-100,35)
+		cont2:object(100,140)
+		statush:status(300,35)
 		objectr->objecth(eq)
 		robot->person(interacting)
 		robot->objectr(know)
@@ -709,12 +752,12 @@ personClassifiesMug : active(2)
 	}
 	=>
 	{
-		person:person(100,-75)
-		statush:status(300,35)
-		objectr:object(-100,35)
-		robot:robot(-100,-75)
-		cont2:object(100,140)
 		objecth:object(100,35)
+		robot:robot(-100,-75)
+		person:person(100,-75)
+		objectr:object(-100,35)
+		cont2:object(100,140)
+		statush:status(300,35)
 		objectr->objecth(eq)
 		robot->person(interacting)
 		robot->objectr(know)
@@ -727,16 +770,15 @@ personClassifiesMug : active(2)
 	}
 }
 
-
 personClassifiesTable : active(2)
 {
 	{
-		person:person(100,-75)
-		statush:status(300,35)
-		objectr:object(-100,35)
-		robot:robot(-100,-75)
-		cont2:object(100,140)
 		objecth:object(100,35)
+		robot:robot(-100,-75)
+		person:person(100,-75)
+		objectr:object(-100,35)
+		cont2:object(100,140)
+		statush:status(300,35)
 		objectr->objecth(eq)
 		robot->person(interacting)
 		robot->objectr(know)
@@ -748,12 +790,12 @@ personClassifiesTable : active(2)
 	}
 	=>
 	{
-		person:person(100,-75)
-		statush:status(300,35)
-		objectr:object(-100,35)
-		robot:robot(-100,-75)
-		cont2:object(100,140)
 		objecth:object(100,35)
+		robot:robot(-100,-75)
+		person:person(100,-75)
+		objectr:object(-100,35)
+		cont2:object(100,140)
+		statush:status(300,35)
 		objectr->objecth(eq)
 		robot->person(interacting)
 		robot->objectr(know)
@@ -769,14 +811,14 @@ personClassifiesTable : active(2)
 personTellsUsAboutMug : active(3)
 {
 	{
-		person:person(100,-75)
-		cont2:object(90,170)
-		objectr:object(-100,35)
 		statusr:status(-285,135)
-		robot:robot(-100,-75)
-		cont1:object(-90,170)
-		statush:status(285,135)
 		objecth:object(100,35)
+		robot:robot(-100,-75)
+		person:person(100,-75)
+		objectr:object(-100,35)
+		cont1:object(-90,170)
+		cont2:object(90,170)
+		statush:status(285,135)
 		objectr->objecth(eq)
 		robot->person(interacting)
 		robot->objectr(know)
@@ -791,14 +833,14 @@ personTellsUsAboutMug : active(3)
 	}
 	=>
 	{
-		person:person(100,-75)
-		cont2:object(90,170)
-		objectr:object(-100,35)
 		statusr:status(-285,135)
-		robot:robot(-100,-75)
-		cont1:object(-90,170)
-		statush:status(285,135)
 		objecth:object(100,35)
+		robot:robot(-100,-75)
+		person:person(100,-75)
+		objectr:object(-100,35)
+		cont1:object(-90,170)
+		cont2:object(90,170)
+		statush:status(285,135)
 		objectr->objecth(eq)
 		robot->person(interacting)
 		robot->objectr(know)
@@ -814,18 +856,17 @@ personTellsUsAboutMug : active(3)
 	}
 }
 
-
 personTellsUsAboutTable : active(3)
 {
 	{
-		person:person(100,-75)
-		cont2:object(90,170)
-		objectr:object(-100,35)
 		statusr:status(-285,135)
-		robot:robot(-100,-75)
-		cont1:object(-90,170)
-		statush:status(285,135)
 		objecth:object(100,35)
+		robot:robot(-100,-75)
+		person:person(100,-75)
+		objectr:object(-100,35)
+		cont1:object(-90,170)
+		cont2:object(90,170)
+		statush:status(285,135)
 		objectr->objecth(eq)
 		robot->person(interacting)
 		robot->objectr(know)
@@ -840,14 +881,14 @@ personTellsUsAboutTable : active(3)
 	}
 	=>
 	{
-		person:person(100,-75)
-		cont2:object(90,170)
-		objectr:object(-100,35)
 		statusr:status(-285,135)
-		robot:robot(-100,-75)
-		cont1:object(-90,170)
-		statush:status(285,135)
 		objecth:object(100,35)
+		robot:robot(-100,-75)
+		person:person(100,-75)
+		objectr:object(-100,35)
+		cont1:object(-90,170)
+		cont2:object(90,170)
+		statush:status(285,135)
 		objectr->objecth(eq)
 		robot->person(interacting)
 		robot->objectr(know)
@@ -873,6 +914,7 @@ findGrannyAndDeliver : active(1)
 	deliver.person = find.person
 }
 
+
 reachAndGrasp : active(1)
 {
 	setObjectReach as reach
@@ -881,3 +923,5 @@ reachAndGrasp : active(1)
 	reach.object = grasp.object
 	reach.status = grasp.status
 }
+
+
