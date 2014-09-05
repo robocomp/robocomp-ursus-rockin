@@ -234,13 +234,13 @@ setRoomExplored : passive(1)
 {
 	{
 		status:roomSt(250,0)
-		object:room(0,0)
+		object:object(0,0)
 		object->status(noExplored)
 	}
 	=>
 	{
 		status:roomSt(250,0)
-		object:room(0,0)
+		object:object(0,0)
 		object->status(explored)
 	}
 }
@@ -249,13 +249,13 @@ setRoomNotExplored : passive(1)
 {
 	{
 		status:roomSt(250,0)
-		object:room(0,0)
+		object:object(0,0)
 		object->status(explored)
 	}
 	=>
 	{
 		status:roomSt(250,0)
-		object:room(0,0)
+		object:object(0,0)
 		object->status(noExplored)
 	}
 }
@@ -362,7 +362,7 @@ graspObject : active(1)
 deliverObject : active(1)
 {
 	{
-		room:room(-160,0)
+		room:object(-160,0)
 		person:person(0,115)
 		object:object(160,0)
 		robot:robot(0,-115)
@@ -373,7 +373,7 @@ deliverObject : active(1)
 	}
 	=>
 	{
-		room:room(-160,0)
+		room:object(-160,0)
 		person:person(0,115)
 		object:object(160,0)
 		robot:robot(0,-115)

@@ -92,9 +92,9 @@
 	<symbol id="15" type="object">
 	</symbol>
 	<link src="1" dst="15" label="know" />
+	<link src="15" dst="7" label="in" />
 	<symbol id="32" type="objectSt">
 	</symbol>
-	<link src="15" dst="7" label="in" />
 	<link src="15" dst="32" label="bed" />
 	<link src="15" dst="32" label="hasStatus" />
 	<link src="15" dst="32" label="notSee" />

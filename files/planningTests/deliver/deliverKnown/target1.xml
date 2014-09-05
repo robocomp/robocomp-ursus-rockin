@@ -1,7 +1,7 @@
 <AGMModel>
 
 	<symbol id="1" type="robot" />
-	<symbol id="7" type="room" />
+	<symbol id="7" type="object" />
 
 	<symbol id="30" type="object" />
 
