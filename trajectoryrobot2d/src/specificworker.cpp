@@ -28,12 +28,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 {
 	this->params = params;
 	compState.state = "IDLE";
-	
-	//innerModel = new InnerModel("/home/robocomp/robocomp/Files/InnerModel/betaWorld.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/wall.xml");  ///CHECK IT CORRESPONDS TO RCIS
-	//	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/vacio.xml");  ///CHECK IT CORRESPONDS TO RCIS
-
 }
 
 /**
@@ -100,8 +94,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	controller = new Controller(*innerModel, laserData, 2);
 	qDebug() << __FUNCTION__ << "----- controller set";
 	
-// 	//Localizer stuff
- //	localizer = new Localizer(innerModel);
+ 	//Localizer stuff
+ 	localizer = new Localizer(*innerModel);
 // 	
 // 	sleep(1);
 
@@ -184,12 +178,7 @@ void SpecificWorker::compute( )
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
 	
-// 	float a=0;
-// 	if( newData )
-// 	{
-// 		avoidanceControl(*innerModel, laserData, ad, ro, reloj2.elapsed());
-// 		newData = false;
-// 	}
+	//localizer->localize(laserData, *innerModel, 16);
 	
 	if ( updateInnerModel(innerModel) )
 	{

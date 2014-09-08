@@ -74,8 +74,15 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		if( QFile(QString::fromStdString(par.value)).exists() == true)
 		{
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-			innerModel = new InnerModel(par.value);
+			innerModel = new InnerModel(par.value);	
 			convertInnerModelFromMilimetersToMeters(innerModel->getRoot());
+			innerModel->transform("world","robot").print("floor");
+	
+			 qDebug() << dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalex;
+			 qDebug()<<  dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scaley;
+			  qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
+			
+			//innerModel->print();
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;		
 		}
 		else
@@ -133,6 +140,7 @@ void SpecificWorker::init()
  		goHome(p.getPartName().toStdString());
 	sleep(1);
 	actualizarInnermodel(listaMotores);
+	
 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
 		
 	//Open file to write errors
@@ -175,6 +183,7 @@ void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* nod
 		if( (joint = dynamic_cast<InnerModelJoint *>(node)) == false)
 		{
 			transformation->setTr(transformation->getTr() / FACTOR);
+			qDebug() << transformation->id << transformation->getTr();
 		}
 		//qDebug() << node->id << node->getTr();
 		for(int i=0; i<node->children.size(); i++)
@@ -725,7 +734,7 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 	{
 		RoboCompDifferentialRobot::TBaseState bState;
 		differentialrobot_proxy->getBaseState( bState );
-		innerModel->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+		innerModel->updateTransformValues("robot", bState.x/1000, 0, bState.z/1000, 0, bState.alpha, 0);
 	
 	} catch (const Ice::Exception &ex) 
 	{		cout<<"--> Excepción reading DifferentialRobot: "<<ex<<endl;	}

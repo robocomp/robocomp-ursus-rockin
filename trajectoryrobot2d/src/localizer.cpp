@@ -19,25 +19,23 @@
 
 #include "localizer.h"
 
-Localizer::Localizer(InnerModel *inner)
+Localizer::Localizer(InnerModel &innerModel)
 {
-	clonModel = new InnerModel( *inner );
-	recursiveIncludeMeshes( clonModel->getRoot(), "robot", false, robotNodes, restNodes);
+	//clonModel = new InnerModel( *inner );
+	//recursiveIncludeMeshes( clonModel->getRoot(), "robot", false, robotNodes, restNodes);
+	recursiveIncludeMeshes( innerModel.getRoot(), "robot", false, robotNodes, restNodes);
 
 	icp.setDefault();	
 }
 
-void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inner, int nLaserRays)
+void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel &innerModel, int nLaserRays)
 {
-	QVec point = inner->transform("world", "robot");
-	float alfa = inner->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
+	QVec point = innerModel.transform("world", "robot");
+	float alfa = innerModel.getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
 	float step = float(laser.size()) / float(nLaserRays);
 
 	virtualLaser.resize(nLaserRays);
 	subsampledLaser.resize(nLaserRays);
-	
-// 	qDebug() << laser[0].angle << laser[laser.size()-1].angle << step;
-
 	
 	int k = 0;
  	for (float i=0; k<nLaserRays; i+=step)
@@ -48,8 +46,7 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 		k++;
  	}
 	
-	laserRender(point, alfa);
-
+	laserRender(innerModel, point, alfa);
 
 // 	std::ofstream outputFileVS;
 // 	outputFileVS.open("laserVirtualS.csv");
@@ -72,22 +69,24 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *inn
 		qDebug() << "	Dist:" << virtualLaser[i].dist << ". DistSub:" << subsampledLaser[i].dist << ". Angle" << virtualLaser[i].angle
 							<< ". Diff: " << subsampledLaser[i].dist - virtualLaser[i].dist;
 	}
-	//estimatePoseWithICP(laser, point, alfa);
+// 	estimatePoseWithICP(laser, point, alfa);
 	
 	localizeInMapWithICP();
 	
 }
 
-void Localizer::laserRender(const QVec& point, float alfa)
+void Localizer::laserRender(InnerModel &innerModel, const QVec& point, float alfa)
 {
 	// TODO: GET FROM VISTUAL LASER SPECIFICATION	
 	const float MAX_LENGTH_ALONG_RAY = 4000;
 	
 	// Update robot's position
-	clonModel->updateTransformValues("robot", point.x(), 0, point.z(), 0., alfa, 0.);
+	QVec currentPos = innerModel.transform("world","robot");
+	float currentAlfa = innerModel.getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
+	innerModel.updateTransformValues("robot", point.x(), 0, point.z(), 0., alfa, 0.);
 	
 	// Compute rotation matrix between laser and world
-	QMat r1q1 = clonModel->getRotationMatrixTo("world", "laser");
+	QMat r1q1 = innerModel.getRotationMatrixTo("world", "laser");
 	
 	// Create hitting appex
 	boost::shared_ptr<fcl::Box> laserBox(new fcl::Box(0.1, 0.1, 0.1));
@@ -103,14 +102,14 @@ void Localizer::laserRender(const QVec& point, float alfa)
 		// Check collision at maximum distance
 		float hitDistance = MAX_LENGTH_ALONG_RAY;
 		laserBox->side = fcl::Vec3f(0.1, 0.1, hitDistance);
- 		clonModel->updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
- 		const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
- 		clonModel->updateRotationValues("laserPose", 0, 0, 0);
+ 		innerModel.updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
+ 		const QVec boxBack = innerModel.transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+ 		innerModel.updateRotationValues("laserPose", 0, 0, 0);
  		laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 		
  		for (uint out=0; out<restNodes.size(); out++)
  		{
- 			hit = clonModel->collide(restNodes[out], &laserBoxCol);
+ 			hit = innerModel.collide(restNodes[out], &laserBoxCol);
  			if (hit) 
 				break;
  		}
@@ -127,15 +126,15 @@ void Localizer::laserRender(const QVec& point, float alfa)
 				// Stretch and create the stick
 				hitDistance = (max+min)/2.;
 				laserBox->side = fcl::Vec3f(0.1, 0.1, hitDistance);
-				clonModel->updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
-				const QVec boxBack = clonModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
-				clonModel->updateRotationValues("laserPose", 0, 0, 0);
+				innerModel.updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
+				const QVec boxBack = innerModel.transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+				innerModel.updateRotationValues("laserPose", 0, 0, 0);
 				laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 				
 				// Check collision using current ray length
 				for (uint32_t out=0; out<restNodes.size(); out++)
 				{
-					hit = clonModel->collide(restNodes[out], &laserBoxCol);
+					hit = innerModel.collide(restNodes[out], &laserBoxCol);
 					if (hit)
 						break;
 				}
@@ -151,6 +150,9 @@ void Localizer::laserRender(const QVec& point, float alfa)
 		// Fill the laser's structure
 		virtualLaser[i].dist = hitDistance;
 	}
+	
+	//Restore innermodel
+	innerModel.updateTransformValues("robot", currentPos.x(), 0, currentPos.z(), 0., currentAlfa, 0.);
 }
 
 void Localizer::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
