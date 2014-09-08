@@ -1,11 +1,10 @@
 <AGMModel>
 
-	<symbol id="7" type="room" />
+	<symbol id="7" type="object" />
 
 	<symbol id="1" type="robot" />
 
 	<link src="1" dst="7" label="in" />
-
 
 	<symbol id="22" type="person" />
 
