@@ -64,11 +64,12 @@ void BodyInverseKinematicsI::stop(const string& part, const Ice::Current&){
 	worker->stop(part);
 }
 
-void BodyInverseKinematicsI::setNewTip(const string &part, const string &transform, const Pose6D& pose, const Ice::Current&){
+void BodyInverseKinematicsI::setNewTip(const string& part, const string& transform, const Pose6D& pose, const Ice::Current&){
 	worker->setNewTip(part,transform,pose);
 }
 
-
-
+void BodyInverseKinematicsI::setJoint(const string& joint, Ice::Float speed, Ice::Float maxSpeed, const Ice::Current&){
+	worker->setJoint(joint,speed,maxSpeed);
+}
 
 

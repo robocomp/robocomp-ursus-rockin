@@ -36,8 +36,8 @@ WayPoints::WayPoints()
 	currentCollisionIndex = 0;
 	currentDistanceToFrontier = 0;
 	requiresReplanning = false;
-
 	meanSpeed = 300.f;  //Initial speed. Should be read from disk
+	antDist = std::numeric_limits< float >::max();
 }
 
 WayPoints::~WayPoints()
@@ -173,6 +173,7 @@ void WayPoints::printRobotState(InnerModel* innerModel, const CurrentTarget &cur
 		qDebug() << "-------Road status report  ---------------------";
 		qDebug() << "	Robot position:" << robot3DPos;
 		qDebug() << "	Target:" << currentTarget.getTranslation();
+		qDebug() << "	Target2:" << last().pos;
 		qDebug() << "	Num points:" << this->size();
 		qDebug() << "	Robot dist to closest point in road:" << getRobotDistanceToClosestPoint();
 		qDebug() << "	Robot perp. dist to road tangent at closest point:" << getRobotPerpendicularDistanceToRoad();
@@ -473,7 +474,7 @@ float WayPoints::computeDistanceToTarget(WayPoints::iterator closestPoint, const
 	{
 		dist += (it->pos - (it+1)->pos).norm2();
 	}
-	float distE = (robotPos - it->pos).norm2();
+	float distE = (robotPos - it->pos).norm2();  //Euclidean distance to last point to detect the robot going away from the target
 	robotDistanceVariationToTarget = distE - antDist;
 	antDist = distE;
 	return dist;

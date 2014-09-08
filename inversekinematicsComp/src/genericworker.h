@@ -28,6 +28,7 @@
 #include <ui_guiDlg.h>
 #include "config.h"
 #include <JointMotor.h>
+#include <DifferentialRobot.h>
 #include <BodyInverseKinematics.h>
 
 #define CHECK_PERIOD 5000
@@ -42,6 +43,7 @@ using namespace std;
        @author authorname
 */
 using namespace RoboCompJointMotor;
+using namespace RoboCompDifferentialRobot;
 using namespace RoboCompBodyInverseKinematics;
 class GenericWorker :
 #ifdef USE_QTGUI
@@ -62,6 +64,7 @@ public:
 
 	JointMotorPrx jointmotor0_proxy;
 	JointMotorPrx jointmotor1_proxy;
+	DifferentialRobotPrx differentialrobot_proxy;
 	virtual void  setTargetPose6D(const string& bodyPart, const Pose6D& target, const WeightVector& weights, float radius) = 0;
 	virtual void  pointAxisTowardsTarget(const string& bodyPart, const Pose6D& target, const Axis& ax, bool axisConstraint, float axisAngleConstraint) = 0;
 	virtual void  advanceAlongAxis(const string& bodyPart, const Axis& ax, float dist) = 0;
@@ -70,7 +73,8 @@ public:
 	virtual void  setRobot(int type) = 0;
 	virtual TargetState getState(const string& part) = 0;
 	virtual void  stop(const string& part) = 0;
-	virtual void  setNewTip(const string &part, const string &transform, const Pose6D& pose) = 0;
+	virtual void  setNewTip(const string& part, const string& transform, const Pose6D& pose) = 0;
+	virtual void  setJoint(const string& joint, float speed, float maxSpeed) = 0;
 protected:
 	QTimer timer;
 	int Period;

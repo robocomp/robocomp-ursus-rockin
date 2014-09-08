@@ -28,6 +28,7 @@
 #include <ui_guiDlg.h>
 #include "config.h"
 #include <TrajectoryRobot2D.h>
+#include <JointMotor.h>
 #include <DifferentialRobot.h>
 #include <BodyInverseKinematics.h>
 #include <AprilTags.h>
@@ -44,6 +45,7 @@ using namespace std;
        @author authorname
 */
 using namespace RoboCompTrajectoryRobot2D;
+using namespace RoboCompJointMotor;
 using namespace RoboCompDifferentialRobot;
 using namespace RoboCompBodyInverseKinematics;
 using namespace RoboCompAprilTags;
@@ -65,6 +67,7 @@ public:
 	QMutex *mutex;                //Shared mutex with servant
 
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
+	JointMotorPrx jointmotor_proxy;
 	DifferentialRobotPrx differentialrobot_proxy;
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
 	virtual void  newAprilTag(const tagsList& tags) = 0;

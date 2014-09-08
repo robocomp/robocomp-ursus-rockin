@@ -1,9 +1,10 @@
+import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
 import "/robocomp/interfaces/IDSLs/BodyInverseKinematics.idsl";
 import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
 
 Component lokiArmComp{
 	Communications{
-		requires  JointMotor, JointMotor;
+		requires  JointMotor, JointMotor, DifferentialRobot;
 		implements BodyInverseKinematics;
 	};
 	gui Qt(QWidget);

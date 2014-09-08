@@ -45,7 +45,8 @@ void  goHome(const string& part, const Ice::Current& = Ice::Current());
 void  setRobot(Ice::Int type, const Ice::Current& = Ice::Current());
 TargetState getState(const string& part, const Ice::Current& = Ice::Current());
 void  stop(const string& part, const Ice::Current& = Ice::Current());
-void  setNewTip(const string &part, const string &transform, const Pose6D& pose, const Ice::Current& = Ice::Current());
+void  setNewTip(const string& part, const string& transform, const Pose6D& pose, const Ice::Current& = Ice::Current());
+void  setJoint(const string& joint, Ice::Float speed, Ice::Float maxSpeed, const Ice::Current& = Ice::Current());
 
 
 	QMutex *mutex;

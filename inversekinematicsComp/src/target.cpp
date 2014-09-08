@@ -87,6 +87,7 @@ Target::Target(Target::TargetType tt, InnerModel* inner, const QString &tip, con
 	this->chopped = false;
 	removal = false;
 	atTarget = false;
+	hasPlan = false;
 }
 
 /**
@@ -122,6 +123,8 @@ Target::Target(Target::TargetType tt, InnerModel* inner, const QString &tip, con
 	this->chopped = false;
 	removal = false;
 	atTarget = false;
+	hasPlan = false;
+
 }
 
 /**
@@ -156,6 +159,7 @@ Target::Target(Target::TargetType tt, InnerModel* inner, const QString &tip, con
 	this->chopped = false;
 	removal = false;
 	atTarget = false;
+	hasPlan = false;
 
 }
 

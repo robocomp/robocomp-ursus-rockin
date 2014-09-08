@@ -35,9 +35,9 @@
 #include "cinematica_inversa.h"
 #include "target.h"
 #include "bodypart.h"
-#include "planner.h"
+#include "plannerompl.h"
 #include "reflexx.h"
-
+#include "sampler.h"
  
 using namespace std;
 
@@ -65,7 +65,8 @@ class SpecificWorker : public GenericWorker
 		void  		setRobot					(const int type) ;
 		void  		stop						(const string& part);
 		TargetState	getState					(const string &part);
-		void 		setNewTip(const string &part, const string &transform, const Pose6D &pose); 
+		void 		setNewTip					(const string &part, const string &transform, const Pose6D &pose); 
+		void  		setJoint					(const string& joint, float speed, float maxSpeed);
 		
 		
 	public slots:
@@ -100,7 +101,8 @@ class SpecificWorker : public GenericWorker
 		//Reflexx *reflexx;
 			
 		//Planner stuff
-		Planner *planner;
+		PlannerOMPL *planner;
+		Sampler sampler;
 		
 		void init();							// Things to do after params are set
 
@@ -119,6 +121,7 @@ class SpecificWorker : public GenericWorker
         void 	calcularModuloFloat						(QVec &angles, float mod);
         void 	chopPath								(const QString &partName, const Target &target);
 		void 	doReflexxes								(const QList<QVec> &jointValues, const QStringList &motors);
+		bool	planPath(InnerModel& innerModel, const Target& target);
 		
 	
 	

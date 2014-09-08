@@ -1,3 +1,4 @@
+import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
 import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
 import "/robocomp/interfaces/IDSLs/BodyInverseKinematics.idsl";
 import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
@@ -7,7 +8,7 @@ Component TrajectoryTesterComp
 {
 	Communications
 	{
-		requires TrajectoryRobot2D, DifferentialRobot, BodyInverseKinematics;
+		requires TrajectoryRobot2D, DifferentialRobot, BodyInverseKinematics, JointMotor;
 		subscribesTo AprilTags;
 	};
 	language Cpp;

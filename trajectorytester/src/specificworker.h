@@ -37,7 +37,7 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void  newAprilTag(const tagsList& tags); 
 
-	enum class State {IDLE, GO_KITCHEN, SERVOING} ;
+	enum class State {IDLE, GO_KITCHEN, SERVOING, LIFT_ARM} ;
 	
 public slots:
  	void compute(); 	
@@ -60,6 +60,8 @@ public slots:
 	void step1();
 	void step2();
 	void step3();
+	void bik1();
+	void bik2();
 	
 private:
 	PlantWidget *plantWidget;
@@ -69,12 +71,15 @@ private:
 	void doStateMachine();
 	State go_kitchen();
 	State servoing();
+	State liftArm();
 	State state;
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
 	bool tag11;
 	RoboCompAprilTags::tag tag;
 	InnerModel *innerModel;
+	QStringList listaMotores;
+	void actualizarInnermodel(const QStringList &listaJoints);
 };
 
 #endif

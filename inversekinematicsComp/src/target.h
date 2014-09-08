@@ -59,10 +59,12 @@ public:
 	~Target();
 	
 	// MÉTODOS GET:
-	QString getTipName() const           { return this->tip; }             // Devuelve el nombre del TIP.
-	QVec getPose() const                 { return this->pose6D; }          // Devuelve el vector pose del target
-	QTime getStartTime() const           { return this->start; }           // Devuelve el tiempo del target.
-	bool isActive() const          	     { return this->activo; }          // Devuelve el estado del target
+	QString getTipName() const           { return this->tip; }            		 	// Devuelve el nombre del TIP.
+	QVec getPose() const                 { return this->pose6D; }          			// Devuelve el vector pose del target
+	QVec getTranslation() const			 { return this->pose6D.subVector(0,2);}  	//Returns the translation component of Pose6D
+	QVec getRotation() const			 { return this->pose6D.subVector(3,5);}  	//Returns the rotation component of Pose6D
+	QTime getStartTime() const           { return this->start; }           			// Devuelve el tiempo del target.
+	bool isActive() const          	     { return this->activo; }          			// Devuelve el estado del target
 	QVec getWeights() const              { return this->weights; } 
 	TargetType getType() const           { return targetType; }
 	bool getAxisConstraint() const       { return axisConstraint; }
@@ -81,6 +83,7 @@ public:
 	bool isMarkedforRemoval() const		 { return removal; }
 	float getRadius() const 			 { return radius; }
 	bool isAtTarget() const 			 { return atTarget; };
+	bool getHasPlan() const 				 { return hasPlan; };
 
 	// MÉTODOS SET:
 	void setPose(const QVec &newPose)				{ this->pose6D = newPose;};
@@ -117,6 +120,7 @@ public:
 	void markForRemoval( bool m) 					{ removal = m; };
 	void setRadius(float r)       					{ radius = r; };
 	void setAtTarget(bool a)  						{ atTarget = a; };
+	void setHasPlan(bool a)							{ hasPlan = a;};
 	
 	// OTROS MÉTODOS
 	void print(const QString &msg = QString());
@@ -152,6 +156,7 @@ private:
 	float radius; 							// if > 0 the robot stops when reaching a ball of radius "radius" with center in Pose6D
 	bool removal;           		         // 
 	bool atTarget;
+	bool hasPlan;							//if false a plan has to be computed and stored
 };
 
 

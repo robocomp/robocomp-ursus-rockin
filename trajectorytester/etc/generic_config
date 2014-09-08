@@ -8,6 +8,7 @@ AprilTagsTopic.Endpoints=tcp -p 10261
 #RemoteProxy = remote:tcp -h remotehost -p 10001
 
 TrajectoryRobot2DProxy = trajectoryrobot2d:tcp -h localhost -p 12204
+JointMotorProxy = jointmotor:tcp -h localhost -p 10067
 DifferentialRobotProxy = differentialrobot:tcp -h localhost -p 10004
 BodyInverseKinematicsProxy = bodyinversekinematics:tcp -h localhost -p 10220
 

@@ -74,7 +74,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
 		 
 //	setRobotInitialPose(800, -1500, M_PI);
-	baseOffsets = computeRobotOffsets(*innerModel, laserData);
+//	baseOffsets = computeRobotOffsets(*innerModel, laserData);
 	
 	//Planning
 	plannerOMPL = new PlannerOMPL(*innerModel);			
@@ -256,7 +256,8 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel)
 {
 	qDebug() << __FUNCTION__ << "with robot at" << innerModel->transform("world","robot");; 
 	road.changeTarget( currentTarget.getTranslation());
-	//drawTarget(currentTarget.getTranslation());
+	road.setFinished( false );
+	drawTarget(currentTarget.getTranslation());
 	currentTarget.command = CurrentTarget::Command::GOTO;
 	return true;
 }
@@ -269,6 +270,8 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 		elasticband->update( road, laserData, currentTarget);
 		
 		road.computeForces();
+		
+		//road.print();
 	
 		road.printRobotState( innerModel, currentTarget);
 
@@ -337,7 +340,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 	}
 	else
 	{
-		float vrot = -0.8 * v[0];
+		float vrot = -0.8 * v[0];  //Proportional controller
 		try 
 		{
 		  differentialrobot_proxy->setSpeedBase(0, vrot);	
@@ -525,32 +528,32 @@ void SpecificWorker::printNumberOfElementsInRCIS()
 void SpecificWorker::changeTarget(const TargetPose& target)
 {
 	QVec t = QVec::vec3((T)target.x, (T)target.y, (T)target.z);
-	QVec tt = innerModel->transform("world","robot") ;
-	//searchRobotValidStateCloseToTarget(*innerModel, laserData, tt);
 	
 	qDebug() << __FUNCTION__ << "CHANGE TARGET command received, with target" << t << "and robot at" << innerModel->transform("world","robot") ; 
 
-	if ( searchRobotValidStateCloseToTarget(*innerModel, laserData, t ))
+	if ( currentTarget.isActive() == false) 
 	{
-		if( (currentTarget.getTranslation() - t).norm2() > 30 )
+		if( searchRobotValidStateCloseToTarget(*innerModel, laserData, t ))
 		{
-			currentTarget.setActive(true)
-			currentTarget.setTranslation( t );
-			currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
-			if( target.onlyRot == true) 
-				currentTarget.setHasRotation(true);
-			else
-				currentTarget.setHasRotation(false);
-			currentTarget.command = CurrentTarget::Command::CHANGETARGET;
+			t.print("target after relocation");
+			if( (currentTarget.getTranslation() - t).norm2() > 30 )
+			{
+				currentTarget.setTranslation( t );
+				currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+				if( target.onlyRot == true) 
+					currentTarget.setHasRotation(true);
+				else
+					currentTarget.setHasRotation(false);
+				currentTarget.command = CurrentTarget::Command::CHANGETARGET;
+			}
 		}
+		else
+		{
+			qDebug() << __FUNCTION__ << "No valid target reposition found!";
+			currentTarget.command = CurrentTarget::Command::STOP;
+		}
+		qDebug() << __FUNCTION__ << "No currentTarget active!";
 	}
-	else
-	{
-		qDebug() << __FUNCTION__ << "No valid target reposition found!";
-		currentTarget.command = CurrentTarget::Command::STOP;
-	}
-	t.print("t");
-		//qFatal("fary");
 }
 
 /**
@@ -563,6 +566,7 @@ void SpecificWorker::go(const TargetPose& target)
 {
 	
 	stop();
+	while( currentTarget.isActive() == true){};
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
@@ -597,6 +601,9 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 	currentTarget.command = CurrentTarget::Command::SETHEADING;	
 	qDebug() << __FUNCTION__ << "SETHEADING command received";
 }
+
+
+
 
 /////////////////////////////////////////////////////7
 ///  Subcription to JoyStick
@@ -644,141 +651,142 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 // }
 
 
-/**
- * @brief To go in Controller class or as a separate class with soft real time restrictions.
- * Keeps the robot safe but, being the last level of control, should try to compute a safe diverging trajectory to keep things moving on the road.
- * 
- * @param innerModel ...
- * @param road ...
- * @param laserData ...
- * @param vadvance ...
- * @param vrot ...
- * @return bool
- */
-bool SpecificWorker::avoidanceControl(InnerModel& innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed)
-{
-	const float MAX_ADV_ACC = 400;
-	const float MAX_ROT_ACC = 0.5;
-	//if( bState.advV == 0 and bState.rotV == 0 )
-	//	return false;
-	
-	//check collision for a future potential position
-	//given current speed and maximun acceleration, compute the minimun time to stop
-	//float time = std::min<float>( fabs((vadvance + bState.advV) / 400.f), 0.1); // mm/sg2
-	//float time = std::max<float>( (fabs(bState.advV) / 400.f), fabs(bState.rotV / 2.));
-	float time = fabs(bState.advV + vadvance) / 400.f;
-	//float time = elapsed / 1000.f;
-	//we want to decide here if the next movement will cause a collision
-	QVec repulsionVector;
-	bool collision;
-	std::tie(repulsionVector, collision) = checkInminentCollision( innerModel, laserData, 
-																   bState.advV + vadvance, 
-																   bState.rotV + vrot, time);
-	
-	//if( repulsionVector != QVec::zeros(3))
-	if( collision )	
-	{
-		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector; 
-		
-		//compute a <vadv,vrot> command to save the situation
-		//check the outcome of all possible velocities to find one that saves the obstacle or else stop the robot
-		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
-		differentialrobot_proxy->setSpeedBase( 0, 0);		
-	}
-	else
-		try 
-		{
-			differentialrobot_proxy->setSpeedBase( vadvance, vrot);
-		}
-		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	 
-	
-	return true;
-}
-
-std::tuple<QVec, bool> SpecificWorker::checkInminentCollision(InnerModel& innerModel, const RoboCompLaser::TLaserData& laserData, float vadv, float vrot, float delta)
-{
-	//integrate speed to obtain base next position using Borenstein's approximation
-	float deltaT = delta; // / 1000.f;
-	float xN = bState.x + (vadv * deltaT) * sin(vrot * deltaT);
-	float zN = bState.z + (vadv * deltaT) * cos(vrot * deltaT);
-	float angN = bState.alpha + (vrot * deltaT);
-	qDebug() << vadv << vrot << deltaT << "now" << bState.x << bState.z << bState.alpha << "new" << xN << zN << angN;
-	
-	//now check if there will be collision in the future position using current laserData
-	innerModel.updateTransformValues("robot", xN, 0, zN, 0, angN, 0);
-	// Three points of rectangle approximating the robot base 
-	QVec p1 = innerModel.transform("world", QVec::vec3(220,0,220), "robot" );
-	QVec p2 = innerModel.transform("world", QVec::vec3(220,0,-220), "robot" );
-	QVec p3 = innerModel.transform("world", QVec::vec3(-220,0,220), "robot" );
-	innerModel.updateTransformValues("robot", bState.x, 10, bState.z, 0, bState.alpha, 0);
-	
-	QVec p(3,0.f);
-	int k=0;
-	bool collision = false;
-	QVec repulsionVector = QVec::zeros(3);
-	for(auto i : laserData)
-	{
-		p = innerModel.laserTo("world","laser",i.dist,i.angle);
-		if( robotLaserCollision( p1, p2, p3, p ))
-		{
-			//p = p * (T)(-1);
-			repulsionVector += ( p * (T)(-1));
-			collision = true;
-		}	
-	}
-	return std::make_tuple(repulsionVector, collision);
-}
-
-
-
-bool SpecificWorker::robotLaserCollision( const QVec &p1, const QVec &p2, const QVec &p3,  const QVec &p)
-{
-	QVec p21 = p2-p1;
-	QVec p31 = p3-p1;
-	
-	if ((p.x() - p1.x()) * p21.x() + (p.z() - p1.z()) * p21.z() < 0.0) return false;
-	if ((p.x() - p2.x()) * p21.x() + (p.z() - p2.z()) * p21.z() > 0.0) return false;
-	if ((p.x() - p1.x()) * p31.x() + (p.z() - p1.z()) * p31.z() < 0.0) return false;
-	if ((p.x() - p3.x()) * p31.x() + (p.z() - p3.z()) * p31.z() > 0.0) return false;
-	
-	return true;
-}
-
-/**
- * @brief Offset computation of each laser beam to account for the geometry of the getBaseState
- * 
- * @param innerModel ...
- * @param laserData ...
- * @return std::vector< float, std::allocator >
- */
-std::vector<float> SpecificWorker::computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData)
-{
-	//Base geometry GET FROM IM!!!
-	QRectF base( QPointF(-200, 200), QPointF(200, -200));
-	std::vector<float> baseOffsets;
-	QVec p(3,0.f);
-	int k;
-	
-	for(auto i : laserData)
-	{
-		for(k=10; k<4000; k++)
-		{ 
-			p = innerModel.laserTo("robot","laser",k,i.angle);
-			if( base.contains( QPointF( p.x(), p.z() ) ) == false )
-				break;
-		}
-		baseOffsets.push_back(k);
-	}
-	return baseOffsets;
-}
-
+// /**
+//  * @brief To go in Controller class or as a separate class with soft real time restrictions.
+//  * Keeps the robot safe but, being the last level of control, should try to compute a safe diverging trajectory to keep things moving on the road.
+//  * 
+//  * @param innerModel ...
+//  * @param road ...
+//  * @param laserData ...
+//  * @param vadvance ...
+//  * @param vrot ...
+//  * @return bool
+//  */
+// bool SpecificWorker::avoidanceControl(InnerModel& innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed)
+// {
+// 	const float MAX_ADV_ACC = 400;
+// 	const float MAX_ROT_ACC = 0.5;
+// 	//if( bState.advV == 0 and bState.rotV == 0 )
+// 	//	return false;
+// 	
+// 	//check collision for a future potential position
+// 	//given current speed and maximun acceleration, compute the minimun time to stop
+// 	//float time = std::min<float>( fabs((vadvance + bState.advV) / 400.f), 0.1); // mm/sg2
+// 	//float time = std::max<float>( (fabs(bState.advV) / 400.f), fabs(bState.rotV / 2.));
+// 	float time = fabs(bState.advV + vadvance) / 400.f;
+// 	//float time = elapsed / 1000.f;
+// 	//we want to decide here if the next movement will cause a collision
+// 	QVec repulsionVector;
+// 	bool collision;
+// 	std::tie(repulsionVector, collision) = checkInminentCollision( innerModel, laserData, 
+// 																   bState.advV + vadvance, 
+// 																   bState.rotV + vrot, time);
+// 	
+// 	//if( repulsionVector != QVec::zeros(3))
+// 	if( collision )	
+// 	{
+// 		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector; 
+// 		
+// 		//compute a <vadv,vrot> command to save the situation
+// 		//check the outcome of all possible velocities to find one that saves the obstacle or else stop the robot
+// 		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
+// 		differentialrobot_proxy->setSpeedBase( 0, 0);		
+// 	}
+// 	else
+// 		try 
+// 		{
+// 			differentialrobot_proxy->setSpeedBase( vadvance, vrot);
+// 		}
+// 		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	 
+// 	
+// 	return true;
+// }
+// 
+// std::tuple<QVec, bool> SpecificWorker::checkInminentCollision(InnerModel& innerModel, const RoboCompLaser::TLaserData& laserData, float vadv, float vrot, float delta)
+// {
+// 	//integrate speed to obtain base next position using Borenstein's approximation
+// 	float deltaT = delta; // / 1000.f;
+// 	float xN = bState.x + (vadv * deltaT) * sin(vrot * deltaT);
+// 	float zN = bState.z + (vadv * deltaT) * cos(vrot * deltaT);
+// 	float angN = bState.alpha + (vrot * deltaT);
+// 	qDebug() << vadv << vrot << deltaT << "now" << bState.x << bState.z << bState.alpha << "new" << xN << zN << angN;
+// 	
+// 	//now check if there will be collision in the future position using current laserData
+// 	innerModel.updateTransformValues("robot", xN, 0, zN, 0, angN, 0);
+// 	// Three points of rectangle approximating the robot base 
+// 	QVec p1 = innerModel.transform("world", QVec::vec3(220,0,220), "robot" );
+// 	QVec p2 = innerModel.transform("world", QVec::vec3(220,0,-220), "robot" );
+// 	QVec p3 = innerModel.transform("world", QVec::vec3(-220,0,220), "robot" );
+// 	innerModel.updateTransformValues("robot", bState.x, 10, bState.z, 0, bState.alpha, 0);
+// 	
+// 	QVec p(3,0.f);
+// 	int k=0;
+// 	bool collision = false;
+// 	QVec repulsionVector = QVec::zeros(3);
+// 	for(auto i : laserData)
+// 	{
+// 		p = innerModel.laserTo("world","laser",i.dist,i.angle);
+// 		if( robotLaserCollision( p1, p2, p3, p ))
+// 		{
+// 			//p = p * (T)(-1);
+// 			repulsionVector += ( p * (T)(-1));
+// 			collision = true;
+// 		}	
+// 	}
+// 	return std::make_tuple(repulsionVector, collision);
+// }
+// 
+// 
+// 
+// bool SpecificWorker::robotLaserCollision( const QVec &p1, const QVec &p2, const QVec &p3,  const QVec &p)
+// {
+// 	QVec p21 = p2-p1;
+// 	QVec p31 = p3-p1;
+// 	
+// 	if ((p.x() - p1.x()) * p21.x() + (p.z() - p1.z()) * p21.z() < 0.0) return false;
+// 	if ((p.x() - p2.x()) * p21.x() + (p.z() - p2.z()) * p21.z() > 0.0) return false;
+// 	if ((p.x() - p1.x()) * p31.x() + (p.z() - p1.z()) * p31.z() < 0.0) return false;
+// 	if ((p.x() - p3.x()) * p31.x() + (p.z() - p3.z()) * p31.z() > 0.0) return false;
+// 	
+// 	return true;
+// }
+// 
+// /**
+//  * @brief Offset computation of each laser beam to account for the geometry of the getBaseState
+//  * 
+//  * @param innerModel ...
+//  * @param laserData ...
+//  * @return std::vector< float, std::allocator >
+//  */
+// std::vector<float> SpecificWorker::computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData)
+// {
+// 	//Base geometry GET FROM IM!!!
+// 	QRectF base( QPointF(-200, 200), QPointF(200, -200));
+// 	std::vector<float> baseOffsets;
+// 	QVec p(3,0.f);
+// 	int k;
+// 	
+// 	for(auto i : laserData)
+// 	{
+// 		for(k=10; k<4000; k++)
+// 		{ 
+// 			p = innerModel.laserTo("robot","laser",k,i.angle);
+// 			if( base.contains( QPointF( p.x(), p.z() ) ) == false )
+// 				break;
+// 		}
+// 		baseOffsets.push_back(k);
+// 	}
+// 	return baseOffsets;
+// }
+// 
 
 
 bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, QVec &target)
 {
 	//now check if there will be collision in the future position using current laserData
 	float height = innerModel.transform("world","robot").y();
-	innerModel.updateTransformValues("robot", target.x(), 10, target.z(), 0, 0, 0);
+	//qDebug() << __FUNCTION__ << "height" << height << target.y();
+	innerModel.updateTransformValues("robot", target.x(), target.y(), target.z(), 0, 0, 0);
 
 	// Three points of rectangle approximating the robot base 
 	QVec p1 = innerModel.transform("world", QVec::vec3(-220,10,220), "robot" );
@@ -789,7 +797,7 @@ bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel &innerModel, const 
 	QVec p21 = p2-p1;
 	QVec p31 = p3-p1;
 	//put back the robot to where it was
-	innerModel.updateTransformValues("robot", bState.x, 10, bState.z, 0, bState.alpha, 0);
+	innerModel.updateTransformValues("robot", bState.x, height, bState.z, 0, bState.alpha, 0);
 
 	// 	target.print("target");
 	// 	p1.print("p1");
@@ -800,14 +808,16 @@ bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel &innerModel, const 
 	QVec p(3,0.f);
 	for(auto i : laserData)
 	{
-		p = innerModel.laserTo("world","laser",i.dist,i.angle);
+		p = innerModel.laserTo("world","laser", i.dist, i.angle);
 		//Check if inside
-		if ((p-p1) * p21 > 0 and (p-p1) * p21 < p21 * p21 and (p-p1) * p31 > 0 and (p-p1) * p31 < p31*p31 )
+		if ((p-p1) * p21 > 0 
+			and 
+			(p-p1) * p21 < p21 * p21 
+			and 
+			(p-p1) * p31 > 0 
+			and 
+			(p-p1) * p31 < p31*p31 )
 		return false;
-// 		if ((p.x() - p1.x()) * p21.x() + (p.z() - p1.z()) * p21.z() < 0.0) return false;
-// 		if ((p.x() - p2.x()) * p21.x() + (p.z() - p2.z()) * p21.z() > 0.0) return false;
-// 		if ((p.x() - p1.x()) * p31.x() + (p.z() - p1.z()) * p31.z() < 0.0) return false;
-// 		if ((p.x() - p3.x()) * p31.x() + (p.z() - p3.z()) * p31.z() > 0.0) return false;
 	}
 	return true;
 }
@@ -817,7 +827,7 @@ bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel &innerModel, 
 	QVec lastPoint;
 
 	QVec origin = innerModel.transform("world","robot");
-	float stepSize = 100.f; //100 mms chunks  SHOULD BE RELATED TO THE ACTUAL SIZE OF THE ROBOT!!!!!
+	float stepSize = 30.f; //100 mms chunks  SHOULD BE RELATED TO THE ACTUAL SIZE OF THE ROBOT!!!!!
 	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
 	float step;
 	

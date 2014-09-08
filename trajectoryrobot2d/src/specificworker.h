@@ -52,6 +52,7 @@ public:
 	//void sendData(const RoboCompJoystickAdapter::TData& data);
 	void changeTarget(const TargetPose& target);
 	
+	
 public slots:
  	void compute(); 	
 	void computeLuis( );
@@ -90,13 +91,13 @@ private:
 	bool setHeadingCommand(InnerModel *innerModel, float alfa);
 	bool stopCommand();
 	bool changeTargetCommand(InnerModel *innerModel);
-	bool avoidanceControl(InnerModel& innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed);
-	std::vector<float> computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData);
+	//bool avoidanceControl(InnerModel& innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed);
+	//std::vector<float> computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData);
 	std::vector<float> baseOffsets;
-	bool robotLaserCollision(const QVec& p1, const QVec& p2, const QVec& p3, const QVec& p);
+	//bool robotLaserCollision(const QVec& p1, const QVec& p2, const QVec& p3, const QVec& p);
 	void filter(float &vadvance, float &vrot);
 	//QVec repulsionVector;
-	tuple< QVec, bool > checkInminentCollision(InnerModel& innerModel, const TLaserData& laserData, float vadv, float vrot, float delta);
+	//tuple< QVec, bool > checkInminentCollision(InnerModel& innerModel, const TLaserData& laserData, float vadv, float vrot, float delta);
 	float ad,ro;
 	bool newData;
 	void calcularModuloFloat(QVec &angles, float mod);

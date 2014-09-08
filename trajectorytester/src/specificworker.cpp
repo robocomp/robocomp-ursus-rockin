@@ -47,18 +47,33 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	connect(t2Button, SIGNAL(clicked()), this, SLOT(step2()));
 	connect(t3Button, SIGNAL(clicked()), this, SLOT(step3()));
 	
+	connect(bik1Button, SIGNAL(clicked()), this, SLOT(bik1()));
+	connect(bik2Button, SIGNAL(clicked()), this, SLOT(bik2()));
+	
+	
 	plantWidget = new PlantWidget(frame, QPointF(82,457), QPointF(0,10000), QPointF(65,387), QPointF(0,-10000));
 	plantWidget->show();
 	statusLabel->setText("");
 	state = State::IDLE;
 	tag11 = false;
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
 	try 
-		{	
-			bodyinversekinematics_proxy->begin_goHome("HEAD");
-		} 
+	{	
+		bodyinversekinematics_proxy->begin_goHome("HEAD");
+		bodyinversekinematics_proxy->begin_goHome("RIGHTARM");
+		bodyinversekinematics_proxy->setFingers(0);
+		
+	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-		{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+	{ std::cout << ex.text << "in Closefingers" << std::endl;}
+	catch (const Ice::Exception &ex) 
+	{ std::cout << ex << "in Close fingers" << std::endl;}
+	
+	
+	listaMotores 	<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
+					<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
+					<< "base" << "head1" << "head2" << "head3";
 	
 	connect(plantWidget, SIGNAL(mouseMove(QVec)), this, SLOT(setTargetCoorFromPlant(QVec)));
 	connect(plantWidget, SIGNAL(mousePress(QVec)), this, SLOT(setNewTargetFromPlant(QVec)));
@@ -98,13 +113,22 @@ void SpecificWorker::compute( )
 		}
 	}
 	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
-	}
+	{	std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;	}
+	
+	actualizarInnermodel(listaMotores);
+
+	if( tag11 ) 
+		tag1LineEdit->setText("Id: 11");	
+	doStateMachine();
+
+}
+
+void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
+{
 	try
 	{
 		differentialrobot_proxy->getBaseState(bState);
-		current = QVec::vec3(bState.x, 0, bState.z);
+		current = QVec::vec3(bState.x, 0, bState.z);  //For widget
 		plantWidget->moveRobot( bState.x, bState.z, bState.alpha);	
 		innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 		innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
@@ -113,28 +137,20 @@ void SpecificWorker::compute( )
 	{
 		std::cout << ex << "Error talking to Differentialrobot" << std::endl;
 	}
+	try 
+	{
+		RoboCompJointMotor::MotorList mList;
+		for(int i=0; i<listaJoints.size(); i++)
+			mList.push_back(listaJoints[i].toStdString());
+		
+		RoboCompJointMotor::MotorStateMap mMap = jointmotor_proxy->getMotorStateMap(mList);
+		
+		for(int j=0; j<listaJoints.size(); j++)
+			innerModel->updateJointValue(listaJoints[j], mMap.at(listaJoints[j].toStdString()).pos);
 
-	if( tag11 ) 
-		tag1LineEdit->setText("Id: 11");	
-	doStateMachine();
-
-//Target tracking
-// 	try 
-// 		{	
-// 			RoboCompBodyInverseKinematics::Pose6D target;
-// 			target.rx=0; target.ry=0; target.rz=0; 		
-// 			//we need to give the Head, local coordinates
-// 			QVec loc = innerModel->transform("robot","mugT");
-// 			loc.print("loc");
-// 	//		qDebug() << "tag coor" << tag.tx << tag.ty << tag.tz;
-// 			target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
-// 			RoboCompBodyInverseKinematics::Axis axis;
-// 			axis.x = 0; axis.y = -1; axis.z = 0;
-// 			bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, true);
-// 		} 
-// 		catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-// 			{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
-	
+	} catch (const Ice::Exception &ex) {
+		cout<<"--> Excepción en actualizar InnerModel: "<<ex<<endl;
+	}
 }
 
 void SpecificWorker::doStateMachine()
@@ -152,6 +168,10 @@ void SpecificWorker::doStateMachine()
 			qDebug() << "SERVOING";
 			state = servoing();
 			break;
+		case State::LIFT_ARM:
+			qDebug() << "LIFT_ARM";
+			state = liftArm();
+			break;
 		default:
 			break;
 	}
@@ -166,6 +186,15 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		qDebug() << __FUNCTION__ << "sending command";	
 		go(QVec::vec3(5500,0,-5100), QVec::vec3(0,0,0));
 		initiated = true;
+		try 
+		{	
+			bodyinversekinematics_proxy->begin_goHome("HEAD");
+			bodyinversekinematics_proxy->begin_goHome("RIGHTARM");
+			bodyinversekinematics_proxy->setFingers(0);
+		} 
+		catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+		{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+		
 		return State::GO_KITCHEN;
 	}
 	if( planningState.state == "IDLE" and initiated and (QVec::vec3(5500,0,-5000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 100)
@@ -229,11 +258,20 @@ SpecificWorker::State SpecificWorker::servoing()
 {
 	static QVec ant = innerModel->transform("world", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
 	
+	if( planningState.state == "IDLE") //and (newRobotTarget - QVec::vec3(bState.x,0,bState.z)).norm2() < 40)
+ 	{
+ 		qDebug() << __FUNCTION__ << "Made it...";
+ 		stopRobot();
+ 		return State::LIFT_ARM;
+ 	}
+	
 	try 
 	{	
 		RoboCompBodyInverseKinematics::Pose6D target;
 		//we need to give the Head target in ROBOT coordinates!!!!
-		QVec loc = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
+		QVec locA = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
+		QVec loc = innerModel->transform("robot","mugT");
+		locA.print("locA"); loc.print("loc");
 		target.rx=0; target.ry=0; target.rz=0; 	
 		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
 		RoboCompBodyInverseKinematics::Axis axis; 
@@ -241,16 +279,11 @@ SpecificWorker::State SpecificWorker::servoing()
 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-		{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+		{ std::cout << ex.text << "calling pointAxisTowardsTarget" << std::endl;}
+	catch (const Ice::Exception &ex) 
+		{ std::cout << ex << std::endl;}
+
 		
- 	//if( planningState.state == "IDLE" and (newRobotTarget - QVec::vec3(bState.x,0,bState.z)).norm2() < 40)
-//  	{
-//  		qDebug() << __FUNCTION__ << "Made it...";
-//  		stopRobot();
-//  		return State::IDLE;
-//  	}
- 	
-	
 	QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
 	tagInWorld(1) = innerModel->transform("world","robot").y();
 	try 
@@ -260,11 +293,42 @@ SpecificWorker::State SpecificWorker::servoing()
 		trajectoryrobot2d_proxy->changeTarget( tp );
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-		{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+		{ std::cout << ex.text << "calling changeTarget" << std::endl;}
+	catch (const Ice::Exception &ex) 
+		{ std::cout << ex << std::endl;}
 		
 	return State::SERVOING;
 	//return State::IDLE;
 	
+}
+
+/**
+ * @brief Sends the arms to a predefined position prior to grasping
+ * 
+ * @return SpecificWorker::State
+ */
+SpecificWorker::State SpecificWorker::liftArm()
+{
+	qDebug() << __FUNCTION__ << "Lifting Arm";
+	try 
+	{
+		//QVec p = QVec::vec3(200,1100,100);
+		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
+		QVec p = innerModel->transform("robot","mugT");
+		RoboCompBodyInverseKinematics::Pose6D pose;
+		pose.x = p.x(); pose.y = p.y(); pose.z = p.z();
+		pose.rx = 0; pose.ry= 0; pose.rz= M_PI;
+		RoboCompBodyInverseKinematics::WeightVector weight;
+		weight.x = 1; weight.y = 1; weight.z = 1; 
+		weight.rx = 1; weight.ry = 0; weight.rz = 1;
+		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", pose, weight, 0); 
+	} 
+	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+	{ std::cout << ex.text << std::endl; }
+	catch (const Ice::Exception &ex) 
+	{ std::cout << ex << std::endl; }
+	
+	return State::IDLE;
 }
 
 /////////////////////////////////////////////////////////////
@@ -291,6 +355,64 @@ void SpecificWorker::step3()
 {
 
 }
+
+///////////////////////////////////////////////////
+
+void SpecificWorker::bik1()
+{
+	//Oriente the head
+// 	try 
+// 	{	
+// 		RoboCompBodyInverseKinematics::Pose6D target;
+// 		//we need to give the Head target in ROBOT coordinates!!!!
+// 		QVec locA = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
+// 		QVec loc = innerModel->transform("robot","mugT");
+// 		locA.print("loc"); loc.print("loc");
+// 		target.rx=0; target.ry=0; target.rz=0; 	
+// 		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
+// 		RoboCompBodyInverseKinematics::Axis axis; 
+// 		axis.x = 0; axis.y = -1; axis.z = 0;
+// 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
+// 	} 
+// 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+// 		{ std::cout << ex.text << "calling pointAxisTowardsTarget" << std::endl;}
+// 	catch (const Ice::Exception &ex) 
+// 		{ std::cout << ex << std::endl;}
+	// 
+// 	usleep(100000);
+	
+	//Send the arm
+	try 
+	{
+		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
+		QVec p = innerModel->transform("robot","mugT");
+		RoboCompBodyInverseKinematics::Pose6D pose;
+		pose.x = p.x(); pose.y = p.y(); pose.z = p.z();
+		pose.rx = 0; pose.ry= 0; pose.rz= M_PI;
+		RoboCompBodyInverseKinematics::WeightVector weight;
+		weight.x = 1; weight.y = 1; weight.z = 1; 
+		weight.rx = 1; weight.ry = 0; weight.rz = 1;
+		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", pose, weight, 0); 
+	} 
+	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+	{ std::cout << ex.text << std::endl; }
+	catch (const Ice::Exception &ex) 
+	{ std::cout << ex << std::endl; }
+	
+}
+
+void SpecificWorker::bik2()
+{
+	try 
+	{	
+		bodyinversekinematics_proxy->begin_goHome("HEAD");
+		bodyinversekinematics_proxy->begin_goHome("RIGHTARM");
+	} 
+	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+	{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
+}
+
+
 
 
 ////////////////////////////////////////////////////////////////////

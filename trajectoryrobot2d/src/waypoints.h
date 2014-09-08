@@ -109,7 +109,7 @@ class WayPoints : public QList< WayPoint >
 		bool isFinished() const 															{ return finish;};
 		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
 		void setBlocked(bool b)																{ blockedRoad = b;};
-		void changeTarget(const QVec &target)												{ QMutexLocker ml(&mutex); replace(length()-1, target);};
+		void changeTarget(const QVec &target)												{ QMutexLocker ml(&mutex); replace(length()-1, target); antDist = std::numeric_limits< float >::max();};
 		
 		int nextPointIndex;
 	//	float distanceToLastVisible;

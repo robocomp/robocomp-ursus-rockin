@@ -111,7 +111,7 @@ void SpecificWorker::init()
 	QString tipRight = "grabPositionHandR";
 	QString tipLeft = "grabPositionHandL";
 	//QString nose = "head3";  //OJO PROV
-	QString nose = "nose";  //OJO PROV
+	QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
 	
 	
 	IK_BrazoDerecho = new Cinematica_Inversa(innerModel, listaBrazoDerecho, tipRight);
@@ -138,18 +138,15 @@ void SpecificWorker::init()
 	//Open file to write errors
 	fichero.open("errores.txt", ios::out);
 	
+	//OMPL path-Planning stuff
+	QList<QPair<float, float > > limits;
+	limits.append(qMakePair((float)-0.4,(float)0.4)); 	 //x in robot RS
+	limits.append(qMakePair((float)0.2,(float)1.2)); 	 //y
+	limits.append(qMakePair((float)0.f,(float)1.f));  	 //z
 	
-	//RRT path-Planning stuff
-// 	planner = new Planner(innerModel);
-// 	qDebug("Planning ...");
-// 	QVec targetToGo;
-// 	planner->computePath(target);	
-// 	if(planner->getPath().size() == 0)
-// 		qFatal("Path NOT found");
-// 	QList<QVec> path = planner->getPath();
-	
-	//Online trajectory generaration with Reflexxes
-	
+	sampler.initialize3D(innerModel, limits);
+	planner = new PlannerOMPL(*innerModel);
+	planner->initialize(&sampler);
 	
 	qDebug();
 	qDebug() << "---------------------------------";
@@ -205,55 +202,98 @@ void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* nod
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 void SpecificWorker::compute( )				
 {
-		QMap<QString, BodyPart>::iterator iterador;
-		for( iterador = bodyParts.begin(); iterador != bodyParts.end(); ++iterador)
-		{	
-			if(iterador.value().noTargets() == false)
+	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
+	QMap<QString, BodyPart>::iterator iterador;
+	for( iterador = bodyParts.begin(); iterador != bodyParts.end(); ++iterador)
+	{	
+		if(iterador.value().noTargets() == false)
+		{
+			Target &target = iterador.value().getHeadFromTargets(); 	
+			if (target.isMarkedforRemoval() == false)
 			{
-				Target &target = iterador.value().getHeadFromTargets(); 	
-				if (target.isMarkedforRemoval() == false)
-				{
-					target.annotateInitialTipPose();
-					target.setInitialAngles(iterador.value().getMotorList());
-					createInnerModelTarget(target);  	//Crear "target" online y borrarlo al final para no tener que meterlo en el xml
-					target.print("BEFORE PROCESSING");
-					
-					iterador.value().getInverseKinematics()->resolverTarget(target);
+				
+				planPath( *innerModel, target );
+				
+				target.annotateInitialTipPose();
+				target.setInitialAngles(iterador.value().getMotorList());
+				createInnerModelTarget(target);  	//Crear "target" online y borrarlo al final para no tener que meterlo en el xml
+				target.print("BEFORE PROCESSING");
+				
+				iterador.value().getInverseKinematics()->resolverTarget(target);
 
-					if(target.getError() <= 0.9 and target.isAtTarget() == false) //local goal achieved: execute the solution
-					{
-						moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
-						//Acumulamos los angulos en una lista en bodyPart para lanzarlos con Reflexx
-						iterador.value().addJointStep(target.getFinalAngles());
-						usleep(100000);
-						target.setExecuted(true);
-					}
-					else  
-					{
-						target.markForRemoval(true);
-					}
-					actualizarInnermodel(listaMotores); 			//actualizamos TODOS los motores.	OJO si la trayectoria no se ejecuta aquí, el Innermodel debe ser restaurado si la acción no se realiza
-					target.annotateFinalTipPose();
-					removeInnerModelTarget(target);
-					target.print("AFTER PROCESSING");
+				if(target.getError() <= 0.9 and target.isAtTarget() == false) //local goal achieved: execute the solution
+				{
+					moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
+					//Acumulamos los angulos en una lista en bodyPart para lanzarlos con Reflexx
+					iterador.value().addJointStep(target.getFinalAngles());
+					usleep(100000);
+					target.setExecuted(true);
 				}
+				else  
+				{
+					target.markForRemoval(true);
+				}
+				actualizarInnermodel(listaMotores); 			//actualizamos TODOS los motores.	La translación de la base no se actualiza!!!!
+				target.annotateFinalTipPose();
+				removeInnerModelTarget(target);
+				target.print("AFTER PROCESSING");
+			}
 // 				if( target.isChopped() == false)
 // 				{
 // 					doReflexxes( iterador.value().getJointStepList(), iterador.value().getMotorList());
 // 				}
-				if(target.isChopped() == false or target.isMarkedforRemoval() == true or target.isAtTarget() )
-				{
-						mutex->lock();	
- 							iterador.value().removeHeadFromTargets(); //eliminamos el target resuelt
-							iterador.value().cleanJointStep();
-						mutex->unlock();
-				}	
-				
-	
-			}
+			if(target.isChopped() == false or target.isMarkedforRemoval() == true or target.isAtTarget() )
+			{
+					mutex->lock();	
+						iterador.value().removeHeadFromTargets(); //eliminamos el target resuelt
+						iterador.value().cleanJointStep();
+					mutex->unlock();
+			}	
+			
+
 		}
-	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores.
+	}
 }
+
+
+bool SpecificWorker::planPath(InnerModel &innerModel, const Target& target)
+{
+	QVec origin = innerModel.transform("robot","grabPositionHandR");
+	
+	qDebug() << __FUNCTION__ << "Origin:" << origin << ". Target:" << target.getTranslation() << target.getHasPlan();
+	
+	if( target.getHasPlan() == true )
+		return true;
+	
+	if( (origin-target.getTranslation()).norm2() < 0.020 )  //already there !!!!
+	{
+		qDebug() << __FUNCTION__ << "Origin and target too close. Diff: "  << (origin-target.getTranslation()).norm2() << origin << target.getTranslation() << ". Returning void";
+		return true;
+	}
+	
+	QVec point;
+// 	if( sampler.checkRobotValidDirectionToTargetOneShot( origin, target ) )
+// 	{
+// 		path << origin << target;
+// 		qDebug() << __FUNCTION__ << "Found target directly in line of sight";
+// 		return true;
+// 	}
+// 	else
+//	{
+		qDebug() << __FUNCTION__ << "Calling Full Power of RRTConnect OMPL planner. This may take a while";
+		
+		if (planner->computePath(origin, target.getTranslation(), 60) == false)
+			qFatal("fary False");
+			//return false;
+//	}
+	
+	qDebug() << __FUNCTION__ << "Plan length: " << planner->getPath().size();
+	qDebug() << planner->getPath();
+	qFatal("fary");
+	//Return the plan
+	return true;
+}
+
 
 
 void SpecificWorker::doReflexxes( const QList<QVec> &jointValues, const QStringList &motors )
@@ -295,16 +335,20 @@ void SpecificWorker::removeInnerModelTarget(const Target& target)
 //////////////////////////////////////////////
 
 
+
 /**
- * @brief ...
+ * @brief Takes bodyPart to target pose, defined in the ROBOT reference system
  * 
  * @param bodyPart ...
  * @param target ...
  * @param weights ...
+ * @param radius NOT USED
  * @return void
  */
 void SpecificWorker::setTargetPose6D(const string& bodyPart, const Pose6D& target, const WeightVector& weights, float radius)
 {
+	//setPose6D(bodyPart, target, weights, radius);
+	
 	QString partName = QString::fromStdString(bodyPart);
 	if ( this->bodyParts.contains(partName)==false)
 	{
@@ -314,7 +358,7 @@ void SpecificWorker::setTargetPose6D(const string& bodyPart, const Pose6D& targe
 		throw ex;
 	}
 	
-	//Se debe comprobar condiciones del target cuando las tengamos.
+	//Se deben comprobar condiciones del target cuando las tengamos.
 	QVec tar(6);
 	tar[0] = target.x;	tar[1] = target.y;	tar[2] = target.z;
 	tar[3] = target.rx;	tar[4] = target.ry;	tar[5] = target.rz;
@@ -323,7 +367,6 @@ void SpecificWorker::setTargetPose6D(const string& bodyPart, const Pose6D& targe
 	tar[0] = tar[0] / (T)1000;
 	tar[1] = tar[1] / (T)1000;
 	tar[2] = tar[2] / (T)1000;
-	
 	
 	//Weights vector
 	QVec w(6);
@@ -337,7 +380,7 @@ void SpecificWorker::setTargetPose6D(const string& bodyPart, const Pose6D& targe
     mutex->unlock();
 	
 	qDebug() << "--------------------------------------------------------------------------";
-	qDebug() << __LINE__<< "New target arrived: " << partName;
+	qDebug() << __FUNCTION__<< "New target arrived: " << partName << ". For target:" << tar << ". With weights: " << w;
 }
 
 /**
@@ -427,9 +470,9 @@ void SpecificWorker::advanceAlongAxis(const string& bodyPart, const Axis& ax, fl
 }
 
 /**
- * @brief Set the fingers position
+ * @brief Set the fingers position so there is d mm between them
  * 
- * @param d ...
+ * @param d millimeters between fingers
  * @return void
  */
 void SpecificWorker::setFingers(float d)
@@ -627,6 +670,27 @@ void SpecificWorker::setNewTip(const std::string &part, const std::string &trans
 }
 
 
+/**
+ * @brief Direct reposition of a joint
+ * 
+ * @param joint InnerModel name of the joint
+ * @param value value in proper units
+ * @return void
+ */
+void SpecificWorker::setJoint(const std::string& joint, float value, float maxSpeed)
+{
+	try 
+	{
+		RoboCompJointMotor::MotorGoalPosition nodo;
+		nodo.name = joint;   
+		nodo.position = value; 		// posición en radianes
+		nodo.maxSpeed = maxSpeed; 			// radianes por segundo 
+		proxy->setPosition(nodo);	
+	} 
+	catch (const Ice::Exception &ex) 
+	{	cout<< ex << "Exception moving " << joint << endl;	}
+}
+
 
 /*-----------------------------------------------------------------------------*
  * 			                MÉTODOS    PRIVADOS                                *
@@ -654,9 +718,17 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 		for(int j=0; j<listaJoints.size(); j++)
 			innerModel->updateJointValue(listaJoints[j], mMap.at(listaJoints[j].toStdString()).pos);
 
-	} catch (const Ice::Exception &ex) {
-		cout<<"--> Excepción en actualizar InnerModel: "<<ex<<endl;
-	}
+	} catch (const Ice::Exception &ex) 
+	{	cout<<"--> Excepción en actualizar InnerModel: "<<ex<<endl; }
+	
+	try 
+	{
+		RoboCompDifferentialRobot::TBaseState bState;
+		differentialrobot_proxy->getBaseState( bState );
+		innerModel->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+	
+	} catch (const Ice::Exception &ex) 
+	{		cout<<"--> Excepción reading DifferentialRobot: "<<ex<<endl;	}
 }
 
 
