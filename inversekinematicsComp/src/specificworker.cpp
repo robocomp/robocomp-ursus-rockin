@@ -168,7 +168,7 @@ void SpecificWorker::init()
  * @param node starting node of InnerModel
  * @return void
  */
-void SpecificWorker::convertInnerModelFromMilimetersToMeter(sInnerModelNode* node)
+void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* node)
 {	
 	const  float FACTOR = 1000.f;
 
