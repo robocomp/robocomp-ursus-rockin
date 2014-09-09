@@ -103,6 +103,7 @@ class SpecificWorker : public GenericWorker
 		//Planner stuff
 		PlannerOMPL *planner;
 		Sampler sampler;
+		FCLModelPtr fclMesh;
 		
 		void init();							// Things to do after params are set
 

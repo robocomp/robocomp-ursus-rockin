@@ -248,10 +248,10 @@ void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* nod
 		mesh->scalex /= FACTOR; mesh->scaley /= FACTOR; mesh->scalez /= FACTOR;
 		// SCALE FACTOR
 		{
-			osg::Node *osgnode_ = osgDB::readNodeFile(meshPath.toStdString());
+			osg::Node *osgnode_ = osgDB::readNodeFile(mesh->meshPath.toStdString());
 			if (not osgnode_)
 			{
-				printf("Could not open: '%s'.\n", meshPath.toStdString().c_str());
+				printf("Could not open: '%s'.\n", mesh->meshPath.toStdString().c_str());
 			}
 			else
 			{
@@ -262,7 +262,7 @@ void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* nod
 				osgnode_->accept(calcTriangles);
 
 				// Get the internal transformation matrix of the mesh
-				RTMat rtm(rx, ry, rz, tx, ty, tz);
+				RTMat rtm(mesh->rx, mesh->ry, mesh->rz, mesh->tx, mesh->ty, mesh->tz);
 				// Transform each of the read vertices
 				for (size_t i=0; i<vertices.size(); i++)
 				{
