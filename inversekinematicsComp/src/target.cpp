@@ -37,7 +37,15 @@ Target::Target()
 	this->activo = false;
 }
 
-/**
+Target Target::operator=( Target tmp ) 
+{
+      std::swap( tip, tmp.tip );
+      std::swap( pose6D, tmp.pose6D );
+	  inner = tmp.inner;
+      return *this;
+}
+
+  /**
  * \brief Constructor parametrizado
  * Inicializa las estructuras que componen sus atributos de clase. 
  * Le pasamos: 

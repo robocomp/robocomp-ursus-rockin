@@ -387,7 +387,7 @@ void SpecificWorker::bik1()
 		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
 		QVec p = innerModel->transform("robot","mugT");
 		RoboCompBodyInverseKinematics::Pose6D pose;
-		pose.x = p.x(); pose.y = p.y() + 80; pose.z = p.z();
+		pose.x = p.x(); pose.y = p.y() + 150; pose.z = p.z();
 		pose.rx = 0; pose.ry= 0; pose.rz= M_PI;
 		RoboCompBodyInverseKinematics::WeightVector weight;
 		weight.x = 1; weight.y = 1; weight.z = 1; 

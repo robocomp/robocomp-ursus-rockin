@@ -122,7 +122,7 @@ class SpecificWorker : public GenericWorker
         void 	calcularModuloFloat						(QVec &angles, float mod);
         void 	chopPath								(const QString &partName, const Target &target);
 		void 	doReflexxes								(const QList<QVec> &jointValues, const QStringList &motors);
-		bool	planPath(InnerModel& innerModel, const Target& target);
+		bool	targetHasAPlan(InnerModel& innerModel, Target& target);
 		
 	
 	

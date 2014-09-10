@@ -185,6 +185,7 @@ void Cinematica_Inversa::chopPath(Target &target)
 			target.setChopped(true);
 			target.setChoppedPose(R);
 			target.setExecuted(false);
+			target.setHasPlan(true);
 		}
 	}
 	else

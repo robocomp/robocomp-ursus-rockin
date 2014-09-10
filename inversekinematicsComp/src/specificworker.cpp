@@ -299,31 +299,32 @@ void SpecificWorker::compute( )
 			if (target.isMarkedforRemoval() == false)
 			{
 				
-				planPath( *innerModel, target );
-				
-				target.annotateInitialTipPose();
-				target.setInitialAngles(iterador.value().getMotorList());
-				createInnerModelTarget(target);  	//Crear "target" online y borrarlo al final para no tener que meterlo en el xml
-				target.print("BEFORE PROCESSING");
-				
-				iterador.value().getInverseKinematics()->resolverTarget(target);
+				if ( targetHasAPlan( *innerModel, target ) == true)
+				{
+					target.annotateInitialTipPose();
+					target.setInitialAngles(iterador.value().getMotorList());
+					createInnerModelTarget(target);  	//Crear "target" online y borrarlo al final para no tener que meterlo en el xml
+					target.print("BEFORE PROCESSING");
+					
+					iterador.value().getInverseKinematics()->resolverTarget(target);
 
-				if(target.getError() <= 0.9 and target.isAtTarget() == false) //local goal achieved: execute the solution
-				{
-					moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
-					//Acumulamos los angulos en una lista en bodyPart para lanzarlos con Reflexx
-					iterador.value().addJointStep(target.getFinalAngles());
-					usleep(100000);
-					target.setExecuted(true);
+					if(target.getError() <= 0.9 and target.isAtTarget() == false) //local goal achieved: execute the solution
+					{
+						moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
+						//Acumulamos los angulos en una lista en bodyPart para lanzarlos con Reflexx
+						iterador.value().addJointStep(target.getFinalAngles());
+						usleep(100000);
+						target.setExecuted(true);
+					}
+					else  
+					{
+						target.markForRemoval(true);
+					}
+					actualizarInnermodel(listaMotores); 			//actualizamos TODOS los motores.	La translación de la base no se actualiza!!!!
+					target.annotateFinalTipPose();
+					removeInnerModelTarget(target);
+					target.print("AFTER PROCESSING");
 				}
-				else  
-				{
-					target.markForRemoval(true);
-				}
-				actualizarInnermodel(listaMotores); 			//actualizamos TODOS los motores.	La translación de la base no se actualiza!!!!
-				target.annotateFinalTipPose();
-				removeInnerModelTarget(target);
-				target.print("AFTER PROCESSING");
 			}
 // 				if( target.isChopped() == false)
 // 				{
@@ -336,14 +337,12 @@ void SpecificWorker::compute( )
 						iterador.value().cleanJointStep();
 					mutex->unlock();
 			}	
-			
-
 		}
 	}
 }
 
 
-bool SpecificWorker::planPath(InnerModel &innerModel, const Target& target)
+bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 {
 	QVec origin = innerModel.transform("robot","grabPositionHandR");
 	
@@ -370,14 +369,25 @@ bool SpecificWorker::planPath(InnerModel &innerModel, const Target& target)
 		qDebug() << __FUNCTION__ << "Calling Full Power of RRTConnect OMPL planner. This may take a while";
 		
 		if (planner->computePath(origin, target.getTranslation(), 60) == false)
-			qFatal("fary False");
-			//return false;
+			return false;
 //	}
 	
 	qDebug() << __FUNCTION__ << "Plan length: " << planner->getPath().size();
-	qDebug() << planner->getPath();
+	QList<QVec> path = planner->getPath();
+	qDebug() << path;
 	qFatal("fary");
-	//Return the plan
+	for(int i=0; i<path.size(); ++i)
+	{
+		QVec w(6);
+		QVec pp(6,0.f);
+		pp.inject(path[i],0);
+		w[0]  = 1; 	w[1]  = 1;  w[2]  = 1; w[3]  = 0; w[4] = 0; w[5] = 0;
+		Target t(Target::POSE6D, &innerModel, bodyParts["RIGHTARM"].getTip(), pp, w, false);
+		t.setHasPlan(true);
+		if(i==0)
+			target = t;	
+		bodyParts["RIGHTARM"].addTargetToList(t);
+	}
 	return true;
 }
 

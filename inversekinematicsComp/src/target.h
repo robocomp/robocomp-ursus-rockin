@@ -55,8 +55,9 @@ public:
 	Target(TargetType tt, InnerModel *inner, const QString &tip, const QVec &pose6D, const QVec &weights, bool chop=true);											// For Pose6D
 	Target(TargetType tt, InnerModel *inner, const QString &tip, const QVec &pose6D, const QVec &axis, const QVec &weights);		// For AlingAxis
 	Target(TargetType tt, InnerModel* inner, const QString &tip, const QVec& axis, float step);																	// For ADVANCEALONGAXIS
-
 	~Target();
+	Target operator=( Target tmp );
+	
 	
 	// MÉTODOS GET:
 	QString getTipName() const           { return this->tip; }            		 	// Devuelve el nombre del TIP.
@@ -83,7 +84,7 @@ public:
 	bool isMarkedforRemoval() const		 { return removal; }
 	float getRadius() const 			 { return radius; }
 	bool isAtTarget() const 			 { return atTarget; };
-	bool getHasPlan() const 				 { return hasPlan; };
+	bool getHasPlan() const 			 { return hasPlan; };
 
 	// MÉTODOS SET:
 	void setPose(const QVec &newPose)				{ this->pose6D = newPose;};
