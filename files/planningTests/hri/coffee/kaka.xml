@@ -1,0 +1,15 @@
+<AGMModel>
+
+	<symbol id="1" type="robot" />
+
+	<symbol id="robj1" type="object" />
+	<symbol id="rstt1" type="objectSt" />
+	<link  src="robj1" dst="rstt1" label="classifailed" />
+
+	<symbol id="20" type="person" />
+
+	<symbol id="hobj1" type="object" />
+	<symbol id="hstt1" type="objectSt" />
+	<link  src="hobj1" dst="hstt1" label="unclassified" />
+
+</AGMModel>

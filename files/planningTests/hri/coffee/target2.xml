@@ -1,0 +1,16 @@
+<AGMModel>
+
+
+	<symbol id="obj1" type="object" />
+	<symbol id="stt1" type="objectSt" />
+	<link  src="obj1" dst="stt1" label="coffeepot" />
+
+	<symbol id="obj2" type="object" />
+	<symbol id="stt2" type="objectSt" />
+	<link  src="obj2" dst="stt2" label="milkpot" />
+
+	<symbol id="20" type="person" />
+	<link src="20" dst="obj1" label="know" />
+	<link src="20" dst="obj2" label="know" />
+
+</AGMModel>
