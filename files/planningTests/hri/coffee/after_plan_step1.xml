@@ -5,9 +5,9 @@
 	</symbol>
 	<symbol id="21" type="personSt">
 	</symbol>
-	<symbol id="109" type="object">
+	<symbol id="109" type="objectSt">
 	</symbol>
-	<symbol id="110" type="objectSt">
+	<symbol id="110" type="object">
 	</symbol>
 	<symbol id="3" type="object">
 	</symbol>
@@ -105,15 +105,13 @@
 	<link src="107" dst="108" label="position" />
 	<link src="107" dst="108" label="reachable" />
 	<link src="107" dst="108" label="explored" />
-	<link src="20" dst="109" label="know" />
-	<link src="109" dst="110" label="hasStatus" />
-	<link src="9" dst="109" label="eq" />
-	<link src="110" dst="105" label="in" />
-	<link src="109" dst="110" label="position" />
-	<link src="109" dst="110" label="classified" />
-	<link src="109" dst="110" label="coffeepot" />
-	<link src="109" dst="110" label="see" />
-	<link src="109" dst="110" label="reach" />
-	<link src="109" dst="110" label="reachable" />
+	<link src="1" dst="110" label="know" />
+	<link src="110" dst="109" label="see" />
+	<link src="110" dst="109" label="unclassified" />
+	<link src="110" dst="109" label="notReach" />
+	<link src="110" dst="109" label="position" />
+	<link src="110" dst="109" label="reachable" />
+	<link src="110" dst="109" label="hasStatus" />
+	<link src="110" dst="3" label="in" />
 </AGMModel>
 
