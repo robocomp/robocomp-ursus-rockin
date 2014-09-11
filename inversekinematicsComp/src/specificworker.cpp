@@ -156,6 +156,10 @@ void SpecificWorker::init()
 	planner = new PlannerOMPL(*innerModel);
 	planner->initialize(&sampler);
 	
+	robotNodes.clear(); restNodes.clear();
+	sampler.recursiveIncludeMeshes(innerModel->getRoot(), "robot", false, robotNodes, restNodes);
+	setJoint("rightShoulder1", -1, 2);
+	
 	qDebug();
 	qDebug() << "---------------------------------";
 	qDebug() << "BodyInverseKinematics --> Waiting for requests!";
@@ -281,14 +285,23 @@ void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* nod
 	}
 }		
 
-
+void SpecificWorker::compute()
+{
+	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
+	for (uint32_t out=0; out<restNodes.size(); out++)
+		if (innerModel->collide("munonMesh", restNodes[out]))
+		{
+			qDebug() << "collide with " << restNodes[out];
+		}
+}
 
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DE LA CLASE											*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-void SpecificWorker::compute( )				
+void SpecificWorker::compute2( )				
 {
+	
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	QMap<QString, BodyPart>::iterator iterador;
 	for( iterador = bodyParts.begin(); iterador != bodyParts.end(); ++iterador)

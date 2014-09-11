@@ -71,6 +71,7 @@ class SpecificWorker : public GenericWorker
 		
 	public slots:
 		void compute(); 
+		void compute2();
 
 	private:
 				
@@ -124,7 +125,8 @@ class SpecificWorker : public GenericWorker
 		void 	doReflexxes								(const QList<QVec> &jointValues, const QStringList &motors);
 		bool	targetHasAPlan(InnerModel& innerModel, Target& target);
 		
-	
+		std::vector<QString> restNodes;
+		std::vector<QString> robotNodes;
 	
 };
 
