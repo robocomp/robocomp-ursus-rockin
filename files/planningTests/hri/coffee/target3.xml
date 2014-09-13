@@ -13,7 +13,13 @@
 
  	<symbol id="obj2" type="object" />
 	<symbol id="stt2" type="objectSt" />
-	<link  src="obj2" dst="stt2" label="unclassified" />
+	<link  src="obj2" dst="stt2" label="milkpot" />
 	<link  src="20" dst="obj2" label="know" />
+
+	<symbol id="obj3" type="object" />
+	<symbol id="stt3" type="objectSt" />
+	<link  src="obj3" dst="stt3" label="coffeepot" />
+	<link  src="20" dst="obj3" label="know" />
+
 
 </AGMModel>

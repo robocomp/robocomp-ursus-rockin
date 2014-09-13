@@ -1,6 +1,0 @@
-findObjectVisually@{'status': '109', 'container': '3', 'object': '110', 'robot': '1', 'cntStatus': '10'}
-findObjectVisually@{'status': '111', 'container': '7', 'object': '112', 'robot': '1', 'cntStatus': '106'}
-recognizeObjFails@{'status': '109', 'object': '110', 'robot': '1'}
-#findObjectVisually@{'container': '3', 'robot': '1', 'cntStatus': '10'}
-#recognizeObjFails@{'status': '109', 'object': '110', 'robot': '1'}
-#tellHumanAboutUnknownObject@{'robot': '1', 'person': '20', 'objectr': '110', 'statusr': '109'}

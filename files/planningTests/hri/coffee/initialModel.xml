@@ -5,9 +5,8 @@
 	<symbol id="4" type="roomSt" />
 	<link src="3" dst="4" label="isKitchen" />
 	<link src="3" dst="4" label="room" />
-	<link src="3" dst="4" label="explored" />
 
-	
+
 	<!-- R O B O T -->
 	<symbol id="1" type="robot" />
 	<symbol id="2" type="robotSt">
@@ -30,7 +29,7 @@
 	<link src="5" dst="6" label="position" />
 	<link src="5" dst="6" label="reachable" />
 	<link src="5" dst="6" label="explored" />
-	
+
 	<!-- coffeepot -->
 	<symbol id="9" type="object">
 	</symbol>
