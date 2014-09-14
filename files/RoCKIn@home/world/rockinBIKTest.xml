@@ -21,15 +21,35 @@
 			</transform> -->
 			
 			<transform id="T_Floor_KitchenDining" tx="0" tz="0">
-					<plane id="P_Floor_KitchenDining_0" ny="1" size="3200,6000,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/kitchendining.png" />
+				<plane id="P_Floor_KitchenDining_0" ny="1" size="3200,6000,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/kitchendining.png" />
 			</transform>	
 			
-			<transform id="k_t" tx="150" tz="500" ty="0">
+			<transform id="dinin_table_t" tz="-1300" ty="600" rx="1.57">
+				<plane id="dinin_table" ny="1" size="2000, 50, 500" texture = "#150105" />
+			</transform>
+			<transform id="dinin_table_front_t" tz="-1100" ty="300" rx="1.57">
+				<plane id="dinin_table_front" nz="1" size="2000, 50, 500" texture = "#150105" />
+			</transform>
+			
+					
+			<transform id="kitchen_t" tz="500" ty="600" rx="1.57">
+				<plane id="kitchen" ny="1" size="2000, 50, 500" texture = "#151115" />
+				<transform id="mugT" tz="-30" ty="-50" tx="0"  >
+					<plane id="mugTag" nz="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+				</transform>
+		
+			</transform>
+			<transform id="kitchen_front_t" tz="300" ty="300" rx="1.57">
+				<plane id="kitchen_front" nz="1" size="2000, 50, 500" texture = "#151115" />
+			</transform>
+			
+			
+		<!--	<transform id="k_t" tx="150" tz="500" ty="0">
 				<mesh id="k" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/komplekt5.3DS" rx="1.57" scale="6.6,9,9"  />
 				<transform id="mugT" tz="-120" ty="900" tx="-200">
 					<plane id="mugTag" ny="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
 				</transform>
-			</transform>		
+			</transform>		-->
 		</transform>
 		
 		
