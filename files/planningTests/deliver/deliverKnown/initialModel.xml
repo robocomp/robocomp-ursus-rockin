@@ -68,15 +68,12 @@
 	<link src="11" dst="13" label="transitable" />
 	<link src="13" dst="11" label="transitable" />
 
-	
+
 	<!--
 	R O B O T
 	-->
 	<symbol id="1" type="robot">
 	</symbol>
-	<symbol id="2" type="robotSt">
-	</symbol>
-	<link src="1" dst="2" label="free" />
 	<!-- hall??? -->
 	<!-- <link src="1" dst="3" label="in" /> -->
 	<!-- livingroom -->
@@ -93,9 +90,9 @@
 	</symbol>
 	<link src="15" dst="32" label="bed" />
 	<link src="15" dst="32" label="hasStatus" />
-	<link src="15" dst="32" label="notSee" />
+	<link src="15" dst="32" label="noSee" />
 	<link src="15" dst="32" label="classified" />
-	<link src="15" dst="32" label="notReach" />
+	<link src="15" dst="32" label="noReach" />
 	<link src="15" dst="32" label="position" />
 	<link src="15" dst="32" label="reachable" />
 
@@ -110,9 +107,9 @@
 	</symbol>
 	<link src="16" dst="33" label="fridge" />
 	<link src="16" dst="33" label="hasStatus" />
-	<link src="16" dst="33" label="notSee" />
+	<link src="16" dst="33" label="noSee" />
 	<link src="16" dst="33" label="classified" />
-	<link src="16" dst="33" label="notReach" />
+	<link src="16" dst="33" label="noReach" />
 	<link src="16" dst="33" label="position" />
 	<link src="16" dst="33" label="reachable" />
 
@@ -124,9 +121,9 @@
 	</symbol>
 	<link src="17" dst="34" label="stove" />
 	<link src="17" dst="34" label="hasStatus" />
-	<link src="17" dst="34" label="notSee" />
+	<link src="17" dst="34" label="noSee" />
 	<link src="17" dst="34" label="classified" />
-	<link src="17" dst="34" label="notReach" />
+	<link src="17" dst="34" label="noReach" />
 	<link src="17" dst="34" label="position" />
 	<link src="17" dst="34" label="reachable" />
 
@@ -138,9 +135,9 @@
 	</symbol>
 	<link src="18" dst="35" label="stove" />
 	<link src="18" dst="35" label="hasStatus" />
-	<link src="18" dst="35" label="notSee" />
+	<link src="18" dst="35" label="noSee" />
 	<link src="18" dst="35" label="classified" />
-	<link src="18" dst="35" label="notReach" />
+	<link src="18" dst="35" label="noReach" />
 	<link src="18" dst="35" label="position" />
 	<link src="18" dst="35" label="reachable" />
 
@@ -155,9 +152,9 @@
 	</symbol>
 	<link src="19" dst="36" label="table" />
 	<link src="19" dst="36" label="hasStatus" />
-	<link src="19" dst="36" label="notSee" />
+	<link src="19" dst="36" label="noSee" />
 	<link src="19" dst="36" label="classified" />
-	<link src="19" dst="36" label="notReach" />
+	<link src="19" dst="36" label="noReach" />
 	<link src="19" dst="36" label="position" />
 	<link src="19" dst="36" label="reachable" />
 
@@ -172,12 +169,12 @@
 	</symbol>
 	<link src="20" dst="21" label="noSee" />
 	<link src="20" dst="21" label="hasStatus" />
-	<link src="20" dst="21" label="notReach" />
+	<link src="20" dst="21" label="noReach" />
 	<link src="20" dst="21" label="reachable" />
 	<link src="20" dst="21" label="position" />
 	<link src="20" dst="21" label="classified" />
 	<link src="20" dst="21" label="table" />
-	
+
 	<symbol id="30" type="object">
 	</symbol>
 	<link src="1" dst="30" label="know" />
@@ -187,13 +184,13 @@
 	</symbol>
 	<link src="30" dst="31" label="noSee" />
 	<link src="30" dst="31" label="hasStatus" />
-	<link src="30" dst="31" label="notReach" />
+	<link src="30" dst="31" label="noReach" />
 	<link src="30" dst="31" label="reachable" />
 	<link src="30" dst="31" label="position" />
 	<link src="30" dst="31" label="classified" />
 	<link src="30" dst="31" label="glasses" />
 
-	
+
 
 	<!--
 	P E R S O N S
