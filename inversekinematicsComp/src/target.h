@@ -102,6 +102,7 @@ public:
 	void setFinalAngles(const QVec &f)  			{ finalAngles = f; }
 	void setExecuted(bool e)             			{ executed = e; }
 	void setChopped(bool c)							{ chopped = c; }
+	
 	void annotateInitialTipPose()
 	{
       initialTipPose.inject(inner->transform("world", QVec::zeros(3), getTipName()),0);

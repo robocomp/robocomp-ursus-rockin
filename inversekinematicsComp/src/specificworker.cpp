@@ -80,7 +80,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	
 			 qDebug() << dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalex;
 			 qDebug()<<  dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scaley;
-			  qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
+			 qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
 			
 			//innerModel->print();
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;		
@@ -141,7 +141,10 @@ void SpecificWorker::init()
 	sleep(1);
 	actualizarInnermodel(listaMotores);
 	
-	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
+// 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
+// 	innerModel->transform("world", QVec::zeros(3),tipLeft).print("LeftTip in World");
+// 	innerModel->transform("world", QVec::zeros(3),"mugTag").print("mug in World");
+	
 		
 	//Open file to write errors
 	fichero.open("errores.txt", ios::out);
@@ -285,7 +288,7 @@ void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* nod
 	}
 }		
 
-void SpecificWorker::compute()
+void SpecificWorker::compute2()
 {
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	for (uint32_t out=0; out<restNodes.size(); out++)
@@ -299,7 +302,7 @@ void SpecificWorker::compute()
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DE LA CLASE											*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-void SpecificWorker::compute2( )				
+void SpecificWorker::compute( )				
 {
 	
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
@@ -312,7 +315,7 @@ void SpecificWorker::compute2( )
 			if (target.isMarkedforRemoval() == false)
 			{
 				
-				if ( targetHasAPlan( *innerModel, target ) == true)
+			//	if ( targetHasAPlan( *innerModel, target ) == true)
 				{
 					target.annotateInitialTipPose();
 					target.setInitialAngles(iterador.value().getMotorList());
