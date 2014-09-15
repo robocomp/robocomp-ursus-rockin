@@ -77,7 +77,7 @@ cd -
 
 echo
 echo "######################################################################"
-planningTest="hri/coffee"
+planningTest="hri/coffee 0"
 echo "Next: $planningTest"
 echo "Press enter to run test"
 sleep 2
@@ -87,7 +87,7 @@ cd -
 
 echo
 echo "######################################################################"
-planningTest="hri/coffee"
+planningTest="hri/coffee 1"
 echo "Next: $planningTest"
 echo "Press enter to run test"
 sleep 2
@@ -97,7 +97,7 @@ cd -
 
 echo
 echo "######################################################################"
-planningTest="hri/coffee"
+planningTest="hri/coffee 2"
 echo "Next: $planningTest"
 echo "Press enter to run test"
 sleep 2
@@ -107,7 +107,7 @@ cd -
 
 echo
 echo "######################################################################"
-planningTest="hri/coffee"
+planningTest="hri/coffee 3"
 echo "Next: $planningTest"
 echo "Press enter to run test"
 sleep 2
@@ -117,7 +117,7 @@ cd -
 
 echo
 echo "######################################################################"
-planningTest="hri/coffee"
+planningTest="hri/coffee 4"
 echo "Next: $planningTest"
 echo "Press enter to run test"
 sleep 2
