@@ -331,7 +331,7 @@ void SpecificWorker::compute( )
 		printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
 	}
 
-
+	printf("((((((%d))))))\n", innerModel->collide("kitchen", "munonMesh"));
 
 
 
