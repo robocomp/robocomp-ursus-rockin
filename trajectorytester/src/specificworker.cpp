@@ -56,15 +56,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	statusLabel->setText("");
 	state = State::IDLE;
 	tag11 = false;
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
-	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
 	try 
 	{	
 		bodyinversekinematics_proxy->begin_goHome("HEAD");
 		bodyinversekinematics_proxy->begin_goHome("RIGHTARM");
 		bodyinversekinematics_proxy->setFingers(0);
-	
-		
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 	{ std::cout << ex.text << "in Closefingers" << std::endl;}
@@ -388,7 +386,7 @@ void SpecificWorker::bik1()
 		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
 		QVec p = innerModel->transform("world","mugT");
 		RoboCompBodyInverseKinematics::Pose6D pose;
-		pose.x = p.x()+100; pose.y = p.y(); pose.z = p.z();
+		pose.x = p.x()+120; pose.y = p.y()+50; pose.z = p.z() + 30;
 		pose.rx = 0; pose.ry= 0; pose.rz= -M_PI;
 		RoboCompBodyInverseKinematics::WeightVector weight;
 		weight.x = 1; weight.y = 1; weight.z = 1; 
@@ -399,7 +397,7 @@ void SpecificWorker::bik1()
 	{ std::cout << ex.text << std::endl; }
 	catch (const Ice::Exception &ex) 
 	{ std::cout << ex << std::endl; }
-	
+// 	
 }
 
 void SpecificWorker::bik2()

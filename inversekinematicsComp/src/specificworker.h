@@ -127,6 +127,9 @@ class SpecificWorker : public GenericWorker
 		
 		std::vector<QString> restNodes;
 		std::vector<QString> robotNodes;
+		
+		bool draw(InnerModelManagerPrx innermodelmanager_proxy, const QList<QVec> &path);
+		void clearDraw();
 	
 };
 

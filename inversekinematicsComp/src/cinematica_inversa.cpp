@@ -100,7 +100,7 @@ void Cinematica_Inversa::resolverTarget(Target& target)
 	else  //POSE6D
 	{
 	
-		chopPath(target);	
+	//	chopPath(target);	
 		// Si el target no ha sido resuelto llamamos Levenberg-Marquardt
 		if( target.isAtTarget() == false )
 		{

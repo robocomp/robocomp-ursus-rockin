@@ -28,6 +28,10 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 	outerRegion = outerRegion_;
 	robotNodes.clear(); restNodes.clear();
 	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes);
+	restNodes.push_back("base_mesh");
+	restNodes.push_back("barrahombro");
+	restNodes.push_back("barracuello");
+	restNodes.push_back("barracolumna") ;
 	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );
@@ -191,17 +195,15 @@ bool Sampler::isStateValid(const ompl::base::State *state)
 		qDebug() << __FUNCTION__ << "go through else";
 		InnerModelNode *nodeParent = innerModel->getNode("robot");
 		InnerModelTransform *node = innerModel->newTransform("munon_t", "static", nodeParent, 0, 0, 0, 0, 0, 0, 0);
-		InnerModelMesh *mesh = innerModel->newMesh("munonMesh", node, "/home/robocomp/robocomp/files/osgModels/basics/cube.3ds", 1, 0.06, 0.06, 0.06, 0, 0, 0, 0, 0, 0, true);
+		InnerModelMesh *mesh = innerModel->newMesh("munonMesh", node, "/home/robocomp/robocomp/files/osgModels/basics/cube.3ds", 1, 0.04, 0.04, 0.04, 0, 0, 0, 0, 0, 0, true);
 		nodeParent->addChild(node);
 		innerModel->updateTransformValues("munon",x, y, z, 0, 0, 0, "robot");
 	}
 	
 	for (uint32_t out=0; out<restNodes.size(); out++)
 		if (innerModel->collide("munonMesh", restNodes[out]))
-		{
-	//		qDebug() << "collide with " << restNodes[out];
+			//	qDebug() << "collide with " << restNodes[out];
 			return false;
-		}
 	return true;
 }
 

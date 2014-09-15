@@ -115,6 +115,8 @@ bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTim
 	simpleSetUp->setStartAndGoalStates(start, goal);
 	simpleSetUp->getProblemDefinition()->print(std::cout);
 	
+	currentPath.clear();
+	
 	ob::PlannerStatus solved = simpleSetUp->solve(maxTime);
 
 	if (solved)
@@ -122,14 +124,14 @@ bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTim
 		std::cout << __FILE__ << __FUNCTION__ << "RRT, found solution with " << simpleSetUp->getSolutionPath().getStateCount() << " waypoints" << std::endl;;
 	
 		//if (simpleSetUp->haveSolutionPath())	
-		//simpleSetUp->simplifySolution();
+	//	simpleSetUp->simplifySolution();
 		og::PathGeometric &p = simpleSetUp->getSolutionPath();
-// 		simpleSetUp->getPathSimplifier()->simplify(p,5);//
+ //		simpleSetUp->getPathSimplifier()->simplify(p,5);//
 //		std::cout << __FILE__ << __FUNCTION__ << "Solution after simplify: " << p. getStateCount() << ". Path length: " << p.length() << std::endl;
 //		p.print(std::cout);
 
- 		//simpleSetUp->getPathSimplifier()->smoothBSpline(p);
-//		p.interpolate();
+ 		simpleSetUp->getPathSimplifier()->smoothBSpline(p);
+		p.interpolate();
 		
 		for (std::size_t i = 0; i < p.getStateCount(); ++i)
 		{
