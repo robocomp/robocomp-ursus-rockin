@@ -80,13 +80,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 			 qDebug() << dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalex;
 			 qDebug()<<  dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scaley;
-<<<<<<< HEAD
-			  qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
-
-=======
 			 qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
-
->>>>>>> 6481e24d1f30abbcdb96ac9336ad44e86b28aff3
 			//innerModel->print();
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
 		}
@@ -95,7 +89,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
 			qFatal("Exiting now.");
 		}
-	}catch(std::exception e) {qFatal("Error reading config params");	}
+	}
+	catch(std::exception e)
+	{
+		qFatal("Error reading config params");
+	}
 
 
 	//timer.start(Period);
@@ -145,18 +143,12 @@ void SpecificWorker::init()
  		goHome(p.getPartName().toStdString());
 	sleep(1);
 	actualizarInnermodel(listaMotores);
-<<<<<<< HEAD
-
-	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
-
-=======
 
 // 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
 // 	innerModel->transform("world", QVec::zeros(3),tipLeft).print("LeftTip in World");
 // 	innerModel->transform("world", QVec::zeros(3),"mugTag").print("mug in World");
 
 
->>>>>>> 6481e24d1f30abbcdb96ac9336ad44e86b28aff3
 	//Open file to write errors
 	fichero.open("errores.txt", ios::out);
 
@@ -314,6 +306,7 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 
 void SpecificWorker::compute2()
 {
+	qFatal("no se si esto se ejecuta o no...");
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	for (uint32_t out=0; out<restNodes.size(); out++)
 		if (innerModel->collide("munonMesh", restNodes[out]))
@@ -326,12 +319,24 @@ void SpecificWorker::compute2()
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DE LA CLASE											*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-<<<<<<< HEAD
-void SpecificWorker::compute2( )
-=======
 void SpecificWorker::compute( )
->>>>>>> 6481e24d1f30abbcdb96ac9336ad44e86b28aff3
 {
+	InnerModelPlane *plane;
+	if ((plane = dynamic_cast<InnerModelPlane *>(innerModel->getNode("kitchen"))))
+	{
+		printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
+		plane->collisionObject->computeAABB();
+		fcl::AABB a1 = plane->collisionObject->getAABB();
+		fcl::Vec3f v1 = a1.center();
+		printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
+	}
+
+
+
+
+
+
+
 
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	QMap<QString, BodyPart>::iterator iterador;
@@ -342,13 +347,8 @@ void SpecificWorker::compute( )
 			Target &target = iterador.value().getHeadFromTargets();
 			if (target.isMarkedforRemoval() == false)
 			{
-<<<<<<< HEAD
 
 				if ( targetHasAPlan( *innerModel, target ) == true)
-=======
-
-			//	if ( targetHasAPlan( *innerModel, target ) == true)
->>>>>>> 6481e24d1f30abbcdb96ac9336ad44e86b28aff3
 				{
 					target.annotateInitialTipPose();
 					target.setInitialAngles(iterador.value().getMotorList());
