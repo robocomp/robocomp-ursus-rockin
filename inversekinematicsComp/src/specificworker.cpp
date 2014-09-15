@@ -80,8 +80,13 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 			 qDebug() << dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalex;
 			 qDebug()<<  dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scaley;
+<<<<<<< HEAD
 			  qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
 
+=======
+			 qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
+
+>>>>>>> 6481e24d1f30abbcdb96ac9336ad44e86b28aff3
 			//innerModel->print();
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
 		}
@@ -140,9 +145,18 @@ void SpecificWorker::init()
  		goHome(p.getPartName().toStdString());
 	sleep(1);
 	actualizarInnermodel(listaMotores);
+<<<<<<< HEAD
 
 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
 
+=======
+
+// 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
+// 	innerModel->transform("world", QVec::zeros(3),tipLeft).print("LeftTip in World");
+// 	innerModel->transform("world", QVec::zeros(3),"mugTag").print("mug in World");
+
+
+>>>>>>> 6481e24d1f30abbcdb96ac9336ad44e86b28aff3
 	//Open file to write errors
 	fichero.open("errores.txt", ios::out);
 
@@ -298,7 +312,7 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 	}
 }
 
-void SpecificWorker::compute()
+void SpecificWorker::compute2()
 {
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	for (uint32_t out=0; out<restNodes.size(); out++)
@@ -312,7 +326,11 @@ void SpecificWorker::compute()
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DE LA CLASE											*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+<<<<<<< HEAD
 void SpecificWorker::compute2( )
+=======
+void SpecificWorker::compute( )
+>>>>>>> 6481e24d1f30abbcdb96ac9336ad44e86b28aff3
 {
 
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
@@ -324,8 +342,13 @@ void SpecificWorker::compute2( )
 			Target &target = iterador.value().getHeadFromTargets();
 			if (target.isMarkedforRemoval() == false)
 			{
+<<<<<<< HEAD
 
 				if ( targetHasAPlan( *innerModel, target ) == true)
+=======
+
+			//	if ( targetHasAPlan( *innerModel, target ) == true)
+>>>>>>> 6481e24d1f30abbcdb96ac9336ad44e86b28aff3
 				{
 					target.annotateInitialTipPose();
 					target.setInitialAngles(iterador.value().getMotorList());

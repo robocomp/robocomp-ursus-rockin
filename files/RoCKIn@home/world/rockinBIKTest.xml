@@ -36,6 +36,7 @@
 				<plane id="kitchen" ny="1" size="2000, 50, 500" texture = "#151115" />
 				<transform id="mugT" tz="-30" ty="-50" tx="0"  >
 					<plane id="mugTag" nz="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+				
 				</transform>
 		
 			</transform>

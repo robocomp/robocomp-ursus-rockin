@@ -56,13 +56,14 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	statusLabel->setText("");
 	state = State::IDLE;
 	tag11 = false;
-	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
 	try 
 	{	
 		bodyinversekinematics_proxy->begin_goHome("HEAD");
 		bodyinversekinematics_proxy->begin_goHome("RIGHTARM");
 		bodyinversekinematics_proxy->setFingers(0);
+	
 		
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
@@ -361,37 +362,37 @@ void SpecificWorker::step3()
 void SpecificWorker::bik1()
 {
 	//Oriente the head
-// 	try 
-// 	{	
-// 		RoboCompBodyInverseKinematics::Pose6D target;
-// 		//we need to give the Head target in ROBOT coordinates!!!!
-// 		QVec locA = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
-// 		QVec loc = innerModel->transform("robot","mugT");
-// 		locA.print("loc"); loc.print("loc");
-// 		target.rx=0; target.ry=0; target.rz=0; 	
-// 		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
-// 		RoboCompBodyInverseKinematics::Axis axis; 
-// 		axis.x = 0; axis.y = -1; axis.z = 0;
-// 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
-// 	} 
-// 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-// 		{ std::cout << ex.text << "calling pointAxisTowardsTarget" << std::endl;}
-// 	catch (const Ice::Exception &ex) 
-// 		{ std::cout << ex << std::endl;}
-	// 
-// 	usleep(100000);
+	try 
+	{	
+		RoboCompBodyInverseKinematics::Pose6D target;
+		//we need to give the Head target in ROBOT coordinates!!!!
+		QVec locA = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
+		QVec loc = innerModel->transform("world","mugT");
+		locA.print("locA"); loc.print("loc");
+		target.rx=0; target.ry=0; target.rz=0; 	
+		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
+		RoboCompBodyInverseKinematics::Axis axis; 
+		axis.x = 0; axis.y = -1; axis.z = 0;
+		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
+	} 
+	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+		{ std::cout << ex.text << "calling pointAxisTowardsTarget" << std::endl;}
+	catch (const Ice::Exception &ex) 
+		{ std::cout << ex << std::endl;}
+	
+	usleep(100000);
 	
 	//Send the arm
 	try 
 	{
 		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
-		QVec p = innerModel->transform("robot","mugT");
+		QVec p = innerModel->transform("world","mugT");
 		RoboCompBodyInverseKinematics::Pose6D pose;
-		pose.x = p.x(); pose.y = p.y() + 150; pose.z = p.z();
-		pose.rx = 0; pose.ry= 0; pose.rz= M_PI;
+		pose.x = p.x()+100; pose.y = p.y(); pose.z = p.z();
+		pose.rx = 0; pose.ry= 0; pose.rz= -M_PI;
 		RoboCompBodyInverseKinematics::WeightVector weight;
 		weight.x = 1; weight.y = 1; weight.z = 1; 
-		weight.rx = 1; weight.ry = 0; weight.rz = 1;
+		weight.rx = 0; weight.ry = 0; weight.rz = 0;
 		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", pose, weight, 0); 
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
