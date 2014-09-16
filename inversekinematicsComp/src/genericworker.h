@@ -27,6 +27,7 @@
 #include <CommonBehavior.h>
 #include <ui_guiDlg.h>
 #include "config.h"
+#include <InnerModelManager.h>
 #include <JointMotor.h>
 #include <DifferentialRobot.h>
 #include <BodyInverseKinematics.h>
@@ -42,6 +43,7 @@ using namespace std;
        \brief
        @author authorname
 */
+using namespace RoboCompInnerModelManager;
 using namespace RoboCompJointMotor;
 using namespace RoboCompDifferentialRobot;
 using namespace RoboCompBodyInverseKinematics;
@@ -62,6 +64,7 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
+	InnerModelManagerPrx innermodelmanager_proxy;
 	JointMotorPrx jointmotor0_proxy;
 	JointMotorPrx jointmotor1_proxy;
 	DifferentialRobotPrx differentialrobot_proxy;
