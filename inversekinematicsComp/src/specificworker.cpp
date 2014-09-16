@@ -81,7 +81,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 			 qDebug() << dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalex;
 			 qDebug()<<  dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scaley;
 			 qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
-			//innerModel->print();
+
+			 //innerModel->print();
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
 		}
 		else
@@ -166,7 +167,11 @@ void SpecificWorker::init()
 
 	robotNodes.clear(); restNodes.clear();
 	sampler.recursiveIncludeMeshes(innerModel->getRoot(), "robot", false, robotNodes, restNodes);
-//	setFingers(0);
+
+	restNodes.push_back("barracolumna");
+	setJoint("rightShoulder1", -1, 2);
+
+	//	setFingers(0);
 	//setJoint("rightShoulder1", -1, 2);
 
 	qDebug();
@@ -307,8 +312,18 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 	}
 }
 
-void SpecificWorker::compute2()
+void SpecificWorker::compute()
 {
+	static int i=0;
+	printf("%d\n", i++);
+	
+InnerModelPlane *plane = (InnerModelPlane *)innerModel->getNode("kitchen");	
+printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
+plane->collisionObject->computeAABB();
+fcl::AABB a1 = plane->collisionObject->getAABB();
+fcl::Vec3f v1 = a1.center();
+printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
+
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	for (uint32_t out=0; out<restNodes.size(); out++)
 		if (innerModel->collide("munonMesh", restNodes[out]))
@@ -345,6 +360,7 @@ void SpecificWorker::compute( )
 			Target &target = iterador.value().getHeadFromTargets();
 	/*		if (target.isMarkedforRemoval() == false)
 			{
+			//	if ( targetHasAPlan( *innerModel, target ) == true)
  	*/			if ( target.getType() == Target::TargetType::ALIGNAXIS or  targetHasAPlan( *innerModel, target ) == true)
 				{
 					target.annotateInitialTipPose();
