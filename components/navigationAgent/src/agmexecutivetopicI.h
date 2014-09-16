@@ -16,37 +16,38 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SPECIFICWORKER_H
-#define SPECIFICWORKER_H
+#ifndef AGMEXECUTIVETOPICI_H
+#define AGMEXECUTIVETOPICI_H
 
-#include <genericworker.h>
+// QT includes
+#include <QtCore/QObject>
 
-/**
-       \brief
-       @author authorname
-*/
+// Ice includes
+#include <Ice/Ice.h>
+#include <AGMExecutive.h>
 
-class SpecificWorker : public GenericWorker
+#include <config.h>
+#include "genericworker.h"
+
+using namespace RoboCompAGMExecutive;
+
+class AGMExecutiveTopicI : public QObject , public virtual RoboCompAGMExecutive::AGMExecutiveTopic
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx);	
-	~SpecificWorker();
-	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	bool activateAgent(const ParameterMap& prs);
-	bool deactivateAgent();
-	StateStruct getAgentState();
-	ParameterMap getAgentParameters();
-	bool setAgentParameters(const ParameterMap& prs);
-	void  killAgent();
-	Ice::Int uptimeAgent();
-	bool reloadConfigAgent();
-	void  modelModified(const RoboCompAGMWorldModel::Event& modification);
-	void  modelUpdated(const RoboCompAGMWorldModel::Node& modification);
+	AGMExecutiveTopicI( GenericWorker *_worker, QObject *parent = 0 );
+	~AGMExecutiveTopicI();
+	void  modelModified(const RoboCompAGMWorldModel::Event& modification, const Ice::Current& = Ice::Current());
+void  modelUpdated(const RoboCompAGMWorldModel::Node& modification, const Ice::Current& = Ice::Current());
 
 
+	QMutex *mutex;
+private:
+
+	GenericWorker *worker;
 public slots:
- 	void compute(); 	
+
+
 };
 
 #endif

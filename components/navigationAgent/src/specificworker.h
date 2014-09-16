@@ -33,6 +33,17 @@ public:
 	SpecificWorker(MapPrx& mprx);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
+	bool activateAgent(const ParameterMap& prs);
+	bool deactivateAgent();
+	StateStruct getAgentState();
+	ParameterMap getAgentParameters();
+	bool setAgentParameters(const ParameterMap& prs);
+	void  killAgent();
+	Ice::Int uptimeAgent();
+	bool reloadConfigAgent();
+	void  modelModified(const RoboCompAGMWorldModel::Event& modification);
+	void  modelUpdated(const RoboCompAGMWorldModel::Node& modification);
+
 
 public slots:
  	void compute(); 	

@@ -16,37 +16,28 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SPECIFICWORKER_H
-#define SPECIFICWORKER_H
+#include "agmexecutivetopicI.h"
 
-#include <genericworker.h>
-
-/**
-       \brief
-       @author authorname
-*/
-
-class SpecificWorker : public GenericWorker
+AGMExecutiveTopicI::AGMExecutiveTopicI(GenericWorker *_worker, QObject *parent) : QObject(parent)
 {
-Q_OBJECT
-public:
-	SpecificWorker(MapPrx& mprx);	
-	~SpecificWorker();
-	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	bool activateAgent(const ParameterMap& prs);
-	bool deactivateAgent();
-	StateStruct getAgentState();
-	ParameterMap getAgentParameters();
-	bool setAgentParameters(const ParameterMap& prs);
-	void  killAgent();
-	Ice::Int uptimeAgent();
-	bool reloadConfigAgent();
-	void  modelModified(const RoboCompAGMWorldModel::Event& modification);
-	void  modelUpdated(const RoboCompAGMWorldModel::Node& modification);
+	worker = _worker;
+	mutex = worker->mutex;       // Shared worker mutex
+	// Component initialization...
+}
 
 
-public slots:
- 	void compute(); 	
-};
+AGMExecutiveTopicI::~AGMExecutiveTopicI()
+{
+	// Free component resources here
+}
 
-#endif
+// Component functions, implementation
+void AGMExecutiveTopicI::modelModified(const RoboCompAGMWorldModel::Event& modification, const Ice::Current&){
+	worker->modelModified(modification);
+}
+
+void AGMExecutiveTopicI::modelUpdated(const RoboCompAGMWorldModel::Node& modification, const Ice::Current&){
+	worker->modelUpdated(modification);
+}
+
+
