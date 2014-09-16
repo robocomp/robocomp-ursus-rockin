@@ -77,11 +77,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 			innerModel = new InnerModel(par.value);
 			convertInnerModelFromMilimetersToMeters(innerModel->getRoot());
 			innerModel->transform("world","robot").print("floor");
-
-			 qDebug() << dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalex;
-			 qDebug()<<  dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scaley;
-			 qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
-
+			
 			 //innerModel->print();
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
 		}
@@ -309,7 +305,7 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 	}
 }
 
-void SpecificWorker::compute()
+void SpecificWorker::compute2()
 {
 	static int i=0;
 	//printf("%d\n", i++);
@@ -335,19 +331,19 @@ void SpecificWorker::compute()
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DE LA CLASE											*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-void SpecificWorker::compute2( )
+void SpecificWorker::compute( )
 {
-// 	InnerModelPlane *plane;
-// 	if ((plane = dynamic_cast<InnerModelPlane *>(innerModel->getNode("kitchen"))))
-// 	{
-// 		printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
-// 		plane->collisionObject->computeAABB();
-// 		fcl::AABB a1 = plane->collisionObject->getAABB();
-// 		fcl::Vec3f v1 = a1.center();
-// 		printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
-// 	}
-// 
-// 	printf("((((((%d))))))\n", innerModel->collide("kitchen", "munonMesh"));
+	// 	InnerModelPlane *plane;
+	// 	if ((plane = dynamic_cast<InnerModelPlane *>(innerModel->getNode("kitchen"))))
+	// 	{
+	// 		printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
+	// 		plane->collisionObject->computeAABB();
+	// 		fcl::AABB a1 = plane->collisionObject->getAABB();
+	// 		fcl::Vec3f v1 = a1.center();
+	// 		printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
+	// 	}
+	// 
+	// 	printf("((((((%d))))))\n", innerModel->collide("kitchen", "munonMesh"));
 
 
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
@@ -431,7 +427,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 //	{
 		qDebug() << __FUNCTION__ << "Calling Full Power of RRTConnect OMPL planner. This may take a while";
 
-		if (planner->computePath(origin, target.getTranslation(), 60) == false)
+		if (planner->computePath(origin, target.getTranslation(), 5) == false)
 			return false;
 //	}
 

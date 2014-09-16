@@ -62,6 +62,7 @@ public slots:
 	void step3();
 	void bik1();
 	void bik2();
+	void goHome();
 	
 private:
 	PlantWidget *plantWidget;

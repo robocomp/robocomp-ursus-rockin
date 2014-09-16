@@ -488,7 +488,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>510</y>
+     <y>500</y>
      <width>861</width>
      <height>16</height>
     </rect>
@@ -501,9 +501,9 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>530</y>
+     <y>520</y>
      <width>871</width>
-     <height>80</height>
+     <height>91</height>
     </rect>
    </property>
    <property name="title">
@@ -584,27 +584,40 @@
    <widget class="QPushButton" name="bik1Button">
     <property name="geometry">
      <rect>
-      <x>440</x>
-      <y>30</y>
+      <x>430</x>
+      <y>40</y>
       <width>81</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>Go to tag</string>
+     <string>Ballistic</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="bik2Button">
+   <widget class="QPushButton" name="goHomeButton">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>30</y>
+      <x>600</x>
+      <y>0</y>
       <width>81</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
      <string>Go home</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="bik2Button">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>40</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Servo</string>
     </property>
    </widget>
   </widget>

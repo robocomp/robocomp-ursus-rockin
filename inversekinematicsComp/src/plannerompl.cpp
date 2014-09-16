@@ -58,6 +58,11 @@ ob::ValidStateSamplerPtr PlannerOMPL::allocOBValidStateSampler(const ob::SpaceIn
 	return ob::ValidStateSamplerPtr(new ob::ObstacleBasedValidStateSampler(si));
 }
 
+ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
+{
+	return ob::OptimizationObjectivePtr(new ob::PathLengthOptimizationObjective(si));
+}
+
 /**
  * @brief Initializer for 3D points (translation only)
  * 
@@ -89,13 +94,22 @@ void PlannerOMPL::initialize(Sampler *sampler)
 	simpleSetUp->getSpaceInformation()->setValidStateSamplerAllocator(allocOBValidStateSampler);
 	
 	simpleSetUp->setStateValidityChecker(boost::bind(&Sampler::isStateValid, sampler, _1));
+	ob::ProblemDefinitionPtr pdef(new ob::ProblemDefinition(simpleSetUp->getSpaceInformation()));
+	pdef->setOptimizationObjective(getPathLengthObjective(simpleSetUp->getSpaceInformation()));
+	
 	space->setup();
+	
 	simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(0.01);
 	//simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(100 / space->getMaximumExtent());
-	simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRTConnect(simpleSetUp->getSpaceInformation())));
+	//simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRTConnect(simpleSetUp->getSpaceInformation())));
+	simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRTstar(simpleSetUp->getSpaceInformation())));
+	simpleSetUp->getPlanner()->as<og::RRTstar>()->setProblemDefinition(pdef);	
+	
 	//simpleSetUp->getPlanner()->as<og::RRTConnect>()->setRange(2000);
 	simpleSetUp->getPlanner()->as<og::RRTConnect>()->setRange(1);	
+	
 }
+
 
 //bool PlannerOMPL::computePath(const QVec& target, InnerModel* inner)
 bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTime)
@@ -108,11 +122,10 @@ bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTim
 	
 	ob::ScopedState<> start(simpleSetUp->getStateSpace());
 	start[0] = origin.x();	start[1] = origin.y(); start[2] = origin.z();
-	
 	ob::ScopedState<> goal(simpleSetUp->getStateSpace());
 	goal[0] = target.x(); goal[1] = target.y(); goal[2] = target.z();
-	
 	simpleSetUp->setStartAndGoalStates(start, goal);
+	
 	simpleSetUp->getProblemDefinition()->print(std::cout);
 	
 	currentPath.clear();
