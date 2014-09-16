@@ -20,6 +20,7 @@
 #define SPECIFICWORKER_H
 
 #include <genericworker.h>
+#include <innermodel/innermodel.h>
 
 /**
        \brief
@@ -47,6 +48,9 @@ public:
 
 public slots:
  	void compute(); 	
+	
+private:
+	InnerModel *innerModel;
 };
 
 #endif

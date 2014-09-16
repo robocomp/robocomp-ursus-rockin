@@ -87,11 +87,11 @@ bool SpecificMonitor::sendParamsToWorker(RoboCompCommonBehavior::ParameterList p
 void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 {
 	//Read params from config file
-	//Example
-	    //RoboCompCommonBehavior::Parameter aux;
-	    //aux.editable = true;
-	    //configGetString( "DRobot.Device", aux.value,"/dev/ttyUSB0");
-	    //params["DRobot.Device"] = aux;
+	
+	RoboCompCommonBehavior::Parameter aux;
+	aux.editable = false;
+	configGetString( "GraspingAgent.InnerModel", aux.value,"no file");
+	params["GraspingAgent.InnerModel"] = aux;
 }
 
 //comprueba que los parametros sean correctos y los transforma a la estructura del worker
