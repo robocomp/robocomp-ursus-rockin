@@ -322,10 +322,10 @@ void SpecificWorker::compute()
 // printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
 
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
-		if (sampler.isStateValidQ(innerModel->transform("world","munon_t")))
-		{
+	if (sampler.isStateValidQ(innerModel->transform("world","munon_t")))
+	{
 			
-		}
+	}
 		else
 			qDebug() << __FUNCTION__ << "collide ";;
 }
