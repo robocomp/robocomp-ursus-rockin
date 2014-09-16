@@ -16,37 +16,24 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SPECIFICWORKER_H
-#define SPECIFICWORKER_H
+#include "apriltagsI.h"
 
-#include <genericworker.h>
-
-/**
-       \brief
-       @author authorname
-*/
-
-class SpecificWorker : public GenericWorker
+AprilTagsI::AprilTagsI(GenericWorker *_worker, QObject *parent) : QObject(parent)
 {
-Q_OBJECT
-public:
-	SpecificWorker(MapPrx& mprx);	
-	~SpecificWorker();
-	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	bool activateAgent(const ParameterMap& prs);
-	bool deactivateAgent();
-	StateStruct getAgentState();
-	ParameterMap getAgentParameters();
-	bool setAgentParameters(const ParameterMap& prs);
-	void  killAgent();
-	Ice::Int uptimeAgent();
-	bool reloadConfigAgent();
-	void  modelModified(const RoboCompAGMWorldModel::Event& modification);
-	void  modelUpdated(const RoboCompAGMWorldModel::Node& modification);
+	worker = _worker;
+	mutex = worker->mutex;       // Shared worker mutex
+	// Component initialization...
+}
 
 
-public slots:
- 	void compute(); 	
-};
+AprilTagsI::~AprilTagsI()
+{
+	// Free component resources here
+}
 
-#endif
+// Component functions, implementation
+void AprilTagsI::newAprilTag(const tagsList& tags, const Ice::Current&){
+	worker->newAprilTag(tags);
+}
+
+

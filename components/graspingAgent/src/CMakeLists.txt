@@ -12,8 +12,8 @@ INCLUDE ( CMakeListsSpecific.txt)
 SET ( SOURCES
   ${SOURCES}
   graspingcomp.cpp
-  I.cpp
-I.cpp
+  agmcommonbehaviorI.cpp
+agmexecutivetopicI.cpp
 
   genericmonitor.cpp
   commonbehaviorI.cpp
@@ -25,8 +25,8 @@ I.cpp
 # Headers set
 SET ( HEADERS
   ${HEADERS}
-  I.h
-I.h
+  agmcommonbehaviorI.h
+agmexecutivetopicI.h
 
   genericmonitor.h
   commonbehaviorI.h
@@ -34,7 +34,7 @@ I.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior )
+ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning AGMAgent  AGMWorldModel)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

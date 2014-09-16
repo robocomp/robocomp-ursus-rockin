@@ -27,6 +27,10 @@
 #include <CommonBehavior.h>
 #include <ui_guiDlg.h>
 #include "config.h"
+#include <agm.h>
+#include <AGMAgent.h>
+#include <AGMCommonBehavior.h>
+#include <AGMExecutive.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -39,6 +43,14 @@ using namespace std;
        \brief
        @author authorname
 */
+using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompAGMExecutive;
+using namespace RoboCompAGMAgent;
+struct BehaviorNavegacionParameters 
+		{
+			RoboCompPlanning::Action action;
+			std::vector< std::vector <std::string> > plan;
+		};
 class GenericWorker :
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
@@ -56,9 +68,33 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
+		
+	bool activate(const BehaviorNavegacionParameters& parameters);
+	bool deactivate();
+	bool isActive() { return active; }
+	RoboCompAGMWorldModel::BehaviorResultType status();
+	AGMAgentTopicPrx agmagenttopic;
+	virtual bool activateAgent(const ParameterMap& prs) = 0;
+	virtual bool deactivateAgent() = 0;
+	virtual StateStruct getAgentState() = 0;
+	virtual ParameterMap getAgentParameters() = 0;
+	virtual bool setAgentParameters(const ParameterMap& prs) = 0;
+	virtual void  killAgent() = 0;
+	virtual Ice::Int uptimeAgent() = 0;
+	virtual bool reloadConfigAgent() = 0;
+	virtual void  modelModified(const RoboCompAGMWorldModel::Event& modification) = 0;
+	virtual void  modelUpdated(const RoboCompAGMWorldModel::Node& modification) = 0;
+
 protected:
 	QTimer timer;
 	int Period;
+	int iter;
+	bool active;
+	AGMModel::SPtr worldModel;
+	ParameterMap params;
+	BehaviorNavegacionParameters p;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	RoboCompPlanning::Action createAction(std::string s);
 public slots:
 	virtual void compute() = 0;
 signals:
