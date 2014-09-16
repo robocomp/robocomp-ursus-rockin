@@ -82,7 +82,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 			 qDebug()<<  dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scaley;
 			 qDebug()<< dynamic_cast<InnerModelMesh *>(innerModel->getNode("munonMesh"))->scalez;
 
-			//innerModel->print();
+			 //innerModel->print();
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
 		}
 		else
@@ -90,7 +90,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
 			qFatal("Exiting now.");
 		}
-	}catch(std::exception e) {qFatal("Error reading config params");	}
+	}
+	catch(std::exception e)
+	{
+		qFatal("Error reading config params");
+	}
 
 
 	//timer.start(Period);
@@ -116,6 +120,8 @@ void SpecificWorker::init()
 
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
+	//QString tipRight = "munon_t";
+	
 	QString tipLeft = "grabPositionHandL";
 	//QString nose = "head3";  //OJO PROV
 	QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
@@ -161,8 +167,12 @@ void SpecificWorker::init()
 
 	robotNodes.clear(); restNodes.clear();
 	sampler.recursiveIncludeMeshes(innerModel->getRoot(), "robot", false, robotNodes, restNodes);
+
 	restNodes.push_back("barracolumna");
 	setJoint("rightShoulder1", -1, 2);
+
+	//	setFingers(0);
+	//setJoint("rightShoulder1", -1, 2);
 
 	qDebug();
 	qDebug() << "---------------------------------";
@@ -326,8 +336,20 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DE LA CLASE											*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-void SpecificWorker::compute2( )
+void SpecificWorker::compute( )
 {
+// 	InnerModelPlane *plane;
+// 	if ((plane = dynamic_cast<InnerModelPlane *>(innerModel->getNode("kitchen"))))
+// 	{
+// 		printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
+// 		plane->collisionObject->computeAABB();
+// 		fcl::AABB a1 = plane->collisionObject->getAABB();
+// 		fcl::Vec3f v1 = a1.center();
+// 		printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
+// 	}
+// 
+// 	printf("((((((%d))))))\n", innerModel->collide("kitchen", "munonMesh"));
+
 
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	QMap<QString, BodyPart>::iterator iterador;
@@ -336,9 +358,10 @@ void SpecificWorker::compute2( )
 		if(iterador.value().noTargets() == false)
 		{
 			Target &target = iterador.value().getHeadFromTargets();
-			if (target.isMarkedforRemoval() == false)
+	/*		if (target.isMarkedforRemoval() == false)
 			{
 			//	if ( targetHasAPlan( *innerModel, target ) == true)
+ 	*/			if ( target.getType() == Target::TargetType::ALIGNAXIS or  targetHasAPlan( *innerModel, target ) == true)
 				{
 					target.annotateInitialTipPose();
 					target.setInitialAngles(iterador.value().getMotorList());
@@ -352,7 +375,7 @@ void SpecificWorker::compute2( )
 						moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
 						//Acumulamos los angulos en una lista en bodyPart para lanzarlos con Reflexx
 						iterador.value().addJointStep(target.getFinalAngles());
-						usleep(100000);
+						usleep(10000);
 						target.setExecuted(true);
 					}
 					else
@@ -363,7 +386,7 @@ void SpecificWorker::compute2( )
 					target.annotateFinalTipPose();
 					removeInnerModelTarget(target);
 					target.print("AFTER PROCESSING");
-				}
+		//		}
 			}
 // 				if( target.isChopped() == false)
 // 				{
@@ -376,8 +399,8 @@ void SpecificWorker::compute2( )
 						iterador.value().cleanJointStep();
 					mutex->unlock();
 			}
-		}
-	}
+		}//if
+	}//for
 }
 
 
@@ -389,6 +412,8 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 
 	if( target.getHasPlan() == true )
 		return true;
+
+	clearDraw();
 
 	if( (origin-target.getTranslation()).norm2() < 0.020 )  //already there !!!!
 	{
@@ -414,7 +439,8 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 	qDebug() << __FUNCTION__ << "Plan length: " << planner->getPath().size();
 	QList<QVec> path = planner->getPath();
 	qDebug() << path;
-	qFatal("fary");
+	draw(innermodelmanager_proxy,path);
+	//qFatal("fary");
 	for(int i=0; i<path.size(); ++i)
 	{
 		QVec w(6);
@@ -653,7 +679,8 @@ void SpecificWorker::setFingers(float d)
 void SpecificWorker::goHome(const string& part)
 {
 	QString partName = QString::fromStdString(part);
-
+	clearDraw();
+	
 	if ( bodyParts.contains(partName)==false)
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Not recognized body part";
@@ -960,6 +987,51 @@ void SpecificWorker::calcularModuloFloat(QVec &angles, float mod)
     }
 }
 
+void SpecificWorker::clearDraw()
+{
+		
+	try
+	{	
+		innermodelmanager_proxy->removeNode("road");		
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ std::cout << ex << std::endl;}
+	
+}
+
+bool SpecificWorker::draw(InnerModelManagerPrx innermodelmanager_proxy, const QList<QVec> &path)
+{
+	RoboCompInnerModelManager::Pose3D pose;
+	pose.y = 0;	pose.x = 0;	pose.z = 0;
+	pose.rx = pose.ry = pose.z = 0.;
+	RoboCompInnerModelManager::Plane3D plane;
+	plane.px = 0; plane.py = 0;	plane.pz = 0;
+	plane.nx = 0; plane.ny = 1; plane.nz = 0;
+	plane.width = 20; 	plane.height = 20;	plane.thickness = 20;
+	plane.texture = "#05ff00";
+	
+	try
+	{	std::string  parentAll = "road";
+		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);		
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ std::cout << ex << std::endl;}
+	
+	for(int i=0; i<path.size(); i++)
+	{
+		QString item = "p_" + QString::number(i);		
+		pose.x = path[i].x()*1000;	pose.y = path[i].y()*1000; pose.z = path[i].z()*1000 ;
+		try
+		{
+			//	qDebug() << "punto" << path[i];
+			innermodelmanager_proxy->addTransform(item.toStdString(),"static","road",pose);
+			innermodelmanager_proxy->addPlane(item.toStdString() + "_point", item.toStdString(), plane);	
+		}
+		catch(const Ice::Exception &ex){ std::cout << ex << std::endl;}
+		//RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#005500" );
+	}
+	return false;
+}
 /*
  * Método getRotacionMano
  * Devuelve la rotación de la mano del robot
