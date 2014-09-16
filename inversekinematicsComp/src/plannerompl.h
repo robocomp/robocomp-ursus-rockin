@@ -63,7 +63,6 @@ class PlannerOMPL : public QObject
 		float xMin, xMax, zMin, zMax; 		//Limits of environmnent
 		static ob::ValidStateSamplerPtr allocOBValidStateSampler(const ob::SpaceInformation *si);
 		
-	
 };
 
 #endif // PLANNEROMPL_H

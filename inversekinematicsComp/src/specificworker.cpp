@@ -165,10 +165,7 @@ void SpecificWorker::init()
 	planner = new PlannerOMPL(*innerModel);
 	planner->initialize(&sampler);
 
-	robotNodes.clear(); restNodes.clear();
-	sampler.recursiveIncludeMeshes(innerModel->getRoot(), "robot", false, robotNodes, restNodes);
-
-	restNodes.push_back("barracolumna");
+	
 	setJoint("rightShoulder1", -1, 2);
 
 	//	setFingers(0);
@@ -315,28 +312,30 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 void SpecificWorker::compute()
 {
 	static int i=0;
-	printf("%d\n", i++);
+	//printf("%d\n", i++);
 	
-InnerModelPlane *plane = (InnerModelPlane *)innerModel->getNode("kitchen");	
-printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
-plane->collisionObject->computeAABB();
-fcl::AABB a1 = plane->collisionObject->getAABB();
-fcl::Vec3f v1 = a1.center();
-printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
+// InnerModelPlane *plane = (InnerModelPlane *)innerModel->getNode("kitchen");	
+// printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
+// plane->collisionObject->computeAABB();
+// fcl::AABB a1 = plane->collisionObject->getAABB();
+// fcl::Vec3f v1 = a1.center();
+// printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
 
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
-	for (uint32_t out=0; out<restNodes.size(); out++)
-		if (innerModel->collide("munonMesh", restNodes[out]))
+		if (sampler.isStateValidQ(innerModel->transform("world","munon_t")))
 		{
-			qDebug() << "collide with " << restNodes[out];
+			
 		}
+		else
+			qDebug() << __FUNCTION__ << "collide ";;
 }
 
-
+	//if (innerModel->collide("munonMesh", restNodes[out]))
+	
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DE LA CLASE											*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-void SpecificWorker::compute( )
+void SpecificWorker::compute2( )
 {
 // 	InnerModelPlane *plane;
 // 	if ((plane = dynamic_cast<InnerModelPlane *>(innerModel->getNode("kitchen"))))
