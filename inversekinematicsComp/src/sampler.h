@@ -37,6 +37,7 @@ class Sampler
 		QList<QVec> sampleFreeSpaceR2Gaussian(float meanX, float meanY, float sigma1, float sigma2, uint32_t nPoints = 1);
 		bool checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot = QVec::zeros(3)) const;
 		bool isStateValid(const ompl::base::State *state) ;
+		bool isStateValidQ(const QVec &rState);
 		bool checkRobotValidDirectionToTarget(const QVec & origin , const QVec & target, QVec &path);
 		bool checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint) const;
 		bool checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target) const;

@@ -29,6 +29,7 @@
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/LBTRRT.h>
+#include <ompl/base/objectives/PathLengthOptimizationObjective.h>
 #include <ompl/base/samplers/ObstacleBasedValidStateSampler.h>
 #include <ompl/config.h>
 #include <iostream>
@@ -63,7 +64,6 @@ class PlannerOMPL : public QObject
 		float xMin, xMax, zMin, zMax; 		//Limits of environmnent
 		static ob::ValidStateSamplerPtr allocOBValidStateSampler(const ob::SpaceInformation *si);
 		
-	
 };
 
 #endif // PLANNEROMPL_H

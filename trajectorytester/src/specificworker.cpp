@@ -49,6 +49,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	
 	connect(bik1Button, SIGNAL(clicked()), this, SLOT(bik1()));
 	connect(bik2Button, SIGNAL(clicked()), this, SLOT(bik2()));
+	connect(goHomeButton, SIGNAL(clicked()), this, SLOT(goHome()));
 	
 	
 	plantWidget = new PlantWidget(frame, QPointF(82,457), QPointF(0,10000), QPointF(65,387), QPointF(0,-10000));
@@ -400,7 +401,26 @@ void SpecificWorker::bik1()
 // 	
 }
 
+/**
+ * @brief Visual servo following Peter Storke paper. We define an error pose as a circular transformation form desired Tip position to current Tip position.
+ * Then, the error is sent to the position controller and updated again in a servo loop. the method guaratees that when the error is zero, both marks are in the same place, regardeless 
+ * of the kinematic and sensor errors.
+ * @return void
+ */
 void SpecificWorker::bik2()
+{
+	//if in its target place, exit
+	
+	//check that both marks are visible and good
+	
+	//compute the error pose given a proper rotation parametrization that set the angles to zero when aligned
+	
+	//send the target pose to the hand controller
+	
+}
+
+
+void SpecificWorker::goHome()
 {
 	try 
 	{	
@@ -410,8 +430,6 @@ void SpecificWorker::bik2()
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 	{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
 }
-
-
 
 
 ////////////////////////////////////////////////////////////////////

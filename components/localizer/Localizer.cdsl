@@ -1,0 +1,13 @@
+import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
+import "/robocomp/interfaces/IDSLs/Laser.idsl";
+import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
+
+Component LocalizerComp
+{
+	Communications
+	{
+		requires DifferentialRobot, Laser;
+		subscribesTo AprilTags;		
+	};
+	language Cpp;
+};

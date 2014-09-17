@@ -1,4 +1,5 @@
 
+SET(LIBS ${LIBS} -lagm)
 # Sources set
 SET ( SOURCES
   specificworker.cpp

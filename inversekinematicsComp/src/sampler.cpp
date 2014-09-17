@@ -28,10 +28,7 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 	outerRegion = outerRegion_;
 	robotNodes.clear(); restNodes.clear();
 	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes);
-	restNodes.push_back("base_mesh");
-	restNodes.push_back("barrahombro");
-	restNodes.push_back("barracuello");
-	restNodes.push_back("barracolumna") ;
+	
 	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );
@@ -44,6 +41,10 @@ void Sampler::initialize3D(InnerModel *inner, const QList< QPair< float, float >
 	limits = limits_;
 	robotNodes.clear(); restNodes.clear();
 	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes);
+	restNodes.push_back("base_mesh");
+	restNodes.push_back("barrahombro");
+	restNodes.push_back("barracuello");
+	restNodes.push_back("barracolumna") ;
 	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );
@@ -172,7 +173,7 @@ bool Sampler::checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &ta
 	return true;
 }
 
-bool Sampler::isStateValid(const ompl::base::State *state) 
+bool Sampler::isStateValid(const ompl::base::State *state) //in robot RS
 {
 	const float x = state->as<ompl::base::RealVectorStateSpace::StateType>()->values[0];
 	const float y = state->as<ompl::base::RealVectorStateSpace::StateType>()->values[1];
@@ -185,8 +186,8 @@ bool Sampler::isStateValid(const ompl::base::State *state)
 	
 	if( innerModel->getNode("munon_t") != NULL)
 	{
-		QVec p = innerModel->transform("munon_t", QVec::vec3(x,y,z), "robot");
-		innerModel->updateTranslationValues("munon_t", p.x(), p.y(), p.z());
+		QVec p = innerModel->transform("world", QVec::vec3(x,y,z), "robot");
+		innerModel->updateTranslationValues("munon_t", p.x(), p.y(), p.z(), "world");
 		//innerModel->transform("robot","munon_t").print("munon_t");
 	}
 	
@@ -204,6 +205,35 @@ bool Sampler::isStateValid(const ompl::base::State *state)
 		if (innerModel->collide("munonMesh", restNodes[out]))
 			//	qDebug() << "collide with " << restNodes[out];
 			return false;
+	return true;
+}
+
+bool Sampler::isStateValidQ(const QVec &rState) //in robot RS
+{
+	
+	if( innerModel->getNode("munon_t") != NULL)
+	{
+		innerModel->updateTranslationValues("munon_t", rState.x(), rState.y(), rState.z(), "world");
+	}
+	else
+	{
+		qDebug() << __FUNCTION__ << "go through else";
+		InnerModelNode *nodeParent = innerModel->getNode("robot");
+		InnerModelTransform *node = innerModel->newTransform("munon_t", "static", nodeParent, 0, 0, 0, 0, 0, 0, 0);
+		InnerModelMesh *mesh = innerModel->newMesh("munonMesh", node, "/home/robocomp/robocomp/files/osgModels/basics/cube.3ds", 1, 0.04, 0.04, 0.04, 0, 0, 0, 0, 0, 0, true);
+		nodeParent->addChild(node);
+		innerModel->updateTransformValues("munon",rState.x(), rState.y(), rState.z(), 0, 0, 0, "robot");
+	}
+	
+	for (uint32_t out=0; out<restNodes.size(); out++)
+	{
+		//qDebug() << restNodes[out];
+		if (innerModel->collide("munonMesh", restNodes[out]))
+		{
+			qDebug() << "collide with " << restNodes[out];
+			return false;
+		}
+	}
 	return true;
 }
 

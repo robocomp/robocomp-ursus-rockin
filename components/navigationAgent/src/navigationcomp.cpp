@@ -76,12 +76,13 @@
 #include "specificworker.h"
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
-#include <I.h>
-#include <I.h>
+#include <agmcommonbehaviorI.h>
+#include <agmexecutivetopicI.h>
 
 // Includes for remote proxy example
 // #include <Remote.h>
 #include <ui_guiDlg.h>
+#include <AGMAgent.h>
 
 
 // User includes here
@@ -89,6 +90,9 @@
 // Namespaces
 using namespace std;
 using namespace RoboCompCommonBehavior;
+using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompAGMExecutive;
+using namespace RoboCompAGMAgent;
 
 
 class navigationComp : public RoboComp::Application
@@ -121,7 +125,7 @@ int navigationComp::run(int argc, char* argv[])
 
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
-	
+
 
 	string proxy;
 
@@ -148,17 +152,40 @@ int navigationComp::run(int argc, char* argv[])
 	//}
 	//rInfo("RemoteProxy initialized Ok!");
 	// 	// Now you can use remote server proxy (remotecomponent_proxy) as local object
-	
+
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
-	
-	
+	IceStorm::TopicPrx agmagenttopic_topic;
+	while (!agmagenttopic_topic)
+	{
+		try
+		{
+			agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic");
+		}
+		catch (const IceStorm::NoSuchTopic&)
+		{
+			try
+			{
+				agmagenttopic_topic = topicManager->create("AGMAgentTopic");
+			}
+			catch (const IceStorm::TopicExists&)
+			{
+				printf("Another client created the topic or no topic?\n");
+				usleep(1000000);
+			}
+		}
+    }
+	Ice::ObjectPrx agmagenttopic_pub = agmagenttopic_topic->getPublisher()->ice_oneway();
+	AGMAgentTopicPrx agmagenttopic = AGMAgentTopicPrx::uncheckedCast(agmagenttopic_pub);
+	mprx["AGMAgentTopicPub"] = (::IceProxy::Ice::Object*)(&agmagenttopic);
+
+
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
 	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor,SIGNAL(kill()),&a,SLOT(quit()));
 	QObject::connect(worker,SIGNAL(kill()),&a,SLOT(quit()));
 	monitor->start();
-	
+
 	if ( !monitor->isRunning() )
 		return status;
 	try
@@ -169,11 +196,32 @@ int navigationComp::run(int argc, char* argv[])
 		adapterCommonBehavior->add(commonbehaviorI, communicator()->stringToIdentity("commonbehavior"));
 		adapterCommonBehavior->activate();
 		// Server adapter creation and publication
-		Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Comp");
-		I * = new I(worker);
-		adapter->add(, communicator()->stringToIdentity(""));
+    	Ice::ObjectAdapterPtr AGMExecutiveTopic_adapter = communicator()->createObjectAdapter("AGMExecutiveTopicTopic");
+    	AGMExecutiveTopicPtr agmexecutivetopicI_ = new AGMExecutiveTopicI(worker);
+    	Ice::ObjectPrx agmexecutivetopic_proxy = AGMExecutiveTopic_adapter->addWithUUID(agmexecutivetopicI_)->ice_oneway();
+    	IceStorm::TopicPrx agmexecutivetopic_topic;
+    	if(!agmexecutivetopic_topic){
+	    	try {
+	    		agmexecutivetopic_topic = topicManager->create("AGMExecutiveTopic");
+	    	}
+	    	catch (const IceStorm::TopicExists&) {
+	    	  	//Another client created the topic
+	    	  	try{
+	       			agmexecutivetopic_topic = topicManager->retrieve("AGMExecutiveTopic");
+	    	  	}catch(const IceStorm::NoSuchTopic&){
+	    	  	  	//Error. Topic does not exist
+				}
+	    	}
+	    	IceStorm::QoS qos;
+	      	agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic_proxy);
+    	}
+    	AGMExecutiveTopic_adapter->activate();
+    	// Server adapter creation and publication
+		Ice::ObjectAdapterPtr adapterAGMCommonBehavior = communicator()->createObjectAdapter("AGMCommonBehaviorComp");
+		AGMCommonBehaviorI *agmcommonbehavior = new AGMCommonBehaviorI(worker);
+		adapterAGMCommonBehavior->add(agmcommonbehavior, communicator()->stringToIdentity("agmcommonbehavior"));
 
-		adapter->activate();
+		adapterAGMCommonBehavior->activate();
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )
