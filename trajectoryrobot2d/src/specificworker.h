@@ -42,31 +42,34 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx, QWidget *parent = 0);
-	~SpecificWorker();
-	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	void go(const TargetPose& target);
-	void setHeadingTo(const TargetPose& target);
-	RoboCompTrajectoryRobot2D::NavState getState();
-	void stop();
-	//void sendData(const RoboCompJoystickAdapter::TData& data);
-	void changeTarget(const TargetPose& target);
+			SpecificWorker		(MapPrx& mprx, QWidget *parent = 0);
+			~SpecificWorker		();
+			
+	bool 									setParams		(RoboCompCommonBehavior::ParameterList params);
+	void 									go				(const TargetPose& target);
+	void 									setHeadingTo	(const TargetPose& target);
+	void 									changeTarget	(const TargetPose& target);
+	void 									stop			();
+	RoboCompTrajectoryRobot2D::NavState 	getState		();
 	
+	//void sendData(const RoboCompJoystickAdapter::TData& data);
 	
 public slots:
- 	void compute(); 	
-	void computeLuis( );
+ 	void 	compute		(); 	
+	void 	computeLuis	();
 	
 private:
 	
-	CurrentTarget currentTarget;
-	RoboCompDifferentialRobot::TBaseState bState;
-	TLaserData datos;
-	RoboCompCommonBehavior::ParameterList params;
+	RoboCompDifferentialRobot::TBaseState 	bState;
+	RoboCompTrajectoryRobot2D::NavState 	compState;
+	RoboCompCommonBehavior::ParameterList 	params;
+	RoboCompLaser::TLaserData 				laserData;
+	RoboCompLaser::TLaserData 				datos;
+
+	CurrentTarget 							currentTarget;
+	
 	InnerModel *innerModel, *innerClon;
-	RoboCompLaser::TLaserData laserData;
 	QVec target;
-	RoboCompTrajectoryRobot2D::NavState compState;
 	QTime taskReloj;
  	
 	QVec P;
