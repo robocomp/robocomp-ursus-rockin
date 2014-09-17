@@ -61,10 +61,11 @@ private:
 
 
 
-	void go(const QVec &t, const QVec r=QVec::vec3(0,0,0));
+	void go(float x, float z, float alpha=0, bool rot=false);
+	void updateRobotsLocation();
+	void actionExecution();
 
-
-
+	
 
 private:
 	std::string action;
@@ -72,7 +73,14 @@ private:
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
 
+	RoboCompTrajectoryRobot2D::NavState planningState;
+	
+	
+	std::map<int32_t, QPolygonF> roomsPolygons;
+	std::map<int32_t, QPolygonF> extractPolygonsFromModel(AGMModel::SPtr &worldModel);
+
 };
 
 #endif
+
 

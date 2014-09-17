@@ -183,15 +183,22 @@ DifferentialRobotPrx differentialrobot_proxy;
 	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 	IceStorm::TopicPrx agmagenttopic_topic;
-    while(!agmagenttopic_topic){
-		try {
-			agmagenttopic_topic = topicManager->create(communicator()->getProperties()->getProperty("AGMAgentTopic"));
-		}catch (const IceStorm::TopicExists&){
-		  	// Another client created the topic.
-			try{
-				agmagenttopic_topic = topicManager->retrieve(communicator()->getProperties()->getProperty("AGMAgentTopic"));
-			}catch (const IceStorm::NoSuchTopic&){
-				//Error. Topic does not exist.	
+ 	while (!agmagenttopic_topic)
+	{
+		try
+		{
+			agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic");
+		}
+		catch (const IceStorm::NoSuchTopic&)
+		{
+			try
+			{
+				agmagenttopic_topic = topicManager->create("AGMAgentTopic");
+			}
+			catch (const IceStorm::TopicExists&)
+			{
+				printf("Another client created the topic or no topic?\n");
+				usleep(1000000);
 			}
 		}
 	}

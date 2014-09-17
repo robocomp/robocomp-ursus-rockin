@@ -26,7 +26,7 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
-
+	
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 }
@@ -41,12 +41,19 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-	printf("%s\n", action.c_str());
+	//  RELOCALIZATION
+	//
+	// to be done
+	//
 
-	if (action == "changeroom")
-	{
-		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
-	}
+
+	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
+	//
+	updateRobotsLocation();
+
+	// ACTION EXECUTION
+	//
+	actionExecution();
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -142,6 +149,8 @@ void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modificat
 {
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+	if (roomsPolygons.size()==0)
+		extractPolygonsFromModel(worldModel);
 	mutex->unlock();
 }
 
@@ -207,31 +216,123 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	}
 }
 
-void SpecificWorker::go(const QVec& t, const QVec r)
+void SpecificWorker::go(float x, float z, float alpha, bool rot)
 {
 	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.x = t.x();
-	tp.z = t.z();
+	tp.x = x;
+	tp.z = z;
 	tp.y = 0;
-	if (r.size() == 3)
+	tp.rx = 0;
+	tp.ry = 0;
+	tp.rz = 0;
+	if (rot)
 	{
-		tp.rx = r.x();
-		tp.ry = r.y();
-		tp.rz = r.z();
+		tp.ry = alpha;
 		tp.onlyRot = true;
 	}
 	else
 	{
 		tp.onlyRot = false;
 	}
-	target = t;
 	try
 	{
 		trajectoryrobot2d_proxy->go(tp);
-		reloj.restart();
 	}
 	catch(const Ice::Exception &ex)
 	{
 		std::cout << ex << std::endl;
 	}
 }
+
+
+void SpecificWorker::actionExecution()
+{
+	static float lastX = std::numeric_limits<float>::quiet_NaN();
+	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+
+	try
+	{
+		planningState = trajectoryrobot2d_proxy->getState();
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
+	}
+	if (action == "changeroom")
+	{
+		printf("%s\n", action.c_str());
+		AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
+		const float x = str2float(goalRoom->getAttribute("x"));
+		const float z = str2float(goalRoom->getAttribute("z"));
+
+		bool proceed = true;
+		if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+		{
+			if (lastX == x and lastZ == z)
+				proceed = false;
+		}
+
+		if (proceed)
+		{
+			printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
+			go((lastX=x), (lastZ=z));
+		}
+		else
+		{
+			printf("%s\n", planningState.state.c_str());
+		}
+	}
+}
+
+void SpecificWorker::updateRobotsLocation()
+{
+	
+}
+
+
+std::map<int32_t, QPolygonF> SpecificWorker::extractPolygonsFromModel(AGMModel::SPtr &worldModel)
+{
+	std::map<int32_t, QPolygonF> ret;
+	
+	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	{
+		const AGMModelSymbol::SPtr &symbol = *symbol_it;
+		if (symbol->symbolType == "object")
+		{
+			for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+			{
+				AGMModelEdge edge = *edge_it;
+				if (edge.linking == "room")
+				{
+					const QString polygonString = QString::fromStdString(symbol->getAttribute("polygon"));
+					const QStringList coords = polygonString.split(";");
+					if (coords.size() < 3)
+					{
+						qFatal("%s %d", __FILE__, __LINE__);
+					}
+					
+					QVector<QPointF> points;
+					for (int32_t ci=0; ci<coords.size(); ci++)
+					{
+						const QString &pointStr = coords[ci];
+						if (pointStr.size() < 5) qFatal("%s %d", __FILE__, __LINE__);
+						const QStringList coords2 = polygonString.split(",");
+						if (coords2.size() < 2) qFatal("%s %d", __FILE__, __LINE__);
+						QString a = coords2[0];
+						QString b = coords2[1];
+						a.remove(0,1);
+						float x = a.toFloat();
+						float z = b.toFloat();
+						points.push_back(QPointF(x, z));
+					}
+					if (points.size() < 3) qFatal("%s %d", __FILE__, __LINE__);
+					ret[symbol->identifier] = QPolygonF(points);
+				}
+			}
+		}
+	}
+	
+	return ret;
+}
+
+
