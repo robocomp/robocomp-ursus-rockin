@@ -21,6 +21,9 @@
 
 #include <genericworker.h>
 
+#include <innermodel/innermodel.h>
+#include <agm.h>
+
 /**
        \brief
        @author authorname
@@ -30,7 +33,7 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx);	
+	SpecificWorker(MapPrx& mprx);
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	bool activateAgent(const ParameterMap& prs);
@@ -46,7 +49,56 @@ public:
 
 
 public slots:
- 	void compute(); 	
+ 	void compute();
+
+private:
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	bool active;
+	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+
+
+
+
+
+
+
+
+
+
+
+private:
+	std::string action;
+	ParameterMap params;
+	AGMModel::SPtr worldModel;
+	InnerModel *innerModel;
+
 };
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

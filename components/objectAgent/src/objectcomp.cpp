@@ -125,7 +125,7 @@ int objectComp::run(int argc, char* argv[])
 
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
-	
+
 
 	string proxy;
 
@@ -152,33 +152,40 @@ int objectComp::run(int argc, char* argv[])
 	//}
 	//rInfo("RemoteProxy initialized Ok!");
 	// 	// Now you can use remote server proxy (remotecomponent_proxy) as local object
-	
+
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 	IceStorm::TopicPrx agmagenttopic_topic;
-    while(!agmagenttopic_topic){
-		try {
-			agmagenttopic_topic = topicManager->create(communicator()->getProperties()->getProperty("AGMAgentTopic"));
-		}catch (const IceStorm::TopicExists&){
-		  	// Another client created the topic.
-			try{
-				agmagenttopic_topic = topicManager->retrieve(communicator()->getProperties()->getProperty("AGMAgentTopic"));
-			}catch (const IceStorm::NoSuchTopic&){
-				//Error. Topic does not exist.	
+	while (!agmagenttopic_topic)
+	{
+		try
+		{
+			agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic");
+		}
+		catch (const IceStorm::NoSuchTopic&)
+		{
+			try
+			{
+				agmagenttopic_topic = topicManager->create("AGMAgentTopic");
+			}
+			catch (const IceStorm::TopicExists&)
+			{
+				printf("Another client created the topic or no topic?\n");
+				usleep(1000000);
 			}
 		}
-	}
+    }
 	Ice::ObjectPrx agmagenttopic_pub = agmagenttopic_topic->getPublisher()->ice_oneway();
 	AGMAgentTopicPrx agmagenttopic = AGMAgentTopicPrx::uncheckedCast(agmagenttopic_pub);
 	mprx["AGMAgentTopicPub"] = (::IceProxy::Ice::Object*)(&agmagenttopic);
-	
-	
+
+
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
 	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor,SIGNAL(kill()),&a,SLOT(quit()));
 	QObject::connect(worker,SIGNAL(kill()),&a,SLOT(quit()));
 	monitor->start();
-	
+
 	if ( !monitor->isRunning() )
 		return status;
 	try

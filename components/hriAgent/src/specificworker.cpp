@@ -16,14 +16,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
  #include "specificworker.h"
 
 /**
 * \brief Default constructor
 */
 
-SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)	
+SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 }
 
@@ -41,6 +41,28 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
+
+	try
+	{
+		RoboCompCommonBehavior::Parameter par = params.at("HRI.InnerModel") ;
+		if( QFile(QString::fromStdString(par.value)).exists() == true)
+		{
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+			innerModel = new InnerModel(par.value);
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+		}
+		else
+		{
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+			qFatal("Exiting now.");
+		}
+	}
+	catch(std::exception e)
+	{
+		qFatal("Error reading config params");
+	}
+
+
 	timer.start(Period);
 	return true;
 }

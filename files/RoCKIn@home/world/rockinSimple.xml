@@ -3,19 +3,18 @@
 <innerModel>
 	<transform id="world">
 
-		<transform id="worldaxis"> 
+<!--		<transform id="worldaxis">
 			<plane id="worldx" px="250" nx="1" size="5,5,500" repeat="1" texture="#ff0000" />
 			<plane id="worldy" py="250" nx="1" size="5,500,5" repeat="1" texture="#00ff00" />
 			<plane id="worldz" pz="250" nx="1" size="500,5,5" repeat="1" texture="#0000ff" />
-		</transform>	
-		
+		</transform>
+-->
 		<!--<transform id="b_t" tx="8500" tz="-2300" ty="0">
 			<mesh id="b" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Alicudi.3ds" rx="1.57" rz="-1.57" scale="1000,1000,1000"  />
 		</transform>-->
 
-		
-		<transform id="floor">
 
+		<transform id="floor">
 			<!-- Left wall of the hallway -->
 			<transform id="T_Wall_0" tx="100" tz="-1400">
 				<plane id="P_Wall_0" py="1500" nx="1" size="2800,3000,200" texture="#666672" />
@@ -24,10 +23,10 @@
 			<transform id="T_Door_0" tx="700" tz="-100">
 				<plane id="P_Door_0" py="2700" nz="1" size="1000,600,200" texture="#666672" />
 				<plane id="P_Door_0d" py="1200" nz="1" size="1000,-2400,100" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/door_entree.png" />
-				<transform id="door_camera" tz="200" ty="2550" rx="1"> 
+				<transform id="door_camera" tz="200" ty="2550" rx="1">
 					<plane id="door_camera_plane" nz="1" pz="0" size="80,60" repeat="1" texture="#0000ff" />
 				<!--	<rgbd id="door_rgbd" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />-->
-				</transform>	
+				</transform>
 			</transform>
 			<!-- Large wall at the top -->
 			<transform id="T_Wall_1" tx="5500" tz="-100">
@@ -142,9 +141,9 @@
 			<transform id="T_Wall_19" tx="2200" tz="-10900">
 				<plane id="P_Wall_19" py="750" nz="1" size="4400,1500,200" texture="#666672" />
 			</transform>
-			
+
 			<transform id="floor_meshes_y" ty="-8">
-				<plane id="nope" ny="1" px="4500" pz="-4500" size="18000,18000,6" texture="#443333" />
+				<plane id="nope" ny="1" px="4500" pz="-4500" size="15000,15000,6" texture="#443333" />
 				<transform id="T_Floor_Bathroom" tx="3600" tz="-1400">
 					<plane id="P_Floor_Bathroom_0" ny="1" size="3400,2600,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/bathroom.png" />
 				</transform>
@@ -155,11 +154,11 @@
 					<plane id="P_Floor_LivingRoom_0" px="2700" pz="-3300" ny="1" size="5200,1200,20" texture="living1.png" />
 					<plane id="P_Floor_LivingRoom_1" px="2200" pz="-6300" ny="1" size="4200,4800,20" texture="living2.png" />
 				</transform>
-				
+
 				<transform id="T_Floor_KitchenDining" tx="5900" tz="-6900">
 					<plane id="P_Floor_KitchenDining_0" ny="1" size="3200,6000,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/kitchendining.png" />
 				</transform>
-				
+
 				<transform id="T_Floor_Bedroom" tx="7500" tz="-2000">
 					<plane id="P_Floor_Bedroom_0" ny="1" size="4400,3800,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/bedroom.png" />
 				</transform>
@@ -167,7 +166,7 @@
 					<plane id="P_Floor_Patio_0" ny="1" size="4200,2200,20" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/grass.png" />
 				</transform>
 			</transform>
-			
+
 			<transform id="mesanoche1_t" tx="9400" tz="-1200">
 				<mesh id="mesanoche1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/mesa_centro_larga.osg" rx="1.57" scale="29,58,200"  />
 			</transform>
@@ -207,22 +206,22 @@
 				<mesh id="sofa1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="-1.57" scale="20,20,20"  />
 			</transform>
 			--><transform id="sofaAA_t" tx="3100" tz="-6300" >
-				<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="800,600.5,600"  />
+				<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="8,6.5,6"  />
 			</transform>
-			
+
 		</transform>
-		
-		
+
+
 		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
 			<differentialrobot id="robot" port="10004" >
 
- 				<translation id="laserPose" tx="0" ty="240" tz="100"> 
- 					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> 
- 					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" /> 
+ 				<translation id="laserPose" tx="0" ty="240" tz="100">
+ 					<laser id="laser" port="10003" measures="50" min="100" max="4000" angle="3" ifconfig="10000" />
+<!--  					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" /> -->
  				</translation>
-						
-				
+
+
 				<transform  id="base_trans" >
 					<joint id="base" port="20000" axis="y" home="0">
 						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.ive"  tx="0" ty="10" tz="0" scale="1000"  />
@@ -275,7 +274,7 @@
 													-->
 													<transform id="nose" tz="90" ty="-20">
 													</transform>
-													
+
 													<transform id="sensor_transform1" rx="1.5707963267948966">
 	<!--													<transform id="axesh4" >
 															<plane id="xh4" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -283,14 +282,14 @@
 															<plane id="zh4" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />
 														</transform>
 	-->
-														
+
 														<!--<transform id="axestablet" >
 															<plane id="xtablet" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 															<plane id="ytablet" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
 															<plane id="ztablet" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />
 														</transform>-->
 
-															
+
 															<transform id="rgbd_transform" ty="90" tz="20">
 																<plane id="sensor" nz="1" size="100,30" repeat="1" texture="#0000ff" />
 																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" />
@@ -455,8 +454,8 @@
 																						<plane id="axisy" py="50" nx="1" size="1,100,1" repeat="1" texture="#005500" />
 																						<plane id="axisz" pz="50" nx="1" size="100,1,1" repeat="1" texture="#000055" />
 																				</transform>-->
-																		
-																				<transform id= "munon_t" tz = "100">		
+
+																				<transform id= "munon_t" tz = "100">
 																						<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="20,20,20" />
 																				</transform>
 
@@ -594,7 +593,7 @@
 
 																					<plane id="handleftMesh1" pz="100" ny="1" size="170,170,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-3.png" />
 
-																					
+
 																					<transform id="grabPositionHandL_pre" tz="0" rx="3.14159265359" >
 																					<transform id="grabPositionHandL" tz="-100" ty="-2.5" >
 																						<plane id="axisxl" px="50" nx="1" size="1,1,100" repeat="1" texture="#550000" />
@@ -791,21 +790,12 @@
 				</transform>
 			</transform>
 
-		
--->		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+-->
+
+
+
 	</transform>
-	
+
 </innerModel>
 
