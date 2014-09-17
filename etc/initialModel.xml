@@ -6,8 +6,8 @@
 	##
 	-->
 	<symbol id="3" type="object">
-		<attribute key="x" value="2700" />
-		<attribute key="z" value="-4000" />
+		<attribute key="x" value="800" />
+		<attribute key="z" value="-1800" />
 		<attribute key="polygon" value="(0,0);(1800,0);(1800,-2600);(0,-2600)" />
 	</symbol>
 	<symbol id="4" type="roomSt" />
@@ -61,7 +61,7 @@
 	<link src="11" dst="5" label="transitable" />
 	<link src="5" dst="11" label="transitable" />
 
-	
+
 	<!--
    ##
    ## R O B O T
@@ -136,9 +136,9 @@
 	</symbol>
 	<link src="21" dst="5" label="in" />
 
-	
-	
 
-		
+
+
+
 
 </AGMModel>
