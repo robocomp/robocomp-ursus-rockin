@@ -940,8 +940,8 @@ bool PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx inner
 {
 	qDebug() << __FUNCTION__;
 	
-	if( graphDirtyBit == false) 
-		return false;
+// 	if( graphDirtyBit == false) 
+// 		return false;
 	
 	RoboCompInnerModelManager::Pose3D pose;
 	pose.rx = pose.ry = pose.z = 0.;pose.x = pose.y = pose.z = 0.;
@@ -995,7 +995,7 @@ bool PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx inner
 		{ std::cout << ex.text  << std::endl;}	
 		i++;
 	}
-	graphDirtyBit = false;
+	//graphDirtyBit = false;
 	return true;
 }
 
