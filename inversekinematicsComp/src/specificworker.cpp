@@ -434,7 +434,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 	qDebug() << __FUNCTION__ << "Plan length: " << planner->getPath().size();
 	QList<QVec> path = planner->getPath();
 	qDebug() << path;
-	draw(innermodelmanager_proxy,path);
+	//draw(innermodelmanager_proxy,path);
 	//qFatal("fary");
 	for(int i=0; i<path.size(); ++i)
 	{
@@ -693,7 +693,7 @@ void SpecificWorker::goHome(const string& part)
 			RoboCompJointMotor::MotorGoalPosition nodo;
 			nodo.name = lmotors.at(i).toStdString();
 			nodo.position = innerModel->getJoint(lmotors.at(i))->home;
-			nodo.maxSpeed = 5; //radianes por segundo
+			nodo.maxSpeed = 1; //radianes por segundo
 			mutex->lock();
 				proxy->setPosition(nodo);
 			mutex->unlock();
