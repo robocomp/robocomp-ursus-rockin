@@ -20,7 +20,9 @@
 #define SPECIFICWORKER_H
 
 #include <genericworker.h>
+
 #include <innermodel/innermodel.h>
+#include <agm.h>
 
 /**
        \brief
@@ -50,6 +52,24 @@ public slots:
  	void compute();
 
 private:
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	bool active;
+	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+
+
+
+
+
+
+
+
+
+
+
+private:
+	std::string action;
+	ParameterMap params;
+	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
 };
 

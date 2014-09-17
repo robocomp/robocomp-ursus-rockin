@@ -457,7 +457,7 @@ void SpecificWorker::go(const QVec& t, const QVec &r)
 	catch(const Ice::Exception &ex)
 	{
 		std::cout << ex << std::endl;
-	}	
+	}
 }
 
 void SpecificWorker::goButton()

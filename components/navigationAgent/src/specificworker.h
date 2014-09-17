@@ -61,7 +61,7 @@ private:
 
 
 
-
+	void go(const QVec &t, const QVec r=QVec::vec3(0,0,0));
 
 
 
@@ -75,30 +75,4 @@ private:
 };
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

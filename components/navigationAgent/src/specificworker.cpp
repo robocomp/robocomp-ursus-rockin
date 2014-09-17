@@ -199,10 +199,39 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		//AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "april");
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigation");
 	}
 	catch(...)
 	{
 		exit(1);
+	}
+}
+
+void SpecificWorker::go(const QVec& t, const QVec r)
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.x = t.x();
+	tp.z = t.z();
+	tp.y = 0;
+	if (r.size() == 3)
+	{
+		tp.rx = r.x();
+		tp.ry = r.y();
+		tp.rz = r.z();
+		tp.onlyRot = true;
+	}
+	else
+	{
+		tp.onlyRot = false;
+	}
+	target = t;
+	try
+	{
+		trajectoryrobot2d_proxy->go(tp);
+		reloj.restart();
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
 	}
 }
