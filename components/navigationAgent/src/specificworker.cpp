@@ -306,7 +306,6 @@ void SpecificWorker::updateRobotsLocation()
 	// Get current location according to the model, if the location is not set yet, there's nothing to do either
 	const int32_t currentLocation = getIdentifierOfRobotsLocation(worldModel);
 	if (currentLocation == -1) return;
-	printf("robot was in %d\n", currentLocation);
 
 	// Compute the robot's location according to the odometry and the set of polygons
 	// If we can't find the room where the robot is, we assume it didn't change, so there's nothing else to do
@@ -315,7 +314,6 @@ void SpecificWorker::updateRobotsLocation()
 	{
 		if (kv.second.containsPoint(QPointF(bState.x,  bState.z), Qt::OddEvenFill))
 		{
-			printf("SI estoy en %d\n", kv.first);
 			newLocation = kv.first;
 			break;
 		}
@@ -326,7 +324,6 @@ void SpecificWorker::updateRobotsLocation()
 	// propose the change to the executive
 	if (newLocation != currentLocation and newLocation != -1)
 	{
-		printf("proposal!\n");
 		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		setIdentifierOfRobotsLocation(newModel, newLocation);
 		AGMModelPrinter::printWorld(newModel);
