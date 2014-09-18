@@ -173,7 +173,7 @@ int hriComp::run(int argc, char* argv[])
 				usleep(1000000);
 			}
 		}
-    }
+	}
 	Ice::ObjectPrx agmagenttopic_pub = agmagenttopic_topic->getPublisher()->ice_oneway();
 	AGMAgentTopicPrx agmagenttopic = AGMAgentTopicPrx::uncheckedCast(agmagenttopic_pub);
 	mprx["AGMAgentTopicPub"] = (::IceProxy::Ice::Object*)(&agmagenttopic);

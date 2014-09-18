@@ -6,52 +6,51 @@
 	##
 	-->
 	<symbol id="3" type="object">
-		<attribute key="x" value="-2000" />
-		<attribute key="z" value="-2000" />
+		<attribute key="x" value="800" />
+		<attribute key="z" value="-1800" />
+		<attribute key="polygon" value="(0,0);(1800,0);(1800,-2600);(0,-2600)" />
 	</symbol>
 	<symbol id="4" type="roomSt" />
 	<link src="3" dst="4" label="room" />
 	<link src="3" dst="4" label="isHall" />
 
 	<symbol id="5" type="object">
-		<attribute key="x" value="-2000" />
-		<attribute key="z" value="-2000" />
+		<attribute key="x" value="666" />
+		<attribute key="z" value="-7861" />
+		<attribute key="polygon" value="(0,-2600);(4200,-2600);(4200,-8700);(0,-8700)" />
 	</symbol>
 	<symbol id="6" type="roomSt" />
 	<link src="5" dst="6" label="room" />
 	<link src="5" dst="6" label="isLivingRoom" />
 
 	<symbol id="7" type="object">
-		<attribute key="x" value="-2000" />
-		<attribute key="z" value="-2000" />
+		<attribute key="x" value="7000" />
+		<attribute key="z" value="-1500" />
+		<attribute key="polygon" value="(5400,0);(10000,0);(10000,-3800);(5400,-3800)" />
 	</symbol>
 	<symbol id="8" type="roomSt" />
 	<link src="7" dst="8" label="room" />
-	<link src="7" dst="8" label="isBedobject" />
+	<link src="7" dst="8" label="isBedroom" />
 
 	<symbol id="9" type="object">
-		<attribute key="x" value="-2000" />
-		<attribute key="z" value="-2000" />
+		<attribute key="x" value="6000" />
+		<attribute key="z" value="-5900" />
+		<attribute key="polygon" value="(4200,-3800);(7600,-3800);(7600,-6800);(4200,-6800)" />
 	</symbol>
 	<symbol id="10" type="roomSt" />
 	<link src="9" dst="10" label="room" />
 	<link src="9" dst="10" label="isKitchen" />
 
 	<symbol id="11" type="object">
-		<attribute key="x" value="-2000" />
-		<attribute key="z" value="-2000" />
+		<attribute key="x" value="6000" />
+		<attribute key="z" value="-9100" />
+		<attribute key="polygon" value="(4200,-6800);(7600,-6800);(7600,-10000);(4200,-10000)" />
 	</symbol>
 	<symbol id="12" type="roomSt" />
 	<link src="11" dst="12" label="room" />
 	<link src="11" dst="12" label="isDiningRoom" />
 
-	<symbol id="13" type="object">
-		<attribute key="x" value="-2000" />
-		<attribute key="z" value="-2000" />
-	</symbol>
-	<symbol id="14" type="roomSt" />
-	<link src="13" dst="14" label="room" />
-	<link src="13" dst="14" label="isPatio" />
+
 
 	<link src="3" dst="5" label="transitable" />
 	<link src="5" dst="3" label="transitable" />
@@ -61,10 +60,8 @@
 	<link src="5" dst="9" label="transitable" />
 	<link src="11" dst="5" label="transitable" />
 	<link src="5" dst="11" label="transitable" />
-	<link src="11" dst="13" label="transitable" />
-	<link src="13" dst="11" label="transitable" />
 
-	
+
 	<!--
    ##
    ## R O B O T
@@ -139,9 +136,9 @@
 	</symbol>
 	<link src="21" dst="5" label="in" />
 
-	
-	
 
-		
+
+
+
 
 </AGMModel>

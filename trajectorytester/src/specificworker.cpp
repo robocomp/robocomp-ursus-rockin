@@ -58,7 +58,10 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	state = State::IDLE;
 	tag11 = false;
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
+	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest2.xml");
+	
+	
 	try 
 	{	
 		bodyinversekinematics_proxy->begin_goHome("HEAD");
@@ -120,6 +123,16 @@ void SpecificWorker::compute( )
 	if( tag11 ) 
 		tag1LineEdit->setText("Id: 11");	
 	doStateMachine();
+	
+	if( tag10 )
+	{
+		innerModel->transform("world","errorMarca2Pruebas").print("marca through arm");
+		tag10Pose.print("tag10pose");
+		QVec p = tag10Pose.subVector(0,2);
+		innerModel->transform("world",p,"rgbd_transform").print("marca through camera");
+		tag10 = false;
+		
+	}
 
 }
 
@@ -457,7 +470,7 @@ void SpecificWorker::go(const QVec& t, const QVec &r)
 	catch(const Ice::Exception &ex)
 	{
 		std::cout << ex << std::endl;
-	}	
+	}
 }
 
 void SpecificWorker::goButton()
@@ -565,6 +578,17 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 			//qDebug() << __FUNCTION__ << "God damn got it!";
 			tag11 = true;
 			tag = i;
+			//qDebug() << "tag dist" << QVec::vec3(tag.tx,tag.ty,tag.tz).norm2() << (innerModel->transform("world", "rgbd_transform") - innerModel->transform("world","mugTag")).norm2();
+		}
+		if( i.id == 10) 
+		{
+			//qDebug() << __FUNCTION__ << "God damn got it!";
+			tag10 = true;
+			//tag = i;
+			tag10Pose.resize(6);
+			tag10Pose[0] = tag.tx;tag10Pose[1] = tag.ty;tag10Pose[2] = tag.tz;
+			tag10Pose[3] = tag.rx;tag10Pose[4] = tag.ry;tag10Pose[5] = tag.rz;
+				
 			//qDebug() << "tag dist" << QVec::vec3(tag.tx,tag.ty,tag.tz).norm2() << (innerModel->transform("world", "rgbd_transform") - innerModel->transform("world","mugTag")).norm2();
 		}
 	}

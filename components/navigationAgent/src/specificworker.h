@@ -61,9 +61,11 @@ private:
 
 
 
-
-
-
+	void go(float x, float z, float alpha=0, bool rot=false);
+	void updateRobotsLocation();
+	void actionExecution();
+	int32_t getIdentifierOfRobotsLocation(AGMModel::SPtr &worldModel);
+	void setIdentifierOfRobotsLocation(AGMModel::SPtr &worldModel, int32_t identifier);
 
 
 private:
@@ -72,33 +74,14 @@ private:
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
 
+	RoboCompTrajectoryRobot2D::NavState planningState;
+
+
+	std::map<int32_t, QPolygonF> roomsPolygons;
+	std::map<int32_t, QPolygonF> extractPolygonsFromModel(AGMModel::SPtr &worldModel);
+
 };
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

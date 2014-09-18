@@ -76,7 +76,8 @@ private:
 	State state;
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
-	bool tag11;
+	bool tag11, tag10;
+	QVec tag10Pose;
 	RoboCompAprilTags::tag tag;
 	InnerModel *innerModel;
 	QStringList listaMotores;

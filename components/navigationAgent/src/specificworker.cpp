@@ -41,12 +41,19 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-	printf("%s\n", action.c_str());
+	//  RELOCALIZATION
+	//
+	// to be done
+	//
 
-	if (action == "changeroom")
-	{
-		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
-	}
+
+	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
+	//
+	updateRobotsLocation();
+
+	// ACTION EXECUTION
+	//
+	actionExecution();
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -142,6 +149,8 @@ void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modificat
 {
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+	if (roomsPolygons.size()==0)
+		roomsPolygons = extractPolygonsFromModel(worldModel);
 	mutex->unlock();
 }
 
@@ -199,10 +208,234 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		//AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "april");
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigation");
 	}
 	catch(...)
 	{
 		exit(1);
 	}
+}
+
+void SpecificWorker::go(float x, float z, float alpha, bool rot)
+{
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.x = x;
+	tp.z = z;
+	tp.y = 0;
+	tp.rx = 0;
+	tp.ry = 0;
+	tp.rz = 0;
+	if (rot)
+	{
+		tp.ry = alpha;
+		tp.onlyRot = true;
+	}
+	else
+	{
+		tp.onlyRot = false;
+	}
+	try
+	{
+		trajectoryrobot2d_proxy->go(tp);
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
+}
+
+
+void SpecificWorker::actionExecution()
+{
+	static float lastX = std::numeric_limits<float>::quiet_NaN();
+	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+
+	try
+	{
+		planningState = trajectoryrobot2d_proxy->getState();
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
+	}
+	if (action == "changeroom")
+	{
+		printf("%s\n", action.c_str());
+		AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
+		const float x = str2float(goalRoom->getAttribute("x"));
+		const float z = str2float(goalRoom->getAttribute("z"));
+
+		bool proceed = true;
+		if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+		{
+			if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+				proceed = false;
+			else
+				printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+		}
+		else
+		{
+			printf("proceed because it's stoped\n");
+		}
+
+		if (proceed)
+		{
+			lastX = x;
+			lastZ = z;
+			printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
+			go(x, z);
+		}
+		else
+		{
+			printf("%s\n", planningState.state.c_str());
+		}
+	}
+}
+
+void SpecificWorker::updateRobotsLocation()
+{
+	// If the polygons are not set yet, there's nothing to do...
+	if (roomsPolygons.size()==0)
+		return;
+
+	// Get odometry. If there's a problem talking to the robot's platform, abort
+	RoboCompDifferentialRobot::TBaseState bState;
+	try { differentialrobot_proxy->getBaseState(bState);}
+	catch(...) { return; }
+
+	// Get current location according to the model, if the location is not set yet, there's nothing to do either
+	const int32_t currentLocation = getIdentifierOfRobotsLocation(worldModel);
+	if (currentLocation == -1) return;
+
+	// Compute the robot's location according to the odometry and the set of polygons
+	// If we can't find the room where the robot is, we assume it didn't change, so there's nothing else to do
+	int32_t newLocation = -1;
+	for (auto &kv : roomsPolygons)
+	{
+		if (kv.second.containsPoint(QPointF(bState.x,  bState.z), Qt::OddEvenFill))
+		{
+			newLocation = kv.first;
+			break;
+		}
+	}
+	if (newLocation == -1) return;
+
+	// If everyting is ok AND the robot changed its location, update the new location in the model and
+	// propose the change to the executive
+	if (newLocation != currentLocation and newLocation != -1)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		setIdentifierOfRobotsLocation(newModel, newLocation);
+		AGMModelPrinter::printWorld(newModel);
+		sendModificationProposal(worldModel, newModel);
+	}
+}
+
+
+std::map<int32_t, QPolygonF> SpecificWorker::extractPolygonsFromModel(AGMModel::SPtr &worldModel)
+{
+	std::map<int32_t, QPolygonF> ret;
+
+	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	{
+		const AGMModelSymbol::SPtr &symbol = *symbol_it;
+		if (symbol->symbolType == "object")
+		{
+			for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+			{
+				AGMModelEdge edge = *edge_it;
+				if (edge.linking == "room")
+				{
+					const QString polygonString = QString::fromStdString(symbol->getAttribute("polygon"));
+					const QStringList coords = polygonString.split(";");
+					if (coords.size() < 3)
+					{
+						qFatal("%s %d", __FILE__, __LINE__);
+					}
+
+					QVector<QPointF> points;
+					for (int32_t ci=0; ci<coords.size(); ci++)
+					{
+						const QString &pointStr = coords[ci];
+						if (pointStr.size() < 5) qFatal("%s %d", __FILE__, __LINE__);
+						const QStringList coords2 = pointStr.split(",");
+						if (coords2.size() < 2) qFatal("%s %d", __FILE__, __LINE__);
+						QString a = coords2[0];
+						QString b = coords2[1];
+						a.remove(0,1);
+						b.remove(b.size()-1,1);
+						float x = a.toFloat();
+						float z = b.toFloat();
+						points.push_back(QPointF(x, z));
+					}
+					if (points.size() < 3) qFatal("%s %d", __FILE__, __LINE__);
+					ret[symbol->identifier] = QPolygonF(points);
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
+int32_t SpecificWorker::getIdentifierOfRobotsLocation(AGMModel::SPtr &worldModel)
+{
+	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	{
+		const AGMModelSymbol::SPtr &symbol = *symbol_it;
+		if (symbol->symbolType == "robot")
+		{
+			for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+			{
+				AGMModelEdge edge = *edge_it;
+				if (edge.linking == "in")
+				{
+					return edge.symbolPair.second;
+				}
+			}
+		}
+	}
+
+	printf("wheres's the robot?\n");
+	return -1;
+}
+
+void SpecificWorker::setIdentifierOfRobotsLocation(AGMModel::SPtr &model, int32_t identifier)
+{
+	bool didSomethin = false;
+	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	{
+		const AGMModelSymbol::SPtr &symbol = *symbol_it;
+		if (symbol->symbolType == "robot")
+		{
+
+			for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+			{
+				if (edge_it->linking == "in")
+				{
+					printf("it was %d\n", edge_it->symbolPair.second);
+				}
+			}
+			for (int32_t edgeIndex=0; edgeIndex<model->numberOfEdges(); edgeIndex++)
+			{
+				if (model->edges[edgeIndex].linking == "in")
+				{
+					if (model->edges[edgeIndex].symbolPair.first == symbol->identifier)
+					{
+						model->edges[edgeIndex].symbolPair.second = identifier;
+						didSomethin = true;
+					}
+				}
+			}
+			for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+			{
+				if (edge_it->linking == "in")
+				{
+					printf("now is %d\n", edge_it->symbolPair.second);
+				}
+			}
+		}
+	}
+	if (not didSomethin)
+		qFatal("couldn't update robot's room in the cog graph");
 }

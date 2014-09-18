@@ -25,6 +25,10 @@
 
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
+	active = false;
+
+	worldModel = AGMModel::SPtr(new AGMModel());
+	worldModel->name = "worldModel";
 }
 
 /**
@@ -144,3 +148,57 @@ void SpecificWorker::modelUpdated(const RoboCompAGMWorldModel::Node& modificatio
 	mutex->unlock();
 }
 
+bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
+{
+	// We didn't reactivate the component
+	reactivated = false;
+
+	// Update parameters
+	params.clear();
+	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
+	{
+		params[it->first] = it->second;
+	}
+
+	try
+	{
+		action = params["action"].value;
+		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
+
+		if (action == "graspobject")
+		{
+			active = true;
+		}
+		else
+		{
+			active = true;
+		}
+	}
+	catch (...)
+	{
+		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
+		return false;
+	}
+
+	// Check if we should reactivate the component
+	if (active)
+	{
+		active = true;
+		reactivated = true;
+	}
+
+	return true;
+}
+
+void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
+{
+	try
+	{
+		//AGMModelPrinter::printWorld(newModel);
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "april");
+	}
+	catch(...)
+	{
+		exit(1);
+	}
+}

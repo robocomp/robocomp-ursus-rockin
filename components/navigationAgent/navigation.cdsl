@@ -2,11 +2,14 @@ import "/robocomp/interfaces/IDSLs/AGMAgent.idsl";
 import "/robocomp/interfaces/IDSLs/AGMExecutive.idsl";
 import "/robocomp/interfaces/IDSLs/AGMCommonBehavior.idsl";
 import "/robocomp/interfaces/IDSLs/AGMWorldModel.idsl";
+import "/robocomp/interfaces/IDSLs/TrajectoryRobot2D.idsl";
+import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
 
 Component navigationComp
 {
 	Communications
 	{
+		requires TrajectoryRobot2D, DifferentialRobot;
 		implements AGMCommonBehavior;
 		publishes AGMAgentTopic;
 		subscribesTo AGMExecutiveTopic;

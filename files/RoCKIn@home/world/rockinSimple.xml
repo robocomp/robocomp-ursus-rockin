@@ -205,13 +205,8 @@
 	 	--><!--	<transform id="sofa1_t" tx="1800" tz="-5200">
 				<mesh id="sofa1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/Armchair N260414.3DS" rx="1.57" rz="-1.57" scale="20,20,20"  />
 			</transform>
-<<<<<<< HEAD
-			-->
-			<transform id="sofaAA_t" tx="3100" tz="-6300" >
-=======
 			--><transform id="sofaAA_t" tx="3100" tz="-6300" >
->>>>>>> a8a32742dd5ba534f30f3e52281e2928c1c07615
-				<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="8,6.5,6"  />
+<!-- 				<mesh id="sofaAA" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/titanik.3DS" rx="1.57" rz="3.14" scale="8,6.5,6"  /> -->
 			</transform>
 
 		</transform>
@@ -803,4 +798,3 @@
 	</transform>
 
 </innerModel>
-
