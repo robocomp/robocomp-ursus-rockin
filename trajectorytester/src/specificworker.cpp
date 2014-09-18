@@ -126,7 +126,9 @@ void SpecificWorker::compute( )
 	
 	if( tag10 )
 	{
-		innerModel->transform("world","errorMarca2Pruebas").print("marca through arm");
+		tag2LineEdit->setText("Id: 10");	
+		innerModel->transform("world","ThandMesh2").print("marca through arm");
+		innerModel->transform("world","handMesh2").print("marca through arm");
 		addTransformInnerModel("marca-segun-head", "rgbd_transform", tag10Pose);
 		innerModel->transform("world", "marca-segun-head").print("marca through head");
 		tag10 = false;
@@ -144,7 +146,6 @@ void SpecificWorker::addTransformInnerModel(const QString &name, const QString &
 			nodeParent->addChild(node);
 		}
 		innerModel->updateTransformValues(name, pose6D.x(), pose6D.y(), pose6D.z(), pose6D.rx(), pose6D.ry(), pose6D.rz());	
-		innerModel->transform("world", QVec::vec3(pose6D.x(), pose6D.y(), pose6D.z()), "rgbd_transform").print("marca through head (sin nodo)");
 }
 
 void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
