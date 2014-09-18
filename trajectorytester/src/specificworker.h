@@ -82,6 +82,7 @@ private:
 	InnerModel *innerModel;
 	QStringList listaMotores;
 	void actualizarInnermodel(const QStringList &listaJoints);
+	void addTransformInnerModel(const QString &name, const QString &parent, const QVec &pose6D);
 };
 
 #endif
