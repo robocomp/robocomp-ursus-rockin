@@ -120,7 +120,7 @@ void SpecificWorker::compute( )
 	
 	actualizarInnermodel(listaMotores);
 
-	if( tag10 ) 
+	if( tag12 ) 
 	{
 		tag1LineEdit->setText("Id: 10");	
 	}
@@ -428,7 +428,7 @@ void SpecificWorker::bik2()
 {
 	//if in its target place, exit
 	
-	if( tag11 and tag10)
+	if( tag11 and tag12)
 	{
 		tag2LineEdit->setText("Id: 11");	
 		//Build target position close to the real target
@@ -439,13 +439,21 @@ void SpecificWorker::bik2()
 		addTransformInnerModel("marca-segun-head", "rgbd_transform", tag11Pose);
 		innerModel->transform("world", "marca-segun-head").print("marca through head");
 		innerModel->transform("world", "mugTag").print("mugTag in world");
+		
+		//define side target with same orientation and to the RIGHTARM
+		
+		
+		//compute sideTarget relative to target.
+		
+		//compute target relative to head
+		
+		//compute head relative to hand
+		
+		
 		tag11 = false;		
-		tag10 = false;
+		tag12 = false;
 	}
-	
-	
-	//check that both marks are visible and good
-	
+		
 	//compute the error pose given a proper rotation parametrization that set the angles to zero when aligned
 	
 	//send the target pose to the hand controller
@@ -591,7 +599,7 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 {
 	tag1LineEdit->setText("");
 	tag11 = false;
-	tag10 = false;
+	tag12 = false;
 	
 	for(auto i: tags)
 	{
@@ -625,13 +633,13 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 // 			qDebug() ;
 	
 		}
-		if( i.id == 10) 
+		if( i.id == 12) 
 		{
 			//qDebug() << __FUNCTION__ << "God damn got it!";
-			tag10 = true;
-			tag10Pose.resize(6);
-			tag10Pose[0] = i.tx;tag10Pose[1] = i.ty;tag10Pose[2] = i.tz;
-			tag10Pose[3] = i.rx;tag10Pose[4] = i.ry;tag10Pose[5] = i.rz;
+			tag12 = true;
+			tag12Pose.resize(6);
+			tag12Pose[0] = i.tx;tag12Pose[1] = i.ty;tag12Pose[2] = i.tz;
+			tag12Pose[3] = i.rx;tag12Pose[4] = i.ry;tag12Pose[5] = i.rz;
 		
 // 			QVec manoApril(6);
 // 			manoApril[0] = i.tx; manoApril[1] = i.ty; manoApril[2] = i.tz; manoApril[3] = i.rx; manoApril[4] = i.ry; manoApril[5] = i.rz;    

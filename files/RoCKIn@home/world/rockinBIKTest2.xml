@@ -35,7 +35,7 @@
 			<transform id="kitchen_t" tz="600" ty="250">
 				<plane id="kitchen" nz="1" size="2000,590,300" texture = "#0405a5" />
 				<transform id="mugT" tz="-80" ty="320" >
-					<plane id="mugTag" ny="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-10.png" />
+					<plane id="mugTag" ny="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
 					
 					<transform id="axesh1" >
 							<plane id="xh1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
