@@ -8,6 +8,7 @@
 	</symbol>
 	<symbol id="4" type="roomSt" />
 	<link src="3" dst="4" label="isKitchen" />
+	<link src="3" dst="4" label="explored" />
 	<link src="3" dst="4" label="room" />
 
 
@@ -29,7 +30,7 @@
 	</symbol>
 	<link src="5" dst="6" label="table" />
 	<link src="5" dst="6" label="hasStatus" />
-	<link src="5" dst="6" label="notSee" />
+	<link src="5" dst="6" label="noSee" />
 	<link src="5" dst="6" label="classified" />
 	<link src="5" dst="6" label="notReach" />
 	<link src="5" dst="6" label="position" />
@@ -66,11 +67,12 @@
 	</symbol>
 	<link src="7" dst="8" label="table" />
 	<link src="7" dst="8" label="hasStatus" />
-	<link src="7" dst="8" label="notSee" />
+	<link src="7" dst="8" label="noSee" />
 	<link src="7" dst="8" label="classified" />
 	<link src="7" dst="8" label="notReach" />
 	<link src="7" dst="8" label="position" />
 	<link src="7" dst="8" label="reachable" />
+	<link src="7" dst="8" label="noExplored" />
 
 
 	<!-- Person -->
@@ -100,7 +102,7 @@
 	<symbol id="106" type="objectSt" />
 	<link src="105" dst="106" label="table" />
 	<link src="105" dst="106" label="hasStatus" />
-	<link src="105" dst="106" label="notSee" />
+	<link src="105" dst="106" label="noSee" />
 	<link src="105" dst="106" label="classified" />
 	<link src="105" dst="106" label="notReach" />
 	<link src="105" dst="106" label="position" />
@@ -115,7 +117,7 @@
 	<symbol id="108" type="objectSt" />
 	<link src="107" dst="108" label="table" />
 	<link src="107" dst="108" label="hasStatus" />
-	<link src="107" dst="108" label="notSee" />
+	<link src="107" dst="108" label="noSee" />
 	<link src="107" dst="108" label="classified" />
 	<link src="107" dst="108" label="notReach" />
 	<link src="107" dst="108" label="position" />
