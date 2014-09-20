@@ -70,6 +70,16 @@ sleep 1
 
 
 echo
+planningTest="deliver/moveObject"
+echo "Next: $planningTest 2"
+cd $planningTest
+agglplan ../../../../etc/domain.aggl initialModel.xml target.xml
+cd -
+echo "######################################################################"
+sleep 1
+
+
+echo
 planningTest="hri/coffee 0"
 echo "Next: $planningTest"
 cd $planningTest

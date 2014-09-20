@@ -83,6 +83,16 @@ findObjectVisuallyInTable : active(1)
 		robot->room(in)
 		container->room(in)
 	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in container something)
+				(in object something)
+			)
+		)
+	}
 }
 
 findObjectTold : active(4)
@@ -400,12 +410,10 @@ setObjectNotReachable : passive(1)
 graspObject : active(1)
 {
 	{
-		status:objectSt(300,0)
 		table:object(0,110)
 		object:object(130,0)
 		robot:robot(0,-110)
 		room:object(-130,0)
-		object->status(reach)
 		robot->object(know)
 		object->table(in)
 		robot->room(in)
@@ -413,12 +421,10 @@ graspObject : active(1)
 	}
 	=>
 	{
-		status:objectSt(300,0)
 		table:object(0,110)
 		object:object(130,0)
 		robot:robot(0,-110)
 		room:object(-130,0)
-		object->status(reach)
 		robot->object(know)
 		object->robot(in)
 		robot->room(in)
@@ -451,7 +457,7 @@ deliverObject : active(1)
 	}
 }
 
-handObject : passive(1)
+handObject : active(1)
 {
 	{
 		status:objectSt(250,0)
@@ -463,35 +469,6 @@ handObject : passive(1)
 		status:objectSt(250,0)
 		object:object(0,0)
 		object->status(noReach)
-	}
-}
-
-leaveObjectTable : passive(1)
-{
-	{
-		status:objectSt(300,110)
-		table:object(0,110)
-		object:object(130,0)
-		robot:robot(0,-110)
-		room:object(-130,0)
-		robot->object(know)
-		object->robot(in)
-		robot->room(in)
-		table->room(in)
-		table->status(reach)
-	}
-	=>
-	{
-		status:objectSt(300,110)
-		table:object(0,110)
-		object:object(130,0)
-		robot:robot(0,-110)
-		room:object(-130,0)
-		robot->object(know)
-		object->table(in)
-		robot->room(in)
-		table->room(in)
-		table->status(reach)
 	}
 }
 
@@ -566,37 +543,41 @@ setObjectNotPosition : passive(1)
 robotMovesObjectFromContainer : active(1)
 {
 	{
-		c2s:objectSt(-215,-45)
-		object:object(-390,-175)
-		robot:robot(-625,-175)
-		c1s:objectSt(-215,-305)
-		c2:object(-390,-45)
-		c1:object(-390,-305)
-		os:objectSt(-215,-175)
+		roomst:roomSt(-950,0)
+		room:object(-755,0)
+		object:object(-390,0)
+		robot:robot(-575,0)
+		c2:object(-650,100)
+		c1:object(-665,-100)
+		os:objectSt(-215,0)
 		robot->object(know)
 		robot->c2(know)
 		robot->c1(know)
 		object->c1(in)
-		c1->c1s(reach)
 		object->os(reach)
-		c2->c2s(reach)
+		room->roomst(room)
+		c1->room(in)
+		c2->room(in)
+		robot->room(in)
 	}
 	=>
 	{
-		c2s:objectSt(-215,-45)
-		object:object(-390,-175)
-		robot:robot(-625,-175)
-		c1s:objectSt(-215,-305)
-		c2:object(-390,-45)
-		c1:object(-390,-305)
-		os:objectSt(-215,-175)
+		roomst:roomSt(-950,0)
+		room:object(-755,0)
+		object:object(-390,0)
+		robot:robot(-575,0)
+		c2:object(-650,100)
+		c1:object(-665,-100)
+		os:objectSt(-215,0)
 		robot->object(know)
 		robot->c2(know)
 		robot->c1(know)
 		object->c2(in)
-		c1->c1s(reach)
 		object->os(reach)
-		c2->c2s(reach)
+		room->roomst(room)
+		c1->room(in)
+		c2->room(in)
+		robot->room(in)
 	}
 }
 
@@ -750,23 +731,29 @@ tellHumanAboutTable : active(1)
 tellHumanAboutUnknownObject : active(1)
 {
 	{
+		statusr:objectSt(-490,-25)
+		conth:object(-90,100)
+		robot:robot(-295,-135)
 		person:person(-90,-135)
 		objectr:object(-295,-25)
-		robot:robot(-295,-135)
-		statusr:objectSt(-490,-25)
+		contr:object(-295,100)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
 		objectr->statusr(classifailed)
 		objectr->statusr(position)
+		objectr->contr(in)
+		contr->conth(eq)
 	}
 	=>
 	{
 		statusr:objectSt(-490,-25)
 		objecth:object(-100,-25)
+		conth:object(-100,100)
 		robot:robot(-295,-135)
 		person:person(-100,-135)
 		objectr:object(-295,-25)
+		contr:object(-300,100)
 		statush:objectSt(100,-25)
 		robot->objectr(know)
 		robot->person(interacting)
@@ -779,6 +766,46 @@ tellHumanAboutUnknownObject : active(1)
 		objecth->statush(unclassified)
 		objecth->statush(position)
 		objecth->statush(reachable)
+		objectr->contr(in)
+		contr->conth(eq)
+		objecth->conth(in)
+	}
+}
+
+makeHumanLook : active(2)
+{
+	{
+		statusr:objectSt(-90,180)
+		objecth:object(150,40)
+		robot:robot(-90,-75)
+		person:person(155,-75)
+		objectr:object(-90,40)
+		statush:objectSt(145,180)
+		objectr->objecth(eq)
+		robot->person(interacting)
+		robot->objectr(know)
+		person->objecth(know)
+		objectr->statusr(position)
+		objectr->statusr(see)
+		objecth->statush(noSee)
+		objecth->statush(position)
+	}
+	=>
+	{
+		statusr:objectSt(-90,180)
+		objecth:object(150,40)
+		robot:robot(-90,-75)
+		person:person(155,-75)
+		objectr:object(-90,40)
+		statush:objectSt(145,180)
+		objectr->objecth(eq)
+		robot->person(interacting)
+		robot->objectr(know)
+		person->objecth(know)
+		objectr->statusr(position)
+		objectr->statusr(see)
+		objecth->statush(see)
+		objecth->statush(position)
 	}
 }
 
@@ -1052,6 +1079,55 @@ personTellsUsAboutTable : active(3)
 	}
 }
 
+informHumanAboutMovedObject : active(2)
+{
+	{
+		cont2r:object(-90,200)
+		cont1r:object(-210,150)
+		objecth:object(200,0)
+		robot:robot(-90,-75)
+		person:person(330,-75)
+		objectr:object(-210,0)
+		cont2h:object(330,200)
+		cont1h:object(200,150)
+		cont2r->cont2h(eq)
+		robot->person(interacting)
+		robot->cont2r(know)
+		person->cont2h(know)
+		robot->cont1r(know)
+		robot->objectr(know)
+		person->cont1h(know)
+		person->objecth(know)
+		objectr->objecth(eq)
+		cont1r->cont1h(eq)
+		objectr->cont1r(in)
+		objecth->cont2h(in)
+	}
+	=>
+	{
+		cont2r:object(-90,200)
+		cont1r:object(-210,150)
+		objecth:object(200,0)
+		robot:robot(-90,-75)
+		person:person(330,-75)
+		objectr:object(-210,0)
+		cont2h:object(330,200)
+		cont1h:object(200,150)
+		cont2r->cont2h(eq)
+		robot->person(interacting)
+		robot->cont2r(know)
+		person->cont2h(know)
+		robot->cont1r(know)
+		robot->objectr(know)
+		person->cont1h(know)
+		person->objecth(know)
+		objectr->objecth(eq)
+		cont1r->cont1h(eq)
+		objectr->cont1r(in)
+		objecth->cont1h(in)
+	}
+}
+
 findGrannyAndDeliver : active(1)
 {
 	findGranny as find
@@ -1089,15 +1165,3 @@ findMilk : active(1)
 }
 
 
-moveObjectBetweenTables : active(1)
-{
-	setObjectReach as reachA
-	graspObject as grasp
-	setObjectReach as reachB
-	leaveObjectTable as leave
-	where:
-	reachA.robot  = grasp.robot  = reachB.robot  = leave.robot
-	reachA.room   = grasp.room   = reachB.room   = leave.room
-	reachA.object = grasp.object = reachB.object = leave.object
-	reachA.status = grasp.status = reachB.status
-}
