@@ -46,10 +46,9 @@ void SpecificWorker::compute( )
 	// to be done
 	//
 
-
 	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
 	//
-	updateRobotsLocation();
+	updateRobotsCognitiveLocation();
 
 	// ACTION EXECUTION
 	//
@@ -260,39 +259,15 @@ void SpecificWorker::actionExecution()
 	}
 	if (action == "changeroom")
 	{
-		printf("%s\n", action.c_str());
-		AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
-		const float x = str2float(goalRoom->getAttribute("x"));
-		const float z = str2float(goalRoom->getAttribute("z"));
+		action_ChangeRoom();
+	}
+	else if ()
+	{
 
-		bool proceed = true;
-		if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
-		{
-			if (abs(lastX-x)<10 and abs(lastZ-z)<10)
-				proceed = false;
-			else
-				printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
-		}
-		else
-		{
-			printf("proceed because it's stoped\n");
-		}
-
-		if (proceed)
-		{
-			lastX = x;
-			lastZ = z;
-			printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
-			go(x, z);
-		}
-		else
-		{
-			printf("%s\n", planningState.state.c_str());
-		}
 	}
 }
 
-void SpecificWorker::updateRobotsLocation()
+void SpecificWorker::updateRobotsCognitiveLocation()
 {
 	// If the polygons are not set yet, there's nothing to do...
 	if (roomsPolygons.size()==0)
@@ -439,3 +414,38 @@ void SpecificWorker::setIdentifierOfRobotsLocation(AGMModel::SPtr &model, int32_
 	if (not didSomethin)
 		qFatal("couldn't update robot's room in the cog graph");
 }
+
+
+void SpecificWorker::action_ChangeRoom()
+{
+	printf("%s\n", action.c_str());
+	AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
+	const float x = str2float(goalRoom->getAttribute("x"));
+	const float z = str2float(goalRoom->getAttribute("z"));
+
+	bool proceed = true;
+	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+	{
+		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+			proceed = false;
+		else
+			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+	}
+	else
+	{
+		printf("proceed because it's stoped\n");
+	}
+
+	if (proceed)
+	{
+		lastX = x;
+		lastZ = z;
+		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
+		go(x, z);
+	}
+	else
+	{
+		printf("%s\n", planningState.state.c_str());
+	}
+}
+

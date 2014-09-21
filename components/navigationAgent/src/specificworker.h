@@ -62,7 +62,7 @@ private:
 
 
 	void go(float x, float z, float alpha=0, bool rot=false);
-	void updateRobotsLocation();
+	void updateRobotsCognitiveLocation();
 	void actionExecution();
 	int32_t getIdentifierOfRobotsLocation(AGMModel::SPtr &worldModel);
 	void setIdentifierOfRobotsLocation(AGMModel::SPtr &worldModel, int32_t identifier);
@@ -80,6 +80,9 @@ private:
 	std::map<int32_t, QPolygonF> roomsPolygons;
 	std::map<int32_t, QPolygonF> extractPolygonsFromModel(AGMModel::SPtr &worldModel);
 
+
+private:
+	void action_ChangeRoom();
 };
 
 #endif
