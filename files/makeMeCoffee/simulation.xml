@@ -1,6 +1,13 @@
 <innerModel>
 	<transform id="world">
 
+		<plane id="derecha"   px="3100" pz="3600" nx="1" size="7800,1400,100" />
+		<plane id="izquierda" px="-900" pz="3600" nx="1" size="7800,1400,100" />
+		<plane id="atras"     px="1200" pz="200"  nz="1" size="4000,1400,100" />
+		<plane id="frente"    px="1200" pz="7000"  nz="1" size="4000,1400,100" />
+
+
+		<transform id="floor" />
 		<transform id="piso" rx="1.57079632679" rz="3.14159265359" tx="1200" >
 			<transform id="pisoP" >
 				<mesh id="pared1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared1.osg" scale="10" />
@@ -116,7 +123,7 @@
 		<transform id="initialRobotPose" tx="2300" tz="3000" ty="10" >
 			<differentialrobot id="robot" port="10004" >
  				<translation id="laserPose" tx="0" ty="240" tz="100">
-<!--   				<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" />  -->
+  				<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" />
  				</translation>
 				<transform  id="base_trans" >
 					<joint id="base" port="2000" axis="y" home="0">
