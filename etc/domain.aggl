@@ -222,32 +222,6 @@ recognizeObjGlasses : active(1)
 	}
 }
 
-recognizeObjTable : active(1)
-{
-	{
-		status:objectSt(65,-75)
-		object:object(-130,-75)
-		robot:robot(-290,-75)
-		robot->object(know)
-		object->status(hasStatus)
-		object->status(see)
-		object->status(position)
-		object->status(unclassified)
-	}
-	=>
-	{
-		status:objectSt(60,-75)
-		object:object(-130,-75)
-		robot:robot(-290,-75)
-		robot->object(know)
-		object->status(hasStatus)
-		object->status(see)
-		object->status(position)
-		object->status(classified)
-		object->status(table)
-	}
-}
-
 recognizeObjCoffeePot : active(1)
 {
 	{
