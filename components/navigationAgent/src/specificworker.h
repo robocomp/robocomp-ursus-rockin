@@ -83,6 +83,7 @@ private:
 
 private:
 	void action_ChangeRoom();
+	void action_FindObjectVisuallyInTable();
 };
 
 #endif

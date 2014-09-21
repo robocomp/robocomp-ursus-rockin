@@ -246,9 +246,6 @@ void SpecificWorker::go(float x, float z, float alpha, bool rot)
 
 void SpecificWorker::actionExecution()
 {
-	static float lastX = std::numeric_limits<float>::quiet_NaN();
-	static float lastZ = std::numeric_limits<float>::quiet_NaN();
-
 	try
 	{
 		planningState = trajectoryrobot2d_proxy->getState();
@@ -261,8 +258,9 @@ void SpecificWorker::actionExecution()
 	{
 		action_ChangeRoom();
 	}
-	else if ()
+	else if (action == "findobjectvisuallyintable")
 	{
+		action_FindObjectVisuallyInTable();
 
 	}
 }
@@ -418,8 +416,48 @@ void SpecificWorker::setIdentifierOfRobotsLocation(AGMModel::SPtr &model, int32_
 
 void SpecificWorker::action_ChangeRoom()
 {
+	static float lastX = std::numeric_limits<float>::quiet_NaN();
+	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+
 	printf("%s\n", action.c_str());
 	AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
+	const float x = str2float(goalRoom->getAttribute("x"));
+	const float z = str2float(goalRoom->getAttribute("z"));
+
+	bool proceed = true;
+	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+	{
+		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+			proceed = false;
+		else
+			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+	}
+	else
+	{
+		printf("proceed because it's stoped\n");
+	}
+
+	if (proceed)
+	{
+		lastX = x;
+		lastZ = z;
+		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
+		go(x, z);
+	}
+	else
+	{
+		printf("%s\n", planningState.state.c_str());
+	}
+}
+
+
+void SpecificWorker::action_FindObjectVisuallyInTable()
+{
+	static float lastX = std::numeric_limits<float>::quiet_NaN();
+	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+
+	printf("%s\n", action.c_str());
+	AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["container"].value));
 	const float x = str2float(goalRoom->getAttribute("x"));
 	const float z = str2float(goalRoom->getAttribute("z"));
 
