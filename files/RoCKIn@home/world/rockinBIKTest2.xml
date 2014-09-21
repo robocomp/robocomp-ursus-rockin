@@ -34,14 +34,14 @@
 
 			<transform id="kitchen_t" tz="600" ty="250">
 				<plane id="kitchen" nz="1" size="2000,590,300" texture = "#0405a5" />
-				<transform id="mugT" tz="-80" ty="320" >
-					<plane id="mugTag" ny="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
+				<transform id="mugT" tz="-80" ty="400" >
+					<plane id="mugTag" ny="-1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
 					
-					<transform id="axesh1" >
+		<!--			<transform id="axesh1" >
 							<plane id="xh1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 							<plane id="yh1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
 							<plane id="zh1" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />
-					</transform>
+					</transform>-->
 					
 				</transform>
 
@@ -165,7 +165,7 @@
 						<transform id="arm_right_1" tx="174" tz="990" ry="1.5707963267948966" rz="1.5707963267948966">
 <!-- 						Gira en Z -->
 							<mesh id="arm_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo1.ive" rz="0" tz="-55" ty="-30" scale="1000"    />
-							<joint id="rightShoulder1" port="20000" axis="z" min="-3.14" max="0.54" home="-0.2">
+							<joint id="rightShoulder1" port="20000" axis="z" min="-3.14" max="0.54" home="-0.1">
 <!--								<transform id="axessr1" >
 									<plane id="xsr1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 									<plane id="ysr1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -174,7 +174,7 @@
 								<mesh id="shoulder_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo2.ive" rz="0" tz="0" scale="1000"    />
 								<transform id="arm_right_2" tz="41" rx="1.5707963267948966">
 <!-- 									Gira en X -->
-									<joint id="rightShoulder2" port="20000"  axis="x" min="-3.14" max="0.34" home="-0.2" >
+									<joint id="rightShoulder2" port="20000"  axis="x" min="-3.14" max="0.34" home="-0.1" >
 <!--										<transform id="axessr2" >
 											<plane id="xsr2" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 											<plane id="ysr2" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -183,7 +183,7 @@
 										<mesh id="shoulder_right_2_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo3.ive" rx="0" scale="1000"     />
 										<transform id="arm_right_3" tz="234" rz="-1.5707963267948966" >
 <!-- 											Gira en Z -->
-											<joint id="rightShoulder3" port="20000"  axis="z" min="-1.8" max="1.8" home="0.4">
+											<joint id="rightShoulder3" port="20000"  axis="z" min="-1.8" max="1.8" home="0.1">
 <!--												<transform id="axessr3" >
 													<plane id="xsr3" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 													<plane id="ysr3" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -192,7 +192,7 @@
 												<mesh id="shoulder_right_3_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo4.ive" rz="3.14159265359" scale="1000"     />
 												<transform id="arm_right_4" ty="-28"  tz="20"    > <!--Codo-->
 <!-- 													Gira en X -->
-													<joint id="rightElbow" port="20000" axis="x"  min="0.01" max="2.6" home="0.6" >
+													<joint id="rightElbow" port="20000" axis="x"  min="0.01" max="2.6" home="0.1" >
 <!--													<transform id="axeser1" >
 														<plane id="xer1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 														<plane id="yer1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -201,7 +201,7 @@
 													<mesh id="elbow_right_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo5.ive" rz="3.14159265359" ty="0" scale="1000"     />
 														<transform id="arm_right_5" ty="28" tz="166"    > <!--Giro1 muñeca-->
 <!-- 															Gira en Z-->
-															<joint id="rightForeArm" port="20000" axis="z" min="-1.8" max="1.8" home="0.4">
+															<joint id="rightForeArm" port="20000" axis="z" min="-1.8" max="1.8" home="0.1">
 <!--																<transform id="axesfa1" >
 																	<plane id="xfa1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 																	<plane id="yfa1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -303,13 +303,13 @@
 
 																		
 																				<!-- El siguiente transform es para que coincidan los ejes de la marca con los del mundo	 -->
-																				<transform	id="ThandMesh2_pre"  ty="-20" tz= "50" rx="-1.5707963267948966" rz="0">
+																				<transform	id="ThandMesh2_pre"  ty="-20" tz= "50" rx="-1.5707963267948966" rz="3.14159265359">
 																				  <transform	id="ThandMesh2" > 
 																				    <!--<plane id="hx" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 																				    <plane id="hy" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
 																				    <plane id="hz" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />-->	
 																				    <!-- Deshacemos la transformación anterior, primero giramos en z, luego y y luego en X. -->
-																				    <transform id="ThandMesh2_2" rz="0"> 
+																				    <transform id="ThandMesh2_2" rz="-3.14159265359"> 
 																				      <transform id="ThandMesh2_3" ry="0"> 
 																					<transform id="ThandMesh2_4" rx="1.5707963267948966"> 
 
@@ -327,6 +327,11 @@
 																					      <plane id="axisz" pz="50" nx="1" size="100,1,1" repeat="1" texture="#000055" />
 																					    </transform>
 																					    
+																						<transform id= "munon_t" tz = "150">
+																							<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="40,40,40" />
+																						</transform>
+																						
+																						
 																					  </transform>  
 																					</transform>
 																				      </transform>
