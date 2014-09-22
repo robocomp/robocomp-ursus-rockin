@@ -46,6 +46,7 @@ void Sampler::initialize3D(InnerModel *inner, const QList< QPair< float, float >
 	restNodes.push_back("barracuello");
 	restNodes.push_back("barracolumna") ;
 	
+	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );
 }

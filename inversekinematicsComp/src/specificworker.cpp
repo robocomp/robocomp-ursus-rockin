@@ -140,6 +140,7 @@ void SpecificWorker::init()
 	//goHomePosition(listaMotores);
  	foreach(BodyPart p, bodyParts)
  		goHome(p.getPartName().toStdString());
+	setFingers(0);
 	sleep(1);
 	actualizarInnermodel(listaMotores);
 
@@ -155,7 +156,7 @@ void SpecificWorker::init()
 	QList<QPair<float, float > > limits;
 	limits.append(qMakePair((float)-0.4,(float)0.4)); 	 //x in robot RS
 	limits.append(qMakePair((float)0.2,(float)1.2)); 	 //y
-	limits.append(qMakePair((float)0.f,(float)1.f));  	 //z
+	limits.append(qMakePair((float)-0.2,(float)1.f));  	 //z
 
 	sampler.initialize3D(innerModel, limits);
 	planner = new PlannerOMPL(*innerModel);
@@ -615,12 +616,12 @@ void SpecificWorker::advanceAlongAxis(const string& bodyPart, const Axis& ax, fl
 }
 
 /**
- * @brief Set the fingers position so there is d mm between them
+ * @brief Set the fingers of the right hand position so there is d mm between them
  *
  * @param d millimeters between fingers
  * @return void
  */
-void SpecificWorker::setFingers(float d)
+void SpecificWorker::setFingers(float d)  ///ONLY RIGHT HAND. FIX
 {
 	qDebug() << __FUNCTION__;
 

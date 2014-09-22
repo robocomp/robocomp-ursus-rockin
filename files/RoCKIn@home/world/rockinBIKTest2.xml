@@ -34,14 +34,14 @@
 
 			<transform id="kitchen_t" tz="600" ty="250">
 				<plane id="kitchen" nz="1" size="2000,590,300" texture = "#0405a5" />
-				<transform id="mugT" tz="-80" ty="400" >
-					<plane id="mugTag" ny="-1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
+				<transform id="mugT" tz="-80" ty="400" rx="0">
+					<plane id="mugTag" ny="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
 					
-						<transform id="axesh1" >
+						<!--<transform id="axesh1" >
 								<plane id="xh1" px="50" nx="1" size="5,5,100" repeat="1" texture="#ff0000" />
 								<plane id="yh1" py="50" nx="1" size="5,100,5" repeat="1" texture="#00ff00" />
 								<plane id="zh1" pz="50" nx="1" size="100,5,5" repeat="1" texture="#0000ff" />
-						</transform>
+						</transform>-->
 				</transform>
 
 			</transform>
@@ -140,8 +140,17 @@
 															<transform id="rgbd_transform" ty="90" tz="20">
  																<plane id="sensor" nz="1" size="100,30" repeat="1" texture="#0000ff" /> -->
  																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" /> 
-															<!--			<plane id="mugTagC" pz="500" nz="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
-			-->
+															
+														<!--		<transform id="axesh1"  tz="500">
+																	<plane id="mugTagC" nz="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
+																</transform>
+														-->		
+																<transform id="axesh2"  ty="50">
+																	<plane id="xh2" px="50" nx="1" size="5,5,100" repeat="1" texture="#ff0000" />
+																	<plane id="yh2" py="50" nx="1" size="5,100,5" repeat="1" texture="#00ff00" />
+																	<plane id="zh2" pz="50" nx="1" size="100,5,5" repeat="1" texture="#0000ff" />
+																</transform>
+																
 															</transform>
 													</transform>
 	<!--
@@ -274,7 +283,11 @@
 																							<mesh id="finger_right_2_mesh3" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tz="30" scale="5,5,30"    />
 																							<transform id="finger_right_2_2_pre" tx="-25" ry="0.40"  >
 																								<mesh id="finger_right_2_mesh4" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tz="80" scale="5,5,20"    />
-																								<transform id="finger_right_2_tip" tz="20"> </transform>
+																								<transform id="finger_right_2_tip" tz="20">
+																									<transform id="munon_t" tz="60">
+																										<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="10,10,10" />
+																									</transform>	
+																								</transform>
 																							</transform>
 																						</transform>
 
@@ -312,8 +325,8 @@
 																				      <transform id="ThandMesh2_3" ry="0"> 
 																								<transform id="ThandMesh2_4" rx="1.5707963267948966"> -->
 
-																									<!--  Metemos un error en la marca -->
-																									<transform id="errorMarca2Pruebas" ty="-15" tz="50" rx="0" ry="0,0" rz="3.14159265359">
+																									<!--  Colocamos la marca -->
+																									<transform id="handMesh2_t" ty="-25" tz="50" rx="0" ry="0,0" rz="3.14159265359">
 																										<plane id="handMesh2" ny="1" size="71.25,71.25,2" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
 																									</transform>																  
 										
@@ -324,9 +337,7 @@
 																											<plane id="axisz" pz="50" nx="1" size="150,5,5" repeat="1" texture="#000055" />
 																									</transform>
 																												
-																									<transform id= "munon_t" tz = "150">
-																											<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="40,40,40" />
-																									</transform>
+																									
 																		<!--									
 																								</transform>  
 																							</transform>
