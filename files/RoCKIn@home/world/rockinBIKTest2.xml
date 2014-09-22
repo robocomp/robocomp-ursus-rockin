@@ -37,12 +37,11 @@
 				<transform id="mugT" tz="-80" ty="400" >
 					<plane id="mugTag" ny="-1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
 					
-		<!--			<transform id="axesh1" >
-							<plane id="xh1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
-							<plane id="yh1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
-							<plane id="zh1" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />
-					</transform>-->
-					
+						<transform id="axesh1" >
+								<plane id="xh1" px="50" nx="1" size="5,5,100" repeat="1" texture="#ff0000" />
+								<plane id="yh1" py="50" nx="1" size="5,100,5" repeat="1" texture="#00ff00" />
+								<plane id="zh1" pz="50" nx="1" size="100,5,5" repeat="1" texture="#0000ff" />
+						</transform>
 				</transform>
 
 			</transform>
@@ -303,55 +302,41 @@
 
 																		
 																				<!-- El siguiente transform es para que coincidan los ejes de la marca con los del mundo	 -->
-																				<transform	id="ThandMesh2_pre"  ty="-20" tz= "50" rx="-1.5707963267948966" rz="3.14159265359">
+																	<!--			<transform	id="ThandMesh2_pre"  ty="-20" tz= "50" rx="-1.5707963267948966" rz="3.14159265359">
 																				  <transform	id="ThandMesh2" > 
-																				    <!--<plane id="hx" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
+																				    <plane id="hx" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 																				    <plane id="hy" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
-																				    <plane id="hz" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />-->	
-																				    <!-- Deshacemos la transformación anterior, primero giramos en z, luego y y luego en X. -->
-																				    <transform id="ThandMesh2_2" rz="-3.14159265359"> 
+																				    <plane id="hz" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />
+																	-->					<!-- Deshacemos la transformación anterior, primero giramos en z, luego y y luego en X. -->
+																			<!--	    <transform id="ThandMesh2_2" rz="-3.14159265359"> 
 																				      <transform id="ThandMesh2_3" ry="0"> 
-																					<transform id="ThandMesh2_4" rx="1.5707963267948966"> 
+																								<transform id="ThandMesh2_4" rx="1.5707963267948966"> -->
 
-																					    <!--  Metemos un error en la marca -->
-																					    <transform id="errorMarca2Pruebas" tx="0" rx="0,0" ry="0,0" rz="0,0">
-																					      <plane id="handMesh2" ny="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
-																					    </transform>
-																  
+																									<!--  Metemos un error en la marca -->
+																									<transform id="errorMarca2Pruebas" ty="-15" tz="50" rx="0" ry="0,0" rz="3.14159265359">
+																										<plane id="handMesh2" ny="1" size="71.25,71.25,2" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+																									</transform>																  
 										
-																					  <transform id="ThandMesh2_5" tz="-50" ty="20" tx="0"> 
-  																																
-																					    <transform id="grabPositionHandR"  tz="100">
-																					      <plane id="axisx" px="50" nx="1" size="1,1,100" repeat="1" texture="#550000" />
-																					      <plane id="axisy" py="50" nx="1" size="1,100,1" repeat="1" texture="#005500" />
-																					      <plane id="axisz" pz="50" nx="1" size="100,1,1" repeat="1" texture="#000055" />
-																					    </transform>
-																					    
-																						<transform id= "munon_t" tz = "150">
-																							<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="40,40,40" />
-																						</transform>
-																						
-																						
-																					  </transform>  
-																					</transform>
-																				      </transform>
-																				    </transform>								
-																				  </transform>
-																				</transform>
-																				
-																				
-																				
-																				
-																				
-																				
-																				
-																				
-																				
-																				
-																			
-																			
-																			</joint>
-																		</transform>
+																									<transform id="ThandMesh2_5" tz="-50" ty="20" tx="0"> 
+																									<transform id="grabPositionHandR"  tz="100">
+																											<plane id="axisx" px="50" nx="1" size="5,5,150" repeat="1" texture="#550000" />
+																											<plane id="axisy" py="50" nx="1" size="5,150,5" repeat="1" texture="#005500" />
+																											<plane id="axisz" pz="50" nx="1" size="150,5,5" repeat="1" texture="#000055" />
+																									</transform>
+																												
+																									<transform id= "munon_t" tz = "150">
+																											<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="40,40,40" />
+																									</transform>
+																		<!--									
+																								</transform>  
+																							</transform>
+																				    </transform>-->
+																		<!--  </transform> -->								
+																		<!--		</transform>
+																		-->	
+																		  </transform>
+																		</joint>
+																	</transform>
 
 																	</joint>
 																</transform>
