@@ -148,7 +148,7 @@ void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modificat
 {
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	if (roomsPolygons.size()==0)
+	if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
 		roomsPolygons = extractPolygonsFromModel(worldModel);
 	mutex->unlock();
 }
@@ -261,7 +261,6 @@ void SpecificWorker::actionExecution()
 	else if (action == "findobjectvisuallyintable")
 	{
 		action_FindObjectVisuallyInTable();
-
 	}
 }
 
@@ -309,40 +308,58 @@ std::map<int32_t, QPolygonF> SpecificWorker::extractPolygonsFromModel(AGMModel::
 {
 	std::map<int32_t, QPolygonF> ret;
 
-	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	for (AGMModel::iterator symbol_itRR=worldModel->begin(); symbol_itRR!=worldModel->end(); symbol_itRR++)
 	{
-		const AGMModelSymbol::SPtr &symbol = *symbol_it;
-		if (symbol->symbolType == "object")
+		const AGMModelSymbol::SPtr &symbolRR = *symbol_itRR;
+		if (symbolRR->symbolType == "robot")
 		{
-			for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+			for (AGMModelSymbol::iterator edge_itRR=symbolRR->edgesBegin(worldModel); edge_itRR!=symbolRR->edgesEnd(worldModel); edge_itRR++)
 			{
-				AGMModelEdge edge = *edge_it;
-				if (edge.linking == "room")
+				AGMModelEdge edgeRR = *edge_itRR;
+				if (edgeRR.linking == "know")
 				{
-					const QString polygonString = QString::fromStdString(symbol->getAttribute("polygon"));
-					const QStringList coords = polygonString.split(";");
-					if (coords.size() < 3)
+					const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(edgeRR.symbolPair.first);
+					if (symbol->symbolType == "object")
 					{
-						qFatal("%s %d", __FILE__, __LINE__);
-					}
+						printf("object: %d\n", symbol->identifier);
+						for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+						{
+							AGMModelEdge edge = *edge_it;
+							if (edge.linking == "room")
+							{
+								const QString polygonString = QString::fromStdString(symbol->getAttribute("polygon"));
+								const QStringList coords = polygonString.split(";");
+								printf("  it is a room\n");
+								qDebug() << " " << coords.size() << " ___ " << polygonString ;
+								if (coords.size() < 3)
+								{
+									qDebug() << coords.size() << " ___ " << polygonString ;
+									qDebug() << polygonString;
+									for (int32_t i=0; i<coords.size(); i++)
+										qDebug() << coords[i];
+									qFatal("ABORT %s %d", __FILE__, __LINE__);
+								}
 
-					QVector<QPointF> points;
-					for (int32_t ci=0; ci<coords.size(); ci++)
-					{
-						const QString &pointStr = coords[ci];
-						if (pointStr.size() < 5) qFatal("%s %d", __FILE__, __LINE__);
-						const QStringList coords2 = pointStr.split(",");
-						if (coords2.size() < 2) qFatal("%s %d", __FILE__, __LINE__);
-						QString a = coords2[0];
-						QString b = coords2[1];
-						a.remove(0,1);
-						b.remove(b.size()-1,1);
-						float x = a.toFloat();
-						float z = b.toFloat();
-						points.push_back(QPointF(x, z));
+								QVector<QPointF> points;
+								for (int32_t ci=0; ci<coords.size(); ci++)
+								{
+									const QString &pointStr = coords[ci];
+									if (pointStr.size() < 5) qFatal("%s %d", __FILE__, __LINE__);
+									const QStringList coords2 = pointStr.split(",");
+									if (coords2.size() < 2) qFatal("%s %d", __FILE__, __LINE__);
+									QString a = coords2[0];
+									QString b = coords2[1];
+									a.remove(0,1);
+									b.remove(b.size()-1,1);
+									float x = a.toFloat();
+									float z = b.toFloat();
+									points.push_back(QPointF(x, z));
+								}
+								if (points.size() < 3) qFatal("%s %d", __FILE__, __LINE__);
+								ret[symbol->identifier] = QPolygonF(points);
+							}
+						}
 					}
-					if (points.size() < 3) qFatal("%s %d", __FILE__, __LINE__);
-					ret[symbol->identifier] = QPolygonF(points);
 				}
 			}
 		}
