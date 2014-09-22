@@ -52,7 +52,9 @@ void SpecificWorker::compute( )
 
 	// ACTION EXECUTION
 	//
+	/*
 	actionExecution();
+	*/
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -496,8 +498,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 		lastX = x;
 		lastZ = z;
 		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
-// 		go(x, z, tableId==7?-3.141592:0, true);
-		go(x, z+2000, 0, true);
+		go(x, z, tableId==7?-3.141592:0, true);
 	}
 	else
 	{
