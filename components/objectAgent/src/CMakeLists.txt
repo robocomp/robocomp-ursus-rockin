@@ -14,6 +14,7 @@ SET ( SOURCES
   objectcomp.cpp
   agmcommonbehaviorI.cpp
 agmexecutivetopicI.cpp
+apriltagsI.cpp
 
   genericmonitor.cpp
   commonbehaviorI.cpp
@@ -27,6 +28,7 @@ SET ( HEADERS
   ${HEADERS}
   agmcommonbehaviorI.h
 agmexecutivetopicI.h
+apriltagsI.h
 
   genericmonitor.h
   commonbehaviorI.h
@@ -34,7 +36,7 @@ agmexecutivetopicI.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning AGMAgent  AGMWorldModel)
+ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning AprilTags JointMotor AGMAgent  AGMWorldModel)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

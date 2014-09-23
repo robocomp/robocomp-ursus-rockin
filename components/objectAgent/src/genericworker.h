@@ -28,9 +28,11 @@
 #include <ui_guiDlg.h>
 #include "config.h"
 #include <agm.h>
+#include <JointMotor.h>
 #include <AGMAgent.h>
 #include <AGMCommonBehavior.h>
 #include <AGMExecutive.h>
+#include <AprilTags.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -43,8 +45,10 @@ using namespace std;
        \brief
        @author authorname
 */
+using namespace RoboCompJointMotor;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMExecutive;
+using namespace RoboCompAprilTags;
 using namespace RoboCompAGMAgent;
 struct BehaviorNavegacionParameters 
 		{
@@ -73,6 +77,7 @@ public:
 	bool deactivate();
 	bool isActive() { return active; }
 	RoboCompAGMWorldModel::BehaviorResultType status();
+	JointMotorPrx jointmotor_proxy;
 	AGMAgentTopicPrx agmagenttopic;
 	virtual bool activateAgent(const ParameterMap& prs) = 0;
 	virtual bool deactivateAgent() = 0;
@@ -84,6 +89,8 @@ public:
 	virtual bool reloadConfigAgent() = 0;
 	virtual void  modelModified(const RoboCompAGMWorldModel::Event& modification) = 0;
 	virtual void  modelUpdated(const RoboCompAGMWorldModel::Node& modification) = 0;
+
+	virtual void  newAprilTag(const tagsList& tags) = 0;
 
 protected:
 	QTimer timer;

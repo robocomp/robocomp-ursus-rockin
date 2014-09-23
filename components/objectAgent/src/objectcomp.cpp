@@ -78,10 +78,12 @@
 #include "commonbehaviorI.h"
 #include <agmcommonbehaviorI.h>
 #include <agmexecutivetopicI.h>
+#include <apriltagsI.h>
 
 // Includes for remote proxy example
 // #include <Remote.h>
 #include <ui_guiDlg.h>
+#include <JointMotor.h>
 #include <AGMAgent.h>
 
 
@@ -92,6 +94,8 @@ using namespace std;
 using namespace RoboCompCommonBehavior;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMExecutive;
+using namespace RoboCompAprilTags;
+using namespace RoboCompJointMotor;
 using namespace RoboCompAGMAgent;
 
 
@@ -125,6 +129,7 @@ int objectComp::run(int argc, char* argv[])
 
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
+	JointMotorPrx jointmotor_proxy;
 
 
 	string proxy;
@@ -152,40 +157,44 @@ int objectComp::run(int argc, char* argv[])
 	//}
 	//rInfo("RemoteProxy initialized Ok!");
 	// 	// Now you can use remote server proxy (remotecomponent_proxy) as local object
-
+	//Remote server proxy creation example
+	try
+	{
+		jointmotor_proxy = JointMotorPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("JointMotorProxy") ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("JointMotorProxy initialized Ok!");
+	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 	IceStorm::TopicPrx agmagenttopic_topic;
-	while (!agmagenttopic_topic)
-	{
-		try
-		{
-			agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic");
-		}
-		catch (const IceStorm::NoSuchTopic&)
-		{
-			try
-			{
-				agmagenttopic_topic = topicManager->create("AGMAgentTopic");
-			}
-			catch (const IceStorm::TopicExists&)
-			{
-				printf("Another client created the topic or no topic?\n");
-				usleep(1000000);
+    while(!agmagenttopic_topic){
+		try {
+			agmagenttopic_topic = topicManager->create("AGMAgentTopic"); // communicator()->getProperties()->getProperty("AGMAgentTopic") does not work!
+		}catch (const IceStorm::TopicExists&){
+		  	// Another client created the topic.
+			try{
+				agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic"); // communicator()->getProperties()->getProperty("AGMAgentTopic") does not work!
+			}catch (const IceStorm::NoSuchTopic&){
+				//Error. Topic does not exist.	
 			}
 		}
-    }
+	}
 	Ice::ObjectPrx agmagenttopic_pub = agmagenttopic_topic->getPublisher()->ice_oneway();
 	AGMAgentTopicPrx agmagenttopic = AGMAgentTopicPrx::uncheckedCast(agmagenttopic_pub);
 	mprx["AGMAgentTopicPub"] = (::IceProxy::Ice::Object*)(&agmagenttopic);
-
-
+	
+	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
 	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor,SIGNAL(kill()),&a,SLOT(quit()));
 	QObject::connect(worker,SIGNAL(kill()),&a,SLOT(quit()));
 	monitor->start();
-
+	
 	if ( !monitor->isRunning() )
 		return status;
 	try
@@ -216,6 +225,27 @@ int objectComp::run(int argc, char* argv[])
 	      	agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic_proxy);
     	}
     	AGMExecutiveTopic_adapter->activate();
+    	// Server adapter creation and publication
+    	Ice::ObjectAdapterPtr AprilTags_adapter = communicator()->createObjectAdapter("AprilTagsTopic");
+    	AprilTagsPtr apriltagsI_ = new AprilTagsI(worker);
+    	Ice::ObjectPrx apriltags_proxy = AprilTags_adapter->addWithUUID(apriltagsI_)->ice_oneway();
+    	IceStorm::TopicPrx apriltags_topic;
+    	if(!apriltags_topic){
+	    	try {
+	    		apriltags_topic = topicManager->create("AprilTags");
+	    	}
+	    	catch (const IceStorm::TopicExists&) {
+	    	  	//Another client created the topic
+	    	  	try{
+	       			apriltags_topic = topicManager->retrieve("AprilTags");
+	    	  	}catch(const IceStorm::NoSuchTopic&){
+	    	  	  	//Error. Topic does not exist
+				}
+	    	}
+	    	IceStorm::QoS qos;
+	      	apriltags_topic->subscribeAndGetPublisher(qos, apriltags_proxy);
+    	}
+    	AprilTags_adapter->activate();
     	// Server adapter creation and publication
 		Ice::ObjectAdapterPtr adapterAGMCommonBehavior = communicator()->createObjectAdapter("AGMCommonBehaviorComp");
 		AGMCommonBehaviorI *agmcommonbehavior = new AGMCommonBehaviorI(worker);
