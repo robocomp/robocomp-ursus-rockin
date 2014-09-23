@@ -202,3 +202,10 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 		exit(1);
 	}
 }
+
+
+void SpecificWorker::newAprilTag(const tagsList &list)
+{
+	
+}
+

@@ -214,4 +214,10 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 void SpecificWorker::actionExecution()
 {
 
+
 }
+
+
+
+
+

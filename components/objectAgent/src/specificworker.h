@@ -63,6 +63,8 @@ private:
 
 
 
+	void newAprilTag(const tagsList &list);
+
 
 
 
