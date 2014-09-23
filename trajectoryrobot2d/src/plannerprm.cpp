@@ -27,8 +27,11 @@ PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh, 
 	innerModel = new InnerModel(innerModel_);
 	
 	QList<QRectF> innerRegions;
-	innerRegions << QRectF(1500, 0, 4000, -3000) <<	QRectF(0, -8500, 4000, -1500) << QRectF(7500, -4000, 2500, -6000);
-	QRectF outerRegion(0, 0, 10000, -10000);
+	QRectF outerRegion(-1920,3500,  4000,-7000);
+
+//	innerRegions << QRectF(1500, 0, 4000, -3000) <<	QRectF(0, -8500, 4000, -1500) << QRectF(7500, -4000, 2500, -6000);
+// 	QRectF outerRegion(0, 0, 10000, -10000);
+
 	
 	sampler.initialize(innerModel, outerRegion, innerRegions);
 	

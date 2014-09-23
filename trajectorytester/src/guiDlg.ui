@@ -527,25 +527,25 @@
      <rect>
       <x>210</x>
       <y>30</y>
-      <width>71</width>
+      <width>91</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>2. Search</string>
+     <string>2. Approach</string>
     </property>
    </widget>
    <widget class="QPushButton" name="t3Button">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>310</x>
       <y>30</y>
       <width>81</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>3. Approach</string>
+     <string>3. Arm</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="tag1LineEdit">
@@ -571,7 +571,7 @@
    <widget class="Line" name="line_4">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>530</x>
       <y>10</y>
       <width>3</width>
       <height>61</height>
@@ -584,8 +584,8 @@
    <widget class="QPushButton" name="bik1Button">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>40</y>
+      <x>560</x>
+      <y>30</y>
       <width>81</width>
       <height>27</height>
      </rect>
@@ -594,24 +594,11 @@
      <string>Ballistic</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="goHomeButton">
-    <property name="geometry">
-     <rect>
-      <x>600</x>
-      <y>0</y>
-      <width>81</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Go home</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="bik2Button">
     <property name="geometry">
      <rect>
-      <x>540</x>
-      <y>40</y>
+      <x>650</x>
+      <y>30</y>
       <width>81</width>
       <height>27</height>
      </rect>
@@ -620,6 +607,32 @@
      <string>Servo</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="t3Button_2">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>30</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>4. Servo</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="goHomeButton">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>480</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Go home</string>
+   </property>
   </widget>
  </widget>
  <resources/>

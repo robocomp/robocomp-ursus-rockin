@@ -1,7 +1,11 @@
 <AGMModel>
 
 	<!-- R O O M -->
-	<symbol id="3" type="object" />
+	<symbol id="3" type="object">
+		<attribute key="x" value="200" />
+		<attribute key="z" value="0" />
+		<attribute key="polygon" value="(-1920,3500);(2000,3500);(2000,-3300);(-1920,-3300)" />
+	</symbol>
 	<symbol id="4" type="roomSt" />
 	<link src="3" dst="4" label="isKitchen" />
 	<link src="3" dst="4" label="room" />
@@ -17,6 +21,9 @@
 
 	<!-- Explored table -->
 	<symbol id="5" type="object">
+		<attribute key="x" value="1240" />
+		<attribute key="z" value="1050" />
+		<attribute key="polygon" value="(-842,1854);(775,1854);(775,751);(-842,751)" />
 	</symbol>
 	<link src="1" dst="5" label="know" />
 	<link src="5" dst="3" label="in" />
@@ -33,6 +40,8 @@
 
 	<!-- coffeepot -->
 	<symbol id="9" type="object">
+		<attribute key="x" value="400" />
+		<attribute key="z" value="1000" />
 	</symbol>
 	<link src="1" dst="9" label="know" />
 	<link src="9" dst="3" label="in" />
@@ -50,6 +59,10 @@
 
 	<!-- Non-explored table -->
 	<symbol id="7" type="object">
+
+		<attribute key="x" value="1240" />
+		<attribute key="z" value="-1080" />
+		<attribute key="polygon" value="(-842,-1746);(775,-1746);(775,-2320);(-842,-2320)" />
 	</symbol>
 	<link src="1" dst="7" label="know" />
 	<link src="7" dst="3" label="in" />
@@ -66,6 +79,8 @@
 
 	<!-- Person -->
 	<symbol id="20" type="person">
+		<attribute key="x" value="-100" />
+		<attribute key="z" value="1500" />
 	</symbol>
 	<symbol id="21" type="personSt" />
 	<link src="20" dst="21" label="granny" />

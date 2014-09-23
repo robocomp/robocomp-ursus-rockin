@@ -140,6 +140,7 @@ void SpecificWorker::init()
 	//goHomePosition(listaMotores);
  	foreach(BodyPart p, bodyParts)
  		goHome(p.getPartName().toStdString());
+	setFingers(0);
 	sleep(1);
 	actualizarInnermodel(listaMotores);
 
@@ -155,7 +156,7 @@ void SpecificWorker::init()
 	QList<QPair<float, float > > limits;
 	limits.append(qMakePair((float)-0.4,(float)0.4)); 	 //x in robot RS
 	limits.append(qMakePair((float)0.2,(float)1.2)); 	 //y
-	limits.append(qMakePair((float)0.f,(float)1.f));  	 //z
+	limits.append(qMakePair((float)-0.2,(float)1.f));  	 //z
 
 	sampler.initialize3D(innerModel, limits);
 	planner = new PlannerOMPL(*innerModel);
@@ -349,19 +350,6 @@ void SpecificWorker::compute2()
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 void SpecificWorker::compute( )
 {
-	// 	InnerModelPlane *plane;
-	// 	if ((plane = dynamic_cast<InnerModelPlane *>(innerModel->getNode("kitchen"))))
-	// 	{
-	// 		printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
-	// 		plane->collisionObject->computeAABB();
-	// 		fcl::AABB a1 = plane->collisionObject->getAABB();
-	// 		fcl::Vec3f v1 = a1.center();
-	// 		printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
-	// 	}
-	// 
-	// 	printf("((((((%d))))))\n", innerModel->collide("kitchen", "munonMesh"));
-
-
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	QMap<QString, BodyPart>::iterator iterador;
 	for( iterador = bodyParts.begin(); iterador != bodyParts.end(); ++iterador)
@@ -369,10 +357,8 @@ void SpecificWorker::compute( )
 		if(iterador.value().noTargets() == false)
 		{
 			Target &target = iterador.value().getHeadFromTargets();
-	/*		if (target.isMarkedforRemoval() == false)
-			{
-			//	if ( targetHasAPlan( *innerModel, target ) == true)
- 	*/			if ( target.getType() == Target::TargetType::ALIGNAXIS or  targetHasAPlan( *innerModel, target ) == true)
+	
+ 			if ( target.getType() == Target::TargetType::ALIGNAXIS or  targetHasAPlan( *innerModel, target ) == true)
 				{
 					target.annotateInitialTipPose();
 					target.setInitialAngles(iterador.value().getMotorList());
@@ -442,7 +428,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 // 	else
 //	{
 		qDebug() << __FUNCTION__ << "Calling Full Power of RRTConnect OMPL planner. This may take a while";
-
+		Target lastTarget = target;
 		if (planner->computePath(origin, target.getTranslation(), 5) == false)
 			return false;
 //	}
@@ -462,8 +448,11 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 		t.setHasPlan(true);
 		if(i==0)
 			target = t;
+		if(i==path.size()-1)
+			t.setWeights( lastTarget.getWeights() );
 		bodyParts["RIGHTARM"].addTargetToList(t);
 	}
+	
 	return true;
 }
 
@@ -643,12 +632,12 @@ void SpecificWorker::advanceAlongAxis(const string& bodyPart, const Axis& ax, fl
 }
 
 /**
- * @brief Set the fingers position so there is d mm between them
+ * @brief Set the fingers of the right hand position so there is d mm between them
  *
  * @param d millimeters between fingers
  * @return void
  */
-void SpecificWorker::setFingers(float d)
+void SpecificWorker::setFingers(float d)  ///ONLY RIGHT HAND. FIX
 {
 	qDebug() << __FUNCTION__;
 

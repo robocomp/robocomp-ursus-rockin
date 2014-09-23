@@ -16,14 +16,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
  #include "specificworker.h"
 
 /**
 * \brief Default constructor
 */
 
-SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)	
+SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
 
@@ -41,11 +41,19 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	// STUFF
+	//
+
+
+	// ACTION EXECUTION
+	//
+	actionExecution();
+
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-	
+
 	try
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("GraspingAgent.InnerModel") ;
@@ -66,7 +74,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		qFatal("Error reading config params");
 	}
 
-	
+
 	timer.start(Period);
 	return true;
 }
@@ -201,4 +209,9 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	{
 		exit(1);
 	}
+}
+
+void SpecificWorker::actionExecution()
+{
+
 }

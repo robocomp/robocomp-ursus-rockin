@@ -62,6 +62,7 @@
 	<link src="7" dst="8" label="noReach" />
 	<link src="7" dst="8" label="position" />
 	<link src="7" dst="8" label="reachable" />
+	<link src="7" dst="8" label="explored" />
 
 
 	<!-- Person -->

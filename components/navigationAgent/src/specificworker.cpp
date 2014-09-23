@@ -46,14 +46,15 @@ void SpecificWorker::compute( )
 	// to be done
 	//
 
-
 	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
 	//
-	updateRobotsLocation();
+	updateRobotsCognitiveLocation();
 
 	// ACTION EXECUTION
 	//
+	/*
 	actionExecution();
+	*/
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -149,7 +150,7 @@ void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modificat
 {
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	if (roomsPolygons.size()==0)
+	if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
 		roomsPolygons = extractPolygonsFromModel(worldModel);
 	mutex->unlock();
 }
@@ -247,9 +248,6 @@ void SpecificWorker::go(float x, float z, float alpha, bool rot)
 
 void SpecificWorker::actionExecution()
 {
-	static float lastX = std::numeric_limits<float>::quiet_NaN();
-	static float lastZ = std::numeric_limits<float>::quiet_NaN();
-
 	try
 	{
 		planningState = trajectoryrobot2d_proxy->getState();
@@ -260,39 +258,15 @@ void SpecificWorker::actionExecution()
 	}
 	if (action == "changeroom")
 	{
-		printf("%s\n", action.c_str());
-		AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
-		const float x = str2float(goalRoom->getAttribute("x"));
-		const float z = str2float(goalRoom->getAttribute("z"));
-
-		bool proceed = true;
-		if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
-		{
-			if (abs(lastX-x)<10 and abs(lastZ-z)<10)
-				proceed = false;
-			else
-				printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
-		}
-		else
-		{
-			printf("proceed because it's stoped\n");
-		}
-
-		if (proceed)
-		{
-			lastX = x;
-			lastZ = z;
-			printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
-			go(x, z);
-		}
-		else
-		{
-			printf("%s\n", planningState.state.c_str());
-		}
+		action_ChangeRoom();
+	}
+	else if (action == "findobjectvisuallyintable")
+	{
+		action_FindObjectVisuallyInTable();
 	}
 }
 
-void SpecificWorker::updateRobotsLocation()
+void SpecificWorker::updateRobotsCognitiveLocation()
 {
 	// If the polygons are not set yet, there's nothing to do...
 	if (roomsPolygons.size()==0)
@@ -336,40 +310,58 @@ std::map<int32_t, QPolygonF> SpecificWorker::extractPolygonsFromModel(AGMModel::
 {
 	std::map<int32_t, QPolygonF> ret;
 
-	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	for (AGMModel::iterator symbol_itRR=worldModel->begin(); symbol_itRR!=worldModel->end(); symbol_itRR++)
 	{
-		const AGMModelSymbol::SPtr &symbol = *symbol_it;
-		if (symbol->symbolType == "object")
+		const AGMModelSymbol::SPtr &symbolRR = *symbol_itRR;
+		if (symbolRR->symbolType == "robot")
 		{
-			for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+			for (AGMModelSymbol::iterator edge_itRR=symbolRR->edgesBegin(worldModel); edge_itRR!=symbolRR->edgesEnd(worldModel); edge_itRR++)
 			{
-				AGMModelEdge edge = *edge_it;
-				if (edge.linking == "room")
+				AGMModelEdge edgeRR = *edge_itRR;
+				if (edgeRR.linking == "know")
 				{
-					const QString polygonString = QString::fromStdString(symbol->getAttribute("polygon"));
-					const QStringList coords = polygonString.split(";");
-					if (coords.size() < 3)
+					const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(edgeRR.symbolPair.first);
+					if (symbol->symbolType == "object")
 					{
-						qFatal("%s %d", __FILE__, __LINE__);
-					}
+						printf("object: %d\n", symbol->identifier);
+						for (AGMModelSymbol::iterator edge_it=symbol->edgesBegin(worldModel); edge_it!=symbol->edgesEnd(worldModel); edge_it++)
+						{
+							AGMModelEdge edge = *edge_it;
+							if (edge.linking == "room")
+							{
+								const QString polygonString = QString::fromStdString(symbol->getAttribute("polygon"));
+								const QStringList coords = polygonString.split(";");
+								printf("  it is a room\n");
+								qDebug() << " " << coords.size() << " ___ " << polygonString ;
+								if (coords.size() < 3)
+								{
+									qDebug() << coords.size() << " ___ " << polygonString ;
+									qDebug() << polygonString;
+									for (int32_t i=0; i<coords.size(); i++)
+										qDebug() << coords[i];
+									qFatal("ABORT %s %d", __FILE__, __LINE__);
+								}
 
-					QVector<QPointF> points;
-					for (int32_t ci=0; ci<coords.size(); ci++)
-					{
-						const QString &pointStr = coords[ci];
-						if (pointStr.size() < 5) qFatal("%s %d", __FILE__, __LINE__);
-						const QStringList coords2 = pointStr.split(",");
-						if (coords2.size() < 2) qFatal("%s %d", __FILE__, __LINE__);
-						QString a = coords2[0];
-						QString b = coords2[1];
-						a.remove(0,1);
-						b.remove(b.size()-1,1);
-						float x = a.toFloat();
-						float z = b.toFloat();
-						points.push_back(QPointF(x, z));
+								QVector<QPointF> points;
+								for (int32_t ci=0; ci<coords.size(); ci++)
+								{
+									const QString &pointStr = coords[ci];
+									if (pointStr.size() < 5) qFatal("%s %d", __FILE__, __LINE__);
+									const QStringList coords2 = pointStr.split(",");
+									if (coords2.size() < 2) qFatal("%s %d", __FILE__, __LINE__);
+									QString a = coords2[0];
+									QString b = coords2[1];
+									a.remove(0,1);
+									b.remove(b.size()-1,1);
+									float x = a.toFloat();
+									float z = b.toFloat();
+									points.push_back(QPointF(x, z));
+								}
+								if (points.size() < 3) qFatal("%s %d", __FILE__, __LINE__);
+								ret[symbol->identifier] = QPolygonF(points);
+							}
+						}
 					}
-					if (points.size() < 3) qFatal("%s %d", __FILE__, __LINE__);
-					ret[symbol->identifier] = QPolygonF(points);
 				}
 			}
 		}
@@ -439,3 +431,78 @@ void SpecificWorker::setIdentifierOfRobotsLocation(AGMModel::SPtr &model, int32_
 	if (not didSomethin)
 		qFatal("couldn't update robot's room in the cog graph");
 }
+
+
+void SpecificWorker::action_ChangeRoom()
+{
+	static float lastX = std::numeric_limits<float>::quiet_NaN();
+	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+
+	printf("%s\n", action.c_str());
+	AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
+	const float x = str2float(goalRoom->getAttribute("x"));
+	const float z = str2float(goalRoom->getAttribute("z"));
+
+	bool proceed = true;
+	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+	{
+		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+			proceed = false;
+		else
+			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+	}
+	else
+	{
+		printf("proceed because it's stoped\n");
+	}
+
+	if (proceed)
+	{
+		lastX = x;
+		lastZ = z;
+		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
+		go(x, z);
+	}
+	else
+	{
+	}
+}
+
+
+void SpecificWorker::action_FindObjectVisuallyInTable()
+{
+	static float lastX = std::numeric_limits<float>::quiet_NaN();
+	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+
+	printf("%s\n", action.c_str());
+	int32_t tableId = str2int(params["container"].value);
+	AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(tableId);
+	const float x = str2float(goalRoom->getAttribute("x"));
+	const float z = str2float(goalRoom->getAttribute("z"));
+
+	bool proceed = true;
+	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+	{
+		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+			proceed = false;
+		else
+			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+	}
+	else
+	{
+		printf("proceed because it's stoped\n");
+	}
+
+	if (proceed)
+	{
+		lastX = x;
+		lastZ = z;
+		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
+		go(x, z, tableId==7?-3.141592:0, true);
+	}
+	else
+	{
+		printf("%s\n", planningState.state.c_str());
+	}
+}
+
