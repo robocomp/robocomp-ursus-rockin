@@ -313,20 +313,21 @@ void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
 		AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
 		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
-		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
-		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
-		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
-		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
-		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
-		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
-		newTag->attributes["id"] = 
-		newTag->attributes["tx"] = float2str(tag.tx);
-		newTag->attributes["ty"] = float2str(tag.ty);
-		newTag->attributes["tz"] = float2str(tag.tz);
-		newTag->attributes["rx"] = float2str(tag.rx);
-		newTag->attributes["ry"] = float2str(tag.ry);
-		newTag->attributes["rz"] = float2str(tag.rz);
-// 		newTag->attributes["id"] = int2str(tag.id);
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "hasStatus");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "see");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "position");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "reachable");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "noReach");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "classified");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "mug");
+		newTag->attributes["id"] = int2str(tag.id);
+
+		newTag->attributes["tx"] = "1300";
+		newTag->attributes["ty"] = "0";
+		newTag->attributes["tz"] = "-1600";
+		newTag->attributes["rx"] = "0";
+		newTag->attributes["ry"] = "-3.1415926535";
+		newTag->attributes["rz"] = "0";
 // 		newTag->attributes["tx"] = float2str(tag.tx);
 // 		newTag->attributes["ty"] = float2str(tag.ty);
 // 		newTag->attributes["tz"] = float2str(tag.tz);
@@ -339,6 +340,69 @@ void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
 
 void SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t)
 {
+	bool updated = false;
+
+	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	{
+		const AGMModelSymbol::SPtr &symbol = *symbol_it;
+		if (symbol->symbolType == "object")
+		{
+			try
+			{
+				const int32_t tag = str2int(symbol->getAttribute("tag"));
+				if (t.id == tag)
+				{
+// 					QVec v(6);
+// 					v(0) = t.tx;
+// 					v(1) = t.ty;
+// 					v(2) = t.tz;
+// 					v(3) = t.rx;
+// 					v(4) = t.ry;
+// 					v(5) = t.rz;
+// 					QVec worldRef = innerModel->transform("world", v, "rgbd");
+					updated = true;
+				}
+			}
+			catch (...)
+			{
+			}
+		}
+	}
+
+	if (not updated)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		int32_t robotId = newModel->getIdentifierByType("robot");
+		if (robotId == -1)
+		{
+			return;
+		}
+		AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
+		AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
+		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "hasStatus");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "see");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "position");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "reachable");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "noReach");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "classified");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "mug");
+		newTag->attributes["id"] = int2str(tag.id);
+
+		newTag->attributes["tx"] = "1100";
+		newTag->attributes["ty"] = "0";
+		newTag->attributes["tz"] = "-1600";
+		newTag->attributes["rx"] = "0";
+		newTag->attributes["ry"] = "-3.1415926535";
+		newTag->attributes["rz"] = "0";
+// 		newTag->attributes["tx"] = float2str(tag.tx);
+// 		newTag->attributes["ty"] = float2str(tag.ty);
+// 		newTag->attributes["tz"] = float2str(tag.tz);
+// 		newTag->attributes["rx"] = float2str(tag.rx);
+// 		newTag->attributes["ry"] = float2str(tag.ry);
+// 		newTag->attributes["rz"] = float2str(tag.rz);
+
+	}
 
 }
 
