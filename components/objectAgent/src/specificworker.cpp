@@ -213,25 +213,28 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::newAprilTag(const tagsList &list)
 {
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+	bool publishModel = false;
 	for (auto ap : list)
 	{
 		printf("%d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 		switch(ap.id)
 		{
 			case 0: // EXPLORED TABLE
-				updateTable(ap);
+				if (updateTable(ap)) publishModel = true;
 				break;
 			case 1: // NON-EXPLORED TABLE
-				updateTable(ap);
+				if (updateTable(ap)) publishModel = true;
 				break;
 			case 2: // MUG
-				updateMug(ap);
+				if (updateMug(ap)) publishModel = true;
 				break;
 			case 11:
-				updateMilk(ap);
+				if (updateMilk(ap)) publishModel = true;
 				break;
 			case 12:
-				updateCoffee(ap);
+				if (updateCoffee(ap)) publishModel = true;
 			case 10:
 			case 13:
 				break;
@@ -269,6 +272,11 @@ void SpecificWorker::updateTable(const RoboCompAprilTags::tag &t)
 			}
 		}
 	}
+
+	if (not updated)
+	{
+
+	}
 }
 
 void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
@@ -304,7 +312,6 @@ void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
 
 	if (not updated)
 	{
-		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		int32_t robotId = newModel->getIdentifierByType("robot");
 		if (robotId == -1)
 		{
@@ -312,7 +319,7 @@ void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
 		}
 		AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
-		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newModel->addEdgeByIdentifiers(robotId, newMug->identifier, "know");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "hasStatus");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "see");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "position");
@@ -320,20 +327,21 @@ void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "noReach");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "classified");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "mug");
-		newTag->attributes["id"] = int2str(tag.id);
 
-		newTag->attributes["tx"] = "1300";
-		newTag->attributes["ty"] = "0";
-		newTag->attributes["tz"] = "-1600";
-		newTag->attributes["rx"] = "0";
-		newTag->attributes["ry"] = "-3.1415926535";
-		newTag->attributes["rz"] = "0";
-// 		newTag->attributes["tx"] = float2str(tag.tx);
-// 		newTag->attributes["ty"] = float2str(tag.ty);
-// 		newTag->attributes["tz"] = float2str(tag.tz);
-// 		newTag->attributes["rx"] = float2str(tag.rx);
-// 		newTag->attributes["ry"] = float2str(tag.ry);
-// 		newTag->attributes["rz"] = float2str(tag.rz);
+		newMug->attributes["id"] = int2str(t.id);
+
+		newMug->attributes["tx"] = "1300";
+		newMug->attributes["ty"] = "0";
+		newMug->attributes["tz"] = "-1600";
+		newMug->attributes["rx"] = "0";
+		newMug->attributes["ry"] = "-3.1415926535";
+		newMug->attributes["rz"] = "0";
+// 		newMug->attributes["tx"] = float2str(t.tx);
+// 		newMug->attributes["ty"] = float2str(t.ty);
+// 		newMug->attributes["tz"] = float2str(t.tz);
+// 		newMug->attributes["rx"] = float2str(t.rx);
+// 		newMug->attributes["ry"] = float2str(t.ry);
+// 		newMug->attributes["rz"] = float2str(t.rz);
 
 	}
 }
@@ -371,36 +379,36 @@ void SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t)
 
 	if (not updated)
 	{
-		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		int32_t robotId = newModel->getIdentifierByType("robot");
 		if (robotId == -1)
 		{
 			return;
 		}
-		AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
-		AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
-		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "hasStatus");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "see");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "position");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "reachable");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "noReach");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "classified");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "mug");
-		newTag->attributes["id"] = int2str(tag.id);
+		AGMModelSymbol::SPtr newMilk = newModel->newSymbol("object");
+		AGMModelSymbol::SPtr newMilkStatus = newModel->newSymbol("objectSt");
+		newModel->addEdgeByIdentifiers(robotId, newMilk->identifier, "know");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "hasStatus");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "see");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "position");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "reachable");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "noReach");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "classified");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "mug");
 
-		newTag->attributes["tx"] = "1100";
-		newTag->attributes["ty"] = "0";
-		newTag->attributes["tz"] = "-1600";
-		newTag->attributes["rx"] = "0";
-		newTag->attributes["ry"] = "-3.1415926535";
-		newTag->attributes["rz"] = "0";
-// 		newTag->attributes["tx"] = float2str(tag.tx);
-// 		newTag->attributes["ty"] = float2str(tag.ty);
-// 		newTag->attributes["tz"] = float2str(tag.tz);
-// 		newTag->attributes["rx"] = float2str(tag.rx);
-// 		newTag->attributes["ry"] = float2str(tag.ry);
-// 		newTag->attributes["rz"] = float2str(tag.rz);
+		newMilk->attributes["id"] = int2str(t.id);
+
+		newMilk->attributes["tx"] = "1100";
+		newMilk->attributes["ty"] = "0";
+		newMilk->attributes["tz"] = "-1600";
+		newMilk->attributes["rx"] = "0";
+		newMilk->attributes["ry"] = "-3.1415926535";
+		newMilk->attributes["rz"] = "0";
+// 		newMilk->attributes["tx"] = float2str(t.tx);
+// 		newMilk->attributes["ty"] = float2str(t.ty);
+// 		newMilk->attributes["tz"] = float2str(t.tz);
+// 		newMilk->attributes["rx"] = float2str(t.rx);
+// 		newMilk->attributes["ry"] = float2str(t.ry);
+// 		newMilk->attributes["rz"] = float2str(t.rz);
 
 	}
 

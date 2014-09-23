@@ -79,7 +79,7 @@
 				</transform>
 			</transform>
 
-			<transform id="t_human" tx="2200" ty="-94" tz="2000">
+			<transform id="t_human" tx="1200" ty="906" tz="2000">
 				<mesh id="mesh-human" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/human.3ds" scale="145,145,145" ty="0" tz="0" rx="1.57079632679"  />
 			</transform>
 
