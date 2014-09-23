@@ -213,11 +213,75 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::actionExecution()
 {
+	static std::string previousAction = "";
+	if (previousAction != action)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}
+
+	if (action == "findobjectvisuallyintable")
+	{
+		action_FindObjectVisuallyInTable();
+	}
+}
+
+void SpecificWorker::action_FindObjectVisuallyInTable()
+{
+	int32_t tableId = str2int(params["container"].value);
+	AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
+	const float x = str2float(goalTable->getAttribute("x"));
+	const float z = str2float(goalTable->getAttribute("z"));
+	QVec robotRef = innerModel->transform("robot", QVec::vec3(x, 800, z), "world");
+	saccadic3D(robotRef, QVec::vec3(0,-1,0));
+}
 
 
+void SpecificWorker::saccadic3D(QVec point, QVec axis)
+{
+	saccadic3D(point(0), point(1), point(2), axis(0), axis(1), axis(2));
+}
+
+void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
+{
+	RoboCompBodyInverseKinematics::Pose6D targetSight;
+	targetSight.x = tx;
+	targetSight.y = ty;
+	targetSight.z = tz;
+	RoboCompBodyInverseKinematics::Axis axSight;
+	axSight.x = axx;
+	axSight.y = axy;
+	axSight.z = axz;
+	bool axisConstraint = false;
+	float axisAngleConstraint = 0;
+	try
+	{
+		bodyinversekinematics_proxy->stop("HEAD");
+		usleep(500000);
+		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
+	}
+	catch(...)
+	{
+		printf("IK connection error\n");
+	}
 }
 
 
 
+void SpecificWorker::updateInnerModel()
+{
+	try
+	{
+		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
+		const float x     = str2float(robot->getAttribute("x"));
+		const float z     = str2float(robot->getAttribute("z"));
+		const float alpha = str2float(robot->getAttribute("alpha"));
+		innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
+	}
+	catch(...)
+	{
+		return;
+	}
+}
 
 

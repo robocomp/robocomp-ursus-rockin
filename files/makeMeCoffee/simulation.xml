@@ -247,7 +247,7 @@
 																				<transform id="grabPositionHandR" tz="150">
 																				</transform>
 																				<transform id= "munon_t" tz = "150">
-																						<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="40,40,40"   />
+																					<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="40,40,40"   />
 																				</transform>
 																				</joint>
 																			</transform>

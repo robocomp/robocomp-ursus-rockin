@@ -41,6 +41,13 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	static std::string previousAction = "";
+	if (previousAction != action)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}
+
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -206,6 +213,9 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::newAprilTag(const tagsList &list)
 {
-	
+	for (auto ap in list)
+	{
+		printf("%d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+	}
 }
 

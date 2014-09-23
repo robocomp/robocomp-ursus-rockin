@@ -22,7 +22,7 @@
 	<!-- Explored table -->
 	<symbol id="5" type="object">
 		<attribute key="x" value="1240" />
-		<attribute key="z" value="1050" />
+		<attribute key="z" value="1300" />
 		<attribute key="polygon" value="(-842,1854);(775,1854);(775,751);(-842,751)" />
 	</symbol>
 	<link src="1" dst="5" label="know" />
@@ -61,7 +61,7 @@
 	<symbol id="7" type="object">
 
 		<attribute key="x" value="1240" />
-		<attribute key="z" value="-1080" />
+		<attribute key="z" value="-2000" />
 		<attribute key="polygon" value="(-842,-1746);(775,-1746);(775,-2320);(-842,-2320)" />
 	</symbol>
 	<link src="1" dst="7" label="know" />
