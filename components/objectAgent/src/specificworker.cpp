@@ -213,9 +213,139 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::newAprilTag(const tagsList &list)
 {
-	for (auto ap in list)
+	for (auto ap : list)
 	{
 		printf("%d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+		switch(ap.id)
+		{
+			case 0: // EXPLORED TABLE
+				updateTable(ap);
+				break;
+			case 1: // NON-EXPLORED TABLE
+				updateTable(ap);
+				break;
+			case 2: // MUG
+				updateMug(ap);
+				break;
+			case 11:
+				updateMilk(ap);
+				break;
+			case 12:
+				updateCoffee(ap);
+			case 10:
+			case 13:
+				break;
+		}
 	}
 }
+
+void SpecificWorker::updateTable(const RoboCompAprilTags::tag &t)
+{
+	bool updated = false;
+
+	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	{
+		const AGMModelSymbol::SPtr &symbol = *symbol_it;
+		if (symbol->symbolType == "object")
+		{
+			try
+			{
+				const int32_t tag = str2int(symbol->getAttribute("tag"));
+				if (t.id == tag)
+				{
+// 					QVec v(6);
+// 					v(0) = t.tx;
+// 					v(1) = t.ty;
+// 					v(2) = t.tz;
+// 					v(3) = t.rx;
+// 					v(4) = t.ry;
+// 					v(5) = t.rz;
+// 					QVec worldRef = innerModel->transform("world", v, "rgbd");
+					updated = true;
+				}
+			}
+			catch (...)
+			{
+			}
+		}
+	}
+}
+
+void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
+{
+	bool updated = false;
+
+	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	{
+		const AGMModelSymbol::SPtr &symbol = *symbol_it;
+		if (symbol->symbolType == "object")
+		{
+			try
+			{
+				const int32_t tag = str2int(symbol->getAttribute("tag"));
+				if (t.id == tag)
+				{
+// 					QVec v(6);
+// 					v(0) = t.tx;
+// 					v(1) = t.ty;
+// 					v(2) = t.tz;
+// 					v(3) = t.rx;
+// 					v(4) = t.ry;
+// 					v(5) = t.rz;
+// 					QVec worldRef = innerModel->transform("world", v, "rgbd");
+					updated = true;
+				}
+			}
+			catch (...)
+			{
+			}
+		}
+	}
+
+	if (not updated)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		int32_t robotId = newModel->getIdentifierByType("robot");
+		if (robotId == -1)
+		{
+			return;
+		}
+		AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
+		AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
+		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "knows");
+		newTag->attributes["id"] = 
+		newTag->attributes["tx"] = float2str(tag.tx);
+		newTag->attributes["ty"] = float2str(tag.ty);
+		newTag->attributes["tz"] = float2str(tag.tz);
+		newTag->attributes["rx"] = float2str(tag.rx);
+		newTag->attributes["ry"] = float2str(tag.ry);
+		newTag->attributes["rz"] = float2str(tag.rz);
+// 		newTag->attributes["id"] = int2str(tag.id);
+// 		newTag->attributes["tx"] = float2str(tag.tx);
+// 		newTag->attributes["ty"] = float2str(tag.ty);
+// 		newTag->attributes["tz"] = float2str(tag.tz);
+// 		newTag->attributes["rx"] = float2str(tag.rx);
+// 		newTag->attributes["ry"] = float2str(tag.ry);
+// 		newTag->attributes["rz"] = float2str(tag.rz);
+
+	}
+}
+
+void SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t)
+{
+
+}
+
+void SpecificWorker::updateCoffee(const RoboCompAprilTags::tag &t)
+{
+
+}
+
+
 

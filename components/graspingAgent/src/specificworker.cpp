@@ -29,6 +29,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
+
+	bodyinversekinematics_proxy->goHome("RIGHTARM");
+
 }
 
 /**

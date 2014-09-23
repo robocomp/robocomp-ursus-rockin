@@ -65,7 +65,10 @@ private:
 
 	void newAprilTag(const tagsList &list);
 
-
+	void updateTable(const RoboCompAprilTags::tag &t);
+	void updateMug(const RoboCompAprilTags::tag &t);
+	void updateMilk(const RoboCompAprilTags::tag &t);
+	void updateCoffee(const RoboCompAprilTags::tag &t);
 
 
 private:
