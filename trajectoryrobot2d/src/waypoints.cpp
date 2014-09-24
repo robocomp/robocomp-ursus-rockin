@@ -215,7 +215,8 @@ bool WayPoints::draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *
 	pose.rx = pose.ry = pose.z = 0.;
 	
 	try
-	{	std::string  parentAll = "road";
+	{	
+		std::string  parentAll = "road";
 		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);		
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)

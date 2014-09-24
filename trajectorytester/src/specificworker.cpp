@@ -603,10 +603,10 @@ void SpecificWorker::drawAxis(const QString& name, const QString &parent)
 	removeAxis(name);
 	try
 	{
-		//float OX = 50; 
-		//float OZ = 50;
-		float OX = 0; 
-		float OZ = 0;
+		float OX = 50; 
+		float OZ = 50;
+		//float OX = 0; 
+		//float OZ = 0;
 		
 		QVec p =innerModel->transform(parent,QVec::zeros(6),name);
 		RoboCompInnerModelManager::Pose3D pose;
