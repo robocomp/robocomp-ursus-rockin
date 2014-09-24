@@ -76,13 +76,6 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 o
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make && bin/objectcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/objectAgentCOFFEE.conf'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'objectAgent'
 
-# graspingAgent
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
-sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent'
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 graspingcomp'
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make && bin/graspingcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgentCOFFEE.conf'
-qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'graspingAgent'
 
 # Mission
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
@@ -91,6 +84,15 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/rob
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 missionagent'
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make && bin/missionagent --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/missionCOFFEE.conf'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'mission'
+
+sleep 2
+# graspingAgent
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 graspingcomp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make && bin/graspingcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgentCOFFEE.conf'
+qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'graspingAgent'
 
 
 
