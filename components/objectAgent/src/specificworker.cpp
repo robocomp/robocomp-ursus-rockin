@@ -47,7 +47,6 @@ void SpecificWorker::compute( )
 		previousAction = action;
 		printf("New action: %s\n", action.c_str());
 	}
-
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -213,6 +212,8 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::newAprilTag(const tagsList &list)
 {
+	if (worldModel->numberOfSymbols() == 0) return;
+
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 
 	bool publishModel = false;
@@ -275,6 +276,7 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 			}
 			catch (...)
 			{
+				printf("%s: %d\n", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -289,42 +291,29 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 
 bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
-	return false;
 	bool existing = false;
 
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
 		const AGMModelSymbol::SPtr &symbol = *symbol_it;
-		if (symbol->symbolType == "object")
-		{
-			try
-			{
+		if (symbol->symbolType == "object") {
+			try {
 				const int32_t tag = str2int(symbol->getAttribute("tag"));
-				if (t.id == tag)
-				{
-// 					QVec v(6);
-// 					v(0) = t.tx;
-// 					v(1) = t.ty;
-// 					v(2) = t.tz;
-// 					v(3) = t.rx;
-// 					v(4) = t.ry;
-// 					v(5) = t.rz;
+				if (t.id == tag) {
+// 					QVec v(6); v(0) = t.tx; v(1) = t.ty; v(2) = t.tz; v(3) = t.rx; v(4) = t.ry; v(5) = t.rz;
 // 					QVec worldRef = innerModel->transform("world", v, "rgbd");
 					existing = true;
 				}
 			}
-			catch (...)
-			{
-			}
+			catch (...) { }
 		}
 	}
 
-	if (not existing)
-	{
+	if (not existing) {
 		int32_t robotId = newModel->getIdentifierByType("robot");
 		if (robotId == -1)
 		{
-			return true;
+			return false;
 		}
 		AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
@@ -333,12 +322,13 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "see");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "position");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "reachable");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "noReach");
+		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "reach");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "classified");
 		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "mug");
 
-		newMug->attributes["id"] = int2str(t.id);
-
+		const std::string tagIdStr = int2str(t.id);
+		printf("--%s--\n", tagIdStr.c_str());
+		newMug->attributes["tag"] = tagIdStr;
 		newMug->attributes["tx"] = "1300";
 		newMug->attributes["ty"] = "0";
 		newMug->attributes["tz"] = "-1600";
@@ -351,11 +341,19 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 // 		newMug->attributes["rx"] = float2str(t.rx);
 // 		newMug->attributes["ry"] = float2str(t.ry);
 // 		newMug->attributes["rz"] = float2str(t.rz);
+
+// 		int32_t tableId = str2int(params["container"].value);
+// 		if (tableId != -1)
+		{
+			newModel->addEdgeByIdentifiers(newMug->identifier,  7, "in");
+		}
 	}
 
 	const bool forcePublishModel = not existing;
+	printf("force publish by mug %d (%d)\n", forcePublishModel, t.id);
 	return forcePublishModel;
 }
+
 
 bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
@@ -364,32 +362,20 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
 		const AGMModelSymbol::SPtr &symbol = *symbol_it;
-		if (symbol->symbolType == "object")
-		{
-			try
-			{
+		if (symbol->symbolType == "object") {
+			try {
 				const int32_t tag = str2int(symbol->getAttribute("tag"));
-				if (t.id == tag)
-				{
-// 					QVec v(6);
-// 					v(0) = t.tx;
-// 					v(1) = t.ty;
-// 					v(2) = t.tz;
-// 					v(3) = t.rx;
-// 					v(4) = t.ry;
-// 					v(5) = t.rz;
+				if (t.id == tag) {
+// 					QVec v(6); v(0) = t.tx; v(1) = t.ty; v(2) = t.tz; v(3) = t.rx; v(4) = t.ry; v(5) = t.rz;
 // 					QVec worldRef = innerModel->transform("world", v, "rgbd");
 					existing = true;
 				}
 			}
-			catch (...)
-			{
-			}
+			catch (...) { }
 		}
 	}
 
-	if (not existing)
-	{
+	if (not existing) {
 		int32_t robotId = newModel->getIdentifierByType("robot");
 		if (robotId == -1)
 		{
@@ -402,14 +388,13 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "see");
 		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "position");
 		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "reachable");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "noReach");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "classified");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "mug");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "reach");
+		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "classifailed");
+// 		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "milk");
 
 		const std::string tagIdStr = int2str(t.id);
 		printf("--%s--\n", tagIdStr.c_str());
 		newMilk->attributes["tag"] = tagIdStr;
-
 		newMilk->attributes["tx"] = "1100";
 		newMilk->attributes["ty"] = "0";
 		newMilk->attributes["tz"] = "-1600";
@@ -422,6 +407,12 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 // 		newMilk->attributes["rx"] = float2str(t.rx);
 // 		newMilk->attributes["ry"] = float2str(t.ry);
 // 		newMilk->attributes["rz"] = float2str(t.rz);
+
+// 		int32_t tableId = str2int(params["container"].value);
+// 		if (tableId != -1)
+		{
+			newModel->addEdgeByIdentifiers(newMilk->identifier,  7, "in");
+		}
 	}
 
 	const bool forcePublishModel = not existing;
