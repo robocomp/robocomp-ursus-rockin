@@ -17,14 +17,15 @@
 
 #include "plannerprm.h"
 
-PlannerPRM::PlannerPRM(const InnerModel& innerModel_, uint nPoints, uint neigh,  QObject *parent)
+PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObject *parent)
 {
 	xMin = 0.;
 	xMax = 10000.;
 	zMin = -10000.;
 	zMax = 0.;
 			
-	innerModel = new InnerModel(innerModel_);
+// 	innerModel = new InnerModel(*innerModel_);
+	innerModel = innerModel_;
 	
 	QList<QRectF> innerRegions;
 	QRectF outerRegion(-1920,3500,  4000,-7000);
@@ -728,9 +729,9 @@ void PlannerPRM::readGraphFromFile(QString name)
 	connectedComponents(cm);
 }
 
-void PlannerPRM::setInnerModel(const InnerModel& innerModel_)
+void PlannerPRM::setInnerModel(InnerModel *innerModel_)
 {
-	innerModel = new InnerModel(innerModel_);
+	innerModel = new InnerModel(*innerModel_);
 }
 
 ////////////////////////////////////////////////////////////////////////

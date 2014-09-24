@@ -310,7 +310,7 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 void SpecificWorker::compute2()
 {
 	static int i=0;
-	//printf("%d\n", i++);
+	printf("%d\n", i++);
 	
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	if (sampler.isStateValidQ(innerModel->transform("world","munon_t")))

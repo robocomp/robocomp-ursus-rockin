@@ -46,9 +46,7 @@ void SpecificWorker::compute( )
 
 	// ACTION EXECUTION
 	//
-	/*
 	actionExecution();
-	*/
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)

@@ -29,9 +29,8 @@ ElasticBand::~ElasticBand()
 
 bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, const CurrentTarget &currentTarget, uint iter)
 {
-	
 	qDebug() << __FILE__ << __FUNCTION__ << "road size"<<  road.size();
-	
+	qDebug() << "laserData" << laserData.size();
 	if( road.isFinished() == true )
 			return false;
 
@@ -85,7 +84,10 @@ bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
 		inhibit = true;  //periodo refractario
 	}
 	if( inhibit )
-		veces = (veces++)%50;  //aprox 5 segs
+	{
+		veces = veces + 1;
+		veces = veces % 50;  //aprox 5 segs
+	}
 	if( veces == 0 )
 		inhibit = false;
 	return true;
@@ -285,7 +287,8 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
  */
 bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
 {	
-	assert(road.size()>1 and laserData.size() > 0);
+	assert(road.size()>1);
+	assert(laserData.size() > 0);
 	
 	float maxAngle, minAngle;
 	if(laserData[0].angle > laserData.back().angle)
