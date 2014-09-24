@@ -20,22 +20,25 @@
 
 #include "controller.h"
 
-Controller::Controller(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, int delay)  //in secs
+Controller::Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, int delay)  //in secs
 {
 	time = QTime::currentTime();
 	this->delay = delay*1000;
 	
+	qDebug() << "kkkkkkkkkkkkkkkK" << laserData.size();
+	qDebug() << "kkkkkkkkkkkkkkkK" << laserData.size();
+	qDebug() << "kkkkkkkkkkkkkkkK" << laserData.size();
 	//compute offsets from laser center to the border of the robot base
 	baseOffsets = computeRobotOffsets(innerModel, laserData);
-
+	printf("baseOffsets.size() = %d\n", (int)baseOffsets.size());
+// 	qFatal("ddede");
 }
 
 Controller::~Controller()
 {
 }
 
-bool Controller::update(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData,
-						RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  WayPoints &road)
+bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  WayPoints &road)
 {	
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive). 
 	static long epoch = 100;
@@ -131,7 +134,8 @@ bool Controller::update(InnerModel &innerModel, const RoboCompLaser::TLaserData 
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
 		
-		bool collision = avoidanceControl(innerModel, road, laserData, vadvance, vrot);
+// 		bool collision = 
+		avoidanceControl(innerModel, road, laserData, vadvance, vrot);
 	
 		/////////////////////////////////////////////////
 		//////   EXECUTION
@@ -165,7 +169,7 @@ bool Controller::update(InnerModel &innerModel, const RoboCompLaser::TLaserData 
  * @param vrot ...
  * @return void
  */
-bool Controller::avoidanceControl(InnerModel& innerModel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot)
+bool Controller::avoidanceControl(InnerModel *innerModel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot)
 {
 	//compute repulsive forces from laser
 	QVec res = QVec::zeros(3);
@@ -175,11 +179,13 @@ bool Controller::avoidanceControl(InnerModel& innerModel, WayPoints& road, const
 	for(auto i : laserData)
 	{
 		//non-linear (exponential) transformation of the magnitude
+printf("%s: %d           (%d)\n", __FILE__, __LINE__, (int)baseOffsets.size());
 		distN = std::max<float>(i.dist - baseOffsets[k], 0);
+printf("%s: %d\n", __FILE__, __LINE__);
 		k++;
 		distNorm = exponentialFunction(distN, 300, 0.1, 0);
 		//qDebug() << distNorm;
-		QVec p = innerModel.laserTo("laser", "laser" , distNorm, i.angle);  //Watch the laser to tobot offset to compute final corrections
+		QVec p = innerModel->laserTo("laser", "laser" , distNorm, i.angle);  //Watch the laser to tobot offset to compute final corrections
 		res += (p * (T)(-1));
 		if( distN < 3) 
 		{
@@ -200,7 +206,7 @@ bool Controller::avoidanceControl(InnerModel& innerModel, WayPoints& road, const
  * @param laserData ...
  * @return std::vector< float, std::allocator >
  */
-std::vector<float> Controller::computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData)
+std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData)
 {
 	//Base geometry GET FROM IM!!!
 	QRectF base( QPointF(-200, 200), QPointF(200, -200));
@@ -212,7 +218,7 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel& innerModel, const
 	{
 		for(k=10; k<4000; k++)
 		{ 
-			p = innerModel.laserTo("robot","laser",k,i.angle);
+			p = innerModel->laserTo("robot","laser",k,i.angle);
 			if( base.contains( QPointF( p.x(), p.z() ) ) == false )
 				break;
 		}

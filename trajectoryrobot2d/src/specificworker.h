@@ -42,14 +42,14 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-			SpecificWorker		(MapPrx& mprx, QWidget *parent = 0);
-			~SpecificWorker		();
+	SpecificWorker(MapPrx& mprx, QWidget *parent = 0);
+	~SpecificWorker();
 			
-	bool 									setParams		(RoboCompCommonBehavior::ParameterList params);
-	void 									go				(const TargetPose& target);
-	void 									setHeadingTo	(const TargetPose& target);
-	void 									changeTarget	(const TargetPose& target);
-	void 									stop			();
+	bool setParams(RoboCompCommonBehavior::ParameterList params);
+	void go(const TargetPose& target);
+	void setHeadingTo(const TargetPose& target);
+	void changeTarget(const TargetPose& target);
+	void stop();
 	RoboCompTrajectoryRobot2D::NavState 	getState		();
 	
 	//void sendData(const RoboCompJoystickAdapter::TData& data);
@@ -63,10 +63,10 @@ private:
 	RoboCompDifferentialRobot::TBaseState 	bState;
 	RoboCompTrajectoryRobot2D::NavState 	compState;
 	RoboCompCommonBehavior::ParameterList 	params;
-	RoboCompLaser::TLaserData 				laserData;
-	RoboCompLaser::TLaserData 				datos;
+	RoboCompLaser::TLaserData laserData;
+	RoboCompLaser::TLaserData datos;
 
-	CurrentTarget 							currentTarget;
+	CurrentTarget currentTarget;
 	
 	InnerModel *innerModel, *innerClon;
 	QVec target;
@@ -94,7 +94,7 @@ private:
 	bool setHeadingCommand(InnerModel *innerModel, float alfa);
 	bool stopCommand();
 	bool changeTargetCommand(InnerModel *innerModel);
-	//bool avoidanceControl(InnerModel& innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed);
+	//bool avoidanceControl(InnerModel *innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed);
 	//std::vector<float> computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData);
 	std::vector<float> baseOffsets;
 	//bool robotLaserCollision(const QVec& p1, const QVec& p2, const QVec& p3, const QVec& p);
@@ -104,8 +104,8 @@ private:
 	float ad,ro;
 	bool newData;
 	void calcularModuloFloat(QVec &angles, float mod);
-	bool checkRobotValidStateAtTarget(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, QVec &target);
-	bool searchRobotValidStateCloseToTarget(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, QVec& target);
+	bool checkRobotValidStateAtTarget(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, QVec &target);
+	bool searchRobotValidStateCloseToTarget(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, QVec& target);
 
 };
 
