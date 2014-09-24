@@ -315,36 +315,31 @@
 
 																		
 																				<!-- El siguiente transform es para que coincidan los ejes de la marca con los del mundo	 -->
-																	<!--			<transform	id="ThandMesh2_pre"  ty="-20" tz= "50" rx="-1.5707963267948966" rz="3.14159265359">
+																				<transform	id="ThandMesh2_pre"  ty="-25" tz= "55" rx="-1.5707963267948966" rz="3.14159265359">
 																				  <transform	id="ThandMesh2" > 
-																				    <plane id="hx" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
-																				    <plane id="hy" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
-																				    <plane id="hz" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />
-																	-->					<!-- Deshacemos la transformación anterior, primero giramos en z, luego y y luego en X. -->
-																			<!--	    <transform id="ThandMesh2_2" rz="-3.14159265359"> 
+																				    <plane id="hx" px="100" pz="10" nx="1" size="3,3,200" repeat="1" texture="#ff0000" />
+																				    <plane id="hy" py="100" pz="10" nx="1" size="3,200,3" repeat="1" texture="#00ff00" />
+																				    <plane id="hz" pz="100"  nx="1" size="200,3,3" repeat="1" texture="#0000ff" />
+																						<!-- Deshacemos la transformación anterior, primero giramos en z, luego y y luego en X. -->
+																						<transform id="ThandMesh2_2" rz="-3.14159265359"> 
 																				      <transform id="ThandMesh2_3" ry="0"> 
-																								<transform id="ThandMesh2_4" rx="1.5707963267948966"> -->
+																								<transform id="ThandMesh2_4" rx="1.5707963267948966"> 
 
 																									<!--  Colocamos la marca -->
-																									<transform id="handMesh2_t" ty="-25" tz="50" rx="0" ry="0,0" rz="3.14159265359">
+																									<transform id="handMesh2_t" ty="0" tz="0" rx="0" ry="0,0" rz="3.14159265359">
 																										<plane id="handMesh2" ny="1" size="71.25,71.25,2" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
 																									</transform>																  
 										
-																									<transform id="ThandMesh2_5" tz="-50" ty="20" tx="0"> 
-																									<transform id="grabPositionHandR"  tz="100">
-																											<plane id="axisx" px="50" nx="1" size="5,5,150" repeat="1" texture="#550000" />
-																											<plane id="axisy" py="50" nx="1" size="5,150,5" repeat="1" texture="#005500" />
-																											<plane id="axisz" pz="50" nx="1" size="150,5,5" repeat="1" texture="#000055" />
-																									</transform>
-																												
-																									
-																		<!--									
-																								</transform>  
+																									<transform id="grabPositionHandR"  tz="50" ty="-20">
+																						<!--					<plane id="axisx" px="50" nx="1" size="3,3,100" repeat="1" texture="#550000" />
+																											<plane id="axisy" py="50" nx="1" size="3,100,3" repeat="1" texture="#005500" />
+																											<plane id="axisz" pz="50" nx="1" size="100,3,3" repeat="1" texture="#000055" />
+																						-->			</transform>																	
 																							</transform>
-																				    </transform>-->
-																		<!--  </transform> -->								
-																		<!--		</transform>
-																		-->	
+																				    </transform>
+																					</transform>							
+																			</transform>
+																			
 																		  </transform>
 																		</joint>
 																	</transform>

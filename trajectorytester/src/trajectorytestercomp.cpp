@@ -82,6 +82,7 @@
 // #include <Remote.h>
 #include <ui_guiDlg.h>
 #include <TrajectoryRobot2D.h>
+#include <InnerModelManager.h>
 #include <JointMotor.h>
 #include <DifferentialRobot.h>
 #include <BodyInverseKinematics.h>
@@ -94,6 +95,7 @@ using namespace std;
 using namespace RoboCompCommonBehavior;
 using namespace RoboCompAprilTags;
 using namespace RoboCompTrajectoryRobot2D;
+using namespace RoboCompInnerModelManager;
 using namespace RoboCompJointMotor;
 using namespace RoboCompDifferentialRobot;
 using namespace RoboCompBodyInverseKinematics;
@@ -130,6 +132,7 @@ int TrajectoryTesterComp::run(int argc, char* argv[])
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
+InnerModelManagerPrx innermodelmanager_proxy;
 JointMotorPrx jointmotor_proxy;
 DifferentialRobotPrx differentialrobot_proxy;
 BodyInverseKinematicsPrx bodyinversekinematics_proxy;
@@ -172,6 +175,17 @@ BodyInverseKinematicsPrx bodyinversekinematics_proxy;
 	}
 	rInfo("TrajectoryRobot2DProxy initialized Ok!");
 	mprx["TrajectoryRobot2DProxy"] = (::IceProxy::Ice::Object*)(&trajectoryrobot2d_proxy);//Remote server proxy creation example
+	try
+	{
+		innermodelmanager_proxy = InnerModelManagerPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("InnerModelManagerProxy") ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("InnerModelManagerProxy initialized Ok!");
+	mprx["InnerModelManagerProxy"] = (::IceProxy::Ice::Object*)(&innermodelmanager_proxy);//Remote server proxy creation example
 	try
 	{
 		jointmotor_proxy = JointMotorPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("JointMotorProxy") ) );
