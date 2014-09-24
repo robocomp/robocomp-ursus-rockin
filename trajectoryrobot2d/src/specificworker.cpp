@@ -162,16 +162,11 @@ void SpecificWorker::computeLuis( )
 		if( reloj2.elapsed() < 100 )
 		{
 			road.clearDraw(innermodelmanager_proxy);
-<<<<<<< HEAD
+
 			//try {	
 			road.draw(innermodelmanager_proxy, innerModel);
 			//
 			//	planner->drawGraph(innermodelmanager_proxy);
-=======
-			planner->cleanGraph(innermodelmanager_proxy);
-			road.draw(innermodelmanager_proxy, innerModel);
-			planner->drawGraph(innermodelmanager_proxy);
->>>>>>> 18f691360d2a45f1608a8671ee8383fa28699e71
 		}
 		reloj.restart();
 	}
