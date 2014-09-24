@@ -61,8 +61,9 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		//Update InnerModel from robot
 	try { differentialrobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
-	try { laserData = laser_proxy->getLaserData(); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
+	// DESCOMENTAR:!!!!!!!!!!!!!!
+	//try { laserData = laser_proxy->getLaserData(); }
+	//catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
 	
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
@@ -105,75 +106,29 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	timer.start(20);	
 	return true;
 };
-void SpecificWorker::computeLuis( )
+
+
+
+
+void SpecificWorker::compute( )
 {	
+	//PARA PROBAR LOS MUEBLES:
+	updateInnerModel(innerModel) ;
 	
-	RoboCompInnerModelManager::Pose3D pose;
-	pose.y = 0;
-	pose.x = 0;
-	pose.z = 0;
-	pose.rx = pose.ry = pose.z = 0.;	
-	RoboCompInnerModelManager::Plane3D plane;
-	plane.px = target.x();	plane.py = 10; plane.pz = target.z();
-	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 150;
-	plane.height = plane.width = 100;
-	
-	try
-	{	
-		innermodelmanager_proxy->addTransform("shit","static","floor", pose);		
-	}
-	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
-	{ 
-		std::cout << ex << std::endl;
-		innermodelmanager_proxy->removeNode("shit");
-		innermodelmanager_proxy->addTransform("shit","static","floor", pose);		
-	}
-	
-	for( int i=0; i<50; i++)
-	{
-		string item = "t_" + QString::number(i).toStdString();
-		pose.x += i*10;
-		innermodelmanager_proxy->addTransform(item,"static","shit", pose);				
-		
-		innermodelmanager_proxy->addPlane(item + "_p", item, plane);
-	}
-	printNumberOfElementsInRCIS();
-// 	printf("############################################################################\n");
-// 	try
-// 	{
-// 		differentialrobot_proxy->getBaseState(bState);
-// 	}
-// 	catch(const Ice::Exception &ex)
-// 	{
-// 		cout << ex << endl;
-// 	}
-// 	try { laserData = laser_proxy->getLaserData(); }
-// 	catch(const Ice::Exception &ex) { cout << ex << endl; }
-// 
-// 
-// 	innerModel->updateTranslationValues("robot", bState.x, 10, bState.z);
-// 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
-// 
-// 	QVec point = innerModel->transform("world", "robot");
-// 	point.print("robot segun IM bueno");
-// // 	innerClon->updateTransformValues("robot", point.x(), point.y(), point.z(), 0, 0, 0);
-// // 	point = innerClon->transform("world", "robot");
-// // 	point.print("robot segun IM clonado");
-// 	
-// 	// OJO con el Inner que se le manda
-// 	if (planner->collisionDetector(point, 0, innerModel) == true) 
-// 		printf("colision\n");
-// 	usleep(500000);
-	
-// 	localizer->localize(laserData, innerModel);
+ 	if (planner->getSampler().checkRobotValidStateAtTarget( innerModel->transform("world","robot") )) 
+ 		qDebug() << "Ho hay colision";
+
 }
+
+
+
 
 /**
  * @brief All architecture goes here. 
  * 
  * @return void
  */
-void SpecificWorker::compute( )
+void SpecificWorker::computeLuis( )
 {		
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
@@ -207,9 +162,16 @@ void SpecificWorker::compute( )
 		if( reloj2.elapsed() < 100 )
 		{
 			road.clearDraw(innermodelmanager_proxy);
+<<<<<<< HEAD
+			//try {	
+			road.draw(innermodelmanager_proxy, innerModel);
+			//
+			//	planner->drawGraph(innermodelmanager_proxy);
+=======
 			planner->cleanGraph(innermodelmanager_proxy);
 			road.draw(innermodelmanager_proxy, innerModel);
 			planner->drawGraph(innermodelmanager_proxy);
+>>>>>>> 18f691360d2a45f1608a8671ee8383fa28699e71
 		}
 		reloj.restart();
 	}
@@ -401,11 +363,13 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner)
 	*/	
 	}
 	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
-	try 
-	{ 
-		laserData = laser_proxy->getLaserData(); 
-	}
-	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
+	
+	// DESCOMENTAR:!!!!!!!!!!!!!
+// 	try 
+// 	{ 
+// 		laserData = laser_proxy->getLaserData(); 
+// 	}
+// 	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
 	if( compState.state == "DISCONNECTED")
 		compState.state = "IDLE";
 	return true;

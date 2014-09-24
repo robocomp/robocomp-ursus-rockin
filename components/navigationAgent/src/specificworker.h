@@ -74,6 +74,7 @@ private:
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
 
+	RoboCompDifferentialRobot::TBaseState bState;
 	RoboCompTrajectoryRobot2D::NavState planningState;
 
 
@@ -84,6 +85,10 @@ private:
 private:
 	void action_ChangeRoom();
 	void action_FindObjectVisuallyInTable();
+	
+	
+	void odometryAndLocationIssues();
+	
 };
 
 #endif

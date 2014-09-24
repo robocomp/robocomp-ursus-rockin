@@ -89,6 +89,7 @@ class PlannerPRM : public QObject
 		void cleanGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
 		bool learnPath(const QList<QVec> &path);
 		bool learnForAWhile();
+		const Sampler & getSampler() const  { return sampler; };
 		
 	private:
 		Graph graph;

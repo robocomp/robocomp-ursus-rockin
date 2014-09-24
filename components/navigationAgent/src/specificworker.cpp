@@ -41,14 +41,8 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-	//  RELOCALIZATION
-	//
-	// to be done
-	//
-
-	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
-	//
-	updateRobotsCognitiveLocation();
+	// ODOMETRY AND LOCATION-RELATED ISSUES
+	odometryAndLocationIssues();
 
 	// ACTION EXECUTION
 	//
@@ -248,6 +242,13 @@ void SpecificWorker::go(float x, float z, float alpha, bool rot)
 
 void SpecificWorker::actionExecution()
 {
+	static std::string previousAction = "";
+	if (previousAction != action)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}
+
 	try
 	{
 		planningState = trajectoryrobot2d_proxy->getState();
@@ -271,11 +272,6 @@ void SpecificWorker::updateRobotsCognitiveLocation()
 	// If the polygons are not set yet, there's nothing to do...
 	if (roomsPolygons.size()==0)
 		return;
-
-	// Get odometry. If there's a problem talking to the robot's platform, abort
-	RoboCompDifferentialRobot::TBaseState bState;
-	try { differentialrobot_proxy->getBaseState(bState);}
-	catch(...) { return; }
 
 	// Get current location according to the model, if the location is not set yet, there's nothing to do either
 	const int32_t currentLocation = getIdentifierOfRobotsLocation(worldModel);
@@ -438,7 +434,6 @@ void SpecificWorker::action_ChangeRoom()
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
 
-	printf("%s\n", action.c_str());
 	AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
 	const float x = str2float(goalRoom->getAttribute("x"));
 	const float z = str2float(goalRoom->getAttribute("z"));
@@ -474,11 +469,10 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
 
-	printf("%s\n", action.c_str());
 	int32_t tableId = str2int(params["container"].value);
-	AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(tableId);
-	const float x = str2float(goalRoom->getAttribute("x"));
-	const float z = str2float(goalRoom->getAttribute("z"));
+	AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
+	const float x = str2float(goalTable->getAttribute("x"));
+	const float z = str2float(goalTable->getAttribute("z"));
 
 	bool proceed = true;
 	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
@@ -498,11 +492,42 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 		lastX = x;
 		lastZ = z;
 		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
-		go(x, z, tableId==7?-3.141592:0, true);
+		go(x, tableId==7?z+400:z-400, tableId==7?-3.141592:0, true);
 	}
 	else
 	{
 		printf("%s\n", planningState.state.c_str());
 	}
 }
+
+
+
+void SpecificWorker::odometryAndLocationIssues()
+{
+	//
+	// Get ODOMETRY and update it in the graph. If there's a problem talking to the robot's platform, abort
+	try
+	{
+		differentialrobot_proxy->getBaseState(bState);
+		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
+		robot->setAttribute("x", float2str(bState.x));
+		robot->setAttribute("z", float2str(bState.z));
+		robot->setAttribute("alpha", float2str(bState.alpha));
+		AGMMisc::publishNodeUpdate(robot, agmagenttopic);
+	}
+	catch(...)
+	{
+		return;
+	}
+
+	//  RELOCALIZATION
+	//
+	// to be done
+	//
+	
+	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
+	//
+	updateRobotsCognitiveLocation();
+}
+
 

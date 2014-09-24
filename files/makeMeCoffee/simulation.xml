@@ -2,8 +2,8 @@
 	<transform id="world">
 
 		<transform id="floor" />
-		<transform id="offset" tz="-3000" tx="-1000">
-			<transform id="piso" rx="1.57079632679" rz="3.14159265359" tx="1200" tz="-500" >
+		<transform id="offset">
+			<transform id="piso" rx="1.57079632679" rz="3.14159265359" tx="200" tz="-3500" >
 				<transform id="pisoP" >
 
 <!--					<mesh id="pared1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared1.osg" scale="10" />
@@ -79,42 +79,42 @@
 				</transform>
 			</transform>
 
-			<transform id="t_human" tx="2200" ty="906" tz="5000">
+			<transform id="t_human" tx="1200" ty="906" tz="2000">
 				<mesh id="mesh-human" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/human.3ds" scale="145,145,145" ty="0" tz="0" rx="1.57079632679"  />
 			</transform>
 
-			<transform id="t_table0" tx="2200" ty="0" tz="4500">
-				<plane id="april-table0" px="0" py="730" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-0.png" />
+			<transform id="t_table0" tx="1200" ty="0" tz="1500">
+				<plane id="april-table0" px="0" py="730" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00000.png" />
 				<mesh id="mesh-table0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,120,150" ty="0" tz="0" rx="1.57079632679"  />
 			</transform>
 
-			<transform id="t_table1" tx="2200" ty="0" tz="1400">
-				<plane id="april-table1" px="0" py="730" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-1.png" />
+			<transform id="t_table1" tx="1200" ty="0" tz="-1600">
+				<plane id="april-table1" px="0" py="730" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00001.png" />
 				<mesh id="mesh-table1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,120,150" ty="0" tz="0" rx="1.57079632679"  />
 			</transform>
 
 
 
-			<transform id="t_mug" tx="2000" ty="0" tz="4500">
-				<plane id="april-mug" px="0" py="855" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-2.png" />
+			<transform id="t_mug" tx="1300" ty="0" tz="-1600">
+				<plane id="april-mug" px="0" py="855" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00002.png" />
 				<mesh id="mesh-mug" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/mug.3ds" scale="170,107,170" ty="790" tz="0" rx="1.57079632679"/>
 			</transform>
 
-			<transform id="t_milk" tx="2100" ty="0" tz="1400">
-				<plane id="april-milk" px="0" py="890" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+			<transform id="t_milk" tx="1100" ty="0" tz="-1600">
+				<plane id="april-milk" px="0" py="890" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00011.png" />
 				<mesh id="mesh-milk" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/milk.3ds" scale="145,145,145" ty="830" tz="0" rz="-2.62" rx="1.57079632679"/>
 			</transform>
 
-			<transform id="t_coffee" tx="2300" ty="0" tz="1400">
-				<plane id="april-coffee" px="0" py="860" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
+			<transform id="t_coffee" tx="1000" ty="0" tz="1500">
+				<plane id="april-coffee" px="0" py="860" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />
 				<mesh id="mesh-coffee" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/coffee.3ds" scale="170,170,170" ty="681" tz="0" rz="-2.4" rx="1.57079632679"/>
 			</transform>
 
 
-			<plane id="derecha"   px="3100" pz="3100" nx="1" size="7000,1400,100"  />
-			<plane id="izquierda" px="-900" pz="3100" nx="1" size="7000,1400,100"  />
-			<plane id="atras"     px="1200" pz="-300"  nz="1" size="4000,1400,100"  />
-			<plane id="frente"    px="1200" pz="6500"  nz="1" size="4000,1400,100"  />
+			<plane id="derecha"   px="2100" pz="100" nx="1" size="7000,1400,100"  />
+			<plane id="izquierda" px="-1900" pz="100" nx="1" size="7000,1400,100"  />
+			<plane id="atras"     px="200" pz="-3300"  nz="1" size="4000,1400,100"  />
+			<plane id="frente"    px="200" pz="3500"  nz="1" size="4000,1400,100"  />
 		</transform>
 
 
@@ -200,7 +200,7 @@
 <!-- 																Gira en Y -->
  																				<plane id="motorWrist2Mesh" px="-15" pz="-20" ny="1" size="66,40,-40" repeat="1" texture="#051105"   />
 																				<joint id="rightWrist2" port="20000" min="-0.1" max="1.5707963267948966" axis="y" home="0" >
- 																					<plane id="handMesh1" pz="60" py="-20" ny="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-10.png"   />
+ 																					<plane id="handMesh1" pz="60" py="-20" ny="1" size="71.25,71.25,5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00010.png"   />
 																					<transform id="axesh2" >
 																						<plane id="xh2" px="50" nx="1" size="1,1,200" repeat="1" texture="#ff0000" />
 																						<plane id="yh2" py="50" nx="1" size="1,200,1" repeat="1" texture="#00ff00" />
@@ -247,7 +247,7 @@
 																				<transform id="grabPositionHandR" tz="150">
 																				</transform>
 																				<transform id= "munon_t" tz = "150">
-																						<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="40,40,40"   />
+																					<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="40,40,40"   />
 																				</transform>
 																				</joint>
 																			</transform>
@@ -298,7 +298,7 @@
 <!-- 																Gira en Y -->
 																					<plane id="motolefrWrist2Mesh" px="-15" pz="-20" ny="1" size="66,40,-40" repeat="1" texture="#051105"   />
 																					<joint id="leftWrist2" port="20000" min="-0.1" max="1.5707963267948966" axis="y" home="0" >
-																						<plane id="handleftMesh1" pz="100" ny="1" size="170,170,5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-3.png"  />
+																						<plane id="handleftMesh1" pz="100" ny="1" size="170,170,5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00003.png"  />
 																						<transform id="grabPositionHandL_pre" tz="0" rx="3.14159265359" >
 																							<transform id="grabPositionHandL" tz="-100" ty="-2.5" >
 																							</transform>

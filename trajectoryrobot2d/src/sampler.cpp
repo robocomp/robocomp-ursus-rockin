@@ -143,14 +143,30 @@ QList<QVec> Sampler::sampleFreeSpaceR2Gaussian(float meanX, float meanY, float s
 	return list;
 }
 
+/**
+ * @brief  CHECK ROBOT VALID STATE AT TARGET
+ * Comprueba el estado del robot (si ha chocado con algo o no). 
+ * 
+ * @param targetPos posicion del robot en el MUNDO (componentes de traslacion).
+ * @param targetRot posicion del robot en el MUNDO (componentes de rotacion).
+ * 
+ * @return bool: - TRUE: cuando las mallas del robot no chocan con las mallas de
+ * 				         cualquier objeto del mundo.
+ * 				 - FALSE: cuando alguna malla del robot choca con alguna malla
+ * 						  de cualquier objeto del mundo.
+ */ 
 //Does not return IM to its original state
 bool Sampler::checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &targetRot) const 
 {
 	innerModel->updateTransformValues("robot", targetPos.x(), targetPos.y(), targetPos.z(), targetRot.x(), targetRot.y(), targetRot.z());
+	
 	for ( auto in : robotNodes )
 		for ( auto out : restNodes )
 			if ( innerModel->collide( in, out))
+			{
+				qDebug() << "collision de " << in << " con " << out;
 				return false;
+			}
 
 	return true;
 }
