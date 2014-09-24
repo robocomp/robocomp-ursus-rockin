@@ -222,31 +222,37 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 		switch(ap.id)
 		{
 			case 0: // EXPLORED TABLE
-				if (updateTable(ap)) publishModel = true;
+				if (updateTable(ap, newModel)) publishModel = true;
 				break;
 			case 1: // NON-EXPLORED TABLE
-				if (updateTable(ap)) publishModel = true;
+				if (updateTable(ap, newModel)) publishModel = true;
 				break;
 			case 2: // MUG
-				if (updateMug(ap)) publishModel = true;
+				if (updateMug(ap, newModel)) publishModel = true;
 				break;
 			case 11:
-				if (updateMilk(ap)) publishModel = true;
+				if (updateMilk(ap, newModel)) publishModel = true;
 				break;
 			case 12:
-				if (updateCoffee(ap)) publishModel = true;
+				if (updateCoffee(ap, newModel)) publishModel = true;
 			case 10:
 			case 13:
 				break;
 		}
 	}
+
+	if (publishModel)
+	{
+		sendModificationProposal(worldModel, newModel);
+	}
 }
 
-void SpecificWorker::updateTable(const RoboCompAprilTags::tag &t)
+bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
-	bool updated = false;
+	return false;
+	bool existing = false;
 
-	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
 		const AGMModelSymbol::SPtr &symbol = *symbol_it;
 		if (symbol->symbolType == "object")
@@ -264,7 +270,7 @@ void SpecificWorker::updateTable(const RoboCompAprilTags::tag &t)
 // 					v(4) = t.ry;
 // 					v(5) = t.rz;
 // 					QVec worldRef = innerModel->transform("world", v, "rgbd");
-					updated = true;
+					existing = true;
 				}
 			}
 			catch (...)
@@ -273,17 +279,20 @@ void SpecificWorker::updateTable(const RoboCompAprilTags::tag &t)
 		}
 	}
 
-	if (not updated)
+	if (not existing)
 	{
 
 	}
+
+	return (not existing);
 }
 
-void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
+bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
-	bool updated = false;
+	return false;
+	bool existing = false;
 
-	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
 		const AGMModelSymbol::SPtr &symbol = *symbol_it;
 		if (symbol->symbolType == "object")
@@ -301,7 +310,7 @@ void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
 // 					v(4) = t.ry;
 // 					v(5) = t.rz;
 // 					QVec worldRef = innerModel->transform("world", v, "rgbd");
-					updated = true;
+					existing = true;
 				}
 			}
 			catch (...)
@@ -310,12 +319,12 @@ void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
 		}
 	}
 
-	if (not updated)
+	if (not existing)
 	{
 		int32_t robotId = newModel->getIdentifierByType("robot");
 		if (robotId == -1)
 		{
-			return;
+			return true;
 		}
 		AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
@@ -342,15 +351,17 @@ void SpecificWorker::updateMug(const RoboCompAprilTags::tag &t)
 // 		newMug->attributes["rx"] = float2str(t.rx);
 // 		newMug->attributes["ry"] = float2str(t.ry);
 // 		newMug->attributes["rz"] = float2str(t.rz);
-
 	}
+
+	const bool forcePublishModel = not existing;
+	return forcePublishModel;
 }
 
-void SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t)
+bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
-	bool updated = false;
+	bool existing = false;
 
-	for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
 		const AGMModelSymbol::SPtr &symbol = *symbol_it;
 		if (symbol->symbolType == "object")
@@ -368,7 +379,7 @@ void SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t)
 // 					v(4) = t.ry;
 // 					v(5) = t.rz;
 // 					QVec worldRef = innerModel->transform("world", v, "rgbd");
-					updated = true;
+					existing = true;
 				}
 			}
 			catch (...)
@@ -377,12 +388,12 @@ void SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t)
 		}
 	}
 
-	if (not updated)
+	if (not existing)
 	{
 		int32_t robotId = newModel->getIdentifierByType("robot");
 		if (robotId == -1)
 		{
-			return;
+			return false;
 		}
 		AGMModelSymbol::SPtr newMilk = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newMilkStatus = newModel->newSymbol("objectSt");
@@ -395,7 +406,9 @@ void SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t)
 		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "classified");
 		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "mug");
 
-		newMilk->attributes["id"] = int2str(t.id);
+		const std::string tagIdStr = int2str(t.id);
+		printf("--%s--\n", tagIdStr.c_str());
+		newMilk->attributes["tag"] = tagIdStr;
 
 		newMilk->attributes["tx"] = "1100";
 		newMilk->attributes["ty"] = "0";
@@ -409,14 +422,17 @@ void SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t)
 // 		newMilk->attributes["rx"] = float2str(t.rx);
 // 		newMilk->attributes["ry"] = float2str(t.ry);
 // 		newMilk->attributes["rz"] = float2str(t.rz);
-
 	}
 
+	const bool forcePublishModel = not existing;
+	printf("force publish by milk %d (%d)\n", forcePublishModel, t.id);
+	return forcePublishModel;
 }
 
-void SpecificWorker::updateCoffee(const RoboCompAprilTags::tag &t)
+bool SpecificWorker::updateCoffee(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
 
+	return false;
 }
 
 

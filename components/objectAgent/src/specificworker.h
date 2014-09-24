@@ -65,10 +65,10 @@ private:
 
 	void newAprilTag(const tagsList &list);
 
-	void updateTable(const RoboCompAprilTags::tag &t);
-	void updateMug(const RoboCompAprilTags::tag &t);
-	void updateMilk(const RoboCompAprilTags::tag &t);
-	void updateCoffee(const RoboCompAprilTags::tag &t);
+	bool updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
+	bool updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
+	bool updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
+	bool updateCoffee(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
 
 
 private:
