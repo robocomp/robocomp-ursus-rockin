@@ -3,13 +3,17 @@ import "/robocomp/interfaces/IDSLs/AGMExecutive.idsl";
 import "/robocomp/interfaces/IDSLs/AGMCommonBehavior.idsl";
 import "/robocomp/interfaces/IDSLs/AGMWorldModel.idsl";
 
+import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
+import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
+
 Component objectComp
 {
 	Communications
 	{
+		requires JointMotor;
 		implements AGMCommonBehavior;
 		publishes AGMAgentTopic;
-		subscribesTo AGMExecutiveTopic;
+		subscribesTo AGMExecutiveTopic, AprilTags;
 	};
 	language Cpp;
 	gui Qt(QWidget);

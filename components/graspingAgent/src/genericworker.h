@@ -28,6 +28,8 @@
 #include <ui_guiDlg.h>
 #include "config.h"
 #include <agm.h>
+#include <JointMotor.h>
+#include <BodyInverseKinematics.h>
 #include <AGMAgent.h>
 #include <AGMCommonBehavior.h>
 #include <AGMExecutive.h>
@@ -43,6 +45,8 @@ using namespace std;
        \brief
        @author authorname
 */
+using namespace RoboCompJointMotor;
+using namespace RoboCompBodyInverseKinematics;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMAgent;
@@ -73,6 +77,8 @@ public:
 	bool deactivate();
 	bool isActive() { return active; }
 	RoboCompAGMWorldModel::BehaviorResultType status();
+	JointMotorPrx jointmotor_proxy;
+	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
 	AGMAgentTopicPrx agmagenttopic;
 	virtual bool activateAgent(const ParameterMap& prs) = 0;
 	virtual bool deactivateAgent() = 0;

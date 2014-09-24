@@ -112,7 +112,8 @@ void SpecificWorker::init()
 	listaCabeza 		<< "head1" << "head2" << "head3";
 	listaMotores 		<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
 						<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
-						<< "base" << "head1" << "head2" << "head3";
+// 						<< "base" 
+						<< "head1" << "head2" << "head3";
 
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
@@ -873,25 +874,37 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 	try
 	{
 		MotorList mList;
-		for(int i=0; i<listaJoints.size(); i++)
+		for (int i=0; i<listaJoints.size(); i++)
+		{
+// 			qDebug() << i;
 			mList.push_back(listaJoints[i].toStdString());
+		}
 
 		RoboCompJointMotor::MotorStateMap mMap = proxy->getMotorStateMap(mList);
 
-		for(int j=0; j<listaJoints.size(); j++)
+		for (int j=0; j<listaJoints.size(); j++)
+		{
+// 			qDebug() << j;
 			innerModel->updateJointValue(listaJoints[j], mMap.at(listaJoints[j].toStdString()).pos);
-
-	} catch (const Ice::Exception &ex)
-	{	cout<<"--> Excepción en actualizar InnerModel: "<<ex<<endl; }
+		}
+	}
+	catch (const Ice::Exception &ex)
+	{
+		cout<<"--> Excepción en actualizar InnerModel: "<<ex<<endl;
+	}
 
 	try
 	{
+// 		qDebug() << "<";
 		RoboCompDifferentialRobot::TBaseState bState;
 		differentialrobot_proxy->getBaseState( bState );
 		innerModel->updateTransformValues("robot", bState.x/1000, 0, bState.z/1000, 0, bState.alpha, 0);
-
-	} catch (const Ice::Exception &ex)
-	{		cout<<"--> Excepción reading DifferentialRobot: "<<ex<<endl;	}
+// 		qDebug() << ">";
+	}
+	catch (const Ice::Exception &ex)
+	{
+		cout<<"--> Excepción reading DifferentialRobot: "<<ex<<endl;
+	}
 }
 
 

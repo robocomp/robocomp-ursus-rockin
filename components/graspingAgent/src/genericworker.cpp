@@ -28,6 +28,8 @@ QObject()
 #endif
 
 {
+	jointmotor_proxy = (*(JointMotorPrx*)mprx["JointMotorProxy"]);
+	bodyinversekinematics_proxy = (*(BodyInverseKinematicsPrx*)mprx["BodyInverseKinematicsProxy"]);
 	agmagenttopic = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
 
 	mutex = new QMutex();
