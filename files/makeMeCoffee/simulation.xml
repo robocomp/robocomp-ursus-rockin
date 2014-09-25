@@ -95,12 +95,12 @@
 
 
 
-			<transform id="t_mug" tx="1300" ty="0" tz="-1600">
+			<transform id="t_mug" tx="1300" ty="0" tz="-1450">
 				<plane id="april-mug" px="0" py="855" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00002.png" />
 				<mesh id="mesh-mug" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/mug.3ds" scale="170,107,170" ty="790" tz="0" rx="1.57079632679"/>
 			</transform>
 
-			<transform id="t_milk" tx="1100" ty="0" tz="-1600">
+			<transform id="t_milk" tx="1100" ty="0" tz="-1450">
 				<plane id="april-milk" px="0" py="890" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00011.png" />
 				<mesh id="mesh-milk" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/milk.3ds" scale="145,145,145" ty="830" tz="0" rz="-2.62" rx="1.57079632679"/>
 			</transform>
