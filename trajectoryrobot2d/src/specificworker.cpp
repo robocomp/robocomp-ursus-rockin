@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
  #include "specificworker.h"
 #include <qt4/QtCore/qdatetime.h>
 
@@ -42,7 +42,7 @@ SpecificWorker::~SpecificWorker()
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	//qDebug() << QString::fromStdString(params["PointsFile"].value);
-	
+
 	try
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("InnerModel");
@@ -64,46 +64,46 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	// DESCOMENTAR:!!!!!!!!!!!!!!
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
-	
+
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
-		 
+
 //	setRobotInitialPose(800, -1500, M_PI);
 //	baseOffsets = computeRobotOffsets(innerModel, laserData);
-	
+
 	//Planning
-	plannerOMPL = new PlannerOMPL(innerModel);			
+	plannerOMPL = new PlannerOMPL(innerModel);
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
 	planner = plannerPRM;
-	
+
 	//planner->drawGraph(innermodelmanager_proxy);
 
 	qDebug() << "----------------inserting" ;
-	
+
 	//planner->drawGraph(innermodelmanager_proxy);
-		
+
 	qDebug() << __FUNCTION__ << "----- planner set";
-	
+
 	//Init road
 	road.setInnerModel(innerModel);
-	
+
 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
-	elasticband = new ElasticBand(innerModel);	
+	elasticband = new ElasticBand(innerModel);
 	qDebug() << __FUNCTION__ << "----- elasticband set";
-	
+
 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
 	controller = new Controller(innerModel, laserData, 2);
 	qDebug() << __FUNCTION__ << "----- controller set";
-	
+
  	//Localizer stuff
  	localizer = new Localizer(innerModel);
-// 	
+//
 // 	sleep(1);
 
 	//Clon para Luis
 //	innerClon = new InnerModel(innerModel);
-	
-	timer.start(20);	
+
+	timer.start(20);
 	return true;
 };
 
@@ -111,11 +111,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 
 void SpecificWorker::computeLuis( )
-{	
+{
 	//PARA PROBAR LOS MUEBLES:
 	updateInnerModel(innerModel) ;
-	
- 	if (planner->getSampler().checkRobotValidStateAtTarget( innerModel->transform("world","robot") )) 
+
+ 	if (planner->getSampler().checkRobotValidStateAtTarget( innerModel->transform("world","robot") ))
  		qDebug() << "Ho hay colision";
 
 }
@@ -124,31 +124,31 @@ void SpecificWorker::computeLuis( )
 
 
 /**
- * @brief All architecture goes here. 
- * 
+ * @brief All architecture goes here.
+ *
  * @return void
  */
 void SpecificWorker::compute( )
-{		
+{
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
-	
+
 	//localizer->localize(laserData, innerModel, 16);
-	
+
 	if ( updateInnerModel(innerModel) )
 	{
 		if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::STOP)
 			stopCommand();
-		
+
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::CHANGETARGET)
 			changeTargetCommand(innerModel);
-		
+
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::GOTO)
 			gotoCommand(innerModel);
-		
+
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::SETHEADING)
-			setHeadingCommand(innerModel, currentTarget.getRotation().y()); 
-	}	
+			setHeadingCommand(innerModel, currentTarget.getRotation().y());
+	}
 	else //LOST connection to robot
 	{
 		currentTarget.reset();
@@ -156,29 +156,29 @@ void SpecificWorker::compute( )
 		compState.state = "DISCONNECTED";
 	}
 
-	if(reloj.elapsed() > 2000) 
+	if(reloj.elapsed() > 2000)
 	{
 		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 		if( reloj2.elapsed() < 100 )
 		{
-			road.clearDraw(innermodelmanager_proxy);
-			road.draw(innermodelmanager_proxy, innerModel);
+// 			road.clearDraw(innermodelmanager_proxy);
+// 			road.draw(innermodelmanager_proxy, innerModel);
 // 			planner->cleanGraph(innermodelmanager_proxy);
-			road.draw(innermodelmanager_proxy, innerModel);
+// 			road.draw(innermodelmanager_proxy, innerModel);
 // 			planner->drawGraph(innermodelmanager_proxy);
 		}
 		reloj.restart();
 	}
 	reloj2.restart();
 }
-	
+
 
 
 /////////////////////////////////////////////////////////
 
 bool SpecificWorker::stopCommand()
 {
-	road.setFinished(true);	
+	road.setFinished(true);
 	currentTarget.reset();
 	controller->stopTheRobot(differentialrobot_proxy);
 	compState.state = "IDLE";
@@ -191,13 +191,13 @@ bool SpecificWorker::stopCommand()
 
 /**
  * @brief Changes current target without interrupting the ongoing process. Introduced to support visual-servoing
- * 
+ *
  * @param innerModel ...
  * @return bool
  */
 bool SpecificWorker::changeTargetCommand(InnerModel *innerModel)
 {
-	qDebug() << __FUNCTION__ << "with robot at" << innerModel->transform("world","robot");; 
+	qDebug() << __FUNCTION__ << "with robot at" << innerModel->transform("world","robot");;
 	road.changeTarget( currentTarget.getTranslation());
 	road.setFinished( false );
 	drawTarget(currentTarget.getTranslation());
@@ -212,17 +212,17 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 	{
 		qDebug() << "laserData" << laserData.size();
 		elasticband->update( road, laserData, currentTarget);
-		
+
 		road.computeForces();
-		
+
 		//road.print();
-	
+
 		road.printRobotState( innerModel, currentTarget);
 
 		controller->update(innerModel, laserData, differentialrobot_proxy, road);
-		
+
 		if (road.isFinished() == true)
-		{		
+		{
 			if( currentTarget.hasRotation() )
 			{
 				qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
@@ -242,13 +242,13 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 				compState.state = "IDLE";
 			}
 		}
-		
+
 		if(road.requiresReplanning == true)
 		{
 			//qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
 			//computePlan(innerModel);
 		}
-		
+
 		compState.planningTime = road.getETA();
 	//	localizer->localize(laserData, innerModel, 20);
 	}
@@ -259,9 +259,9 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 {
 	qDebug() << __FUNCTION__;
 	const float MAX_ORIENTATION_ERROR  = 0.05;
-	
+
 	float angRobot = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
-	QVec v(1); 
+	QVec v(1);
 	v[0] = (angRobot -alfa);
 	calcularModuloFloat(v , M_PI);
 	qDebug() << __FUNCTION__ << (angRobot-alfa) << v[0];
@@ -277,20 +277,20 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 		road.endRoad();
 		compState.elapsedTime = taskReloj.elapsed();
 		compState.state = "IDLE";
-		try 
+		try
 		{
-		  differentialrobot_proxy->setSpeedBase(0, 0);	
+		  differentialrobot_proxy->setSpeedBase(0, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 	else
 	{
 		float vrot = -0.8 * v[0];  //Proportional controller
-		try 
+		try
 		{
-		  differentialrobot_proxy->setSpeedBase(0, vrot);	
+		  differentialrobot_proxy->setSpeedBase(0, vrot);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
-		
+
 	return true;
 }
 
@@ -298,20 +298,20 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 
 /**
  * @brief If there is no plan, this method computes a plan to achieve the current target
- * 
+ *
  * @param inner ...
  * @return true if a plan has been obtained
  */
 bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 {
-	if( currentTarget.isWithoutPlan() == false ) 
+	if( currentTarget.isWithoutPlan() == false )
 		return true;
-		
+
 	QTime reloj = QTime::currentTime();
 	qDebug() << __FUNCTION__ << "Computing plan... ";
-	
+
 	if (updateInnerModel(inner))
-	{	
+	{
 		compState.state = "PLANNING";
 		QVec localTarget = currentTarget.getTranslation();
 		if ( planner->computePath(localTarget, inner) == false)
@@ -322,13 +322,13 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		}
 		currentTarget.setTranslation( localTarget );
 		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
-		
+
 		// take inner to current values
 		updateInnerModel(inner);
 		currentTarget.setWithoutPlan( false );
 		currentTarget.print();
 		//planner->cleanGraph(innermodelmanager_proxy);
-		compState.state = "EXECUTING";	
+		compState.state = "EXECUTING";
 		//Init road
 		road.reset();
 		road.readRoadFromList( planner->getPath() );
@@ -340,29 +340,29 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		road.startRoad();
 		compState.planningTime = road.getETA();
 		//compState.planningTime = reloj.elapsed();
-	
+
 		return true;
 	}
-	else 
+	else
 		return false;
 }
 
 bool SpecificWorker::updateInnerModel(InnerModel *inner)
 {
-	try 
-	{ 
-		differentialrobot_proxy->getBaseState(bState); 
+	try
+	{
+		differentialrobot_proxy->getBaseState(bState);
 		inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-	/*	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");	
+	/*	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");
 		qDebug() << __FUNCTION__ << "robot state" << bState.x << bState.z << bState.alpha << r1q.extractAnglesR_min().y();
-	*/	
+	*/
 	}
 	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
-	
+
 	// DESCOMENTAR:!!!!!!!!!!!!!
-	try 
-	{ 
-		laserData = laser_proxy->getLaserData(); 
+	try
+	{
+		laserData = laser_proxy->getLaserData();
 	}
 	catch(const Ice::Exception &ex) { cout << ex << endl; return false; }
 	if( compState.state == "DISCONNECTED")
@@ -389,7 +389,7 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting initialRobotPose";
 	}
 
-	usleep(125000);	
+	usleep(125000);
 
 	try
 	{
@@ -406,7 +406,7 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	{
 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot pose";
 	}
-	usleep(125000);	
+	usleep(125000);
 
 	try
 	{
@@ -417,14 +417,14 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot odometer";
 	}
 
-	usleep(125000);	
+	usleep(125000);
 }
 
 // void SpecificWorker::cleanWorld()  ///CAMBIAR ESTO PARA QUE TODO CUELGUE DE "MARCAS" y de pueda borrar marcas de golpe.
 // {
 // 	qDebug() << __FUNCTION__ << "SpecificWorker::CleaningWorld()";
 // 	//RcisDraw::removeObject(innermodelmanager_proxy, "nose");
-// 	for (int i = 0 ; i < 150; i++) 
+// 	for (int i = 0 ; i < 150; i++)
 // 	{
 // 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_line"));
 // 		RcisDraw::removeObject(innermodelmanager_proxy, QString("p_" + QString::number(i) + "_lineA"));
@@ -440,13 +440,13 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 
 void SpecificWorker::drawTarget(const QVec &target)
 {
-	//Draw target as red box	
+	//Draw target as red box
 	RoboCompInnerModelManager::Plane3D plane;
 	plane.px = target.x();	plane.py = 10; plane.pz = target.z();
 	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 150;
 	plane.height = plane.width = 100;
 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
-		
+
 }
 
 void SpecificWorker::drawGreenBoxOnTarget(const QVec& target)
@@ -474,10 +474,10 @@ void SpecificWorker::printNumberOfElementsInRCIS()
 void SpecificWorker::changeTarget(const TargetPose& target)
 {
 	QVec t = QVec::vec3((T)target.x, (T)target.y, (T)target.z);
-	
-	qDebug() << __FUNCTION__ << "CHANGE TARGET command received, with target" << t << "and robot at" << innerModel->transform("world","robot") ; 
 
-	if ( currentTarget.isActive() == false) 
+	qDebug() << __FUNCTION__ << "CHANGE TARGET command received, with target" << t << "and robot at" << innerModel->transform("world","robot") ;
+
+	if ( currentTarget.isActive() == false)
 	{
 		if( searchRobotValidStateCloseToTarget(innerModel, laserData, t ))
 		{
@@ -486,7 +486,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 			{
 				currentTarget.setTranslation( t );
 				currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
-				if( target.onlyRot == true) 
+				if( target.onlyRot == true)
 					currentTarget.setHasRotation(true);
 				else
 					currentTarget.setHasRotation(false);
@@ -504,20 +504,20 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 
 /**
  * @brief Sends the robot to the target position. the state of the process is recorded in the NavState structure that cnan be accessed through the getState() method
- * 
+ *
  * @param target ...
  * @return void
  */
 void SpecificWorker::go(const TargetPose& target)
 {
-	
+
 	stop();
 	while( currentTarget.isActive() == true){};
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
 	currentTarget.command = CurrentTarget::Command::GOTO;
-	if( target.onlyRot == true) 
+	if( target.onlyRot == true)
 		currentTarget.setHasRotation(true);
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
@@ -537,14 +537,14 @@ void SpecificWorker::stop()
 
 /**
  * @brief Integrator to orient the robot making an alfa angle with the world's Z axis
- * 
+ *
  * @param alfa ...
  * @return void
  */
 void SpecificWorker::setHeadingTo(const TargetPose& target)
 {
 	//stop();
-	currentTarget.command = CurrentTarget::Command::SETHEADING;	
+	currentTarget.command = CurrentTarget::Command::SETHEADING;
 	qDebug() << __FUNCTION__ << "SETHEADING command received";
 }
 
@@ -557,18 +557,18 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 
 /**
  * @brief Data from JoyStick. Axes values come in (-1,1) range
- * 
+ *
  * @param data ...
  * @return void
  */
 // void SpecificWorker::sendData(const RoboCompJoystickAdapter::TData& data)
 // {
 // 	//qDebug() << __FUNCTION__ << "Data from Joy";
-// 	try 
-// 	{	
+// 	try
+// 	{
 // 		QList<QPair<QPointF,QPointF> > intervals;
-// 		intervals.append(QPair<QPointF,QPointF>(QPointF(-1,1),QPointF(-600,600))); 
-// 	
+// 		intervals.append(QPair<QPointF,QPointF>(QPointF(-1,1),QPointF(-600,600)));
+//
 // 		//qDebug() << __FUNCTION__ << intervals << "X" << X;
 // 		QMat m = QMat::afinTransformFromIntervals( intervals );
 // 		float vadvance = (m * QVec::vec2(data.axes[data.dirAxisIndex].value, 1))[0];
@@ -576,9 +576,9 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 // 		newData = true;
 // 		ad = vadvance; ro = vrot;
 // 		//avoidanceControl(innerModel, laserData, vadvance, vrot);
-// 		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
-// 	} 
-//    	catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	
+// 		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);
+// 	}
+//    	catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }
 // }
 
 ///////////////////////////////////////7
@@ -587,20 +587,20 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 
 
 // void SpecificWorker::filter(float& vadvance, float& vrot)
-// {	
+// {
 // 	if( repulsionVector != QVec::zeros(3))
 //  	{
-//  		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector; 
+//  		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector;
 //  		vadvance = -fabs(vadvance);
 //  	}
-// 	
+//
 // }
 
 
 // /**
 //  * @brief To go in Controller class or as a separate class with soft real time restrictions.
 //  * Keeps the robot safe but, being the last level of control, should try to compute a safe diverging trajectory to keep things moving on the road.
-//  * 
+//  *
 //  * @param innerModel ...
 //  * @param road ...
 //  * @param laserData ...
@@ -614,7 +614,7 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 // 	const float MAX_ROT_ACC = 0.5;
 // 	//if( bState.advV == 0 and bState.rotV == 0 )
 // 	//	return false;
-// 	
+//
 // 	//check collision for a future potential position
 // 	//given current speed and maximun acceleration, compute the minimun time to stop
 // 	//float time = std::min<float>( fabs((vadvance + bState.advV) / 400.f), 0.1); // mm/sg2
@@ -624,30 +624,30 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 // 	//we want to decide here if the next movement will cause a collision
 // 	QVec repulsionVector;
 // 	bool collision;
-// 	std::tie(repulsionVector, collision) = checkInminentCollision( innerModel, laserData, 
-// 																   bState.advV + vadvance, 
+// 	std::tie(repulsionVector, collision) = checkInminentCollision( innerModel, laserData,
+// 																   bState.advV + vadvance,
 // 																   bState.rotV + vrot, time);
-// 	
+//
 // 	//if( repulsionVector != QVec::zeros(3))
-// 	if( collision )	
+// 	if( collision )
 // 	{
-// 		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector; 
-// 		
+// 		qDebug() << "---COLLISION!!!!!!! at direction " << repulsionVector;
+//
 // 		//compute a <vadv,vrot> command to save the situation
 // 		//check the outcome of all possible velocities to find one that saves the obstacle or else stop the robot
-// 		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);		
-// 		differentialrobot_proxy->setSpeedBase( 0, 0);		
+// 		//differentialrobot_proxy->setSpeedBase( vadvance, vrot);
+// 		differentialrobot_proxy->setSpeedBase( 0, 0);
 // 	}
 // 	else
-// 		try 
+// 		try
 // 		{
 // 			differentialrobot_proxy->setSpeedBase( vadvance, vrot);
 // 		}
-// 		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }	 
-// 	
+// 		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl; }
+//
 // 	return true;
 // }
-// 
+//
 // std::tuple<QVec, bool> SpecificWorker::checkInminentCollision(InnerModel& innerModel, const RoboCompLaser::TLaserData& laserData, float vadv, float vrot, float delta)
 // {
 // 	//integrate speed to obtain base next position using Borenstein's approximation
@@ -656,15 +656,15 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 // 	float zN = bState.z + (vadv * deltaT) * cos(vrot * deltaT);
 // 	float angN = bState.alpha + (vrot * deltaT);
 // 	qDebug() << vadv << vrot << deltaT << "now" << bState.x << bState.z << bState.alpha << "new" << xN << zN << angN;
-// 	
+//
 // 	//now check if there will be collision in the future position using current laserData
 // 	innerModel->updateTransformValues("robot", xN, 0, zN, 0, angN, 0);
-// 	// Three points of rectangle approximating the robot base 
+// 	// Three points of rectangle approximating the robot base
 // 	QVec p1 = innerModel->transform("world", QVec::vec3(220,0,220), "robot" );
 // 	QVec p2 = innerModel->transform("world", QVec::vec3(220,0,-220), "robot" );
 // 	QVec p3 = innerModel->transform("world", QVec::vec3(-220,0,220), "robot" );
 // 	innerModel->updateTransformValues("robot", bState.x, 10, bState.z, 0, bState.alpha, 0);
-// 	
+//
 // 	QVec p(3,0.f);
 // 	int k=0;
 // 	bool collision = false;
@@ -677,29 +677,29 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 // 			//p = p * (T)(-1);
 // 			repulsionVector += ( p * (T)(-1));
 // 			collision = true;
-// 		}	
+// 		}
 // 	}
 // 	return std::make_tuple(repulsionVector, collision);
 // }
-// 
-// 
-// 
+//
+//
+//
 // bool SpecificWorker::robotLaserCollision( const QVec &p1, const QVec &p2, const QVec &p3,  const QVec &p)
 // {
 // 	QVec p21 = p2-p1;
 // 	QVec p31 = p3-p1;
-// 	
+//
 // 	if ((p.x() - p1.x()) * p21.x() + (p.z() - p1.z()) * p21.z() < 0.0) return false;
 // 	if ((p.x() - p2.x()) * p21.x() + (p.z() - p2.z()) * p21.z() > 0.0) return false;
 // 	if ((p.x() - p1.x()) * p31.x() + (p.z() - p1.z()) * p31.z() < 0.0) return false;
 // 	if ((p.x() - p3.x()) * p31.x() + (p.z() - p3.z()) * p31.z() > 0.0) return false;
-// 	
+//
 // 	return true;
 // }
-// 
+//
 // /**
 //  * @brief Offset computation of each laser beam to account for the geometry of the getBaseState
-//  * 
+//  *
 //  * @param innerModel ...
 //  * @param laserData ...
 //  * @return std::vector< float, std::allocator >
@@ -711,11 +711,11 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 // 	std::vector<float> baseOffsets;
 // 	QVec p(3,0.f);
 // 	int k;
-// 	
+//
 // 	for(auto i : laserData)
 // 	{
 // 		for(k=10; k<4000; k++)
-// 		{ 
+// 		{
 // 			p = innerModel->laserTo("robot","laser",k,i.angle);
 // 			if( base.contains( QPointF( p.x(), p.z() ) ) == false )
 // 				break;
@@ -724,7 +724,7 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 // 	}
 // 	return baseOffsets;
 // }
-// 
+//
 
 
 bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, QVec &target)
@@ -734,12 +734,12 @@ bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel *innerModel, const 
 	//qDebug() << __FUNCTION__ << "height" << height << target.y();
 	innerModel->updateTransformValues("robot", target.x(), target.y(), target.z(), 0, 0, 0);
 
-	// Three points of rectangle approximating the robot base 
+	// Three points of rectangle approximating the robot base
 	QVec p1 = innerModel->transform("world", QVec::vec3(-220,10,220), "robot" );
 	QVec p2 = innerModel->transform("world", QVec::vec3(220,10,220), "robot" );
 	QVec p3 = innerModel->transform("world", QVec::vec3(-220,10,-220), "robot" );
 	//QVec p4 = innerModel->transform("world", QVec::vec3(220,0,-220), "robot" );
-	
+
 	QVec p21 = p2-p1;
 	QVec p31 = p3-p1;
 	//put back the robot to where it was
@@ -749,19 +749,19 @@ bool SpecificWorker::checkRobotValidStateAtTarget(InnerModel *innerModel, const 
 	// 	p1.print("p1");
 	// 	p2.print("p2");
 	// 	p3.print("p3");
-	
+
 	//Check if any laser point falls inside the rectangle using an angle criterium
 	QVec p(3,0.f);
 	for(auto i : laserData)
 	{
 		p = innerModel->laserTo("world","laser", i.dist, i.angle);
 		//Check if inside
-		if ((p-p1) * p21 > 0 
-			and 
-			(p-p1) * p21 < p21 * p21 
-			and 
-			(p-p1) * p31 > 0 
-			and 
+		if ((p-p1) * p21 > 0
+			and
+			(p-p1) * p21 < p21 * p21
+			and
+			(p-p1) * p31 > 0
+			and
 			(p-p1) * p31 < p31*p31 )
 		return false;
 	}
@@ -774,11 +774,11 @@ bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel *innerModel, 
 
 	QVec origin = innerModel->transform("world","robot");
 	float stepSize = 30.f; //100 mms chunks  SHOULD BE RELATED TO THE ACTUAL SIZE OF THE ROBOT!!!!!
-	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
+	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);
 	float step;
-	
+
 	//if too close return target
-	if (nSteps == 0) 
+	if (nSteps == 0)
 	{
 		return false;
 	}
@@ -787,12 +787,12 @@ bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel *innerModel, 
 	//go along visual ray connecting robot pose and target pos in world coordinates. l*robot + (1-r)*roiPos = 0
 	QVec point(3);
 	float landa = step;
-	
+
 	lastPoint = origin;
 	for(uint i=1 ; i<=nSteps; i++)
 	{
 		point = (origin * (1-landa)) + (target * landa);
-		if (checkRobotValidStateAtTarget(innerModel, laserData, point) ) 
+		if (checkRobotValidStateAtTarget(innerModel, laserData, point) )
 		{
 			lastPoint  = point;
 			landa = landa + step;
@@ -811,14 +811,14 @@ bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel *innerModel, 
 // 	//If current is good, return
 // 	if( checkRobotValidStateAtTarget(innerModel, laserData, target) )
 // 		return true;
-// 	
+//
 // 	//Start searching radially from target to origin and adding the vertices of a n regular polygon of radius 1000 and center "target"
 // 	const int nVertices = 12;
 // 	const float radius = 1000.f;
 // 	QVec lastPoint, minVertex, vertex;
 // 	float fi,vert;
 // 	float dist, minDist = radius;
-// 	
+//
 // 	for(int i=0; i< nVertices; i++)
 // 	{
 // 		fi = (2.f*M_PI/nVertices) * i;
@@ -828,13 +828,13 @@ bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel *innerModel, 
 // 		{
 // 			vertex = QVec::vec3(target.x() + k*sin(fi), target.y(), target.z() + k*cos(fi));
 // 			free = checkRobotValidStateAtTarget(innerModel, laserData, vertex);
-// 			if (free == true) 
+// 			if (free == true)
 // 				break;
 // 		}
 // 		if( free and k < minDist )
 // 		{
 // 			minVertex = vertex;
-// 			minDist = k;	
+// 			minDist = k;
 // 			vert = fi;
 // 		}
 // 	}
@@ -856,14 +856,14 @@ bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel *innerModel, 
 * Metodo moduloFloat
 * Devuelve el modulo entre dos numeros reales.   ///HAS PROBADO FMOD?
 * FUNCIONA.
-*/ 
+*/
 void SpecificWorker::calcularModuloFloat(QVec &angles, float mod)
 {
 	for(int i=0; i<angles.size(); i++)
 	{
 		int cociente = (int)(angles[i] / mod);
 		angles[i] = angles[i] -(cociente*mod);
-		
+
 		if(angles[i] > M_PI)
 			angles[i] = angles[i]- M_PI;
 		else
