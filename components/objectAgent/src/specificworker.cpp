@@ -200,7 +200,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-		//AGMModelPrinter::printWorld(newModel);
+		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "april");
 	}
 	catch(...)
