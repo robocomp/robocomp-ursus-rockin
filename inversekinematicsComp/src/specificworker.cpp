@@ -426,8 +426,8 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 		t.setHasPlan(true);
 		if(i==0)
 			target = t;
-		if(i==path.size()-1)
-			t.setWeights( lastTarget.getWeights() );
+// 		if(i==path.size()-1)																					///NO ROTATION DURING PATH PLANNING
+// 			t.setWeights( lastTarget.getWeights() );
 		bodyParts["RIGHTARM"].addTargetToList(t);
 	}
 	
@@ -512,8 +512,9 @@ void SpecificWorker::setTargetPose6D(const string& bodyPart, const Pose6D& targe
 	QVec w(6);
 	w[0]  = weights.x; 	w[1]  = weights.y; w[2]  = weights.z; w[3]  = weights.rx; w[4] = weights.ry; w[5] = weights.rz;
 
-   Target t(Target::POSE6D, innerModel, bodyParts[partName].getTip(), tar, w, false);
+   Target t(Target::POSE6D, innerModel, bodyParts[partName].getTip(), tar, w, radius);
    t.setRadius(radius/1000.f);
+	 t.setHasPlan(!radius);  //Ñapa para que no planifique si este campo viene a false
 
     mutex->lock();
         bodyParts[partName].addTargetToList(t);
