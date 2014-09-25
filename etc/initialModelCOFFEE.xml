@@ -62,7 +62,7 @@
 	<!-- Non-explored table -->
 	<symbol id="7" type="object">
 		<attribute key="x" value="1240" />
-		<attribute key="z" value="-1600" />
+		<attribute key="z" value="-1500" />
 		<attribute key="tag" value="1" />
 		<attribute key="polygon" value="(-842,-1746);(775,-1746);(775,-2320);(-842,-2320)" />
 	</symbol>

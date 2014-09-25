@@ -161,10 +161,10 @@ void SpecificWorker::compute( )
 		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 		if( reloj2.elapsed() < 100 )
 		{
-// 			road.clearDraw(innermodelmanager_proxy);
-// 			road.draw(innermodelmanager_proxy, innerModel);
+			road.clearDraw(innermodelmanager_proxy);
+			road.draw(innermodelmanager_proxy, innerModel);
 // 			planner->cleanGraph(innermodelmanager_proxy);
-// 			road.draw(innermodelmanager_proxy, innerModel);
+			road.draw(innermodelmanager_proxy, innerModel);
 // 			planner->drawGraph(innermodelmanager_proxy);
 		}
 		reloj.restart();

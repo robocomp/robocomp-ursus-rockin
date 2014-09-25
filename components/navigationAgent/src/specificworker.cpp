@@ -200,7 +200,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-		//AGMModelPrinter::printWorld(newModel);
+		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigation");
 	}
 	catch(...)
@@ -522,7 +522,7 @@ void SpecificWorker::odometryAndLocationIssues()
 	//
 	// to be done
 	//
-	
+
 	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
 	//
 	updateRobotsCognitiveLocation();
