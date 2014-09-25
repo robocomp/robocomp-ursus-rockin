@@ -310,15 +310,8 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 void SpecificWorker::compute2()
 {
 	static int i=0;
-	//printf("%d\n", i++);
+	printf("%d\n", i++);
 	
-// InnerModelPlane *plane = (InnerModelPlane *)innerModel->getNode("kitchen");	
-// printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
-// plane->collisionObject->computeAABB();
-// fcl::AABB a1 = plane->collisionObject->getAABB();
-// fcl::Vec3f v1 = a1.center();
-// printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
-
 	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
 	if (sampler.isStateValidQ(innerModel->transform("world","munon_t")))
 	{

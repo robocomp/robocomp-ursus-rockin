@@ -73,6 +73,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	catch (const Ice::Exception &ex) 
 	{ std::cout << ex << "in Close fingers" << std::endl;}
 	
+	removeAxis("marca-segun-head");
+	removeAxis("mano-segun-head");
 	
 	listaMotores 	<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
 					<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
@@ -417,12 +419,12 @@ void SpecificWorker::bik1()
 		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
 		QVec p = innerModel->transform("world","mugT");
 		RoboCompBodyInverseKinematics::Pose6D pose;
-		pose.x = p.x()+120; pose.y = p.y(); pose.z = p.z();
+		pose.x = p.x()+40; pose.y = p.y(); pose.z = p.z()+120;
 		pose.rx =  0; pose.ry=0; pose.rz= 0;
 		RoboCompBodyInverseKinematics::WeightVector weight;
 		weight.x = 1; weight.y = 1; weight.z = 1; 
 		weight.rx = 0; weight.ry = 0; weight.rz = 0;
-//		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", pose, weight, 1); 
+		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", pose, weight, 1); 
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 	{ std::cout << ex.text << std::endl; }
@@ -439,36 +441,27 @@ void SpecificWorker::bik1()
  */
 void SpecificWorker::bik2()
 {
-	//if in its target place, exit
-	//Close fingers
-	
-	addTransformInnerModel("marca-segun-head", "rgbd_transform", tag12Pose);
-	innerModel->transform("world", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en world");
-	innerModel->transform("rgbd_transform", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en camara");
-	innerModel->transform("sensor_transform1", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en sensor_transform1");
-	innerModel->transform("head3_pre", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en head3_pre");
-	innerModel->transform("base_head", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en base_head");
-	innerModel->transform("base_body", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en base_body");
-	innerModel->transform("base_trans", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en base_trans");
-	innerModel->transform("initialRobotPose", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en initialRobotPose");
-	innerModel->transform("floor", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en floor");
-	
-	innerModel->transform("world", QVec::zeros(6),"mugTag").print("marca en world");
-	qDebug() << "Differencia entre marcas. Debería ser cero" << innerModel->transform("world", QVec::zeros(6),"marca-segun-head") -
-																innerModel->transform("world", QVec::zeros(6),"mugTag"); 
-	return;
-	
 	
 	if( tag11 and tag12)
 	{
 	
 		//Grab en el mundo antes después del sacádico
-		innerModel->transform("world", QVec::zeros(6), "grabPositionHandR").print("Grab en el mundo antes de modificar");
+		//innerModel->transform("world", QVec::zeros(6), "grabPositionHandR").print("Grab en el mundo antes de modificar");
 			
+		//AprilTags Z axis points outwards the mark, X to the right and Y upwards (left hand convention)
+		
 		//Create hand as seen by head
 		addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11Pose);
 		innerModel->transform("world", QVec::zeros(6), "mano-segun-head").print("mano-segun-head en world");
 	
+		drawAxis("mano-segun-head", "rgbd_transform");
+		
+		QVec correctingPose(6,0.f);
+		correctingPose[3] = -M_PI/2;
+		addTransformInnerModel("mano-segun-head-ok", "mano-segun-head", correctingPose);
+		innerModel->transform("world", QVec::zeros(6), "mano-segun-head-ok").print("mano-segun-head-ok en world");
+		
+		
 		//Compute hand as felt in world
 		//innerModel->transform("world",QVec::zeros(6),"ThandMesh2").print("mano through arm in world");
 		innerModel->transform("world",QVec::zeros(6),"handMesh2").print("mano through arm in world");
@@ -532,7 +525,8 @@ void SpecificWorker::bik2()
 		qDebug() << "Differencia entre marcas. Debería ser cero" << innerModel->transform("world", QVec::zeros(6),"marca-segun-head") -
 																	innerModel->transform("world", QVec::zeros(6),"mugTag"); 
 		
-		
+		drawAxis("marca-segun-head", "rgbd_transform");
+			
 		//Build a temporary target position close to the real target. SHOULD CHANGE TO APPROXIMATE INCREMTANLLY THE OBJECT 
 		QVec nearTarget(6,0.f);
 		nearTarget[0] = 150; nearTarget[0] = 0 ;nearTarget[0] = 0 ;nearTarget[3] = 0;nearTarget[4] = 0;nearTarget[5] = 0;
@@ -603,6 +597,64 @@ void SpecificWorker::bik2()
 	//send the target pose to the hand controller
 	
 }
+
+void SpecificWorker::drawAxis(const QString& name, const QString &parent)
+{
+	removeAxis(name);
+	try
+	{
+		float OX = 50; 
+		float OZ = 50;
+		//float OX = 0; 
+		//float OZ = 0;
+		
+		QVec p =innerModel->transform(parent,QVec::zeros(6),name);
+		RoboCompInnerModelManager::Pose3D pose;
+		pose.x=p.x() + OX ; pose.y=p.y(); pose.z=p.z() - OZ; pose.rx=p.rx(); pose.ry=p.ry(); pose.rz=p.rz();
+		innermodelmanager_proxy->addTransform(name.toStdString(), "static", parent.toStdString(), pose);
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ 
+		std::cout << ex.text << std::endl;
+	}
+	
+	
+	try
+	{
+		RoboCompInnerModelManager::Plane3D planeX, planeY, planeZ;
+		planeX.px = 50 ; planeX.py = 0; planeX.pz = 0; planeX.nx = 1; planeX.ny = 0; planeX.nz = 0; planeX.width = 3; planeX.height = 3; planeX.thickness = 100;	planeX.texture = "#ff0000";
+		planeY.px = 0 ; planeY.py = 50; planeY.pz = 0; planeY.nx = 1; planeY.ny = 0; planeY.nz = 0; planeY.width = 3; planeY.height = 100; planeY.thickness = 3;	planeY.texture = "#00ff00";
+		planeZ.px = 0 ; planeZ.py = 0; planeZ.pz = 50; planeZ.nx = 1; planeZ.ny = 0; planeZ.nz = 0; planeZ.width = 100; planeZ.height = 3; planeZ.thickness = 3;	planeZ.texture = "#0000ff";
+		innermodelmanager_proxy->addPlane(name.toStdString()+"_X", name.toStdString(), planeX);
+		innermodelmanager_proxy->addPlane(name.toStdString()+"_Y", name.toStdString(), planeY);
+		innermodelmanager_proxy->addPlane(name.toStdString()+"_Z", name.toStdString(), planeZ);
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ 
+		std::cout << ex.text << std::endl;
+	}
+	catch(const Ice::Exception &ex)
+	{ 
+		std::cout << ex << std::endl;
+	}
+}
+
+void SpecificWorker::removeAxis(const QString &name)
+{
+	try
+	{
+		innermodelmanager_proxy->removeNode(name.toStdString());
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ 
+		std::cout << ex.text << std::endl;
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
+}
+
 
 
 void SpecificWorker::goHome()

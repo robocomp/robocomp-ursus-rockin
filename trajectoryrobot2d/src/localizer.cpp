@@ -19,19 +19,19 @@
 
 #include "localizer.h"
 
-Localizer::Localizer(InnerModel &innerModel)
+Localizer::Localizer(InnerModel *innerModel)
 {
 	//clonModel = new InnerModel( *inner );
 	//recursiveIncludeMeshes( clonModel->getRoot(), "robot", false, robotNodes, restNodes);
-	recursiveIncludeMeshes( innerModel.getRoot(), "robot", false, robotNodes, restNodes);
+	recursiveIncludeMeshes( innerModel->getRoot(), "robot", false, robotNodes, restNodes);
 
 	icp.setDefault();	
 }
 
-void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel &innerModel, int nLaserRays)
+void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel *innerModel, int nLaserRays)
 {
-	QVec point = innerModel.transform("world", "robot");
-	float alfa = innerModel.getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
+	QVec point = innerModel->transform("world", "robot");
+	float alfa = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
 	float step = float(laser.size()) / float(nLaserRays);
 
 	virtualLaser.resize(nLaserRays);
@@ -75,18 +75,18 @@ void Localizer::localize(const RoboCompLaser::TLaserData &laser, InnerModel &inn
 	
 }
 
-void Localizer::laserRender(InnerModel &innerModel, const QVec& point, float alfa)
+void Localizer::laserRender(InnerModel *innerModel, const QVec& point, float alfa)
 {
 	// TODO: GET FROM VISTUAL LASER SPECIFICATION	
 	const float MAX_LENGTH_ALONG_RAY = 4000;
 	
 	// Update robot's position
-	QVec currentPos = innerModel.transform("world","robot");
-	float currentAlfa = innerModel.getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
-	innerModel.updateTransformValues("robot", point.x(), 0, point.z(), 0., alfa, 0.);
+	QVec currentPos = innerModel->transform("world","robot");
+	float currentAlfa = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
+	innerModel->updateTransformValues("robot", point.x(), 0, point.z(), 0., alfa, 0.);
 	
 	// Compute rotation matrix between laser and world
-	QMat r1q1 = innerModel.getRotationMatrixTo("world", "laser");
+	QMat r1q1 = innerModel->getRotationMatrixTo("world", "laser");
 	
 	// Create hitting appex
 	boost::shared_ptr<fcl::Box> laserBox(new fcl::Box(0.1, 0.1, 0.1));
@@ -102,14 +102,14 @@ void Localizer::laserRender(InnerModel &innerModel, const QVec& point, float alf
 		// Check collision at maximum distance
 		float hitDistance = MAX_LENGTH_ALONG_RAY;
 		laserBox->side = fcl::Vec3f(0.1, 0.1, hitDistance);
- 		innerModel.updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
- 		const QVec boxBack = innerModel.transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
- 		innerModel.updateRotationValues("laserPose", 0, 0, 0);
+ 		innerModel->updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
+ 		const QVec boxBack = innerModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+ 		innerModel->updateRotationValues("laserPose", 0, 0, 0);
  		laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 		
  		for (uint out=0; out<restNodes.size(); out++)
  		{
- 			hit = innerModel.collide(restNodes[out], &laserBoxCol);
+ 			hit = innerModel->collide(restNodes[out], &laserBoxCol);
  			if (hit) 
 				break;
  		}
@@ -126,15 +126,15 @@ void Localizer::laserRender(InnerModel &innerModel, const QVec& point, float alf
 				// Stretch and create the stick
 				hitDistance = (max+min)/2.;
 				laserBox->side = fcl::Vec3f(0.1, 0.1, hitDistance);
-				innerModel.updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
-				const QVec boxBack = innerModel.transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
-				innerModel.updateRotationValues("laserPose", 0, 0, 0);
+				innerModel->updateRotationValues("laserPose", 0, virtualLaser[i].angle, 0);
+				const QVec boxBack = innerModel->transform("world", QVec::vec3(0, 0, hitDistance/2.), "laser");
+				innerModel->updateRotationValues("laserPose", 0, 0, 0);
 				laserBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 				
 				// Check collision using current ray length
 				for (uint32_t out=0; out<restNodes.size(); out++)
 				{
-					hit = innerModel.collide(restNodes[out], &laserBoxCol);
+					hit = innerModel->collide(restNodes[out], &laserBoxCol);
 					if (hit)
 						break;
 				}
@@ -152,7 +152,7 @@ void Localizer::laserRender(InnerModel &innerModel, const QVec& point, float alf
 	}
 	
 	//Restore innermodel
-	innerModel.updateTransformValues("robot", currentPos.x(), 0, currentPos.z(), 0., currentAlfa, 0.);
+	innerModel->updateTransformValues("robot", currentPos.x(), 0, currentPos.z(), 0., currentAlfa, 0.);
 }
 
 void Localizer::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)

@@ -32,7 +32,7 @@ SET ( HEADERS
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior  AprilTags TrajectoryRobot2D DifferentialRobot BodyInverseKinematics  JointMotor)
+ROBOCOMP_WRAP_ICE( CommonBehavior  AprilTags TrajectoryRobot2D DifferentialRobot BodyInverseKinematics JointMotor  InnerModelManager)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

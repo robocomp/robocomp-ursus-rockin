@@ -42,8 +42,8 @@ class PlannerOMPL : public QObject
     Q_OBJECT
 
 	public:
-		PlannerOMPL(){};
-		PlannerOMPL(const InnerModel &innerModel_, QObject *parent=0);
+		PlannerOMPL(){}
+		PlannerOMPL(InnerModel *innerModel_, QObject *parent=0);
 		//bool computePath(const QVec &target, InnerModel *inner);
 		bool computePath(const QVec& origin, const QVec& target, int maxTime);
 		void initialize(Sampler *sampler);

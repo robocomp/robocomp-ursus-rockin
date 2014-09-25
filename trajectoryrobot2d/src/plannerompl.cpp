@@ -19,14 +19,14 @@
 
 
 
-PlannerOMPL::PlannerOMPL(const InnerModel &innerModel_, QObject *parent)
+PlannerOMPL::PlannerOMPL(InnerModel *innerModel_, QObject *parent)
 {
 // 	xMin = 0.;
 // 	xMax = 10000.;
 // 	zMin = -10000.;
 // 	zMax = 0.;
 // 	
-// 	innerModel = new InnerModel(innerModel_);
+// 	innerModel = new InnerModel(*innerModel_);
 // 	
 // 	//Create state space as R2
 // 	ob::RealVectorStateSpace *space = new ob::RealVectorStateSpace();

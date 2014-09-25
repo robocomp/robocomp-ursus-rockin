@@ -28,6 +28,7 @@
 #include <ui_guiDlg.h>
 #include "config.h"
 #include <TrajectoryRobot2D.h>
+#include <InnerModelManager.h>
 #include <JointMotor.h>
 #include <DifferentialRobot.h>
 #include <BodyInverseKinematics.h>
@@ -45,6 +46,7 @@ using namespace std;
        @author authorname
 */
 using namespace RoboCompTrajectoryRobot2D;
+using namespace RoboCompInnerModelManager;
 using namespace RoboCompJointMotor;
 using namespace RoboCompDifferentialRobot;
 using namespace RoboCompBodyInverseKinematics;
@@ -67,6 +69,7 @@ public:
 	QMutex *mutex;                //Shared mutex with servant
 
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
+	InnerModelManagerPrx innermodelmanager_proxy;
 	JointMotorPrx jointmotor_proxy;
 	DifferentialRobotPrx differentialrobot_proxy;
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;

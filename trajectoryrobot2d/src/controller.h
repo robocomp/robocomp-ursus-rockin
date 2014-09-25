@@ -31,18 +31,18 @@
 class Controller
 {
 	public:
-		Controller(InnerModel &innerModel, const RoboCompLaser::TLaserData &laserData, int delay); //in secs
+		Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, int delay); //in secs
 		~Controller();
 	
-		bool update(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy, WayPoints& road);
+		bool update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy, WayPoints& road);
 		void stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy);
 		float exponentialFunction(float value, float xValue, float yValue, float min = 0.f);
 
 	private:
 		QTime time;
 		int delay;
-		bool avoidanceControl(InnerModel& innerModel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot);
-		std::vector<float> computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData);
+		bool avoidanceControl(InnerModel *innerModel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot);
+		std::vector<float> computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData);
 		std::vector<float> baseOffsets;
 };
 

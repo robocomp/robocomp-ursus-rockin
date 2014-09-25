@@ -29,9 +29,8 @@ ElasticBand::~ElasticBand()
 
 bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, const CurrentTarget &currentTarget, uint iter)
 {
-	
 	qDebug() << __FILE__ << __FUNCTION__ << "road size"<<  road.size();
-	
+	qDebug() << "laserData" << laserData.size();
 	if( road.isFinished() == true )
 			return false;
 
@@ -85,7 +84,10 @@ bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
 		inhibit = true;  //periodo refractario
 	}
 	if( inhibit )
-		veces = (veces++)%50;  //aprox 5 segs
+	{
+		veces = veces + 1;
+		veces = veces % 50;  //aprox 5 segs
+	}
 	if( veces == 0 )
 		inhibit = false;
 	return true;
@@ -101,8 +103,8 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 {		
 	//qDebug() << __FUNCTION__ ;
 	//for(int i=0; i< road.size()-1; i++)
-	int offset;
-	if( road.last().hasRotation ) offset = 2; else offset = 1;
+	int offset = 1;
+	//if( road.last().hasRotation ) offset = 2; else offset = 1;
 	
 	for(int i=0; i< road.size()-offset; i++)	
 	{
@@ -119,6 +121,8 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 			road.insert(i+1,wNew);
 		}
 	}
+	
+	//ELIMINATED AS REQUESTED BY MANSO
 	//Move point before last to orient the robot. This works but only if the robots approaches from the lower quadrants
 	//The angle formed by this point and the last one has to be the same es specified in the target
 	//We solve this equations for (x,z)
@@ -126,19 +130,19 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 	// sqr(x'-x) + sqr(z'-z) = sqr(r)
 	// z = z' - (r/(sqrt(t*t -1)))
 	// x = x' - r(sqrt(1-(1/t*t+1)))
-	if( (currentTarget.hasRotation() == true) and (road.last().hasRotation == false) )
-	{
-		qDebug() << __FUNCTION__ << "computing rotation" << road.last().pos;
-		float radius = 500;
-		float ta = tan(currentTarget.getRotation().y());
-		float xx = road.last().pos.x() - radius*sqrt(1.f - (1.f/(ta*ta+1)));
-		float zz = road.last().pos.z() - (radius/sqrt(ta*ta+1));
-		WayPoint wNew( QVec::vec3(xx,road.last().pos.y(),zz) );
-		road.insert(road.end()-1,wNew);
-		road.last().hasRotation = true;
-		qDebug() << __FUNCTION__ << "after rotation" << wNew.pos << currentTarget.getRotation().y() << ta;
-	
-	}
+	// 	if( (currentTarget.hasRotation() == true) and (road.last().hasRotation == false) )
+	// 	{
+	// 		qDebug() << __FUNCTION__ << "computing rotation" << road.last().pos;
+	// 		float radius = 500;
+	// 		float ta = tan(currentTarget.getRotation().y());
+	// 		float xx = road.last().pos.x() - radius*sqrt(1.f - (1.f/(ta*ta+1)));
+	// 		float zz = road.last().pos.z() - (radius/sqrt(ta*ta+1));
+	// 		WayPoint wNew( QVec::vec3(xx,road.last().pos.y(),zz) );
+	// 		road.insert(road.end()-1,wNew);
+	// 		road.last().hasRotation = true;
+	// 		qDebug() << __FUNCTION__ << "after rotation" << wNew.pos << currentTarget.getRotation().y() << ta;
+	// 	
+	// 	}
 	//else
 		//qDebug() << road.last().hasRotation << road.last().pos << (road.end()-2)->pos << currentTarget.getRotation().y();
 	
@@ -153,10 +157,9 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 void ElasticBand::cleanPoints(WayPoints &road)
 {
 	int i;
-	int offset;
-	if( road.last().hasRotation ) offset = 3; else offset = 2;
+	int offset=2;
+	//if( road.last().hasRotation ) offset = 3; else offset = 2;
 	
-// 	for(i=1; i< road.size()-2; i++) // exlude 1 to avoid deleting the nextPoint and the last two to avoid deleting the target rotation
 	for(i=1; i< road.size()-offset; i++) // exlude 1 to avoid deleting the nextPoint and the last two to avoid deleting the target rotation
 	{
 		if( road[i].isVisible == false )
@@ -285,7 +288,8 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
  */
 bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
 {	
-	assert(road.size()>1 and laserData.size() > 0);
+	assert(road.size()>1);
+	assert(laserData.size() > 0);
 	
 	float maxAngle, minAngle;
 	if(laserData[0].angle > laserData.back().angle)
