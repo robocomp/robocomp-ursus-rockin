@@ -403,7 +403,7 @@ void SpecificWorker::bik1()
 		QVec loc = innerModel->transform("world","mugT");
 		locA.print("locA"); loc.print("loc");
 		target.rx=0; target.ry=0; target.rz=0; 	
-		target.x = loc.x()+100; target.y=loc.y(); target.z = loc.z();
+		target.x = loc.x()+80; target.y=loc.y(); target.z = loc.z();
 		RoboCompBodyInverseKinematics::Axis axis; 
 		axis.x = 0; axis.y = -1; axis.z = 0;
 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
@@ -421,7 +421,7 @@ void SpecificWorker::bik1()
 		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
 		QVec p = innerModel->transform("world","mugT");
 		RoboCompBodyInverseKinematics::Pose6D pose;
-		pose.x = p.x()+70; pose.y = p.y(); pose.z = p.z()+40;
+		pose.x = p.x()+120; pose.y = p.y(); pose.z = p.z()+40;
 		pose.rx =  M_PI; pose.ry=-M_PI/2; pose.rz= 0;
 		RoboCompBodyInverseKinematics::WeightVector weight;
 		weight.x = 1; weight.y = 1; weight.z = 1; 
@@ -432,28 +432,9 @@ void SpecificWorker::bik1()
 	{ std::cout << ex.text << std::endl; }
 	catch (const Ice::Exception &ex) 
 	{ std::cout << ex << std::endl; }
-// 	
+	
+	initialDistance= 200;
 
-// 	sleep(10);
-// 	qDebug() << "Now rotation";
-// 	
-// try 
-// 	{
-// 		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
-// 		QVec p = innerModel->transform("world","mugT");
-// 		RoboCompBodyInverseKinematics::Pose6D pose;
-// 		pose.x = p.x()+100; pose.y = p.y(); pose.z = p.z()+40;
-// 		pose.rx =  M_PI; pose.ry=-M_PI/2; pose.rz= 0;
-// 		RoboCompBodyInverseKinematics::WeightVector weight;
-// 		weight.x = 1; weight.y = 1; weight.z = 1; 
-// 		weight.rx = 1; weight.ry = 1; weight.rz = 1;
-// 		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", pose, weight, 0); 
-// 	} 
-// 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-// 	{ std::cout << ex.text << std::endl; }
-// 	catch (const Ice::Exception &ex) 
-// 	{ std::cout << ex << std::endl; }
-// 
  }
 
 /**
@@ -465,7 +446,7 @@ void SpecificWorker::bik1()
 void SpecificWorker::bik2()
 {
 	
-	if( tag11 and tag12)
+	//if( tag11 and tag12)
 	{
 				
 		innerModel->transform("world",QVec::zeros(6),"grabPositionHandR").print("Grab en el mundo antes de todo");
@@ -473,7 +454,15 @@ void SpecificWorker::bik2()
 		//AprilTags Z axis points outwards the mark, X to the right and Y upwards (left hand convention)
 		
 		//Create hand as seen by head
-		addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11Pose);
+		if( tag11 == true)
+		{
+			addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11Pose);
+		}
+		else
+		{
+			addTransformInnerModel("mano-segun-head", "rgbd_transform", innerModel->transform("rgbd_transform", QVec::zeros(6), "handMesh2"));
+		}
+			
 		innerModel->transform("world", QVec::zeros(6), "mano-segun-head").print("mano-segun-head en world");
 		//drawAxis("mano-segun-head", "rgbd_transform");
 				
@@ -542,8 +531,8 @@ void SpecificWorker::bik2()
 		//Build a CHANGING temporary target position close to the real target. SHOULD CHANGE TO APPROXIMATE INCREMTANLLY THE OBJECT 
 		QVec nearTarget(6,0.f);
 		
-		static float initialDistance = 200;
-		qDebug() << "initialDistance" << initialDistance;
+	
+		qDebug() << "initialDistance" << initialDistance << "real dist" << innerModel->transform("mano-segun-head", "marca-segun-head").norm2() ;
 		nearTarget[0] = initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = -M_PI/2;nearTarget[5] = 0;
 		if( innerModel->transform("mano-segun-head", "marca-segun-head").norm2() > 110) 
 		{
@@ -556,11 +545,12 @@ void SpecificWorker::bik2()
 			//Close fingers
 			try
 			{		
-				qDebug() << __FUNCTION__ << "Open fingers RCIS";
+				qDebug() << __FUNCTION__ << "Close fingers RCIS";
 				bodyinversekinematics_proxy->setRobot(0);
 				bodyinversekinematics_proxy->setFingers(30);
 			} 
 			catch (Ice::Exception ex) {cout <<"ERROR EN ABRIR PINZA: "<< ex << endl;}
+			return;
 		}
 			
 		

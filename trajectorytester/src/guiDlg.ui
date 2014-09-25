@@ -620,6 +620,19 @@
      <string>4. Servo</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="bik3Button">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>30</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Detatch</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QPushButton" name="goHomeButton">
    <property name="geometry">
