@@ -228,16 +228,14 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 			case 1: // NON-EXPLORED TABLE
 				if (updateTable(ap, newModel)) publishModel = true;
 				break;
-			case 2: // MUG
+			case 12: // MUG
 				if (updateMug(ap, newModel)) publishModel = true;
 				break;
-			case 11:
+			case 13:
 				if (updateMilk(ap, newModel)) publishModel = true;
 				break;
-			case 12:
+			case 14:
 				if (updateCoffee(ap, newModel)) publishModel = true;
-			case 10:
-			case 13:
 				break;
 		}
 	}
