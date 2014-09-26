@@ -56,17 +56,17 @@ class SpecificWorker : public GenericWorker
 		SpecificWorker	(MapPrx& mprx, QWidget *parent = 0);	
 		~SpecificWorker	();
 		
-		bool		setParams					(RoboCompCommonBehavior::ParameterList params);
-		void  		setTargetPose6D				(const string& bodyPart, const Pose6D& target, const WeightVector& weights, float radius);
-		void  		pointAxisTowardsTarget		(const string& bodyPart, const Pose6D& target, const Axis &axis, bool axisConstraint, float axisAngleConstraint);
-		void  		advanceAlongAxis			(const string& bodyPart, const Axis& ax, float dist);
-		void  		setFingers					(float d);
-		void  		goHome						(const string& part);
-		void  		setRobot					(const int type) ;
-		void  		stop						(const string& part);
-		TargetState	getState					(const string &part);
-		void 		setNewTip					(const string &part, const string &transform, const Pose6D &pose); 
-		void  		setJoint					(const string& joint, float speed, float maxSpeed);
+		bool		setParams(RoboCompCommonBehavior::ParameterList params);
+		void  	setTargetPose6D(const string& bodyPart, const Pose6D& target, const WeightVector& weights, float radius);
+		void  	pointAxisTowardsTarget(const string& bodyPart, const Pose6D& target, const Axis &axis, bool axisConstraint, float axisAngleConstraint);
+		void  	advanceAlongAxis(const string& bodyPart, const Axis& ax, float dist);
+		void  	setFingers(float d);
+		void  	goHome(const string& part);
+		void  	setRobot(const int type) ;
+		void  	stop(const string& part);
+		RoboCompBodyInverseKinematics::TargetState	getState(const string &part);
+		void 		setNewTip(const string &part, const string &transform, const Pose6D &pose); 
+		void  	setJoint(const string& joint, float speed, float maxSpeed);
 		
 		
 	public slots:

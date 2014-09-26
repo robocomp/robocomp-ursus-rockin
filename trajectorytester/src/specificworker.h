@@ -37,7 +37,7 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void  newAprilTag(const tagsList& tags); 
 
-	enum class State {IDLE, GO_KITCHEN, SERVOING, LIFT_ARM} ;
+	enum class State {IDLE, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, CLOSE_FINGERS, OPEN_FINGERS, DETACH} ;
 	
 public slots:
  	void compute(); 	
@@ -57,12 +57,13 @@ public slots:
 	void stopRobot();
 	void setNewTargetFromPlant(QVec);
 	void setTargetCoorFromPlant(QVec t);
+	void goHome();
 	void step1();
 	void step2();
 	void step3();
-	void bik1();
-	void bik2();
-	void goHome();
+	void step4();
+	void step5();
+	
 	
 private:
 	PlantWidget *plantWidget;
@@ -72,7 +73,14 @@ private:
 	void doStateMachine();
 	State go_kitchen();
 	State servoing();
-	State liftArm();
+	State moveArm();
+	State initMoveArm();
+	State openFingers();
+	State closeFingers();
+	State grasp();
+	State detach();
+	
+	
 	State state;
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
@@ -85,6 +93,7 @@ private:
 	void drawAxis(const QString &name, const QString &parent);
 	void removeAxis(const QString &name);
 	float initialDistance; //to grab the mug
+	RoboCompBodyInverseKinematics::TargetState bikState;
 };
 
 #endif

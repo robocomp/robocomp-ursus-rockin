@@ -400,7 +400,7 @@
 						<transform id="niapa_arm_left_1" rz="0" >
 							<mesh id="arm_left_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo1.ive" rz="3.14159265359" tz="-55" tx="0" ty="30" scale="1000"    />
 							<!-- Gira en Z -->
-							<joint id="leftShoulder1" port="20000" min="-0.54" max="3.14" axis="z" home="0.2">
+							<joint id="leftShoulder1" port="20000" min="-0.54" max="3.14" axis="z" home="0.1">
 <!--								<transform id="axessl1" >
 									<plane id="xsl1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 									<plane id="ysl1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -410,7 +410,7 @@
 
 								<transform id="arm_left_2" tz="41" rx="-1.5707963267948966">
 <!-- 								Gira en X -->
-									<joint id="leftShoulder2" port="20000" min="-0.34" max="3.14" axis="x" home="0.2" >
+									<joint id="leftShoulder2" port="20000" min="-0.34" max="3.14" axis="x" home="0.1" >
 
 <!--										<transform id="axessl2" >
 											<plane id="xsl2" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -421,7 +421,7 @@
 
 										<transform id="arm_left_3" tz="234" rz="1.5707963267948966" >
 											<!-- Gira en Z -->
-											<joint id="leftShoulder3" port="20000" min="-1.8" max="1.8" axis="z" home="-0.4" >
+											<joint id="leftShoulder3" port="20000" min="-1.8" max="1.8" axis="z" home="-0.1" >
 
 <!--												<transform id="axessl3" >
 													<plane id="xsl3" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -432,7 +432,7 @@
 
 												<transform id="arm_left_4"  ty="28"  tz="20" > <!--Codo-->
 <!-- 													Gira en X -->
-														<joint id="leftElbow" port="20000"  axis="x" min="-2.6" max="0" home="-0.6" >
+														<joint id="leftElbow" port="20000"  axis="x" min="-2.6" max="0" home="-0.1" >
 
 <!--															<transform id="axesel1" >
 																<plane id="xel1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />

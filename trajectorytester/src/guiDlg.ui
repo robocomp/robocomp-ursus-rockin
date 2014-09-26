@@ -488,7 +488,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>500</y>
+     <y>510</y>
      <width>861</width>
      <height>16</height>
     </rect>
@@ -501,7 +501,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>520</y>
+     <y>530</y>
      <width>871</width>
      <height>91</height>
     </rect>
@@ -525,7 +525,7 @@
    <widget class="QPushButton" name="t2Button">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>90</x>
       <y>30</y>
       <width>91</width>
       <height>27</height>
@@ -538,7 +538,7 @@
    <widget class="QPushButton" name="t3Button">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>190</x>
       <y>30</y>
       <width>81</width>
       <height>27</height>
@@ -548,69 +548,23 @@
      <string>3. Arm</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="tag1LineEdit">
+   <widget class="QPushButton" name="t5Button">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>10</y>
-      <width>113</width>
-      <height>27</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="tag2LineEdit">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>40</y>
-      <width>113</width>
-      <height>27</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="Line" name="line_4">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>10</y>
-      <width>3</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="bik1Button">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
+      <x>370</x>
       <y>30</y>
       <width>81</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>Ballistic</string>
+     <string>5. Detach</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="bik2Button">
+   <widget class="QPushButton" name="t4Button">
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>30</y>
-      <width>81</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Servo</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="t3Button_2">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
+      <x>280</x>
       <y>30</y>
       <width>81</width>
       <height>27</height>
@@ -620,24 +574,11 @@
      <string>4. Servo</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="bik3Button">
-    <property name="geometry">
-     <rect>
-      <x>740</x>
-      <y>30</y>
-      <width>81</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Detatch</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QPushButton" name="goHomeButton">
    <property name="geometry">
     <rect>
-     <x>600</x>
+     <x>820</x>
      <y>480</y>
      <width>81</width>
      <height>27</height>
@@ -645,6 +586,26 @@
    </property>
    <property name="text">
     <string>Go home</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="tag1LineEdit">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>480</y>
+     <width>113</width>
+     <height>27</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="tag2LineEdit">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>480</y>
+     <width>113</width>
+     <height>27</height>
+    </rect>
    </property>
   </widget>
  </widget>

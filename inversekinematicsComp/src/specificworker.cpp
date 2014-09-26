@@ -344,7 +344,7 @@ void SpecificWorker::compute( )
 					target.print("BEFORE PROCESSING");
 
 					iterador.value().getInverseKinematics()->resolverTarget(target);
-
+				
 					if(target.getError() <= 0.9 and target.isAtTarget() == false) //local goal achieved: execute the solution
 					{
 						moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
@@ -522,6 +522,7 @@ void SpecificWorker::setTargetPose6D(const string& bodyPart, const Pose6D& targe
 
 	qDebug() << "--------------------------------------------------------------------------";
 	qDebug() << __FUNCTION__<< "New target arrived: " << partName << ". For target:" << tar << ". With weights: " << w;
+	
 }
 
 /**
@@ -741,7 +742,11 @@ TargetState SpecificWorker::getState(const std::string &part)
 		if( bodyParts[partName].getTargets().isEmpty() )
 			state.finish = true;
 		else
+		{
 			state.elapsedTime = bodyParts[partName].getHeadFromTargets().getElapsedTime();
+			state.finish = false;
+		}
+		
 		mutex->unlock();
 	}
 	return state;
