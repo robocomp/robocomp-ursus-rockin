@@ -24,6 +24,13 @@
 * \brief Default constructor
 */
 
+float angmMPI(float angle)
+{
+	while (angle > +M_PI) angle -= 2.*M_PI;
+	while (angle < -M_PI) angle += 2.*M_PI;
+	return angle;
+}
+
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
 	this->params = params;
@@ -258,21 +265,14 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 {
 	qDebug() << __FUNCTION__;
-	const float MAX_ORIENTATION_ERROR  = 0.05;
+	const float MAX_ORIENTATION_ERROR  = 0.08726646259722222;
 
-	float angRobot = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
-	while (angRobot > +M_PI) angRobot -= 2.*M_PI;
-	while (angRobot < -M_PI) angRobot += 2.*M_PI;
-	while (alfa > +M_PI) alfa -= 2.*M_PI;
-	while (alfa < -M_PI) alfa += 2.*M_PI;
-	QVec v(1);
-	v[0] = (angRobot -alfa);
-	while (v[0] > +M_PI) v[0] -= 2.*M_PI;
-	while (v[0] < -M_PI) v[0] += 2.*M_PI;
-// 	calcularModuloFloat(v , M_PI);
-	qDebug() << __FUNCTION__ << (angRobot-alfa) << v[0];
+	float angRobot = angmMPI(innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y());
+	alfa = angmMPI(alfa);
+	float error = angmMPI(angRobot-alfa);
+	qDebug() << __FUNCTION__ << (angRobot-alfa) << error;
 
-	if( fabs(v[0]) < MAX_ORIENTATION_ERROR)
+	if( fabs(error) < MAX_ORIENTATION_ERROR)
 	{
 		currentTarget.setHasRotation(false);
 		road.setFinished(true);
@@ -290,7 +290,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 	}
 	else
 	{
-		float vrot = -0.8 * v[0];  //Proportional controller
+		float vrot = -0.7 * error;  //Proportional controller
 		try
 		{
 		  differentialrobot_proxy->setSpeedBase(0, vrot);
@@ -877,3 +877,7 @@ void SpecificWorker::calcularModuloFloat(QVec &angles, float mod)
 				angles[i] = angles[i] + M_PI;
 	}
 }
+
+
+
+
