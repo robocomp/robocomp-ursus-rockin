@@ -201,7 +201,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigation");
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigationAgent");
 	}
 	catch(...)
 	{

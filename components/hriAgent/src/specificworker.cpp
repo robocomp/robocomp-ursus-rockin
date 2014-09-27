@@ -41,6 +41,7 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	actionExecution();
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -195,10 +196,60 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		//AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "april");
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "hriAgent");
 	}
 	catch(...)
 	{
 		exit(1);
 	}
 }
+
+void SpecificWorker::actionExecution()
+{
+	static std::string previousAction = "";
+	if (previousAction != action)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}
+
+	if (action == "personClassifiesMilkPot")
+	{
+		action_PersonClassifiesMilkPot();
+	}
+	else if (action == "tellHumanAboutCoffeePot")
+	{
+		action_TellHumanAboutCoffeePot();
+	}
+	else if (action == "tellHumanAboutMug")
+	{
+		action_TellHumanAboutMug();
+	}
+	else if (action == "tellHumanAboutUnknownObject")
+	{
+		action_TellHumanAboutUnknownObject();
+	}
+
+
+}
+
+void SpecificWorker::action_PersonClassifiesMilkPot()
+{
+}
+
+void SpecificWorker::action_TellHumanAboutCoffeePot()
+{
+}
+
+
+void SpecificWorker::action_TellHumanAboutMug()
+{
+}
+
+
+void SpecificWorker::action_TellHumanAboutUnknownObject()
+{
+}
+
+
+
