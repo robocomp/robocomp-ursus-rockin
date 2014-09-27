@@ -505,7 +505,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	{
 		lastX = x;
 		lastZ = z;
-		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
+		printf("find objects in table %d\n", tableId);
 		go(x, tableId==7?z+400:z-400, tableId==7?-3.141592:0, true);
 	}
 	else
