@@ -96,17 +96,17 @@
 
 
 			<transform id="mugT" tx="1300" ty="805" tz="-1350">
-				<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00002.png" />
+				<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />
 				<mesh id="mesh-mug" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/mug.3ds" scale="170,107,170" ty="-15" tz="0" rx="1.57079632679"/>
 			</transform>
 
 			<transform id="milkT" tx="1100" ty="850" tz="-1350">
-				<plane id="april-milk" px="0" py="50" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00011.png" />
+				<plane id="april-milk" px="0" py="50" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00013.png" />
 				<mesh id="mesh-milk" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/milk.3ds" scale="145,145,145" ty="-10" tz="0" rz="0.8" rx="1.57079632679"/>
 			</transform>
 
 			<transform id="coffeeT" tx="1000" ty="10" tz="1500">
-				<plane id="april-coffee" px="0" py="860" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />
+				<plane id="april-coffee" px="0" py="860" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00014.png" />
 				<mesh id="mesh-coffee" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/coffee.3ds" scale="170,170,170" ty="681" tz="0" rz="-2.4" rx="1.57079632679"/>
 			</transform>
 
@@ -131,7 +131,7 @@
 <!-- 		<transform id="initialRobotPose" tx="2300" tz="3000" ty="10" > -->
 			<differentialrobot id="robot" port="10004" >
  				<translation id="laserPose" tx="0" ty="240" tz="100">
-<!--   				<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> -->
+  				<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" />
  				</translation>
 				<transform  id="base_trans" >
 					<joint id="base" port="2000" axis="y" home="0">
