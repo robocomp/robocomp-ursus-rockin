@@ -49,7 +49,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	try
 	{
-		RoboCompCommonBehavior::Parameter par = params.at("HRI.InnerModel") ;
+		RoboCompCommonBehavior::Parameter par = params.at("HRIAgent.InnerModel") ;
 		if( QFile(QString::fromStdString(par.value)).exists() == true)
 		{
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
@@ -213,23 +213,23 @@ void SpecificWorker::actionExecution()
 		printf("New action: %s\n", action.c_str());
 	}
 
-	if (action == "personClassifiesMilkPot")
+	if (action == "personclassifiesmilkpot")
 	{
 		action_PersonClassifiesMilkPot();
 	}
-	else if (action == "tellHumanAboutCoffeePot")
+	else if (action == "tellhumanaboutcoffeepot")
 	{
 		action_TellHumanAboutCoffeePot();
 	}
-	else if (action == "tellHumanAboutMug")
+	else if (action == "tellhumanaboutmug")
 	{
 		action_TellHumanAboutMug();
 	}
-	else if (action == "tellHumanAboutTable")
+	else if (action == "tellhumanabouttable")
 	{
 		action_TellHumanAboutTable();
 	}
-	else if (action == "tellHumanAboutUnknownObject")
+	else if (action == "tellhumanaboutunknownobject")
 	{
 		action_TellHumanAboutUnknownObject();
 	}
