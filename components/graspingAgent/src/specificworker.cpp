@@ -227,6 +227,14 @@ void SpecificWorker::actionExecution()
 	{
 		action_FindObjectVisuallyInTable();
 	}
+	else if (action == "setobjectreach")
+	{
+		action_SetObjectReach();
+	}
+	else if (action == "robotmovesobjectfromcontainer")
+	{
+		action_RobotMovesObjectFromContainer();
+	}
 }
 
 void SpecificWorker::action_FindObjectVisuallyInTable()
@@ -237,6 +245,53 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	const float z = str2float(goalTable->getAttribute("z"));
 	QVec robotRef = innerModel->transform("robot", QVec::vec3(x, 800, z), "world");
 	saccadic3D(robotRef, QVec::vec3(0,-1,0));
+}
+
+
+void SpecificWorker::action_RobotMovesObjectFromContainer()
+{
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	try
+	{
+		auto symbols = newModel->getSymbolsMap(params, "object", "c1", "c2");
+		newModel->removeEdge(symbols["object"], symbols["c1"], "in");
+		newModel->addEdge(   symbols["object"], symbols["c2"], "in");
+		try
+		{
+			sendModificationProposal(worldModel, newModel);
+		}
+		catch(...)
+		{
+			printf("graspingAgent: Couldn't publish new model\n");
+		}
+	}
+	catch(...)
+	{
+		printf("graspingAgent: Couldn't retrieve action's parameters\n");
+	}
+}
+
+
+void SpecificWorker::action_SetObjectReach()
+{
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	try
+	{
+		auto symbols = newModel->getSymbolsMap(params, "object", "status");
+		newModel->renameEdge(symbols["object"], symbols["status"], "noReach", "reach");
+		try
+		{
+			sendModificationProposal(worldModel, newModel);
+		}
+		catch(...)
+		{
+			printf("graspingAgent: Couldn't publish new model\n");
+		}
+	}
+	catch(...)
+	{
+		printf("graspingAgent: Couldn't retrieve action's parameters\n");
+	}
 }
 
 

@@ -57,11 +57,12 @@ private:
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 
 
-
-
-
 	void actionExecution();
-
+	void action_PersonClassifiesMilkPot();
+	void action_TellHumanAboutCoffeePot();
+	void action_TellHumanAboutMug();
+	void action_TellHumanAboutTable();
+	void action_TellHumanAboutUnknownObject();
 
 
 
