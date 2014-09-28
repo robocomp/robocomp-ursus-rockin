@@ -315,7 +315,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 	{
 		try
 		{
-			auto symbols = newModel->getSymbolsMap(params, "robot");
+			auto symbols = newModel->getSymbolsMap(params, "robot", "container");
 			AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
 			AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
 			newModel->addEdge(symbols["robot"], newMug, "know");
@@ -373,7 +373,7 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 	{
 		try
 		{
-			auto symbols = newModel->getSymbolsMap(params, "robot");
+			auto symbols = newModel->getSymbolsMap(params, "robot", "container");
 			AGMModelSymbol::SPtr newMilk = newModel->newSymbol("object");
 			AGMModelSymbol::SPtr newMilkStatus = newModel->newSymbol("objectSt");
 			newModel->addEdge(symbols["robot"], newMilk, "know");
