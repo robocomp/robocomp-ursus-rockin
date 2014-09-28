@@ -258,6 +258,28 @@ void SpecificWorker::action_RobotMovesObjectFromContainer()
 		newModel->addEdge(   symbols["object"], symbols["c2"], "in");
 		try
 		{
+			try
+			{
+				Pose6D target;
+				target.x = str2float(symbols["object"]->getAttribute("x"));
+				target.y = str2float(symbols["object"]->getAttribute("y"));
+				target.z = str2float(symbols["object"]->getAttribute("z"));
+				target.rx = str2float(symbols["object"]->getAttribute("rx"));
+				target.ry = str2float(symbols["object"]->getAttribute("ry"));
+				target.rz = str2float(symbols["object"]->getAttribute("rz"));
+				WeightVector weights;
+				weights.x = 1;
+				weights.y = 1;
+				weights.z = 1;
+				weights.rx = 1;
+				weights.ry = 0;
+				weights.rz = 1;
+				bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+			}
+			catch (...)
+			{
+				printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
+			}
 			sendModificationProposal(worldModel, newModel);
 		}
 		catch(...)

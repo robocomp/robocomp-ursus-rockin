@@ -307,43 +307,35 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 		}
 	}
 
-	if (not existing) {
-		int32_t robotId = newModel->getIdentifierByType("robot");
-		if (robotId == -1)
+	if (not existing)
+	{
+		try
 		{
-			return false;
+			auto symbols = newModel->getSymbolsMap(params, "robot");
+			AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
+			AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
+			newModel->addEdge(symbols["robot"], newMug, "know");
+			newModel->addEdge(newMug, newMugStatus, "hasStatus");
+			newModel->addEdge(newMug, newMugStatus, "see");
+			newModel->addEdge(newMug, newMugStatus, "position");
+			newModel->addEdge(newMug, newMugStatus, "reachable");
+			newModel->addEdge(newMug, newMugStatus, "reach");
+			newModel->addEdge(newMug, newMugStatus, "classified");
+			newModel->addEdge(newMug, newMugStatus, "mug");
+			newModel->addEdge(newMug, symbols["container"], "in");
+
+			const std::string tagIdStr = int2str(t.id);
+			newMug->attributes["tag"] = tagIdStr;
+			newMug->attributes["tx"] = "1300";
+			newMug->attributes["ty"] = "800";
+			newMug->attributes["tz"] = "-1350";
+			newMug->attributes["rx"] = "0";
+			newMug->attributes["ry"] = "-3.1415926535";
+			newMug->attributes["rz"] = "0";
 		}
-		AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
-		AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
-		newModel->addEdgeByIdentifiers(robotId, newMug->identifier, "know");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "hasStatus");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "see");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "position");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "reachable");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "reach");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "classified");
-		newModel->addEdgeByIdentifiers(newMug->identifier, newMugStatus->identifier, "mug");
-
-		const std::string tagIdStr = int2str(t.id);
-		printf("--%s--\n", tagIdStr.c_str());
-		newMug->attributes["tag"] = tagIdStr;
-		newMug->attributes["tx"] = "1300";
-		newMug->attributes["ty"] = "0";
-		newMug->attributes["tz"] = "-1600";
-		newMug->attributes["rx"] = "0";
-		newMug->attributes["ry"] = "-3.1415926535";
-		newMug->attributes["rz"] = "0";
-// 		newMug->attributes["tx"] = float2str(t.tx);
-// 		newMug->attributes["ty"] = float2str(t.ty);
-// 		newMug->attributes["tz"] = float2str(t.tz);
-// 		newMug->attributes["rx"] = float2str(t.rx);
-// 		newMug->attributes["ry"] = float2str(t.ry);
-// 		newMug->attributes["rz"] = float2str(t.rz);
-
-// 		int32_t tableId = str2int(params["container"].value);
-// 		if (tableId != -1)
+		catch(...)
 		{
-			newModel->addEdgeByIdentifiers(newMug->identifier,  7, "in");
+			printf("objectAgent: Couldn't retrieve action's parameters\n");
 		}
 	}
 
@@ -373,43 +365,34 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 		}
 	}
 
-	if (not existing) {
-		int32_t robotId = newModel->getIdentifierByType("robot");
-		if (robotId == -1)
+	if (not existing)
+	{
+		try
 		{
-			return false;
+			auto symbols = newModel->getSymbolsMap(params, "robot");
+			AGMModelSymbol::SPtr newMilk = newModel->newSymbol("object");
+			AGMModelSymbol::SPtr newMilkStatus = newModel->newSymbol("objectSt");
+			newModel->addEdge(symbols["robot"], newMilk, "know");
+			newModel->addEdge(newMilk, newMilkStatus, "hasStatus");
+			newModel->addEdge(newMilk, newMilkStatus, "see");
+			newModel->addEdge(newMilk, newMilkStatus, "position");
+			newModel->addEdge(newMilk, newMilkStatus, "reachable");
+			newModel->addEdge(newMilk, newMilkStatus, "reach");
+			newModel->addEdge(newMilk, newMilkStatus, "classifailed");
+			newModel->addEdge(newMilk, symbols["container"], "in");
+
+			const std::string tagIdStr = int2str(t.id);
+			newMilk->attributes["tag"] = tagIdStr;
+			newMilk->attributes["tx"] = "1100";
+			newMilk->attributes["ty"] = "820";
+			newMilk->attributes["tz"] = "-1350";
+			newMilk->attributes["rx"] = "0";
+			newMilk->attributes["ry"] = "-3.1415926535";
+			newMilk->attributes["rz"] = "0";
 		}
-		AGMModelSymbol::SPtr newMilk = newModel->newSymbol("object");
-		AGMModelSymbol::SPtr newMilkStatus = newModel->newSymbol("objectSt");
-		newModel->addEdgeByIdentifiers(robotId, newMilk->identifier, "know");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "hasStatus");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "see");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "position");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "reachable");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "reach");
-		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "classifailed");
-// 		newModel->addEdgeByIdentifiers(newMilk->identifier, newMilkStatus->identifier, "milk");
-
-		const std::string tagIdStr = int2str(t.id);
-		printf("--%s--\n", tagIdStr.c_str());
-		newMilk->attributes["tag"] = tagIdStr;
-		newMilk->attributes["tx"] = "1100";
-		newMilk->attributes["ty"] = "0";
-		newMilk->attributes["tz"] = "-1600";
-		newMilk->attributes["rx"] = "0";
-		newMilk->attributes["ry"] = "-3.1415926535";
-		newMilk->attributes["rz"] = "0";
-// 		newMilk->attributes["tx"] = float2str(t.tx);
-// 		newMilk->attributes["ty"] = float2str(t.ty);
-// 		newMilk->attributes["tz"] = float2str(t.tz);
-// 		newMilk->attributes["rx"] = float2str(t.rx);
-// 		newMilk->attributes["ry"] = float2str(t.ry);
-// 		newMilk->attributes["rz"] = float2str(t.rz);
-
-// 		int32_t tableId = str2int(params["container"].value);
-// 		if (tableId != -1)
+		catch(...)
 		{
-			newModel->addEdgeByIdentifiers(newMilk->identifier,  7, "in");
+			printf("objectAgent: Couldn't retrieve action's parameters\n");
 		}
 	}
 
