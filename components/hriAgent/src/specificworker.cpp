@@ -239,10 +239,20 @@ void SpecificWorker::actionExecution()
 
 void SpecificWorker::action_PersonClassifiesMilkPot()
 {
-		speech_proxy->say("Is this milk? What? ... I can't hear you... I guess you said yes.", false);
+	static bool first = true;
+	static QTime lastTime = QTime::currentTime();
+	if (lastTime.elapsed() < 5000 and not first) return;
+	first = false;
+	lastTime = QTime::currentTime();
 
-	
-	
+
+
+	speech_proxy->say("Is this milk? What? ... I can't hear you... I guess you said yes.", false);
+	while(speech_proxy->isBusy())
+		usleep(100000);
+
+
+
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
@@ -266,6 +276,14 @@ void SpecificWorker::action_PersonClassifiesMilkPot()
 
 void SpecificWorker::action_TellHumanAboutCoffeePot()
 {
+	static bool first = true;
+	static QTime lastTime = QTime::currentTime();
+	if (lastTime.elapsed() < 5000 and not first) return;
+	first = false;
+	lastTime = QTime::currentTime();
+
+
+
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
@@ -282,9 +300,11 @@ void SpecificWorker::action_TellHumanAboutCoffeePot()
 				}
 			}
 		}
-		
+
 
 		speech_proxy->say("This is a coffeepot.", false);
+		while(speech_proxy->isBusy())
+			usleep(100000);
 
 		//
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
@@ -317,11 +337,20 @@ void SpecificWorker::action_TellHumanAboutCoffeePot()
 
 void SpecificWorker::action_TellHumanAboutTable()
 {
+	static bool first = true;
+	static QTime lastTime = QTime::currentTime();
+	if (lastTime.elapsed() < 5000 and not first) return;
+	first = false;
+	lastTime = QTime::currentTime();
+
+
+
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
-
 		speech_proxy->say("This is a table.", false);
+		while(speech_proxy->isBusy())
+			usleep(100000);
 
 		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
@@ -354,11 +383,28 @@ void SpecificWorker::action_TellHumanAboutTable()
 
 void SpecificWorker::action_TellHumanAboutMug()
 {
+	static bool first = true;
+	static QTime lastTime = QTime::currentTime();
+	if (lastTime.elapsed() < 5000 and not first) return;
+	first = false;
+	lastTime = QTime::currentTime();
+	printf("SpecificWorker::action_TellHumanAboutMug()\n");
+
+
+
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
-
-		speech_proxy->say("This is a mug.", false);
+		try
+		{
+			speech_proxy->say("This is a mug.", false);
+			while(speech_proxy->isBusy())
+				usleep(100000);
+		}
+		catch(...)
+		{
+			printf("couldn't speak!!");
+		}
 
 		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
@@ -391,11 +437,23 @@ void SpecificWorker::action_TellHumanAboutMug()
 
 void SpecificWorker::action_TellHumanAboutUnknownObject()
 {
+	static bool first = true;
+	static QTime lastTime = QTime::currentTime();
+	printf("void SpecificWorker::action_TellHumanAboutUnknownObject()%d\n", __LINE__);
+	if (lastTime.elapsed() < 5000 and not first) return;
+	printf("void SpecificWorker::action_TellHumanAboutUnknownObject()%d\n", __LINE__);
+	first = false;
+	lastTime = QTime::currentTime();
+
+
+	speech_proxy->say("Look at this object I couldn't classify, please.", false);
+	while(speech_proxy->isBusy())
+		usleep(100000);
+
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
 
-		speech_proxy->say("Look at this object I couldn't classify, please.", false);
 
 		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
