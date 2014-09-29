@@ -28,6 +28,7 @@
 #include <ui_guiDlg.h>
 #include "config.h"
 #include <agm.h>
+#include <Speech.h>
 #include <AGMAgent.h>
 #include <AGMCommonBehavior.h>
 #include <AGMExecutive.h>
@@ -43,6 +44,7 @@ using namespace std;
        \brief
        @author authorname
 */
+using namespace RoboCompSpeech;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMAgent;
@@ -73,6 +75,7 @@ public:
 	bool deactivate();
 	bool isActive() { return active; }
 	RoboCompAGMWorldModel::BehaviorResultType status();
+	SpeechPrx speech_proxy;
 	AGMAgentTopicPrx agmagenttopic;
 	virtual bool activateAgent(const ParameterMap& prs) = 0;
 	virtual bool deactivateAgent() = 0;

@@ -28,6 +28,7 @@ QObject()
 #endif
 
 {
+	speech_proxy = (*(SpeechPrx*)mprx["SpeechProxy"]);
 	agmagenttopic = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
 
 	mutex = new QMutex();
