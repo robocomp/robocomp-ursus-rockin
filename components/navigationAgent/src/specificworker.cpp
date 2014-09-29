@@ -201,7 +201,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigation");
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigationAgent");
 	}
 	catch(...)
 	{
@@ -471,6 +471,22 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
 	const float x = str2float(goalTable->getAttribute("x"));
 	const float z = str2float(goalTable->getAttribute("z"));
+	float alpha = tableId==7?-3.141592:0;
+
+	AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
+	const float rx = str2float(robot->getAttribute("x"));
+	const float rz = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("z"));
+
+	// Avoid repeating the same goal and confuse the navigator
+	const float errX = abs(rx-x);
+	const float errZ = abs(rz-z);
+	float errAlpha = abs(ralpha-alpha);
+	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+	errAlpha = abs(errAlpha);
+	if (errX<20 and errZ<20 and errAlpha<02)
+		return;
 
 	bool proceed = true;
 	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
@@ -489,7 +505,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	{
 		lastX = x;
 		lastZ = z;
-		printf("changeroom from %s to %s\n", params["r1"].value.c_str(), params["r2"].value.c_str());
+		printf("find objects in table %d\n", tableId);
 		go(x, tableId==7?z+400:z-400, tableId==7?-3.141592:0, true);
 	}
 	else

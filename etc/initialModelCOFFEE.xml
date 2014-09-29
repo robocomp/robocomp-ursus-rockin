@@ -43,7 +43,7 @@
 	<symbol id="9" type="object">
 		<attribute key="x" value="400" />
 		<attribute key="z" value="1000" />
-		<attribute key="tag" value="12" />
+		<attribute key="tag" value="14" />
 	</symbol>
 	<link src="1" dst="9" label="know" />
 	<link src="9" dst="3" label="in" />

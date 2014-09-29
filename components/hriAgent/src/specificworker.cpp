@@ -41,6 +41,7 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	actionExecution();
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -48,7 +49,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	try
 	{
-		RoboCompCommonBehavior::Parameter par = params.at("HRI.InnerModel") ;
+		RoboCompCommonBehavior::Parameter par = params.at("HRIAgent.InnerModel") ;
 		if( QFile(QString::fromStdString(par.value)).exists() == true)
 		{
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
@@ -195,10 +196,214 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		//AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "april");
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "hriAgent");
 	}
 	catch(...)
 	{
 		exit(1);
 	}
 }
+
+void SpecificWorker::actionExecution()
+{
+	static std::string previousAction = "";
+	if (previousAction != action)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}
+
+	if (action == "personclassifiesmilkpot")
+	{
+		action_PersonClassifiesMilkPot();
+	}
+	else if (action == "tellhumanaboutcoffeepot")
+	{
+		action_TellHumanAboutCoffeePot();
+	}
+	else if (action == "tellhumanaboutmug")
+	{
+		action_TellHumanAboutMug();
+	}
+	else if (action == "tellhumanabouttable")
+	{
+		action_TellHumanAboutTable();
+	}
+	else if (action == "tellhumanaboutunknownobject")
+	{
+		action_TellHumanAboutUnknownObject();
+	}
+
+
+}
+
+void SpecificWorker::action_PersonClassifiesMilkPot()
+{
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	try
+	{
+		auto symbols = newModel->getSymbolsMap(params, "objectr", "statusr", "objecth", "statush");
+		newModel->renameEdge(symbols["objectr"], symbols["statusr"], "classifailed", "milkpot");
+		newModel->renameEdge(symbols["objecth"], symbols["statush"], "unclassified", "milkpot");
+		try
+		{
+			sendModificationProposal(worldModel, newModel);
+		}
+		catch(...)
+		{
+			printf("hriAgent: Couldn't publish new model\n");
+		}
+	}
+	catch(...)
+	{
+		printf("hriAgent: Couldn't retrieve action's parameters\n");
+	}
+}
+
+void SpecificWorker::action_TellHumanAboutCoffeePot()
+{
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	try
+	{
+		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
+		//
+		// BEFORE SUBMITTING A NEW MODIFICATION... BE SURE WE DON'T DO IT TWICE!
+		{
+			for (auto objEdgIt : *(symbols["objectr"]))
+			{
+				if (objEdgIt->getLabel() == "eq")
+				{
+					// We already told him!? :-?  (Maybe we're too fast! :-D)
+					return;
+				}
+			}
+		}
+		//
+		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
+		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
+		newModel->addEdge( symbols["person"],          newObjH, "know");
+		newModel->addEdge(symbols["objectr"],          newObjH, "eq");
+		newModel->addEdge(           newObjH, symbols["conth"], "in");
+		newModel->addEdge(           newObjH,    newObjHStatus, "hasStatus");
+		newModel->addEdge(           newObjH,    newObjHStatus, "position");
+		newModel->addEdge(           newObjH,    newObjHStatus, "classified");
+		newModel->addEdge(           newObjH,    newObjHStatus, "coffeepot");
+		newModel->addEdge(           newObjH,    newObjHStatus, "see");
+		newModel->addEdge(           newObjH,    newObjHStatus, "reach");
+		newModel->addEdge(           newObjH,    newObjHStatus, "reachable");
+		try
+		{
+			sendModificationProposal(worldModel, newModel);
+		}
+		catch(...)
+		{
+			printf("Some error occurred when publishing the new model\n");
+		}
+	}
+	catch(...)
+	{
+		printf("Some error occurred when retrieving action's parameters\n");
+	}
+}
+
+
+void SpecificWorker::action_TellHumanAboutTable()
+{
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	try
+	{
+		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
+		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
+		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
+		newModel->addEdge( symbols["person"],          newObjH, "know");
+		newModel->addEdge(symbols["objectr"],          newObjH, "eq");
+		newModel->addEdge(           newObjH, symbols["conth"], "in");
+		newModel->addEdge(           newObjH,    newObjHStatus, "hasStatus");
+		newModel->addEdge(           newObjH,    newObjHStatus, "position");
+		newModel->addEdge(           newObjH,    newObjHStatus, "classified");
+		newModel->addEdge(           newObjH,    newObjHStatus, "table");
+		newModel->addEdge(           newObjH,    newObjHStatus, "see");
+		newModel->addEdge(           newObjH,    newObjHStatus, "reach");
+		newModel->addEdge(           newObjH,    newObjHStatus, "reachable");
+		try
+		{
+			sendModificationProposal(worldModel, newModel);
+		}
+		catch(...)
+		{
+			printf("Some error occurred when publishing the new model\n");
+		}
+	}
+	catch(...)
+	{
+		printf("Some error occurred when retrieving action's parameters\n");
+	}
+}
+
+
+void SpecificWorker::action_TellHumanAboutMug()
+{
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	try
+	{
+		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
+		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
+		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
+		newModel->addEdge( symbols["person"],          newObjH, "know");
+		newModel->addEdge(symbols["objectr"],          newObjH, "eq");
+		newModel->addEdge(           newObjH, symbols["conth"], "in");
+		newModel->addEdge(           newObjH,    newObjHStatus, "hasStatus");
+		newModel->addEdge(           newObjH,    newObjHStatus, "position");
+		newModel->addEdge(           newObjH,    newObjHStatus, "classified");
+		newModel->addEdge(           newObjH,    newObjHStatus, "mug");
+		newModel->addEdge(           newObjH,    newObjHStatus, "see");
+		newModel->addEdge(           newObjH,    newObjHStatus, "reach");
+		newModel->addEdge(           newObjH,    newObjHStatus, "reachable");
+		try
+		{
+			sendModificationProposal(worldModel, newModel);
+		}
+		catch(...)
+		{
+			printf("Some error occurred when publishing the new model\n");
+		}
+	}
+	catch(...)
+	{
+		printf("Some error occurred when retrieving action's parameters\n");
+	}
+}
+
+
+void SpecificWorker::action_TellHumanAboutUnknownObject()
+{
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	try
+	{
+		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
+		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
+		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
+		newModel->addEdge( symbols["person"],          newObjH, "know");
+		newModel->addEdge(symbols["objectr"],          newObjH, "eq");
+		newModel->addEdge(           newObjH, symbols["conth"], "in");
+		newModel->addEdge(           newObjH,    newObjHStatus, "hasStatus");
+		newModel->addEdge(           newObjH,    newObjHStatus, "unclassified");
+		newModel->addEdge(           newObjH,    newObjHStatus, "position");
+		newModel->addEdge(           newObjH,    newObjHStatus, "reachable");
+		try
+		{
+			sendModificationProposal(worldModel, newModel);
+		}
+		catch(...)
+		{
+			printf("Some error occurred when publishing the new model\n");
+		}
+	}
+	catch(...)
+	{
+		printf("Some error occurred when retrieving action's parameters\n");
+	}
+}
+
+
+

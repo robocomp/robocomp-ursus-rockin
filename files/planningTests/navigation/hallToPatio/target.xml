@@ -2,8 +2,8 @@
 
 	<symbol id="13" type="object" />
 
-	<symbol id="1" type="robot" />
+	<symbol id="r" type="robot" />
 
-	<link src="1" dst="13" label="in" />
+	<link src="r" dst="13" label="in" />
 
 </AGMModel>

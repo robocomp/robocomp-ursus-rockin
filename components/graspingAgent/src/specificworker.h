@@ -62,6 +62,9 @@ private:
 
 	void actionExecution();
 	void action_FindObjectVisuallyInTable();
+	void action_SetObjectReach();
+	void action_RobotMovesObjectFromContainer();
+
 	void saccadic3D(QVec point, QVec axis);
 	void saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz);
 	void updateInnerModel();
