@@ -207,7 +207,7 @@
 
 
 															<transform id="rgbd_transform" ty="90" tz="20">
- 																<plane id="sensor" nz="1" size="100,30" repeat="1" texture="#0000ff" /> -->
+<!--  																<plane id="sensor" nz="1" size="100,30" repeat="1" texture="#0000ff" /> --> -->
  																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" />
 
 														<!--		<transform id="axesh1"  tz="500">
