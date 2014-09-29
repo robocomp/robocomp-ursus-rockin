@@ -266,6 +266,20 @@ void SpecificWorker::action_TellHumanAboutCoffeePot()
 	try
 	{
 		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
+		//
+		// BEFORE SUBMITTING A NEW MODIFICATION... BE SURE WE DON'T DO IT TWICE!
+		{
+			AGMModelSymbol::iterator objEdgIt;
+			for (objEdgIt=symbols["objectr"]->edgesBegin(newModel); objEdgIt!=symbols["objectr"]->edgesBegin(newModel); objEdgIt++)
+			{
+				if (objEdgIt->getLabel() == "eq")
+				{
+					// We already told him!? :-?  (Maybe we're too fast! :-D)
+					return;
+				}
+			}
+		}
+		//
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
 		newModel->addEdge( symbols["person"],          newObjH, "know");
