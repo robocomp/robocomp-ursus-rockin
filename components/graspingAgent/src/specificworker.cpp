@@ -258,19 +258,26 @@ void SpecificWorker::action_RobotMovesObjectFromContainer()
 		try
 		{
 			Pose6D target;
-			target.x = str2float(symbols["object"]->getAttribute("x"));
-			target.y = str2float(symbols["object"]->getAttribute("y"));
-			target.z = str2float(symbols["object"]->getAttribute("z"));
-			target.rx = str2float(symbols["object"]->getAttribute("rx"));
-			target.ry = str2float(symbols["object"]->getAttribute("ry"));
-			target.rz = str2float(symbols["object"]->getAttribute("rz"));
 			WeightVector weights;
-			weights.x = 1;
-			weights.y = 1;
-			weights.z = 1;
-			weights.rx = 1;
-			weights.ry = 0;
-			weights.rz = 1;
+			try
+			{
+				target.x = str2float(symbols["object"]->getAttribute("tx"));
+				target.y = str2float(symbols["object"]->getAttribute("ty"));
+				target.z = str2float(symbols["object"]->getAttribute("tz"));
+				target.rx = str2float(symbols["object"]->getAttribute("rx"));
+				target.ry = str2float(symbols["object"]->getAttribute("ry"));
+				target.rz = str2float(symbols["object"]->getAttribute("rz"));
+				weights.x = 1;
+				weights.y = 1;
+				weights.z = 1;
+				weights.rx = 1;
+				weights.ry = 0;
+				weights.rz = 1;
+			}
+			catch (...)
+			{
+				printf("graspingAgent: Error reading data from cognitive model: (%s:%d)\n", __FILE__, __LINE__);
+			}
 			try
 			{
 				bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
@@ -304,10 +311,15 @@ void SpecificWorker::action_SetObjectReach()
 		{
 			sendModificationProposal(worldModel, newModel);
 		}
-		catch(...)
+		catch(const Ice::Exception& ex)
 		{
-			printf("graspingAgent: Couldn't publish new model\n");
+			cout << "Exception: " << ex << endl;
+			return ;
 		}
+// 		catch(...)
+// 		{
+// 			printf("graspingAgent: Couldn't publish new model\n");
+// 		}
 	}
 	catch(...)
 	{
