@@ -239,6 +239,10 @@ void SpecificWorker::actionExecution()
 
 void SpecificWorker::action_PersonClassifiesMilkPot()
 {
+		speech_proxy->say("Is this milk? What? ... I can't hear you... I guess you said yes.", false);
+
+	
+	
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
@@ -278,6 +282,10 @@ void SpecificWorker::action_TellHumanAboutCoffeePot()
 				}
 			}
 		}
+		
+
+		speech_proxy->say("This is a coffeepot.", false);
+
 		//
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
@@ -312,6 +320,9 @@ void SpecificWorker::action_TellHumanAboutTable()
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
+
+		speech_proxy->say("This is a table.", false);
+
 		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
@@ -346,6 +357,9 @@ void SpecificWorker::action_TellHumanAboutMug()
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
+
+		speech_proxy->say("This is a mug.", false);
+
 		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
@@ -380,6 +394,9 @@ void SpecificWorker::action_TellHumanAboutUnknownObject()
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
+
+		speech_proxy->say("Look at this object I couldn't classify, please.", false);
+
 		auto symbols = newModel->getSymbolsMap(params, "person", "objectr", "conth");
 		AGMModelSymbol::SPtr newObjH       = newModel->newSymbol("object");
 		AGMModelSymbol::SPtr newObjHStatus = newModel->newSymbol("objectSt");
