@@ -269,8 +269,7 @@ void SpecificWorker::action_TellHumanAboutCoffeePot()
 		//
 		// BEFORE SUBMITTING A NEW MODIFICATION... BE SURE WE DON'T DO IT TWICE!
 		{
-			AGMModelSymbol::iterator objEdgIt;
-			for (objEdgIt=symbols["objectr"]->edgesBegin(newModel); objEdgIt!=symbols["objectr"]->edgesBegin(newModel); objEdgIt++)
+			for (auto objEdgIt : *(symbols["objectr"]))
 			{
 				if (objEdgIt->getLabel() == "eq")
 				{
