@@ -97,14 +97,15 @@
 
 
 			<transform id="mugT" tx="1300" ty="805" tz="-1350">
-				<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />
+		<!--	<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />-->
+				<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
 				<mesh id="mesh-mug" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/mug.3ds" scale="170,107,170" ty="-15" tz="0" rx="1.57079632679"/>
 			</transform>
 
-			<transform id="milkT" tx="1100" ty="850" tz="-1350">
+	<!--		<transform id="milkT" tx="1100" ty="850" tz="-1350">
 				<plane id="april-milk" px="0" py="50" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00013.png" />
 				<mesh id="mesh-milk" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/milk.3ds" scale="145,145,145" ty="-10" tz="0" rz="0.8" rx="1.57079632679"/>
-			</transform>
+			</transform>-->
 
 			<transform id="coffeeT" tx="1000" ty="10" tz="1500">
 				<plane id="april-coffee" px="0" py="860" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00014.png" />
@@ -395,9 +396,8 @@
 
 																									<!--  Colocamos la marca -->
 																									<transform id="handMesh2_t" ty="0" tz="0" rx="0" ry="0,0" rz="0">
-																										<plane id="handMesh2" ny="1" size="71.25,71.25,2" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00011.png" />
-																									</transform>
-
+																										<plane id="handMesh2" ny="1" size="71.25,71.25,2" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+																									</transform>																									
 																									<transform id="ThandMesh2_5" tz="-55" ty="25" tx="0"> 	<!--  Deshacemos la translacion -->
 																								<transform id="grabPositionHandR"  tz="55" ty="-25">
 																						  			<!--	<plane id="axisx" px="50" nx="1" size="3,3,100" repeat="1" texture="#550000" />

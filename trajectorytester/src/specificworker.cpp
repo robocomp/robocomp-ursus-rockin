@@ -64,7 +64,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest2.xml");
-innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/simulation.xml");
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/simulation.xml");
 	
 	
 	try 
@@ -397,9 +397,9 @@ SpecificWorker::State SpecificWorker::openFingers()
 	//Close fingers
 	try
 	{	
-		qDebug() << __FUNCTION__ << "Close fingers RCIS";
+		qDebug() << __FUNCTION__ << "Open fingers RCIS";
 		bodyinversekinematics_proxy->setRobot(0);
-		bodyinversekinematics_proxy->setFingers(0);
+		bodyinversekinematics_proxy->setFingers(70);
 		usleep(100000);
 	} 
 	catch (Ice::Exception ex) {cout <<"ERROR EN CERRAR PINZA: "<< ex << endl;}
@@ -422,12 +422,11 @@ SpecificWorker::State SpecificWorker::initMoveArm()
 	try 
 	{	
 		RoboCompBodyInverseKinematics::Pose6D target;
-		//we need to give the Head target in ROBOT coordinates!!!!
-		//QVec locA = innerModel->transform("robot", QVec::vec3(tag11Pose.x(),tag11Pose.y(),tag11Pose.z()), "rgbd_transform");
+		//Gaze to where you think the mark is
 		QVec loc = innerModel->transform("world","mugT");
 		loc.print("loc");
 		target.rx=0; target.ry=0; target.rz=0; 	
-		target.x = loc.x()+80; target.y=loc.y(); target.z = loc.z();
+		target.x = loc.x()-80; target.y=loc.y(); target.z = loc.z();  /// OJO. EL TAG en el mundo está girado al revés que en el ROCKIN
 		RoboCompBodyInverseKinematics::Axis axis; 
 		axis.x = 0; axis.y = -1; axis.z = 0;
 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
@@ -444,14 +443,11 @@ SpecificWorker::State SpecificWorker::initMoveArm()
 	try 
 	{
 		//QVec p = innerModel->transform("robot", QVec::vec3(tag.tx,tag.ty,tag.tz), "rgbd_transform");
-		QVec p = innerModel->transform("world","mugT");
+		QVec p = innerModel->transform("world","april-mug");
 		qDebug() << "Sending arm to" << p << "robot at" << innerModel->transform("world", QVec::zeros(6), "robot");
 		RoboCompBodyInverseKinematics::Pose6D pose;
-		pose.x = p.x()+120; pose.y = p.y(); pose.z = p.z();
-		
-		p = innerModel->transform("world", QVec::vec3(0,800,500),"robot");
-		pose.x = p.x(); pose.y = p.y(); pose.z = p.z();
-		qDebug() << "Sending arm to" << p << "robot at" << innerModel->transform("world", QVec::zeros(6), "robot");
+		pose.x = p.x()-120; pose.y = p.y(); pose.z = p.z();   /// OJO. EL TAG en el mundo está girado al revés que en el ROCKIN. Restamos en X
+	//	drawAxis("april-mug", "world");
 		
 		pose.rx =  M_PI; pose.ry=-M_PI/2; pose.rz= 0;  //don't care
 		RoboCompBodyInverseKinematics::WeightVector weight;
@@ -484,7 +480,8 @@ SpecificWorker::State SpecificWorker::moveArm()
 	else
 	{
 		openFingers();
-		return State::GRASP;
+ 		return State::GRASP;
+//		return State::IDLE;
 	}
 }
 
@@ -517,7 +514,8 @@ SpecificWorker::State SpecificWorker::grasp()
 		
 	innerModel->transform("world", QVec::zeros(6), "mano-segun-head").print("mano-segun-head en world");
 	//drawAxis("mano-segun-head", "rgbd_transform");
-			
+	//drawAxis("mano-segun-head", "world");		
+	
 	//Compute hand as felt in world
 	innerModel->transform("world",QVec::zeros(6),"ThandMesh2").print("mano through arm in world");
 	
@@ -571,18 +569,19 @@ SpecificWorker::State SpecificWorker::grasp()
 	/////////////////////////////////////////////
 	
 
-// 	if( tag12 == true)
-// 	{
-// 		addTransformInnerModel("marca-segun-head", "rgbd_transform", tag12Pose);
-// 	}
-// 	else
-// 	{
-// 		addTransformInnerModel("marca-segun-head", "rgbd_transform", innerModel->transform("rgbd_transform", QVec::zeros(6), "mugTag"));
-// 	}
+	if( tag12 == true)
+	{
+		addTransformInnerModel("marca-segun-head", "rgbd_transform", tag12Pose);
+	}
+	else
+	{
+		addTransformInnerModel("marca-segun-head", "rgbd_transform", innerModel->transform("rgbd_transform", QVec::zeros(6), "april-mug"));
+	}
 	
 	addTransformInnerModel("marca-segun-head", "rgbd_transform", tag12Pose);
 	innerModel->transform("world", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en world");
-	innerModel->transform("world", QVec::zeros(6),"mugTag").print("marca en world");
+	innerModel->transform("world", QVec::zeros(6),"mesh-mug").print("marca en world");
+	
 	
 	qDebug() << "Differencia entre mano y marca visual" << innerModel->transform("rgbd_transform", QVec::zeros(6),"marca-segun-head") -
 																innerModel->transform("rgbd_transform", QVec::zeros(6),"mano-segun-head"); 
@@ -595,7 +594,12 @@ SpecificWorker::State SpecificWorker::grasp()
 	
 
 	qDebug() << "initialDistance" << initialDistance << "real dist" << innerModel->transform("mano-segun-head", "marca-segun-head").norm2() ;
-	nearTarget[0] = initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = -M_PI/2;nearTarget[5] = 0;
+	
+	
+	//nearTarget[0] = -initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = -M_PI/2;nearTarget[5] = 0;  //OJJOO MARCA X REVES
+	nearTarget[0] = -initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = M_PI/2;nearTarget[5] = 0;  //OJJOO MARCA X REVES por lo que giro en Y al reves
+	
+	
 	if( innerModel->transform("mano-segun-head", "marca-segun-head").norm2() > 110) 
 	{
 		initialDistance = initialDistance * 0.8;
@@ -605,7 +609,7 @@ SpecificWorker::State SpecificWorker::grasp()
 	else
 	{
 		closeFingers();
-		return State::DETACH;
+ 		return State::DETACH;
 	}
 			
 		
@@ -616,7 +620,7 @@ SpecificWorker::State SpecificWorker::grasp()
 	
 	//drawAxis("marca-segun-head", "rgbd_transform");
 	//drawAxis("marca-segun-head-cercana", "rgbd_transform");
-	
+	//drawAxis("marca-segun-head-cercana", "world");
 	try 
 	{
 		RoboCompBodyInverseKinematics::Pose6D pose;
@@ -640,7 +644,7 @@ SpecificWorker::State SpecificWorker::grasp()
 	tag11 = false;		
 	tag12 = false;
 		
-	return State::GRASP;
+ 	return State::GRASP;
 }
 
 
@@ -667,7 +671,7 @@ SpecificWorker::State SpecificWorker::detach()
 		
 		RoboCompInnerModelManager::Plane3D plane;
 		plane.py=40; plane.ny=1; plane.width=71.25;plane.height=71.25;plane.thickness=5;plane.texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png";	
-		innermodelmanager_proxy->addPlane("mugTag2" , "mugT2", plane);
+		innermodelmanager_proxy->addPlane("mesh-mug2" , "mugT2", plane);
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
 	{ 

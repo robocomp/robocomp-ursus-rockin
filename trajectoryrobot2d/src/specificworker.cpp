@@ -170,9 +170,9 @@ void SpecificWorker::compute( )
 		{
 			road.clearDraw(innermodelmanager_proxy);
 			road.draw(innermodelmanager_proxy, innerModel);
-// 			planner->cleanGraph(innermodelmanager_proxy);
+ 			planner->cleanGraph(innermodelmanager_proxy);
 			road.draw(innermodelmanager_proxy, innerModel);
-// 			planner->drawGraph(innermodelmanager_proxy);
+ 			planner->drawGraph(innermodelmanager_proxy);
 		}
 		reloj.restart();
 	}
