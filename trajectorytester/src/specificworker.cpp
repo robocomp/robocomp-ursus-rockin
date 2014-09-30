@@ -127,10 +127,11 @@ void SpecificWorker::compute( )
 {
 	try
 	{
-	//	planningState = trajectoryrobot2d_proxy->getState();
+		planningState = trajectoryrobot2d_proxy->getState();
 		bikState = bodyinversekinematics_proxy->getState("RIGHTARM");
 		
 		statusLabel->setText(QString::fromStdString( planningState.state ));
+		
 		if( planningState.state == "PLANNING" )
 		{
 			segsLcd->display(reloj.elapsed() );
@@ -254,7 +255,10 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 	if( planningState.state == "IDLE" and not initiated)
 	{
 		qDebug() << __FUNCTION__ << "sending command";	
-		go(QVec::vec3(5500,0,-5100), QVec::vec3(0,0,0));
+		
+		//go(QVec::vec3(5500,0,-5100), QVec::vec3(0,0,0));
+		go(QVec::vec3(1200,0,-1300), QVec::vec3(0,M_PI,0));
+		
 		initiated = true;
 		try 
 		{	
@@ -267,27 +271,35 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		
 		return State::GO_KITCHEN;
 	}
-	if( planningState.state == "IDLE" and initiated and (QVec::vec3(5500,0,-5000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 100)
+	
+	//if( planningState.state == "IDLE" and initiated and (QVec::vec3(5500,0,-5000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 100)
+	
+	if( planningState.state == "IDLE" and initiated and (QVec::vec3(1200,0,-1300) - QVec::vec3(bState.x,0,bState.z)).norm2() < 100)
 	{
 		qDebug() << __FUNCTION__ << "Made it...";
 		initiated = false;
 		stopRobot();
 		return State::IDLE;
 	}
-	if( tag11 == true) 
+	
+	if( tag12 == true) 
 	{
 		qDebug() << __FUNCTION__ << "TAG11";
 		initiated = false;
 		stopRobot();
 		tag11 = false;
+
+		return State::IDLE;
+
 		
-		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag11Pose.x(),tag11Pose.y(),tag11Pose.z()), "rgbd_transform");
+		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
 		tagInWorld(1) = innerModel->transform("world","robot").y();
 		go(tagInWorld, QVec::vec3(0,0,0));  //Should be perpendicular to table long side
 		qDebug() << "send to tag location " << tagInWorld;
 		sleep(1);
 		return State::SERVOING;
 	}
+	
 	if( planningState.state == "EXECUTING" )
 	{
 		qDebug() << __FUNCTION__ << "Working...";
@@ -296,7 +308,7 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 			RoboCompBodyInverseKinematics::Pose6D target;
 			target.rx=0; target.ry=0; target.rz=0; 		
 			//we need to give the Head target in ROBOT coordinates!!!!
-			QVec loc = innerModel->transform("robot","mugT");
+			QVec loc = innerModel->transform("world","mugT");
 			target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
 			RoboCompBodyInverseKinematics::Axis axis;
 			axis.x = 0; axis.y = -1; axis.z = 0;
@@ -307,6 +319,7 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		
 		return State::GO_KITCHEN;
 	}
+	
 	if( planningState.state == "PLANNING" )
 	{
 		qDebug() << __FUNCTION__ << "Waiting for a plan...";
@@ -658,7 +671,9 @@ SpecificWorker::State SpecificWorker::detach()
 	qDebug() << __FUNCTION__ << "Detatching mug";
 	try
 	{	
-		//innermodelmanager_proxy->removeNode("mugT");
+		innermodelmanager_proxy->removeNode("mugT");
+		
+		qDebug() << "hola";
 		
 		RoboCompInnerModelManager::Pose3D pose;
 		pose.x=0; pose.y=50; pose.z=110; pose.rx=0; pose.ry=0; pose.rz=M_PI;
