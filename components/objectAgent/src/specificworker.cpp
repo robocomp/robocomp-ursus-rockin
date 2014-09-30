@@ -200,7 +200,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-		AGMModelPrinter::printWorld(newModel);
+// 		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "objectAgent");
 	}
 	catch(...)
@@ -222,23 +222,23 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 		switch(ap.id)
 		{
 			case 0: // EXPLORED TABLE
-				printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+// 				printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 				if (updateTable(ap, newModel)) publishModel = true;
 				break;
 			case 1: // NON-EXPLORED TABLE
-				printf("TABLE NE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+// 				printf("TABLE NE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 				if (updateTable(ap, newModel)) publishModel = true;
 				break;
 			case 12: // MUG
-				printf("MUG %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+// 				printf("MUG %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 				if (updateMug(ap, newModel)) publishModel = true;
 				break;
 			case 13:
-				printf("MILK %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+// 				printf("MILK %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 				if (updateMilk(ap, newModel)) publishModel = true;
 				break;
 			case 14:
-				printf("E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+// 				printf("E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 				if (updateCoffee(ap, newModel)) publishModel = true;
 				break;
 		}
@@ -315,9 +315,13 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 	{
 		try
 		{
+			int32_t objectSymbolID;
+			int32_t objectStSymbolID;
+			getIDsFor("mug", objectSymbolID, objectStSymbolID);
+
 			auto symbols = newModel->getSymbolsMap(params, "robot", "container");
-			AGMModelSymbol::SPtr newMug = newModel->newSymbol("object");
-			AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt");
+			AGMModelSymbol::SPtr newMug = newModel->newSymbol("object", objectSymbolID);
+			AGMModelSymbol::SPtr newMugStatus = newModel->newSymbol("objectSt", objectStSymbolID);
 			newModel->addEdge(symbols["robot"], newMug, "know");
 			newModel->addEdge(newMug, newMugStatus, "hasStatus");
 			newModel->addEdge(newMug, newMugStatus, "see");
@@ -344,7 +348,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 	}
 
 	const bool forcePublishModel = not existing;
-	printf("force publish by mug %d (%d)\n", forcePublishModel, t.id);
+// 	printf("force publish by mug %d (%d)\n", forcePublishModel, t.id);
 	return forcePublishModel;
 }
 
@@ -373,9 +377,13 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 	{
 		try
 		{
+			int32_t objectSymbolID;
+			int32_t objectStSymbolID;
+			getIDsFor("milk", objectSymbolID, objectStSymbolID);
+			
 			auto symbols = newModel->getSymbolsMap(params, "robot", "container");
-			AGMModelSymbol::SPtr newMilk = newModel->newSymbol("object");
-			AGMModelSymbol::SPtr newMilkStatus = newModel->newSymbol("objectSt");
+			AGMModelSymbol::SPtr newMilk = newModel->newSymbol("object", objectSymbolID);
+			AGMModelSymbol::SPtr newMilkStatus = newModel->newSymbol("objectSt", objectStSymbolID);
 			newModel->addEdge(symbols["robot"], newMilk, "know");
 			newModel->addEdge(newMilk, newMilkStatus, "hasStatus");
 			newModel->addEdge(newMilk, newMilkStatus, "see");
@@ -401,7 +409,7 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 	}
 
 	const bool forcePublishModel = not existing;
-	printf("force publish by milk %d (%d)\n", forcePublishModel, t.id);
+// 	printf("force publish by milk %d (%d)\n", forcePublishModel, t.id);
 	return forcePublishModel;
 }
 
@@ -410,6 +418,29 @@ bool SpecificWorker::updateCoffee(const RoboCompAprilTags::tag &t, AGMModel::SPt
 
 	return false;
 }
+
+void SpecificWorker::getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t &objectStSymbolID)
+{
+	objectSymbolID = -1;
+	objectStSymbolID = -1;
+	
+	QStringList actions = QString::fromStdString(params["plan"].value).toLower().split("\n");
+	
+	for (auto a : actions)
+	{
+		if (a.contains(QString::fromStdString(obj)))
+		{
+			QStringList parts = a.split("'");
+			for (int32_t index=0; index<parts.size()-2; index++)
+			{
+				if      (parts[index] == "objectr") objectSymbolID   = parts[index+2].toInt();
+				else if (parts[index] == "statusr") objectStSymbolID = parts[index+2].toInt();
+			}
+		}
+	}
+	printf("------------------------------->%d %d\n", objectSymbolID, objectStSymbolID);
+}
+
 
 
 

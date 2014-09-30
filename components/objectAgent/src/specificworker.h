@@ -62,6 +62,7 @@ private:
 
 
 
+	void getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t &objectStSymbolID);
 
 	void newAprilTag(const tagsList &list);
 
