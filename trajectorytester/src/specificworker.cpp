@@ -284,18 +284,17 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 	
 	if( tag12 == true) 
 	{
-		qDebug() << __FUNCTION__ << "TAG11";
+		qDebug() << __FUNCTION__ << "TAG12";
 		initiated = false;
 		stopRobot();
-		tag11 = false;
-
-		return State::IDLE;
-
+		tag12 = false;
 		
 		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
 		tagInWorld(1) = innerModel->transform("world","robot").y();
-		go(tagInWorld, QVec::vec3(0,0,0));  //Should be perpendicular to table long side
-		qDebug() << "send to tag location " << tagInWorld;
+		
+		go(tagInWorld, QVec::vec3(0,M_PI,0));  //Should be perpendicular to table long side                 HARDCODED!!!!!!!!!!!!!!!!!!!!1
+		
+		qDebug() << __FUNCTION__  << "send to tag location " << tagInWorld;
 		sleep(1);
 		return State::SERVOING;
 	}
@@ -340,22 +339,25 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 	
 SpecificWorker::State SpecificWorker::servoing()
 {
-	static QVec ant = innerModel->transform("world", QVec::vec3(tag11Pose.x(),tag11Pose.y(),tag11Pose.z()), "rgbd_transform");
+	static QVec ant = innerModel->transform("world", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
 	
 	if( planningState.state == "IDLE") //and (newRobotTarget - QVec::vec3(bState.x,0,bState.z)).norm2() < 40)
  	{
  		qDebug() << __FUNCTION__ << "Made it...";
  		stopRobot();
- 		return State::MOVE_ARM;
+ 		return State::INIT_MOVE_ARM;
  	}
 	
 	try 
 	{	
 		RoboCompBodyInverseKinematics::Pose6D target;
 		//we need to give the Head target in ROBOT coordinates!!!!
-		QVec locA = innerModel->transform("robot", QVec::vec3(tag11Pose.x(),tag11Pose.y(),tag11Pose.z()), "rgbd_transform");
-		QVec loc = innerModel->transform("robot","mugT");
-		locA.print("locA"); loc.print("loc");
+		QVec loc;
+		if( tag12 == true )
+			loc = innerModel->transform("robot", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
+		else
+			loc = innerModel->transform("robot","mugT");
+		loc.print("loc"); 
 		target.rx=0; target.ry=0; target.rz=0; 	
 		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
 		RoboCompBodyInverseKinematics::Axis axis; 
@@ -368,7 +370,7 @@ SpecificWorker::State SpecificWorker::servoing()
 		{ std::cout << ex << std::endl;}
 
 		
-	QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag11Pose.x(),tag11Pose.y(),tag11Pose.z()), "rgbd_transform");
+	QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
 	tagInWorld(1) = innerModel->transform("world","robot").y();
 	try 
 	{	
@@ -700,6 +702,72 @@ SpecificWorker::State SpecificWorker::detach()
 	return State::IDLE;
 }
 
+
+/**
+ * @brief Lift and redraw little bit the arm to perform a safe transport
+ * 
+ * @return SpecificWorker::State
+ */
+SpecificWorker::State SpecificWorker::initRedrawArm()
+{
+	QVec currentPose = innerModel->transform("robot", QVec::zeros(6), "grabPositionHandR");
+	currentPose[1] += 100;
+	currentPose[2] -= 100;
+	QVec p = innerModel->transform("world", currentPose,"robot");
+	try
+	{
+		RoboCompBodyInverseKinematics::Pose6D pose;				
+		pose.x = p.x();pose.y = p.y();pose.z = p.z();
+		pose.rx = p.rx();pose.ry = p.ry();pose.rz = p.rz();
+		RoboCompBodyInverseKinematics::WeightVector weights;
+		weights.x = 1; 		weights.y = 1; 		weights.z = 1;	weights.rx = 1; 	weights.ry = 1; 	weights.rz = 1; 
+		qDebug() << __FUNCTION__ << "Sent to target:" << p;
+		bodyinversekinematics_proxy->setRobot(0); //Para enviar al RCIS-->0 Para enviar al robot-->1
+		bodyinversekinematics_proxy->setTargetPose6D( "RIGHTARM", pose, weights,0);
+	}
+	catch(const Ice::Exception &ex)
+	{ std::cout << ex << std::endl; };
+}
+
+SpecificWorker::State SpecificWorker::redrawArm()
+{
+	if( bikState.finish == false )
+		return State::REDRAW_ARM;
+	else
+ 		return State::INIT_BACKUP;
+}
+
+
+SpecificWorker::State SpecificWorker::initBackUp()
+{
+	QVec current = innerModel->transform("world","robot");
+	QVec table = innerModel->transform("world","t_table1");
+	
+	//Compute get away direction
+	if( table.z() + current.z() + 10 > fabs(table.z() - current.z()) )
+		current[2] += 200;
+	else
+		current[2] -= 200;
+	
+	go(current);
+}
+
+SpecificWorker::State SpecificWorker::backUp()
+{
+	if( planningState.state  == "IDLE" )
+		return State::INIT_GO_OTHER_TABLE;
+	else
+ 		return State::BACKUP;
+	
+}
+
+
+SpecificWorker::State SpecificWorker::goOtherTable()
+{
+	
+}
+
+
 ///////////////////////////////
 //////////////////////////////
 
@@ -778,6 +846,13 @@ void SpecificWorker::goHome()
 
 ////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Just for TrajectoryRobot2D
+ * 
+ * @param t ...
+ * @param r ...
+ * @return void
+ */
 void SpecificWorker::go(const QVec& t, const QVec &r)
 {
 	RoboCompTrajectoryRobot2D::TargetPose tp;

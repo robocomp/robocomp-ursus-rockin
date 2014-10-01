@@ -82,8 +82,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	plannerOMPL = new PlannerOMPL(innerModel);
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
 	planner = plannerPRM;
-
-	//planner->drawGraph(innermodelmanager_proxy);
+	planner->cleanGraph(innermodelmanager_proxy);
+	planner->drawGraph(innermodelmanager_proxy);
 
 	qDebug() << "----------------inserting" ;
 
@@ -170,9 +170,6 @@ void SpecificWorker::compute( )
 		{
 			road.clearDraw(innermodelmanager_proxy);
 			road.draw(innermodelmanager_proxy, innerModel);
- 			planner->cleanGraph(innermodelmanager_proxy);
-			road.draw(innermodelmanager_proxy, innerModel);
- 			planner->drawGraph(innermodelmanager_proxy);
 		}
 		reloj.restart();
 	}
@@ -245,7 +242,8 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 				road.reset();
 				road.endRoad();
 				compState.elapsedTime = taskReloj.elapsed();
-				//planner->drawGraph(innermodelmanager_proxy);
+				planner->cleanGraph(innermodelmanager_proxy);
+				planner->drawGraph(innermodelmanager_proxy);
 				compState.state = "IDLE";
 			}
 		}

@@ -1,0 +1,9 @@
+#
+# This property is used to configure the endpoints of the subscriber adapter.
+#
+OmniRobotComp.Endpoints=tcp -p 12233
+CommonBehavior.Endpoints=tcp -p 12234
+
+# Remote servers proxies example
+#RemoteProxy = remote:tcp -h remotehost -p 10001
+

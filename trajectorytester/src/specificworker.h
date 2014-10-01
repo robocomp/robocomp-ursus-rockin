@@ -37,7 +37,8 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void  newAprilTag(const tagsList& tags); 
 
-	enum class State {IDLE, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, CLOSE_FINGERS, OPEN_FINGERS, DETACH} ;
+	enum class State {IDLE, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, CLOSE_FINGERS, OPEN_FINGERS, DETACH, INIT_REDRAW_ARM, REDRAW_ARM, INIT_BACKUP, BACKUP, 
+										INIT_GO_OTHER_TABLE, GO_OTHER_TABLE} ;
 	
 public slots:
  	void compute(); 	
@@ -79,7 +80,12 @@ private:
 	State closeFingers();
 	State grasp();
 	State detach();
-	
+	State initRedrawArm();
+	State redrawArm();
+	State initBackUp();
+	State backUp();
+	State initGoOtherTable();
+	State goOtherTable();
 	
 	State state;
 	RoboCompTrajectoryRobot2D::NavState planningState;

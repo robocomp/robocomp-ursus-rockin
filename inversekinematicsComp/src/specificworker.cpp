@@ -156,7 +156,7 @@ void SpecificWorker::init()
 	//OMPL path-Planning stuff
 	QList<QPair<float, float > > limits;
 	limits.append(qMakePair((float)-0.4,(float)0.4)); 	 //x in robot RS
-	limits.append(qMakePair((float)0.2,(float)1.2)); 	 //y
+	limits.append(qMakePair((float)0.2,(float)1.2)); 	   //y
 	limits.append(qMakePair((float)-0.2,(float)1.f));  	 //z
 
 	sampler.initialize3D(innerModel, limits);
