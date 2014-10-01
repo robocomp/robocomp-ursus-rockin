@@ -86,8 +86,9 @@ private:
 	State backUp();
 	State initGoOtherTable();
 	State goOtherTable();
-	
 	State state;
+	
+	void attachMug();
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
 	bool tag11, tag12;

@@ -72,6 +72,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 		bodyinversekinematics_proxy->begin_goHome("HEAD");
 		bodyinversekinematics_proxy->begin_goHome("RIGHTARM");
 		bodyinversekinematics_proxy->setFingers(0);
+		
+		
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 	{ std::cout << ex.text << "in Closefingers" << std::endl;}
@@ -87,6 +89,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 					<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
 					<< "base" << "head1" << "head2" << "head3";
 	
+	attachMug();
+					
 	connect(plantWidget, SIGNAL(mouseMove(QVec)), this, SLOT(setTargetCoorFromPlant(QVec)));
 	connect(plantWidget, SIGNAL(mousePress(QVec)), this, SLOT(setNewTargetFromPlant(QVec)));
 }
@@ -207,41 +211,48 @@ void SpecificWorker::doStateMachine()
 	switch (state) 
 	{
 		case State::IDLE:
-				qDebug() << "IDLE";
 				break;
 		case State::GO_KITCHEN:
-				qDebug() << "GO_KITCHEN";
 				state = go_kitchen();
 		break;
 		case State::SERVOING:
-				qDebug() << "SERVOING";
 				state = servoing();
 				break;
 		case State::MOVE_ARM:
-				qDebug() << "MOVE_ARM";
 				state = moveArm();
 				break;
 		case State::INIT_MOVE_ARM:
-				qDebug() << "INIT_MOVE_ARM";
 				state = initMoveArm();
 				break;
 		case State::GRASP:
-				
-				qDebug() << "GRASP";
 				state = grasp();
 				break;
 		case State::CLOSE_FINGERS:
-				qDebug() << "CLOSE_FINGERS";
 				state = closeFingers();
 				break;
 		case State::OPEN_FINGERS:
-				qDebug() << "OPEN_FINGERS";
 				state = openFingers();
 				break;
 		case State::DETACH:
-				qDebug() << "DETACH";
 				state = detach();
 				break;
+		case State::INIT_REDRAW_ARM:
+				state = initRedrawArm();
+				break;
+		case State::REDRAW_ARM:
+				state = redrawArm();
+				break;
+		case State::INIT_BACKUP:
+				state = initBackUp();
+				break;
+		case State::INIT_GO_OTHER_TABLE:
+				state = initGoOtherTable();
+				break;
+		case State::GO_OTHER_TABLE:
+				state = goOtherTable();
+				break;
+	
+				
 				
 		default:
 			break;
@@ -257,7 +268,7 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		qDebug() << __FUNCTION__ << "sending command";	
 		
 		//go(QVec::vec3(5500,0,-5100), QVec::vec3(0,0,0));
-		go(QVec::vec3(1200,0,-1300), QVec::vec3(0,M_PI,0));
+		go(QVec::vec3(1200,0,-1000), QVec::vec3(0,M_PI,0));
 		
 		initiated = true;
 		try 
@@ -274,30 +285,33 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 	
 	//if( planningState.state == "IDLE" and initiated and (QVec::vec3(5500,0,-5000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 100)
 	
-	if( planningState.state == "IDLE" and initiated and (QVec::vec3(1200,0,-1300) - QVec::vec3(bState.x,0,bState.z)).norm2() < 100)
+	if( planningState.state == "IDLE" /*and initiated*/ and (QVec::vec3(1200,0,-1000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 150)
 	{
 		qDebug() << __FUNCTION__ << "Made it...";
 		initiated = false;
 		stopRobot();
-		return State::IDLE;
+		//return State::IDLE;
+		return State::INIT_MOVE_ARM;
+		
 	}
 	
-	if( tag12 == true) 
-	{
-		qDebug() << __FUNCTION__ << "TAG12";
-		initiated = false;
-		stopRobot();
-		tag12 = false;
-		
-		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
-		tagInWorld(1) = innerModel->transform("world","robot").y();
-		
-		go(tagInWorld, QVec::vec3(0,M_PI,0));  //Should be perpendicular to table long side                 HARDCODED!!!!!!!!!!!!!!!!!!!!1
-		
-		qDebug() << __FUNCTION__  << "send to tag location " << tagInWorld;
-		sleep(1);
-		return State::SERVOING;
-	}
+// 	if( tag12 == true) 
+// 	{
+// 		qDebug() << __FUNCTION__ << "TAG12";
+// 		initiated = false;
+// 		stopRobot();
+// 		tag12 = false;
+// 		
+// 		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
+// 		tagInWorld(1) = innerModel->transform("world","robot").y();
+// 		
+// 		go(tagInWorld, QVec::vec3(0,M_PI,0));  //Should be perpendicular to table long side                 HARDCODED!!!!!!!!!!!!!!!!!!!!1
+// 		
+// 		qDebug() << __FUNCTION__  << "send to tag location " << tagInWorld;
+// 		sleep(1);
+// 		
+// 		return State::SERVOING;
+// 	}
 	
 	if( planningState.state == "EXECUTING" )
 	{
@@ -325,7 +339,7 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		return State::GO_KITCHEN;
 	}
 	initiated = false;
-	qDebug() << __FUNCTION__ << "Otherwise. Should not happen. Passing to IDLE" << QString::fromStdString(planningState.state) << tag11 << initiated;
+	qDebug() << __FUNCTION__ << "Otherwise. Should not happen. Passing to IDLE" << QString::fromStdString(planningState.state) << tag12 << initiated;
 	return State::IDLE;
 }
 
@@ -375,7 +389,7 @@ SpecificWorker::State SpecificWorker::servoing()
 	try 
 	{	
 		RoboCompTrajectoryRobot2D::TargetPose tp;
-		tp.x = tagInWorld.x(); tp.y = tagInWorld.y(); tp.z = tagInWorld.z();
+		tp.x = tagInWorld.x(); tp.y = tagInWorld.y(); tp.z = tagInWorld.z() +150;
 		trajectoryrobot2d_proxy->changeTarget( tp );
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
@@ -674,21 +688,19 @@ SpecificWorker::State SpecificWorker::detach()
 	try
 	{	
 		innermodelmanager_proxy->removeNode("mugT");
-		
-		qDebug() << "hola";
-		
+				
 		RoboCompInnerModelManager::Pose3D pose;
 		pose.x=0; pose.y=50; pose.z=110; pose.rx=0; pose.ry=0; pose.rz=M_PI;
-		innermodelmanager_proxy->addTransform("mugT2","static","grabPositionHandR", pose);
+		innermodelmanager_proxy->addTransform("mugT","static","grabPositionHandR", pose);
 		
 		RoboCompInnerModelManager::meshType mesh;
 		mesh.pose.x=0; mesh.pose.y=0; mesh.pose.z=0; mesh.pose.rx=1.57079; mesh.pose.ry=0; /*mesh.pose.rz=-2.62;*/	mesh.pose.rz=-1.62;	
 		mesh.scaleX=100; mesh.scaleY=100; mesh.scaleZ=100; mesh.meshPath="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/milk.3ds";
-		innermodelmanager_proxy->addMesh("mesh-milk2" , "mugT2", mesh);
+		innermodelmanager_proxy->addMesh("mesh-milk" , "mugT", mesh);
 		
 		RoboCompInnerModelManager::Plane3D plane;
 		plane.py=40; plane.ny=1; plane.width=71.25;plane.height=71.25;plane.thickness=5;plane.texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png";	
-		innermodelmanager_proxy->addPlane("mesh-mug2" , "mugT2", plane);
+		innermodelmanager_proxy->addPlane("mesh-mug" , "mugT", plane);
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
 	{ 
@@ -699,7 +711,7 @@ SpecificWorker::State SpecificWorker::detach()
 		std::cout << ex << std::endl;
 	}
 	
-	return State::IDLE;
+	return State::INIT_REDRAW_ARM;
 }
 
 
@@ -712,7 +724,7 @@ SpecificWorker::State SpecificWorker::initRedrawArm()
 {
 	QVec currentPose = innerModel->transform("robot", QVec::zeros(6), "grabPositionHandR");
 	currentPose[1] += 100;
-	currentPose[2] -= 100;
+	currentPose[2] -= 50;
 	QVec p = innerModel->transform("world", currentPose,"robot");
 	try
 	{
@@ -724,6 +736,8 @@ SpecificWorker::State SpecificWorker::initRedrawArm()
 		qDebug() << __FUNCTION__ << "Sent to target:" << p;
 		bodyinversekinematics_proxy->setRobot(0); //Para enviar al RCIS-->0 Para enviar al robot-->1
 		bodyinversekinematics_proxy->setTargetPose6D( "RIGHTARM", pose, weights,0);
+		sleep(1);
+		return State::REDRAW_ARM;
 	}
 	catch(const Ice::Exception &ex)
 	{ std::cout << ex << std::endl; };
@@ -731,45 +745,96 @@ SpecificWorker::State SpecificWorker::initRedrawArm()
 
 SpecificWorker::State SpecificWorker::redrawArm()
 {
-	if( bikState.finish == false )
-		return State::REDRAW_ARM;
-	else
- 		return State::INIT_BACKUP;
+// 	qDebug() << __FUNCTION__;
+// 	if( bikState.finish == false )
+// 		return State::REDRAW_ARM;
+// 	else
+	sleep(1);
+ 		//return State::INIT_BACKUP;
+		return State::INIT_GO_OTHER_TABLE;
+		
 }
 
 
 SpecificWorker::State SpecificWorker::initBackUp()
 {
+	qDebug() << __FUNCTION__;
 	QVec current = innerModel->transform("world","robot");
 	QVec table = innerModel->transform("world","t_table1");
 	
 	//Compute get away direction
 	if( table.z() + current.z() + 10 > fabs(table.z() - current.z()) )
-		current[2] += 200;
-	else
 		current[2] -= 200;
+	else
+		current[2] += 200;
 	
 	go(current);
+	return State::BACKUP;
 }
 
 SpecificWorker::State SpecificWorker::backUp()
 {
+	qDebug() << __FUNCTION__;
 	if( planningState.state  == "IDLE" )
 		return State::INIT_GO_OTHER_TABLE;
 	else
  		return State::BACKUP;
-	
 }
 
+SpecificWorker::State SpecificWorker::initGoOtherTable()
+{
+	qDebug() << __FUNCTION__;
+	go(QVec::vec3(1200,0, 1300), QVec::vec3(0,0,0));
+	return State::GO_OTHER_TABLE;
+}
 
 SpecificWorker::State SpecificWorker::goOtherTable()
 {
-	
+	qDebug() << __FUNCTION__;
+	if( planningState.state  == "IDLE" )
+		return State::IDLE;
+	else
+ 		return State::GO_OTHER_TABLE;
 }
+
+
 
 
 ///////////////////////////////
 //////////////////////////////
+
+void SpecificWorker::attachMug()
+{
+	qDebug() << __FUNCTION__ << "Attching mug";
+	try
+	{	
+		innermodelmanager_proxy->removeNode("mugT");
+				
+		RoboCompInnerModelManager::Pose3D pose;
+		pose.x=1300; pose.y=805; pose.z=-1350; pose.rx=0; pose.ry=0; pose.rz=0;
+		innermodelmanager_proxy->addTransform("mugT","static","offset", pose);
+		
+		RoboCompInnerModelManager::meshType mesh;
+		mesh.pose.x=0; mesh.pose.y=-15; mesh.pose.z=0; mesh.pose.rx=1.57079; mesh.pose.ry=0; mesh.pose.rz=0;	
+		mesh.scaleX=100; mesh.scaleY=100; mesh.scaleZ=100; mesh.meshPath="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/milk.3ds";
+		innermodelmanager_proxy->addMesh("mesh-milk" , "mugT", mesh);
+		
+		RoboCompInnerModelManager::Plane3D plane;
+		plane.py=40; plane.ny=1; plane.width=71.25;plane.height=71.25;plane.thickness=5;plane.texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png";	
+		innermodelmanager_proxy->addPlane("mesh-mug" , "mugT", plane);
+	}
+	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
+	{ 
+		std::cout << ex.text << std::endl;
+	}
+	catch(const Ice::Exception &ex)
+	{ 
+		std::cout << ex << std::endl;
+	}
+
+}
+
+
 
 void SpecificWorker::drawAxis(const QString& name, const QString &parent)
 {
@@ -855,6 +920,8 @@ void SpecificWorker::goHome()
  */
 void SpecificWorker::go(const QVec& t, const QVec &r)
 {
+	qDebug() << __FUNCTION__;
+	
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.x = t.x();
 	tp.z = t.z();
@@ -870,7 +937,7 @@ void SpecificWorker::go(const QVec& t, const QVec &r)
 	try
 	{
 		trajectoryrobot2d_proxy->go(tp);
-		//qDebug() << __FUNCTION__ << "Target " << t << " sent";
+		qDebug() << __FUNCTION__ << "Target " << t << " sent";
 		reloj.restart();
 	}
 	catch(const Ice::Exception &ex)
