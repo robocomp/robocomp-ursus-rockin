@@ -911,7 +911,7 @@ void SpecificWorker::moveRobotPart(QVec angles, const QStringList &listaJoints)
 			RoboCompJointMotor::MotorGoalPosition nodo;
 			nodo.name = listaJoints.at(i).toStdString();
 			nodo.position = angles[i]; // posición en radianes
-			nodo.maxSpeed = 3; //radianes por segundo TODO Bajar velocidad.
+			nodo.maxSpeed = 0.5; //radianes por segundo TODO Bajar velocidad.
 			proxy->setPosition(nodo);
 		} catch (const Ice::Exception &ex) {
 			cout<<"Excepción en mover Brazo: "<<ex<<endl;

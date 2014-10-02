@@ -82,8 +82,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	plannerOMPL = new PlannerOMPL(innerModel);
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
 	planner = plannerPRM;
-	planner->cleanGraph(innermodelmanager_proxy);
-	planner->drawGraph(innermodelmanager_proxy);
+// 	planner->cleanGraph(innermodelmanager_proxy);
+// 	planner->drawGraph(innermodelmanager_proxy);
 
 	qDebug() << "----------------inserting" ;
 
@@ -128,8 +128,6 @@ void SpecificWorker::computeLuis( )
 }
 
 
-
-
 /**
  * @brief All architecture goes here.
  *
@@ -155,6 +153,18 @@ void SpecificWorker::compute( )
 
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::SETHEADING)
 			setHeadingCommand(innerModel, currentTarget.getRotation().y());
+		
+		if(reloj.elapsed() > 2000)
+		{
+			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
+			if( reloj2.elapsed() < 100 )
+			{
+				road.clearDraw(innermodelmanager_proxy);
+				road.draw(innermodelmanager_proxy, innerModel);
+			}
+			reloj.restart();
+		}
+		reloj2.restart();
 	}
 	else //LOST connection to robot
 	{
@@ -162,18 +172,6 @@ void SpecificWorker::compute( )
 		road.reset();
 		compState.state = "DISCONNECTED";
 	}
-
-	if(reloj.elapsed() > 2000)
-	{
-		qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
-		if( reloj2.elapsed() < 100 )
-		{
-			road.clearDraw(innermodelmanager_proxy);
-			road.draw(innermodelmanager_proxy, innerModel);
-		}
-		reloj.restart();
-	}
-	reloj2.restart();
 }
 
 

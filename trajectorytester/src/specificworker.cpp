@@ -285,7 +285,7 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 	
 	//if( planningState.state == "IDLE" and initiated and (QVec::vec3(5500,0,-5000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 100)
 	
-	if( planningState.state == "IDLE" /*and initiated*/ and (QVec::vec3(1200,0,-1000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 150)
+	if( planningState.state == "IDLE" /*and initiated*/ and (QVec::vec3(1200,0,-1000) - QVec::vec3(bState.x,0,bState.z)).norm2() < 150)   //HARDCODED--------------------------
 	{
 		qDebug() << __FUNCTION__ << "Made it...";
 		initiated = false;
@@ -294,7 +294,7 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		return State::INIT_MOVE_ARM;
 		
 	}
-	
+//  Init Servo positioning wrt the visual mark	
 // 	if( tag12 == true) 
 // 	{
 // 		qDebug() << __FUNCTION__ << "TAG12";
@@ -509,8 +509,8 @@ SpecificWorker::State SpecificWorker::moveArm()
 	else
 	{
 		openFingers();
- 		return State::GRASP;
-//		return State::IDLE;
+ 	//	return State::GRASP;
+		return State::IDLE;
 	}
 }
 
@@ -732,7 +732,7 @@ SpecificWorker::State SpecificWorker::initRedrawArm()
 		pose.x = p.x();pose.y = p.y();pose.z = p.z();
 		pose.rx = p.rx();pose.ry = p.ry();pose.rz = p.rz();
 		RoboCompBodyInverseKinematics::WeightVector weights;
-		weights.x = 1; 		weights.y = 1; 		weights.z = 1;	weights.rx = 1; 	weights.ry = 1; 	weights.rz = 1; 
+		weights.x = 1; 		weights.y = 1; 		weights.z = 1;	weights.rx = 0; 	weights.ry = 0; 	weights.rz = 0; 
 		qDebug() << __FUNCTION__ << "Sent to target:" << p;
 		bodyinversekinematics_proxy->setRobot(0); //Para enviar al RCIS-->0 Para enviar al robot-->1
 		bodyinversekinematics_proxy->setTargetPose6D( "RIGHTARM", pose, weights,0);
