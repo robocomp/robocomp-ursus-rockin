@@ -1,0 +1,22 @@
+#
+# This property is used to configure the endpoints of the subscriber adapter.
+#
+AGMCommonBehaviorComp.Endpoints=tcp -p 10240
+CommonBehavior.Endpoints=tcp -p 12229
+AGMExecutiveTopicTopic.Endpoints=tcp -p 10243
+ASRCommandTopic.Endpoints=tcp -p 12234
+
+# Remote servers proxies example
+#RemoteProxy = remote:tcp -h remotehost -p 10001
+
+ASRComprehensionProxy = asrcomprehension:tcp -h localhost -p 12233
+
+#
+# This property is used by the clients to connect to IceStorm.
+#
+TopicManager.Proxy=IceStorm/TopicManager:default -p 9999
+
+#
+# Topics ID
+#
+AGMAgentTopic=AGMAgentTopic

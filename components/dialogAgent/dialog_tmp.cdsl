@@ -1,0 +1,21 @@
+import "../../../..//interfaces/IDSLs/AGMAgent.idsl";
+import "../../../..//interfaces/IDSLs/AGMExecutive.idsl";
+import "../../../..//interfaces/IDSLs/AGMCommonBehavior.idsl";
+import "../../../..//interfaces/IDSLs/AGMWorldModel.idsl";
+import "../../../..//interfaces/IDSLs/ASRComprehension.idsl";
+import "../../../..//interfaces/IDSLs/ASRCommand.idsl";
+
+import "../../../..//interfaces/IDSLs/Speech.idsl";
+
+Component hriComp
+{
+	Communications
+	{
+		implements AGMCommonBehavior;
+		publishes AGMAgentTopic;
+		subscribesTo AGMExecutiveTopic, ASRCommand;
+		requires ASRComprehension;
+	};
+	language Cpp;
+	gui Qt(QWidget);
+};
