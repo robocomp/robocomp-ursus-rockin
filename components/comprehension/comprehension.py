@@ -76,17 +76,17 @@ class Server (Ice.Application):
 			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
 			try:
 				topic = False
-				topic = topicManager.retrieve("ASRCommandTopic")
+				topic = topicManager.retrieve("ASRCommand")
 			except:
 				pass
 			while not topic:
 				try:
-					topic = topicManager.retrieve("ASRCommandTopic")
+					topic = topicManager.retrieve("ASRCommand")
 				except IceStorm.NoSuchTopic:
 					try:
-						topic = topicManager.create("ASRCommandTopic")
+						topic = topicManager.create("ASRCommand")
 					except:
-						print 'Another client created the ASRCommandTopic topic... ok'
+						print 'Another client created the ASRCommand topic... ok'
 			pub = topic.getPublisher().ice_oneway()
 			commandTopic = RoboCompASRCommand.ASRCommandPrx.uncheckedCast(pub)
 

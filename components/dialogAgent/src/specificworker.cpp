@@ -16,14 +16,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
  #include "specificworker.h"
 
 /**
 * \brief Default constructor
 */
 
-SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)	
+SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 }
 
@@ -37,11 +37,13 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::compute( )
 {
 }
+
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	timer.start(Period);
 	return true;
-};
+}
+
 bool SpecificWorker::activateAgent(const ParameterMap& prs){
 	bool activated = false;
 	if (setParametersAndPossibleActivation(prs, activated)){
@@ -54,11 +56,13 @@ bool SpecificWorker::activateAgent(const ParameterMap& prs){
 	return true;
 }
 
-bool SpecificWorker::deactivateAgent(){
+bool SpecificWorker::deactivateAgent()
+{
 		return deactivate();
 }
 
-StateStruct SpecificWorker::getAgentState(){
+StateStruct SpecificWorker::getAgentState()
+{
 	StateStruct s;
 	if (isActive()){
 		s.state = Running;
@@ -69,38 +73,54 @@ StateStruct SpecificWorker::getAgentState(){
 	return s;
 }
 
-ParameterMap SpecificWorker::getAgentParameters(){
+ParameterMap SpecificWorker::getAgentParameters()
+{
 	return params;
 }
 
-bool SpecificWorker::setAgentParameters(const ParameterMap& prs){
+bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
+{
 	bool activated = false;
 	return setParametersAndPossibleActivation(prs, activated);
 }
 
 void SpecificWorker::killAgent(){
 }
-Ice::Int SpecificWorker::uptimeAgent(){
+
+Ice::Int SpecificWorker::uptimeAgent()
+{
 	return 0;
 }
 
-bool SpecificWorker::reloadConfigAgent(){
+bool SpecificWorker::reloadConfigAgent()
+{
 	return true;
 }
 
 
-void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modification){
+void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modification)
+{
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	mutex->unlock();
 }
 
-void SpecificWorker::modelUpdated(const RoboCompAGMWorldModel::Node& modification){
+void SpecificWorker::modelUpdated(const RoboCompAGMWorldModel::Node& modification)
+{
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	mutex->unlock();
 }
 
 
-void SpecificWorker::newCommand(const Command& c){
+void SpecificWorker::newCommand(const Command& c)
+{
+	printf("New command %s --> ", c.action.c_str());
+	for (auto a : c.complements)
+	{
+		printf("(%s) ", a.c_str());
+	}
+	printf("\n");
 }
+
+

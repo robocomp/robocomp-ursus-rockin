@@ -179,22 +179,22 @@ int hriComp::run(int argc, char* argv[])
 			try{
 				agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic"); // communicator()->getProperties()->getProperty("AGMAgentTopic") does not work!
 			}catch (const IceStorm::NoSuchTopic&){
-				//Error. Topic does not exist.	
+				//Error. Topic does not exist.
 			}
 		}
 	}
 	Ice::ObjectPrx agmagenttopic_pub = agmagenttopic_topic->getPublisher()->ice_oneway();
 	AGMAgentTopicPrx agmagenttopic = AGMAgentTopicPrx::uncheckedCast(agmagenttopic_pub);
 	mprx["AGMAgentTopicPub"] = (::IceProxy::Ice::Object*)(&agmagenttopic);
-	
-	
+
+
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
 	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor,SIGNAL(kill()),&a,SLOT(quit()));
 	QObject::connect(worker,SIGNAL(kill()),&a,SLOT(quit()));
 	monitor->start();
-	
+
 	if ( !monitor->isRunning() )
 		return status;
 	try
