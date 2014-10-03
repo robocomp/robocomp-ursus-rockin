@@ -36,7 +36,7 @@ asrcommandI.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning ASRCommand ASRComprehension AGMAgent  AGMWorldModel)
+ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning ASRCommand ASRComprehension Speech AGMAgent  AGMWorldModel)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

@@ -14,7 +14,7 @@ Component hriComp
 		implements AGMCommonBehavior;
 		publishes AGMAgentTopic;
 		subscribesTo AGMExecutiveTopic, ASRCommand;
-		requires ASRComprehension;
+		requires ASRComprehension, Speech;
 	};
 	language Cpp;
 	gui Qt(QWidget);

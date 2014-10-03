@@ -29,6 +29,7 @@
 #include "config.h"
 #include <agm.h>
 #include <ASRComprehension.h>
+#include <Speech.h>
 #include <AGMAgent.h>
 #include <AGMCommonBehavior.h>
 #include <ASRCommand.h>
@@ -46,11 +47,12 @@ using namespace std;
        @author authorname
 */
 using namespace RoboCompASRComprehension;
+using namespace RoboCompSpeech;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompASRCommand;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMAgent;
-struct BehaviorNavegacionParameters 
+struct BehaviorNavegacionParameters
 		{
 			RoboCompPlanning::Action action;
 			std::vector< std::vector <std::string> > plan;
@@ -68,16 +70,17 @@ public:
 	virtual ~GenericWorker();
 	virtual void killYourSelf();
 	virtual void setPeriod(int p);
-	
+
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
-		
+
 	bool activate(const BehaviorNavegacionParameters& parameters);
 	bool deactivate();
 	bool isActive() { return active; }
 	RoboCompAGMWorldModel::BehaviorResultType status();
 	ASRComprehensionPrx asrcomprehension_proxy;
+	SpeechPrx speech_proxy;
 	AGMAgentTopicPrx agmagenttopic;
 	virtual bool activateAgent(const ParameterMap& prs) = 0;
 	virtual bool deactivateAgent() = 0;

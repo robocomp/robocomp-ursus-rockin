@@ -121,6 +121,10 @@ void SpecificWorker::newCommand(const Command& c)
 		printf("(%s) ", a.c_str());
 	}
 	printf("\n");
+
+	asrcomprehension_proxy->mode("aqui pondriamos algo util");
+	speech_proxy->say("me ha llegado algo", true);
+
 }
 
 

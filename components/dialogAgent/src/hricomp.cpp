@@ -84,6 +84,7 @@
 // #include <Remote.h>
 #include <ui_guiDlg.h>
 #include <ASRComprehension.h>
+#include <Speech.h>
 #include <AGMAgent.h>
 
 
@@ -96,6 +97,7 @@ using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompASRCommand;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompASRComprehension;
+using namespace RoboCompSpeech;
 using namespace RoboCompAGMAgent;
 
 
@@ -130,6 +132,7 @@ int hriComp::run(int argc, char* argv[])
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
 	ASRComprehensionPrx asrcomprehension_proxy;
+	SpeechPrx speech_proxy;
 
 
 	string proxy;
@@ -169,6 +172,17 @@ int hriComp::run(int argc, char* argv[])
 	}
 	rInfo("ASRComprehensionProxy initialized Ok!");
 	mprx["ASRComprehensionProxy"] = (::IceProxy::Ice::Object*)(&asrcomprehension_proxy);
+	try
+	{
+		speech_proxy = SpeechPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("SpeechProxy") ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("SpeechProxy initialized Ok!");
+	mprx["SpeechProxy"] = (::IceProxy::Ice::Object*)(&speech_proxy);
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 	IceStorm::TopicPrx agmagenttopic_topic;
     while(!agmagenttopic_topic){

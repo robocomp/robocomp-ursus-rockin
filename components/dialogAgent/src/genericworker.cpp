@@ -29,6 +29,7 @@ QObject()
 
 {
 	asrcomprehension_proxy = (*(ASRComprehensionPrx*)mprx["ASRComprehensionProxy"]);
+	speech_proxy = (*(SpeechPrx*)mprx["SpeechProxy"]);
 	agmagenttopic = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
 
 	mutex = new QMutex();
@@ -62,7 +63,7 @@ void GenericWorker::setPeriod(int p)
 	Period = p;
 	timer.start(Period);
 }
-	
+
 	RoboCompPlanning::Action GenericWorker::createAction(std::string s)  /// ESTO PODRIA ESTAR AUTOGENERADO
 	{
 		// Remove useless characters
@@ -71,11 +72,11 @@ void GenericWorker::setPeriod(int p)
 		{
 			s.erase(std::remove(s.begin(), s.end(), chars[i]), s.end());
 		}
-	
+
 	    // Initialize string parsing
 		RoboCompPlanning::Action ret;
 		istringstream iss(s);
-	
+
 		// Get action (first segment)
 		if (not iss)
 		{
@@ -86,24 +87,24 @@ void GenericWorker::setPeriod(int p)
 		{
 			iss >> ret.name;
 		}
-	
+
 		do
 		{
 			std::string ss;
 			iss >> ss;
 			ret.symbols.push_back(ss);
 		} while (iss);
-	
+
 		return ret;
-	}	
-	
+	}
+
 	RoboCompAGMWorldModel::BehaviorResultType GenericWorker::status()
 	{
 		if (active)
 			return RoboCompAGMWorldModel::StatusActive;
 		return RoboCompAGMWorldModel::StatusIdle;
 	}
-	
+
 	bool GenericWorker::activate(const BehaviorNavegacionParameters &prs)
 	{
 		printf("Worker::activate\n");
@@ -114,8 +115,8 @@ void GenericWorker::setPeriod(int p)
 		mutex->unlock();
 		return active;
 	}
-	
-	bool GenericWorker::deactivate() 
+
+	bool GenericWorker::deactivate()
 	{
 		printf("Worker::deactivate\n");
 		mutex->lock();
@@ -124,23 +125,23 @@ void GenericWorker::setPeriod(int p)
 		mutex->unlock();
 		return active;
 	}
-	
+
 	bool GenericWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 	{
 		// We didn't reactivate the component
 		reactivated = false;
-	
+
 		// Update parameters
 		for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
 		{
 			params[it->first] = it->second;
 		}
-	
+
 		try
 		{
 			// Action
 			p.action = createAction(params["action"].value);
-	
+
 			// Fill received plan
 			p.plan.clear();
 			QStringList actionList = QString::fromStdString(params["plan"].value).split(QRegExp("[()]+"), QString::SkipEmptyParts);
@@ -159,13 +160,13 @@ void GenericWorker::setPeriod(int p)
 		{
 			return false;
 		}
-	
+
 		// Check if we should reactivate the component
 		if (isActive())
 		{
 			activate(p);
 			reactivated = true;
 		}
-	
+
 		return true;
 	}

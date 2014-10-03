@@ -32,7 +32,7 @@ qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'comprehen
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/dialogAgent'
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake .; make -j 1; bin/hricomp --Ice.Config=config'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake .; make -j 1 && bin/hricomp --Ice.Config=config'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'dialog'
 
 
