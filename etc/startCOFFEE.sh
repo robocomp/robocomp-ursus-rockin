@@ -22,6 +22,15 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 t
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'trajectory'
 sleep 1
 
+#laserrgbd
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/laserRGBDComp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 laserrgbdComp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 laserrgbdComp; make -j 1 && bin/laserrgbdComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/laserrgbd.conf'
+qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'laserrgbd'
+sleep 1
+
 
 
 # Ice Storm
