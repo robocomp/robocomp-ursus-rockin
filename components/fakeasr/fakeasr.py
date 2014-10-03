@@ -52,7 +52,7 @@ class MainClass(QWidget):
 		QMetaObject.connectSlotsByName(self)
 
 	def retranslateUi(self, Form):
-		Form.setWindowTitle(QApplication.translate("Form", "Form", None, QApplication.UnicodeUTF8))
+		Form.setWindowTitle(QApplication.translate("Form", "Fake ASR", None, QApplication.UnicodeUTF8))
 		self.sendButton.setText(QApplication.translate("Form", "send", None, QApplication.UnicodeUTF8))
 
 	def sendSlot(self):
