@@ -37,8 +37,8 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void  newAprilTag(const tagsList& tags); 
 
-	enum class State {IDLE, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, CLOSE_FINGERS, OPEN_FINGERS, DETACH, INIT_REDRAW_ARM, REDRAW_ARM, INIT_BACKUP, BACKUP, 
-										INIT_GO_OTHER_TABLE, GO_OTHER_TABLE} ;
+	enum class State {IDLE, INIT_GO_KITCHEN, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, CLOSE_FINGERS, OPEN_FINGERS, DETACH_TO_GET, INIT_REDRAW_ARM, REDRAW_ARM, INIT_BACKUP, BACKUP, 
+					  INIT_GO_OTHER_TABLE, GO_OTHER_TABLE, DETACH_TO_PUT, INIT_PUT_MUG_ON_TABLE, PUT_MUG_ON_TABLE, INIT_GO_CENTER, GO_CENTER} ;
 	
 public slots:
  	void compute(); 	
@@ -72,6 +72,7 @@ private:
 	QTime reloj, relojE;
 	QVec target, current;
 	void doStateMachine();
+	State init_go_kitchen();
 	State go_kitchen();
 	State servoing();
 	State moveArm();
@@ -79,20 +80,27 @@ private:
 	State openFingers();
 	State closeFingers();
 	State grasp();
-	State detach();
+	State detachToGet();
 	State initRedrawArm();
 	State redrawArm();
 	State initBackUp();
 	State backUp();
 	State initGoOtherTable();
 	State goOtherTable();
+	State initPutMugOntable();
+	State putMugOntable();
+	State detachToPut();
+	State initGoCenter();
+	State goCenter();
 	State state;
 	
 	void attachMug();
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
-	bool tag11, tag12;
-	QVec tag12Pose, tag11Pose;
+	bool tag11; 	//mano	
+	bool tag12;		//marca mug mesa 1
+	bool tag0; 		//marca mesa humano
+	QVec tag12Pose, tag11Pose, tag0Pose;
 	InnerModel *innerModel;
 	QStringList listaMotores;
 	void actualizarInnermodel(const QStringList &listaJoints);
