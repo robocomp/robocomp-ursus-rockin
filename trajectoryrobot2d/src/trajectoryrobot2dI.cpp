@@ -36,6 +36,10 @@ void TrajectoryRobot2DI::go(const TargetPose& target, const Ice::Current&){
 	worker->go(target);
 }
 
+void TrajectoryRobot2DI::goBackwards(const TargetPose& target, const Ice::Current&){
+	worker->goBackwards(target);
+}
+
 void TrajectoryRobot2DI::changeTarget(const TargetPose& target, const Ice::Current&){
 	worker->changeTarget(target);
 }

@@ -68,6 +68,7 @@ public:
 	InnerModelManagerPrx innermodelmanager_proxy;
 	DifferentialRobotPrx differentialrobot_proxy;
 	virtual void  go(const TargetPose& target) = 0;
+	virtual void  goBackwards(const TargetPose& target) = 0;
 	virtual void  changeTarget(const TargetPose& target) = 0;
 	virtual NavState getState() = 0;
 	virtual void  stop() = 0;

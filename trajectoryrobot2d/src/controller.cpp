@@ -44,7 +44,10 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 	
 	if( (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
-		qDebug() << __FILE__ << __FUNCTION__ << "Robot blocked,  target reached or road lost";
+		qDebug() << __FILE__ << __FUNCTION__;
+		if( road.isFinished() ) qDebug() << "road finished";
+		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
+		if( road.isLost ) qDebug() << "robot is lost";
 		stopTheRobot(differentialrobot_proxy);
 		return false;
 	}
@@ -58,6 +61,10 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 // 		stopTheRobot(differentialrobot_proxy);
 // 		return false;
 // 	}
+	
+	/////////////////////////////////////////////////
+	//////  CHECK CPU AVAILABILITY
+	////////////////////////////////////////////////
 	
 	if ( time.elapsed() > delay )   //Initial wait in secs
 	{

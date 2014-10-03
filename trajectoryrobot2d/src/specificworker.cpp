@@ -24,12 +24,7 @@
 * \brief Default constructor
 */
 
-float angmMPI(float angle)
-{
-	while (angle > +M_PI) angle -= 2.*M_PI;
-	while (angle < -M_PI) angle += 2.*M_PI;
-	return angle;
-}
+
 
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
@@ -154,6 +149,9 @@ void SpecificWorker::compute( )
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::SETHEADING)
 			setHeadingCommand(innerModel, currentTarget.getRotation().y());
 		
+		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::GOBACKWARDS)
+			goBackwardsCommand(innerModel, currentTarget.getTranslation());
+		
 		if(reloj.elapsed() > 2000)
 		{
 			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
@@ -260,6 +258,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 
 bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 {
+
 	qDebug() << __FUNCTION__;
 	const float MAX_ORIENTATION_ERROR  = 0.08726646259722222;
 
@@ -296,6 +295,45 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 	return true;
 }
 
+
+bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &target)
+{
+	float MAX_ADV_SPEED = 600.f;
+	//const float MAX_ORIENTATION_ERROR  = 0.08726646259722222; //rads
+	const float MAX_POSITIONING_ERROR  = 50;  //mm
+	
+	QVec rPose = innerModel->transform("world","robot");
+	float error = (rPose-target).norm2();
+	qDebug() << __FUNCTION__ << "Error: " << error;
+
+	if( error < MAX_POSITIONING_ERROR)
+	{
+		currentTarget.setHasRotation(false);
+		road.setFinished(true);
+		drawGreenBoxOnTarget( currentTarget.getTranslation() );
+		currentTarget.print();
+		currentTarget.reset();
+		road.reset();
+		road.endRoad();
+		compState.elapsedTime = taskReloj.elapsed();
+		compState.state = "IDLE";
+		try
+		{
+		  differentialrobot_proxy->setSpeedBase(0, 0);
+		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+	}
+	else
+	{
+		float vadv = -0.3 * error;  //Proportional controller
+		if( vadv < -MAX_ADV_SPEED ) vadv = -MAX_ADV_SPEED;
+		try
+		{
+		  differentialrobot_proxy->setSpeedBase(vadv, 0);
+		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+	}
+
+	return true;
+}
 /////////////////////////////////////////////////////////
 
 /**
@@ -488,7 +526,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 			{
 				currentTarget.setTranslation( t );
 				currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
-				if( target.onlyRot == true)
+				if( target.doRotation == true)
 					currentTarget.setHasRotation(true);
 				else
 					currentTarget.setHasRotation(false);
@@ -512,14 +550,13 @@ void SpecificWorker::changeTarget(const TargetPose& target)
  */
 void SpecificWorker::go(const TargetPose& target)
 {
-
 	stop();
 	while( currentTarget.isActive() == true){};
 	currentTarget.setActive(true);
 	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
 	currentTarget.command = CurrentTarget::Command::GOTO;
-	if( target.onlyRot == true)
+	if( target.doRotation == true)
 		currentTarget.setHasRotation(true);
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
@@ -548,6 +585,23 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 	//stop();
 	currentTarget.command = CurrentTarget::Command::SETHEADING;
 	qDebug() << __FUNCTION__ << "SETHEADING command received";
+}
+
+void SpecificWorker::goBackwards(const TargetPose& target)
+{
+	qDebug() << __FUNCTION__ << "GOBACKWARDS command received";
+
+	while( currentTarget.isActive() == true){};
+	currentTarget.setActive(true);
+	currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
+	currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+	currentTarget.command = CurrentTarget::Command::GOBACKWARDS;
+	if( target.doRotation == true)
+		currentTarget.setHasRotation(true);
+	drawTarget( QVec::vec3(target.x,target.y,target.z));
+	taskReloj.restart();
+	qDebug() << __FUNCTION__ << "-------------------------------------------------------------------------GOBACKWARDS command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
+	
 }
 
 
@@ -875,5 +929,10 @@ void SpecificWorker::calcularModuloFloat(QVec &angles, float mod)
 }
 
 
-
+float SpecificWorker::angmMPI(float angle)
+{
+	while (angle > +M_PI) angle -= 2.*M_PI;
+	while (angle < -M_PI) angle += 2.*M_PI;
+	return angle;
+}
 

@@ -51,6 +51,7 @@ public:
 	void changeTarget(const TargetPose& target);
 	void stop();
 	RoboCompTrajectoryRobot2D::NavState 	getState		();
+	void goBackwards(const TargetPose& target);
 	
 	//void sendData(const RoboCompJoystickAdapter::TData& data);
 	
@@ -94,6 +95,7 @@ private:
 	bool setHeadingCommand(InnerModel *innerModel, float alfa);
 	bool stopCommand();
 	bool changeTargetCommand(InnerModel *innerModel);
+	bool goBackwardsCommand(InnerModel *innerModel, const QVec &target);
 	//bool avoidanceControl(InnerModel *innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed);
 	//std::vector<float> computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData);
 	std::vector<float> baseOffsets;
@@ -106,7 +108,7 @@ private:
 	void calcularModuloFloat(QVec &angles, float mod);
 	bool checkRobotValidStateAtTarget(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, QVec &target);
 	bool searchRobotValidStateCloseToTarget(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, QVec& target);
-
+	float angmMPI(float angle);
 };
 
 #endif

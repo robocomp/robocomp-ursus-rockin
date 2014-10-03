@@ -264,6 +264,9 @@ void SpecificWorker::doStateMachine()
 		case State::DETACH_TO_PUT:
 				state = detachToPut();
 				break;
+		case State::BACKUP2:
+				state = initBackUp2();
+				break;		
 		case State::INIT_GO_CENTER:
 			state = initGoCenter();
 			break;
@@ -433,7 +436,7 @@ SpecificWorker::State SpecificWorker::closeFingers()
 	{	
 		qDebug() << __FUNCTION__ << "Close fingers RCIS";
 		bodyinversekinematics_proxy->setRobot(0);
-		bodyinversekinematics_proxy->setFingers(0);
+		bodyinversekinematics_proxy->setFingers(50);
 		usleep(100000);
 	} 
 	catch (Ice::Exception ex) {cout <<"ERROR EN CERRAR PINZA: "<< ex << endl;}
@@ -777,25 +780,16 @@ SpecificWorker::State SpecificWorker::redrawArm()
 	else
 	{
 		sleep(1);
- 		//return State::IDLE;
+		//return State::INIT_BACKUP;
 		return State::INIT_GO_OTHER_TABLE;
 	}	
 }
 
 
-SpecificWorker::State SpecificWorker::initBackUp()  //COULD NOT WORK UNTIL BACKWARDS MOTION IS HABILITATED
+SpecificWorker::State SpecificWorker::initBackUp()  
 {
-	qDebug() << __FUNCTION__;
-	QVec current = innerModel->transform("world","robot");
-	QVec table = innerModel->transform("world","t_table1");
-	
-	//Compute get away direction
-	if( table.z() + current.z() + 10 > fabs(table.z() - current.z()) )
-		current[2] -= 200;
-	else
-		current[2] += 200;
-	
-	go(current);
+	qDebug() << __FUNCTION__;	
+	goBackwards(innerModel->transform("world", QVec::vec3(0,0,-300), "robot"));
 	return State::BACKUP;
 }
 
@@ -929,7 +923,7 @@ SpecificWorker::State SpecificWorker::initPutMugOntable()
 
 	
 	tag0 = false;
-	sleep(2);
+	sleep(1);
 	return State::DETACH_TO_PUT;
 	//return State::INIT_PUT_MUG_ON_TABLE;
 }
@@ -971,12 +965,36 @@ SpecificWorker::State SpecificWorker::detachToPut()
 	}
 	
 	sleep(1);
+// 	return State::BACKUP2;   
 	return State::INIT_GO_CENTER;   
-	
 }
 
+SpecificWorker::State SpecificWorker::initBackUp2()  
+{
+	static bool firstTime=true;
+	
+	if( firstTime )
+	{
+		qDebug() << __FUNCTION__;
+		QVec atras = QVec::vec3(0,0,-300);   //HARDCODED ----------------------------
+		QVec target = innerModel->transform("world", atras, "robot");
+		
+		goBackwards(target);
+		firstTime = false;
+		return State::BACKUP2;
+	}
+	else
+	{
+		if( planningState.state  == "IDLE" )
+		{
+			firstTime = true;
+			return State::INIT_GO_CENTER;
+		}
+		else
+			return State::BACKUP2;
+	}
+}
 
-///////// FALTA RECULAR
 
 SpecificWorker::State SpecificWorker::initGoCenter()
 {
@@ -1131,7 +1149,7 @@ void SpecificWorker::goHome()
 ////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Just for TrajectoryRobot2D
+ * @brief Just for TrajectoryRobot2D. Go to t
  * 
  * @param t ...
  * @param r ...
@@ -1148,14 +1166,42 @@ void SpecificWorker::go(const QVec& t, const QVec &r)
 	if( r.size() == 3 )
 	{
 		tp.rx = r.x(); tp.ry = r.y(); tp.rz = r.z();
-		tp.onlyRot = true;
+		tp.doRotation = true;
 	}
 	else
-		tp.onlyRot = false;
+		tp.doRotation = false;
 	target = t;
 	try
 	{
 		trajectoryrobot2d_proxy->go(tp);
+		qDebug() << __FUNCTION__ << "Target " << t << " sent";
+		reloj.restart();
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
+}
+
+void SpecificWorker::goBackwards(const QVec& t, const QVec &r)
+{
+	qDebug() << __FUNCTION__;
+	
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.x = t.x();
+	tp.z = t.z();
+	tp.y = t.y();
+// 	if( r.size() == 3 )
+// 	{
+// 		tp.rx = r.x(); tp.ry = r.y(); tp.rz = r.z();
+// 		tp.doRotation = true;
+// 	}
+// 	else
+		tp.doRotation = false;
+	target = t;
+	try
+	{
+		trajectoryrobot2d_proxy->goBackwards(tp);
 		qDebug() << __FUNCTION__ << "Target " << t << " sent";
 		reloj.restart();
 	}

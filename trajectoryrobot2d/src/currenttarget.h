@@ -38,7 +38,7 @@ class CurrentTarget
 		ulong getElapsedTime() const;  //ms
 		bool hasRotation() const;
 		void setHasRotation(bool a);
-		enum class Command { GOTO, SETHEADING, STOP, CHANGETARGET};
+		enum class Command { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS};
 		Command command;
 		
 	private:
