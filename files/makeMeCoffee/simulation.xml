@@ -132,11 +132,11 @@
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
 			<differentialrobot id="robot" port="10004" >
 
- 				<translation id="laserPose" tx="0" ty="240" tz="100">
-   					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> 
-<!--						<rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
- --> 					<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" />
- 				</translation>
+ 				<transform id="laserPose" tx="0" ty="340" tz="100" rx="-0.6">
+<!--    					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" />  -->
+						<rgbd id="laser" focal="80" width="160" height="120" port="10097" ifconfig="20000,10004" />
+<!-- 						<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" /> -->
+ 				</transform>
 
 
 				<transform  id="base_trans" >
@@ -398,7 +398,7 @@
 																									<!--  Colocamos la marca -->
 																									<transform id="handMesh2_t" ty="0" tz="0" rx="0" ry="0,0" rz="0">
 																										<plane id="handMesh2" ny="1" size="71.25,71.25,2" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
-																									</transform>																									
+																									</transform>
 																									<transform id="ThandMesh2_5" tz="-55" ty="25" tx="0"> 	<!--  Deshacemos la translacion -->
 																								<transform id="grabPositionHandR"  tz="55" ty="-25">
 																						  			<!--	<plane id="axisx" px="50" nx="1" size="3,3,100" repeat="1" texture="#550000" />
