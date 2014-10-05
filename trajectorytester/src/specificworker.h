@@ -38,7 +38,7 @@ public:
 	void  newAprilTag(const tagsList& tags); 
 
 	enum class State {IDLE, INIT_GO_KITCHEN, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, CLOSE_FINGERS, OPEN_FINGERS, DETACH_TO_GET, INIT_REDRAW_ARM, REDRAW_ARM, INIT_BACKUP, BACKUP, 
-					  INIT_GO_OTHER_TABLE, GO_OTHER_TABLE, DETACH_TO_PUT, INIT_PUT_MUG_ON_TABLE, PUT_MUG_ON_TABLE, BACKUP2, INIT_GO_CENTER, GO_CENTER} ;
+					  INIT_GO_OTHER_TABLE, GO_OTHER_TABLE, DETACH_TO_PUT, PUT_MUG_ON_TABLE, INIT_REDRAW_ARM2, REDRAW_ARM2, BACKUP2, INIT_GO_CENTER, GO_CENTER} ;
 	
 public slots:
  	void compute(); 	
@@ -88,10 +88,11 @@ private:
 	State backUp();
 	State initGoOtherTable();
 	State goOtherTable();
-	State initPutMugOntable();
 	State putMugOntable();
 	State detachToPut();
-	State initBackUp2();
+	State initRedrawArm2();
+	State redrawArm2();
+	State backUp2();
 	State initGoCenter();
 	State goCenter();
 	State state;

@@ -72,7 +72,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 //	setRobotInitialPose(800, -1500, M_PI);
 //	baseOffsets = computeRobotOffsets(innerModel, laserData);
-
+ 
 	//Planning
 	plannerOMPL = new PlannerOMPL(innerModel);
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
@@ -157,9 +157,9 @@ void SpecificWorker::compute( )
 			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 			if( reloj2.elapsed() < 100 )
 			{
-				road.clearDraw(innermodelmanager_proxy);
+		/*		road.clearDraw(innermodelmanager_proxy);
 				road.draw(innermodelmanager_proxy, innerModel);
-			}
+		*/	}
 			reloj.restart();
 		}
 		reloj2.restart();
@@ -210,7 +210,6 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 	qDebug() << __FUNCTION__;
 	if( targetHasAPlan(innerModel))
 	{
-		qDebug() << "laserData" << laserData.size();
 		elasticband->update( road, laserData, currentTarget);
 
 		road.computeForces();
@@ -238,8 +237,8 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 				road.reset();
 				road.endRoad();
 				compState.elapsedTime = taskReloj.elapsed();
-				planner->cleanGraph(innermodelmanager_proxy);
-				planner->drawGraph(innermodelmanager_proxy);
+// 				planner->cleanGraph(innermodelmanager_proxy);
+// 				planner->drawGraph(innermodelmanager_proxy);
 				compState.state = "IDLE";
 			}
 		}
@@ -263,9 +262,10 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 	const float MAX_ORIENTATION_ERROR  = 0.08726646259722222;
 
 	float angRobot = angmMPI(innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y());
-	alfa = angmMPI(alfa);
+	alfa = angmMPI(alfa); 
 	float error = angmMPI(angRobot-alfa);
-	qDebug() << __FUNCTION__ << (angRobot-alfa) << error;
+	compState.state = "EXECUTING";
+	//qDebug() << __FUNCTION__ << (angRobot-alfa) << error;
 
 	if( fabs(error) < MAX_ORIENTATION_ERROR)
 	{
@@ -304,6 +304,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 	
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
+	compState.state = "EXECUTING";
 	qDebug() << __FUNCTION__ << "Error: " << error;
 
 	if( error < MAX_POSITIONING_ERROR)
@@ -482,9 +483,9 @@ void SpecificWorker::drawTarget(const QVec &target)
 {
 	//Draw target as red box
 	RoboCompInnerModelManager::Plane3D plane;
-	plane.px = target.x();	plane.py = 10; plane.pz = target.z();
-	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 150;
-	plane.height = plane.width = 100;
+	plane.px = target.x();	plane.py = 5; plane.pz = target.z();
+	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 80;
+	plane.height = plane.width = 80;
 	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
 
 }

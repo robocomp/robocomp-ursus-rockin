@@ -109,11 +109,11 @@ void SpecificWorker::init()
 	// RECONFIGURABLE PARA CADA ROBOT: Listas de motores de las distintas partes del robot
 	listaBrazoIzquierdo	<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2";
 	listaBrazoDerecho 	<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2";
-	listaCabeza 		<< "head1" << "head2" << "head3";
+	listaCabeza 		<< "head1" <<  "head3";
 	listaMotores 		<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
 						<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
 // 						<< "base" 
-						<< "head1" << "head2" << "head3";
+						<< "head1" << "head3";
 
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
