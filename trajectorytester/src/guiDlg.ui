@@ -574,19 +574,19 @@
      <string>4. Servo</string>
     </property>
    </widget>
-  </widget>
-  <widget class="QPushButton" name="goHomeButton">
-   <property name="geometry">
-    <rect>
-     <x>820</x>
-     <y>480</y>
-     <width>81</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Go home</string>
-   </property>
+   <widget class="QPushButton" name="goHomeButton">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>10</y>
+      <width>131</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Rest Position</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QLineEdit" name="tag1LineEdit">
    <property name="geometry">

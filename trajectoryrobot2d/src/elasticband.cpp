@@ -30,7 +30,6 @@ ElasticBand::~ElasticBand()
 bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, const CurrentTarget &currentTarget, uint iter)
 {
 	qDebug() << __FILE__ << __FUNCTION__ << "road size"<<  road.size();
-	qDebug() << "laserData" << laserData.size();
 	if( road.isFinished() == true )
 			return false;
 
