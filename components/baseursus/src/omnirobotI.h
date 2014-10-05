@@ -45,7 +45,45 @@ private:
 	GenericWorker *worker;
 public slots:
 
+	void getBaseState(::RoboCompOmniRobot::TBaseState &a, const ::Ice::Current & = ::Ice::Current())
+	{
+		worker->getBaseState(a);
+	}
 
+	void getBasePose(::Ice::Int &a, ::Ice::Int &b, ::Ice::Float &c, const ::Ice::Current & = ::Ice::Current())
+	{
+		worker->getBasePose(a, b, c);
+	}
+
+	void setSpeedBase(::Ice::Float a, ::Ice::Float b, ::Ice::Float c, const ::Ice::Current& = ::Ice::Current())
+	{
+		worker->setSpeedBase(a,b,c);
+	}
+
+	void stopBase(const ::Ice::Current& = ::Ice::Current())
+	{
+		worker->stopBase();
+	}
+
+	void resetOdometer(const ::Ice::Current& = ::Ice::Current())
+	{
+		worker->resetOdometer();
+	}
+
+	void setOdometer(const ::RoboCompOmniRobot::TBaseState &a, const ::Ice::Current& = ::Ice::Current())
+	{
+		worker->setOdometer(a);
+	}
+
+	void setOdometerPose(::Ice::Int a, ::Ice::Int b, ::Ice::Float c, const ::Ice::Current& = ::Ice::Current())
+	{
+		worker->setOdometerPose(a,b,c);
+	}
+
+	void correctOdometer(::Ice::Int a, ::Ice::Int b, ::Ice::Float c, const ::Ice::Current& = ::Ice::Current())
+	{
+		worker->correctOdometer(a, b, c);
+	}
 };
 
 #endif

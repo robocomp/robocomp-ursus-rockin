@@ -21,6 +21,8 @@
 
 #include <genericworker.h>
 
+#include <qmat/QMatAll>
+
 /**
        \brief
        @author authorname
@@ -35,7 +37,26 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
 public slots:
- 	void compute(); 	
+	void compute();
+
+	
+private:
+	void setWheels(QVec wheelVels);
+	float R, l1, l2;
+	QMat M_wheels_2_vels;
+	QMat M_vels_2_wheels;
+
+	
+	void getBaseState(::RoboCompOmniRobot::TBaseState &state);
+	void getBasePose(::Ice::Int &x, ::Ice::Int &z, ::Ice::Float &alpha);
+	void setSpeedBase(::Ice::Float advx, ::Ice::Float advz, ::Ice::Float rotv);
+	void stopBase();
+	void resetOdometer();
+	void setOdometer(const ::RoboCompOmniRobot::TBaseState &state);
+	void setOdometerPose(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha);
+	void correctOdometer(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha);
+
+
 };
 
 #endif

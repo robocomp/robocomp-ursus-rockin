@@ -86,12 +86,20 @@ bool SpecificMonitor::sendParamsToWorker(RoboCompCommonBehavior::ParameterList p
 ///We need to supply a list of accepted values to each call
 void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 {
-	//Read params from config file
-	//Example
-	    //RoboCompCommonBehavior::Parameter aux;
-	    //aux.editable = true;
-	    //configGetString( "DRobot.Device", aux.value,"/dev/ttyUSB0");
-	    //params["DRobot.Device"] = aux;
+	RoboCompCommonBehavior::Parameter aux;
+
+	aux.editable = true;
+	configGetString("UrsusBase.WheelRadius", aux.value, "20.");
+	params["UrsusBase.WheelRadius"] = aux;
+
+	aux.editable = true;
+	configGetString("UrsusBase.DistAxes", aux.value, "120.");
+	params["UrsusBase.DistAxes"] = aux;
+
+	aux.editable = true;
+	configGetString("UrsusBase.AxesLength", aux.value, "120.");
+	params["UrsusBase.AxesLength"] = aux;
+
 }
 
 //comprueba que los parametros sean correctos y los transforma a la estructura del worker

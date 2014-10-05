@@ -52,11 +52,24 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
+
+	virtual void getBaseState(::RoboCompOmniRobot::TBaseState &state) = 0;
+	virtual void getBasePose(::Ice::Int &x, ::Ice::Int &z, ::Ice::Float &alpha) = 0;
+	virtual void setSpeedBase(::Ice::Float advx, ::Ice::Float advz, ::Ice::Float rotv) = 0;
+	virtual void stopBase() = 0;
+	virtual void resetOdometer() = 0;
+	virtual void setOdometer(const ::RoboCompOmniRobot::TBaseState &state) = 0;
+	virtual void setOdometerPose(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha) = 0;
+	virtual void correctOdometer(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha) = 0;
+
+
 protected:
 	QTimer timer;
 	int Period;
+
 public slots:
 	virtual void compute() = 0;
+
 signals:
 	void kill();
 };
