@@ -142,21 +142,12 @@
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
 			<differentialrobot id="robot" port="10004" >
 
-<<<<<<< HEAD
  				<translation id="laserPose" tx="0" ty="240" tz="100">
   <!-- 					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> -->
-				<!--		<rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
+				<!--	<rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
 				-->		<rgbd id="laser" focal="525" width="320" height="240" port="10097" ifconfig="20000,10004" />
- --> 					<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" />
+ 					<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" />
  				</translation>
-=======
- 				<transform id="laserPose" tx="0" ty="340" tz="100" rx="-0.6">
-<!--    					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" />  -->
-						<rgbd id="laser" focal="80" width="160" height="120" port="10097" ifconfig="20000,10004" />
-<!-- 						<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" /> -->
- 				</transform>
->>>>>>> eb4308eea60f7f3794b62b24730088cb6af07a1c
-
 
 				<transform  id="base_trans" >
 					<joint id="base" port="20000" axis="y" home="0">

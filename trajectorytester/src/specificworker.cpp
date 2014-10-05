@@ -84,6 +84,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	removeAxis("mano-segun-head_AXIS");
 	removeAxis("marca-segun-head-cercana_AXIS");
 	removeAxis("april-mug_AXIS");
+	removeAxis("marca-segun-head-orientada_AXIS");
  	
 	try{	innermodelmanager_proxy->removeNode("mugT2"); } catch(const RoboCompInnerModelManager::InnerModelManagerError &ex){};
 	
@@ -638,8 +639,8 @@ SpecificWorker::State SpecificWorker::grasp()
 	else 
 	{
 		//addTransformInnerModel("marca-segun-head", "rgbd_transform", innerModel->transform("rgbd_transform", QVec::zeros(6), "mesh-mug"));
-		qDebug() << "Didn't see the mark";
-	}
+		qDebug() << "Didn't see the mark 12";
+ 	}
 	
 	//innerModel->transform("world", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en world");
 	//innerModel->transform("world", QVec::zeros(6),"mesh-mug").print("marca en world");
@@ -652,13 +653,20 @@ SpecificWorker::State SpecificWorker::grasp()
 	QVec nearTarget(6,0.f);	
 	//nearTarget[0] = -initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = -M_PI/2;nearTarget[5] = 0;  //OJJOO MARCA X REVES
 	nearTarget[0] = -initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = M_PI/2;nearTarget[5] = 0;  //OJJOO MARCA X REVES por lo que giro en Y al reves
+	addTransformInnerModel("marca-segun-head-cercana", "marca-segun-head", nearTarget);
+	QVec nearTargetR(6,0.f);
+	nearTargetR[5] = -M_PI/2.; 
+	addTransformInnerModel("marca-segun-head-orientada", "marca-segun-head", nearTargetR);
+	QVec pose = innerModel->transform("mano-segun-head",QVec::zeros(6),"marca-segun-head-orientada");
+	//drawAxis("marca-segun-head-orientada", "rgbd_transform");
+	//drawAxis("mano-segun-head", "rgbd_transform");
 	
-	QVec pose = innerModel->transform("mano-segun-head", QVec::zeros(6), "marca-segun-head");
+	
 	qDebug() << "initialDistance" << initialDistance << "real dist" << pose.subVector(0,2).norm2() << "poset" << pose;
 
-	if( pose.subVector(0,2).norm2() > 110 or pose.subVector(3,4).norm2() > 0.1) 
+	if( pose.subVector(0,2).norm2() > 140 or pose.subVector(3,4).norm2() > 0.1) 
 	{
-		initialDistance = initialDistance * 0.8;
+		initialDistance = initialDistance * 0.8; 
 		if(initialDistance < 110 ) 
 			initialDistance = 109;
 	}
@@ -669,7 +677,7 @@ SpecificWorker::State SpecificWorker::grasp()
  		return State::DETACH_TO_GET;
 	}
 		
-	addTransformInnerModel("marca-segun-head-cercana", "marca-segun-head", nearTarget);
+	
 	//qDebug() << "Differencia entre mano y marca cercana visual" << innerModel->transform("rgbd_transform", QVec::zeros(6),"marca-segun-head-cercana") -
 	//															innerModel->transform("rgbd_transform", QVec::zeros(6),"mano-segun-head"); 
 	//qDebug() << "Differencia entre mano y marca cercana visual en el SR de la mano" << innerModel->transform("marca-segun-head-cercana", QVec::zeros(6),"mano-segun-head");
@@ -1157,11 +1165,11 @@ void SpecificWorker::drawAxis(const QString& name, const QString &parent)
 	try
 	{
 		float OX = 0; 
-		float OZ = 0;
+		float OZ = 10;
 
 		QVec p =innerModel->transform(parent,QVec::zeros(6),name);
 		RoboCompInnerModelManager::Pose3D pose;
-		pose.x=p.x() + OX ; pose.y=p.y(); pose.z=p.z() - OZ; pose.rx=p.rx(); pose.ry=p.ry(); pose.rz=p.rz();
+		pose.x=p.x() + OX ; pose.y=p.y(); pose.z=p.z() + OZ; pose.rx=p.rx(); pose.ry=p.ry(); pose.rz=p.rz();
 		innermodelmanager_proxy->addTransform(axisName, "static", parent.toStdString(), pose);
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
