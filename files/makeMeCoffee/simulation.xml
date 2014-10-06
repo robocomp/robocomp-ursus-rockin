@@ -393,7 +393,8 @@
 																										<plane id="handMesh2" ny="1" size="71.25,71.25,2" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
 																									</transform>
 																									<transform id="ThandMesh2_5" tz="-55" ty="25" tx="0"> 	<!--  Deshacemos la translacion -->
-																										<transform id="grabPositionHandR"  tz="55" ty="-25">
+																								<!--		<transform id="grabPositionHandR"  tz="55" ty="-25">
+																								-->		<transform id="grabPositionHandR"  tz="175" ty="-25">																											
 																						  			<!--	<plane id="axisx" px="50" nx="1" size="3,3,100" repeat="1" texture="#550000" />
 																											<plane id="axisy" py="50" nx="1" size="3,100,3" repeat="1" texture="#005500" />
 																											<plane id="axisz" pz="50" nx="1" size="100,3,3" repeat="1" texture="#000055" />-->

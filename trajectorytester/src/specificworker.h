@@ -78,8 +78,6 @@ private:
 	State servoing();
 	State moveArm();
 	State initMoveArm();
-	State openFingers();
-	State closeFingers();
 	State grasp();
 	State detachToGet();
 	State initRedrawArm();
@@ -98,6 +96,10 @@ private:
 	State state;
 	
 	void attachMug();
+	void openFingers();
+	void closeFingers();
+	void graspFingers();
+	
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
 	bool tag11; 	//mano	

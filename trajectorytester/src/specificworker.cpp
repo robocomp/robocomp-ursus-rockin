@@ -234,12 +234,6 @@ void SpecificWorker::doStateMachine()
 		case State::GRASP:
 				state = grasp();
 				break;
-		case State::CLOSE_FINGERS:
-				state = closeFingers();
-				break;
-		case State::OPEN_FINGERS:
-				state = openFingers();
-				break;
 		case State::DETACH_TO_GET:
 				state = detachToGet();
 				break;
@@ -425,38 +419,7 @@ SpecificWorker::State SpecificWorker::servoing()
 	
 }
 
-SpecificWorker::State SpecificWorker::closeFingers()
-{
-	qDebug() << __FUNCTION__;
 
-	//Close fingers
-	try
-	{	
-		qDebug() << __FUNCTION__ << "Close fingers RCIS";
-		bodyinversekinematics_proxy->setRobot(0);
-		bodyinversekinematics_proxy->setFingers(50);  //ALLOW HAND SPECIFICATON
-		usleep(100000);
-	} 
-	catch (Ice::Exception ex) {cout <<"ERROR EN CERRAR PINZA: "<< ex << endl;}
-	return State::INIT_MOVE_ARM;
-}
-
-
-SpecificWorker::State SpecificWorker::openFingers()
-{
-	qDebug() << __FUNCTION__;
-
-	//Close fingers
-	try
-	{	
-		qDebug() << __FUNCTION__ << "Open fingers RCIS";
-		bodyinversekinematics_proxy->setRobot(0);
-		bodyinversekinematics_proxy->setFingers(70);
-		usleep(100000);
-	} 
-	catch (Ice::Exception ex) {cout <<"ERROR EN CERRAR PINZA: "<< ex << endl;}
-	return State::INIT_MOVE_ARM;
-}
 
 
 /**
@@ -493,17 +456,15 @@ SpecificWorker::State SpecificWorker::initMoveArm()
 	//Send the arm
 	try 
 	{
-		QVec p = innerModel->transform("world","mugT");  //SI VE LA MARCA dEBERIA IR A LA MARCA. TO DO
+		QVec p = innerModel->transform("world","mugT");  ////SI VE LA MARCA dEBERIA IR A LA MARCA. TO DO
 		qDebug() << "Sending arm to" << p << "robot at" << innerModel->transform("world", QVec::zeros(6), "robot");
 		RoboCompBodyInverseKinematics::Pose6D pose;
-		pose.x = p.x()-120; pose.y = p.y(); pose.z = p.z();   
-	//	drawAxis("april-mug", "world");
-		
+		pose.x = p.x()-120; pose.y = p.y(); pose.z = p.z();   	
 		pose.rx =  M_PI; pose.ry=-M_PI/2; pose.rz= 0;  //don't care
 		RoboCompBodyInverseKinematics::WeightVector weight;
 		weight.x = 1; weight.y = 1; weight.z = 1; 
 		weight.rx = 0; weight.ry = 0; weight.rz = 0;
-		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", pose, weight, 0); 
+		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", pose, weight, true); 
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 	{ std::cout << ex.text << std::endl; }
@@ -526,12 +487,16 @@ SpecificWorker::State SpecificWorker::moveArm()
 	qDebug() << __FUNCTION__;
 
 	if( bikState.finish == false )
+	{
+		qDebug() << "BIK is planning or moving";
 		return State::MOVE_ARM;
+	}
 	else
 	{
+		sleep(1);
 		openFingers();
 		initialDistance = 200;
-		sleep(3);
+		sleep(1);
 		if (tag11 == true and tag12 == true)
 			return State::GRASP;
 		else
@@ -738,7 +703,7 @@ SpecificWorker::State SpecificWorker::grasp()
 	}	
 	else
 	{
-		closeFingers();
+		graspFingers();
 		return State::DETACH_TO_GET;
 	}	
 }
@@ -1145,6 +1110,52 @@ SpecificWorker::State SpecificWorker::goCenter()
 
 ///////////////////////////////
 //////////////////////////////
+
+void SpecificWorker::closeFingers()
+{
+	qDebug() << __FUNCTION__;
+
+	//Close fingers
+	try
+	{	
+		qDebug() << __FUNCTION__ << "Close fingers RCIS";
+		bodyinversekinematics_proxy->setRobot(0);
+		bodyinversekinematics_proxy->setFingers(0);  //ALLOW HAND SPECIFICATON
+		usleep(100000);
+	} 
+	catch (Ice::Exception ex) {cout <<"ERROR EN CERRAR PINZA: "<< ex << endl;}
+}
+
+void SpecificWorker::graspFingers()
+{
+	qDebug() << __FUNCTION__;
+
+	//Close fingers
+	try
+	{	
+		qDebug() << __FUNCTION__ << "Close fingers RCIS";
+		bodyinversekinematics_proxy->setRobot(0);
+		bodyinversekinematics_proxy->setFingers(50);  //ALLOW HAND SPECIFICATON
+		usleep(100000);
+	} 
+	catch (Ice::Exception ex) {cout <<"ERROR EN CERRAR PINZA: "<< ex << endl;}
+}
+
+
+void SpecificWorker::openFingers()
+{
+	qDebug() << __FUNCTION__;
+
+	//Close fingers
+	try
+	{	
+		qDebug() << __FUNCTION__ << "Open fingers RCIS";
+		bodyinversekinematics_proxy->setRobot(0);
+		bodyinversekinematics_proxy->setFingers(70);
+		usleep(100000);
+	} 
+	catch (Ice::Exception ex) {cout <<"ERROR EN CERRAR PINZA: "<< ex << endl;}
+}
 
 void SpecificWorker::attachMug()
 {

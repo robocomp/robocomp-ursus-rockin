@@ -204,8 +204,10 @@ bool Sampler::isStateValid(const ompl::base::State *state) //in robot RS
 	
 	for (uint32_t out=0; out<restNodes.size(); out++)
 		if (innerModel->collide("munonMesh", restNodes[out]))
-			//	qDebug() << "collide with " << restNodes[out];
+		{
+			qDebug() << "collide with " << restNodes[out];
 			return false;
+		}
 	return true;
 }
 

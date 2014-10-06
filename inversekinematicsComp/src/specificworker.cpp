@@ -153,21 +153,16 @@ void SpecificWorker::init()
 	//Open file to write errors
 	fichero.open("errores.txt", ios::out);
 
-	//OMPL path-Planning stuff
+	//OMPL path-Planning initialization
 	QList<QPair<float, float > > limits;
 	limits.append(qMakePair((float)-0.4,(float)0.4)); 	 //x in robot RS
-	limits.append(qMakePair((float)0.2,(float)1.2)); 	   //y
+	limits.append(qMakePair((float)0.2,(float)1.2)); 	 //y
 	limits.append(qMakePair((float)-0.2,(float)1.f));  	 //z
 
 	sampler.initialize3D(innerModel, limits);
 	planner = new PlannerOMPL(*innerModel);
 	planner->initialize(&sampler);
 
-	
-	setJoint("rightShoulder1", -1, 2);
-
-	//	setFingers(0);
-	//setJoint("rightShoulder1", -1, 2);
 
 	qDebug();
 	qDebug() << "---------------------------------";
@@ -350,7 +345,7 @@ void SpecificWorker::compute( )
 						moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
 						//Acumulamos los angulos en una lista en bodyPart para lanzarlos con Reflexx
 						iterador.value().addJointStep(target.getFinalAngles());
-						usleep(10000);
+						usleep(100000);
 						target.setExecuted(true);
 					}
 					else
@@ -381,7 +376,9 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 {
+	//Convert to ROBOT referece frame to faciitate SAMPLING procedure
 	QVec origin = innerModel.transform("robot","grabPositionHandR");
+	QVec targetR = innerModel.transform("robot", target.getPose(), "world");
 
 	qDebug() << __FUNCTION__ << "Origin:" << origin << ". Target:" << target.getTranslation() << target.getHasPlan();
 
@@ -407,30 +404,37 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 //	{
 		qDebug() << __FUNCTION__ << "Calling Full Power of RRTConnect OMPL planner. This may take a while";
 		Target lastTarget = target;
-		if (planner->computePath(origin, target.getTranslation(), 5) == false)
+		if (planner->computePath(origin, targetR.subVector(0,2), 5) == false)  //5 secs max
 			return false;
 //	}
 
 	qDebug() << __FUNCTION__ << "Plan length: " << planner->getPath().size();
 	QList<QVec> path = planner->getPath();
+	
 	qDebug() << path;
+	
+	//Convert back to world reference system
+	for(int i= 0; i<path.size(); i++)
+		path[i] = innerModel.transform("world",path[i],"robot");
+	
 	//draw(innermodelmanager_proxy,path);
+	
 	//qFatal("fary");
+	QVec w(6);
+	w[0]  = 1; 	w[1]  = 1;  w[2]  = 1; w[3]  = 0; w[4] = 0; w[5] = 0;
 	for(int i=0; i<path.size(); ++i)
 	{
-		QVec w(6);
 		QVec pp(6,0.f);
 		pp.inject(path[i],0);
-		w[0]  = 1; 	w[1]  = 1;  w[2]  = 1; w[3]  = 0; w[4] = 0; w[5] = 0;
 		Target t(Target::POSE6D, &innerModel, bodyParts["RIGHTARM"].getTip(), pp, w, false);
 		t.setHasPlan(true);
+		//t.print();
 		if(i==0)
 			target = t;
 // 		if(i==path.size()-1)																					///NO ROTATION DURING PATH PLANNING
 // 			t.setWeights( lastTarget.getWeights() );
 		bodyParts["RIGHTARM"].addTargetToList(t);
-	}
-	
+	}	
 	return true;
 }
 
@@ -447,7 +451,8 @@ void SpecificWorker::doReflexxes( const QList<QVec> &jointValues, const QStringL
 }
 
 /**
- * @brief Creates a target element inside InnerModel to be used by IK. Avoids having a "target" in the XML file.
+ * @brief Targets have to be defined in the WORLD reference SYSTEM
+ * 		  Creates a target element inside InnerModel to be used by IK. Avoids having a "target" in the XML file.
  * 		  Each "target" node in InnerModel is created for each target that arrives here, and deleted when finished.
  * 		  Each bodypart may have a different target and BIK eliminates its dependence of InnerModelManager
  *
@@ -477,7 +482,7 @@ void SpecificWorker::removeInnerModelTarget(const Target& target)
 
 
 /**
- * @brief Takes bodyPart to target pose, defined in the ROBOT reference system
+ * @brief Takes bodyPart to target pose, defined in the WORLD reference system
  *
  * @param bodyPart ...
  * @param target ...
