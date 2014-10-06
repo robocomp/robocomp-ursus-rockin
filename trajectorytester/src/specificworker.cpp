@@ -567,6 +567,8 @@ SpecificWorker::State SpecificWorker::grasp()
 	{
 		addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11Pose);
 	}
+	else
+		qDebug() << "No veo el 11";
 // 	else
 // 	{
 // 		addTransformInnerModel("mano-segun-head", "rgbd_transform", innerModel->transform("rgbd_transform", QVec::zeros(6), "grabPositionHandR"));
@@ -581,11 +583,11 @@ SpecificWorker::State SpecificWorker::grasp()
 	//innerModel->transform("world",QVec::zeros(6),"ThandMesh2").print("mano through arm in world");
 	
 	//Difference should be zero if correctly calibrated
-	//qDebug() << "Diferencia entre felt-hand y seen-hand (should be zero)" << innerModel->transform("world", QVec::zeros(6), "mano-segun-head")-innerModel->transform("world",QVec::zeros(6),"ThandMesh2");
+	qDebug() << "Diferencia entre felt-hand y seen-hand (should be zero)" << innerModel->transform("world", QVec::zeros(6), "mano-segun-head")-innerModel->transform("world",QVec::zeros(6),"ThandMesh2");
 	
 	// Ponemos la marca de la mano vista desde la cámara en el sistma de coordenadas de la marca de la mano, si el target se ha alcanzado error debería ser todo cero
 	QVec visualMarcaTInHandMarca = innerModel->transform("ThandMesh2", QVec::zeros(3), "mano-segun-head");
-	//qDebug() << "Marca vista por la camara en el sistema de la marca de la mano (deberia ser cero si no hay errores)" << innerModel->transform("ThandMesh2", QVec::zeros(6), "mano-segun-head");
+	qDebug() << "Marca vista por la camara en el sistema de la marca de la mano (deberia ser cero si no hay errores)" << innerModel->transform("ThandMesh2", QVec::zeros(6), "mano-segun-head");
 	
 	///CALIBRACION
 	
@@ -655,60 +657,90 @@ SpecificWorker::State SpecificWorker::grasp()
 	nearTarget[0] = -initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = M_PI/2;nearTarget[5] = 0;  //OJJOO MARCA X REVES por lo que giro en Y al reves
 	addTransformInnerModel("marca-segun-head-cercana", "marca-segun-head", nearTarget);
 	QVec nearTargetR(6,0.f);
-	nearTargetR[5] = -M_PI/2.; 
+	nearTargetR[3] = M_PI/2; nearTargetR[4] = M_PI/2;; 
 	addTransformInnerModel("marca-segun-head-orientada", "marca-segun-head", nearTargetR);
-	QVec pose = innerModel->transform("mano-segun-head",QVec::zeros(6),"marca-segun-head-orientada");
-	//drawAxis("marca-segun-head-orientada", "rgbd_transform");
-	//drawAxis("mano-segun-head", "rgbd_transform");
 	
+	QMat m = innerModel->getRotationMatrixTo("ThandMesh2", "grabPositionHandR");
+	QMat mm = innerModel->getRotationMatrixTo("mano-segun-head", "marca-segun-head-orientada");
+
+	m.print("m");
+	mm.print("mm");
+	
+	(mm * m.transpose()).print("RESTO6");
+	(mm * m.transpose()).extractAnglesR_min().print("angles");
+	QVec anglesDiff = (mm*m.transpose()).extractAnglesR_min();
+	
+	QVec pose = innerModel->transform("mano-segun-head",QVec::zeros(6),"marca-segun-head-cercana");
+	
+	pose.print("pose");
+// 	QVec mh = innerModel->transform("world",QVec::zeros(6),"marca-segun-head-cercana"); mh.print("marca segun head");
+// 	QVec gp = innerModel->transform("world",QVec::zeros(6),"grabPositionHandR"); gp.print("grabPositionHandR");
+	QVec mh = innerModel->transform("mano-segun-head",QVec::zeros(6),"marca-segun-head-cercana"); mh.print("mm");
+	QVec gp = innerModel->transform("ThandMesh2",QVec::zeros(6),"grabPositionHandR"); gp.print("grabPositionHandR");
+	innerModel->transform("world",QVec::zeros(6),"marca-segun-head-orientada").print("marca segun head orientada");
+	
+	innerModel->transform("world",QVec::zeros(6),"mano-segun-head").print("mano-segun head");
+	innerModel->transform("world",QVec::zeros(6),"ThandMesh2").print("Thandmesh2");
+	
+	Rot3D mhm(mh.rx(),mh.ry(), mh.rz());
+	mhm.print("mhm");
+	Rot3D gpm(gp.rx(),gp.ry(), gp.rz());
+	gpm.print("gpm");
+		
+	//drawAxis("marca-segun-head-cercana", "rgbd_transform");
+// 	drawAxis("marca-segun-head-orientada", "rgbd_transform");
+// 	drawAxis("mano-segun-head", "rgbd_transform");
+	
+	Rot3D caca(pose.rx(),pose.ry(), pose.rz());
+	caca.print("caca");
 	
 	qDebug() << "initialDistance" << initialDistance << "real dist" << pose.subVector(0,2).norm2() << "poset" << pose;
 
-	if( pose.subVector(0,2).norm2() > 140 or pose.subVector(3,4).norm2() > 0.1) 
+	if( pose.subVector(0,2).norm2() > 110 or anglesDiff.norm2() > 0.1) 
 	{
 		initialDistance = initialDistance * 0.8; 
 		if(initialDistance < 110 ) 
 			initialDistance = 109;
-	}
+	
+				//qDebug() << "Differencia entre mano y marca cercana visual" << innerModel->transform("rgbd_transform", QVec::zeros(6),"marca-segun-head-cercana") -
+				//															innerModel->transform("rgbd_transform", QVec::zeros(6),"mano-segun-head"); 
+				//qDebug() << "Differencia entre mano y marca cercana visual en el SR de la mano" << innerModel->transform("marca-segun-head-cercana", QVec::zeros(6),"mano-segun-head");
+				
+				//drawAxis("marca-segun-head", "rgbd_transform");
+				//drawAxis("marca-segun-head-cercana", "rgbd_transform");
+				//drawAxis("marca-segun-head-cercana", "world");
+			try 
+			{
+				RoboCompBodyInverseKinematics::Pose6D pose;
+				QVec p = innerModel->transform("world",QVec::zeros(6),"marca-segun-head-cercana");
+				pose.x = p.x();pose.y = p.y();pose.z = p.z();
+				pose.rx = p.rx();pose.ry = p.ry();pose.rz = p.rz();
+						
+				RoboCompBodyInverseKinematics::WeightVector weights;
+				weights.x = 1; 		weights.y = 1; 		weights.z = 1;
+				weights.rx = 1; 	weights.ry = 1; 	weights.rz = 1; 
+				//qDebug() << __FUNCTION__ << "Sent to target in RCIS" << p;
+				bodyinversekinematics_proxy->setRobot(0); //Para enviar al RCIS-->0 Para enviar al robot-->1
+				qDebug() << "anteS";
+				bodyinversekinematics_proxy->setTargetPose6D( "RIGHTARM", pose, weights,0);
+				usleep(300000);
+				qDebug() << "despues";
+			} 
+			catch (const Ice::Exception &ex) 
+			{
+				std::cout << ex << endl;
+			} 
+				
+			//tag11 = false;		
+			//tag12 = false;
+				
+			return State::GRASP;
+	}	
 	else
 	{
 		closeFingers();
-		sleep(1);
- 		return State::DETACH_TO_GET;
-	}
-		
-	
-	//qDebug() << "Differencia entre mano y marca cercana visual" << innerModel->transform("rgbd_transform", QVec::zeros(6),"marca-segun-head-cercana") -
-	//															innerModel->transform("rgbd_transform", QVec::zeros(6),"mano-segun-head"); 
-	//qDebug() << "Differencia entre mano y marca cercana visual en el SR de la mano" << innerModel->transform("marca-segun-head-cercana", QVec::zeros(6),"mano-segun-head");
-	
-	//drawAxis("marca-segun-head", "rgbd_transform");
-	//drawAxis("marca-segun-head-cercana", "rgbd_transform");
-	//drawAxis("marca-segun-head-cercana", "world");
-	try 
-	{
-		RoboCompBodyInverseKinematics::Pose6D pose;
-		QVec p = innerModel->transform("world",QVec::zeros(6),"marca-segun-head-cercana");
-		pose.x = p.x();pose.y = p.y();pose.z = p.z();
-		pose.rx = p.rx();pose.ry = p.ry();pose.rz = p.rz();
-				
-		RoboCompBodyInverseKinematics::WeightVector weights;
-		weights.x = 1; 		weights.y = 1; 		weights.z = 1;
-		weights.rx = 1; 	weights.ry = 1; 	weights.rz = 1; 
-		//qDebug() << __FUNCTION__ << "Sent to target in RCIS" << p;
-		bodyinversekinematics_proxy->setRobot(0); //Para enviar al RCIS-->0 Para enviar al robot-->1
-		bodyinversekinematics_proxy->setTargetPose6D( "RIGHTARM", pose, weights,0);
-		sleep(1);
-} 
-	catch (const Ice::Exception &ex) 
-	{
-		std::cout << ex << endl;
-	} 
-		
-	tag11 = false;		
-	//tag12 = false;
-		
- 	return State::GRASP;
+		return State::DETACH_TO_GET;
+	}	
 }
 
 
@@ -784,7 +816,7 @@ SpecificWorker::State SpecificWorker::initRedrawArm()
 		qDebug() << __FUNCTION__ << "Sent to target:" << p;
 		bodyinversekinematics_proxy->setRobot(0); //Para enviar al RCIS-->0 Para enviar al robot-->1
 		bodyinversekinematics_proxy->setTargetPose6D( "RIGHTARM", pose, weights,0);
-		sleep(1);
+		usleep(300000);
 		return State::REDRAW_ARM;
 	}
 	catch(const Ice::Exception &ex)
@@ -1107,7 +1139,7 @@ SpecificWorker::State SpecificWorker::goCenter()
 		return State::GO_CENTER;
 	}
 	else
- 		return State::IDLE;
+ 		return State::INIT_GO_KITCHEN;
 }
 
 
@@ -1134,6 +1166,8 @@ void SpecificWorker::attachMug()
 
 		//remove mugT
 		innermodelmanager_proxy->removeNode("mugT");
+		
+qDebug() << "hola";
 
 		RoboCompInnerModelManager::Pose3D pose;
 		QVec mugTPoseOnTable = innerModel->transform("t_table1",QVec::zeros(6),"mugPos1");
