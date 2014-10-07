@@ -177,7 +177,8 @@ void SpecificWorker::compute( )
 /////////////////////////////////////////////////////////
 
 bool SpecificWorker::stopCommand()
-{
+{	
+	qDebug() << __FUNCTION__ ;
 	road.setFinished(true);
 	currentTarget.reset();
 	controller->stopTheRobot(differentialrobot_proxy);

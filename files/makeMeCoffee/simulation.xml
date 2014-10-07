@@ -86,14 +86,14 @@
 			<transform id="t_table0" tx="1200" ty="0" tz="1500">
 				<plane id="april-table0" px="0" py="730" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00000.png" />
 				<plane id="p-table0" px="50" py="704" pz="52.5" ny="1" size="1650,605,52" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/wood.jpg" />
-				<mesh id="mesh-table0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,120,150" ty="0" tz="0" rx="1.57079632679"  />
+				<mesh id="mesh-table0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,100,150" ty="0" tz="0" rx="1.57079632679"  />
 				<transform id="mugPos0" tx="0" ty="805" tz="0"/>
 			</transform>
 
 			<transform id="t_table1" tx="1200" ty="0" tz="-1600">
 				<plane id="april-table1" px="0" py="715" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00001.png" />
 				<plane id="p-table1" px="50" py="704" pz="52.5" ny="1" size="1650,605,52" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/wood.jpg" />
-				<mesh id="mesh-table1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,120,150" ty="0" tz="0" rx="1.57079632679"  />
+				<mesh id="mesh-table1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,100,150" ty="0" tz="0" rx="1.57079632679"  />
 				<transform id="mugPos1" tx="100" ty="805" tz="250">
 					<transform id="mugT" >
 						<!--<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />-->
@@ -348,7 +348,7 @@
 																								<mesh id="finger_right_2_mesh4" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tz="80" scale="5,5,20"    />
 																								<transform id="finger_right_2_tip" tz="20">
 																									<transform id="munon_t" tz="60">
-																										<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="10,10,10" />
+																										<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="20,20,20" />
 																									</transform>
 																								</transform>
 																							</transform>
@@ -394,7 +394,7 @@
 																									</transform>
 																									<transform id="ThandMesh2_5" tz="-55" ty="25" tx="0"> 	<!--  Deshacemos la translacion -->
 																								<!--		<transform id="grabPositionHandR"  tz="55" ty="-25">
-																								-->		<transform id="grabPositionHandR"  tz="175" ty="-25">																											
+																								-->		<transform id="grabPositionHandR"  tz="190" ty="-25">																											
 																						  			<!--	<plane id="axisx" px="50" nx="1" size="3,3,100" repeat="1" texture="#550000" />
 																											<plane id="axisy" py="50" nx="1" size="3,100,3" repeat="1" texture="#005500" />
 																											<plane id="axisz" pz="50" nx="1" size="100,3,3" repeat="1" texture="#000055" />-->

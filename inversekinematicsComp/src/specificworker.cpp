@@ -156,7 +156,7 @@ void SpecificWorker::init()
 	//OMPL path-Planning initialization
 	QList<QPair<float, float > > limits;
 	limits.append(qMakePair((float)-0.4,(float)0.4)); 	 //x in robot RS
-	limits.append(qMakePair((float)0.2,(float)1.2)); 	 //y
+	limits.append(qMakePair((float)0.2,(float)1.4)); 	 //y
 	limits.append(qMakePair((float)-0.2,(float)1.f));  	 //z
 
 	sampler.initialize3D(innerModel, limits);
@@ -345,7 +345,7 @@ void SpecificWorker::compute( )
 						moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
 						//Acumulamos los angulos en una lista en bodyPart para lanzarlos con Reflexx
 						iterador.value().addJointStep(target.getFinalAngles());
-						usleep(100000);
+						usleep(20000);
 						target.setExecuted(true);
 					}
 					else
@@ -367,6 +367,7 @@ void SpecificWorker::compute( )
 					mutex->lock();
 						iterador.value().removeHeadFromTargets(); //eliminamos el target resuelt
 						iterador.value().cleanJointStep();
+						
 					mutex->unlock();
 			}
 		}//if
@@ -404,7 +405,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 //	{
 		qDebug() << __FUNCTION__ << "Calling Full Power of RRTConnect OMPL planner. This may take a while";
 		Target lastTarget = target;
-		if (planner->computePath(origin, targetR.subVector(0,2), 5) == false)  //5 secs max
+		if (planner->computePath(origin, targetR.subVector(0,2), 6) == false)  //5 secs max
 			return false;
 //	}
 
@@ -417,7 +418,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 	for(int i= 0; i<path.size(); i++)
 		path[i] = innerModel.transform("world",path[i],"robot");
 	
-	//draw(innermodelmanager_proxy,path);
+	draw(innermodelmanager_proxy,path);
 	
 	//qFatal("fary");
 	QVec w(6);

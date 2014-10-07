@@ -99,14 +99,14 @@ void PlannerOMPL::initialize(Sampler *sampler)
 	
 	space->setup();
 	
-	simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(0.01);
+	simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(0.1);
 	//simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(100 / space->getMaximumExtent());
 	//simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRTConnect(simpleSetUp->getSpaceInformation())));
 	simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRTstar(simpleSetUp->getSpaceInformation())));
 	simpleSetUp->getPlanner()->as<og::RRTstar>()->setProblemDefinition(pdef);	
 	
 	//simpleSetUp->getPlanner()->as<og::RRTConnect>()->setRange(2000);
-	simpleSetUp->getPlanner()->as<og::RRTConnect>()->setRange(1);	
+	simpleSetUp->getPlanner()->as<og::RRTConnect>()->setRange(0.5);	
 	
 }
 

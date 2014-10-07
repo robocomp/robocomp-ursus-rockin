@@ -37,8 +37,9 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void  newAprilTag(const tagsList& tags); 
 
-	enum class State {IDLE, INIT_GO_KITCHEN, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, CLOSE_FINGERS, OPEN_FINGERS, DETACH_TO_GET, INIT_REDRAW_ARM, REDRAW_ARM, INIT_BACKUP, BACKUP, 
-					  INIT_GO_OTHER_TABLE, GO_OTHER_TABLE, DETACH_TO_PUT, PUT_MUG_ON_TABLE, INIT_REDRAW_ARM2, REDRAW_ARM2, BACKUP2, INIT_GO_CENTER, GO_CENTER} ;
+	enum class State {IDLE, INIT_GO_KITCHEN, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, INIT_PREPARE_ARM, PREPARE_ARM, INIT_APPROACH, APPROACH,
+										DETACH_TO_GET, INIT_REDRAW_ARM, REDRAW_ARM, INIT_BACKUP, BACKUP, 
+										INIT_GO_OTHER_TABLE, GO_OTHER_TABLE, DETACH_TO_PUT, PUT_MUG_ON_TABLE, INIT_REDRAW_ARM2, REDRAW_ARM2, BACKUP2, INIT_GO_CENTER, GO_CENTER} ;
 	
 public slots:
  	void compute(); 	
@@ -81,7 +82,11 @@ private:
 	State grasp();
 	State detachToGet();
 	State initRedrawArm();
+	State initPrepareArm();
+	State prepareArm();
 	State redrawArm();
+	State initApproach();
+	State approach();
 	State initBackUp();
 	State backUp();
 	State initGoOtherTable();
