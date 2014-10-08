@@ -104,6 +104,9 @@ private:
 	void openFingers();
 	void closeFingers();
 	void graspFingers();
+	void doPosture();
+	bool gazeToTag(const QString &tag);
+	bool gazeBetweenTags(const QString &tag1, const QString &tag2);
 	
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
@@ -115,6 +118,8 @@ private:
 	QStringList listaMotores;
 	void actualizarInnermodel(const QStringList &listaJoints);
 	void addTransformInnerModel(const QString &name, const QString &parent, const QVec &pose6D);
+	void addPlaneInnerModel(const QString &name, const QString &parent, const Plane3D &plane, const QVec &pose6D);
+	void addMeshInnerModel(const QString &name, const QString &parent, const meshType &mesh, const QVec &pose6D);
 	void drawAxis(const QString &name, const QString &parent);
 	void removeAxis(const QString &name);
 	float initialDistance; //to grab the mug
