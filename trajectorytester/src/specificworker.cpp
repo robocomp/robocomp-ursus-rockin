@@ -381,14 +381,14 @@ SpecificWorker::State SpecificWorker::initPrepareArm()
 	closeFingers();
 	try
 	{
-			bodyinversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
-			bodyinversekinematics_proxy->setJoint("rightShoulder1", -0.08, 0.3);
-			bodyinversekinematics_proxy->setJoint("rightShoulder2", -1.2, 0.3);
-			bodyinversekinematics_proxy->setJoint("rightShoulder3", 0.39, 0.3);
-			bodyinversekinematics_proxy->setJoint("rightWrist1", 1, 0.3);
-			bodyinversekinematics_proxy->setJoint("rightWrist2", 0.5, 0.3);
-			sleep(3);
-			return State::PREPARE_ARM;
+		bodyinversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
+		bodyinversekinematics_proxy->setJoint("rightShoulder1", -0.08, 0.3);
+		bodyinversekinematics_proxy->setJoint("rightShoulder2", -1.2, 0.3);
+		bodyinversekinematics_proxy->setJoint("rightShoulder3", 0.39, 0.3);
+		bodyinversekinematics_proxy->setJoint("rightWrist1", 1, 0.3);
+		bodyinversekinematics_proxy->setJoint("rightWrist2", 0.5, 0.3);
+		sleep(3);
+		return State::PREPARE_ARM;
 	}
 	catch(const Ice::Exception &ex)
 	{ std::cout << ex << std::endl; };
@@ -419,16 +419,24 @@ SpecificWorker::State SpecificWorker::initApproach()
 
 SpecificWorker::State SpecificWorker::approach()
 {
-	qDebug() << __FUNCTION__;
-	if( planningState.state  == "IDLE" )
+	qDebug() << __FUNCTION__ << "planningState" << QString::fromStdString(planningState.state);
+	if( planningState.state  == "IDLE")
 	{
-		gazeBetweenTags("handMesh2","april-mug");	
-		openFingers();
-		sleep(1);
-		return State::GRASP;
+		if( tag11 == true and tag12 == true)
+		{
+			openFingers();
+			sleep(1);
+			return State::GRASP;
+		}
+		else
+			qDebug() << __FUNCTION__ << "Waiting for marks to appear";
 	}
 	else
+	{
+		gazeBetweenTags("handMesh2","mugT");	
+		//gazeToTag("handMesh2");	
  		return State::APPROACH;
+	}
 }
 
 /**
@@ -902,19 +910,7 @@ SpecificWorker::State SpecificWorker::goOtherTable()
 	qDebug() << __FUNCTION__;
 	if( planningState.state  == "PLANNING" or planningState.state == "EXECUTING" )
 	{
-		try 
-		{	
-			RoboCompBodyInverseKinematics::Pose6D target;
-			target.rx=0; target.ry=0; target.rz=0; 
-			QVec loc = innerModel->transform("world","mesh-table0");  //HARDCODED -------------------------
-			target.x = loc.x(); target.y=loc.y()+750; target.z = loc.z(); //HARDCODED subimos la Y porque la taza parte del suelo
-			RoboCompBodyInverseKinematics::Axis axis;
-			axis.x = 0; axis.y = -1; axis.z = 0;
-			bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
-		} 
-		catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-			{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
-			
+		gazeToTag("mugPos0");	
 		return State::GO_OTHER_TABLE;
 	}
 	else
@@ -925,7 +921,7 @@ SpecificWorker::State SpecificWorker::goOtherTable()
 			return State::PUT_MUG_ON_TABLE;
 		else
 		{
-			qDebug() << __FUNCTION__ << "Could not see the mark 0. Going IDLE";
+			qDebug() << __FUNCTION__ << "Could not see mark 0. Going IDLE";
 			return State::IDLE;
 		}
 	}
@@ -1002,27 +998,13 @@ SpecificWorker::State SpecificWorker::putMugOntable()
 	catch (const Ice::Exception &ex) 
 	{	std::cout << ex << endl; } 	
 	
-	
 	//Gaze
-	try 
-	{	
-		RoboCompBodyInverseKinematics::Pose6D target;
-		target.rx=0; target.ry=0; target.rz=0; 
-		QVec loc = innerModel->transform("world","mugT");  //HARDCODED -------------------------MARK ON TABLE
-		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
-		RoboCompBodyInverseKinematics::Axis axis;
-		axis.x = 0; axis.y = -1; axis.z = 0;
-		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
-	} 
-	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-		{ std::cout << ex.text << "in pointAxisTowardsTarget" << std::endl;}
-
+	gazeToTag("mugPos0");	
 	
 	tag0 = false;
 	openFingers();
 	sleep(1);
 	return State::DETACH_TO_PUT;
-	//return State::INIT_PUT_MUG_ON_TABLE;
 }
 
 
@@ -1033,8 +1015,23 @@ SpecificWorker::State SpecificWorker::detachToPut()
 	try
 	{	
 		//Get mugT info
+		qDebug() << __FUNCTION__  << "hola0";
+		InnerModelNode *node = innerModel->getNode("mesh-mug");
+		if( node == NULL)
+		{
+			qDebug() << __FUNCTION__ << "mesh-mug es nulo";
+			return State::DETACH_TO_PUT;
+		}
+		InnerModelNode *node1 = innerModel->getNode("mugT");
+		if( node1 == NULL)
+		{
+			qDebug() << __FUNCTION__ << "mugT es nulo";
+			return State::DETACH_TO_PUT;
+		}
 		QVec mugTInHand = innerModel->transform("t_table0",QVec::zeros(6),"mesh-mug");
+		qDebug() << __FUNCTION__  << "hola";
 		QVec mugTOnTable = innerModel->transform("t_table0",QVec::zeros(6),"mugT");
+		qDebug() << __FUNCTION__  << "hola1";
 		
 		//Get mug info
 		RoboCompInnerModelManager::meshType mesh;
@@ -1052,9 +1049,6 @@ SpecificWorker::State SpecificWorker::detachToPut()
 		//remove mugT
 		innermodelmanager_proxy->removeNode("mugT");
 		innerModel->removeNode("mugT");
-
-		//mugTInHand.print("mugTInHand");
-		//mugTPoseOnTable.print("mugTPoseOnTable");
 
 		RoboCompInnerModelManager::Pose3D pose;		
 		pose.x=mugTInHand.x(); pose.y=mugTOnTable.y(); pose.z=mugTInHand.z();
@@ -1078,6 +1072,10 @@ SpecificWorker::State SpecificWorker::detachToPut()
 	catch(const Ice::Exception &ex)
 	{ 
 		std::cout << ex << std::endl;
+	}
+	catch(const std::exception &ex)
+	{
+		std::cout << ex.what() << std::cout;
 	}
 	
 	sleep(1);
@@ -1212,7 +1210,7 @@ bool SpecificWorker::gazeToTag(const QString &tag)
 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-		{ std::cout << ex.text << "calling pointAxisTowardsTarget" << std::endl;}
+		{ std::cout << ex.text << "Exception calling BIK to move head towards" << tag.toStdString() << std::endl;}
 	catch (const Ice::Exception &ex) 
 		{ std::cout << ex << std::endl;}
 		
@@ -1240,7 +1238,7 @@ bool SpecificWorker::gazeBetweenTags(const QString &tag1, const QString &tag2)
 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-		{ std::cout << ex.text << "calling pointAxisTowardsTarget" << std::endl;}
+		{ std::cout << ex.text << "Exception calling BIK to move head towards the middle of" << tag1.toStdString() << "and" << tag2.toStdString() << std::endl;}
 	catch (const Ice::Exception &ex) 
 		{ std::cout << ex << std::endl;}
 		
@@ -1299,6 +1297,8 @@ void SpecificWorker::attachMug()
 	qDebug() << __FUNCTION__ << "Attching mug";
 	try
 	{	
+		QVec mugTPoseOnTable = innerModel->transform("t_table1",QVec::zeros(6),"mugPos1");
+		
 		//Get mug info
 		RoboCompInnerModelManager::meshType mesh;
 		InnerModelMesh *nmesh = dynamic_cast<InnerModelMesh *>(innerModel->getNode("mesh-mug"));
@@ -1314,18 +1314,20 @@ void SpecificWorker::attachMug()
 
 		//remove mugT
 		innermodelmanager_proxy->removeNode("mugT");
+		innerModel->removeNode("mugT");
 		
-qDebug() << "hola";
-
 		RoboCompInnerModelManager::Pose3D pose;
-		QVec mugTPoseOnTable = innerModel->transform("t_table1",QVec::zeros(6),"mugPos1");
  		pose.x=mugTPoseOnTable.x(); pose.y=mugTPoseOnTable.y(); pose.z=mugTPoseOnTable.z();
 // 		pose.x += (300.f / RAND_MAX)*qrand() -150;
 // 		pose.z += (100.f / RAND_MAX)*qrand() -50;
 		pose.rx=mugTPoseOnTable.rx(); pose.ry=mugTPoseOnTable.ry(); pose.rz=mugTPoseOnTable.rz();  
+		
 		innermodelmanager_proxy->addTransform("mugT","static","t_table1", pose);
+		addTransformInnerModel("mugT","t_table1",mugTPoseOnTable);
 		innermodelmanager_proxy->addMesh("mesh-mug", "mugT", mesh);
+		addMeshInnerModel("mesh-mug","mugT",mesh, QVec::zeros(6));
 		innermodelmanager_proxy->addPlane("april-mug" , "mugT", plane);
+		addPlaneInnerModel("april-mug", "mugT",plane, QVec::zeros(6));
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
 	{ 
