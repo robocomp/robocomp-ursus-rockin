@@ -49,9 +49,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	connect(t4Button, SIGNAL(clicked()), this, SLOT(step4()));
 	connect(t5Button, SIGNAL(clicked()), this, SLOT(step5()));
 	
-	
 	connect(goHomeButton, SIGNAL(clicked()), this, SLOT(goHome()));
-	
 	
 	plantWidget = new PlantWidget(frame, QPointF(82,457), QPointF(0,10000), QPointF(65,387), QPointF(0,-10000));
 	plantWidget->show();
@@ -59,8 +57,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	
 	state = State::IDLE;
 	
-	tag11 = false;
-	tag12 = false;
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest2.xml");
@@ -155,19 +151,7 @@ void SpecificWorker::compute( )
 	
 	actualizarInnermodel(listaMotores);
 
-	if( tag12 ) //mug
-	{
-		tag1LineEdit->setText("Id: 12");	
-	}
 	
-	if( tag0 ) //Mesa human
-	{
-		tag1LineEdit->setText("Id: 12");	
-	}
-	if( tag11 ) //mano robot
-	{
-		tag2LineEdit->setText("Id: 11");	
-	}
 	doStateMachine();
 	
 }
@@ -420,21 +404,24 @@ SpecificWorker::State SpecificWorker::initApproach()
 SpecificWorker::State SpecificWorker::approach()
 {
 	qDebug() << __FUNCTION__ << "planningState" << QString::fromStdString(planningState.state);
+	Tag tag11,tag12;
 	if( planningState.state  == "IDLE")
 	{
-		if( tag11 == true and tag12 == true)
+		if( localTags.existId(11, tag11) and localTags.existId(12, tag12))
 		{
 			openFingers();
 			sleep(1);
 			return State::GRASP;
 		}
 		else
+		{
 			qDebug() << __FUNCTION__ << "Waiting for marks to appear";
+			return State::APPROACH;
+		}
 	}
 	else
 	{
 		gazeBetweenTags("handMesh2","mugT");	
-		//gazeToTag("handMesh2");	
  		return State::APPROACH;
 	}
 }
@@ -445,12 +432,9 @@ SpecificWorker::State SpecificWorker::approach()
  * @return SpecificWorker::State
  */
 
-
-	
 SpecificWorker::State SpecificWorker::servoing()
 {
-	static QVec ant = innerModel->transform("world", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
-	
+	Tag tag12;
 	if( planningState.state == "IDLE") //and (newRobotTarget - QVec::vec3(bState.x,0,bState.z)).norm2() < 40)
  	{
  		qDebug() << __FUNCTION__ << "Made it...";
@@ -463,8 +447,8 @@ SpecificWorker::State SpecificWorker::servoing()
 		RoboCompBodyInverseKinematics::Pose6D target;
 		//we need to give the Head target in ROBOT coordinates!!!!
 		QVec loc;
-		if( tag12 == true )
-			loc = innerModel->transform("robot", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
+		if( localTags.existId(12, tag12) == true )
+			loc = innerModel->transform("robot", QVec::vec3(tag12.pose.x(),tag12.pose.y(),tag12.pose.z()), "rgbd_transform");
 		else
 			loc = innerModel->transform("robot","mugT");
 		loc.print("loc"); 
@@ -480,7 +464,7 @@ SpecificWorker::State SpecificWorker::servoing()
 		{ std::cout << ex << std::endl;}
 
 		
-	QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12Pose.x(),tag12Pose.y(),tag12Pose.z()), "rgbd_transform");
+	QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12.pose.x(),tag12.pose.y(),tag12.pose.z()), "rgbd_transform");
 	tagInWorld(1) = innerModel->transform("world","robot").y();
 	try 
 	{	
@@ -562,7 +546,8 @@ SpecificWorker::State SpecificWorker::initMoveArm()
 SpecificWorker::State SpecificWorker::moveArm()
 {
 	qDebug() << __FUNCTION__;
-
+	
+	Tag tag11, tag12;
 	if( bikState.finish == false )
 	{
 		qDebug() << "BIK is planning or moving";
@@ -574,7 +559,7 @@ SpecificWorker::State SpecificWorker::moveArm()
 		openFingers();
 		initialDistance = 200;
 		sleep(1);
-		if (tag11 == true and tag12 == true)
+		if (localTags.existId(11, tag11) == true and localTags.existId(12, tag12) == true)
 			return State::GRASP;
 		else
 		{
@@ -599,15 +584,13 @@ SpecificWorker::State SpecificWorker::grasp()
 	qDebug() << __FUNCTION__;
 // 	if( bikState.finish == false )
 // 		return State::GRASP;			//REPLACE BY A POSITION CONTROL
-	
-	//innerModel->transform("world",QVec::zeros(6),"grabPositionHandR").print("Grab en el mundo antes de todo");
-	
+		
 	//AprilTags Z axis points outwards the mark, X to the right and Y upwards (left hand convention)
-	
+	Tag tag11;
 	//Create hand as seen by head
-	if( tag11 == true)
+	if( localTags.existId(11,tag11) == true)
 	{
-		addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11Pose);
+		addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11.pose);
 	}
 	else
 		qDebug() << "No veo el 11";
@@ -671,10 +654,10 @@ SpecificWorker::State SpecificWorker::grasp()
 	
 	/////////////////////////////////////////////
 	
-
-	if( tag12 == true)
+	Tag tag12;
+	if( localTags.existId(12, tag12) == true)
 	{
-		addTransformInnerModel("marca-segun-head", "rgbd_transform", tag12Pose);
+		addTransformInnerModel("marca-segun-head", "rgbd_transform", tag12.pose);
  		//drawAxis("marca-segun-head", "world");
  		//drawAxis("april-mug", "world");
 	}
@@ -768,11 +751,7 @@ SpecificWorker::State SpecificWorker::grasp()
 			catch (const Ice::Exception &ex) 
 			{
 				std::cout << ex << endl;
-			} 
-				
-			//tag11 = false;		
-			//tag12 = false;
-				
+			} 				
 			return State::GRASP;
 	}	
 	else
@@ -909,6 +888,7 @@ SpecificWorker::State SpecificWorker::initGoOtherTable()
 SpecificWorker::State SpecificWorker::goOtherTable()
 {
 	qDebug() << __FUNCTION__;
+	Tag tag0;
 	if( planningState.state  == "PLANNING" or planningState.state == "EXECUTING" )
 	{
 		gazeToTag("mugPos0");	
@@ -918,7 +898,7 @@ SpecificWorker::State SpecificWorker::goOtherTable()
 	{
 		sleep(1);
 		initialDistance = 150;
-		if( tag0 == true)
+		if( localTags.existId(0, tag0) == true)
 			return State::PUT_MUG_ON_TABLE;
 		else
 		{
@@ -931,10 +911,11 @@ SpecificWorker::State SpecificWorker::goOtherTable()
 SpecificWorker::State SpecificWorker::putMugOntable()
 {
 	qDebug() << __FUNCTION__ ;
+	Tag tag0;
 	
-	if(tag0 == true)  //HARDCODED --------------------------
+	if(localTags.existId(0, tag0) == true)  //HARDCODED --------------------------
 	{
-		addTransformInnerModel("mesa-humano-segun-head", "rgbd_transform", tag0Pose);
+		addTransformInnerModel("mesa-humano-segun-head", "rgbd_transform", tag0.pose);
 	}
 // 	else
 // 	{
@@ -1002,7 +983,6 @@ SpecificWorker::State SpecificWorker::putMugOntable()
 	//Gaze
 	gazeToTag("mugPos0");	
 	
-	tag0 = false;
 	openFingers();
 	sleep(1);
 	return State::DETACH_TO_PUT;
@@ -1127,7 +1107,6 @@ SpecificWorker::State SpecificWorker::redrawArm2()
 		return State::BACKUP2;
 	}	
 }
-
 
 SpecificWorker::State SpecificWorker::backUp2()  
 {
@@ -1582,6 +1561,21 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 {
 	
 	localTags.update(tags);
+	
+	Tag tag12,tag11,tag0;
+	if( localTags.existId(12, tag12) ) //mug
+	{
+		tag1LineEdit->setText("Id: 12");	
+	}
+	if( localTags.existId(0, tag0) ) //Mesa human
+	{
+		tag1LineEdit->setText("Id: 0");	
+	}
+	if( localTags.existId(11, tag11) ) //mano robot
+	{
+		tag2LineEdit->setText("Id: 11");	
+	}
+
 	
 // 	tag1LineEdit->setText("");
 // 	tag11 = false;

@@ -73,8 +73,12 @@ private:
 	{
 		int id;
 		float x,y,z,rx,ry,rz;
+		Tag(){};
 		Tag(int id_, float x_, float y_, float z_, float rx_, float ry_, float rz_)
-		{ id = id_; x = x_; y = y_; z = z_; rx = rx_; ry = ry_; rz = rz_;}
+		{ 
+			id = id_; pose[0] = x_; pose[1] = y_; pose[2] = z_; pose[3] = rx_; pose[4] = ry_; pose[5] = rz_;
+		}
+		QVec pose;
 	};
 	struct LocalTags
 	{
@@ -88,13 +92,15 @@ private:
 					listaTags.push_back(tt);
 				}
 		}
-		tuple<bool, Tag> existId(int id_)
+		bool existId(int id_, Tag &tag)
 		{
 			for(auto t: listaTags)
 				if (t.id == id_)
-					return make_tuple(true, t);
+				{	tag = t;
+					return true;
+				}
 				else
-					return make_tuple(false, t);
+					return false;
 		}
 		std::vector<Tag> listaTags;
 	};
@@ -143,10 +149,6 @@ private:
 	
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
-	bool tag11; 	//mano	
-	bool tag12;		//marca mug mesa 1
-	bool tag0; 		//marca mesa humano
-	QVec tag12Pose, tag11Pose, tag0Pose;
 	InnerModel *innerModel;
 	QStringList listaMotores;
 	void actualizarInnermodel(const QStringList &listaJoints);

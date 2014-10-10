@@ -77,12 +77,12 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	plannerOMPL = new PlannerOMPL(innerModel);
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
 	planner = plannerPRM;
-// 	planner->cleanGraph(innermodelmanager_proxy);
+ 	planner->cleanGraph(innermodelmanager_proxy);
 // 	planner->drawGraph(innermodelmanager_proxy);
 
 	qDebug() << "----------------inserting" ;
 
-	//planner->drawGraph(innermodelmanager_proxy);
+//	planner->drawGraph(innermodelmanager_proxy);
 
 	qDebug() << __FUNCTION__ << "----- planner set";
 
@@ -157,9 +157,9 @@ void SpecificWorker::compute( )
 			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 			if( reloj2.elapsed() < 100 )
 			{
-		/*		road.clearDraw(innermodelmanager_proxy);
-				road.draw(innermodelmanager_proxy, innerModel);
-		*/	}
+		//		road.clearDraw(innermodelmanager_proxy);
+		//		road.draw(innermodelmanager_proxy, innerModel);
+			}
 			reloj.restart();
 		}
 		reloj2.restart();
