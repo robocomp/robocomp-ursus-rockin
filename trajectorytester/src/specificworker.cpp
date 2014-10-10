@@ -407,6 +407,10 @@ SpecificWorker::State SpecificWorker::approach()
 	Tag tag11,tag12;
 	if( planningState.state  == "IDLE")
 	{
+		for(auto i:localTags.listaTags)
+		{ 
+			qDebug() << i.id << localTags.existId(i.id, tag12);
+		}
 		if( localTags.existId(11, tag11) and localTags.existId(12, tag12))
 		{
 			openFingers();
@@ -1562,19 +1566,19 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 	
 	localTags.update(tags);
 	
-	Tag tag12,tag11,tag0;
-	if( localTags.existId(12, tag12) ) //mug
-	{
-		tag1LineEdit->setText("Id: 12");	
-	}
-	if( localTags.existId(0, tag0) ) //Mesa human
-	{
-		tag1LineEdit->setText("Id: 0");	
-	}
-	if( localTags.existId(11, tag11) ) //mano robot
-	{
-		tag2LineEdit->setText("Id: 11");	
-	}
+// 	Tag tag12,tag11,tag0;
+// 	if( localTags.existId(12, tag12) ) //mug
+// 	{
+// 		tag1LineEdit->setText("Id: 12");	
+// 	}
+// 	if( localTags.existId(0, tag0) ) //Mesa human
+// 	{
+// 		tag1LineEdit->setText("Id: 0");	
+// 	}
+// 	if( localTags.existId(11, tag11) ) //mano robot
+// 	{
+// 		tag2LineEdit->setText("Id: 11");	
+// 	}
 
 	
 // 	tag1LineEdit->setText("");

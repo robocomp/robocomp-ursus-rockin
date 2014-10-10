@@ -71,13 +71,17 @@ private:
 	
 	struct Tag
 	{
-		int id;
-		float x,y,z,rx,ry,rz;
 		Tag(){};
+		Tag(const Tag &t)
+		{	pose.resize(6);
+			id = t.id; pose = t.pose;
+		}
 		Tag(int id_, float x_, float y_, float z_, float rx_, float ry_, float rz_)
 		{ 
+			pose.resize(6);
 			id = id_; pose[0] = x_; pose[1] = y_; pose[2] = z_; pose[3] = rx_; pose[4] = ry_; pose[5] = rz_;
 		}
+		int id;
 		QVec pose;
 	};
 	struct LocalTags
@@ -85,22 +89,23 @@ private:
 		QMutex lock;
 		void update(const tagsList &tags)
 		{
-				QMutexLocker m(&lock);
-				for(auto t: tags)
-				{
-					Tag tt(t.id, t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
-					listaTags.push_back(tt);
-				}
+			QMutexLocker m(&lock);
+			listaTags.clear();
+			for(auto t: tags)
+			{
+				Tag tt(t.id, t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
+				listaTags.push_back(tt);
+			}
 		}
 		bool existId(int id_, Tag &tag)
 		{
+			QMutexLocker m(&lock);
 			for(auto t: listaTags)
 				if (t.id == id_)
 				{	tag = t;
 					return true;
 				}
-				else
-					return false;
+			return false;
 		}
 		std::vector<Tag> listaTags;
 	};
