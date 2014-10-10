@@ -38,8 +38,8 @@ public:
 	void  newAprilTag(const tagsList& tags); 
 
 	enum class State {IDLE, INIT_GO_KITCHEN, GO_KITCHEN, SERVOING, MOVE_ARM, INIT_MOVE_ARM, GRASP, INIT_PREPARE_ARM, PREPARE_ARM, INIT_APPROACH, APPROACH,
-										DETACH_TO_GET, INIT_REDRAW_ARM, REDRAW_ARM, INIT_BACKUP, BACKUP, 
-										INIT_GO_OTHER_TABLE, GO_OTHER_TABLE, DETACH_TO_PUT, PUT_MUG_ON_TABLE, INIT_REDRAW_ARM2, REDRAW_ARM2, BACKUP2, INIT_GO_CENTER, GO_CENTER} ;
+										DETACH_TO_GET, INIT_REDRAW_ARM, REDRAW_ARM, INIT_BACKUP, BACKUP, INIT_GO_OTHER_TABLE, GO_OTHER_TABLE, DETACH_TO_PUT, PUT_MUG_ON_TABLE, 
+										INIT_REDRAW_ARM2, REDRAW_ARM2, BACKUP2, INIT_GO_CENTER, GO_CENTER} ;
 	
 public slots:
  	void compute(); 	
@@ -68,6 +68,39 @@ public slots:
 	
 	
 private:
+	
+	struct Tag
+	{
+		int id;
+		float x,y,z,rx,ry,rz;
+		Tag(int id_, float x_, float y_, float z_, float rx_, float ry_, float rz_)
+		{ id = id_; x = x_; y = y_; z = z_; rx = rx_; ry = ry_; rz = rz_;}
+	};
+	struct LocalTags
+	{
+		QMutex lock;
+		void update(const tagsList &tags)
+		{
+				QMutexLocker m(&lock);
+				for(auto t: tags)
+				{
+					Tag tt(t.id, t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
+					listaTags.push_back(tt);
+				}
+		}
+		tuple<bool, Tag> existId(int id_)
+		{
+			for(auto t: listaTags)
+				if (t.id == id_)
+					return make_tuple(true, t);
+				else
+					return make_tuple(false, t);
+		}
+		std::vector<Tag> listaTags;
+	};
+	
+	LocalTags localTags;
+	
 	PlantWidget *plantWidget;
 	void go(const QVec& t, const QVec& r=QVec());
 	void goBackwards(const QVec& t, const QVec &r=QVec());

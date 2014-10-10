@@ -835,7 +835,6 @@ SpecificWorker::State SpecificWorker::detachToGet()
 	return State::INIT_REDRAW_ARM;
 }
 
-
 /**
  * @brief Lift and redraw little bit the arm to perform a safe transport
  * 
@@ -865,6 +864,8 @@ SpecificWorker::State SpecificWorker::initRedrawArm()
 	}
 	catch(const Ice::Exception &ex)
 	{ std::cout << ex << std::endl; };
+	qDebug() << __FUNCTION__ << "Error talking to BIK. Going IDLE";
+	return State::IDLE;
 }
 
 SpecificWorker::State SpecificWorker::redrawArm()
@@ -1579,35 +1580,40 @@ void SpecificWorker::stopRobot()
 
 void SpecificWorker::newAprilTag(const tagsList& tags)
 {
-	tag1LineEdit->setText("");
-	tag11 = false;
-	tag12 = false;
 	
-	for(auto i: tags)
-	{
-		if( i.id == 11) //ROBOT HAND
-		{
-			tag11 = true;
-			tag11Pose.resize(6);
-			tag11Pose[0] = i.tx;tag11Pose[1] = i.ty;tag11Pose[2] = i.tz;
-			tag11Pose[3] = i.rx;tag11Pose[4] = i.ry;tag11Pose[5] = i.rz;
-		}
-		if( i.id == 12) //MUG
-		{
-			//qDebug() << __FUNCTION__ << "God damn got it!";
-			tag12 = true;
-			tag12Pose.resize(6);
-			tag12Pose[0] = i.tx;tag12Pose[1] = i.ty;tag12Pose[2] = i.tz;
-			tag12Pose[3] = i.rx;tag12Pose[4] = i.ry;tag12Pose[5] = i.rz;
-		}
-		if( i.id == 0) //ROBOT TABLE
-		{
-			//qDebug() << __FUNCTION__ << "God damn got it!";
-			tag0 = true;
-			tag0Pose.resize(6);
-			tag0Pose[0] = i.tx;tag0Pose[1] = i.ty;tag0Pose[2] = i.tz;
-			tag0Pose[3] = i.rx;tag0Pose[4] = i.ry;tag0Pose[5] = i.rz;
-		}
-
-	}
+	localTags.update(tags);
+	
+// 	tag1LineEdit->setText("");
+// 	tag11 = false;
+// 	tag12 = false;
+// 	
+// 	
+// 	
+// 	for(auto i: tags)
+// 	{
+// 		if( i.id == 11) //ROBOT HAND
+// 		{
+// 			tag11 = true;
+// 			tag11Pose.resize(6);
+// 			tag11Pose[0] = i.tx;tag11Pose[1] = i.ty;tag11Pose[2] = i.tz;
+// 			tag11Pose[3] = i.rx;tag11Pose[4] = i.ry;tag11Pose[5] = i.rz;
+// 		}
+// 		if( i.id == 12) //MUG
+// 		{
+// 			//qDebug() << __FUNCTION__ << "God damn got it!";
+// 			tag12 = true;
+// 			tag12Pose.resize(6);
+// 			tag12Pose[0] = i.tx;tag12Pose[1] = i.ty;tag12Pose[2] = i.tz;
+// 			tag12Pose[3] = i.rx;tag12Pose[4] = i.ry;tag12Pose[5] = i.rz;
+// 		}
+// 		if( i.id == 0) //ROBOT TABLE
+// 		{
+// 			//qDebug() << __FUNCTION__ << "God damn got it!";
+// 			tag0 = true;
+// 			tag0Pose.resize(6);
+// 			tag0Pose[0] = i.tx;tag0Pose[1] = i.ty;tag0Pose[2] = i.tz;
+// 			tag0Pose[3] = i.rx;tag0Pose[4] = i.ry;tag0Pose[5] = i.rz;
+// 		}
+// 
+// 	}
 }
