@@ -22,7 +22,7 @@
 	<link  src="obj1r"  dst="obj1h"    label="eq" />
 
 
-
+<!--
 	<symbol id="obj2r" type="object" />
 	<symbol id="stt2r" type="objectSt" />
 	<link  src="obj2r"  dst="stt2r"     label="coffeepot" />
@@ -49,6 +49,6 @@
 	<link  src="20"    dst="obj3h"     label="know" />
 	<link  src="obj3h" dst="105"       label="in" />
 	<link  src="obj3r" dst="obj3h"     label="eq" />
-
+-->
 
 </AGMModel>
