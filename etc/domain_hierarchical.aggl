@@ -11,6 +11,16 @@ longPattern=3
 
 include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_basic.aggl)
 
+findGrannyAndDeliver : active(1)
+{
+	findGranny as find
+	deliverObject as deliver
+	where:
+	deliver.robot = find.robot
+	deliver.room = find.room
+	deliver.person = find.person
+}
+
 reachAndGrasp : active(1)
 {
 	setObjectReach as reach
@@ -18,6 +28,21 @@ reachAndGrasp : active(1)
 	where:
 	reach.object = grasp.object
 	reach.status = grasp.status
+}
+
+findMilk : active(1)
+{
+	findObjectVisuallyInTable as find
+	recognizeObjFails as fail
+	tellHumanAboutUnknownObject as tell
+	personClassifiesMilkPot as milk
+	where:
+	find.status = fail.status = tell.statusr = milk.statusr
+	find.object = fail.object = tell.objectr = milk.objectr
+	find.robot = fail.robot = tell.robot = milk.robot
+	tell.person = milk.person
+	tell.objecth = milk.objecth
+	tell.statush = milk.statush
 }
 
 hierarchical hierarchicalFindMilkInTable : active(1)
@@ -31,6 +56,7 @@ hierarchical hierarchicalFindMilkInTable : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
+		container->contst(explored)*
 	}
 	=>
 	{
@@ -53,6 +79,7 @@ hierarchical hierarchicalFindMilkInTable : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
+		container->contst(explored)*
 	}
 	effect
 	{
@@ -66,19 +93,50 @@ hierarchical hierarchicalFindMilkInTable : active(1)
 	}
 }
 
-findMilk : active(1)
+hierarchical hierarchicalFindMugInTable : active(1)
 {
-	findObjectVisuallyInTable as find
-	recognizeObjFails as fail
-	tellHumanAboutUnknownObject as tell
-	personClassifiesMilkPot as milk
-	where:
-	find.status = fail.status = tell.statusr = milk.statusr
-	find.object = fail.object = tell.objectr = milk.objectr
-	find.robot = fail.robot = tell.robot = milk.robot
-	tell.person = milk.person
-	tell.objecth = milk.objecth
-	tell.statush = milk.statush
+	{
+		contst:objectSt(95,110)
+		container:object(-130,110)
+		robot:robot(-325,0)
+		room:object(-325,110)
+		container->contst(explored)*
+		container->contst(table)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+	}
+	=>
+	{
+		status:objectSt(95,0)
+		object:object(-130,0)
+		container:object(-130,110)
+		room:object(-325,110)
+		contst:objectSt(95,110)
+		robot:robot(-325,0)
+		container->contst(explored)*
+		container->contst(table)
+		robot->object(know)
+		object->status(see)
+		object->status(classified)
+		object->status(mug)
+		object->status(reach)
+		object->status(position)
+		object->status(reachable)
+		object->status(hasStatus)
+		object->container(in)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in container something)
+				(in object something)
+			)
+		)
+	}
 }
-
-

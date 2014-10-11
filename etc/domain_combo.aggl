@@ -8,6 +8,7 @@ nodeThickness=2
 fontSize=12
 longPattern=3
 ===
+
 include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_basic.aggl)
 
 findGrannyAndDeliver : active(1)
@@ -20,7 +21,6 @@ findGrannyAndDeliver : active(1)
 	deliver.person = find.person
 }
 
-
 reachAndGrasp : active(1)
 {
 	setObjectReach as reach
@@ -29,7 +29,6 @@ reachAndGrasp : active(1)
 	reach.object = grasp.object
 	reach.status = grasp.status
 }
-
 
 findMilk : active(1)
 {
