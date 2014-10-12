@@ -127,7 +127,7 @@ findObjectTold : active(4)
 	}
 }
 
-findGranny : active(2)
+findGranny : active(1)
 {
 	{
 		person:person(-15,-75)
@@ -832,44 +832,7 @@ makeHumanLook : active(2)
 	}
 }
 
-makeHumanLook : active(2)
-{
-	{
-		statusr:objectSt(-90,180)
-		objecth:object(150,40)
-		robot:robot(-90,-75)
-		person:person(155,-75)
-		objectr:object(-90,40)
-		statush:objectSt(145,180)
-		objectr->objecth(eq)
-		robot->person(interacting)
-		robot->objectr(know)
-		person->objecth(know)
-		objectr->statusr(position)
-		objectr->statusr(see)
-		objecth->statush(noSee)
-		objecth->statush(position)
-	}
-	=>
-	{
-		statusr:objectSt(-90,180)
-		objecth:object(150,40)
-		robot:robot(-90,-75)
-		person:person(155,-75)
-		objectr:object(-90,40)
-		statush:objectSt(145,180)
-		objectr->objecth(eq)
-		robot->person(interacting)
-		robot->objectr(know)
-		person->objecth(know)
-		objectr->statusr(position)
-		objectr->statusr(see)
-		objecth->statush(see)
-		objecth->statush(position)
-	}
-}
-
-personClassifiesMug : active(2)
+personClassifiesMug : active(1)
 {
 	{
 		objecth:object(100,35)
@@ -907,7 +870,7 @@ personClassifiesMug : active(2)
 	}
 }
 
-personClassifiesTable : active(2)
+personClassifiesTable : active(1)
 {
 	{
 		objecth:object(100,35)
@@ -1102,7 +1065,7 @@ personTellsUsAboutTable : active(3)
 	}
 }
 
-informHumanAboutMovedObject : active(2)
+informHumanAboutMovedObject : active(1)
 {
 	{
 		cont2r:object(-90,200)
