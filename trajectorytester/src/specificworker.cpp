@@ -317,7 +317,7 @@ SpecificWorker::State SpecificWorker::init_go_kitchen()
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 	{ std::cout << ex.text << "in goHome" << std::endl;}
 	
-	go(QVec::vec3(1300,0,-750), QVec::vec3(0,M_PI,0));
+	go(QVec::vec3(1300,0,-600), QVec::vec3(0,M_PI,0));
 	sleep(1);   //ÑAÂ
 	return State::GO_KITCHEN;
 }
@@ -325,7 +325,15 @@ SpecificWorker::State SpecificWorker::init_go_kitchen()
 SpecificWorker::State SpecificWorker::go_kitchen()
 {
 	qDebug() << __FUNCTION__ << "planningState=" << QString::fromStdString(planningState.state);	
-		
+	
+	Tag tag12;
+	if( localTags.existId(12, tag12))
+	{
+		qDebug() << "Lo vi. servo should start here";
+		stopRobot();
+		return State::IDLE;
+	}
+	
 	if( planningState.state == "IDLE" )
 	{
 		qDebug() << __FUNCTION__ << "Made it...";
@@ -349,6 +357,8 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		qDebug() << __FUNCTION__ << "Waiting for a plan...";
 		return State::GO_KITCHEN;
 	}
+	
+	
 // 	initiated = false;
 // 	qDebug() << __FUNCTION__ << "Otherwise. Should not happen. Passing to IDLE" << QString::fromStdString(planningState.state) << tag12 << initiated;
 // 	return State::IDLE;
@@ -398,7 +408,9 @@ SpecificWorker::State SpecificWorker::initApproach()
 	qDebug() << __FUNCTION__;	
 	go(QVec::vec3(1300,0,-1250), QVec::vec3(0,M_PI,0));
 	usleep(100000);
-	return State::APPROACH;
+	//return State::APPROACH;
+	return State::SERVOING;
+	
 }
 
 SpecificWorker::State SpecificWorker::approach()
@@ -407,10 +419,6 @@ SpecificWorker::State SpecificWorker::approach()
 	Tag tag11,tag12;
 	if( planningState.state  == "IDLE")
 	{
-		for(auto i:localTags.listaTags)
-		{ 
-			qDebug() << i.id << localTags.existId(i.id, tag12);
-		}
 		if( localTags.existId(11, tag11) and localTags.existId(12, tag12))
 		{
 			openFingers();
@@ -435,54 +443,33 @@ SpecificWorker::State SpecificWorker::approach()
  * 
  * @return SpecificWorker::State
  */
-
 SpecificWorker::State SpecificWorker::servoing()
-{
-	Tag tag12;
+{	
 	if( planningState.state == "IDLE") //and (newRobotTarget - QVec::vec3(bState.x,0,bState.z)).norm2() < 40)
  	{
  		qDebug() << __FUNCTION__ << "Made it...";
  		stopRobot();
- 		return State::INIT_MOVE_ARM;
+ 		return State::GRASP;
  	}
-	
-	try 
-	{	
-		RoboCompBodyInverseKinematics::Pose6D target;
-		//we need to give the Head target in ROBOT coordinates!!!!
-		QVec loc;
-		if( localTags.existId(12, tag12) == true )
-			loc = innerModel->transform("robot", QVec::vec3(tag12.pose.x(),tag12.pose.y(),tag12.pose.z()), "rgbd_transform");
-		else
-			loc = innerModel->transform("robot","mugT");
-		loc.print("loc"); 
-		target.rx=0; target.ry=0; target.rz=0; 	
-		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();
-		RoboCompBodyInverseKinematics::Axis axis; 
-		axis.x = 0; axis.y = -1; axis.z = 0;
-		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
-	} 
-	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-		{ std::cout << ex.text << "calling pointAxisTowardsTarget" << std::endl;}
-	catch (const Ice::Exception &ex) 
-		{ std::cout << ex << std::endl;}
-
-		
-	QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12.pose.x(),tag12.pose.y(),tag12.pose.z()), "rgbd_transform");
-	tagInWorld(1) = innerModel->transform("world","robot").y();
-	try 
-	{	
-		RoboCompTrajectoryRobot2D::TargetPose tp;
-		tp.x = tagInWorld.x(); tp.y = tagInWorld.y(); tp.z = tagInWorld.z() +150;
-		trajectoryrobot2d_proxy->changeTarget( tp );
-	} 
-	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+ 	
+	gazeToTag("mugT");
+	Tag tag12;
+	if( localTags.existId(12, tag12))
+	{
+		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12.pose.x(),tag12.pose.y(),tag12.pose.z()), "rgbd_transform");
+		tagInWorld(1) = innerModel->transform("world","robot").y();
+		try 
+		{	
+			RoboCompTrajectoryRobot2D::TargetPose tp;
+			tp.x = tagInWorld.x(); tp.y = tagInWorld.y(); tp.z = tagInWorld.z();
+			trajectoryrobot2d_proxy->changeTarget( tp );
+		} 
+		catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 		{ std::cout << ex.text << "calling changeTarget" << std::endl;}
-	catch (const Ice::Exception &ex) 
+		catch (const Ice::Exception &ex) 
 		{ std::cout << ex << std::endl;}
-		
+	}
 	return State::SERVOING;
-	//return State::IDLE;
 	
 }
 
@@ -1000,6 +987,7 @@ SpecificWorker::State SpecificWorker::detachToPut()
 	try
 	{	
 		//Get mugT info
+		usleep(500000);
 		qDebug() << __FUNCTION__  << "hola0";
 		InnerModelNode *node = innerModel->getNode("mesh-mug");
 		if( node == NULL)
@@ -1015,7 +1003,7 @@ SpecificWorker::State SpecificWorker::detachToPut()
 		}
 		QVec mugTInHand = innerModel->transform("t_table0",QVec::zeros(6),"mesh-mug");
 		qDebug() << __FUNCTION__  << "hola";
-		QVec mugTOnTable = innerModel->transform("t_table0",QVec::zeros(6),"mugT");
+		QVec mugTOnTable = innerModel->transform("t------------------------   l   -_table0",QVec::zeros(6),"mugT");
 		qDebug() << __FUNCTION__  << "hola1";
 		
 		//Get mug info
@@ -1119,7 +1107,7 @@ SpecificWorker::State SpecificWorker::backUp2()
 	if( firstTime )
 	{
 		qDebug() << __FUNCTION__;
-		QVec target = innerModel->transform("world", QVec::vec3(0,0,-400), "robot"); //HARDCODED ----------------------------
+		QVec target = innerModel->transform("world", QVec::vec3(0,0,-600), "robot"); //HARDCODED ----------------------------
 		try{ bodyinversekinematics_proxy->goHome("HEAD");} catch(const Ice::Exception &ex){ std::cout << ex << std::endl;};
 		goBackwards(target);
 		firstTime = false;
