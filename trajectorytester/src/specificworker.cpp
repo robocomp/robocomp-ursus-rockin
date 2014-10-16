@@ -331,7 +331,7 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 	{
 		qDebug() << "Lo vi. servo should start here";
 		stopRobot();
-		return State::IDLE;
+		return State::INIT_APPROACH;
 	}
 	
 	if( planningState.state == "IDLE" )
@@ -406,11 +406,10 @@ SpecificWorker::State SpecificWorker::prepareArm()
 SpecificWorker::State SpecificWorker::initApproach()  
 {
 	qDebug() << __FUNCTION__;	
-	go(QVec::vec3(1300,0,-1250), QVec::vec3(0,M_PI,0));
-	usleep(100000);
-	//return State::APPROACH;
-	return State::SERVOING;
-	
+	//go(QVec::vec3(1300,0,-1250), QVec::vec3(0,M_PI,0));
+	goToTag(12);
+	usleep(500000);
+	return State::APPROACH;
 }
 
 SpecificWorker::State SpecificWorker::approach()
@@ -419,7 +418,7 @@ SpecificWorker::State SpecificWorker::approach()
 	Tag tag11,tag12;
 	if( planningState.state  == "IDLE")
 	{
-		if( localTags.existId(11, tag11) and localTags.existId(12, tag12))
+		if(/* localTags.existId(11, tag11) and */localTags.existId(12, tag12))  //OJO DESCOMENTAR
 		{
 			openFingers();
 			sleep(1);
@@ -434,6 +433,8 @@ SpecificWorker::State SpecificWorker::approach()
 	else
 	{
 		gazeBetweenTags("handMesh2","mugT");	
+		changeTargetToTag(12);
+		usleep(300000);
  		return State::APPROACH;
 	}
 }
@@ -449,30 +450,13 @@ SpecificWorker::State SpecificWorker::servoing()
  	{
  		qDebug() << __FUNCTION__ << "Made it...";
  		stopRobot();
- 		return State::GRASP;
+ 		//return State::GRASP;
+		return State::IDLE;
  	}
- 	
 	gazeToTag("mugT");
-	Tag tag12;
-	if( localTags.existId(12, tag12))
-	{
-		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag12.pose.x(),tag12.pose.y(),tag12.pose.z()), "rgbd_transform");
-		tagInWorld(1) = innerModel->transform("world","robot").y();
-		try 
-		{	
-			RoboCompTrajectoryRobot2D::TargetPose tp;
-			tp.x = tagInWorld.x(); tp.y = tagInWorld.y(); tp.z = tagInWorld.z();
-			trajectoryrobot2d_proxy->changeTarget( tp );
-		} 
-		catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
-		{ std::cout << ex.text << "calling changeTarget" << std::endl;}
-		catch (const Ice::Exception &ex) 
-		{ std::cout << ex << std::endl;}
-	}
+	changeTargetToTag(12);
 	return State::SERVOING;
-	
 }
-
 
 /**
  * @brief Sends the arms to a predefined position prior to grasping
@@ -1157,6 +1141,45 @@ SpecificWorker::State SpecificWorker::goCenter()
 ///////////////////////////////
 ///  HIGH LEVEL BEHAVIOR LAYER
 //////////////////////////////
+bool SpecificWorker::goToTag(int id)
+{
+	qDebug() << __FUNCTION__ ;
+	Tag tag;
+	if( localTags.existId(id, tag))
+	{
+		innerModel->transform("world","robot").print("currently robot at:");
+		QVec nTarget = innerModel->transform("world",tag.pose,"rgbd_transform");
+		nTarget.print("going to:");
+		go(nTarget);
+	}
+	return true;
+}
+
+bool SpecificWorker::changeTargetToTag(int id)
+{
+	qDebug() << __FUNCTION__ ;
+	Tag tag;
+	if( localTags.existId(id, tag))
+	{
+		QVec tagInWorld = innerModel->transform("world", QVec::vec3(tag.pose.x(),tag.pose.y(),tag.pose.z()), "rgbd_transform");
+		
+		// Set in floor
+		tagInWorld(1) = innerModel->transform("world","robot").y();
+		innerModel->transform("world","robot").print("currently robot at:");
+		tagInWorld.print("going to new target:");
+		try 
+		{	
+			RoboCompTrajectoryRobot2D::TargetPose tp;
+			tp.x = tagInWorld.x(); tp.y = tagInWorld.y(); tp.z = tagInWorld.z();
+			trajectoryrobot2d_proxy->changeTarget( tp );
+		} 
+		catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+		{ std::cout << ex.text << "calling changeTarget" << std::endl;}
+		catch (const Ice::Exception &ex) 
+		{ std::cout << ex << std::endl;}
+	}
+	return true;
+}
 
 /**
  * @brief Make the head look at ->
@@ -1553,53 +1576,6 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 {
 	
 	localTags.update(tags);
+	localTags.print();
 	
-// 	Tag tag12,tag11,tag0;
-// 	if( localTags.existId(12, tag12) ) //mug
-// 	{
-// 		tag1LineEdit->setText("Id: 12");	
-// 	}
-// 	if( localTags.existId(0, tag0) ) //Mesa human
-// 	{
-// 		tag1LineEdit->setText("Id: 0");	
-// 	}
-// 	if( localTags.existId(11, tag11) ) //mano robot
-// 	{
-// 		tag2LineEdit->setText("Id: 11");	
-// 	}
-
-	
-// 	tag1LineEdit->setText("");
-// 	tag11 = false;
-// 	tag12 = false;
-// 	
-// 	
-// 	
-// 	for(auto i: tags)
-// 	{
-// 		if( i.id == 11) //ROBOT HAND
-// 		{
-// 			tag11 = true;
-// 			tag11Pose.resize(6);
-// 			tag11Pose[0] = i.tx;tag11Pose[1] = i.ty;tag11Pose[2] = i.tz;
-// 			tag11Pose[3] = i.rx;tag11Pose[4] = i.ry;tag11Pose[5] = i.rz;
-// 		}
-// 		if( i.id == 12) //MUG
-// 		{
-// 			//qDebug() << __FUNCTION__ << "God damn got it!";
-// 			tag12 = true;
-// 			tag12Pose.resize(6);
-// 			tag12Pose[0] = i.tx;tag12Pose[1] = i.ty;tag12Pose[2] = i.tz;
-// 			tag12Pose[3] = i.rx;tag12Pose[4] = i.ry;tag12Pose[5] = i.rz;
-// 		}
-// 		if( i.id == 0) //ROBOT TABLE
-// 		{
-// 			//qDebug() << __FUNCTION__ << "God damn got it!";
-// 			tag0 = true;
-// 			tag0Pose.resize(6);
-// 			tag0Pose[0] = i.tx;tag0Pose[1] = i.ty;tag0Pose[2] = i.tz;
-// 			tag0Pose[3] = i.rx;tag0Pose[4] = i.ry;tag0Pose[5] = i.rz;
-// 		}
-// 
-// 	}
 }

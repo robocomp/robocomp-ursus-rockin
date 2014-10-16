@@ -81,12 +81,20 @@ private:
 			pose.resize(6);
 			id = id_; pose[0] = x_; pose[1] = y_; pose[2] = z_; pose[3] = rx_; pose[4] = ry_; pose[5] = rz_;
 		}
+		void print()
+		{
+			qDebug() << "Id:" << id << "Pose:" << pose;
+		}
 		int id;
 		QVec pose;
 	};
 	struct LocalTags
 	{
 		QMutex lock;
+		LocalTags()
+		{
+			ant = false;
+		}
 		void update(const tagsList &tags)
 		{
 			QMutexLocker m(&lock);
@@ -96,6 +104,7 @@ private:
 				Tag tt(t.id, t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
 				listaTags.push_back(tt);
 			}
+			listaTagsAnt = listaTags;
 		}
 		bool existId(int id_, Tag &tag)
 		{
@@ -103,11 +112,28 @@ private:
 			for(auto t: listaTags)
 				if (t.id == id_)
 				{	tag = t;
+					ant = false;
+					return true;
+				}
+			for(auto t: listaTagsAnt)
+				if (t.id == id_)
+				{	tag = t;
+					ant = true;
 					return true;
 				}
 			return false;
 		}
-		std::vector<Tag> listaTags;
+		void print()
+		{
+			qDebug() << "ListaTags:";
+			for(auto t: listaTags)
+				t.print();
+			qDebug() << "ListaTagsAnt:";
+			for(auto t: listaTagsAnt)
+				t.print();
+		}
+		std::vector<Tag> listaTags, listaTagsAnt;
+		bool ant;
 	};
 	
 	LocalTags localTags;
@@ -151,6 +177,8 @@ private:
 	void doPosture();
 	bool gazeToTag(const QString &tag);
 	bool gazeBetweenTags(const QString &tag1, const QString &tag2);
+	bool changeTargetToTag(int id);
+	bool goToTag(int id);
 	
 	RoboCompTrajectoryRobot2D::NavState planningState;
 	RoboCompDifferentialRobot::TBaseState bState;
