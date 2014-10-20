@@ -221,11 +221,11 @@ void SpecificWorker::go(float x, float z, float alpha, bool rot)
 	if (rot)
 	{
 		tp.ry = alpha;
-		tp.onlyRot = true;
+		tp.doRotation = true;
 	}
 	else
 	{
-		tp.onlyRot = false;
+		tp.doRotation = false;
 	}
 	try
 	{

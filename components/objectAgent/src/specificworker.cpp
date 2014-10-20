@@ -380,7 +380,7 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 			int32_t objectSymbolID;
 			int32_t objectStSymbolID;
 			getIDsFor("milk", objectSymbolID, objectStSymbolID);
-			
+
 			auto symbols = newModel->getSymbolsMap(params, "robot", "container");
 			AGMModelSymbol::SPtr newMilk = newModel->newSymbol("object", objectSymbolID);
 			AGMModelSymbol::SPtr newMilkStatus = newModel->newSymbol("objectSt", objectStSymbolID);
