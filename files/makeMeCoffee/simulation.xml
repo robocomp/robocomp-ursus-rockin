@@ -188,7 +188,8 @@
 												<joint id="head_tilt_joint" port="20000" min="-1" max="1" axis="z" >
 													<transform id="head_post_tilt" ry="-1.57079632679">
 														<!-- center mesh -->
-														<mesh id="head_center_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="95,20,20" ty="40" />
+														<mesh id="head_center_mesh1" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="95,20,20" ty="40" />
+														<mesh id="head_center_mesh2" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="35,35,35" ry="1.5707963268" />
 														
 														<!-- rgbd camera -->
 														<transform id="rgbd_transform" ty="85">
@@ -202,9 +203,9 @@
 																<joint id="left_rgb_pan" port="20000" min="-1" max="1" axis="z" >
 																	<transform id="left_rgb_pan_post" rx="1.57079632679">
 																		<transform id="left_axes" >
-																			<plane id="left_x" px="50" nz="1" size="100,10,10" repeat="1" texture="#ff0000" />
-																			<plane id="left_y" py="50" nz="1" size="10,100,10" repeat="1" texture="#00ff00" />
-																			<plane id="left_z" pz="50" nz="1" size="10,10,100" repeat="1" texture="#0000ff" />
+																			<plane id="left_x" px="25" nz="1" size="50,5,5" repeat="1" texture="#ff0000" />
+																			<plane id="left_y" py="25" nz="1" size="5,50,5" repeat="1" texture="#00ff00" />
+																			<plane id="left_z" pz="25" nz="1" size="5,5,50" repeat="1" texture="#0000ff" />
 																		</transform>
 																		<mesh id="left_rgb_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="15,15,25" />
 																	</transform>
@@ -218,9 +219,9 @@
 																<joint id="right_rgb_pan" port="20000" min="-1" max="1" axis="z" >
 																	<transform id="right_rgb_pan_post" rx="1.57079632679">
 																		<transform id="right_axes" >
-																			<plane id="right_x" px="50" nz="1" size="100,10,10" repeat="1" texture="#ff0000" />
-																			<plane id="right_y" py="50" nz="1" size="10,100,10" repeat="1" texture="#00ff00" />
-																			<plane id="right_z" pz="50" nz="1" size="10,10,100" repeat="1" texture="#0000ff" />
+																			<plane id="right_x" px="25" nz="1" size="50,5,5" repeat="1" texture="#ff0000" />
+																			<plane id="right_y" py="25" nz="1" size="5,50,5" repeat="1" texture="#00ff00" />
+																			<plane id="right_z" pz="25" nz="1" size="5,5,50" repeat="1" texture="#0000ff" />
 																		</transform>
 																		<mesh id="right_rgb_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="15,15,25" />
 																	</transform>
