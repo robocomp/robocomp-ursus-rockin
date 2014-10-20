@@ -1,4 +1,4 @@
-FILES="coffee.3ds human.3ds milk.3ds mug.3ds table.3ds wood.jpg"
+FILES="coffee.3ds human.3ds milk.3ds mug.3ds table.3ds wood.jpg cube.3ds"
 
 
 for i in $FILES; do
