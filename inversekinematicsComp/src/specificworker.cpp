@@ -117,8 +117,8 @@ void SpecificWorker::init()
 	//QString tipRight = "munon_t";
 	
 	QString tipLeft = "grabPositionHandL";
-	//QString nose = "head3";  //OJO PROV
-	QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
+	QString nose = "rgbd_transform";  //OJO PROV
+	//QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
 
 
 	IK_BrazoDerecho = new Cinematica_Inversa(innerModel, listaBrazoDerecho, tipRight);
