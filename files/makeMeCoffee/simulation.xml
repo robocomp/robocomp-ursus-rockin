@@ -185,7 +185,7 @@
 											</transform>-->
 											
 											<transform id="head_pre_tilt" ry="1.57079632679">
-												<joint id="head_tilt_joint" port="20000" min="-1" max="1" axis="z" >
+												<joint id="head_pitch_joint" port="20000" min="-1" max="1" axis="z" >
 													<transform id="head_post_tilt" ry="-1.57079632679">
 														<!-- center mesh -->
 														<mesh id="head_center_mesh1" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="95,20,20" ty="40" />

@@ -76,9 +76,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
 			innerModel = new InnerModel(par.value);
 			convertInnerModelFromMilimetersToMeters(innerModel->getRoot());
-			innerModel->transform("world","robot").print("floor");
-			
-			 //innerModel->print();
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
 		}
 		else
@@ -109,11 +106,11 @@ void SpecificWorker::init()
 	// RECONFIGURABLE PARA CADA ROBOT: Listas de motores de las distintas partes del robot
 	listaBrazoIzquierdo	<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2";
 	listaBrazoDerecho 	<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2";
-	listaCabeza 		<< "head1" <<  "head3";
+	listaCabeza 		<< "head_yaw_joint" <<  "head_pitch_joint";
 	listaMotores 		<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
 						<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
 // 						<< "base" 
-						<< "head1" << "head3";
+						<< "head_yaw_joint" << "head_pitch_joint";
 
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
@@ -126,8 +123,8 @@ void SpecificWorker::init()
 
 	IK_BrazoDerecho = new Cinematica_Inversa(innerModel, listaBrazoDerecho, tipRight);
 	IK_BrazoIzquierdo = new Cinematica_Inversa(innerModel, listaBrazoIzquierdo, tipLeft);
-	IK_Cabeza = new Cinematica_Inversa(innerModel, listaCabeza, nose);
-
+	IK_Cabeza = new Cinematica_Inversa(innerModel, listaCabeza, nose);	
+	
 	// CREA EL MAPA DE PARTES DEL CUERPO: por ahora los brazos.
 	bodyParts.insert("LEFTARM", BodyPart(innerModel, IK_BrazoIzquierdo, "LEFTARM", tipLeft, listaBrazoIzquierdo));
 	bodyParts.insert("RIGHTARM", BodyPart(innerModel, IK_BrazoDerecho, "RIGHTARM", tipRight, listaBrazoDerecho));
