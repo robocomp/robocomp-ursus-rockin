@@ -1201,7 +1201,8 @@ bool SpecificWorker::gazeToTag(const QString &tag)
 		target.rx=0; target.ry=0; target.rz=0; 	
 		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();  
 		RoboCompBodyInverseKinematics::Axis axis; 
-		axis.x = 0; axis.y = -1; axis.z = 0;
+		//axis.x = 0; axis.y = -1; axis.z = 0;
+		axis.x = -1; axis.y = 0; axis.z = 0;
 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
