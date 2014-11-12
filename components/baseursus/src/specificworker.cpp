@@ -67,7 +67,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		const float iR = 1./R;
 		const float ll = (l1 + l2);
 
-		M_vels_2_wheels = QMat(4);
+		M_vels_2_wheels = QMat(4,3);
 		M_vels_2_wheels(0,0) = +iR;
 		M_vels_2_wheels(1,0) = +iR;
 		M_vels_2_wheels(2,0) = +iR;
@@ -109,8 +109,22 @@ void SpecificWorker::getBasePose(::Ice::Int &x, ::Ice::Int &z, ::Ice::Float &alp
 
 void SpecificWorker::setSpeedBase(::Ice::Float advx, ::Ice::Float advz, ::Ice::Float rotv)
 {
+	printf("%s: %d\n", __FILE__, __LINE__);
+
+	QVec v = QVec::vec3(advz, advx, rotv);
+	printf("%s: %d\n", __FILE__, __LINE__);
+	v.print("v");
+	printf("%s: %d\n", __FILE__, __LINE__);
+
+	M_vels_2_wheels.print("M_vels_2_wheels");
+	printf("%s: %d\n", __FILE__, __LINE__);
+
 	QVec wheels = M_vels_2_wheels * QVec::vec3(advz, advx, rotv);
+	printf("%s: %d\n", __FILE__, __LINE__);
+
+	printf("%s: %d\n", __FILE__, __LINE__);
 	setWheels(wheels);
+	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 void SpecificWorker::stopBase()
@@ -136,6 +150,41 @@ void SpecificWorker::correctOdometer(::Ice::Int x, ::Ice::Int z, ::Ice::Float al
 
 void SpecificWorker::setWheels(QVec wheelVels)
 {
+	printf("%s: %d\n", __FILE__, __LINE__);
 	wheelVels.print("wheel vels");
+	printf("%s: %d\n", __FILE__, __LINE__);
+	static MotorGoalVelocity goalFL, goalFR, goalBL, goalBR;
+	printf("%s: %d\n", __FILE__, __LINE__);
+
+	goalFL.maxAcc = goalFR.maxAcc = goalBL.maxAcc = goalBR.maxAcc = 0.1;
+	
+	
+	QVec vv = wheelVels * 0.1;
+	
+	goalFL.name = "frontLeft";
+	goalFL.velocity = vv(0);
+	
+	goalFR.name = "frontRight";
+	goalFR.velocity = vv(1);
+	
+	goalBL.name = "backLeft";
+	goalBL.velocity = vv(2);
+	
+	goalBR.name = "backRight";
+	goalBR.velocity = vv(3);
+
+	printf("%s: %d\n", __FILE__, __LINE__);
+	try 
+	{
+		jointmotor_proxy->setVelocity(goalFL);
+		jointmotor_proxy->setVelocity(goalFR);
+		jointmotor_proxy->setVelocity(goalBL);
+		jointmotor_proxy->setVelocity(goalBR);
+	}
+	catch(...)
+	{
+		printf("Error sending motor commands to JointMotor interface\n");
+	}
+	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
