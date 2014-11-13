@@ -119,7 +119,7 @@ void SpecificWorker::setSpeedBase(::Ice::Float advx, ::Ice::Float advz, ::Ice::F
 	const QVec v = QVec::vec3(advz, advx, rotv);
 	const QVec wheels = M_vels_2_wheels * v;
 	printf("Mandamos: %f %f %f %f\n", wheels(0), wheels(1), wheels(2), wheels(3));
-// 	setWheels(wheels);
+	setWheels(wheels);
 }
 
 void SpecificWorker::stopBase()
