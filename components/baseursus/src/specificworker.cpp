@@ -37,10 +37,11 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-	// http://cdn.intechopen.com/pdfs-wm/465.pdf
-	R  = QString::fromStdString(params["UrsusBase.WheelRadius"].value).toFloat();
-	l1 = QString::fromStdString(params["UrsusBase.DistAxes"].value   ).toFloat() / 2.;
-	l2 = QString::fromStdString(params["UrsusBase.AxesLength"].value ).toFloat() / 2.;
+	// YEP: OMNI-DIRECTIONAL ROBOTS: Abstract: All the robots introduced in chapter 7, with the exception of syncro-drive vehicles...
+	// NOPE: http://cdn.intechopen.com/pdfs-wm/465.pdf
+	R  = QString::fromStdString(params["UrsusBase.WheelRadius"].value).toFloat(); 
+	l1 = QString::fromStdString(params["UrsusBase.DistAxes"].value   ).toFloat();
+	l2 = QString::fromStdString(params["UrsusBase.AxesLength"].value ).toFloat();
 
 	{
 		const float R4 = R/4.;
@@ -64,24 +65,29 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	}
 
 	{
-		const float iR = 1./R;
-		const float ll = (l1 + l2);
+		printf("l1: %f\n", l1);
+		printf("l2: %f\n", l2);
+		printf("r:  %f\n", R);
+		const float ll = (l1 + l2)/2.;
 
 		M_vels_2_wheels = QMat(4,3);
-		M_vels_2_wheels(0,0) = +iR;
-		M_vels_2_wheels(1,0) = +iR;
-		M_vels_2_wheels(2,0) = +iR;
-		M_vels_2_wheels(3,0) = +iR;
+		M_vels_2_wheels(0,0) = +1.;
+		M_vels_2_wheels(1,0) = +1.;
+		M_vels_2_wheels(2,0) = +1.;
+		M_vels_2_wheels(3,0) = +1.;
 
-		M_vels_2_wheels(0,1) = +iR;
-		M_vels_2_wheels(1,1) = -iR;
-		M_vels_2_wheels(2,1) = -iR;
-		M_vels_2_wheels(3,1) = +iR;
+		M_vels_2_wheels(0,1) = -1.;
+		M_vels_2_wheels(1,1) = +1.;
+		M_vels_2_wheels(2,1) = +1.;
+		M_vels_2_wheels(3,1) = -1.;
 		
-		M_vels_2_wheels(0,2) = iR*(-ll);
-		M_vels_2_wheels(1,2) = iR*(+ll);
-		M_vels_2_wheels(2,2) = iR*(-ll);
-		M_vels_2_wheels(3,2) = iR*(+ll);
+		M_vels_2_wheels(0,2) = -ll;
+		M_vels_2_wheels(1,2) = +ll;
+		M_vels_2_wheels(2,2) = -ll;
+		M_vels_2_wheels(3,2) = +ll;
+		
+		M_vels_2_wheels = M_vels_2_wheels.operator*(1./(2.*M_PIl*R));
+		M_vels_2_wheels.print("M_vels_2_wheels");
 	}
 	
 	timer.start(Period);
@@ -109,22 +115,11 @@ void SpecificWorker::getBasePose(::Ice::Int &x, ::Ice::Int &z, ::Ice::Float &alp
 
 void SpecificWorker::setSpeedBase(::Ice::Float advx, ::Ice::Float advz, ::Ice::Float rotv)
 {
-	printf("%s: %d\n", __FILE__, __LINE__);
-
-	QVec v = QVec::vec3(advz, advx, rotv);
-	printf("%s: %d\n", __FILE__, __LINE__);
-	v.print("v");
-	printf("%s: %d\n", __FILE__, __LINE__);
-
-	M_vels_2_wheels.print("M_vels_2_wheels");
-	printf("%s: %d\n", __FILE__, __LINE__);
-
-	QVec wheels = M_vels_2_wheels * QVec::vec3(advz, advx, rotv);
-	printf("%s: %d\n", __FILE__, __LINE__);
-
-	printf("%s: %d\n", __FILE__, __LINE__);
-	setWheels(wheels);
-	printf("%s: %d\n", __FILE__, __LINE__);
+	printf("Me llega: %f %f %f\n", advx, advz, rotv);
+	const QVec v = QVec::vec3(advz, advx, rotv);
+	const QVec wheels = M_vels_2_wheels * v;
+	printf("Mandamos: %f %f %f %f\n", wheels(0), wheels(1), wheels(2), wheels(3));
+// 	setWheels(wheels);
 }
 
 void SpecificWorker::stopBase()
@@ -150,16 +145,12 @@ void SpecificWorker::correctOdometer(::Ice::Int x, ::Ice::Int z, ::Ice::Float al
 
 void SpecificWorker::setWheels(QVec wheelVels)
 {
-	printf("%s: %d\n", __FILE__, __LINE__);
-	wheelVels.print("wheel vels");
-	printf("%s: %d\n", __FILE__, __LINE__);
 	static MotorGoalVelocity goalFL, goalFR, goalBL, goalBR;
-	printf("%s: %d\n", __FILE__, __LINE__);
 
 	goalFL.maxAcc = goalFR.maxAcc = goalBL.maxAcc = goalBR.maxAcc = 0.1;
 	
 	
-	QVec vv = wheelVels * 0.1;
+	QVec vv = wheelVels.operator*(1.);
 	
 	goalFL.name = "frontLeft";
 	goalFL.velocity = vv(0);
@@ -173,7 +164,6 @@ void SpecificWorker::setWheels(QVec wheelVels)
 	goalBR.name = "backRight";
 	goalBR.velocity = vv(3);
 
-	printf("%s: %d\n", __FILE__, __LINE__);
 	try 
 	{
 		jointmotor_proxy->setVelocity(goalFL);
@@ -185,6 +175,5 @@ void SpecificWorker::setWheels(QVec wheelVels)
 	{
 		printf("Error sending motor commands to JointMotor interface\n");
 	}
-	printf("%s: %d\n", __FILE__, __LINE__);
 }
 

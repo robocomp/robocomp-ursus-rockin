@@ -42,9 +42,7 @@ void OmniRobotI::getBasePose(Ice::Int& x, Ice::Int& z, Ice::Float& alpha, const 
 
 void OmniRobotI::setSpeedBase(Ice::Float advx, Ice::Float advz, Ice::Float rot, const Ice::Current&)
 {
-	printf("%s: %d\n", __FILE__, __LINE__);
 	worker->setSpeedBase(advx,advz,rot);
-	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 void OmniRobotI::stopBase(const Ice::Current&){
