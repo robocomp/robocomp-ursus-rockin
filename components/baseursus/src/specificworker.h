@@ -22,6 +22,7 @@
 #include <genericworker.h>
 
 #include <qmat/QMatAll>
+#include <innermodel/innermodel.h>
 
 /**
        \brief
@@ -38,14 +39,22 @@ public:
 
 public slots:
 	void compute();
+	void computeOdometry(bool forced=false);
 
-	
+
 private:
-	void setWheels(QVec wheelVels);
+	void setWheels(QVec wheelVels_);
 	float R, l1, l2;
 	QMat M_wheels_2_vels;
 	QMat M_vels_2_wheels;
-
+	
+	// Odometry control
+	QMutex *dataMutex;
+	QVec wheelVels;
+	float angle, x, z;
+	InnerModel *innermodel;
+	InnerModelTransform *backPose, *newPose;
+	QTime lastOdometryUpdate;
 	
 	void getBaseState(::RoboCompOmniRobot::TBaseState &state);
 	void getBasePose(::Ice::Int &x, ::Ice::Int &z, ::Ice::Float &alpha);
@@ -55,8 +64,6 @@ private:
 	void setOdometer(const ::RoboCompOmniRobot::TBaseState &state);
 	void setOdometerPose(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha);
 	void correctOdometer(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha);
-
-
 };
 
 #endif

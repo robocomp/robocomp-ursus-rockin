@@ -25,6 +25,19 @@
 
 SpecificWorker::SpecificWorker(MapPrx& mprx, QObject *parent) : GenericWorker(mprx, parent)	
 {
+	dataMutex = new QMutex(QMutex::Recursive);
+
+	wheelVels = QVec::vec4(0,0,0,0);
+	x = z = angle = 0;
+	innermodel = new InnerModel();
+	
+	backPose = innermodel->newTransform("backPose", "static", innermodel->getRoot(), 0,0,0, 0,0,0, 0);
+	innermodel->getRoot()->addChild(backPose);
+	
+	newPose = innermodel->newTransform("newPose", "static", backPose, 0,0,0, 0,0,0, 0);
+	backPose->addChild(newPose);
+	
+	lastOdometryUpdate = QTime::currentTime();
 }
 
 /**
@@ -37,88 +50,107 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
+	QMutexLocker locker(dataMutex);
+
 	// YEP: OMNI-DIRECTIONAL ROBOTS: Abstract: All the robots introduced in chapter 7, with the exception of syncro-drive vehicles...
 	// NOPE: http://cdn.intechopen.com/pdfs-wm/465.pdf
 	R  = QString::fromStdString(params["UrsusBase.WheelRadius"].value).toFloat(); 
 	l1 = QString::fromStdString(params["UrsusBase.DistAxes"].value   ).toFloat();
 	l2 = QString::fromStdString(params["UrsusBase.AxesLength"].value ).toFloat();
 
-	{
-		const float R4 = R/4.;
-		const float ill = 1. / (l1 + l2);
+	printf("l1: %f\n", l1);
+	printf("l2: %f\n", l2);
+	printf("r:  %f\n", R);
 
-		M_wheels_2_vels = QMat(3, 4);
-		M_wheels_2_vels(0,0) = +R4;
-		M_wheels_2_vels(0,1) = +R4;
-		M_wheels_2_vels(0,2) = +R4;
-		M_wheels_2_vels(0,3) = +R4;
+	// inverse kinematics matrix
+	const float ill = 1. / (2.*(l1 + l2));
+	M_wheels_2_vels = QMat(3, 4);
+	M_wheels_2_vels(0,0) = +1./4.;
+	M_wheels_2_vels(0,1) = +1./4.;
+	M_wheels_2_vels(0,2) = +1./4.;
+	M_wheels_2_vels(0,3) = +1./4.;
+	M_wheels_2_vels(1,0) = -1./4.;
+	M_wheels_2_vels(1,1) = +1./4.;
+	M_wheels_2_vels(1,2) = +1./4.;
+	M_wheels_2_vels(1,3) = -1./4.;
+	M_wheels_2_vels(2,0) = +ill;
+	M_wheels_2_vels(2,1) = -ill;
+	M_wheels_2_vels(2,2) = +ill;
+	M_wheels_2_vels(2,3) = -ill;
+	M_wheels_2_vels = M_wheels_2_vels.operator*(R); // R instead of 2*pi*R because we use rads/s instead of rev/s
 
-		M_wheels_2_vels(1,0) = +R4;
-		M_wheels_2_vels(1,1) = -R4;
-		M_wheels_2_vels(1,2) = -R4;
-		M_wheels_2_vels(1,3) = +R4;
-		
-		M_wheels_2_vels(2,0) = R4*(-ill);
-		M_wheels_2_vels(2,1) = R4*(+ill);
-		M_wheels_2_vels(2,2) = R4*(-ill);
-		M_wheels_2_vels(2,3) = R4*(+ill);
-	}
-
-	{
-		printf("l1: %f\n", l1);
-		printf("l2: %f\n", l2);
-		printf("r:  %f\n", R);
-		const float ll = (l1 + l2)/2.;
-
-		M_vels_2_wheels = QMat(4,3);
-		M_vels_2_wheels(0,0) = +1.;
-		M_vels_2_wheels(1,0) = +1.;
-		M_vels_2_wheels(2,0) = +1.;
-		M_vels_2_wheels(3,0) = +1.;
-
-		M_vels_2_wheels(0,1) = -1.;
-		M_vels_2_wheels(1,1) = +1.;
-		M_vels_2_wheels(2,1) = +1.;
-		M_vels_2_wheels(3,1) = -1.;
-		
-		M_vels_2_wheels(0,2) = -ll;
-		M_vels_2_wheels(1,2) = +ll;
-		M_vels_2_wheels(2,2) = -ll;
-		M_vels_2_wheels(3,2) = +ll;
-		
-		M_vels_2_wheels = M_vels_2_wheels.operator*(1./(2.*M_PIl*R));
-		M_vels_2_wheels.print("M_vels_2_wheels");
-	}
+	// forward kinematics matrix
+	const float ll = (l1 + l2)/2.;
+	M_vels_2_wheels = QMat(4,3);
+	M_vels_2_wheels(0,0) = +1.;
+	M_vels_2_wheels(1,0) = +1.;
+	M_vels_2_wheels(2,0) = +1.;
+	M_vels_2_wheels(3,0) = +1.;
+	M_vels_2_wheels(0,1) = -1.;
+	M_vels_2_wheels(1,1) = +1.;
+	M_vels_2_wheels(2,1) = +1.;
+	M_vels_2_wheels(3,1) = -1.;
+	M_vels_2_wheels(0,2) = +ll; // In contrast with the paper this code is based on, the
+	M_vels_2_wheels(1,2) = -ll; // third column of the matrix is inverted because we use
+	M_vels_2_wheels(2,2) = +ll; // the left-hand rule for angles.
+	M_vels_2_wheels(3,2) = -ll;
+	M_vels_2_wheels = M_vels_2_wheels.operator*(1./(R)); // 1/R instead of 1/(2*pi*R) because we use rads/s instead of rev/s
+	M_vels_2_wheels.print("M_vels_2_wheels");
 	
 	timer.start(Period);
 	return true;
 }
 
-void SpecificWorker::SpecificWorker::compute( )
+void SpecificWorker::SpecificWorker::compute()
 {
-	const float w1 = 0; // front left
-	const float w2 = 0; // front right
-	const float w3 = 0; // back left
-	const float w4 = 0; // back right
+	computeOdometry(false);
+}
 
-	QVec delta = M_wheels_2_vels * QVec::vec4(w1, w2, w3, w4);
+void SpecificWorker::SpecificWorker::computeOdometry(bool forced)
+{
+	QMutexLocker locker(dataMutex);
+	const float elapsedTime = 0.001*float(lastOdometryUpdate.elapsed());
+	lastOdometryUpdate = QTime::currentTime();
+	
+	if (forced or lastOdometryUpdate.elapsed() > 0.1)
+	{
+		QVec deltaPos = (M_wheels_2_vels * wheelVels).operator*(elapsedTime);
+		deltaPos.print("delta");
+
+		innermodel->updateTransformValues("newPose",           deltaPos(0), 0, deltaPos(1),            0,       deltaPos(2), 0);
+		QVec newP = innermodel->transform("root", "newPose");
+		innermodel->updateTransformValues("backPose",              newP(0), 0,     newP(2),            0, deltaPos(2)+angle, 0);
+		innermodel->updateTransformValues("newPose",                     0, 0,           0,            0,                 0, 0);
+
+		x = newP(0);
+		z = newP(2);
+		angle += deltaPos(2);
+	}
 }
 
 
 void SpecificWorker::getBaseState(::RoboCompOmniRobot::TBaseState &state)
 {
+	state.x = x;
+	state.z = z;
+	state.alpha = angle;
 }
 
 void SpecificWorker::getBasePose(::Ice::Int &x, ::Ice::Int &z, ::Ice::Float &alpha)
 {
+	x = x;
+	z = z;
+	alpha = angle;
 }
 
 void SpecificWorker::setSpeedBase(::Ice::Float advx, ::Ice::Float advz, ::Ice::Float rotv)
 {
-	printf("Me llega: %f %f %f\n", advx, advz, rotv);
+	computeOdometry(true);
+	QMutexLocker locker(dataMutex);
+// 	printf("Me llega: %f %f %f\n", advx, advz, rotv);
 	const QVec v = QVec::vec3(advz, advx, rotv);
 	const QVec wheels = M_vels_2_wheels * v;
-	printf("Mandamos: %f %f %f %f\n", wheels(0), wheels(1), wheels(2), wheels(3));
+// 	printf("Mandamos: %f %f %f %f\n", wheels(0), wheels(1), wheels(2), wheels(3));
 	setWheels(wheels);
 }
 
@@ -143,26 +175,25 @@ void SpecificWorker::correctOdometer(::Ice::Int x, ::Ice::Int z, ::Ice::Float al
 {
 }
 
-void SpecificWorker::setWheels(QVec wheelVels)
+void SpecificWorker::setWheels(QVec wheelVels_)
 {
+	QMutexLocker locker(dataMutex);
+	wheelVels = wheelVels_;
 	static MotorGoalVelocity goalFL, goalFR, goalBL, goalBR;
 
 	goalFL.maxAcc = goalFR.maxAcc = goalBL.maxAcc = goalBR.maxAcc = 0.1;
-	
-	
-	QVec vv = wheelVels.operator*(1.);
-	
+
 	goalFL.name = "frontLeft";
-	goalFL.velocity = vv(0);
+	goalFL.velocity = wheelVels(0);
 	
 	goalFR.name = "frontRight";
-	goalFR.velocity = vv(1);
+	goalFR.velocity = wheelVels(1);
 	
 	goalBL.name = "backLeft";
-	goalBL.velocity = vv(2);
+	goalBL.velocity = wheelVels(2);
 	
 	goalBR.name = "backRight";
-	goalBR.velocity = vv(3);
+	goalBR.velocity = wheelVels(3);
 
 	try 
 	{
