@@ -37,7 +37,15 @@ Q_OBJECT
 public:
 	OmniRobotI( GenericWorker *_worker, QObject *parent = 0 );
 	~OmniRobotI();
-	
+	void  getBaseState(TBaseState& state, const Ice::Current& = Ice::Current());
+void  getBasePose(Ice::Int& x, Ice::Int& z, Ice::Float& alpha, const Ice::Current& = Ice::Current());
+void  setSpeedBase(Ice::Float advx, Ice::Float advz, Ice::Float rot, const Ice::Current& = Ice::Current());
+void  stopBase(const Ice::Current& = Ice::Current());
+void  resetOdometer(const Ice::Current& = Ice::Current());
+void  setOdometer(const TBaseState& state, const Ice::Current& = Ice::Current());
+void  setOdometerPose(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current& = Ice::Current());
+void  correctOdometer(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current& = Ice::Current());
+
 
 	QMutex *mutex;
 private:
@@ -45,45 +53,7 @@ private:
 	GenericWorker *worker;
 public slots:
 
-	void getBaseState(::RoboCompOmniRobot::TBaseState &a, const ::Ice::Current & = ::Ice::Current())
-	{
-		worker->getBaseState(a);
-	}
 
-	void getBasePose(::Ice::Int &a, ::Ice::Int &b, ::Ice::Float &c, const ::Ice::Current & = ::Ice::Current())
-	{
-		worker->getBasePose(a, b, c);
-	}
-
-	void setSpeedBase(::Ice::Float a, ::Ice::Float b, ::Ice::Float c, const ::Ice::Current& = ::Ice::Current())
-	{
-		worker->setSpeedBase(a,b,c);
-	}
-
-	void stopBase(const ::Ice::Current& = ::Ice::Current())
-	{
-		worker->stopBase();
-	}
-
-	void resetOdometer(const ::Ice::Current& = ::Ice::Current())
-	{
-		worker->resetOdometer();
-	}
-
-	void setOdometer(const ::RoboCompOmniRobot::TBaseState &a, const ::Ice::Current& = ::Ice::Current())
-	{
-		worker->setOdometer(a);
-	}
-
-	void setOdometerPose(::Ice::Int a, ::Ice::Int b, ::Ice::Float c, const ::Ice::Current& = ::Ice::Current())
-	{
-		worker->setOdometerPose(a,b,c);
-	}
-
-	void correctOdometer(::Ice::Int a, ::Ice::Int b, ::Ice::Float c, const ::Ice::Current& = ::Ice::Current())
-	{
-		worker->correctOdometer(a, b, c);
-	}
 };
 
 #endif

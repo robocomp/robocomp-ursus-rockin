@@ -8,6 +8,7 @@ nodeThickness=2
 fontSize=12
 longPattern=3
 ===
+
 changeRoom : active(1)
 {
 	{

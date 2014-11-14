@@ -32,4 +32,37 @@ OmniRobotI::~OmniRobotI()
 }
 
 // Component functions, implementation
+void OmniRobotI::getBaseState(TBaseState& state, const Ice::Current&){
+	worker->getBaseState(state);
+}
+
+void OmniRobotI::getBasePose(Ice::Int& x, Ice::Int& z, Ice::Float& alpha, const Ice::Current&){
+	worker->getBasePose(x,z,alpha);
+}
+
+void OmniRobotI::setSpeedBase(Ice::Float advx, Ice::Float advz, Ice::Float rot, const Ice::Current&)
+{
+	worker->setSpeedBase(advx,advz,rot);
+}
+
+void OmniRobotI::stopBase(const Ice::Current&){
+	worker->stopBase();
+}
+
+void OmniRobotI::resetOdometer(const Ice::Current&){
+	worker->resetOdometer();
+}
+
+void OmniRobotI::setOdometer(const TBaseState& state, const Ice::Current&){
+	worker->setOdometer(state);
+}
+
+void OmniRobotI::setOdometerPose(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current&){
+	worker->setOdometerPose(x,z,alpha);
+}
+
+void OmniRobotI::correctOdometer(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current&){
+	worker->correctOdometer(x,z,alpha);
+}
+
 

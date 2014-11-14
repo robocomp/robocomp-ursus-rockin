@@ -80,6 +80,7 @@
 
 // Includes for remote proxy example
 // #include <Remote.h>
+#include <JointMotor.h>
 
 
 // User includes here
@@ -88,6 +89,7 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 using namespace RoboCompOmniRobot;
+using namespace RoboCompJointMotor;
 
 
 class BaseUrsusComp : public RoboComp::Application
@@ -120,7 +122,8 @@ int BaseUrsusComp::run(int argc, char* argv[])
 
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
-	
+	JointMotorPrx jointmotor_proxy;
+
 
 	string proxy;
 
@@ -147,7 +150,18 @@ int BaseUrsusComp::run(int argc, char* argv[])
 	//}
 	//rInfo("RemoteProxy initialized Ok!");
 	// 	// Now you can use remote server proxy (remotecomponent_proxy) as local object
-	
+	//Remote server proxy creation example
+	try
+	{
+		jointmotor_proxy = JointMotorPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("JointMotorProxy") ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("JointMotorProxy initialized Ok!");
+	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);
 	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
