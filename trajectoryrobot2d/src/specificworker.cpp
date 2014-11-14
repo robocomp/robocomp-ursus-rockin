@@ -61,13 +61,14 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	}
 
 		//Update InnerModel from robot
-	try { differentialrobot_proxy->getBaseState(bState); }
+	//try { differentialrobot_proxy->getBaseState(bState); }
+	try {  omnirobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
 	// DESCOMENTAR:!!!!!!!!!!!!!!
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
 
-	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
+	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);   //"robot" should be an external parameter
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
 
 //	setRobotInitialPose(800, -1500, M_PI);
@@ -181,7 +182,8 @@ bool SpecificWorker::stopCommand()
 	qDebug() << __FUNCTION__ ;
 	road.setFinished(true);
 	currentTarget.reset();
-	controller->stopTheRobot(differentialrobot_proxy);
+	//controller->stopTheRobot(differentialrobot_proxy);
+	controller->stopTheRobot(omnirobot_proxy);
 	compState.state = "IDLE";
 	//drawGreenBoxOnTarget( currentTarget.getTranslation() );
 	road.reset();
@@ -219,7 +221,9 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 
 		road.printRobotState( innerModel, currentTarget);
 
-		controller->update(innerModel, laserData, differentialrobot_proxy, road);
+		//controller->update(innerModel, laserData, differentialrobot_proxy, road);
+		controller->update(innerModel, laserData, omnirobot_proxy, road);
+		
 
 		if (road.isFinished() == true)
 		{
@@ -281,7 +285,8 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 		compState.state = "IDLE";
 		try
 		{
-		  differentialrobot_proxy->setSpeedBase(0, 0);
+		  //differentialrobot_proxy->setSpeedBase(0, 0);
+		  omnirobot_proxy->setSpeedBase(0, 0, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 	else
@@ -289,7 +294,8 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 		float vrot = -0.7 * error;  //Proportional controller
 		try
 		{
-		  differentialrobot_proxy->setSpeedBase(0, vrot);
+		  //differentialrobot_proxy->setSpeedBase(0, vrot);
+		  omnirobot_proxy->setSpeedBase(0, 0, vrot);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 
@@ -321,7 +327,8 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		compState.state = "IDLE";
 		try
 		{
-		  differentialrobot_proxy->setSpeedBase(0, 0);
+		  //differentialrobot_proxy->setSpeedBase(0, 0);
+		  omnirobot_proxy->setSpeedBase(0, 0, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 	else
@@ -330,7 +337,8 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		if( vadv < -MAX_ADV_SPEED ) vadv = -MAX_ADV_SPEED;
 		try
 		{
-		  differentialrobot_proxy->setSpeedBase(vadv, 0);
+		  //differentialrobot_proxy->setSpeedBase(vadv, 0);
+		  omnirobot_proxy->setSpeedBase(vadv, 0, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 
@@ -393,7 +401,8 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner)
 {
 	try
 	{
-		differentialrobot_proxy->getBaseState(bState);
+		//differentialrobot_proxy->getBaseState(bState);
+		omnirobot_proxy->getBaseState(bState);
 		inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
 	/*	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");
 		qDebug() << __FUNCTION__ << "robot state" << bState.x << bState.z << bState.alpha << r1q.extractAnglesR_min().y();
@@ -452,7 +461,7 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 
 	try
 	{
-		differentialrobot_proxy->setOdometerPose(x, z, alpha);
+		omnirobot_proxy->setOdometerPose(x, z, alpha);
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{

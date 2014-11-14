@@ -140,7 +140,7 @@
 
 		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
-			<differentialrobot id="robot" port="10004" >
+			<omnirobot id="robot" port="10004" >
 
  				<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
   <!-- 					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> -->
@@ -696,7 +696,7 @@
 				</transform> <!-- base tronco -->
 				</joint> <!-- joint base -->
 			</transform> <!-- cambiocoordenadas -->
-		</differentialrobot> <!--base -->
+		</omnirobot> <!--base -->
 	</transform>
 
 

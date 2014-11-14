@@ -83,7 +83,7 @@
 #include <ui_guiDlg.h>
 #include <InnerModelManager.h>
 #include <JointMotor.h>
-#include <DifferentialRobot.h>
+#include <OmniRobot.h>
 
 
 // User includes here
@@ -94,7 +94,7 @@ using namespace RoboCompCommonBehavior;
 using namespace RoboCompBodyInverseKinematics;
 using namespace RoboCompInnerModelManager;
 using namespace RoboCompJointMotor;
-using namespace RoboCompDifferentialRobot;
+using namespace RoboCompOmniRobot;
 
 
 class lokiArmComp : public RoboComp::Application
@@ -130,7 +130,7 @@ int lokiArmComp::run(int argc, char* argv[])
 	InnerModelManagerPrx innermodelmanager_proxy;
 JointMotorPrx jointmotor0_proxy;
 JointMotorPrx jointmotor1_proxy;
-DifferentialRobotPrx differentialrobot_proxy;
+OmniRobotPrx omnirobot_proxy;
 
 
 	string proxy;
@@ -194,15 +194,15 @@ DifferentialRobotPrx differentialrobot_proxy;
 	mprx["JointMotor1Proxy"] = (::IceProxy::Ice::Object*)(&jointmotor1_proxy);//Remote server proxy creation example
 	try
 	{
-		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("DifferentialRobotProxy") ) );
+		omnirobot_proxy = OmniRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("OmniRobotProxy") ) );
 	}
 	catch(const Ice::Exception& ex)
 	{
 		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
 		return EXIT_FAILURE;
 	}
-	rInfo("DifferentialRobotProxy initialized Ok!");
-	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);
+	rInfo("OmniRobotProxy initialized Ok!");
+	mprx["OmniRobotProxy"] = (::IceProxy::Ice::Object*)(&omnirobot_proxy);
 	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread

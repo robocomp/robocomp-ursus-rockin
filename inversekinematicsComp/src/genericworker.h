@@ -29,7 +29,7 @@
 #include "config.h"
 #include <InnerModelManager.h>
 #include <JointMotor.h>
-#include <DifferentialRobot.h>
+#include <OmniRobot.h>
 #include <BodyInverseKinematics.h>
 
 #define CHECK_PERIOD 5000
@@ -45,7 +45,7 @@ using namespace std;
 */
 using namespace RoboCompInnerModelManager;
 using namespace RoboCompJointMotor;
-using namespace RoboCompDifferentialRobot;
+using namespace RoboCompOmniRobot;
 using namespace RoboCompBodyInverseKinematics;
 class GenericWorker :
 #ifdef USE_QTGUI
@@ -67,7 +67,7 @@ public:
 	InnerModelManagerPrx innermodelmanager_proxy;
 	JointMotorPrx jointmotor0_proxy;
 	JointMotorPrx jointmotor1_proxy;
-	DifferentialRobotPrx differentialrobot_proxy;
+	OmniRobotPrx omnirobot_proxy;
 	virtual void  setTargetPose6D(const string& bodyPart, const Pose6D& target, const WeightVector& weights, float radius) = 0;
 	virtual void  pointAxisTowardsTarget(const string& bodyPart, const Pose6D& target, const Axis& ax, bool axisConstraint, float axisAngleConstraint) = 0;
 	virtual void  advanceAlongAxis(const string& bodyPart, const Axis& ax, float dist) = 0;

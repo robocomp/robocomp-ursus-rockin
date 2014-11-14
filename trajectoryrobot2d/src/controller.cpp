@@ -33,7 +33,7 @@ Controller::~Controller()
 {
 }
 
-bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy,  WayPoints &road)
+bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy,  WayPoints &road)
 {	
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive). 
 	static long epoch = 100;
@@ -48,7 +48,7 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		if( road.isFinished() ) qDebug() << "road finished";
 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
 		if( road.isLost ) qDebug() << "robot is lost";
-		stopTheRobot(differentialrobot_proxy);
+		stopTheRobot(omnirobot_proxy);
 		return false;
 	}
 		
@@ -58,7 +58,7 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 // 	{
 // 		qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to last point visible is" << road.distanceToLastVisible << "less than 400";
 // 		road.requiresReplanning = true;
-// 		stopTheRobot(differentialrobot_proxy);
+// 		stopTheRobot(omnirobot_proxy);
 // 		return false;
 // 	}
 	
@@ -148,12 +148,12 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		qDebug() << "---------------------------------------------------;";
  		
  
-   		try {	differentialrobot_proxy->setSpeedBase( vadvance, vrot);	} 
-   		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl;		}	
+   		try {	omnirobot_proxy->setSpeedBase( vadvance, 0, vrot);	} 
+   		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl;		}	
 	}
 	else
-		try {	differentialrobot_proxy->setSpeedBase( 0, 0);	} 
-		catch (const Ice::Exception &e) { std::cout << e << "Differential robot not responding" << std::endl;		}	
+		try {	omnirobot_proxy->setSpeedBase( 0, 0, 0);	} 
+		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl;		}	
 	
 	epoch = reloj.restart();  //epcoh time in ms
 	return false;
@@ -228,10 +228,10 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 
 
 
-void Controller::stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy)
+void Controller::stopTheRobot(RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy)
 {
 	///CHECK IF ROBOT IS MOVING BEFORE
-	try {	differentialrobot_proxy->setSpeedBase( 0.f, 0.f);	} 
+	try {	omnirobot_proxy->setSpeedBase( 0.f, 0.f, 0.f);	} 
 	catch (const Ice::Exception &e) { std::cout << e << std::endl;}	
 }
 

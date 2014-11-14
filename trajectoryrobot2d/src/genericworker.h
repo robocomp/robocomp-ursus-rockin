@@ -29,7 +29,7 @@
 #include "config.h"
 #include <Laser.h>
 #include <InnerModelManager.h>
-#include <DifferentialRobot.h>
+#include <OmniRobot.h>
 #include <TrajectoryRobot2D.h>
 
 #define CHECK_PERIOD 5000
@@ -45,7 +45,7 @@ using namespace std;
 */
 using namespace RoboCompLaser;
 using namespace RoboCompInnerModelManager;
-using namespace RoboCompDifferentialRobot;
+using namespace RoboCompOmniRobot;
 using namespace RoboCompTrajectoryRobot2D;
 class GenericWorker :
 #ifdef USE_QTGUI
@@ -66,7 +66,7 @@ public:
 
 	LaserPrx laser_proxy;
 	InnerModelManagerPrx innermodelmanager_proxy;
-	DifferentialRobotPrx differentialrobot_proxy;
+	OmniRobotPrx omnirobot_proxy;
 	virtual void  go(const TargetPose& target) = 0;
 	virtual void  goBackwards(const TargetPose& target) = 0;
 	virtual void  changeTarget(const TargetPose& target) = 0;
