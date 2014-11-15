@@ -889,7 +889,7 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 	}
 	catch (const Ice::Exception &ex)
 	{
-		cout<<"--> Excepción reading DifferentialRobot: "<<ex<<endl;
+		cout<<"--> Excepción reading OmniRobot: "<<ex<<endl;
 	}
 }
 
