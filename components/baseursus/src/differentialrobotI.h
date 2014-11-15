@@ -16,33 +16,33 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OMNIROBOTI_H
-#define OMNIROBOTI_H
+#ifndef DIFFERENTIALROBOTI_H
+#define DIFFERENTIALROBOTI_H
 
 // QT includes
 #include <QtCore/QObject>
 
 // Ice includes
 #include <Ice/Ice.h>
-#include <OmniRobot.h>
+#include <DifferentialRobot.h>
 
 #include <config.h>
 #include "genericworker.h"
 
-using namespace RoboCompOmniRobot;
+using namespace RoboCompDifferentialRobot;
 
-class OmniRobotI : public QObject , public virtual RoboCompOmniRobot::OmniRobot
+class DifferentialRobotI : public QObject , public virtual RoboCompDifferentialRobot::DifferentialRobot
 {
 Q_OBJECT
 public:
-	OmniRobotI( GenericWorker *_worker, QObject *parent = 0 );
-	~OmniRobotI();
-	void  getBaseState(RoboCompOmniRobot::TBaseState& state, const Ice::Current& = Ice::Current());
+	DifferentialRobotI( GenericWorker *_worker, QObject *parent = 0 );
+	~DifferentialRobotI();
+	void getBaseState(RoboCompDifferentialRobot::TBaseState& state, const Ice::Current& = Ice::Current());
 	void getBasePose(Ice::Int& x, Ice::Int& z, Ice::Float& alpha, const Ice::Current& = Ice::Current());
-	void setSpeedBase(Ice::Float advx, Ice::Float advz, Ice::Float rot, const Ice::Current& = Ice::Current());
+	void setSpeedBase(Ice::Float adv, Ice::Float rot, const Ice::Current& = Ice::Current());
 	void stopBase(const Ice::Current& = Ice::Current());
 	void resetOdometer(const Ice::Current& = Ice::Current());
-	void setOdometer(const RoboCompOmniRobot::TBaseState& state, const Ice::Current& = Ice::Current());
+	void setOdometer(const RoboCompDifferentialRobot::TBaseState& state, const Ice::Current& = Ice::Current());
 	void setOdometerPose(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current& = Ice::Current());
 	void correctOdometer(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current& = Ice::Current());
 
