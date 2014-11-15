@@ -161,8 +161,8 @@
 
 
 
-							
-							
+
+
 							<transform id="base_bodypost" rx="1.5707963267948966" ty="0" tz="0" >
 								<!--<transform id="head_axes_0" >
 									<plane id="head_x_0" px="200" nz="1" size="200,40,40" repeat="1" texture="#ff0000" />
@@ -183,24 +183,24 @@
 												<plane id="head_y_2" py="100" nz="1" size="10,200,10" repeat="1" texture="#00ff00" />
 												<plane id="head_z_2" pz="100" nz="1" size="10,10,200" repeat="1" texture="#0000ff" />
 											</transform>-->
-											
+
 											<transform id="head_pre_tilt" ry="1.57079632679">
 												<joint id="head_pitch_joint" port="20000" min="-1" max="1" axis="z" >
 													<transform id="head_post_tilt" ry="-1.57079632679">
 														<!-- center mesh -->
 														<mesh id="head_center_mesh1" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="95,20,20" ty="50" />
 														<mesh id="head_center_mesh2" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="35,35,35" ry="1.5707963268" />
-														
+
 														<!-- rgbd camera -->
 														<transform id="rgbd_transform0" ty="85">
 															<transform id="rgbd_transform" tz="20">
 																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" />
 															</transform>
 															<mesh id="sensorRGBD" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/cube.3ds" scale="100,21,30" />
-															
+
 <!-- 															<plane id="sensorRGBD" nz="1" pz="-20" size="100,16,20" repeat="1" texture="#000000" /> -->
 														</transform>
-														
+
 														<!-- left camera -->
 														<transform id="left_rgb" tx="-75">
 															<transform id="left_rgb_pan_pre" rx="-1.57079632679">
@@ -216,7 +216,7 @@
 																</joint>
 															</transform>
 														</transform>
-														
+
 														<!-- right camera -->
 														<transform id="right_rgb" tx="75">
 															<transform id="right_rgb_pan_pre" rx="-1.57079632679">
@@ -243,7 +243,7 @@
 
 
 
-							
+
 
 
 
@@ -409,7 +409,7 @@
 																									</transform>
 																									<transform id="ThandMesh2_5" tz="-55" ty="25" tx="0"> 	<!--  Deshacemos la translacion -->
 																								<!--		<transform id="grabPositionHandR"  tz="55" ty="-25">
-																								-->		<transform id="grabPositionHandR"  tz="190" ty="-25">																											
+																								-->		<transform id="grabPositionHandR"  tz="190" ty="-25">
 																						  			<!--	<plane id="axisx" px="50" nx="1" size="3,3,100" repeat="1" texture="#550000" />
 																											<plane id="axisy" py="50" nx="1" size="3,100,3" repeat="1" texture="#005500" />
 																											<plane id="axisz" pz="50" nx="1" size="100,3,3" repeat="1" texture="#000055" />-->
