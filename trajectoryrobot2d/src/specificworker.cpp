@@ -73,7 +73,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 //	setRobotInitialPose(800, -1500, M_PI);
 //	baseOffsets = computeRobotOffsets(innerModel, laserData);
- 
+
 	//Planning
 	plannerOMPL = new PlannerOMPL(innerModel);
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
@@ -149,10 +149,10 @@ void SpecificWorker::compute( )
 
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::SETHEADING)
 			setHeadingCommand(innerModel, currentTarget.getRotation().y());
-		
+
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::GOBACKWARDS)
 			goBackwardsCommand(innerModel, currentTarget.getTranslation());
-		
+
 		if(reloj.elapsed() > 2000)
 		{
 			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
@@ -178,7 +178,7 @@ void SpecificWorker::compute( )
 /////////////////////////////////////////////////////////
 
 bool SpecificWorker::stopCommand()
-{	
+{
 	qDebug() << __FUNCTION__ ;
 	road.setFinished(true);
 	currentTarget.reset();
@@ -223,7 +223,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 
 		//controller->update(innerModel, laserData, differentialrobot_proxy, road);
 		controller->update(innerModel, laserData, omnirobot_proxy, road);
-		
+
 
 		if (road.isFinished() == true)
 		{
@@ -267,7 +267,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 	const float MAX_ORIENTATION_ERROR  = 0.08726646259722222;
 
 	float angRobot = angmMPI(innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y());
-	alfa = angmMPI(alfa); 
+	alfa = angmMPI(alfa);
 	float error = angmMPI(angRobot-alfa);
 	compState.state = "EXECUTING";
 	//qDebug() << __FUNCTION__ << (angRobot-alfa) << error;
@@ -308,7 +308,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 	float MAX_ADV_SPEED = 600.f;
 	//const float MAX_ORIENTATION_ERROR  = 0.08726646259722222; //rads
 	const float MAX_POSITIONING_ERROR  = 50;  //mm
-	
+
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
 	compState.state = "EXECUTING";
@@ -338,7 +338,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		try
 		{
 		  //differentialrobot_proxy->setSpeedBase(vadv, 0);
-		  omnirobot_proxy->setSpeedBase(vadv, 0, 0);
+		  omnirobot_proxy->setSpeedBase(0, vadv, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 
@@ -612,7 +612,7 @@ void SpecificWorker::goBackwards(const TargetPose& target)
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
 	qDebug() << __FUNCTION__ << "-------------------------------------------------------------------------GOBACKWARDS command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
-	
+
 }
 
 

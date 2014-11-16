@@ -24,7 +24,7 @@ Controller::Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &
 {
 	time = QTime::currentTime();
 	this->delay = delay*1000;
-	
+
 	//compute offsets from laser center to the border of the robot base
 	baseOffsets = computeRobotOffsets(innerModel, laserData);
 }
@@ -33,15 +33,15 @@ Controller::~Controller()
 {
 }
 
-bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy,  WayPoints &road)
-{	
-	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive). 
+bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints &road)
+{
+	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
 	static long epoch = 100;
-	
+
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
-	
+
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
-	
+
 	if( (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
 		qDebug() << __FILE__ << __FUNCTION__;
@@ -51,21 +51,21 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		stopTheRobot(omnirobot_proxy);
 		return false;
 	}
-		
+
 		///ELIMINADO MOEMENTANME
-		
-// 	if (road.distanceToLastVisible < 400 /*and road.distanceToLastVisible < road.distanceToTarget*/ ) 
+
+// 	if (road.distanceToLastVisible < 400 /*and road.distanceToLastVisible < road.distanceToTarget*/ )
 // 	{
 // 		qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to last point visible is" << road.distanceToLastVisible << "less than 400";
 // 		road.requiresReplanning = true;
 // 		stopTheRobot(omnirobot_proxy);
 // 		return false;
 // 	}
-	
+
 	/////////////////////////////////////////////////
 	//////  CHECK CPU AVAILABILITY
 	////////////////////////////////////////////////
-	
+
 	if ( time.elapsed() > delay )   //Initial wait in secs
 	{
 		//qDebug() << "epoch" << epoch;
@@ -75,95 +75,95 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		{
 			MAX_ADV_SPEED = 600 * exponentialFunction(epoch-100, 200, 0.2);
 			MAX_ROT_SPEED = 0.7 * exponentialFunction(epoch-100, 200, 0.2);
-		}	
-		
+		}
+
 		float vadvance = 0;
 		float vrot = 0;
-		
+
 		/////////////////////////////////////////////////
 		//////   ROTATION SPEED
 		////////////////////////////////////////////////
-	
+
 		// VRot is computed as the sum of three terms: angle with tangent to road + atan(perp. distance to road) + road curvature
 		// as descirbed in Thrun's paper on DARPA challenge
-		
+
 		vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/350.) + 0.8 * road.getRoadCurvatureAtClosestPoint() ;
-	
+
 	// Limiting filter
- 		if( vrot > MAX_ROT_SPEED ) 
+ 		if( vrot > MAX_ROT_SPEED )
  			vrot = MAX_ROT_SPEED;
- 		if( vrot < -MAX_ROT_SPEED ) 
+ 		if( vrot < -MAX_ROT_SPEED )
  			vrot = -MAX_ROT_SPEED;
-		
+
 		/////////////////////////////////////////////////
 		//////   ADVANCE SPEED
 		////////////////////////////////////////////////
-		
+
 		// Factor to be used in speed control when approaching the end of the road
 		float teta;
 		if( road.getRobotDistanceToTarget() < 1000)
 			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
 		else
 			teta= 1;
-		
+
 // 		if( (road.getRobotDistanceToTarget() < 1000) and (derRobotDistanceToTarget < 0) and (vadvance > 0))
 // 		{
 // 			sunk = 0;
 // 			road.
 // 		}
-		
-		//VAdv is computed as a reduction of MAX_ADV_SPEED by three computed functions: 
+
+		//VAdv is computed as a reduction of MAX_ADV_SPEED by three computed functions:
 		//				* road curvature reduces forward speed
 		//				* VRot reduces forward speed
 		//				* teta that applies when getting close to the target (1/roadGetCurvature)
 		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
-		
-		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint())) 
+
+		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
 								 * exponentialFunction(vrot, 0.8, 0.1)
 								 * teta;
-								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1) 
+								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
 								 //* sunk;
-		
+
 		//Pre-limiting filter to avoid displacements in very closed turns
 		if( fabs(vrot) > 0.8)
 			vadvance = 0;
-	
+
  		// Limiting filter
- 		if( vadvance > MAX_ADV_SPEED ) 
+ 		if( vadvance > MAX_ADV_SPEED )
  			vadvance = MAX_ADV_SPEED;
- 		
+
 		/////////////////////////////////////////////////
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
-		
-// 		bool collision = 
+
+// 		bool collision =
 		avoidanceControl(innerModel, road, laserData, vadvance, vrot);
-	
+
 		/////////////////////////////////////////////////
 		//////   EXECUTION
 		////////////////////////////////////////////////
-		
+
 		qDebug() << "------------------Controller Report ---------------;";
  		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
 		qDebug() << "---------------------------------------------------;";
- 		
- 
-   		try {	omnirobot_proxy->setSpeedBase( vadvance, 0, vrot);	} 
-   		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl;		}	
+
+
+   		try { omnirobot_proxy->setSpeedBase(0, vadvance, vrot); }
+   		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 	}
 	else
-		try {	omnirobot_proxy->setSpeedBase( 0, 0, 0);	} 
-		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl;		}	
-	
+		try { omnirobot_proxy->setSpeedBase( 0, 0, 0);	}
+		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
+
 	epoch = reloj.restart();  //epcoh time in ms
 	return false;
-		
+
 }
 
 
 /**
  * @brief Lowest level of movement control
- * 
+ *
  * @param innerModel ...
  * @param road ...
  * @param laserData ...
@@ -187,7 +187,7 @@ bool Controller::avoidanceControl(InnerModel *innerModel, WayPoints& road, const
 		//qDebug() << distNorm;
 		QVec p = innerModel->laserTo("laser", "laser" , distNorm, i.angle);  //Watch the laser to tobot offset to compute final corrections
 		res += (p * (T)(-1));
-		if( distN < 3) 
+		if( distN < 3)
 		{
 			collision = true;
 			vadvance = 0;
@@ -200,7 +200,7 @@ bool Controller::avoidanceControl(InnerModel *innerModel, WayPoints& road, const
 
 /**
  * @brief Offset computation of each laser beam to account for the geometry of the getBaseState
- * 
+ *
  * @param innerModel ...
  * @param laserData ...
  * @return std::vector< float, std::allocator >
@@ -212,11 +212,11 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 	std::vector<float> baseOffsets;
 	QVec p(3,0.f);
 	int k;
-	
+
 	for(auto i : laserData)
 	{
 		for(k=10; k<4000; k++)
-		{ 
+		{
 			p = innerModel->laserTo("robot","laser",k,i.angle);
 			if( base.contains( QPointF( p.x(), p.z() ) ) == false )
 				break;
@@ -231,13 +231,13 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 void Controller::stopTheRobot(RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy)
 {
 	///CHECK IF ROBOT IS MOVING BEFORE
-	try {	omnirobot_proxy->setSpeedBase( 0.f, 0.f, 0.f);	} 
-	catch (const Ice::Exception &e) { std::cout << e << std::endl;}	
+	try {	omnirobot_proxy->setSpeedBase( 0.f, 0.f, 0.f);	}
+	catch (const Ice::Exception &e) { std::cout << e << std::endl;}
 }
 
 /**
  * @brief ...
- * 
+ *
  * @param value quantity to be tranformed
  * @param xValue for a point with xValue in X axis
  * @param yValue we want an yValue in Y axis
@@ -247,7 +247,7 @@ void Controller::stopTheRobot(RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy)
 float Controller::exponentialFunction(float value, float xValue, float yValue, float min)
 {
 	Q_ASSERT( yValue>0 );
-	
+
 	float landa = -fabs(xValue) / log(yValue);
 	//qDebug() << landa << value << value/landa << exp(-fabs(value)/landa);
 	float res = exp(-fabs(value)/landa);
