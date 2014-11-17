@@ -882,8 +882,8 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 	try
 	{
 // 		qDebug() << "<";
-		RoboCompDifferentialRobot::TBaseState bState;
-		differentialrobot_proxy->getBaseState( bState );
+		RoboCompOmniRobot::TBaseState bState;
+		omnirobot_proxy->getBaseState( bState );
 		innerModel->updateTransformValues("robot", bState.x/1000, 0, bState.z/1000, 0, bState.alpha, 0);
 // 		qDebug() << ">";
 	}

@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <qlog/qlog.h>
 #include <CommonBehavior.h>
+#include <JointMotor.h>
+#include <DifferentialRobot.h>
 #include <OmniRobot.h>
 
 #define CHECK_PERIOD 5000
@@ -38,6 +40,8 @@ using namespace std;
        \brief
        @author authorname
 */
+using namespace RoboCompJointMotor;
+using namespace RoboCompDifferentialRobot;
 using namespace RoboCompOmniRobot;
 
 class GenericWorker : public QObject
@@ -48,28 +52,24 @@ public:
 	virtual ~GenericWorker();
 	virtual void killYourSelf();
 	virtual void setPeriod(int p);
-	
+
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
-
-	virtual void getBaseState(::RoboCompOmniRobot::TBaseState &state) = 0;
-	virtual void getBasePose(::Ice::Int &x, ::Ice::Int &z, ::Ice::Float &alpha) = 0;
-	virtual void setSpeedBase(::Ice::Float advx, ::Ice::Float advz, ::Ice::Float rotv) = 0;
-	virtual void stopBase() = 0;
-	virtual void resetOdometer() = 0;
-	virtual void setOdometer(const ::RoboCompOmniRobot::TBaseState &state) = 0;
-	virtual void setOdometerPose(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha) = 0;
-	virtual void correctOdometer(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha) = 0;
-
-
+	JointMotorPrx jointmotor_proxy;
+	virtual void  getBaseState(RoboCompOmniRobot::TBaseState& state) = 0;
+	virtual void  getBasePose(Ice::Int& x, Ice::Int& z, Ice::Float& alpha) = 0;
+	virtual void  setSpeedBase(float advx, float advz, float rot) = 0;
+	virtual void  stopBase() = 0;
+	virtual void  resetOdometer() = 0;
+	virtual void  setOdometer(const RoboCompOmniRobot::TBaseState& state) = 0;
+	virtual void  setOdometerPose(int x, int z, float alpha) = 0;
+	virtual void  correctOdometer(int x, int z, float alpha) = 0;
 protected:
 	QTimer timer;
 	int Period;
-
 public slots:
 	virtual void compute() = 0;
-
 signals:
 	void kill();
 };

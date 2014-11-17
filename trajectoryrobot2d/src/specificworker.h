@@ -61,7 +61,8 @@ public slots:
 	
 private:
 	
-	RoboCompDifferentialRobot::TBaseState 	bState;
+	//RoboCompDifferentialRobot::TBaseState 	bState;
+	RoboCompOmniRobot::TBaseState bState;
 	RoboCompTrajectoryRobot2D::NavState 	compState;
 	RoboCompCommonBehavior::ParameterList 	params;
 	RoboCompLaser::TLaserData laserData;

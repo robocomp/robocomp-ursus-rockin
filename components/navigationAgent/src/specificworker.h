@@ -85,10 +85,11 @@ private:
 private:
 	void action_ChangeRoom();
 	void action_FindObjectVisuallyInTable();
-	
-	
+	void action_SetObjectReach();
+
+
 	void odometryAndLocationIssues();
-	
+
 };
 
 #endif

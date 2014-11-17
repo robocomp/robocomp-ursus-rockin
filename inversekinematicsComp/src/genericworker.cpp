@@ -31,7 +31,7 @@ QObject()
 	innermodelmanager_proxy = (*(InnerModelManagerPrx*)mprx["InnerModelManagerProxy"]);
 	jointmotor0_proxy = (*(JointMotorPrx*)mprx["JointMotor0Proxy"]);
 	jointmotor1_proxy = (*(JointMotorPrx*)mprx["JointMotor1Proxy"]);
-	differentialrobot_proxy = (*(DifferentialRobotPrx*)mprx["DifferentialRobotProxy"]);
+	omnirobot_proxy = (*(OmniRobotPrx*)mprx["OmniRobotProxy"]);
 
 	mutex = new QMutex();
 	#ifdef USE_QTGUI

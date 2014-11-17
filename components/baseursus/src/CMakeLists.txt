@@ -13,6 +13,7 @@ SET ( SOURCES
   ${SOURCES}
   baseursuscomp.cpp
   omnirobotI.cpp
+differentialrobotI.cpp
 
   genericmonitor.cpp
   commonbehaviorI.cpp
@@ -25,6 +26,7 @@ SET ( SOURCES
 SET ( HEADERS
   ${HEADERS}
   omnirobotI.h
+differentialrobotI.h
 
   genericmonitor.h
   commonbehaviorI.h
@@ -32,7 +34,7 @@ SET ( HEADERS
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior   OmniRobot)
+ROBOCOMP_WRAP_ICE( CommonBehavior  OmniRobot DifferentialRobot  JointMotor)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

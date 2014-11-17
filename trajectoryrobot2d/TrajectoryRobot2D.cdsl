@@ -1,13 +1,13 @@
+import "/robocomp/interfaces/IDSLs/OmniRobot.idsl";
 import "/robocomp/interfaces/IDSLs/TrajectoryRobot2D.idsl";
 import "/robocomp/interfaces/IDSLs/InnerModelManager.idsl";
-import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
 import "/robocomp/interfaces/IDSLs/Laser.idsl";
 
 Component TrajectoryRobot2DComp
 {
 	Communications
 	{
-		requires Laser, DifferentialRobot, InnerModelManager;
+		requires Laser, OmniRobot, InnerModelManager;
 		implements TrajectoryRobot2D;
 	};
 	language Cpp;

@@ -263,6 +263,10 @@ void SpecificWorker::actionExecution()
 	{
 		action_FindObjectVisuallyInTable();
 	}
+	else if (action == "setobjectreach")
+	{
+		action_SetObjectReach();
+	}
 }
 
 void SpecificWorker::updateRobotsCognitiveLocation()
@@ -507,6 +511,59 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 		lastZ = z;
 		printf("find objects in table %d\n", tableId);
 		go(x, tableId==7?z+550:z-550, tableId==7?-3.141592:0, true);
+	}
+	else
+	{
+		printf("%s\n", planningState.state.c_str());
+	}
+}
+
+
+void SpecificWorker::action_SetObjectReach()
+{
+	static float lastX = std::numeric_limits<float>::quiet_NaN();
+	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+
+	int32_t objectId = str2int(params["object"].value);
+	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+	const float x = str2float(goalObject->getAttribute("x"));
+	const float z = str2float(goalObject->getAttribute("z"));
+	float alpha = objectId==7?-3.141592:0;
+
+	AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
+	const float rx = str2float(robot->getAttribute("x"));
+	const float rz = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("z"));
+
+	// Avoid repeating the same goal and confuse the navigator
+	const float errX = abs(rx-x);
+	const float errZ = abs(rz-z);
+	float errAlpha = abs(ralpha-alpha);
+	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+	errAlpha = abs(errAlpha);
+	if (errX<20 and errZ<20 and errAlpha<02)
+		return;
+
+	bool proceed = true;
+	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+	{
+		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+			proceed = false;
+		else
+			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+	}
+	else
+	{
+		printf("proceed because it's stoped\n");
+	}
+
+	if (proceed)
+	{
+		lastX = x;
+		lastZ = z;
+		printf("setobjectreach %d\n", objectId);
+		go(x, objectId==7?z+550:z-550, objectId==7?-3.141592:0, true);
 	}
 	else
 	{

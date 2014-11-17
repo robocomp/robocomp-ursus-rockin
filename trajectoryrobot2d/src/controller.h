@@ -23,7 +23,7 @@
 
 #include <QtCore>
 #include "pointstoroad.h"
-#include <DifferentialRobot.h>
+#include <OmniRobot.h>
 #include "waypoints.h"
 #include <innermodel/innermodel.h>
 #include <Laser.h>
@@ -34,8 +34,8 @@ class Controller
 		Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, int delay); //in secs
 		~Controller();
 	
-		bool update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy, WayPoints& road);
-		void stopTheRobot(RoboCompDifferentialRobot::DifferentialRobotPrx differentialrobot_proxy);
+		bool update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx differentialrobot_proxy, WayPoints& road);
+		void stopTheRobot(RoboCompOmniRobot::OmniRobotPrx differentialrobot_proxy);
 		float exponentialFunction(float value, float xValue, float yValue, float min = 0.f);
 
 	private:

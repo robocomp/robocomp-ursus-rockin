@@ -30,7 +30,7 @@ QObject()
 {
 	laser_proxy = (*(LaserPrx*)mprx["LaserProxy"]);
 	innermodelmanager_proxy = (*(InnerModelManagerPrx*)mprx["InnerModelManagerProxy"]);
-	differentialrobot_proxy = (*(DifferentialRobotPrx*)mprx["DifferentialRobotProxy"]);
+	omnirobot_proxy = (*(OmniRobotPrx*)mprx["OmniRobotProxy"]);
 
 	mutex = new QMutex();
 	#ifdef USE_QTGUI

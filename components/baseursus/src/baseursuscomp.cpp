@@ -77,9 +77,11 @@
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
 #include <omnirobotI.h>
+#include <differentialrobotI.h>
 
 // Includes for remote proxy example
 // #include <Remote.h>
+#include <JointMotor.h>
 
 
 // User includes here
@@ -87,7 +89,9 @@
 // Namespaces
 using namespace std;
 using namespace RoboCompCommonBehavior;
+using namespace RoboCompDifferentialRobot;
 using namespace RoboCompOmniRobot;
+using namespace RoboCompJointMotor;
 
 
 class BaseUrsusComp : public RoboComp::Application
@@ -120,7 +124,8 @@ int BaseUrsusComp::run(int argc, char* argv[])
 
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
-	
+	JointMotorPrx jointmotor_proxy;
+
 
 	string proxy;
 
@@ -147,7 +152,18 @@ int BaseUrsusComp::run(int argc, char* argv[])
 	//}
 	//rInfo("RemoteProxy initialized Ok!");
 	// 	// Now you can use remote server proxy (remotecomponent_proxy) as local object
-	
+	//Remote server proxy creation example
+	try
+	{
+		jointmotor_proxy = JointMotorPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("JointMotorProxy") ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("JointMotorProxy initialized Ok!");
+	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);
 	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
@@ -171,6 +187,11 @@ int BaseUrsusComp::run(int argc, char* argv[])
 		adapterOmniRobot->add(omnirobot, communicator()->stringToIdentity("omnirobot"));
 
 		adapterOmniRobot->activate();
+		Ice::ObjectAdapterPtr adapterDifferentialRobot = communicator()->createObjectAdapter("DifferentialRobotComp");
+		DifferentialRobotI *differentialrobot = new DifferentialRobotI(worker);
+		adapterDifferentialRobot->add(differentialrobot, communicator()->stringToIdentity("differentialrobot"));
+
+		adapterDifferentialRobot->activate();
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )

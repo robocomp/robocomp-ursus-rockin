@@ -12,4 +12,4 @@ CommonBehavior.Endpoints=tcp -p 12207
 InnerModelManagerProxy = innermodelmanager:tcp -h localhost -p 11175
 JointMotor0Proxy = jointmotor:tcp -h localhost -p 10067
 JointMotor1Proxy = jointmotor:tcp -h localhost -p 10067
-DifferentialRobotProxy = differentialrobot:tcp -h localhost -p 10004
+OmniRobotProxy = omnirobot:tcp -h localhost -p 12238
