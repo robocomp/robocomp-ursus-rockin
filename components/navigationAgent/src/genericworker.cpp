@@ -29,7 +29,7 @@ QObject()
 
 {
 	trajectoryrobot2d_proxy = (*(TrajectoryRobot2DPrx*)mprx["TrajectoryRobot2DProxy"]);
-	differentialrobot_proxy = (*(DifferentialRobotPrx*)mprx["DifferentialRobotProxy"]);
+	omnirobot_proxy = (*(OmniRobotPrx*)mprx["OmniRobotProxy"]);
 	agmagenttopic = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
 
 	mutex = new QMutex();

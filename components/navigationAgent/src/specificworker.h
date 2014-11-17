@@ -62,6 +62,7 @@ private:
 
 
 	void go(float x, float z, float alpha=0, bool rot=false);
+	void stop();
 	void updateRobotsCognitiveLocation();
 	void actionExecution();
 	int32_t getIdentifierOfRobotsLocation(AGMModel::SPtr &worldModel);
@@ -74,7 +75,7 @@ private:
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
 
-	RoboCompDifferentialRobot::TBaseState bState;
+	RoboCompOmniRobot::TBaseState bState;
 	RoboCompTrajectoryRobot2D::NavState planningState;
 
 
@@ -86,6 +87,8 @@ private:
 	void action_ChangeRoom();
 	void action_FindObjectVisuallyInTable();
 	void action_SetObjectReach();
+	void action_GraspObject();
+	void action_NoAction();
 
 
 	void odometryAndLocationIssues();
