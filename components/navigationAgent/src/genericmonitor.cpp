@@ -143,29 +143,6 @@ bool GenericMonitor::configGetString( const std::string name, std::string&value,
 		throw error;
 	}
 
-	if (value[0]=='@')
-	{
-		QString qstr = QString::fromStdString(value).remove(0,1);
-		QFile ff(qstr);
-		if (not ff.exists())
-		{
-			qFatal("Not such file: %s\n", qstr.toStdString().c_str());
-		}
-		if (!ff.open(QIODevice::ReadOnly | QIODevice::Text))
-		{
-			qFatal("Can't open file: %s\n", qstr.toStdString().c_str());
-		}
-
-		QString content;
-		while (!ff.atEnd())
-		{
-			content += QString(ff.readLine());
-		}
-		value = content.toStdString();
-	}
 	std::cout << name << " " << value << std::endl;
 	return true; 
 }
-
-
-

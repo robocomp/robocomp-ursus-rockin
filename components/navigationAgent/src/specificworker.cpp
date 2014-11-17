@@ -238,6 +238,19 @@ void SpecificWorker::go(float x, float z, float alpha, bool rot)
 }
 
 
+void SpecificWorker::stop()
+{
+	try
+	{
+		trajectoryrobot2d_proxy->stop();
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
+}
+
+
 void SpecificWorker::actionExecution()
 {
 	static std::string previousAction = "";
@@ -266,6 +279,10 @@ void SpecificWorker::actionExecution()
 	else if (action == "setobjectreach")
 	{
 		action_SetObjectReach();
+	}
+	else
+	{
+		action_NoAction();
 	}
 }
 
@@ -542,7 +559,7 @@ void SpecificWorker::action_SetObjectReach()
 	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
 	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
 	errAlpha = abs(errAlpha);
-	if (errX<20 and errZ<20 and errAlpha<02)
+	if (errX<20 and errZ<20 and errAlpha<0.1)
 		return;
 
 	bool proceed = true;
@@ -571,6 +588,31 @@ void SpecificWorker::action_SetObjectReach()
 	}
 }
 
+void SpecificWorker::action_GraspObject()
+{
+	int32_t objectId = str2int(params["object"].value);
+	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+	const float x = str2float(goalObject->getAttribute("x"));
+	const float z = str2float(goalObject->getAttribute("z"));
+	float alpha = (objectId==7 or objectId==100)?-3.141592:0;
+
+	AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
+	const float rx = str2float(robot->getAttribute("x"));
+	const float rz = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("z"));
+
+	// Avoid repeating the same goal and confuse the navigator
+	const float errX = abs(rx-x);
+	const float errZ = abs(rz-z);
+	float errAlpha = abs(ralpha-alpha);
+	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+	errAlpha = abs(errAlpha);
+	if (errX<20 and errZ<20 and errAlpha<0.1)
+		return;
+
+	omnirobot_proxy->setSpeedBase(errX, errZ, errAlpha);	
+}
 
 
 void SpecificWorker::odometryAndLocationIssues()
@@ -579,7 +621,7 @@ void SpecificWorker::odometryAndLocationIssues()
 	// Get ODOMETRY and update it in the graph. If there's a problem talking to the robot's platform, abort
 	try
 	{
-		differentialrobot_proxy->getBaseState(bState);
+		omnirobot_proxy->getBaseState(bState);
 		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
 		robot->setAttribute("x", float2str(bState.x));
 		robot->setAttribute("z", float2str(bState.z));
@@ -599,6 +641,12 @@ void SpecificWorker::odometryAndLocationIssues()
 	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
 	//
 	updateRobotsCognitiveLocation();
+}
+
+
+void SpecificWorker::action_NoAction()
+{
+		stop();
 }
 
 

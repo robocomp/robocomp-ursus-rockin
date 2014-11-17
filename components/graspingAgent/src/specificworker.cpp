@@ -234,10 +234,10 @@ void SpecificWorker::actionExecution()
 	{
 		action_GraspObject();
 	}
-	else if (action == "robotmovesobjectfromcontainer")
-	{
-		action_RobotMovesObjectFromContainer();
-	}
+// 	else if (action == "robotmovesobjectfromcontainer")
+// 	{
+// 		action_RobotMovesObjectFromContainer();
+// 	}
 }
 
 void SpecificWorker::action_FindObjectVisuallyInTable()
