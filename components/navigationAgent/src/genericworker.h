@@ -29,7 +29,7 @@
 #include "config.h"
 #include <agm.h>
 #include <TrajectoryRobot2D.h>
-#include <DifferentialRobot.h>
+#include <OmniRobot.h>
 #include <AGMAgent.h>
 #include <AGMCommonBehavior.h>
 #include <AGMExecutive.h>
@@ -46,7 +46,7 @@ using namespace std;
        @author authorname
 */
 using namespace RoboCompTrajectoryRobot2D;
-using namespace RoboCompDifferentialRobot;
+using namespace RoboCompOmniRobot;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMAgent;
@@ -68,7 +68,7 @@ public:
 	virtual ~GenericWorker();
 	virtual void killYourSelf();
 	virtual void setPeriod(int p);
-	
+
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
@@ -78,7 +78,7 @@ public:
 	bool isActive() { return active; }
 	RoboCompAGMWorldModel::BehaviorResultType status();
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
-	DifferentialRobotPrx differentialrobot_proxy;
+	OmniRobotPrx omnirobot_proxy;
 	AGMAgentTopicPrx agmagenttopic;
 	virtual bool activateAgent(const ParameterMap& prs) = 0;
 	virtual bool deactivateAgent() = 0;

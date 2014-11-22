@@ -2,6 +2,7 @@
 # This property is used to configure the endpoints of the subscriber adapter.
 #
 OmniRobotComp.Endpoints=tcp -p 12238
+DifferentialRobotComp.Endpoints=tcp -p 10004
 CommonBehavior.Endpoints=tcp -p 12239
 
 # Remote servers proxies example

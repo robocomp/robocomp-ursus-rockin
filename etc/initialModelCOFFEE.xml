@@ -13,7 +13,11 @@
 
 
 	<!-- R O B O T -->
-	<symbol id="1" type="robot" />
+	<symbol id="1" type="robot">
+		<attribute key="x" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="alpha" value="0" />
+	</symbol>
 	<symbol id="2" type="robotSt">
 	</symbol>
 	<link src="1" dst="2" label="free" />
@@ -74,7 +78,7 @@
 	<link src="7" dst="8" label="hasStatus" />
 	<link src="7" dst="8" label="see" />
 	<link src="7" dst="8" label="classified" />
-	<link src="7" dst="8" label="noReach" />
+	<link src="7" dst="8" label="reach" />
 	<link src="7" dst="8" label="position" />
 	<link src="7" dst="8" label="reachable" />
 

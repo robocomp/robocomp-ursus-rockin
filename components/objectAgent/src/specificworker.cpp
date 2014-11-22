@@ -343,7 +343,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 		}
 		catch(...)
 		{
-			printf("objectAgent: Couldn't retrieve action's parameters\n");
+			printf("(updateMug) objectAgent: Couldn't retrieve action's parameters\n");
 		}
 	}
 
@@ -404,7 +404,7 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 		}
 		catch(...)
 		{
-			printf("objectAgent: Couldn't retrieve action's parameters\n");
+			printf("(updateMilk) objectAgent: Couldn't retrieve action's parameters\n");
 		}
 	}
 

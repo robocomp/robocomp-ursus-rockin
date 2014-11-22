@@ -228,12 +228,16 @@ void SpecificWorker::actionExecution()
 	}
 	else if (action == "setobjectreach")
 	{
-		action_SetObjectReach();
+// 		action_SetObjectReach();
 	}
-	else if (action == "robotmovesobjectfromcontainer")
+	else if (action == "graspobject")
 	{
-		action_RobotMovesObjectFromContainer();
+		action_GraspObject();
 	}
+// 	else if (action == "robotmovesobjectfromcontainer")
+// 	{
+// 		action_RobotMovesObjectFromContainer();
+// 	}
 }
 
 void SpecificWorker::action_FindObjectVisuallyInTable()
@@ -247,14 +251,67 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 }
 
 
-void SpecificWorker::action_RobotMovesObjectFromContainer()
+// void SpecificWorker::action_RobotMovesObjectFromContainer()
+// {
+// 	AGMModel::SPtr newModel(new AGMModel(worldModel));
+// 	try
+// 	{
+// 		auto symbols = newModel->getSymbolsMap(params, "object", "c1", "c2");
+// 		newModel->removeEdge(symbols["object"], symbols["c1"], "in");
+// 		newModel->addEdge(   symbols["object"], symbols["c2"], "in");
+// 		try
+// 		{
+// 			Pose6D target;
+// 			WeightVector weights;
+// 			try
+// 			{
+// 				target.x = str2float(symbols["object"]->getAttribute("tx"));
+// 				target.y = str2float(symbols["object"]->getAttribute("ty"));
+// 				target.z = str2float(symbols["object"]->getAttribute("tz"));
+// 				target.rx = str2float(symbols["object"]->getAttribute("rx"));
+// 				target.ry = str2float(symbols["object"]->getAttribute("ry"));
+// 				target.rz = str2float(symbols["object"]->getAttribute("rz"));
+// 				weights.x = 1;
+// 				weights.y = 1;
+// 				weights.z = 1;
+// 				weights.rx = 1;
+// 				weights.ry = 0;
+// 				weights.rz = 1;
+// 			}
+// 			catch (...)
+// 			{
+// 				printf("graspingAgent: Error reading data from cognitive model: (%s:%d)\n", __FILE__, __LINE__);
+// 			}
+// 			try
+// 			{
+// 				bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+// 			}
+// 			catch (...)
+// 			{
+// 				printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
+// 			}
+// 			sendModificationProposal(worldModel, newModel);
+// 		}
+// 		catch(...)
+// 		{
+// 			printf("graspingAgent: Couldn't publish new model\n");
+// 		}
+// 	}
+// 	catch(...)
+// 	{
+// 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
+// 	}
+// }
+
+
+void SpecificWorker::action_GraspObject()
 {
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
-		auto symbols = newModel->getSymbolsMap(params, "object", "c1", "c2");
-		newModel->removeEdge(symbols["object"], symbols["c1"], "in");
-		newModel->addEdge(   symbols["object"], symbols["c2"], "in");
+		auto symbols = newModel->getSymbolsMap(params, "object", "table");
+		newModel->removeEdge(symbols["object"], symbols["table"], "in");
+		newModel->addEdge(   symbols["object"], symbols["table"], "in");
 		try
 		{
 			Pose6D target;

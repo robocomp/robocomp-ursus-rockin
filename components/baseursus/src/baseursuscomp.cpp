@@ -77,6 +77,7 @@
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
 #include <omnirobotI.h>
+#include <differentialrobotI.h>
 
 // Includes for remote proxy example
 // #include <Remote.h>
@@ -88,6 +89,7 @@
 // Namespaces
 using namespace std;
 using namespace RoboCompCommonBehavior;
+using namespace RoboCompDifferentialRobot;
 using namespace RoboCompOmniRobot;
 using namespace RoboCompJointMotor;
 
@@ -185,6 +187,11 @@ int BaseUrsusComp::run(int argc, char* argv[])
 		adapterOmniRobot->add(omnirobot, communicator()->stringToIdentity("omnirobot"));
 
 		adapterOmniRobot->activate();
+		Ice::ObjectAdapterPtr adapterDifferentialRobot = communicator()->createObjectAdapter("DifferentialRobotComp");
+		DifferentialRobotI *differentialrobot = new DifferentialRobotI(worker);
+		adapterDifferentialRobot->add(differentialrobot, communicator()->stringToIdentity("differentialrobot"));
+
+		adapterDifferentialRobot->activate();
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )

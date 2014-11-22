@@ -68,6 +68,9 @@
    ##
    -->
 	<symbol id="1" type="robot">
+		<attribute key="x" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="alpha" value="0" />
 	</symbol>
 	<symbol id="2" type="status">
 	</symbol>

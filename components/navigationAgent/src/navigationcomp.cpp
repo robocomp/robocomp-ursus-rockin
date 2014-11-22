@@ -83,7 +83,7 @@
 // #include <Remote.h>
 #include <ui_guiDlg.h>
 #include <TrajectoryRobot2D.h>
-#include <DifferentialRobot.h>
+#include <OmniRobot.h>
 #include <AGMAgent.h>
 
 
@@ -95,7 +95,7 @@ using namespace RoboCompCommonBehavior;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompTrajectoryRobot2D;
-using namespace RoboCompDifferentialRobot;
+using namespace RoboCompOmniRobot;
 using namespace RoboCompAGMAgent;
 
 
@@ -130,7 +130,7 @@ int navigationComp::run(int argc, char* argv[])
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
-DifferentialRobotPrx differentialrobot_proxy;
+OmniRobotPrx omnirobot_proxy;
 
 
 	string proxy;
@@ -172,33 +172,26 @@ DifferentialRobotPrx differentialrobot_proxy;
 	mprx["TrajectoryRobot2DProxy"] = (::IceProxy::Ice::Object*)(&trajectoryrobot2d_proxy);//Remote server proxy creation example
 	try
 	{
-		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("DifferentialRobotProxy") ) );
+		omnirobot_proxy = OmniRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("OmniRobotProxy") ) );
 	}
 	catch(const Ice::Exception& ex)
 	{
 		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
 		return EXIT_FAILURE;
 	}
-	rInfo("DifferentialRobotProxy initialized Ok!");
-	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);
+	rInfo("OmniRobotProxy initialized Ok!");
+	mprx["OmniRobotProxy"] = (::IceProxy::Ice::Object*)(&omnirobot_proxy);
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 	IceStorm::TopicPrx agmagenttopic_topic;
- 	while (!agmagenttopic_topic)
-	{
-		try
-		{
-			agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic");
-		}
-		catch (const IceStorm::NoSuchTopic&)
-		{
-			try
-			{
-				agmagenttopic_topic = topicManager->create("AGMAgentTopic");
-			}
-			catch (const IceStorm::TopicExists&)
-			{
-				printf("Another client created the topic or no topic?\n");
-				usleep(1000000);
+    while(!agmagenttopic_topic){
+		try {
+			agmagenttopic_topic = topicManager->create("AGMAgentTopic"); // communicator()->getProperties()->getProperty("AGMAgentTopic") does not work!
+		}catch (const IceStorm::TopicExists&){
+		  	// Another client created the topic.
+			try{
+				agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic"); // communicator()->getProperties()->getProperty("AGMAgentTopic") does not work!
+			}catch (const IceStorm::NoSuchTopic&){
+				//Error. Topic does not exist.	
 			}
 		}
 	}

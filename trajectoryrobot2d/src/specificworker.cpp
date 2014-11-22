@@ -63,17 +63,17 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		//Update InnerModel from robot
 	//try { differentialrobot_proxy->getBaseState(bState); }
 	try {  omnirobot_proxy->getBaseState(bState); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with robot proxy");}
 	// DESCOMENTAR:!!!!!!!!!!!!!!
 	try { laserData = laser_proxy->getLaserData(); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
 
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);   //"robot" should be an external parameter
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
 
 //	setRobotInitialPose(800, -1500, M_PI);
 //	baseOffsets = computeRobotOffsets(innerModel, laserData);
- 
+
 	//Planning
 	plannerOMPL = new PlannerOMPL(innerModel);
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
@@ -149,13 +149,13 @@ void SpecificWorker::compute( )
 
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::SETHEADING)
 			setHeadingCommand(innerModel, currentTarget.getRotation().y());
-		
+
 		else if( currentTarget.isActive() and currentTarget.command == CurrentTarget::Command::GOBACKWARDS)
 			goBackwardsCommand(innerModel, currentTarget.getTranslation());
-		
+
 		if(reloj.elapsed() > 2000)
 		{
-			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
+// 			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 			if( reloj2.elapsed() < 100 )
 			{
 			road.clearDraw(innermodelmanager_proxy);
@@ -178,7 +178,7 @@ void SpecificWorker::compute( )
 /////////////////////////////////////////////////////////
 
 bool SpecificWorker::stopCommand()
-{	
+{
 	qDebug() << __FUNCTION__ ;
 	road.setFinished(true);
 	currentTarget.reset();
@@ -219,11 +219,11 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 
 		//road.print();
 
-		road.printRobotState( innerModel, currentTarget);
+// 		road.printRobotState( innerModel, currentTarget);
 
 		//controller->update(innerModel, laserData, differentialrobot_proxy, road);
 		controller->update(innerModel, laserData, omnirobot_proxy, road);
-		
+
 
 		if (road.isFinished() == true)
 		{
@@ -267,7 +267,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 	const float MAX_ORIENTATION_ERROR  = 0.08726646259722222;
 
 	float angRobot = angmMPI(innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y());
-	alfa = angmMPI(alfa); 
+	alfa = angmMPI(alfa);
 	float error = angmMPI(angRobot-alfa);
 	compState.state = "EXECUTING";
 	//qDebug() << __FUNCTION__ << (angRobot-alfa) << error;
@@ -308,7 +308,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 	float MAX_ADV_SPEED = 600.f;
 	//const float MAX_ORIENTATION_ERROR  = 0.08726646259722222; //rads
 	const float MAX_POSITIONING_ERROR  = 50;  //mm
-	
+
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
 	compState.state = "EXECUTING";
@@ -338,7 +338,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		try
 		{
 		  //differentialrobot_proxy->setSpeedBase(vadv, 0);
-		  omnirobot_proxy->setSpeedBase(vadv, 0, 0);
+		  omnirobot_proxy->setSpeedBase(0, vadv, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 
@@ -371,7 +371,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 			return false;
 		}
 		currentTarget.setTranslation( localTarget );
-		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
+// 		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
 
 		// take inner to current values
 		updateInnerModel(inner);
@@ -385,7 +385,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		//road.last() = currentTarget.getRotation();
 		road.requiresReplanning = false;
 		road.computeDistancesToNext();
-		road.print();
+// 		road.print();
 		road.computeForces();  //NOT SURE IF NEEDED HERE
 		road.startRoad();
 		compState.planningTime = road.getETA();
@@ -532,7 +532,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 	{
 		if( searchRobotValidStateCloseToTarget(innerModel, laserData, t ))
 		{
-			t.print("target after relocation");
+// 			t.print("target after relocation");
 			if( (currentTarget.getTranslation() - t).norm2() > 30 )
 			{
 				currentTarget.setTranslation( t );
@@ -612,7 +612,7 @@ void SpecificWorker::goBackwards(const TargetPose& target)
 	drawTarget( QVec::vec3(target.x,target.y,target.z));
 	taskReloj.restart();
 	qDebug() << __FUNCTION__ << "-------------------------------------------------------------------------GOBACKWARDS command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
-	
+
 }
 
 

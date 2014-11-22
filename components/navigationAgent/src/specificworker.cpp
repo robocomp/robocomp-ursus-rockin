@@ -211,6 +211,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::go(float x, float z, float alpha, bool rot)
 {
+	printf("go: %f %f %f\n", x, z, alpha);
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.x = x;
 	tp.z = z;
@@ -230,6 +231,19 @@ void SpecificWorker::go(float x, float z, float alpha, bool rot)
 	try
 	{
 		trajectoryrobot2d_proxy->go(tp);
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
+}
+
+
+void SpecificWorker::stop()
+{
+	try
+	{
+// 		trajectoryrobot2d_proxy->stop();
 	}
 	catch(const Ice::Exception &ex)
 	{
@@ -262,6 +276,14 @@ void SpecificWorker::actionExecution()
 	else if (action == "findobjectvisuallyintable")
 	{
 		action_FindObjectVisuallyInTable();
+	}
+	else if (action == "setobjectreach")
+	{
+		action_SetObjectReach();
+	}
+	else
+	{
+		action_NoAction();
 	}
 }
 
@@ -515,6 +537,99 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 }
 
 
+void SpecificWorker::action_SetObjectReach()
+{
+	static float lastX = std::numeric_limits<float>::quiet_NaN();
+	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+
+	int32_t objectId = str2int(params["object"].value);
+	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+	const float x = str2float(goalObject->getAttribute("x"));
+	const float z = str2float(goalObject->getAttribute("z"));
+	float alpha = objectId==7?-3.141592:0;
+	// printf("object (%f, %f, %f)\n", x, z, alpha);
+
+	const int32_t robotId = worldModel->getIdentifierByType("robot");
+	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
+	const float rx = str2float(robot->getAttribute("x"));
+	const float rz = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("alpha"));
+	// printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
+
+	// Avoid repeating the same goal and confuse the navigator
+	const float errX = abs(rx-x);
+	const float errZ = abs(rz-z);
+	float errAlpha = abs(ralpha-alpha);
+	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+	errAlpha = abs(errAlpha);
+	if (errX<20 and errZ<20 and errAlpha<0.1)
+		return;
+
+	bool proceed = true;
+	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+	{
+		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+		{
+			proceed = false;
+			printf("proceed because the coordinates do not differ\n");
+		}
+		else
+		{
+			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+		}
+	}
+	else
+	{
+		printf("proceed because it's already working\n");
+	}
+
+	static bool backp = true;
+	if (proceed)
+	{
+		lastX = x;
+		lastZ = z;
+		printf("proceed setobjectreach %d\n", objectId);
+		float xx = x;
+		float zz = z;
+// 		objectId==7?z+550:z-550
+		float aa = objectId==7?-3.141592:0;
+		go(xx, zz, aa, true);
+		backp = true;
+	}
+	else if (backp)
+	{
+		printf("not proceeding %s\n", planningState.state.c_str());
+		backp = false;
+	}
+}
+
+void SpecificWorker::action_GraspObject()
+{
+	int32_t objectId = str2int(params["object"].value);
+	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+	const float x = str2float(goalObject->getAttribute("x"));
+	const float z = str2float(goalObject->getAttribute("z"));
+	float alpha = (objectId==7 or objectId==100)?-3.141592:0;
+
+	AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
+	const float rx = str2float(robot->getAttribute("x"));
+	const float rz = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("z"));
+
+	// Avoid repeating the same goal and confuse the navigator
+	const float errX = abs(rx-x);
+	const float errZ = abs(rz-z);
+	float errAlpha = abs(ralpha-alpha);
+	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+	errAlpha = abs(errAlpha);
+	if (errX<20 and errZ<20 and errAlpha<0.1)
+		return;
+
+	omnirobot_proxy->setSpeedBase(errX, errZ, errAlpha);
+}
+
 
 void SpecificWorker::odometryAndLocationIssues()
 {
@@ -522,18 +637,30 @@ void SpecificWorker::odometryAndLocationIssues()
 	// Get ODOMETRY and update it in the graph. If there's a problem talking to the robot's platform, abort
 	try
 	{
-		differentialrobot_proxy->getBaseState(bState);
-		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
+		omnirobot_proxy->getBaseState(bState);
+	}
+	catch(...)
+	{
+		printf("Can't connect to the robot!!\n");
+		return;
+	}
+
+	try
+	{
+// 		AGMModelPrinter::printWorld(worldModel);
+		const int32_t robotId = worldModel->getIdentifierByType("robot");
+		AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
 		robot->setAttribute("x", float2str(bState.x));
 		robot->setAttribute("z", float2str(bState.z));
 		robot->setAttribute("alpha", float2str(bState.alpha));
 		AGMMisc::publishNodeUpdate(robot, agmagenttopic);
 	}
-	catch(...)
+	catch (...)
 	{
+		printf("Can't update odometry in the model!!!\n");
 		return;
 	}
-
+// 	printf("oki\n");
 	//  RELOCALIZATION
 	//
 	// to be done
@@ -542,6 +669,12 @@ void SpecificWorker::odometryAndLocationIssues()
 	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
 	//
 	updateRobotsCognitiveLocation();
+}
+
+
+void SpecificWorker::action_NoAction()
+{
+		stop();
 }
 
 

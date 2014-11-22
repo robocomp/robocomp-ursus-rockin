@@ -34,7 +34,7 @@ agmexecutivetopicI.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning TrajectoryRobot2D DifferentialRobot AGMAgent  AGMWorldModel)
+ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning TrajectoryRobot2D OmniRobot AGMAgent  AGMWorldModel)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4
