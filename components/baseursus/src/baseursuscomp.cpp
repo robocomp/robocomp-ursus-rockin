@@ -164,14 +164,14 @@ int BaseUrsusComp::run(int argc, char* argv[])
 	}
 	rInfo("JointMotorProxy initialized Ok!");
 	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);
-	
+
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
 	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor,SIGNAL(kill()),&a,SLOT(quit()));
 	QObject::connect(worker,SIGNAL(kill()),&a,SLOT(quit()));
 	monitor->start();
-	
+
 	if ( !monitor->isRunning() )
 		return status;
 	try
