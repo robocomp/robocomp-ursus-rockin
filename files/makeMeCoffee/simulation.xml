@@ -85,14 +85,14 @@
 
 			<transform id="t_table0" tx="1200" ty="0" tz="1500">
 				<plane id="april-table0" px="0" py="730" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00000.png" />
-				<plane id="p-table0" px="50" py="704" pz="52.5" ny="1" size="1650,605,52" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/wood.jpg" />
+				<plane id="p-table0" px="50" py="704" pz="52.5" ny="1" size="1650,605,52" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/wood.jpg" />
 				<mesh id="mesh-table0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,100,150" ty="0" tz="0" rx="1.57079632679"  />
 				<transform id="mugPos0" tx="0" ty="805" tz="0"/>
 			</transform>
 
 			<transform id="t_table1" tx="1200" ty="0" tz="-1600">
 				<plane id="april-table1" px="0" py="715" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00001.png" />
-				<plane id="p-table1" px="50" py="704" pz="52.5" ny="1" size="1650,605,52" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/wood.jpg" />
+				<plane id="p-table1" px="50" py="704" pz="52.5" ny="1" size="1650,605,52" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/wood.jpg" />
 				<mesh id="mesh-table1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,100,150" ty="0" tz="0" rx="1.57079632679"  />
 				<transform id="mugPos1" tx="100" ty="805" tz="250">
 					<transform id="mugT" >
