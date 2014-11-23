@@ -22,6 +22,20 @@
 #include <innermodel/innermodel.h>
 #include <QtCore>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+#include <fcl/math/transform.h>
+#include <fcl/collision_data.h>
+#include <fcl/collision_object.h>
+#include <fcl/collision.h>
+#include <fcl/narrowphase/narrowphase.h>
+#include <fcl/ccd/motion.h>
+#include <fcl/BV/BV.h>
+#include <fcl/BVH/BVH_model.h>
+#include <fcl/shape/geometric_shapes.h>
+#include <fcl/traversal/traversal_node_setup.h>
+#include <fcl/traversal/traversal_node_bvh_shape.h>
+#include <fcl/traversal/traversal_node_bvhs.h>
+typedef fcl::BVHModel<fcl::OBBRSS> FCLModel;
+typedef boost::shared_ptr<FCLModel> FCLModelPtr;
 #include <assert.h>
 #include <stdio.h>    
 
