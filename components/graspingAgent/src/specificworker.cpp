@@ -228,7 +228,7 @@ void SpecificWorker::actionExecution()
 	}
 	else if (action == "setobjectreach")
 	{
-		action_SetObjectReach();
+// 		action_SetObjectReach();
 	}
 	else if (action == "graspobject")
 	{

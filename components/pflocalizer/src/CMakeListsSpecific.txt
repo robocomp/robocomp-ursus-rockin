@@ -3,13 +3,12 @@
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
+  particle.cpp		
 )
 
 # Headers set
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
+  particle.h
 )
-
-INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)
-

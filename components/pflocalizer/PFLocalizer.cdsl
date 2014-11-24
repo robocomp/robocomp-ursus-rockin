@@ -1,0 +1,9 @@
+import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
+import "/robocomp/interfaces/IDSLs/Laser.idsl";
+
+Component PFLocalizerComp{
+	Communications{
+		requires DifferentialRobot, Laser;
+	};
+	language Cpp;
+};

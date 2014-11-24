@@ -1,18 +1,18 @@
 /*
  * Copyright 2014 <copyright holder> <email>
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 #include "currenttarget.h"
@@ -25,9 +25,9 @@ CurrentTarget::CurrentTarget()
 void CurrentTarget::reset()
 {
 	QMutexLocker  ml(&mutex);
-	active = false; 
-	withoutPlan = true; 
-	targetTr = QVec::zeros(3); 
+	active = false;
+	withoutPlan = true;
+	targetTr = QVec::zeros(3);
 	targetRot = QVec::zeros(3);
 	reloj.start();
 	doRotation = false;
@@ -93,6 +93,7 @@ void CurrentTarget::setWithoutPlan(bool w)
 }
 void CurrentTarget::print()
 {
+	return;
 	QMutexLocker ml(&mutex);
 	qDebug() << "------------------------------------";
 	qDebug() << "CurrentTarget  ---------------------";
@@ -101,6 +102,6 @@ void CurrentTarget::print()
 	qDebug() << "	Rotation:" << targetRot;
 	qDebug() << "	WithoutPlan" << withoutPlan;
 	qDebug() << "	ElapsedTime" << reloj.elapsed()/1000 << "sg";
-	
+
 	qDebug() << "------------------------------------";
 }

@@ -63,10 +63,10 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		//Update InnerModel from robot
 	//try { differentialrobot_proxy->getBaseState(bState); }
 	try {  omnirobot_proxy->getBaseState(bState); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with robot proxy");}
 	// DESCOMENTAR:!!!!!!!!!!!!!!
 	try { laserData = laser_proxy->getLaserData(); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
 
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);   //"robot" should be an external parameter
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
@@ -155,7 +155,7 @@ void SpecificWorker::compute( )
 
 		if(reloj.elapsed() > 2000)
 		{
-			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
+// 			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
 			if( reloj2.elapsed() < 100 )
 			{
 			road.clearDraw(innermodelmanager_proxy);
@@ -219,7 +219,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 
 		//road.print();
 
-		road.printRobotState( innerModel, currentTarget);
+// 		road.printRobotState( innerModel, currentTarget);
 
 		//controller->update(innerModel, laserData, differentialrobot_proxy, road);
 		controller->update(innerModel, laserData, omnirobot_proxy, road);
@@ -371,7 +371,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 			return false;
 		}
 		currentTarget.setTranslation( localTarget );
-		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
+// 		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
 
 		// take inner to current values
 		updateInnerModel(inner);
@@ -385,7 +385,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		//road.last() = currentTarget.getRotation();
 		road.requiresReplanning = false;
 		road.computeDistancesToNext();
-		road.print();
+// 		road.print();
 		road.computeForces();  //NOT SURE IF NEEDED HERE
 		road.startRoad();
 		compState.planningTime = road.getETA();
@@ -532,7 +532,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 	{
 		if( searchRobotValidStateCloseToTarget(innerModel, laserData, t ))
 		{
-			t.print("target after relocation");
+// 			t.print("target after relocation");
 			if( (currentTarget.getTranslation() - t).norm2() > 30 )
 			{
 				currentTarget.setTranslation( t );

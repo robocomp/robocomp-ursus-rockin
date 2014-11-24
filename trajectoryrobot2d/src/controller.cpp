@@ -143,9 +143,9 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-		qDebug() << "------------------Controller Report ---------------;";
- 		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
-		qDebug() << "---------------------------------------------------;";
+// 		qDebug() << "------------------Controller Report ---------------;";
+//  		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+// 		qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(0, vadvance, vrot); }

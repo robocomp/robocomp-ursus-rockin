@@ -2,141 +2,6 @@
 	<transform id="world">
 
 		<transform id="floor" />
-		<transform id="offset">
-			<transform id="piso" rx="1.57079632679" rz="3.14159265359" tx="200" tz="-3500" >
-				<transform id="pisoP" >
-
-<!--					<mesh id="pared1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared1.osg" scale="10" />
-					<mesh id="pared2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared2.osg" scale="10" />
-					<mesh id="pared3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared3.osg" scale="10" />
-					<mesh id="pared4" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared4.osg" scale="10" />
-					<mesh id="pared5" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared5.osg" scale="10" />
-					<mesh id="pared6" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared6.osg" scale="10" />
-					<mesh id="pared7" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared7.osg" scale="10" />
-					<mesh id="pared8" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared8.osg" scale="10" />
-					<mesh id="pared9" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared9.osg" scale="10" />
-					<mesh id="pared10" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared10.osg" scale="10" />
-					<mesh id="pared11" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared11.osg" scale="10" />
-					<mesh id="pilar1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pilar1.osg" scale="10" />
-					<mesh id="pilar2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pilar2.osg" scale="10" />-->
-	<!-- 				<mesh id="columna1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/columna1.osg" scale="10" /> -->
-	<!-- 				<mesh id="columna2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/columna2.osg" scale="10" /> -->
-<!--					<mesh id="paredwc1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/paredwc1.osg" scale="10" />
-					<mesh id="paredwc2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/paredwc2.osg" scale="10" />
-					<mesh id="paredwc3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/paredwc3.osg" scale="10" />-->
-	<!-- 				<mesh id="indoor" file="/home/robocomp/robocomp/files/osgModels/piso_osg/indoor.osg" scale="10" /> -->
-<!-- 					<mesh id="wcdoor" file="/home/robocomp/robocomp/files/osgModels/piso_osg/wcdoor.osg" scale="10" /> -->
-	<!-- 				<mesh id="cristalera2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cristalera2.osg" scale="10" /> -->
-<!--					<mesh id="tubes" file="/home/robocomp/robocomp/files/osgModels/piso_osg/tubes.osg" scale="10" />
-					<mesh id="arch1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/arch1.osg" scale="10" />
-					<mesh id="arch2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/arch2.osg" scale="10" />
-					<mesh id="suelo" file="/home/robocomp/robocomp/files/osgModels/piso_osg/suelo.osg" scale="10" />
-					<mesh id="wc" file="/home/robocomp/robocomp/files/osgModels/piso_osg/wc.osg" scale="10"  tz="-10" />-->
-	<!-- 				<mesh id="lavabo" file="/home/robocomp/robocomp/files/osgModels/piso_osg/lavavo.osg" scale="10" /> -->
-<!-- 					<mesh id="platoducha" file="/home/robocomp/robocomp/files/osgModels/piso_osg/platoducha.osg" scale="10" tz="-10" /> -->
-
-<!-- 					<mesh id="cocinabase" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cocinabase1.osg" scale="10" /> -->
-	<!-- 				<mesh id="fregadero" file="/home/robocomp/robocomp/files/osgModels/piso_osg/fregadero.osg" scale="10" /> -->
-	<!-- 				<mesh id="encimera" file="/home/robocomp/robocomp/files/osgModels/piso_osg/encimera.osg" scale="10" /> -->
-	<!-- 				<mesh id="nevera" file="/home/robocomp/robocomp/files/osgModels/piso_osg/nevera.osg" scale="10" /> -->
-	<!-- 				<mesh id="escurreplatos" file="/home/robocomp/robocomp/files/osgModels/piso_osg/escurreplatos.osg" scale="10" /> -->
-
-	<!-- 				<mesh id="estan_1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/estanteria1.osg" scale="10" tx="5830" ty="-4127.5" tz="-1866" /> -->
-	<!-- 				<mesh id="estan_2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/estanteria2.osg" scale="10" tx="5830" ty="-4527.5" tz="-1866"/> -->
-	<!-- 				<mesh id="estan_3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/estanteria3.osg" scale="10" tx="5830" ty="-5303" tz="-1866"/> -->
-	<!-- 				<mesh id="estan_4" file="/home/robocomp/robocomp/files/osgModels/piso_osg/estanteria4.osg" scale="10" tx="5830" ty="-5703" tz="-1866"/> -->
-
-	<!-- 				<mesh id="p_lavaplatos" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_lavaplatos.osg" scale="10" tx="5495" ty="-3831" tz="-870"/> -->
-	<!-- 				<mesh id="p_encima_lavaplatos" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_encima_lavaplatos.osg" scale="10" tx="5500" ty="-3839" tz="-1866.5"/> -->
-	<!-- 				<mesh id="bandeja" file="/home/robocomp/robocomp/files/osgModels/piso_osg/bandeja.osg" scale="10" tx="5525" ty="-3840" tz="-1027.5"/> -->
-
-	<!--				<mesh id="p_nevera_peke" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_nevera_peke.osg" scale="10" tx="5500" ty="-2901" tz="-1866.5"/>
-					<mesh id="p_nevera_gr" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_nevera_grande.osg" scale="10" tx="5500" ty="-3502.5" tz="-827"/>
-					<mesh id="canasta" file="/home/robocomp/robocomp/files/osgModels/piso_osg/canasta.osg" scale="10" tx="5560" ty="-3202.5" tz="-252.5"/>
-
-					<mesh id="cajon1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_gr_frente.osg" scale="10"   tx="5495" ty="-3840" tz="-790"/>
-					<mesh id="cajon2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_frente.osg" scale="10" tx="5495" ty="-4315" tz="-790"/>
-					<mesh id="cajon3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_frente.osg" scale="10" tx="5495" ty="-4715" tz="-790"/>
-					<mesh id="cajon4" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_gr_frente.osg" scale="10"   tx="5495" ty="-5740" tz="-790"/>
-					<mesh id="cajon5" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_frente.osg" scale="10" tx="5495" ty="-6215" tz="-790"/>
-
-					<mesh id="puerta1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_gr_der_frente.osg" scale="10" tx="5500" ty="-3565" tz="-720"/>
-					<mesh id="puerta2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_gr_izq_frente.osg" scale="10" tx="5500" ty="-5465" tz="-720"/>
-					<mesh id="puerta3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_gr_izq_frente.osg" scale="10" tx="5500" ty="-6015" tz="-720"/>
-					<mesh id="puerta4" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_der_frente.osg" scale="10" tx="5500" ty="-4115" tz="-720"/>
-					<mesh id="puerta5" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_izq_frente.osg" scale="10" tx="5500" ty="-4915" tz="-720"/>
-					<mesh id="puerta6" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_izq_frente.osg" scale="10" tx="5500" ty="-6415" tz="-720"/>
-
-					<mesh id="puertahorno" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_horno.osg" scale="10" tx="4850" ty="-6430" tz="-247.5"/>
-					<mesh id="puerta_lat1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_izq_lateral.osg" scale="10" tx="5050" ty="-6435" tz="-720"/>
-					<mesh id="puerta_lat2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_gr_izq_lateral.osg" scale="10" tx="3980" ty="-6435" tz="-720"/>
-					<mesh id="puerta_lat3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_izq_lateral.osg" scale="10" tx="3580" ty="-6435" tz="-720"/>
-
-					<mesh id="cajon_lat1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_lateral.osg" scale="10" tx="5280" ty="-6435" tz="-790"/>
-					<mesh id="cajon_lat2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_gr_lateral.osg" scale="10" tx="4255" ty="-6435" tz="-790"/>
-					<mesh id="cajon_lat3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_lateral.osg" scale="10" tx="3780" ty="-6435" tz="-790"/>
-	-->
-				</transform>
-			</transform>
-
-			<transform id="t_human" tx="1200" ty="906" tz="2000">
-				<mesh id="mesh-human" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/human.3ds" scale="145,145,145" ty="0" tz="0" rx="1.57079632679"  />
-			</transform>
-
-			<transform id="t_table0" tx="1200" ty="0" tz="1500">
-				<plane id="april-table0" px="0" py="730" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00000.png" />
-				<plane id="p-table0" px="50" py="704" pz="52.5" ny="1" size="1650,605,52" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/wood.jpg" />
-				<mesh id="mesh-table0" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,100,150" ty="0" tz="0" rx="1.57079632679"  />
-				<transform id="mugPos0" tx="0" ty="805" tz="0"/>
-			</transform>
-
-			<transform id="t_table1" tx="1200" ty="0" tz="-1600">
-				<plane id="april-table1" px="0" py="715" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00001.png" />
-				<plane id="p-table1" px="50" py="704" pz="52.5" ny="1" size="1650,605,52" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/wood.jpg" />
-				<mesh id="mesh-table1" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/table.3ds" scale="140,100,150" ty="0" tz="0" rx="1.57079632679"  />
-				<transform id="mugPos1" tx="100" ty="805" tz="250">
-					<transform id="mugT" >
-						<!--<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />-->
-						<plane id="april-mug" px="0" py="50" pz="8" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
-						<mesh id="mesh-mug" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/mug.3ds" scale="170,107,170" ty="-15" tz="0" rx="1.57079632679"/>
-					</transform>
-				</transform>
-			</transform>
-<!--
-			<transform id="mugTPoseOnTable"  tx="1300" ty="805" tz="-1350" >
-			<transform id="mugT" tx="1300" ty="805" tz="-1350">
-				    <transform id="mugT" >
-				    <plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />
-					<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" />
-					<mesh id="mesh-mug" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/mug.3ds" scale="170,107,170" ty="-15" tz="0" rx="1.57079632679"/>
-				</transform>
-			</transform>-->
-
-			<!--		<transform id="milkT" tx="1100" ty="850" tz="-1350">
-				<plane id="april-milk" px="0" py="50" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00013.png" />
-				<mesh id="mesh-milk" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/milk.3ds" scale="145,145,145" ty="-10" tz="0" rz="0.8" rx="1.57079632679"/>
-			</transform>-->
-
-			<transform id="coffeeT" tx="1000" ty="10" tz="1500">
-				<plane id="april-coffee" px="0" py="860" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00014.png" />
-				<mesh id="mesh-coffee" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/coffee.3ds" scale="170,170,170" ty="681" tz="0" rz="-2.4" rx="1.57079632679"/>
-			</transform>
-
-
-			<plane id="derecha"   px="2100"  py="600" pz="100"   nx="1" size="7000,1200,10" texture="#666667" />
-			<plane id="izquierda" px="-1900" py="600" pz="100"   nx="1" size="7000,1200,10" texture="#666667"  />
-			<plane id="atras"     px="200"   py="600" pz="-3300" nz="1" size="4000,1200,10" texture="#666666" />
-			<plane id="frente"    px="200"   py="600" pz="3500"  nz="1" size="4000,1200,10" texture="#666666" />
-		</transform>
-
-
-
-		<plane id="SS"   px="100" pz="100" py="-11" ny="1" size="4200,6900,8" texture="#666666" />
-		<plane id="NO"   px="-1920" pz="3500" py="1500" nx="1" size="200,3000,200" texture="#ff0000"  />
-		<plane id="NE"   px="+2000" pz="3500" py="1500" nx="1" size="200,3000,200" texture="#00ff00"  />
-		<plane id="SE"   px="+2000" pz="-3300" py="1500" nx="1" size="200,3000,200" texture="#0000ff"  />
-		<plane id="SO"   px="-1920" pz="-3300" py="1500" nx="1" size="200,3000,200" texture="#ffffff"  />
-
 
 		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
@@ -151,13 +16,17 @@
 
 				<transform  id="base_trans" >
 					<joint id="base" port="20000" axis="y" home="0">
- 						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.3ds"  tx="0" ty="10" tz="0" scale="1000"  />
+ 						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.ive"  tx="0" ty="10" tz="0" scale="1000"  />
 						<transform id="base_body" rx="-1.5707963267948966" ty="0" tz="0" >
 							<!-- Gira en Z -->
 							<joint id="body" port="20000" min="-1" max="1" axis="z" >
  							<mesh id="barrahombro" file="/home/robocomp/robocomp/files/osgModels/robexarm/barrahombro.3ds" tx="-150" ty="0" tz="945" ry="-1.5707963267948966" scale="1000"  />
 							<mesh id="barracuello" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracuello.ive" tx="0" ty="0" tz="930" rx="3.14159265359" scale="1000"  />
  							<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850"  />
+
+
+
+
 
 							<transform id="base_bodypost" rx="1.5707963267948966" ty="0" tz="0" >
 								<!--<transform id="head_axes_0" >
@@ -182,13 +51,6 @@
 
 											<transform id="head_pre_tilt" ry="1.57079632679">
 												<joint id="head_pitch_joint" port="20000" min="-1" max="1" axis="z" >
-													<transform id="nose" ty="85" tx="-20" > 
-								<!--						<transform id="head_axes_2" ty="10">
-															<plane id="head_x_2" px="100" nz="1" size="200,10,10" repeat="1" texture="#ff0000" />
-															<plane id="head_y_2" py="100" nz="1" size="10,200,10" repeat="1" texture="#00ff00" />
-															<plane id="head_z_2" pz="100" nz="1" size="10,10,200" repeat="1" texture="#0000ff" />
-														</transform>			
-							-->						</transform>
 													<transform id="head_post_tilt" ry="-1.57079632679">
 														<!-- center mesh -->
 														<mesh id="head_center_mesh1" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="95,20,20" ty="50" />
@@ -198,7 +60,6 @@
 														<transform id="rgbd_transform0" ty="85">
 															<transform id="rgbd_transform" tz="20">
 																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" />
-																
 															</transform>
 															<mesh id="sensorRGBD" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/cube.3ds" scale="100,21,30" />
 
