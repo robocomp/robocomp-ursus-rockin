@@ -44,10 +44,9 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 
 	if( (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
-		qDebug() << __FILE__ << __FUNCTION__;
-		if( road.isFinished() ) qDebug() << "road finished";
-		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
-		if( road.isLost ) qDebug() << "robot is lost";
+// 		if( road.isFinished() ) qDebug() << "road finished";
+// 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
+// 		if( road.isLost ) qDebug() << "robot is lost";
 		stopTheRobot(omnirobot_proxy);
 		return false;
 	}
@@ -143,9 +142,9 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-		qDebug() << "------------------Controller Report ---------------;";
- 		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
-		qDebug() << "---------------------------------------------------;";
+// 		qDebug() << "------------------Controller Report ---------------;";
+//  		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+// 		qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(0, vadvance, vrot); }

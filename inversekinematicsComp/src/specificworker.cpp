@@ -884,8 +884,14 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 // 		qDebug() << "<";
 		RoboCompOmniRobot::TBaseState bState;
 		omnirobot_proxy->getBaseState( bState );
-		innerModel->updateTransformValues("robot", bState.x/1000, 0, bState.z/1000, 0, bState.alpha, 0);
-// 		qDebug() << ">";
+		try
+		{
+			innerModel->updateTransformValues("robot", bState.x/1000, 0, bState.z/1000, 0, bState.alpha, 0);
+		}
+		catch (const Ice::Exception &ex)
+		{
+			cout<<"--> Exception updating transform values: "<<ex<<endl;
+		}
 	}
 	catch (const Ice::Exception &ex)
 	{
