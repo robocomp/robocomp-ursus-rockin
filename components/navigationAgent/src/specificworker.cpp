@@ -260,6 +260,8 @@ void SpecificWorker::actionExecution()
 		printf("New action: %s\n", action.c_str());
 	}
 
+	printf(" action: %s\n", action.c_str());
+
 	try
 	{
 		planningState = trajectoryrobot2d_proxy->getState();
@@ -497,7 +499,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
 	const float rx = str2float(robot->getAttribute("x"));
 	const float rz = str2float(robot->getAttribute("z"));
-	const float ralpha = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("alpha"));
 
 	// Avoid repeating the same goal and confuse the navigator
 	const float errX = abs(rx-x);
@@ -506,7 +508,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
 	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
 	errAlpha = abs(errAlpha);
-	if (errX<20 and errZ<20 and errAlpha<02)
+	if (errX<20 and errZ<20 and errAlpha<0.02)
 		return;
 
 	bool proceed = true;
@@ -531,26 +533,25 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	}
 	else
 	{
-		printf("%s\n", planningState.state.c_str());
 	}
 }
 
 
 void SpecificWorker::action_SetObjectReach()
 {
+	printf("void SpecificWorker::action_SetObjectReach()\n");
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
-
 	int32_t objectId = str2int(params["object"].value);
 	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
 	const float x = str2float(goalObject->getAttribute("x"));
 	const float z = str2float(goalObject->getAttribute("z"));
 	float alpha = objectId==7?-3.141592:0;
 
-	AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
-	const float rx = str2float(robot->getAttribute("x"));
-	const float rz = str2float(robot->getAttribute("z"));
-	const float ralpha = str2float(robot->getAttribute("z"));
+	AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot")); // printf("%s, %d\n", __FILE__, __LINE__);
+	const float rx = str2float(robot->getAttribute("x")); // printf("%s, %d\n", __FILE__, __LINE__);
+	const float rz = str2float(robot->getAttribute("z")); // printf("%s, %d\n", __FILE__, __LINE__);
+	const float ralpha = str2float(robot->getAttribute("alpha")); // printf("%s, %d\n", __FILE__, __LINE__);
 
 	// Avoid repeating the same goal and confuse the navigator
 	const float errX = abs(rx-x);
@@ -579,7 +580,7 @@ void SpecificWorker::action_SetObjectReach()
 	{
 		lastX = x;
 		lastZ = z;
-		printf("setobjectreach %d\n", objectId);
+		printf("setobjectreach %d   (%f, %f)\n", objectId, x, z);
 		go(x, objectId==7?z+550:z-550, objectId==7?-3.141592:0, true);
 	}
 	else
