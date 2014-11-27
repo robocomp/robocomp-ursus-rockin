@@ -9,3 +9,4 @@ CommonBehavior.Endpoints=tcp -p 12239
 #RemoteProxy = remote:tcp -h remotehost -p 10001
 
 JointMotorProxy = jointmotor:tcp -h localhost -p 10067
+

@@ -76,12 +76,11 @@
 #include "specificworker.h"
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
-#include <omnirobotI.h>
-#include <differentialrobotI.h>
 
 // Includes for remote proxy example
 // #include <Remote.h>
-#include <JointMotor.h>
+#include <Laser.h>
+#include <DifferentialRobot.h>
 
 
 // User includes here
@@ -89,12 +88,11 @@
 // Namespaces
 using namespace std;
 using namespace RoboCompCommonBehavior;
+using namespace RoboCompLaser;
 using namespace RoboCompDifferentialRobot;
-using namespace RoboCompOmniRobot;
-using namespace RoboCompJointMotor;
 
 
-class BaseUrsusComp : public RoboComp::Application
+class PFLocalizerComp : public RoboComp::Application
 {
 private:
 	// User private data here
@@ -106,14 +104,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void BaseUrsusComp::initialize()
+void PFLocalizerComp::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int BaseUrsusComp::run(int argc, char* argv[])
+int PFLocalizerComp::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -124,7 +122,8 @@ int BaseUrsusComp::run(int argc, char* argv[])
 
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
-	JointMotorPrx jointmotor_proxy;
+	LaserPrx laser_proxy;
+DifferentialRobotPrx differentialrobot_proxy;
 
 
 	string proxy;
@@ -155,23 +154,34 @@ int BaseUrsusComp::run(int argc, char* argv[])
 	//Remote server proxy creation example
 	try
 	{
-		jointmotor_proxy = JointMotorPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("JointMotorProxy") ) );
+		laser_proxy = LaserPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("LaserProxy") ) );
 	}
 	catch(const Ice::Exception& ex)
 	{
 		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
 		return EXIT_FAILURE;
 	}
-	rInfo("JointMotorProxy initialized Ok!");
-	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);
-
+	rInfo("LaserProxy initialized Ok!");
+	mprx["LaserProxy"] = (::IceProxy::Ice::Object*)(&laser_proxy);//Remote server proxy creation example
+	try
+	{
+		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("DifferentialRobotProxy") ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("DifferentialRobotProxy initialized Ok!");
+	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);
+	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
 	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor,SIGNAL(kill()),&a,SLOT(quit()));
 	QObject::connect(worker,SIGNAL(kill()),&a,SLOT(quit()));
 	monitor->start();
-
+	
 	if ( !monitor->isRunning() )
 		return status;
 	try
@@ -182,16 +192,6 @@ int BaseUrsusComp::run(int argc, char* argv[])
 		adapterCommonBehavior->add(commonbehaviorI, communicator()->stringToIdentity("commonbehavior"));
 		adapterCommonBehavior->activate();
 		// Server adapter creation and publication
-		Ice::ObjectAdapterPtr adapterOmniRobot = communicator()->createObjectAdapter("OmniRobotComp");
-		OmniRobotI *omnirobot = new OmniRobotI(worker);
-		adapterOmniRobot->add(omnirobot, communicator()->stringToIdentity("omnirobot"));
-
-		adapterOmniRobot->activate();
-		Ice::ObjectAdapterPtr adapterDifferentialRobot = communicator()->createObjectAdapter("DifferentialRobotComp");
-		DifferentialRobotI *differentialrobot = new DifferentialRobotI(worker);
-		adapterDifferentialRobot->add(differentialrobot, communicator()->stringToIdentity("differentialrobot"));
-
-		adapterDifferentialRobot->activate();
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )
@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 {
 	bool hasConfig = false;
 	string arg;
-	BaseUrsusComp app;
+	PFLocalizerComp app;
 
 	// Search in argument list for --Ice.Config= argument
 	for (int i = 1; i < argc; ++i)
