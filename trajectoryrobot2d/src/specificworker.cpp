@@ -63,10 +63,10 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		//Update InnerModel from robot
 	//try { differentialrobot_proxy->getBaseState(bState); }
 	try {  omnirobot_proxy->getBaseState(bState); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, robot not found");}
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with robot proxy");}
 	// DESCOMENTAR:!!!!!!!!!!!!!!
 	try { laserData = laser_proxy->getLaserData(); }
-	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, laser not found");}
+	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
 
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);   //"robot" should be an external parameter
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
@@ -219,7 +219,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 
 		//road.print();
 
-		road.printRobotState( innerModel, currentTarget);
+// 		road.printRobotState( innerModel, currentTarget);
 
 		//controller->update(innerModel, laserData, differentialrobot_proxy, road);
 		controller->update(innerModel, laserData, omnirobot_proxy, road);
@@ -385,7 +385,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		//road.last() = currentTarget.getRotation();
 		road.requiresReplanning = false;
 		road.computeDistancesToNext();
-		road.print();
+// 		road.print();
 		road.computeForces();  //NOT SURE IF NEEDED HERE
 		road.startRoad();
 		compState.planningTime = road.getETA();
@@ -532,7 +532,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 	{
 		if( searchRobotValidStateCloseToTarget(innerModel, laserData, t ))
 		{
-			t.print("target after relocation");
+// 			t.print("target after relocation");
 			if( (currentTarget.getTranslation() - t).norm2() > 30 )
 			{
 				currentTarget.setTranslation( t );

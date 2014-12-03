@@ -248,12 +248,19 @@
 		<transform id="initialRobotPose" tx="0" tz="0" ry="-3.14" ty="10">
 			<differentialrobot id="robot" port="10004"  >
 
-				<translation id="laserPose" tx="0" ty="40" tz="100">
+	<!--			<translation id="laserPose" tx="0" ty="40" tz="100">
 					<laser id="laser" port="10003" measures="100" min="100" max="30000" angle="3" ifconfig="10000" />
 					<plane id="sensorL" nz="1" pz="-200" size="100" repeat="1" texture="#ff0000" /> 
 				</translation>	-->
 				
 				
+ 				<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
+  <!-- 					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> -->
+				<!--	<rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
+				-->		<rgbd id="laser" focal="120" width="160" height="120" port="10097" ifconfig="20000,10004" />
+ 					<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" />
+ 				</transform>
+	
 				<transform  id="base_trans" >
 					<joint id="base" port="20000" axis="y" home="0">
 						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.ive"  tx="0" ty="0" tz="0" scale="1000"  />
