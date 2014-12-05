@@ -8,10 +8,6 @@
 			<omnirobot id="robot" port="10004" >
 
  				<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
-  <!-- 					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> -->
-				<!--	<rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
-				-->		<rgbd id="laser" focal="120" width="160" height="120" port="10097" ifconfig="20000,10004" />
- 					<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" />
  				</transform>
 
 				<transform  id="base_trans" >
@@ -59,7 +55,6 @@
 														<!-- rgbd camera -->
 														<transform id="rgbd_transform0" ty="85">
 															<transform id="rgbd_transform" tz="20">
-																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" />
 															</transform>
 															<mesh id="sensorRGBD" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/cube.3ds" scale="100,21,30" />
 
