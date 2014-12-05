@@ -3,82 +3,6 @@
 
 		<transform id="floor" />
 		<transform id="offset">
-			<transform id="piso" rx="1.57079632679" rz="3.14159265359" tx="200" tz="-3500" >
-				<transform id="pisoP" >
-
-<!--					<mesh id="pared1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared1.osg" scale="10" />
-					<mesh id="pared2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared2.osg" scale="10" />
-					<mesh id="pared3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared3.osg" scale="10" />
-					<mesh id="pared4" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared4.osg" scale="10" />
-					<mesh id="pared5" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared5.osg" scale="10" />
-					<mesh id="pared6" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared6.osg" scale="10" />
-					<mesh id="pared7" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared7.osg" scale="10" />
-					<mesh id="pared8" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared8.osg" scale="10" />
-					<mesh id="pared9" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared9.osg" scale="10" />
-					<mesh id="pared10" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared10.osg" scale="10" />
-					<mesh id="pared11" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pared11.osg" scale="10" />
-					<mesh id="pilar1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pilar1.osg" scale="10" />
-					<mesh id="pilar2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/pilar2.osg" scale="10" />-->
-	<!-- 				<mesh id="columna1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/columna1.osg" scale="10" /> -->
-	<!-- 				<mesh id="columna2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/columna2.osg" scale="10" /> -->
-<!--					<mesh id="paredwc1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/paredwc1.osg" scale="10" />
-					<mesh id="paredwc2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/paredwc2.osg" scale="10" />
-					<mesh id="paredwc3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/paredwc3.osg" scale="10" />-->
-	<!-- 				<mesh id="indoor" file="/home/robocomp/robocomp/files/osgModels/piso_osg/indoor.osg" scale="10" /> -->
-<!-- 					<mesh id="wcdoor" file="/home/robocomp/robocomp/files/osgModels/piso_osg/wcdoor.osg" scale="10" /> -->
-	<!-- 				<mesh id="cristalera2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cristalera2.osg" scale="10" /> -->
-<!--					<mesh id="tubes" file="/home/robocomp/robocomp/files/osgModels/piso_osg/tubes.osg" scale="10" />
-					<mesh id="arch1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/arch1.osg" scale="10" />
-					<mesh id="arch2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/arch2.osg" scale="10" />
-					<mesh id="suelo" file="/home/robocomp/robocomp/files/osgModels/piso_osg/suelo.osg" scale="10" />
-					<mesh id="wc" file="/home/robocomp/robocomp/files/osgModels/piso_osg/wc.osg" scale="10"  tz="-10" />-->
-	<!-- 				<mesh id="lavabo" file="/home/robocomp/robocomp/files/osgModels/piso_osg/lavavo.osg" scale="10" /> -->
-<!-- 					<mesh id="platoducha" file="/home/robocomp/robocomp/files/osgModels/piso_osg/platoducha.osg" scale="10" tz="-10" /> -->
-
-<!-- 					<mesh id="cocinabase" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cocinabase1.osg" scale="10" /> -->
-	<!-- 				<mesh id="fregadero" file="/home/robocomp/robocomp/files/osgModels/piso_osg/fregadero.osg" scale="10" /> -->
-	<!-- 				<mesh id="encimera" file="/home/robocomp/robocomp/files/osgModels/piso_osg/encimera.osg" scale="10" /> -->
-	<!-- 				<mesh id="nevera" file="/home/robocomp/robocomp/files/osgModels/piso_osg/nevera.osg" scale="10" /> -->
-	<!-- 				<mesh id="escurreplatos" file="/home/robocomp/robocomp/files/osgModels/piso_osg/escurreplatos.osg" scale="10" /> -->
-
-	<!-- 				<mesh id="estan_1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/estanteria1.osg" scale="10" tx="5830" ty="-4127.5" tz="-1866" /> -->
-	<!-- 				<mesh id="estan_2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/estanteria2.osg" scale="10" tx="5830" ty="-4527.5" tz="-1866"/> -->
-	<!-- 				<mesh id="estan_3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/estanteria3.osg" scale="10" tx="5830" ty="-5303" tz="-1866"/> -->
-	<!-- 				<mesh id="estan_4" file="/home/robocomp/robocomp/files/osgModels/piso_osg/estanteria4.osg" scale="10" tx="5830" ty="-5703" tz="-1866"/> -->
-
-	<!-- 				<mesh id="p_lavaplatos" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_lavaplatos.osg" scale="10" tx="5495" ty="-3831" tz="-870"/> -->
-	<!-- 				<mesh id="p_encima_lavaplatos" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_encima_lavaplatos.osg" scale="10" tx="5500" ty="-3839" tz="-1866.5"/> -->
-	<!-- 				<mesh id="bandeja" file="/home/robocomp/robocomp/files/osgModels/piso_osg/bandeja.osg" scale="10" tx="5525" ty="-3840" tz="-1027.5"/> -->
-
-	<!--				<mesh id="p_nevera_peke" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_nevera_peke.osg" scale="10" tx="5500" ty="-2901" tz="-1866.5"/>
-					<mesh id="p_nevera_gr" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_nevera_grande.osg" scale="10" tx="5500" ty="-3502.5" tz="-827"/>
-					<mesh id="canasta" file="/home/robocomp/robocomp/files/osgModels/piso_osg/canasta.osg" scale="10" tx="5560" ty="-3202.5" tz="-252.5"/>
-
-					<mesh id="cajon1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_gr_frente.osg" scale="10"   tx="5495" ty="-3840" tz="-790"/>
-					<mesh id="cajon2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_frente.osg" scale="10" tx="5495" ty="-4315" tz="-790"/>
-					<mesh id="cajon3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_frente.osg" scale="10" tx="5495" ty="-4715" tz="-790"/>
-					<mesh id="cajon4" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_gr_frente.osg" scale="10"   tx="5495" ty="-5740" tz="-790"/>
-					<mesh id="cajon5" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_frente.osg" scale="10" tx="5495" ty="-6215" tz="-790"/>
-
-					<mesh id="puerta1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_gr_der_frente.osg" scale="10" tx="5500" ty="-3565" tz="-720"/>
-					<mesh id="puerta2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_gr_izq_frente.osg" scale="10" tx="5500" ty="-5465" tz="-720"/>
-					<mesh id="puerta3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_gr_izq_frente.osg" scale="10" tx="5500" ty="-6015" tz="-720"/>
-					<mesh id="puerta4" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_der_frente.osg" scale="10" tx="5500" ty="-4115" tz="-720"/>
-					<mesh id="puerta5" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_izq_frente.osg" scale="10" tx="5500" ty="-4915" tz="-720"/>
-					<mesh id="puerta6" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_izq_frente.osg" scale="10" tx="5500" ty="-6415" tz="-720"/>
-
-					<mesh id="puertahorno" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_horno.osg" scale="10" tx="4850" ty="-6430" tz="-247.5"/>
-					<mesh id="puerta_lat1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_izq_lateral.osg" scale="10" tx="5050" ty="-6435" tz="-720"/>
-					<mesh id="puerta_lat2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_gr_izq_lateral.osg" scale="10" tx="3980" ty="-6435" tz="-720"/>
-					<mesh id="puerta_lat3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/p_peke_izq_lateral.osg" scale="10" tx="3580" ty="-6435" tz="-720"/>
-
-					<mesh id="cajon_lat1" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_lateral.osg" scale="10" tx="5280" ty="-6435" tz="-790"/>
-					<mesh id="cajon_lat2" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_gr_lateral.osg" scale="10" tx="4255" ty="-6435" tz="-790"/>
-					<mesh id="cajon_lat3" file="/home/robocomp/robocomp/files/osgModels/piso_osg/cajon_peke_lateral.osg" scale="10" tx="3780" ty="-6435" tz="-790"/>
-	-->
-				</transform>
-			</transform>
-
 			<transform id="t_human" tx="1200" ty="906" tz="2000">
 				<mesh id="mesh-human" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/human.3ds" scale="145,145,145" ty="0" tz="0" rx="1.57079632679"  />
 			</transform>
@@ -142,19 +66,19 @@
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
 			<omnirobot id="robot" port="10004" >
 
- 				<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
-  <!-- 					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> -->
-				<!--	<rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
-				-->		<rgbd id="laser" focal="120" width="160" height="120" port="10097" ifconfig="20000,10004" />
-<!--  					<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" /> -->
+				<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
+					<!-- <laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> -->
+					<!-- <rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />-->
+					<rgbd id="laser" focal="120" width="160" height="120" port="10097" ifconfig="20000,10004" />
+					<!-- <plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" /> -->
  				</transform>
 
 				<transform  id="base_trans" >
-					<joint id="base" port="20000" axis="y" home="0">
- 						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.3ds"  tx="0" ty="10" tz="0" scale="1000"  />
+					<joint id="base" port="10065" axis="y" home="0">
+ 						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.3ds" rx="1.5707963268" tx="0" ty="10" tz="0" scale="1000"  />
 						<transform id="base_body" rx="-1.5707963267948966" ty="0" tz="0" >
 							<!-- Gira en Z -->
-							<joint id="body" port="20000" min="-1" max="1" axis="z" >
+							<joint id="body" port="10065" min="-1" max="1" axis="z" >
  							<mesh id="barrahombro" file="/home/robocomp/robocomp/files/osgModels/robexarm/barrahombro.3ds" tx="-150" ty="0" tz="945" ry="-1.5707963267948966" scale="1000"  />
 							<mesh id="barracuello" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracuello.ive" tx="0" ty="0" tz="930" rx="3.14159265359" scale="1000"  />
  							<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850"  />
@@ -175,7 +99,7 @@
 										<plane id="head_y_1" py="100" nz="1" size="20,200,20" repeat="1" texture="#00ff00" />
 										<plane id="head_z_1" pz="100" nz="1" size="20,20,200" repeat="1" texture="#0000ff" />
 									</transform>-->
-									<joint id="head_yaw_joint" port="20000" min="-1" max="1" axis="z" >
+									<joint id="head_yaw_joint" port="10068" min="-1" max="1" axis="z" >
 										<mesh id="head_base_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="25,25,87.5" tz="87.5" />
 										<transform id="head_rot_tilt_pose" tz="0" tz="175" rx="1.5707963267948966" >
 											<!--<transform id="head_axes_2" >
@@ -185,7 +109,7 @@
 											</transform>-->
 
 											<transform id="head_pre_tilt" ry="1.57079632679">
-												<joint id="head_pitch_joint" port="20000" min="-1" max="1" axis="z" >
+												<joint id="head_pitch_joint" port="10068" min="-1" max="1" axis="z" >
 													<transform id="head_post_tilt" ry="-1.57079632679">
 														<!-- center mesh -->
 														<mesh id="head_center_mesh1" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="95,20,20" ty="50" />
@@ -204,7 +128,7 @@
 														<!-- left camera -->
 														<transform id="left_rgb" tx="-75">
 															<transform id="left_rgb_pan_pre" rx="-1.57079632679">
-																<joint id="left_rgb_pan" port="20000" min="-1" max="1" axis="z" >
+																<joint id="left_rgb_pan" port="10068" min="-1" max="1" axis="z" >
 																	<transform id="left_rgb_pan_post" rx="1.57079632679">
 																		<transform id="left_axes" >
 																			<plane id="left_x" px="25" nz="1" size="50,5,5" repeat="1" texture="#ff0000" />
@@ -220,7 +144,7 @@
 														<!-- right camera -->
 														<transform id="right_rgb" tx="75">
 															<transform id="right_rgb_pan_pre" rx="-1.57079632679">
-																<joint id="right_rgb_pan" port="20000" min="-1" max="1" axis="z" >
+																<joint id="right_rgb_pan" port="10068" min="-1" max="1" axis="z" >
 																	<transform id="right_rgb_pan_post" rx="1.57079632679">
 																		<transform id="right_axes" >
 																			<plane id="right_x" px="25" nz="1" size="50,5,5" repeat="1" texture="#ff0000" />
@@ -251,7 +175,7 @@
 						<transform id="arm_right_1" tx="174" tz="990" ry="1.5707963267948966" rz="1.5707963267948966">
 <!-- 						Gira en Z -->
 							<mesh id="arm_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo1.ive" rz="0" tz="-55" ty="-30" scale="1000"    />
-							<joint id="rightShoulder1" port="20000" axis="z" min="-3.14" max="0.54" home="-0.1">
+							<joint id="rightShoulder1" port="10067" axis="z" min="-3.14" max="0.54" home="-0.1">
 <!--								<transform id="axessr1" >
 									<plane id="xsr1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 									<plane id="ysr1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -260,7 +184,7 @@
 								<mesh id="shoulder_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo2.ive" rz="0" tz="0" scale="1000"    />
 								<transform id="arm_right_2" tz="41" rx="1.5707963267948966">
 <!-- 									Gira en X -->
-									<joint id="rightShoulder2" port="20000"  axis="x" min="-3.14" max="0.34" home="-0.1" >
+									<joint id="rightShoulder2" port="10067"  axis="x" min="-3.14" max="0.34" home="-0.1" >
 <!--										<transform id="axessr2" >
 											<plane id="xsr2" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 											<plane id="ysr2" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -269,7 +193,7 @@
 										<mesh id="shoulder_right_2_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo3.ive" rx="0" scale="1000"     />
 										<transform id="arm_right_3" tz="234" rz="-1.5707963267948966" >
 <!-- 											Gira en Z -->
-											<joint id="rightShoulder3" port="20000"  axis="z" min="-1.8" max="1.8" home="0.1">
+											<joint id="rightShoulder3" port="10067"  axis="z" min="-1.8" max="1.8" home="0.1">
 <!--												<transform id="axessr3" >
 													<plane id="xsr3" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 													<plane id="ysr3" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -278,7 +202,7 @@
 												<mesh id="shoulder_right_3_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo4.ive" rz="3.14159265359" scale="1000"     />
 												<transform id="arm_right_4" ty="-28"  tz="20"    > <!--Codo-->
 <!-- 													Gira en X -->
-													<joint id="rightElbow" port="20000" axis="x"  min="0.01" max="2.6" home="0.1" >
+													<joint id="rightElbow" port="10067" axis="x"  min="0.01" max="2.6" home="0.1" >
 <!--													<transform id="axeser1" >
 														<plane id="xer1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 														<plane id="yer1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -287,7 +211,7 @@
 													<mesh id="elbow_right_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo5.ive" rz="3.14159265359" ty="0" scale="1000"     />
 														<transform id="arm_right_5" ty="28" tz="166"    > <!--Giro1 muñeca-->
 <!-- 															Gira en Z-->
-															<joint id="rightForeArm" port="20000" axis="z" min="-1.8" max="1.8" home="0.1">
+															<joint id="rightForeArm" port="10068" axis="z" min="-1.8" max="1.8" home="0.1">
 <!--																<transform id="axesfa1" >
 																	<plane id="xfa1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 																	<plane id="yfa1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -299,7 +223,7 @@
 																<transform id="arm_right_6" tz="60" >
 	<!-- 																Gira en x -->
 																	<plane id="motorWrist1Mesh" py="0" pz="-20" ny="1" size="40,66,-40" repeat="1" texture="#152115" />
-																	<joint id="rightWrist1" port="20000" min="-1.5707963267948966" max="1.5707963267948966" axis="x" home="0" >
+																	<joint id="rightWrist1" port="10068" min="-1.5707963267948966" max="1.5707963267948966" axis="x" home="0" >
 
 																		<!--<transform id="axeswr1" >
 																			<plane id="xwr1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -311,7 +235,7 @@
 																		<transform id="arm_right_7" tz="60" >
 			<!-- 																Gira en Y -->
 																			<plane id="motorWrist2Mesh" px="-15" pz="-20" ny="1" size="66,40,-40" repeat="1" texture="#152115" />
-																			<joint id="rightWrist2" port="20000" min="-0.1" max="1.5707963267948966" axis="y" home="0" >
+																			<joint id="rightWrist2" port="10068" min="-0.1" max="1.5707963267948966" axis="y" home="0" >
 
 																				<!--<transform id="axeswr2" >
 																					<plane id="xwr2" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -324,7 +248,7 @@
 																				<transform id="arm_right_8" tx="20" tz="95" >
 					<!-- 																Gira en Y -->
 																					<mesh id="finger_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" ty="0" tz="-22" scale="20"    />
-																					<joint id="rightFinger1" port="20000" min="-1.5707963267948966" max="0" axis="y" home="0" >
+																					<joint id="rightFinger1" port="10068" min="-1.5707963267948966" max="0" axis="y" home="0" >
 																						<mesh id="finger_right_1_mesh2" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tx="18" ty="12" scale="18,5,5"    />
 																						<transform id="finger_right_1_1_pre" tx="30" ty="12" ry="0.7"  >
 																							<mesh id="finger_right_1_mesh3" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tz="30" scale="5,5,30"    />
@@ -355,7 +279,7 @@
 																				<transform id="arm_right_9" tx="-20" tz="95" >
 					<!-- 																Gira en Y -->
 																					<mesh id="finger_right_2_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" ty="0" tz="-22" scale="20"    />
-																					<joint id="rightFinger2" port="20000" min="0" max="1.5707963267948966" axis="y" home="0" >
+																					<joint id="rightFinger2" port="10068" min="0" max="1.5707963267948966" axis="y" home="0" >
 																						<mesh id="finger_right_2_mesh2" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tx="-18" scale="-18,5,5"    />
 																						<transform id="finger_right_2_1_pre" tx="-30" ry="-0.7"  >
 																							<mesh id="finger_right_2_mesh3" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tz="30" scale="5,5,30"    />
@@ -378,19 +302,6 @@
 																						</transform>
 																					</joint>
 																				</transform>
-
-<!--																				<transform id="axesrh2"  tz="117" >
-																					<plane id="xrh2" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
-																					<plane id="yrh2" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
-																					<plane id="zrh2" pz="50" nx="1" size="100,1,1" repeat="1" texture="#0000ff" />
-																				</transform>
-																			-->
-																	<!--			<transform id="grabPositionHandR" tz="0.250" rx="3.14159265359" ry="-1.5707963267948966">
-																					<plane id="axisx" px="50" nx="1" size="1,1,100" repeat="1" texture="#550000" />
-																					<plane id="axisy" py="50" nx="1" size="1,100,1" repeat="1" texture="#005500" />
-																					<plane id="axisz" pz="50" nx="1" size="100,1,1" repeat="1" texture="#000055" />
-																				</transform>-->
-
 
 																				<!-- El siguiente transform es para que coincidan los ejes de la marca con los del mundo	 -->
 																				<transform	id="ThandMesh2_pre"  ty="-25" tz= "55" rx="-1.5707963267948966" rz="3.14159265359">
@@ -426,38 +337,6 @@
 
 																	</joint>
 																</transform>
-
-
-<!--																<transform id="arm_right_6" tz="1" >
-
-																	<joint id="rightWrist1" port="20000" axis="z">
-
-																	<joint id="rightWrist2" port="20000" axis="x" min="-0.8" max="0.8">
-
-																	<joint id="rightWrist3" port="20000" axis="y" min="-0.8" max="0.8">
-																		<transform id="arm_right_7" tx="0.0"    >
-																			<joint id="hand_right" port="20000">
-																				<mesh id="hand_right_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/mano.ive" scale="1000" ry="-1.5707963267948966" tz="0.080"/>
-																				<transform id="axesHandR" >
-																					<plane id="xHandR" px="100" nx="1" size="0.010,0.010,100" repeat="1" texture="#ff0000" />
-																					<plane id="yHandR" py="100" nx="1" size="0.010,100,0.010" repeat="1" texture="#00ff00" />
-																					<plane id="zHandR" pz="100" nx="1" size="100,0.010,0.010" repeat="1" texture="#0000ff" />
-																					<transform id="grabPositionHandR" tz="0.200">
-																						<plane id="axisx" px="50" nx="1" size="0.015,0.015,0.200" repeat="1" texture="#550000" />
-																						<plane id="axisy" py="50" nx="1" size="0.015,0.200,0.015" repeat="1" texture="#005500" />
-																						<plane id="axisz" pz="50" nx="1" size="0.200,0.015,0.015" repeat="1" texture="#000055" />
-																					</transform>
-																				</transform>
-																			</joint>
-																		</transform>
-																	</joint>
-																	</joint>
-																	</joint>
-																</transform>-->
-
-
-
-
 															</joint>
 														</transform>
 													</joint>
@@ -477,7 +356,7 @@
 						<transform id="niapa_arm_left_1" rz="0" >
 							<mesh id="arm_left_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo1.ive" rz="3.14159265359" tz="-55" tx="0" ty="30" scale="1000"    />
 							<!-- Gira en Z -->
-							<joint id="leftShoulder1" port="20000" min="-0.54" max="3.14" axis="z" home="0.1">
+							<joint id="leftShoulder1" port="10067" min="-0.54" max="3.14" axis="z" home="0.1">
 <!--								<transform id="axessl1" >
 									<plane id="xsl1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
 									<plane id="ysl1" py="50" nx="1" size="1,100,1" repeat="1" texture="#00ff00" />
@@ -487,7 +366,7 @@
 
 								<transform id="arm_left_2" tz="41" rx="-1.5707963267948966">
 <!-- 								Gira en X -->
-									<joint id="leftShoulder2" port="20000" min="-0.34" max="3.14" axis="x" home="0.1" >
+									<joint id="leftShoulder2" port="10067" min="-0.34" max="3.14" axis="x" home="0.1" >
 
 <!--										<transform id="axessl2" >
 											<plane id="xsl2" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -498,7 +377,7 @@
 
 										<transform id="arm_left_3" tz="234" rz="1.5707963267948966" >
 											<!-- Gira en Z -->
-											<joint id="leftShoulder3" port="20000" min="-1.8" max="1.8" axis="z" home="-0.1" >
+											<joint id="leftShoulder3" port="10067" min="-1.8" max="1.8" axis="z" home="-0.1" >
 
 <!--												<transform id="axessl3" >
 													<plane id="xsl3" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -509,7 +388,7 @@
 
 												<transform id="arm_left_4"  ty="28"  tz="20" > <!--Codo-->
 <!-- 													Gira en X -->
-														<joint id="leftElbow" port="20000"  axis="x" min="-2.6" max="0" home="-0.1" >
+														<joint id="leftElbow" port="10067"  axis="x" min="-2.6" max="0" home="-0.1" >
 
 <!--															<transform id="axesel1" >
 																<plane id="xel1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -520,7 +399,7 @@
 
 															<transform id="arm_left_5" ty="-28" tz="166"    > <!--Giro1 muñeca-->
 <!-- 															Gira en Z-->
-																<joint id="leftForeArm" port="20000" min="-2.3" max="2.3" home="0" axis="z">
+																<joint id="leftForeArm" port="10068" min="-2.3" max="2.3" home="0" axis="z">
 
 <!--																	<transform id="axesfal1" >
 																		<plane id="xfal1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -533,7 +412,7 @@
 																	<transform id="arm_left_6" tz="63" >
 	<!-- 																Gira en x -->
 																	  <plane id="motorleftWrist1Mesh" py="0" pz="-20" ny="1" size="40,66,-40" repeat="1" texture="#152115" />
-																	  <joint id="leftWrist1" port="20000" min="-1.5707963267948966" max="1.5707963267948966" axis="x" home="0" >
+																	  <joint id="leftWrist1" port="10068" min="-1.5707963267948966" max="1.5707963267948966" axis="x" home="0" >
 
   																		<!--<transform id="axeswl1" >
 																			  <plane id="xwl1" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -545,7 +424,7 @@
 																		  <transform id="arm_left_7" tz="60" >
 			  <!-- 																Gira en Y -->
 																			  <plane id="motolefrWrist2Mesh" px="-15" pz="-20" ny="1" size="66,40,-40" repeat="1" texture="#152115" />
-																			  <joint id="leftWrist2" port="20000" min="-0.1" max="1.5707963267948966" axis="y" home="0" >
+																			  <joint id="leftWrist2" port="10068" min="-0.1" max="1.5707963267948966" axis="y" home="0" >
 
 																				  <!--<transform id="axeswl2" >
 																					  <plane id="xwl2" px="50" nx="1" size="1,1,100" repeat="1" texture="#ff0000" />
@@ -558,7 +437,7 @@
 																				  <transform id="arm_left_8" tx="20" tz="95" >
 
 																					  <mesh id="finger_left_1_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" ty="0" tz="-22" scale="20"    />
-																					  <joint id="leftFinger1" port="20000" min="-1.5707963267948966" max="1.5707963267948966" axis="y" home="0" >
+																					  <joint id="leftFinger1" port="10067" min="-1.5707963267948966" max="1.5707963267948966" axis="y" home="0" >
 																						  <mesh id="finger_left_1_mesh2" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tx="18" ty="12" scale="18,5,5"    />
 																						  <transform id="finger_left_1_1_pre" tx="30" ty="12" ry="0.70"  >
 																							  <mesh id="finger_left_1_mesh3" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tz="30" scale="5,5,30"    />
@@ -581,7 +460,7 @@
 																				  <transform id="arm_left_9" tx="-20" tz="95" >
 
 																					  <mesh id="finger_left_2_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" ty="0" tz="-22" scale="20"    />
-																					  <joint id="leftFinger2" port="20000" min="-1.5707963267948966" max="1.5707963267948966" axis="y" home="0" >
+																					  <joint id="leftFinger2" port="10067" min="-1.5707963267948966" max="1.5707963267948966" axis="y" home="0" >
 																						  <mesh id="finger_left_2_mesh2" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tx="-18" scale="-18,5,5"    />
 																						  <transform id="finger_left_2_1_pre" tx="-30" ry="-0.70"  >
 																							  <mesh id="finger_left_2_mesh3" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tz="30" scale="5,5,30"    />
@@ -647,36 +526,6 @@
 
 
 
-																<!--Mano antigua -->
-
-																	<!--<transform id="arm_left_6" tz="1" >
-
-																		<joint id="leftWrist1" port="20000" axis="z">
-
-																		<joint id="leftWrist2" port="20000" min="-0.8" max="0.8" axis="x">
-
-																		<joint id="leftWrist3" port="20000" min="-0.8" max="0.8" axis="y">
-
-																			<transform id="arm_left_7" tx="0.0"    >
-																				<joint id="hand_left" port="20000">
-																					<mesh id="hand_left_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/mano.ive" scale="1000" ry="-1.5707963267948966"  tz="0.080" />
-
-																					<transform id="axesHandL" >
-																						<plane id="xHandL" px="100" nx="1" size="0.010,0.010,100" repeat="1" texture="#ff0000" />
-																						<plane id="yHandL" py="100" nx="1" size="0.010,100,0.010" repeat="1" texture="#00ff00" />
-																						<plane id="zHandL" pz="100" nx="1" size="100,0.010,0.010" repeat="1" texture="#0000ff" />
-																						<transform id="grabPositionHandL" tz="0.200" >
-																							<plane id="axislx" px="0.010" nx="1" size="0.01,0.01,100" repeat="1" texture="#550000" />
-																							<plane id="axisly" py="0.010" nx="1" size="0.01,100,0.01" repeat="1" texture="#005500" />
-																							<plane id="axislz" pz="0.010" nx="1" size="100,0.01,0.01" repeat="1" texture="#000055" />
-																						</transform>
-																					</transform>
-																				</joint>
-																			</transform>
-																		</joint>
-																		</joint>
-																		</joint>
-																	</transform>-->
 																	</joint>
 																  </transform>
 																</joint>
