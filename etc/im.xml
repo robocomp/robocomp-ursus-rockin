@@ -50,11 +50,11 @@
 															<transform id="left_rgb_pan_pre" rx="-1.57079632679">
 																<joint id="left_rgb_pan" port="20000" min="-1" max="1" axis="z" >
 																	<transform id="left_rgb_pan_post" rx="1.57079632679">
-																		<transform id="left_axes" >
+<!--																		<transform id="left_axes" >
 																			<plane id="left_x" px="25" nz="1" size="50,5,5" repeat="1" texture="#ff0000" />
 																			<plane id="left_y" py="25" nz="1" size="5,50,5" repeat="1" texture="#00ff00" />
 																			<plane id="left_z" pz="25" nz="1" size="5,5,50" repeat="1" texture="#0000ff" />
-																		</transform>
+																		</transform>-->
 																		<mesh id="left_rgb_mesh" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/cube.3ds" scale="30,30,50" />
 																	</transform>
 																</joint>
@@ -66,11 +66,11 @@
 															<transform id="right_rgb_pan_pre" rx="-1.57079632679">
 																<joint id="right_rgb_pan" port="20000" min="-1" max="1" axis="z" >
 																	<transform id="right_rgb_pan_post" rx="1.57079632679">
-																		<transform id="right_axes" >
+<!--																		<transform id="right_axes" >
 																			<plane id="right_x" px="25" nz="1" size="50,5,5" repeat="1" texture="#ff0000" />
 																			<plane id="right_y" py="25" nz="1" size="5,50,5" repeat="1" texture="#00ff00" />
 																			<plane id="right_z" pz="25" nz="1" size="5,5,50" repeat="1" texture="#0000ff" />
-																		</transform>
+																		</transform>-->
 																		<mesh id="right_rgb_mesh" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/cube.3ds" scale="30,30,50" />
 																	</transform>
 																</joint>
@@ -303,11 +303,11 @@
 																							<transform id="ThandMesh1_5" tz="-50" ty="-20" tx="0">
 
 																							  <transform id="grabPositionHandL_pre" tz="0" rx="3.14159265359">
-																								<transform id="grabPositionHandL"  tz="-100">
+<!--																								<transform id="grabPositionHandL"  tz="-100">
 																								  <plane id="axis2x" px="50" nx="1" size="1,1,100" repeat="1" texture="#550000" />
 																								  <plane id="axis2y" py="50" nx="1" size="1,100,1" repeat="1" texture="#005500" />
 																								  <plane id="axis2z" pz="50" nx="1" size="100,1,1" repeat="1" texture="#000055" />
-																								</transform>
+																								</transform>-->
 																							  </transform>
 
 																							</transform>

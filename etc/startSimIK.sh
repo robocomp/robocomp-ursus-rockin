@@ -35,9 +35,9 @@ sleep 2
 # ikTester
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsComp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/beta-robotica-class/inversekinematicsTesterComp'
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 lokiarmtestercomp'
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j 1 && bin/lokiarmtestercomp  --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicsCOFFEE.conf'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j 1 && bin/lokiarmtestercomp  --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicstester.conf'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'ikTest'
 sleep 2
 
