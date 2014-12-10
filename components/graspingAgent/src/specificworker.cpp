@@ -228,7 +228,7 @@ void SpecificWorker::actionExecution()
 	}
 	else if (action == "setobjectreach")
 	{
-// 		action_SetObjectReach();
+		action_SetObjectReach();
 	}
 	else if (action == "graspobject")
 	{
@@ -359,29 +359,74 @@ void SpecificWorker::action_GraspObject()
 
 void SpecificWorker::action_SetObjectReach()
 {
-	AGMModel::SPtr newModel(new AGMModel(worldModel));
-	try
+	printf("void SpecificWorker::action_SetObjectReach()\n");
+	int32_t objectId = str2int(params["object"].value);
+	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+	const float x = str2float(goalObject->getAttribute("x"));
+	const float z = str2float(goalObject->getAttribute("z"));
+	float alpha;
+	switch (objectId)
 	{
-		auto symbols = newModel->getSymbolsMap(params, "object", "status");
-		newModel->renameEdge(symbols["object"], symbols["status"], "noReach", "reach");
+		case 7:
+			alpha = -3.141592;
+			break;
+		case 9:
+			alpha = 0;
+			break;
+		default:
+			qFatal("ee");
+			break;		
+	}
+	// printf("object (%f, %f, %f)\n", x, z, alpha);
+
+	const int32_t robotId = worldModel->getIdentifierByType("robot");
+	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
+	const float rx = str2float(robot->getAttribute("x"));
+	const float rz = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("alpha"));
+
+	// Avoid repeating the same goal and confuse the navigator
+	const float errX = abs(rx-x);
+	const float errZ = abs(rz-z);
+	float errAlpha = abs(ralpha-alpha);
+	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+	errAlpha = abs(errAlpha);
+	printf("%f %f %f\n", errX, errZ, errAlpha);
+	if (errX<100 and errZ<100 and errAlpha<0.1)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		std::map<std::string, AGMModelSymbol::SPtr> symbols;
 		try
 		{
-			sendModificationProposal(worldModel, newModel);
+			symbols = newModel->getSymbolsMap(params, "object", "status");
 		}
-		catch(const Ice::Exception& ex)
+		catch(...)
 		{
-			cout << "Exception: " << ex << endl;
-			return ;
+			printf("graspingAgent: Couldn't retrieve action's parameters\n");
+			return;
 		}
-// 		catch(...)
-// 		{
-// 			printf("graspingAgent: Couldn't publish new model\n");
-// 		}
+
+		if (newModel->renameEdge(symbols["object"], symbols["status"], "noReach", "reach"))
+		{
+			try
+			{
+				sendModificationProposal(worldModel, newModel);
+				printf("sent reach\n");
+			}
+			catch(const Ice::Exception& ex)
+			{
+				printf("graspingAgent: Couldn't publish new model\n");
+				cout << "Exception: " << ex << endl;
+				return ;
+			}
+		}
+		else
+		{
+			printf("already reaching??\n");
+		}
 	}
-	catch(...)
-	{
-		printf("graspingAgent: Couldn't retrieve action's parameters\n");
-	}
+
 }
 
 

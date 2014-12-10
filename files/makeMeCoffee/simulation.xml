@@ -41,7 +41,7 @@
 				<mesh id="mesh-milk" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/milk.3ds" scale="145,145,145" ty="-10" tz="0" rz="0.8" rx="1.57079632679"/>
 			</transform>-->
 
-			<transform id="coffeeT" tx="1000" ty="10" tz="1500">
+			<transform id="coffeeT" tx="1000" ty="10" tz="1370">
 				<plane id="april-coffee" px="0" py="860" pz="0" ny="1" size="71.25,-71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00014.png" />
 				<mesh id="mesh-coffee" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/coffee.3ds" scale="170,170,170" ty="681" tz="0" rz="-2.4" rx="1.57079632679"/>
 			</transform>
