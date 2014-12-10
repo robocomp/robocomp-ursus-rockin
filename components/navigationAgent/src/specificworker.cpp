@@ -547,22 +547,27 @@ void SpecificWorker::action_SetObjectReach()
 	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
 	const float x = str2float(goalObject->getAttribute("x"));
 	const float z = str2float(goalObject->getAttribute("z"));
-	float alpha = objectId==7?-3.141592:0;
+	float alpha;
+	switch (objectId)
+	{
+		case 7:
+			alpha = -3.141592;
+			break;
+		case 9:
+			alpha = 0;
+			break;
+		default:
+			qFatal("");
+			break;		
+	}
 	// printf("object (%f, %f, %f)\n", x, z, alpha);
 
-<<<<<<< HEAD
-	AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot")); // printf("%s, %d\n", __FILE__, __LINE__);
-	const float rx = str2float(robot->getAttribute("x")); // printf("%s, %d\n", __FILE__, __LINE__);
-	const float rz = str2float(robot->getAttribute("z")); // printf("%s, %d\n", __FILE__, __LINE__);
-	const float ralpha = str2float(robot->getAttribute("alpha")); // printf("%s, %d\n", __FILE__, __LINE__);
-=======
 	const int32_t robotId = worldModel->getIdentifierByType("robot");
 	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
 	const float rx = str2float(robot->getAttribute("x"));
 	const float rz = str2float(robot->getAttribute("z"));
 	const float ralpha = str2float(robot->getAttribute("alpha"));
 	// printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
->>>>>>> 8295947d326fd8c02de8088d50e11dd632af6f08
 
 	// Avoid repeating the same goal and confuse the navigator
 	const float errX = abs(rx-x);
@@ -597,10 +602,6 @@ void SpecificWorker::action_SetObjectReach()
 	{
 		lastX = x;
 		lastZ = z;
-<<<<<<< HEAD
-		printf("setobjectreach %d   (%f, %f)\n", objectId, x, z);
-		go(x, objectId==7?z+550:z-550, objectId==7?-3.141592:0, true);
-=======
 		printf("proceed setobjectreach %d\n", objectId);
 		float xx = x;
 		float zz = z;
@@ -608,7 +609,6 @@ void SpecificWorker::action_SetObjectReach()
 		float aa = objectId==7?-3.141592:0;
 		go(xx, zz, aa, true);
 		backp = true;
->>>>>>> 8295947d326fd8c02de8088d50e11dd632af6f08
 	}
 	else if (backp)
 	{
@@ -660,17 +660,33 @@ void SpecificWorker::odometryAndLocationIssues()
 
 	try
 	{
-// 		AGMModelPrinter::printWorld(worldModel);
-		const int32_t robotId = worldModel->getIdentifierByType("robot");
+		int32_t robotId;
+		//AGMModelPrinter::printWorld(worldModel);
+		robotId = worldModel->getIdentifierByType("robot");
+		if (robotId < 0)
+		{
+			printf("Waiting for the executive...\n");
+			return;
+		}
 		AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-		robot->setAttribute("x", float2str(bState.x));
-		robot->setAttribute("z", float2str(bState.z));
-		robot->setAttribute("alpha", float2str(bState.alpha));
+		try
+		{
+			robot->setAttribute("x", float2str(bState.x));
+			robot->setAttribute("z", float2str(bState.z));
+			robot->setAttribute("alpha", float2str(bState.alpha));
+		}
+		catch (...)
+		{
+			printf("Can't update odometry in the model A!!!\n");
+			return;
+		}
+		printf("a %d\n", __LINE__);
 		AGMMisc::publishNodeUpdate(robot, agmagenttopic);
+		printf("a %d\n", __LINE__);
 	}
 	catch (...)
 	{
-		printf("Can't update odometry in the model!!!\n");
+		printf("Can't update odometry in the model B!!!\n");
 		return;
 	}
 // 	printf("oki\n");
