@@ -70,8 +70,11 @@ private:
 	void saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz);
 	void updateInnerModel();
 
+
+	void setRightArm_Reflex();
+
 private:
-	std::string action;
+	std::string action, backAction;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;

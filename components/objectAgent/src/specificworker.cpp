@@ -46,6 +46,9 @@ void SpecificWorker::compute( )
 	{
 		previousAction = action;
 		printf("New action: %s\n", action.c_str());
+
+		if (action == "findobjectvisuallyintable")
+			
 	}
 }
 
@@ -423,9 +426,9 @@ void SpecificWorker::getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t
 {
 	objectSymbolID = -1;
 	objectStSymbolID = -1;
-	
+
 	QStringList actions = QString::fromStdString(params["plan"].value).toLower().split("\n");
-	
+
 	for (auto a : actions)
 	{
 		if (a.contains(QString::fromStdString(obj)))

@@ -557,8 +557,8 @@ void SpecificWorker::action_SetObjectReach()
 			alpha = 0;
 			break;
 		default:
-			qFatal("");
-			break;		
+			qFatal("navigation: unknown object to reach");
+			break;
 	}
 	// printf("object (%f, %f, %f)\n", x, z, alpha);
 

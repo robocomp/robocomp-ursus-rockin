@@ -173,6 +173,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 
 	try
 	{
+		backAction = action;
 		action = params["action"].value;
 		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
 
@@ -247,6 +248,8 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 	const float x = str2float(goalTable->getAttribute("x"));
 	const float z = str2float(goalTable->getAttribute("z"));
 	QVec robotRef = innerModel->transform("robot", QVec::vec3(x, 800, z), "world");
+	printf("saccadic3D\n");
+	robotRef.print("roboref");
 	saccadic3D(robotRef, QVec::vec3(0,-1,0));
 }
 
@@ -360,6 +363,14 @@ void SpecificWorker::action_GraspObject()
 void SpecificWorker::action_SetObjectReach()
 {
 	printf("void SpecificWorker::action_SetObjectReach()\n");
+
+	if (backAction != "setobjectreach")
+	{
+			backAction = action;
+			printf("first time, set arm for manipulation\n");
+			setRightArm_Reflex();
+	}
+
 	int32_t objectId = str2int(params["object"].value);
 	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
 	const float x = str2float(goalObject->getAttribute("x"));
@@ -375,7 +386,7 @@ void SpecificWorker::action_SetObjectReach()
 			break;
 		default:
 			qFatal("ee");
-			break;		
+			break;
 	}
 	// printf("object (%f, %f, %f)\n", x, z, alpha);
 
@@ -392,6 +403,8 @@ void SpecificWorker::action_SetObjectReach()
 	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
 	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
 	errAlpha = abs(errAlpha);
+	printf("%f %f %f\n", rx, rz, ralpha);
+	printf("%f %f %f\n",  x,  z,  alpha);
 	printf("%f %f %f\n", errX, errZ, errAlpha);
 	if (errX<100 and errZ<100 and errAlpha<0.1)
 	{
@@ -478,3 +491,13 @@ void SpecificWorker::updateInnerModel()
 }
 
 
+void SpecificWorker::setRightArm_Reflex()
+{
+	bodyinversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
+	bodyinversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
+}
