@@ -48,7 +48,9 @@ void SpecificWorker::compute( )
 		printf("New action: %s\n", action.c_str());
 
 		if (action == "findobjectvisuallyintable")
-			
+		{
+			action_FindObjectVisuallyInTable();
+		}
 	}
 }
 
@@ -442,6 +444,11 @@ void SpecificWorker::getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t
 		}
 	}
 	printf("------------------------------->%d %d\n", objectSymbolID, objectStSymbolID);
+}
+
+void SpecificWorker::action_FindObjectVisuallyInTable()
+{
+	
 }
 
 

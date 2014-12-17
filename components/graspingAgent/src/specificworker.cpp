@@ -217,15 +217,14 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 void SpecificWorker::actionExecution()
 {
 	static std::string previousAction = "";
-	if (previousAction != action)
-	{
-		previousAction = action;
-		printf("New action: %s\n", action.c_str());
-	}
+	bool newAction = (previousAction != action);
+
+	if (newAction)
+		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
 
 	if (action == "findobjectvisuallyintable")
 	{
-		action_FindObjectVisuallyInTable();
+		action_FindObjectVisuallyInTable(newAction);
 	}
 	else if (action == "setobjectreach")
 	{
@@ -235,22 +234,28 @@ void SpecificWorker::actionExecution()
 	{
 		action_GraspObject();
 	}
-// 	else if (action == "robotmovesobjectfromcontainer")
-// 	{
-// 		action_RobotMovesObjectFromContainer();
-// 	}
+
+	if (newAction)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}	
 }
 
-void SpecificWorker::action_FindObjectVisuallyInTable()
+void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 {
-	int32_t tableId = str2int(params["container"].value);
-	AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
-	const float x = str2float(goalTable->getAttribute("x"));
-	const float z = str2float(goalTable->getAttribute("z"));
-	QVec robotRef = innerModel->transform("robot", QVec::vec3(x, 800, z), "world");
-	printf("saccadic3D\n");
-	robotRef.print("roboref");
-	saccadic3D(robotRef, QVec::vec3(0,-1,0));
+	if (first)
+	{
+		int32_t tableId = str2int(params["container"].value);
+		AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
+		const float x = str2float(goalTable->getAttribute("x"));
+		const float z = str2float(goalTable->getAttribute("z"));
+		QVec robotRef = innerModel->transform("robot", QVec::vec3(x, 800, z), "world");
+		printf("saccadic3D\n");
+		robotRef.print("roboref");
+		printf("\n");
+		saccadic3D(robotRef, QVec::vec3(0,-1,0));
+	}
 }
 
 

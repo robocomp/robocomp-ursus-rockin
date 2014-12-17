@@ -61,9 +61,8 @@ private:
 
 
 	void actionExecution();
-	void action_FindObjectVisuallyInTable();
+	void action_FindObjectVisuallyInTable(bool first=false);
 	void action_SetObjectReach();
-// 	void action_RobotMovesObjectFromContainer();
 	void action_GraspObject();
 
 	void saccadic3D(QVec point, QVec axis);

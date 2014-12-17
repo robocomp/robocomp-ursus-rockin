@@ -226,25 +226,25 @@ void SpecificWorker::doStateMachine()
 	switch (state) 
 	{
 		case State::IDLE:
-				break;
+			break;
 		case State::INIT_GO_KITCHEN:
-				state = init_go_kitchen();
-		break;
+			state = init_go_kitchen();
+			break;
 		case State::GO_KITCHEN:
-				state = go_kitchen();
-		break;
+			state = go_kitchen();
+			break;
 		case State::INIT_PREPARE_ARM:
-				state = initPrepareArm();
-		break;
+			state = initPrepareArm();
+			break;
 		case State::PREPARE_ARM:
-				state = prepareArm();
-		break;
+			state = prepareArm();
+			break;
 		case State::INIT_APPROACH:
-				state = initApproach();
-		break;
+			state = initApproach();
+			break;
 		case State::APPROACH:
-				state = approach();
-		break;
+			state = approach();
+			break;
 		case State::SERVOING:
 				state = servoing();
 				break;
