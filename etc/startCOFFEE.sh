@@ -30,7 +30,7 @@ sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc'
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'icebox --Ice.Config=config.icebox'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'storm'
-sleep 3
+sleep 5
 
 #trajectoryrobot
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
@@ -133,6 +133,9 @@ qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'graspingA
 # qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'tester'
 # sleep 1
 #
+
+
+sleep 5
 
 # AGM Executive
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
