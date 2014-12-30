@@ -62,15 +62,16 @@ private:
 
 	void actionExecution();
 	void action_FindObjectVisuallyInTable(bool first=false);
-	void action_SetObjectReach();
-	void action_GraspObject();
+	void action_SetObjectReach(bool first=false);
+	void action_GraspObject(bool first=false);
 
 	void saccadic3D(QVec point, QVec axis);
 	void saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz);
 	void updateInnerModel();
 
 
-	void setRightArm_Reflex();
+	void setRightArmUp_Reflex();
+	void setRightArm_GRASP_0_Reflex();
 
 private:
 	std::string action, backAction;

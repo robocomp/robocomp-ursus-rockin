@@ -70,8 +70,10 @@
 				<!--	<rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
 				-->		<rgbd id="laser" focal="120" width="160" height="120" port="10097" ifconfig="20000,10004" />
 <!--  					<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" /> -->
- 				</transform>
+				</transform>
 
+				
+				
 				<transform  id="base_trans" >
 					<joint id="base" port="10067" axis="y" home="0">
  						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.3ds"  tx="0" ty="10" tz="0" rx="1.5707963267949" scale="1000"  />
@@ -88,11 +90,6 @@
 
 
 							<transform id="base_bodypost" rx="1.5707963267948966" ty="0" tz="0" >
-								<!--<transform id="head_axes_0" >
-									<plane id="head_x_0" px="200" nz="1" size="200,40,40" repeat="1" texture="#ff0000" />
-									<plane id="head_y_0" py="200" nz="1" size="40,200,40" repeat="1" texture="#00ff00" />
-									<plane id="head_z_0" pz="200" nz="1" size="40,40,200" repeat="1" texture="#0000ff" />
-								</transform>-->
 								<transform id="base_head" tz="0" ty="1080"  rx="-1.5707963267948966"  >  <!-- Head begins -->
 									<!--<transform id="head_axes_1" >
 										<plane id="head_x_1" px="100" nz="1" size="200,20,20" repeat="1" texture="#ff0000" />
@@ -119,6 +116,11 @@
 														<transform id="rgbd_transform0" ty="85">
 															<transform id="rgbd_transform" tz="20">
 																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="20000,10004" />
+																<transform id="head_axes_0" >
+<!--																	<plane id="head_x_0" px="100" nz="1" size="200,30,30" repeat="1" texture="#ff0000" />
+																	<plane id="head_y_0" py="100" nz="1" size="30,200,30" repeat="1" texture="#00ff00" />
+																	<plane id="head_z_0" pz="100" nz="1" size="30,30,200" repeat="1" texture="#0000ff" />-->
+																</transform>
 															</transform>
 															<mesh id="sensorRGBD" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/cube.3ds" scale="100,21,30" />
 
