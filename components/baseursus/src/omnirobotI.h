@@ -37,7 +37,7 @@ Q_OBJECT
 public:
 	OmniRobotI( GenericWorker *_worker, QObject *parent = 0 );
 	~OmniRobotI();
-	void  getBaseState(RoboCompOmniRobot::TBaseState& state, const Ice::Current& = Ice::Current());
+	void getBaseState(RoboCompOmniRobot::TBaseState& state, const Ice::Current& = Ice::Current());
 	void getBasePose(Ice::Int& x, Ice::Int& z, Ice::Float& alpha, const Ice::Current& = Ice::Current());
 	void setSpeedBase(Ice::Float advx, Ice::Float advz, Ice::Float rot, const Ice::Current& = Ice::Current());
 	void stopBase(const Ice::Current& = Ice::Current());

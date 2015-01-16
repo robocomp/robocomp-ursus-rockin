@@ -1,6 +1,11 @@
 <innerModel>
 	<transform id="world">
-
+		
+		<transform id="ceilingReference0" tx="0" tz="0"    rx="-1.5707963268" ry="3.1415926535" />
+		<transform id="ceilingReference1" tx="0" tz="1500" rx="-1.5707963268" ry="3.1415926535" />
+		<transform id="ceilingReference2" tx="0" tz="3000" rx="-1.5707963268" ry="3.1415926535" />
+		<transform id="ceilingReference3" tx="0" tz="4500" rx="-1.5707963268" ry="3.1415926535" />
+		
 		<transform id="floor" />
 		<transform id="offset">
 			<transform id="t_human" tx="1200" ty="906" tz="2000">
@@ -65,6 +70,10 @@
 		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
 			<omnirobot id="robot" port="12238" >
+				<transform id="poseRGBCeiling" ty="400" tz="-200" rx="-1.5707963267949">
+					<camera id="RGBCeiling" width="640" height="480" focal="635" />
+				</transform>
+
  				<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
   <!-- 					<laser id="laser" port="10003" measures="100" min="100" max="4000" angle="3" ifconfig="10000" /> -->
 				<!--	<rgbd id="laser" focal="525" width="640" height="480" port="10097" ifconfig="20000,10004" />
