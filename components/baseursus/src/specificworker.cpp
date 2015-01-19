@@ -165,10 +165,17 @@ void SpecificWorker::resetOdometer()
 
 void SpecificWorker::setOdometer(const ::RoboCompOmniRobot::TBaseState &state)
 {
+	setOdometerPose(state.x, state.z, state.alpha);
 }
 
 void SpecificWorker::setOdometerPose(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha)
 {
+	QMutexLocker locker(dataMutex);
+	innermodel->updateTransformValues("backPose",     x, 0, z,     0, alpha, 0);
+	innermodel->updateTransformValues("newPose",      0, 0, 0,     0,     0, 0);
+	this->x = x;
+	this->z = z;
+	this->angle = alpha;
 }
 
 void SpecificWorker::correctOdometer(::Ice::Int x, ::Ice::Int z, ::Ice::Float alpha)
