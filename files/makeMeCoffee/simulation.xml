@@ -1,11 +1,19 @@
 <innerModel>
 	<transform id="world">
 		
-		<transform id="ceilingReference0" tx="0" tz="0"    rx="-1.5707963268" ry="3.1415926535" />
-		<transform id="ceilingReference1" tx="0" tz="1500" rx="-1.5707963268" ry="3.1415926535" />
-		<transform id="ceilingReference2" tx="0" tz="3000" rx="-1.5707963268" ry="3.1415926535" />
-		<transform id="ceilingReference3" tx="0" tz="4500" rx="-1.5707963268" ry="3.1415926535" />
-		
+		<transform id="ceilingReference0_pose" tx="0" tz="0"    rx="1.5707963268" ry="3.1415926535" >
+			<transform id="ceilingReference0" />
+		</transform>
+		<transform id="ceilingReference1_pose" tx="0" tz="1500" rx="1.5707963268" ry="3.1415926535" >
+			<transform id="ceilingReference1" />
+		</transform>
+		<transform id="ceilingReference2_pose" tx="0" tz="3000" rx="1.5707963268" ry="3.1415926535" >
+			<transform id="ceilingReference2" />
+		</transform>
+		<transform id="ceilingReference3_pose" tx="0" tz="4500" rx="1.5707963268" ry="3.1415926535" >
+			<transform id="ceilingReference3" />
+		</transform>
+
 		<transform id="floor" />
 		<transform id="offset">
 			<transform id="t_human" tx="1200" ty="906" tz="2000">
