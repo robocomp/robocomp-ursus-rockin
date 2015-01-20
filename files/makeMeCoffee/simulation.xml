@@ -1,10 +1,10 @@
 <innerModel>
 	<transform id="world">
 
-		<transform id="aprilOdometryReference0_pose" tx="0" ty="3000" tz="0"    rx="1.5707963268" ry="3.1415926535" />
-		<transform id="aprilOdometryReference1_pose" tx="0" ty="3000" tz="1500" rx="1.5707963268" ry="3.1415926535" />
-		<transform id="aprilOdometryReference2_pose" tx="0" ty="3000" tz="3000" rx="1.5707963268" ry="3.1415926535" />
-		<transform id="aprilOdometryReference3_pose" tx="0" ty="3000" tz="4500" rx="1.5707963268" ry="3.1415926535" />
+		<transform id="aprilOdometryReference0_pose" tx="0" ty="2850" tz="0"    rx="1.5707963268" ry="3.1415926535" />
+		<transform id="aprilOdometryReference1_pose" tx="0" ty="2850" tz="1500" rx="1.5707963268" ry="3.1415926535" />
+		<transform id="aprilOdometryReference2_pose" tx="0" ty="2850" tz="3000" rx="1.5707963268" ry="3.1415926535" />
+		<transform id="aprilOdometryReference3_pose" tx="0" ty="2850" tz="4500" rx="1.5707963268" ry="3.1415926535" />
 
 		<transform id="floor" />
 		<transform id="offset">
@@ -70,7 +70,7 @@
 		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="0" tz="0" ty="0" >
 			<omnirobot id="robot" port="10004" >
-				<transform id="poseRGBCeiling" ty="900" tz="-200" rx="-1.5707963267949" >
+				<transform id="poseRGBCeiling" ty="930" tz="-200" rx="-1.5707963267949" >
 					<camera id="RGBCeiling" width="640" height="480" focal="635" />
 					<rgbd id="RGBDCeiling" width="640" height="480" focal="635" port="10096" />
 					<transform id="aprilOdometryReference_seen_pose" > <!-- AQUI SE PONE LA POSE DEL TAG QUE SE VE -->
