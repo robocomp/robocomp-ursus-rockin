@@ -35,6 +35,7 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 p
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make && bin/primeSenseComp  --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/primesense.conf'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'primeSenseComp'
 
+
 # dynamixel
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
@@ -43,6 +44,34 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 d
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && ./bin/dynamixelComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/dynamixel.conf'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'Dynamixel'
 sleep 3
+
+
+# prosilica cameras
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-robolab/components/cameraComp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 cameraComp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && ./bin/cameraComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/prosilica.conf'
+qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'prosilica'
+sleep 3
+
+# apriltagsComp
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 apriltagscomp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && bin/apriltagscomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilTecho.conf'
+qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'aprilTecho'
+sleep 2
+
+# apriltags localization
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-robolab/components/aprilBasedLocalizationComp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 aprilbasedlocalization'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && bin/aprilbasedlocalization --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilLocalization.conf'
+qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'aprilLocalization'
+sleep 2
 
 # base
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
@@ -53,6 +82,7 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && m
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'BASE'
 sleep 3
 
+
 # joystickOmni
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
@@ -61,6 +91,7 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 j
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && ./bin/joystickOmniComp --Ice.Config=config'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'JOYSTICK'
 sleep 3
+
 
 # faulhaber
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
@@ -93,14 +124,6 @@ qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'ikComp'
 sleep 2
 
 # 
-# # apriltagsComp
-# qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
-# sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
-# qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp'
-# qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 apriltagscomp'
-# qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && bin/apriltagscomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-XXXXXXXXXXXX/etc/aprilComp.conf'
-# qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'aprilComp'
-# sleep 2
 # 
 # # ikAgent
 # qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
