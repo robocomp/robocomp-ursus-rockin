@@ -74,7 +74,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		RoboCompCommonBehavior::Parameter par = params.at("BIK.InnerModel") ;
 		if( QFile(QString::fromStdString(par.value)).exists() == true)
 		{
-//			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
 			innerModel = new InnerModel(par.value);
 			convertInnerModelFromMilimetersToMeters(innerModel->getRoot());
 //			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
@@ -107,20 +107,18 @@ void SpecificWorker::init()
 	// RECONFIGURABLE PARA CADA ROBOT: Listas de motores de las distintas partes del robot
 	listaBrazoIzquierdo	<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2";
 	listaBrazoDerecho 	<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2";
-//	listaCabeza 		<< "head_yaw_joint" <<  "head_pitch_joint";
-	listaCabeza 		<< "head1"  <<  "head2" << "head3";
+	listaCabeza 		<< "head_pitch_joint"  <<  "head_yaw_joint";
 	listaMotores 		<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
 						<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
-//						<< "head_yaw_joint" << "head_pitch_joint"
-						<< "head1"  <<  "head3" << "head2";
-;
+						<< "head_yaw_joint" << "head_pitch_joint";
+				
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
 	//QString tipRight = "munon_t";
 	
 	QString tipLeft = "grabPositionHandL";
-	QString nose = "rgbd_transform";  //OJO PROV
-	//QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
+//	QString nose = "rgbd_transform";  //OJO PROV
+	QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
 
 
 	IK_BrazoDerecho = new Cinematica_Inversa(innerModel, listaBrazoDerecho, tipRight);
