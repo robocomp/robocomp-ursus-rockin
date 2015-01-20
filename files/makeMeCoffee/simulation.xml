@@ -1,18 +1,10 @@
 <innerModel>
 	<transform id="world">
-		
-		<transform id="ceilingReference0_pose" tx="0" tz="0"    rx="1.5707963268" ry="3.1415926535" >
-			<transform id="ceilingReference0" />
-		</transform>
-		<transform id="ceilingReference1_pose" tx="0" tz="1500" rx="1.5707963268" ry="3.1415926535" >
-			<transform id="ceilingReference1" />
-		</transform>
-		<transform id="ceilingReference2_pose" tx="0" tz="3000" rx="1.5707963268" ry="3.1415926535" >
-			<transform id="ceilingReference2" />
-		</transform>
-		<transform id="ceilingReference3_pose" tx="0" tz="4500" rx="1.5707963268" ry="3.1415926535" >
-			<transform id="ceilingReference3" />
-		</transform>
+
+		<transform id="aprilOdometryReference0_pose" tx="0" ty="3000" tz="0"    rx="1.5707963268" ry="3.1415926535" />
+		<transform id="aprilOdometryReference1_pose" tx="0" ty="3000" tz="1500" rx="1.5707963268" ry="3.1415926535" />
+		<transform id="aprilOdometryReference2_pose" tx="0" ty="3000" tz="3000" rx="1.5707963268" ry="3.1415926535" />
+		<transform id="aprilOdometryReference3_pose" tx="0" ty="3000" tz="4500" rx="1.5707963268" ry="3.1415926535" />
 
 		<transform id="floor" />
 		<transform id="offset">
@@ -76,10 +68,13 @@
 
 
 		<!-- Base		 -->
-		<transform id="initialRobotPose" tx="0" tz="0" ty="10" >
-			<omnirobot id="robot" port="12238" >
-				<transform id="poseRGBCeiling" ty="400" tz="-200" rx="-1.5707963267949">
+		<transform id="initialRobotPose" tx="0" tz="0" ty="0" >
+			<omnirobot id="robot" port="10004" >
+				<transform id="poseRGBCeiling" ty="900" tz="-200" rx="-1.5707963267949" >
 					<camera id="RGBCeiling" width="640" height="480" focal="635" />
+					<rgbd id="RGBDCeiling" width="640" height="480" focal="635" port="10096" />
+					<transform id="aprilOdometryReference_seen_pose" > <!-- AQUI SE PONE LA POSE DEL TAG QUE SE VE -->
+					</transform>
 				</transform>
 
  				<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
@@ -89,8 +84,8 @@
 <!--  					<plane id="sensorL" nz="1" pz="-10" size="100" repeat="1" texture="#ff0000" /> -->
 				</transform>
 
-				
-				
+
+
 				<transform  id="base_trans" >
 					<joint id="base" port="10067" axis="y" home="0">
  						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.3ds"  tx="0" ty="10" tz="0" rx="1.5707963267949" scale="1000"  />
