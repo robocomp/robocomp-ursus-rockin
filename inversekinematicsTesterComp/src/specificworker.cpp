@@ -1166,7 +1166,10 @@ void SpecificWorker::sendAxisAlign()
 			pose6D.rx = axisAlignRXSB->value();	pose6D.ry = axisAlignRYSB->value();	pose6D.rz = axisAlignRZSB->value();	
 			// Movemos el target en RCIS
 			QVec pose = QVec::zeros(6);
-			pose[0] = pose6D.x/1000; pose[1] = pose6D.y/1000; pose[2] = pose6D.z/1000;
+			
+			//pose[0] = pose6D.x/1000; pose[1] = pose6D.y/1000; pose[2] = pose6D.z/1000;
+			pose[0] = pose6D.x; pose[1] = pose6D.y; pose[2] = pose6D.z;
+			
 			moveTargetRCIS(pose);
 
 			bodyinversekinematics_proxy->pointAxisTowardsTarget(parte.toStdString(), pose6D, axis, false, 0 );
