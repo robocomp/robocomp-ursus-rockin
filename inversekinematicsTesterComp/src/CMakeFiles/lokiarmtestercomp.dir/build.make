@@ -35,13 +35,13 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The program to use to edit the cache.
-CMAKE_EDIT_COMMAND = /usr/bin/ccmake
+CMAKE_EDIT_COMMAND = /usr/bin/cmake-gui
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp
+CMAKE_SOURCE_DIR = /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp
+CMAKE_BINARY_DIR = /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp
 
 # Include any dependencies generated for this target.
 include src/CMakeFiles/lokiarmtestercomp.dir/depend.make
@@ -52,99 +52,99 @@ include src/CMakeFiles/lokiarmtestercomp.dir/progress.make
 # Include the compile flags for this target's objects.
 include src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 
-src/CommonBehavior.cpp: /home/pbustos/robocomp/interfaces/CommonBehavior.ice
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_1)
+src/CommonBehavior.cpp: /home/robocomp/robocomp/interfaces/CommonBehavior.ice
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating CommonBehavior.cpp and CommonBehavior.h from CommonBehavior.ice"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && slice2cpp -I/home/pbustos/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/pbustos/robocomp//interfaces//CommonBehavior.ice --output-dir .
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && slice2cpp -I/home/robocomp/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/robocomp/robocomp//interfaces//CommonBehavior.ice --output-dir .
 
 src/CommonBehavior.h: src/CommonBehavior.cpp
 
-src/AprilTags.cpp: /home/pbustos/robocomp/interfaces/AprilTags.ice
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_2)
+src/AprilTags.cpp: /home/robocomp/robocomp/interfaces/AprilTags.ice
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating AprilTags.cpp and AprilTags.h from AprilTags.ice"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && slice2cpp -I/home/pbustos/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/pbustos/robocomp//interfaces//AprilTags.ice --output-dir .
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && slice2cpp -I/home/robocomp/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/robocomp/robocomp//interfaces//AprilTags.ice --output-dir .
 
 src/AprilTags.h: src/AprilTags.cpp
 
-src/BodyInverseKinematics.cpp: /home/pbustos/robocomp/interfaces/BodyInverseKinematics.ice
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_3)
+src/BodyInverseKinematics.cpp: /home/robocomp/robocomp/interfaces/BodyInverseKinematics.ice
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating BodyInverseKinematics.cpp and BodyInverseKinematics.h from BodyInverseKinematics.ice"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && slice2cpp -I/home/pbustos/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/pbustos/robocomp//interfaces//BodyInverseKinematics.ice --output-dir .
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && slice2cpp -I/home/robocomp/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/robocomp/robocomp//interfaces//BodyInverseKinematics.ice --output-dir .
 
 src/BodyInverseKinematics.h: src/BodyInverseKinematics.cpp
 
-src/InnerModelManager.cpp: /home/pbustos/robocomp/interfaces/InnerModelManager.ice
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_4)
+src/InnerModelManager.cpp: /home/robocomp/robocomp/interfaces/InnerModelManager.ice
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating InnerModelManager.cpp and InnerModelManager.h from InnerModelManager.ice"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && slice2cpp -I/home/pbustos/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/pbustos/robocomp//interfaces//InnerModelManager.ice --output-dir .
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && slice2cpp -I/home/robocomp/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/robocomp/robocomp//interfaces//InnerModelManager.ice --output-dir .
 
 src/InnerModelManager.h: src/InnerModelManager.cpp
 
-src/JointMotor.cpp: /home/pbustos/robocomp/interfaces/JointMotor.ice
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_5)
+src/JointMotor.cpp: /home/robocomp/robocomp/interfaces/JointMotor.ice
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating JointMotor.cpp and JointMotor.h from JointMotor.ice"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && slice2cpp -I/home/pbustos/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/pbustos/robocomp//interfaces//JointMotor.ice --output-dir .
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && slice2cpp -I/home/robocomp/robocomp//interfaces/ -I/opt/robocomp/ThirdPartyinterfaces -I. /home/robocomp/robocomp//interfaces//JointMotor.ice --output-dir .
 
 src/JointMotor.h: src/JointMotor.cpp
 
 src/moc_specificworker.cxx: src/specificworker.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_6)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating moc_specificworker.cxx"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_specificworker.cxx_parameters
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_specificworker.cxx_parameters
 
 src/moc_specificmonitor.cxx: src/specificmonitor.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_7)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_7)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating moc_specificmonitor.cxx"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_specificmonitor.cxx_parameters
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_specificmonitor.cxx_parameters
 
 src/moc_trayectoria.cxx: src/trayectoria.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_8)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_8)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating moc_trayectoria.cxx"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_trayectoria.cxx_parameters
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_trayectoria.cxx_parameters
 
-src/__/__/inversekinematicsComp/src/moc_target.cxx: /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_9)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating __/__/inversekinematicsComp/src/moc_target.cxx"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/__/__/inversekinematicsComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/__/__/inversekinematicsComp/src/moc_target.cxx_parameters
+src/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx: /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.h
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_9)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating __/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx"
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/__/__/__/robocomp-ursus/components/inversekinematicsComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx_parameters
 
 src/moc_apriltagsI.cxx: src/apriltagsI.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_10)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_10)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating moc_apriltagsI.cxx"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_apriltagsI.cxx_parameters
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_apriltagsI.cxx_parameters
 
 src/moc_genericmonitor.cxx: src/genericmonitor.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_11)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_11)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating moc_genericmonitor.cxx"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_genericmonitor.cxx_parameters
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_genericmonitor.cxx_parameters
 
 src/moc_commonbehaviorI.cxx: src/commonbehaviorI.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_12)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_12)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating moc_commonbehaviorI.cxx"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_commonbehaviorI.cxx_parameters
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_commonbehaviorI.cxx_parameters
 
 src/moc_genericworker.cxx: src/genericworker.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_13)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_13)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating moc_genericworker.cxx"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_genericworker.cxx_parameters
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/moc @/home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_genericworker.cxx_parameters
 
 src/ui_guiDlg.h: src/guiDlg.ui
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_14)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_14)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ui_guiDlg.h"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/uic -o /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/ui_guiDlg.h /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/guiDlg.ui
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/lib/x86_64-linux-gnu/qt4/bin/uic -o /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/ui_guiDlg.h /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/guiDlg.ui
 
 src/CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.o: src/specificworker.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_15)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_15)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/specificworker.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/specificworker.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/specificworker.cpp > CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/specificworker.cpp > CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/specificworker.cpp -o CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/specificworker.cpp -o CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.o.requires
@@ -157,17 +157,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/specificworker.cpp.o.provides.build: src/CM
 
 src/CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.o: src/specificmonitor.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_16)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_16)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/specificmonitor.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/specificmonitor.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/specificmonitor.cpp > CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/specificmonitor.cpp > CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/specificmonitor.cpp -o CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/specificmonitor.cpp -o CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.o.requires
@@ -180,17 +180,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/specificmonitor.cpp.o.provides.build: src/C
 
 src/CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.o: src/trayectoria.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_17)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_17)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/trayectoria.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/trayectoria.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/trayectoria.cpp > CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/trayectoria.cpp > CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/trayectoria.cpp -o CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/trayectoria.cpp -o CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.o.requires
@@ -203,17 +203,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/trayectoria.cpp.o.provides.build: src/CMake
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.o: /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_18)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_18)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp > CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp > CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsComp/src/target.cpp.o.requires
@@ -226,17 +226,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/components/robocomp-
 
 src/CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.o: src/lokiarmtestercomp.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_19)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_19)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/lokiarmtestercomp.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/lokiarmtestercomp.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/lokiarmtestercomp.cpp > CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/lokiarmtestercomp.cpp > CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/lokiarmtestercomp.cpp -o CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/lokiarmtestercomp.cpp -o CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.o.requires
@@ -249,17 +249,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/lokiarmtestercomp.cpp.o.provides.build: src
 
 src/CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.o: src/apriltagsI.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_20)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_20)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/apriltagsI.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/apriltagsI.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/apriltagsI.cpp > CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/apriltagsI.cpp > CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/apriltagsI.cpp -o CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/apriltagsI.cpp -o CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.o.requires
@@ -272,17 +272,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/apriltagsI.cpp.o.provides.build: src/CMakeF
 
 src/CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.o: src/genericmonitor.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_21)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_21)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/genericmonitor.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/genericmonitor.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/genericmonitor.cpp > CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/genericmonitor.cpp > CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/genericmonitor.cpp -o CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/genericmonitor.cpp -o CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.o.requires
@@ -295,17 +295,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/genericmonitor.cpp.o.provides.build: src/CM
 
 src/CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.o: src/commonbehaviorI.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_22)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_22)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/commonbehaviorI.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/commonbehaviorI.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/commonbehaviorI.cpp > CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/commonbehaviorI.cpp > CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/commonbehaviorI.cpp -o CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/commonbehaviorI.cpp -o CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.o.requires
@@ -318,17 +318,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/commonbehaviorI.cpp.o.provides.build: src/C
 
 src/CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.o: src/genericworker.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_23)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_23)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/genericworker.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/genericworker.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/genericworker.cpp > CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/genericworker.cpp > CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/genericworker.cpp -o CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/genericworker.cpp -o CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.o.requires
@@ -341,17 +341,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/genericworker.cpp.o.provides.build: src/CMa
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.o: /home/robocomp/robocomp/classes/rapplication/rapplication.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_24)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_24)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.o -c /home/robocomp/robocomp/classes/rapplication/rapplication.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.o -c /home/robocomp/robocomp/classes/rapplication/rapplication.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/classes/rapplication/rapplication.cpp > CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/classes/rapplication/rapplication.cpp > CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/classes/rapplication/rapplication.cpp -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/classes/rapplication/rapplication.cpp -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication/rapplication.cpp.o.requires
@@ -364,17 +364,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/rapplication
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.o: /home/robocomp/robocomp/classes/qlog/qlog.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_25)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_25)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.o -c /home/robocomp/robocomp/classes/qlog/qlog.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.o -c /home/robocomp/robocomp/classes/qlog/qlog.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/classes/qlog/qlog.cpp > CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/classes/qlog/qlog.cpp > CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/classes/qlog/qlog.cpp -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/classes/qlog/qlog.cpp -o CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cpp.o.requires
@@ -387,17 +387,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/home/robocomp/robocomp/classes/qlog/qlog.cp
 
 src/CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.o: src/CommonBehavior.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_26)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_26)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/CommonBehavior.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/CommonBehavior.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/CommonBehavior.cpp > CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/CommonBehavior.cpp > CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/CommonBehavior.cpp -o CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/CommonBehavior.cpp -o CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.o.requires
@@ -410,17 +410,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/CommonBehavior.cpp.o.provides.build: src/CM
 
 src/CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.o: src/AprilTags.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_27)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_27)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/AprilTags.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/AprilTags.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/AprilTags.cpp > CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/AprilTags.cpp > CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/AprilTags.cpp -o CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/AprilTags.cpp -o CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.o.requires
@@ -433,17 +433,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/AprilTags.cpp.o.provides.build: src/CMakeFi
 
 src/CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.o: src/BodyInverseKinematics.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_28)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_28)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/BodyInverseKinematics.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/BodyInverseKinematics.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/BodyInverseKinematics.cpp > CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/BodyInverseKinematics.cpp > CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/BodyInverseKinematics.cpp -o CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/BodyInverseKinematics.cpp -o CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.o.requires
@@ -456,17 +456,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/BodyInverseKinematics.cpp.o.provides.build:
 
 src/CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.o: src/InnerModelManager.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_29)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_29)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/InnerModelManager.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/InnerModelManager.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/InnerModelManager.cpp > CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/InnerModelManager.cpp > CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/InnerModelManager.cpp -o CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/InnerModelManager.cpp -o CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.o.requires
@@ -479,17 +479,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/InnerModelManager.cpp.o.provides.build: src
 
 src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o: src/JointMotor.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_30)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_30)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/JointMotor.cpp
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/JointMotor.cpp
 
 src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/JointMotor.cpp > CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/JointMotor.cpp > CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/JointMotor.cpp -o CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/JointMotor.cpp -o CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o.requires
@@ -502,17 +502,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o.provides.build: src/CMakeF
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o: src/moc_specificworker.cxx
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_31)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_31)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_specificworker.cxx
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_specificworker.cxx
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_specificworker.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_specificworker.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_specificworker.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_specificworker.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o.requires
@@ -525,17 +525,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o.provides.build: sr
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o: src/moc_specificmonitor.cxx
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_32)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_32)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_specificmonitor.cxx
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_specificmonitor.cxx
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_specificmonitor.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_specificmonitor.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_specificmonitor.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_specificmonitor.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o.requires
@@ -548,17 +548,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o.provides.build: s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o: src/moc_trayectoria.cxx
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_33)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_33)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_trayectoria.cxx
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_trayectoria.cxx
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_trayectoria.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_trayectoria.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_trayectoria.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_trayectoria.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o.requires
@@ -569,42 +569,42 @@ src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o.provides: src/CMakeFi
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o.provides.build: src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o
 
-src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
-src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o: src/__/__/inversekinematicsComp/src/moc_target.cxx
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_34)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/__/__/inversekinematicsComp/src/moc_target.cxx
+src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
+src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o: src/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_34)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o"
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx
 
-src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/__/__/inversekinematicsComp/src/moc_target.cxx > CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.i
+src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.i"
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx > CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.i
 
-src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/__/__/inversekinematicsComp/src/moc_target.cxx -o CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.s
+src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.s"
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx -o CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.s
 
-src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o.requires:
-.PHONY : src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o.requires
+src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o.requires:
+.PHONY : src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o.requires
 
-src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o.provides: src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o.requires
-	$(MAKE) -f src/CMakeFiles/lokiarmtestercomp.dir/build.make src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o.provides.build
-.PHONY : src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o.provides
+src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o.provides: src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o.requires
+	$(MAKE) -f src/CMakeFiles/lokiarmtestercomp.dir/build.make src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o.provides.build
+.PHONY : src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o.provides
 
-src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o.provides.build: src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o
+src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o.provides.build: src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o: src/moc_apriltagsI.cxx
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_35)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_35)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_apriltagsI.cxx
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_apriltagsI.cxx
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_apriltagsI.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_apriltagsI.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_apriltagsI.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_apriltagsI.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o.requires
@@ -617,17 +617,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o.provides.build: src/CM
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o: src/moc_genericmonitor.cxx
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_36)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_36)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_genericmonitor.cxx
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_genericmonitor.cxx
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_genericmonitor.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_genericmonitor.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_genericmonitor.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_genericmonitor.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o.requires
@@ -640,17 +640,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o.provides.build: sr
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o: src/moc_commonbehaviorI.cxx
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_37)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_37)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_commonbehaviorI.cxx
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_commonbehaviorI.cxx
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_commonbehaviorI.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_commonbehaviorI.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_commonbehaviorI.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_commonbehaviorI.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o.requires
@@ -663,17 +663,17 @@ src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o.provides.build: s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.o: src/CMakeFiles/lokiarmtestercomp.dir/flags.make
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.o: src/moc_genericworker.cxx
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_38)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/CMakeFiles $(CMAKE_PROGRESS_38)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.o"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_genericworker.cxx
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.o -c /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_genericworker.cxx
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.i"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_genericworker.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.i
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_genericworker.cxx > CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.i
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.s"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/moc_genericworker.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.s
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/moc_genericworker.cxx -o CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.s
 
 src/CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.o.requires:
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/moc_genericworker.cxx.o.requires
@@ -705,7 +705,7 @@ lokiarmtestercomp_OBJECTS = \
 "CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o" \
 "CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o" \
 "CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o" \
-"CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o" \
+"CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o" \
 "CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o" \
 "CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o" \
 "CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o" \
@@ -733,7 +733,7 @@ bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/JointMotor.cpp.o
 bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o
 bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o
 bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o
-bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o
+bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o
 bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o
 bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o
 bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o
@@ -753,7 +753,7 @@ bin/lokiarmtestercomp: /usr/lib/x86_64-linux-gnu/libQtXml.so
 bin/lokiarmtestercomp: /usr/lib/x86_64-linux-gnu/libQtCore.so
 bin/lokiarmtestercomp: src/CMakeFiles/lokiarmtestercomp.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --red --bold "Linking CXX executable ../bin/lokiarmtestercomp"
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/lokiarmtestercomp.dir/link.txt --verbose=$(VERBOSE)
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/lokiarmtestercomp.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 src/CMakeFiles/lokiarmtestercomp.dir/build: bin/lokiarmtestercomp
@@ -778,7 +778,7 @@ src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.
 src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.dir/moc_specificworker.cxx.o.requires
 src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.dir/moc_specificmonitor.cxx.o.requires
 src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.dir/moc_trayectoria.cxx.o.requires
-src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.dir/__/__/inversekinematicsComp/src/moc_target.cxx.o.requires
+src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.dir/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx.o.requires
 src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.dir/moc_apriltagsI.cxx.o.requires
 src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.dir/moc_genericmonitor.cxx.o.requires
 src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.dir/moc_commonbehaviorI.cxx.o.requires
@@ -786,7 +786,7 @@ src/CMakeFiles/lokiarmtestercomp.dir/requires: src/CMakeFiles/lokiarmtestercomp.
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/requires
 
 src/CMakeFiles/lokiarmtestercomp.dir/clean:
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src && $(CMAKE_COMMAND) -P CMakeFiles/lokiarmtestercomp.dir/cmake_clean.cmake
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src && $(CMAKE_COMMAND) -P CMakeFiles/lokiarmtestercomp.dir/cmake_clean.cmake
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/clean
 
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/CommonBehavior.cpp
@@ -802,12 +802,12 @@ src/CMakeFiles/lokiarmtestercomp.dir/depend: src/JointMotor.h
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/moc_specificworker.cxx
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/moc_specificmonitor.cxx
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/moc_trayectoria.cxx
-src/CMakeFiles/lokiarmtestercomp.dir/depend: src/__/__/inversekinematicsComp/src/moc_target.cxx
+src/CMakeFiles/lokiarmtestercomp.dir/depend: src/__/__/__/robocomp-ursus/components/inversekinematicsComp/src/moc_target.cxx
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/moc_apriltagsI.cxx
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/moc_genericmonitor.cxx
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/moc_commonbehaviorI.cxx
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/moc_genericworker.cxx
 src/CMakeFiles/lokiarmtestercomp.dir/depend: src/ui_guiDlg.h
-	cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/src/CMakeFiles/lokiarmtestercomp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/src/CMakeFiles/lokiarmtestercomp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : src/CMakeFiles/lokiarmtestercomp.dir/depend
 

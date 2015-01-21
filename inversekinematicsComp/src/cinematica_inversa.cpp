@@ -422,17 +422,18 @@ QVec Cinematica_Inversa::computeErrorVector(const Target &target)
 		QVec targetRInTip = matTargetInTip.extractAnglesR_min();	
 		// 4) Pasamos los errores de rotación al last joint.
 		QVec anglesRot = matTipInFrameBase * targetRInTip;
-		
+		// Calculamos el equivalente de rotar en X el Tip pero en el sistema de referencia del lastJoint (frameBase)		
 		QVec firstRot = matTipInFrameBase * QVec::vec3(targetRInTip[0],0,0);
 		Rot3D matFirtRot(firstRot[0], firstRot[1], firstRot[2]);
-		
+		// Hacemos lo mismo con la rotación en Y
 		QVec secondRot = matTipInFrameBase * QVec::vec3(0,targetRInTip[1],0);
 		Rot3D matSecondRot(secondRot[0], secondRot[1], secondRot[2]);
-		
+		// Hacemos lo mismo con la rotación en Z
 		QVec thirdRot = matTipInFrameBase * QVec::vec3(0,0,targetRInTip[2]);
 		Rot3D matThirdRot(thirdRot[0], thirdRot[1], thirdRot[2]);
-		
+		// Creamos la matríz resultante de las rotaciones calculadas multipiclando las matrices calculasdas anteriormente (ojo al orden correcto)
 		QMat matResulInFrameBase =  (matFirtRot * matSecondRot) * matThirdRot;
+		// Extraemos los ángulos de la matriz calculada que ya equivalen a las rotaciones del tip vistas desde el frameBase
 		QVec errorRInFrameBase = matResulInFrameBase.extractAnglesR_min();
 	
 		errorTotal.inject(errorTInFrameBase,0);
@@ -457,8 +458,33 @@ QVec Cinematica_Inversa::computeErrorVector(const Target &target)
 		float ang = atan2(si,co);	
 		QMat c = o.crossProductMatrix();
 		QMat r = QMat::identity(3) + (c * (T)sin(ang)) + (c*c)*(T)(1.f-cos(ang));  ///Rodrigues formula to compute R from <vector-angle>
+		
 		QVec erroRotaciones = r.extractAnglesR_min();
-		errorTotal.inject(erroRotaciones,3);
+		//errorTotal.inject(erroRotaciones,3);
+		
+		
+		// 4) Pasamos los errores de rotación del tip al last joint.
+		QString frameBase; // Frame where the errors will be referred
+		frameBase = this->listaJoints.last();
+		QVec errorRInTip = erroRotaciones;
+		QMat matTipInFrameBase = inner->getRotationMatrixTo(frameBase, this->endEffector);
+		// Calculamos el equivalente de rotar en X el Tip pero en el sistema de referencia del lastJoint (frameBase)	
+		QVec firstRot = matTipInFrameBase * QVec::vec3(errorRInTip[0],0,0);
+		Rot3D matFirtRot(firstRot[0], firstRot[1], firstRot[2]);
+		// Hacemos lo mismo con la rotación en Y
+		QVec secondRot = matTipInFrameBase * QVec::vec3(0,errorRInTip[1],0);
+		Rot3D matSecondRot(secondRot[0], secondRot[1], secondRot[2]);
+		// Hacemos lo mismo con la rotación en Z
+		QVec thirdRot = matTipInFrameBase * QVec::vec3(0,0,errorRInTip[2]);
+		Rot3D matThirdRot(thirdRot[0], thirdRot[1], thirdRot[2]);
+		// Creamos la matríz resultante de las rotaciones calculadas multipiclando las matrices calculasdas anteriormente (ojo al orden correcto)
+		QMat matResulInFrameBase =  (matFirtRot * matSecondRot) * matThirdRot;
+		// Extraemos los ángulos de la matriz calculada que ya equivalen a las rotaciones del tip vistas desde el frameBase
+		QVec errorRInFrameBase = matResulInFrameBase.extractAnglesR_min();
+		
+		errorTotal.inject(errorRInFrameBase,3);
+		
+		
 	}
 	
 	//qDebug() << __FUNCTION__ << errorTotal;
