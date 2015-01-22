@@ -52,8 +52,10 @@ private:
 	QMutex *dataMutex;
 	QVec wheelVels;
 	float angle, x, z;
+	float corrAngle, corrX, corrZ;
 	InnerModel *innermodel;
 	InnerModelTransform *backPose, *newPose;
+	InnerModelTransform *corrBackPose, *corrNewPose;
 	QTime lastOdometryUpdate;
 	
 	void getBaseState(::RoboCompOmniRobot::TBaseState &state);

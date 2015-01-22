@@ -60,7 +60,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest.xml");
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest2.xml");
-	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/simulation.xml");
+	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/pablo/simulation.xml");
 	
 	
 	try 
@@ -220,6 +220,8 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 		cout<<"--> Excepción en actualizar InnerModel: "<<ex<<endl;
 	}
 }
+
+
 
 void SpecificWorker::doStateMachine()
 {

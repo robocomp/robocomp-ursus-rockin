@@ -81,22 +81,22 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
  	planner->cleanGraph(innermodelmanager_proxy);
 // 	planner->drawGraph(innermodelmanager_proxy);
 
-	qDebug() << "----------------inserting" ;
+// 	qDebug() << "----------------inserting" ;
 
 //	planner->drawGraph(innermodelmanager_proxy);
 
-	qDebug() << __FUNCTION__ << "----- planner set";
+// 	qDebug() << __FUNCTION__ << "----- planner set";
 
 	//Init road
 	road.setInnerModel(innerModel);
 
 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
 	elasticband = new ElasticBand(innerModel);
-	qDebug() << __FUNCTION__ << "----- elasticband set";
+// 	qDebug() << __FUNCTION__ << "----- elasticband set";
 
 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
 	controller = new Controller(innerModel, laserData, 2);
-	qDebug() << __FUNCTION__ << "----- controller set";
+// 	qDebug() << __FUNCTION__ << "----- controller set";
 
  	//Localizer stuff
  	localizer = new Localizer(innerModel);
@@ -118,8 +118,8 @@ void SpecificWorker::computeLuis( )
 	//PARA PROBAR LOS MUEBLES:
 	updateInnerModel(innerModel) ;
 
- 	if (planner->getSampler().checkRobotValidStateAtTarget( innerModel->transform("world","robot") ))
- 		qDebug() << "Ho hay colision";
+//  	if (planner->getSampler().checkRobotValidStateAtTarget( innerModel->transform("world","robot") ))
+//  		qDebug() << "Ho hay colision";
 
 }
 
@@ -179,7 +179,7 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::stopCommand()
 {
-	qDebug() << __FUNCTION__ ;
+// 	qDebug() << __FUNCTION__ ;
 	road.setFinished(true);
 	currentTarget.reset();
 	//controller->stopTheRobot(differentialrobot_proxy);
@@ -200,7 +200,7 @@ bool SpecificWorker::stopCommand()
  */
 bool SpecificWorker::changeTargetCommand(InnerModel *innerModel)
 {
-	qDebug() << __FUNCTION__ << "with robot at" << innerModel->transform("world","robot");;
+// 	qDebug() << __FUNCTION__ << "with robot at" << innerModel->transform("world","robot");;
 	road.changeTarget( currentTarget.getTranslation());
 	road.setFinished( false );
 	drawTarget(currentTarget.getTranslation());
@@ -210,7 +210,7 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel)
 
 bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 {
-	qDebug() << __FUNCTION__;
+// 	qDebug() << __FUNCTION__;
 	if( targetHasAPlan(innerModel))
 	{
 		elasticband->update( road, laserData, currentTarget);
@@ -229,7 +229,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 		{
 			if( currentTarget.hasRotation() )
 			{
-				qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
+// 				qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
 				road.setFinished(false);
 				currentTarget.command = CurrentTarget::Command::SETHEADING;
 			}
@@ -263,7 +263,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa)
 {
 
-	qDebug() << __FUNCTION__;
+// 	qDebug() << __FUNCTION__;
 	const float MAX_ORIENTATION_ERROR  = 0.08726646259722222;
 
 	float angRobot = angmMPI(innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y());
@@ -312,7 +312,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
 	compState.state = "EXECUTING";
-	qDebug() << __FUNCTION__ << "Error: " << error;
+// 	qDebug() << __FUNCTION__ << "Error: " << error;
 
 	if( error < MAX_POSITIONING_ERROR)
 	{
@@ -358,7 +358,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		return true;
 
 	QTime reloj = QTime::currentTime();
-	qDebug() << __FUNCTION__ << "Computing plan... ";
+// 	qDebug() << __FUNCTION__ << "Computing plan... ";
 
 	if (updateInnerModel(inner))
 	{
@@ -366,7 +366,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		QVec localTarget = currentTarget.getTranslation();
 		if ( planner->computePath(localTarget, inner) == false)
 		{
-			qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
+// 			qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
 			currentTarget.reset();
 			return false;
 		}
@@ -423,7 +423,7 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner)
 
 void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 {
-	qDebug()<< __FUNCTION__ << "Sending robot to initial position";
+// 	qDebug()<< __FUNCTION__ << "Sending robot to initial position";
 	try
 	{
 		RoboCompInnerModelManager::Pose3D p;
@@ -437,7 +437,7 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
-		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting initialRobotPose";
+// 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting initialRobotPose";
 	}
 
 	usleep(125000);
@@ -455,7 +455,7 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
-		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot pose";
+// 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot pose";
 	}
 	usleep(125000);
 
@@ -465,7 +465,7 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
-		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot odometer";
+// 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot odometer";
 	}
 
 	usleep(125000);
@@ -513,7 +513,7 @@ void SpecificWorker::printNumberOfElementsInRCIS()
 	try
 	{	RoboCompInnerModelManager::NodeInformationSequence ni;
 		innermodelmanager_proxy->getAllNodeInformation(ni);
-		qDebug() << __FUNCTION__ << "..............Number of elements in: " << ni.size();
+// 		qDebug() << __FUNCTION__ << "..............Number of elements in: " << ni.size();
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
 	{ std::cout << ex << std::endl;}
@@ -546,10 +546,10 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 		}
 		else
 		{
-			qDebug() << __FUNCTION__ << "No valid target reposition found!";
+// 			qDebug() << __FUNCTION__ << "No valid target reposition found!";
 			currentTarget.command = CurrentTarget::Command::STOP;
 		}
-		qDebug() << __FUNCTION__ << "No currentTarget active!";
+// 		qDebug() << __FUNCTION__ << "No currentTarget active!";
 	}
 }
 
@@ -581,7 +581,7 @@ RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 
 void SpecificWorker::stop()
 {
-	qDebug() << __FUNCTION__ << "STOP command received";
+// 	qDebug() << __FUNCTION__ << "STOP command received";
 	currentTarget.command = CurrentTarget::Command::STOP;
 }
 

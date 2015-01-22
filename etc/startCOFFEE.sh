@@ -30,7 +30,7 @@ sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc'
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'icebox --Ice.Config=config.icebox'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'storm'
-sleep 2
+sleep 5
 
 #trajectoryrobot
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
@@ -41,6 +41,15 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 t
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'trajectory'
 sleep 1
 
+
+# ursuscommonjoint
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 ursuscommonjointcomp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j 1 && bin/ursuscommonjointcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursusCommonSim.conf'
+qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'commonJoint'
+sleep 2
 
 
 # ikComp
@@ -124,6 +133,9 @@ qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'graspingA
 # qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'tester'
 # sleep 1
 #
+
+
+sleep 5
 
 # AGM Executive
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession

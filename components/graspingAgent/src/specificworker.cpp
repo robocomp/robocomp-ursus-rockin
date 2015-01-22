@@ -30,7 +30,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 
-	bodyinversekinematics_proxy->goHome("RIGHTARM");
+// 	bodyinversekinematics_proxy->goHome("RIGHTARM");
+	setRightArmUp_Reflex();
 
 }
 
@@ -46,7 +47,7 @@ void SpecificWorker::compute( )
 {
 	// STUFF
 	//
-
+	updateInnerModel();
 
 	// ACTION EXECUTION
 	//
@@ -56,7 +57,6 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-
 	try
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("GraspingAgent.InnerModel") ;
@@ -76,7 +76,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	{
 		qFatal("Error reading config params");
 	}
-
 
 	timer.start(Period);
 	return true;
@@ -173,6 +172,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 
 	try
 	{
+		backAction = action;
 		action = params["action"].value;
 		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
 
@@ -216,38 +216,48 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 void SpecificWorker::actionExecution()
 {
 	static std::string previousAction = "";
-	if (previousAction != action)
-	{
-		previousAction = action;
-		printf("New action: %s\n", action.c_str());
-	}
+	bool newAction = (previousAction != action);
+
+	if (newAction)
+		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
 
 	if (action == "findobjectvisuallyintable")
 	{
-		action_FindObjectVisuallyInTable();
+		action_FindObjectVisuallyInTable(newAction);
 	}
 	else if (action == "setobjectreach")
 	{
-// 		action_SetObjectReach();
+		action_SetObjectReach(newAction);
 	}
 	else if (action == "graspobject")
 	{
-		action_GraspObject();
+		action_GraspObject(newAction);
 	}
-// 	else if (action == "robotmovesobjectfromcontainer")
-// 	{
-// 		action_RobotMovesObjectFromContainer();
-// 	}
+
+	if (newAction)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}	
 }
 
-void SpecificWorker::action_FindObjectVisuallyInTable()
+void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 {
 	int32_t tableId = str2int(params["container"].value);
-	AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
-	const float x = str2float(goalTable->getAttribute("x"));
-	const float z = str2float(goalTable->getAttribute("z"));
-	QVec robotRef = innerModel->transform("robot", QVec::vec3(x, 800, z), "world");
-	saccadic3D(robotRef, QVec::vec3(0,-1,0));
+	try
+	{
+		AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
+		const float x = str2float(goalTable->getAttribute("x"));
+		const float z = str2float(goalTable->getAttribute("z"));
+		QVec worldRef = QVec::vec3(x, 800, z);
+		QVec robotRef = innerModel->transform("robot", worldRef, "world");
+		printf("saccadic3D\n");
+		printf("\n");
+		saccadic3D(robotRef, QVec::vec3(0,0,1));
+	}
+	catch(...)
+	{
+	}
 }
 
 
@@ -304,51 +314,61 @@ void SpecificWorker::action_FindObjectVisuallyInTable()
 // }
 
 
-void SpecificWorker::action_GraspObject()
+void SpecificWorker::action_GraspObject(bool first)
 {
+	static int32_t state = 0;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
 		auto symbols = newModel->getSymbolsMap(params, "object", "table");
 		newModel->removeEdge(symbols["object"], symbols["table"], "in");
 		newModel->addEdge(   symbols["object"], symbols["table"], "in");
-		try
+		
+		
+		if (first) state = 0;
+		
+		if (state == 0)
 		{
-			Pose6D target;
-			WeightVector weights;
+			
 			try
 			{
-				target.x = str2float(symbols["object"]->getAttribute("tx"));
-				target.y = str2float(symbols["object"]->getAttribute("ty"));
-				target.z = str2float(symbols["object"]->getAttribute("tz"));
-				target.rx = str2float(symbols["object"]->getAttribute("rx"));
-				target.ry = str2float(symbols["object"]->getAttribute("ry"));
-				target.rz = str2float(symbols["object"]->getAttribute("rz"));
-				weights.x = 1;
-				weights.y = 1;
-				weights.z = 1;
-				weights.rx = 1;
-				weights.ry = 0;
-				weights.rz = 1;
+				Pose6D target;
+				WeightVector weights;
+				try
+				{
+					target.x = str2float(symbols["object"]->getAttribute("tx"));
+					target.y = str2float(symbols["object"]->getAttribute("ty"));
+					target.z = str2float(symbols["object"]->getAttribute("tz"));
+					target.rx = str2float(symbols["object"]->getAttribute("rx"));
+					target.ry = str2float(symbols["object"]->getAttribute("ry"));
+					target.rz = str2float(symbols["object"]->getAttribute("rz"));
+					weights.x = 1;
+					weights.y = 1;
+					weights.z = 1;
+					weights.rx = 1;
+					weights.ry = 0;
+					weights.rz = 1;
+				}
+				catch (...)
+				{
+					printf("graspingAgent: Error reading data from cognitive model: (%s:%d)\n", __FILE__, __LINE__);
+				}
+				try
+				{
+					bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+				}
+				catch (...)
+				{
+					printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
+				}
+				sendModificationProposal(worldModel, newModel);
 			}
-			catch (...)
+			catch(...)
 			{
-				printf("graspingAgent: Error reading data from cognitive model: (%s:%d)\n", __FILE__, __LINE__);
+				printf("graspingAgent: Couldn't publish new model\n");
 			}
-			try
-			{
-				bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
-			}
-			catch (...)
-			{
-				printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
-			}
-			sendModificationProposal(worldModel, newModel);
 		}
-		catch(...)
-		{
-			printf("graspingAgent: Couldn't publish new model\n");
-		}
+		
 	}
 	catch(...)
 	{
@@ -357,31 +377,86 @@ void SpecificWorker::action_GraspObject()
 }
 
 
-void SpecificWorker::action_SetObjectReach()
+void SpecificWorker::action_SetObjectReach(bool first)
 {
-	AGMModel::SPtr newModel(new AGMModel(worldModel));
-	try
+	printf("void SpecificWorker::action_SetObjectReach()\n");
+
+	if (backAction != "setobjectreach")
 	{
-		auto symbols = newModel->getSymbolsMap(params, "object", "status");
-		newModel->renameEdge(symbols["object"], symbols["status"], "noReach", "reach");
+			backAction = action;
+			printf("first time, set arm for manipulation\n");
+			setRightArmUp_Reflex();
+	}
+
+	int32_t objectId = str2int(params["object"].value);
+	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+	const float x = str2float(goalObject->getAttribute("x"));
+	const float z = str2float(goalObject->getAttribute("z"));
+	float alpha;
+	switch (objectId)
+	{
+		case 7:
+			alpha = -3.141592;
+			break;
+		case 9:
+			alpha = 0;
+			break;
+		default:
+			qFatal("ee");
+			break;
+	}
+	// printf("object (%f, %f, %f)\n", x, z, alpha);
+
+	const int32_t robotId = worldModel->getIdentifierByType("robot");
+	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
+	const float rx = str2float(robot->getAttribute("x"));
+	const float rz = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("alpha"));
+
+	// Avoid repeating the same goal and confuse the navigator
+	const float errX = abs(rx-x);
+	const float errZ = abs(rz-z);
+	float errAlpha = abs(ralpha-alpha);
+	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+	errAlpha = abs(errAlpha);
+	printf("%f %f %f\n", rx, rz, ralpha);
+	printf("%f %f %f\n",  x,  z,  alpha);
+	printf("%f %f %f\n", errX, errZ, errAlpha);
+	if (errX<100 and errZ<100 and errAlpha<0.1)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		std::map<std::string, AGMModelSymbol::SPtr> symbols;
 		try
 		{
-			sendModificationProposal(worldModel, newModel);
+			symbols = newModel->getSymbolsMap(params, "object", "status");
 		}
-		catch(const Ice::Exception& ex)
+		catch(...)
 		{
-			cout << "Exception: " << ex << endl;
-			return ;
+			printf("graspingAgent: Couldn't retrieve action's parameters\n");
+			return;
 		}
-// 		catch(...)
-// 		{
-// 			printf("graspingAgent: Couldn't publish new model\n");
-// 		}
+
+		if (newModel->renameEdge(symbols["object"], symbols["status"], "noReach", "reach"))
+		{
+			try
+			{
+				sendModificationProposal(worldModel, newModel);
+				printf("sent reach\n");
+			}
+			catch(const Ice::Exception& ex)
+			{
+				printf("graspingAgent: Couldn't publish new model\n");
+				cout << "Exception: " << ex << endl;
+				return ;
+			}
+		}
+		else
+		{
+			printf("already reaching??\n");
+		}
 	}
-	catch(...)
-	{
-		printf("graspingAgent: Couldn't retrieve action's parameters\n");
-	}
+
 }
 
 
@@ -392,26 +467,50 @@ void SpecificWorker::saccadic3D(QVec point, QVec axis)
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
-	RoboCompBodyInverseKinematics::Pose6D targetSight;
-	targetSight.x = tx;
-	targetSight.y = ty;
-	targetSight.z = tz;
-	RoboCompBodyInverseKinematics::Axis axSight;
-	axSight.x = axx;
-	axSight.y = axy;
-	axSight.z = axz;
-	bool axisConstraint = false;
-	float axisAngleConstraint = 0;
-	try
-	{
-		bodyinversekinematics_proxy->stop("HEAD");
-		usleep(500000);
-		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
-	}
-	catch(...)
-	{
-		printf("IK connection error\n");
-	}
+	printf("saccadic3D\n");
+// 	tx = -3000;
+// 	ty = 500;
+// 	tz = 1000;
+	QVec::vec3(tx, ty, tz).print("desde el robot");
+// 	innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "robot").print("");
+	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "robot");
+	rel.print("desde la camara");
+	float errYaw   = -atan2(rel(0), rel(2));
+	float errPitch = +atan2(rel(1), rel(2));
+	printf("%f  %f\n", errYaw, errPitch);
+
+	RoboCompJointMotor::MotorGoalPosition goal;
+	
+	goal.name = "head_yaw_joint";
+	goal.maxSpeed = 0.5;
+	goal.position = jointmotor_proxy->getMotorState("head_yaw_joint").pos - errYaw;
+	jointmotor_proxy->setPosition(goal);
+
+	goal.name = "head_pitch_joint";
+	goal.maxSpeed = 0.5;
+	goal.position = jointmotor_proxy->getMotorState("head_pitch_joint").pos - errPitch;
+	jointmotor_proxy->setPosition(goal);
+	
+// 	RoboCompBodyInverseKinematics::Pose6D targetSight;
+// 	targetSight.x = tx;
+// 	targetSight.y = ty;
+// 	targetSight.z = tz;
+// 	RoboCompBodyInverseKinematics::Axis axSight;
+// 	axSight.x = axx;
+// 	axSight.y = axy;
+// 	axSight.z = axz;
+// 	bool axisConstraint = false;
+// 	float axisAngleConstraint = 0;
+// 	try
+// 	{
+// 		bodyinversekinematics_proxy->stop("HEAD");
+// 		usleep(500000);
+// 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
+// 	}
+// 	catch(...)
+// 	{
+// 		printf("IK connection error\n");
+// 	}
 }
 
 
@@ -425,11 +524,43 @@ void SpecificWorker::updateInnerModel()
 		const float z     = str2float(robot->getAttribute("z"));
 		const float alpha = str2float(robot->getAttribute("alpha"));
 		innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
+
+		MotorStateMap mstateMap;
+		jointmotor_proxy->getAllMotorState(mstateMap);
+		for (auto &joint : mstateMap)
+		{
+			innerModel->updateJointValue(QString::fromStdString(joint.first), joint.second.pos);
+		}
+
 	}
 	catch(...)
 	{
 		return;
 	}
+}
+
+
+void SpecificWorker::setRightArmUp_Reflex()
+{
+	bodyinversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
+	bodyinversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
+}
+
+
+void SpecificWorker::setRightArm_GRASP_0_Reflex()
+{
+	bodyinversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
+	bodyinversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
+	bodyinversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
 }
 
 

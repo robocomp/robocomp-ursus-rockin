@@ -97,7 +97,7 @@ void WayPoints::readRoadFromFile(InnerModel *innerModel, std::string name)
 			file >> w.pos[0] >> w.pos[2];
 			append(w);
 		}
-		qDebug() << "SpecificWorker::ReadFromFile:: " << QString::fromStdString(name) << "read with" << size() << "points";
+// 		qDebug() << "SpecificWorker::ReadFromFile:: " << QString::fromStdString(name) << "read with" << size() << "points";
 	}
 	else
 		qDebug() << "Could not open File " << QString::fromStdString( name );
@@ -558,8 +558,8 @@ bool WayPoints::computeForces()
 		or ( (getRobotDistanceToTarget() < 1000) and ( getRobotDistanceVariationToTarget() > 0) ) )
 	{
 		setFinished(true);
-		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
-		getIndexOfClosestPointToRobot()->pos.print("closest point");
+// 		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
+// 		getIndexOfClosestPointToRobot()->pos.print("closest point");
 	}
 
 	//compute curvature of trajectory at closest point to robot

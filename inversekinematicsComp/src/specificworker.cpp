@@ -30,6 +30,7 @@
  */
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
+	printf("ddd\n");
 	correlativeID = 0;		//Unique ID to name provisional targets
 	hide();
 }
@@ -44,7 +45,7 @@ SpecificWorker::~SpecificWorker()
 
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
- * 							MÉTODOS DE INICIALIZACIÓN DE LA CLASE 									*
+ *                              MÉTODOS DE INICIALIZACIÓN DE LA CLASE                               *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /**
  * @brief SET PARAMS
@@ -76,11 +77,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
 			innerModel = new InnerModel(par.value);
 			convertInnerModelFromMilimetersToMeters(innerModel->getRoot());
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+//			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
 		}
 		else
 		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+//			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
 			qFatal("Exiting now.");
 		}
 	}
@@ -103,21 +104,24 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
  */
 void SpecificWorker::init()
 {
-	// RECONFIGURABLE PARA CADA ROBOT: Listas de motores de las distintas partes del robot
+	// RECONFIGURABLE PARA CADA ROBOT: Listas de motores de las distintas partes del robot --------------- OJO CON EL ORDEN!!!!!!!!!!!!!!!!!!!!!!!!!!
 	listaBrazoIzquierdo	<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2";
 	listaBrazoDerecho 	<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2";
-	listaCabeza 		<< "head_yaw_joint" <<  "head_pitch_joint";
+	listaCabeza 		<< "head_yaw_joint" << "head_pitch_joint";
 	listaMotores 		<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
 						<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
-// 						<< "base" 
 						<< "head_yaw_joint" << "head_pitch_joint";
-
+				
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
 	//QString tipRight = "munon_t";
 	
 	QString tipLeft = "grabPositionHandL";
+<<<<<<< HEAD
 	//QString nose = "rgbd_transform";  //OJO PROV
+=======
+//	QString nose = "rgbd_transform";  //OJO PROV
+>>>>>>> 3f611243b36e62746f7f43aed3434f82509ca1af
 	QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
 
 
@@ -383,7 +387,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 	if( target.getHasPlan() == true )
 		return true;
 
-	clearDraw();
+	//clearDraw();
 
 	if( (origin-target.getTranslation()).norm2() < 0.020 )  //already there !!!!
 	{
@@ -408,15 +412,15 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 
 	qDebug() << __FUNCTION__ << "Plan length: " << planner->getPath().size();
 	QList<QVec> path = planner->getPath();
-	
+
 	qDebug() << path;
-	
+
 	//Convert back to world reference system
 	for(int i= 0; i<path.size(); i++)
 		path[i] = innerModel.transform("world",path[i],"robot");
-	
-	draw(innermodelmanager_proxy,path);
-	
+
+	//draw(innermodelmanager_proxy,path);
+
 	//qFatal("fary");
 	QVec w(6);
 	w[0]  = 1; 	w[1]  = 1;  w[2]  = 1; w[3]  = 0; w[4] = 0; w[5] = 0;
@@ -662,7 +666,7 @@ void SpecificWorker::setFingers(float d)  ///ONLY RIGHT HAND. FIX
 void SpecificWorker::goHome(const string& part)
 {
 	QString partName = QString::fromStdString(part);
-	clearDraw();
+	//clearDraw();
 	
 	if ( bodyParts.contains(partName)==false)
 	{
@@ -862,7 +866,6 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 		MotorList mList;
 		for (int i=0; i<listaJoints.size(); i++)
 		{
-// 			qDebug() << i;
 			mList.push_back(listaJoints[i].toStdString());
 		}
 
@@ -870,7 +873,6 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 
 		for (int j=0; j<listaJoints.size(); j++)
 		{
-// 			qDebug() << j;
 			innerModel->updateJointValue(listaJoints[j], mMap.at(listaJoints[j].toStdString()).pos);
 		}
 	}
@@ -884,8 +886,14 @@ void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 // 		qDebug() << "<";
 		RoboCompOmniRobot::TBaseState bState;
 		omnirobot_proxy->getBaseState( bState );
-		innerModel->updateTransformValues("robot", bState.x/1000, 0, bState.z/1000, 0, bState.alpha, 0);
-// 		qDebug() << ">";
+		try
+		{
+			innerModel->updateTransformValues("robot", bState.x/1000, 0, bState.z/1000, 0, bState.alpha, 0);
+		}
+		catch (const Ice::Exception &ex)
+		{
+			cout<<"--> Exception updating transform values: "<<ex<<endl;
+		}
 	}
 	catch (const Ice::Exception &ex)
 	{
