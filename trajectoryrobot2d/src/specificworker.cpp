@@ -23,9 +23,6 @@
 /**
 * \brief Default constructor
 */
-
-
-
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
 	this->params = params;
@@ -41,6 +38,12 @@ SpecificWorker::~SpecificWorker()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Reads run time parameters fron config file
+ * 
+ * @param params ...
+ * @return bool
+ */
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	//qDebug() << QString::fromStdString(params["PointsFile"].value);
@@ -60,51 +63,46 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		qFatal("Error reading config params");
 	}
 
-		//Update InnerModel from robot
+	//Update InnerModel from robot
 	//try { differentialrobot_proxy->getBaseState(bState); }
 	try {  omnirobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with robot proxy");}
-	// DESCOMENTAR:!!!!!!!!!!!!!!
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
 
 	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);   //"robot" should be an external parameter
 	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
 
-//	setRobotInitialPose(800, -1500, M_PI);
-//	baseOffsets = computeRobotOffsets(innerModel, laserData);
+	//	setRobotInitialPose(800, -1500, M_PI);
+	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
 
 	//Planning
-	plannerOMPL = new PlannerOMPL(innerModel);
+	//plannerOMPL = new PlannerOMPL(innerModel);
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
 	planner = plannerPRM;
- 	planner->cleanGraph(innermodelmanager_proxy);
-// 	planner->drawGraph(innermodelmanager_proxy);
+ 	//planner->cleanGraph(innermodelmanager_proxy);
+ 	//planner->drawGraph(innermodelmanager_proxy);
 
-// 	qDebug() << "----------------inserting" ;
-
-//	planner->drawGraph(innermodelmanager_proxy);
-
-// 	qDebug() << __FUNCTION__ << "----- planner set";
+	// 	qDebug() << "----------------inserting" ;
 
 	//Init road
 	road.setInnerModel(innerModel);
 
 	//Creates and amintains the road (elastic band) adapting it to the real world using a laser device
 	elasticband = new ElasticBand(innerModel);
-// 	qDebug() << __FUNCTION__ << "----- elasticband set";
+	// 	qDebug() << __FUNCTION__ << "----- elasticband set";
 
 	//Low level controller that drives the robot on the road by computing VAdv and VRot from the relative position wrt to the local road
 	controller = new Controller(innerModel, laserData, 2);
-// 	qDebug() << __FUNCTION__ << "----- controller set";
+	// 	qDebug() << __FUNCTION__ << "----- controller set";
 
  	//Localizer stuff
  	localizer = new Localizer(innerModel);
-//
-// 	sleep(1);
+	//
+	// 	sleep(1);
 
 	//Clon para Luis
-//	innerClon = new InnerModel(innerModel);
+	//	innerClon = new InnerModel(innerModel);
 
 	timer.start(20);
 	return true;
@@ -125,7 +123,7 @@ void SpecificWorker::computeLuis( )
 
 
 /**
- * @brief All architecture goes here.
+ * @brief Four levels architecture is called sequentially here
  *
  * @return void
  */
@@ -133,6 +131,7 @@ void SpecificWorker::compute( )
 {
 	static QTime reloj = QTime::currentTime();
 	static QTime reloj2 = QTime::currentTime();
+	static int cont = 0;
 
 	//localizer->localize(laserData, innerModel, 16);
 
@@ -156,14 +155,16 @@ void SpecificWorker::compute( )
 		if(reloj.elapsed() > 2000)
 		{
 // 			qDebug() << __FUNCTION__ << "Elapsed time: " << reloj2.elapsed();
-			if( reloj2.elapsed() < 100 )
-			{
+// 			if( reloj2.elapsed() < 100 )
+// 			{
 			road.clearDraw(innermodelmanager_proxy);
 			road.draw(innermodelmanager_proxy, innerModel);
-			}
+	//		}
+			qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed()/cont;
+			cont = 0;
 			reloj.restart();
 		}
-		reloj2.restart();
+//		reloj2.restart();
 	}
 	else //LOST connection to robot
 	{
@@ -171,6 +172,7 @@ void SpecificWorker::compute( )
 		road.reset();
 		compState.state = "DISCONNECTED";
 	}
+	cont++;
 }
 
 
@@ -216,15 +218,13 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel)
 		elasticband->update( road, laserData, currentTarget);
 
 		road.computeForces();
-
 		//road.print();
-
-// 		road.printRobotState( innerModel, currentTarget);
-
-		//controller->update(innerModel, laserData, differentialrobot_proxy, road);
+		// 		road.printRobotState( innerModel, currentTarget);
 		controller->update(innerModel, laserData, omnirobot_proxy, road);
-
-
+		
+// 		road.clearDraw(innermodelmanager_proxy);
+// 		road.draw(innermodelmanager_proxy, innerModel);
+		
 		if (road.isFinished() == true)
 		{
 			if( currentTarget.hasRotation() )
@@ -358,7 +358,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		return true;
 
 	QTime reloj = QTime::currentTime();
-// 	qDebug() << __FUNCTION__ << "Computing plan... ";
+	// 	qDebug() << __FUNCTION__ << "Computing plan... ";
 
 	if (updateInnerModel(inner))
 	{
@@ -366,12 +366,12 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		QVec localTarget = currentTarget.getTranslation();
 		if ( planner->computePath(localTarget, inner) == false)
 		{
-// 			qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
+		// 			qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
 			currentTarget.reset();
 			return false;
 		}
 		currentTarget.setTranslation( localTarget );
-// 		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
+		qDebug() << __FUNCTION__ << "Plan obtained after " << reloj.elapsed() << "ms. Plan length: " << planner->getPath().size();
 
 		// take inner to current values
 		updateInnerModel(inner);
@@ -389,6 +389,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner)
 		road.computeForces();  //NOT SURE IF NEEDED HERE
 		road.startRoad();
 		compState.planningTime = road.getETA();
+		road.draw(innermodelmanager_proxy, inner);
 		//compState.planningTime = reloj.elapsed();
 
 		return true;
