@@ -17,6 +17,14 @@
 
 #include "plannerprm.h"
 
+/**
+ * @brief Probabilistic Road Map planner constructor. Computes and updates a free-path graph and trajectories on it. If no path can be found on graph, it calls RRT
+ * 
+ * @param innerModel_ ...
+ * @param nPoints ...
+ * @param neigh ...
+ * @param parent ...
+ */
 PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObject *parent)
 {
 	xMin = 0.;
@@ -24,15 +32,15 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	zMin = -10000.;
 	zMax = 0.;
 
-// 	innerModel = new InnerModel(*innerModel_);
+	// 	innerModel = new InnerModel(*innerModel_);
 	innerModel = innerModel_;
 
 	QList<QRectF> innerRegions;
 	QRectF outerRegion(-1920,3500,  4000,-7000);
 
-//	innerRegions << QRectF(1500, 0, 4000, -3000) <<	QRectF(0, -8500, 4000, -1500) << QRectF(7500, -4000, 2500, -6000);
-// 	QRectF outerRegion(0, 0, 10000, -10000);
-
+	// for Rocking apartment
+	// innerRegions << QRectF(1500, 0, 4000, -3000) <<	QRectF(0, -8500, 4000, -1500) << QRectF(7500, -4000, 2500, -6000);
+	// QRectF outerRegion(0, 0, 10000, -10000);
 
 	sampler.initialize(innerModel, outerRegion, innerRegions);
 
@@ -86,7 +94,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	QVec point;
 	if ( sampler.checkRobotValidDirectionToTargetOneShot( robot, target) )
 	{
-// 		qDebug() << __FILE__ << __FUNCTION__ << "Target on sight. Proceeding";
+ 		qDebug() << __FILE__ << __FUNCTION__ << "Target on sight. Proceeding";
 		currentPath << robot << target;
 		return true;
 	}

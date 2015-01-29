@@ -231,22 +231,23 @@ void SpecificWorker::doStateMachine()
 				break;
 		case State::INIT_GO_KITCHEN:
 				state = init_go_kitchen();
-		break;
+				break;
 		case State::GO_KITCHEN:
 				state = go_kitchen();
-		break;
+				qFatal("bye");
+				break;
 		case State::INIT_PREPARE_ARM:
 				state = initPrepareArm();
-		break;
+				break;
 		case State::PREPARE_ARM:
 				state = prepareArm();
-		break;
+				break;
 		case State::INIT_APPROACH:
 				state = initApproach();
-		break;
+				break;
 		case State::APPROACH:
 				state = approach();
-		break;
+				break;
 		case State::SERVOING:
 				state = servoing();
 				break;
