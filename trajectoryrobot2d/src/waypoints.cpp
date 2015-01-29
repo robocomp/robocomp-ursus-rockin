@@ -208,7 +208,7 @@ void WayPoints::print() const
 	}
 }
 
-bool WayPoints::draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo)
+bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, const CurrentTarget &currentTarget)
 {
 	RoboCompInnerModelManager::Pose3D pose;
 	pose.y = 0;	pose.x = 0;	pose.z = 0;
@@ -222,6 +222,7 @@ bool WayPoints::draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
 	{ std::cout << ex << std::endl;}
 
+	//Draw all points now
 	for(int i=1; i<size(); i++)
 	{
 		WayPoint &w = (*this)[i];
@@ -235,92 +236,25 @@ bool WayPoints::draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *
 
 		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "road", pose);
 		if ( (int)i == (int)currentPointIndex+1 )	//CHANGE TO getIndexOfClosestPointToRobot()
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 1000, 30, "#000055" );
+			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 600, 30, "#000055" );
 		if (w.isVisible)
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#005500" );
 		else
 			RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#550099" );  //Morado
 	}
-	return false;
-}
-
-bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo)
-{
-	return draw2(innermodelmanager_proxy, innerModel, upTo);
-
-	RoboCompInnerModelManager::Pose3D pose;
-	pose.y = 0;
-	pose.x = 0;
-	pose.z = 0;
-	pose.rx = pose.ry = pose.z = 0.;
-	RoboCompInnerModelManager::meshType mesh;
-
-	if( this->isEmpty() )
-		return false;
-
-	//clearDraw(innermodelmanager_proxy);
-
-	QString item;
-	if( upTo == -1)
-		upTo = this->size();
-	if( upTo < 0 )
-		upTo = 0;
-	if( upTo > this->size() )
-		upTo = this->size();
-
-
-	try
-	{	std::string  parentAll = "road";
-		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);
-	}
-	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
-	{ std::cout << ex << std::endl;}
-
-	WayPoint &w = (*this)[0];
-	item = "p_" + QString::number(0);
-	pose.x = w.pos.x();
-	pose.y = 10;
-	pose.z = w.pos.z();
-	RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "road", pose);
-	RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, QVec::vec3(0,0,1), 50, 50, "#335577" );
-
-	for(int i=1; i<upTo; i++)
+	if( currentTarget.hasRotation() == true) 	//Draw an arrow indicating final desired orientation
 	{
-		WayPoint &w = (*this)[i];
-		WayPoint &wAnt = (*this)[i-1];
-
-		QLine2D l(wAnt.pos, w.pos);
-		QLine2D lp = l.getPerpendicularLineThroughPoint( QVec::vec2(w.pos.x(), w.pos.z()));
-		QVec normal = lp.getNormalForOSGLineDraw();  //3D vector
-		//QVec tangent = l.getNormalForOSGLineDraw();
-		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();		//OJO, PETA SI NO ESTA LA TG CALCULADA ANTES
-		item = "p_" + QString::number(i);
-		pose.x = w.pos.x();
-		pose.y = 10;
-		pose.z = w.pos.z();
-		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "road", pose);
-		RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 150, 50, "#005500" );
-		if ( (int)i == (int)currentPointIndex+1 )	//CHANGE TO getIndexOfClosestPointToRobot()
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 1000, 30, "#000055" );
-	/*	else if (i == nextPointIndex )
-		{
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 400, 30, "#999900" );
-			QVec normalR = (getRobotZAxis(innerModel).getPerpendicularLineThroughPoint( QVec::vec2(getNextPoint().pos.x(), getNextPoint().pos.z()))).getNormalForOSGLineDraw();
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_lineA", item, normalR, 1000, 20, "#009999" );  //ligh blue, frontier
-		}
-*/
-		else if(w.isVisible)
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 400, 30, "#550099" );  //Morado
-		else
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, normal, 400, 30 );
-
-		w.centerTransformName = item;
-		w.centerLineName = item + "_line";
-		w.centerPointName = item + "_point";
+		float rot = currentTarget.getRotation().y();
+		WayPoint &w = this->last();
+		QLine2D l(w.pos, w.pos + QVec::vec3((T)(500*sin(rot)),0,(T)(500*cos(rot))));
+		QVec ln = l.getNormalForOSGLineDraw();
+		QString item = "p_" + QString::number(this->size()-1);
+		RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, ln, 600, 30, "#400055" );
 	}
-
+	
 	return true;
 }
+
 
 
 void WayPoints::clearDraw(InnerModelManagerPrx innermodelmanager_proxy)
