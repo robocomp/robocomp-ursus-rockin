@@ -52,15 +52,11 @@ public:
 	void stop();
 	RoboCompTrajectoryRobot2D::NavState 	getState		();
 	void goBackwards(const TargetPose& target);
-	
-	//void sendData(const RoboCompJoystickAdapter::TData& data);
-	
+		
 public slots:
  	void 	compute		(); 	
-	void 	computeLuis	();
 	
 private:
-	
 	//RoboCompDifferentialRobot::TBaseState 	bState;
 	RoboCompOmniRobot::TBaseState bState;
 	RoboCompTrajectoryRobot2D::NavState 	compState;

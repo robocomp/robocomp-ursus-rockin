@@ -67,8 +67,7 @@ class WayPoints : public QList< WayPoint >
 		void readRoadFromList(QList<QVec> list);
 		void printRobotState(InnerModel* innerModel, const CurrentTarget& currentTarget);
 		void print() const;
-		bool draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo = -1);  //Default in upTo means all list
-		bool draw2(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, int upTo = -1);  //Default in upTo means all list
+		bool draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, const CurrentTarget &currentTarget);  //Default in upTo means all list
 		void clearDraw(InnerModelManagerPrx innermodelmanager_proxy);
 		void removeFirst(InnerModelManagerPrx innermodelmanager_proxy);
 		float robotDistanceToCurrentPoint(InnerModel *innerModel);
