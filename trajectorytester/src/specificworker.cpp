@@ -62,14 +62,11 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest2.xml");
 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/pablo/simulation.xml");
 	
-	
 	try 
 	{	
 		bodyinversekinematics_proxy->begin_goHome("HEAD");
 		bodyinversekinematics_proxy->begin_goHome("RIGHTARM");
-		bodyinversekinematics_proxy->setFingers(0);
-		
-		
+	//	bodyinversekinematics_proxy->setFingers(0);	
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 	{ std::cout << ex.text << "in Closefingers" << std::endl;}

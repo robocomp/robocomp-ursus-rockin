@@ -98,6 +98,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	//imv = new InnerModelViewer (innerModel, "root", osgView->getRootGroup());
 
+
 	timer.start(Period);
 	return true;
 };

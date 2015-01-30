@@ -117,11 +117,8 @@ void SpecificWorker::init()
 	//QString tipRight = "munon_t";
 	
 	QString tipLeft = "grabPositionHandL";
-<<<<<<< HEAD
-	//QString nose = "rgbd_transform";  //OJO PROV
-=======
-//	QString nose = "rgbd_transform";  //OJO PROV
->>>>>>> 3f611243b36e62746f7f43aed3434f82509ca1af
+
+	//	QString nose = "rgbd_transform";  //OJO PROV
 	QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
 
 
