@@ -83,22 +83,22 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 
 	currentPath.clear();
 
-	//If target on obstacle, abort.  IMPROVE THIS TO INCLUDE closest VALID POINT TO TARGET
-	//if( sampler.checkRobotValidStateAtTarget(target) == false )
+	//If target on obstacle find a point close to it on the robot-target line
 	if( sampler.searchRobotValidStateCloseToTarget(target) == false )
 	{
-// 		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
+		// 		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		return false;
 	}
 	//Check if the target is in "plain sight"
 	QVec point;
 	if ( sampler.checkRobotValidDirectionToTargetOneShot( robot, target) )
 	{
- 		qDebug() << __FILE__ << __FUNCTION__ << "Target on sight. Proceeding";
+ 		qDebug() << __FILE__ << __FUNCTION__ << "-------- Target on sight. Proceeding";
 		currentPath << robot << target;
 		return true;
 	}
-
+	
+	
 	//Now search in KD-tree for closest points to origin and target
 	Vertex robotVertex, targetVertex;
 	searchClosestPoints(robot, target, robotVertex, targetVertex);

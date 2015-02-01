@@ -36,21 +36,20 @@
 class ElasticBand
 {
 	public:
-		ElasticBand(InnerModel *_innermodel);
+		ElasticBand();
 		~ElasticBand();
-		bool update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, const CurrentTarget &currentTarget, uint iter = 1);
+		bool update(InnerModel* innermodel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, const CurrentTarget& currentTarget, uint iter = 1);
 		void addPoints(WayPoints &road, const CurrentTarget &currentTarget);
 
 	private:		
-		InnerModel *innermodel;
 		float computeIntersectionChord( const WayPoint b1, const WayPoint b2);
-		void computeDistanceField(WayPoint &ball, const RoboCompLaser::TLaserData &laserData, float forceDistanceLimit);
-		bool computeFreePath(const WayPoint &w1, const WayPoint &w2, const RoboCompLaser::TLaserData &laserData );
-		void checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData &laserData);
-		bool checkCollision(WayPoints &road, const RoboCompLaser::TLaserData &laserData,float robotRadius);
-		float computeForces(WayPoints &road, const RoboCompLaser::TLaserData& laserData);
+		void computeDistanceField(InnerModel *innermodel, WayPoint &ball, const RoboCompLaser::TLaserData &laserData, float forceDistanceLimit);
+		bool computeFreePath(InnerModel* innermodel, const WayPoint& w1, const WayPoint& w2, const RoboCompLaser::TLaserData& laserData );
+		void checkBlocked(InnerModel* innermodel, WayPoints& road, const RoboCompLaser::TLaserData& laserData);
+		bool checkCollision(InnerModel* innermodel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float robotRadius);
+		float computeForces(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData& laserData);
 		void cleanPoints(WayPoints &road);
-		bool checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData);
+		bool checkVisiblePoints(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData &laserData);
 		bool shortCut(WayPoints& road);
 		bool checkIfNAN(const WayPoints &road);
 };

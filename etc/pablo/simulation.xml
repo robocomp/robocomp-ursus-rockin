@@ -4,9 +4,9 @@
 		<transform id="floor" />
 		<transform id="offset">
 			
-			<transform id="target" ty="850" >
+			<!--<transform id="target" ty="1800" >
 				<plane id="targetP" ny="1" size="50, 50 ,50" repeat="1" texture="#00ffff" />
-			</transform>-->
+			</transform>-->-->
 			
 			
 			<transform id="t_human" tx="1200" ty="906" tz="2000">
@@ -80,11 +80,11 @@
 
 				
 				<transform  id="base_trans" >
-					<joint id="base" port="20000" axis="y" home="0">
+					<joint id="base" port="10067" axis="y" home="0">
  						<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.3ds"  tx="0" ty="10" tz="0" rx="1.5707963267949" scale="1000"  />
 						<transform id="base_body" rx="-1.5707963267948966" ty="0" tz="0" >
 							<!-- Gira en Z -->
-							<joint id="body" port="20000" min="-1" max="1" axis="z" >
+							<joint id="body" port="10067" min="-1" max="1" axis="z" >
 
  							<mesh id="barrahombro" file="/home/robocomp/robocomp/files/osgModels/robexarm/barrahombro.3ds" tx="-150" ty="0" tz="945" ry="-1.5707963267948966" scale="1000"  />
 							<mesh id="barracuello" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracuello.ive" tx="0" ty="0" tz="930" rx="3.14159265359" scale="1000"  />
@@ -97,7 +97,7 @@
 										<plane id="head_y_1" py="100" nz="1" size="20,200,20" repeat="1" texture="#00ff00" />
 										<plane id="head_z_1" pz="100" nz="1" size="20,20,200" repeat="1" texture="#0000ff" />
 									</transform>-->
-									<joint id="head_yaw_joint" port="10067" axis="z" >
+									<joint id="head_yaw_joint" port="10067" axis="z" home="0" min="-1" max="1">
 										<mesh id="head_base_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="25,25,87.5" tz="87.5" />
 										<transform id="head_rot_tilt_pose" tz="0" tz="175" rx="1.5707963267948966" >
 												<!--<transform id="head_axes_2" >
@@ -106,15 +106,15 @@
 													<plane id="head_z_2" pz="100" nz="1" size="10,10,200" repeat="1" texture="#0000ff" />
 												</transform>-->
 											<transform id="head_pre_tilt" ry="1.57079632679">
-												<joint id="head_pitch_joint" port="10067" axis="z" >
+												<joint id="head_pitch_joint" port="10067" axis="z" home="0" min="-1" max="1">
 
-													<transform id="nose_pre" rz="-1.57079632679">
+												<!--	<transform id="nose_pre" rz="-1.57079632679">
 														<transform id="nose">
 															<plane id="nose_x" px="50" nz="1" size="100,3,3" repeat="1" texture="#ff0000" />
 															<plane id="nose_y" py="50" nz="1" size="3,100,3" repeat="1" texture="#00ff00" />
 															<plane id="nose_z" pz="50" nz="1" size="3,3,100" repeat="1" texture="#0000ff" />
 														</transform>
-													</transform>
+													</transform>-->
 
 													<transform id="head_post_tilt" ry="-1.57079632679">
 														<!-- center mesh -->
@@ -299,7 +299,7 @@
 																								<mesh id="finger_right_2_mesh4" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" tz="80" scale="5,5,20"    />
 																								<transform id="finger_right_2_tip" tz="20">
 																									<transform id="munon_t" tz="60">
-																										<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="20,20,20" />
+																										<mesh id="munonMesh" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="10,10,10" />
 																									</transform>
 																								</transform>
 																							</transform>
@@ -333,9 +333,9 @@
 																									<transform id="ThandMesh2_5" tz="-55" ty="25" tx="0"> 	<!--  Deshacemos la translacion -->
 																								<!--		<transform id="grabPositionHandR"  tz="55" ty="-25">
 																								-->		<transform id="grabPositionHandR"  tz="190" ty="-25">
-																											<plane id="axisx" px="50" nx="1" size="3,3,100" repeat="1" texture="#550000" />
+																										<!--	<plane id="axisx" px="50" nx="1" size="3,3,100" repeat="1" texture="#550000" />
 																											<plane id="axisy" py="50" nx="1" size="3,100,3" repeat="1" texture="#005500" />
-																											<plane id="axisz" pz="50" nx="1" size="100,3,3" repeat="1" texture="#000055" />
+																											<plane id="axisz" pz="50" nx="1" size="100,3,3" repeat="1" texture="#000055" />-->
 																										</transform>
 																									</transform>
 																								</transform>

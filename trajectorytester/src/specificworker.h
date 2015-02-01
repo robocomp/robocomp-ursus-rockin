@@ -81,6 +81,10 @@ private:
 			pose.resize(6);
 			id = id_; pose[0] = x_; pose[1] = y_; pose[2] = z_; pose[3] = rx_; pose[4] = ry_; pose[5] = rz_;
 		}
+		QVec getTrans() const
+		{
+			return pose.subVector(0,2);
+		}	
 		void print()
 		{
 			qDebug() << "Id:" << id << "Pose:" << pose;
@@ -177,6 +181,7 @@ private:
 	void doPosture();
 	bool gazeToTag(const QString &tag);
 	bool gazeBetweenTags(const QString &tag1, const QString &tag2);
+	bool gazeBetweenTags(int hand, int mug);
 	bool changeTargetToTag(int id);
 	bool goToTag(int id);
 	
@@ -192,6 +197,7 @@ private:
 	void removeAxis(const QString &name);
 	float initialDistance; //to grab the mug
 	RoboCompBodyInverseKinematics::TargetState bikState;
+	RoboCompBodyInverseKinematics::Axis axisCamera;
 };
 
 #endif

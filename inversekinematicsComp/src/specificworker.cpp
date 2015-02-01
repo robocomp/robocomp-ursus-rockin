@@ -30,7 +30,7 @@
  */
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
-	printf("ddd\n");
+	qDebug() << __FUNCTION__;
 	correlativeID = 0;		//Unique ID to name provisional targets
 	hide();
 }
@@ -58,15 +58,6 @@ SpecificWorker::~SpecificWorker()
  */
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-// 	try
-// 	{
-// 		RoboCompCommonBehavior::Parameter par = params.at("LEFTARM") ;
-//
-// 		qFatal("FARY");
-//
-// 	}catch(std::exception e) {qFatal("Error al leer la cadena de motores");	}
-//
-
 	try
 	{
 		// Leemos donde está el InnerModel. Si existe cargamos el InnerModel en nuestra variable de clase
@@ -90,8 +81,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		qFatal("Error reading config params");
 	}
 
-
-	//timer.start(Period);
 	init();
 	timer.start(50);
 	return true;
@@ -114,13 +103,9 @@ void SpecificWorker::init()
 				
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
-	//QString tipRight = "munon_t";
-	
 	QString tipLeft = "grabPositionHandL";
-
-	//	QString nose = "rgbd_transform";  //OJO PROV
-	QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
-
+	QString nose = "rgbd_transform";  //OJO PROV
+	//QString nose = "nose";  //OJO PROV NO FUNCIONA SI SE PONE EL TABLET
 
 	IK_BrazoDerecho = new Cinematica_Inversa(innerModel, listaBrazoDerecho, tipRight);
 	IK_BrazoIzquierdo = new Cinematica_Inversa(innerModel, listaBrazoIzquierdo, tipLeft);
@@ -300,22 +285,6 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 	}
 }
 
-void SpecificWorker::compute2()
-{
-	static int i=0;
-	printf("%d\n", i++);
-	
-	actualizarInnermodel(listaMotores); //actualizamos TODOS los motores y la posicion de la base.
-	if (sampler.isStateValidQ(innerModel->transform("world","munon_t")))
-	{
-			
-	}
-		else
-			qDebug() << __FUNCTION__ << "collide ";;
-}
-
-	//if (innerModel->collide("munonMesh", restNodes[out]))
-	
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DE LA CLASE											*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -364,8 +333,7 @@ void SpecificWorker::compute( )
 			{
 					mutex->lock();
 						iterador.value().removeHeadFromTargets(); //eliminamos el target resuelt
-						iterador.value().cleanJointStep();
-						
+						iterador.value().cleanJointStep();						
 					mutex->unlock();
 			}
 		}//if

@@ -66,6 +66,7 @@ void WayPoints::reset()
 	requiresReplanning = false;
 	backList.clear();
 	antDist = std::numeric_limits< float >::max();
+	
 }
 
 void WayPoints::startRoad()
@@ -439,6 +440,11 @@ float WayPoints::computeRoadCurvature(WayPoints::iterator closestPoint, uint poi
 		return 0;
 }
 
+/**
+ * @brief Estimated time of arrival en miliseconds
+ * 
+ * @return void
+ */
 void WayPoints::setETA()
 {
 	estimatedTimeOfArrival = getRobotDistanceToTarget() / meanSpeed;
@@ -450,7 +456,7 @@ void WayPoints::setETA()
  *
  * @return void
  */
-bool WayPoints::computeForces()
+bool WayPoints::update()
 {
 
 	//Get robot's position in world and create robot's nose

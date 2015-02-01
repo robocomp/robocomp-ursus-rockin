@@ -25,7 +25,6 @@
 #include "controller.h"
 #include "elasticband.h"
 #include "waypoints.h"
-//#include "forcefield.h"
 #include "localizer.h"
 #include "plannerompl.h"
 #include "plannerprm.h"
@@ -37,6 +36,43 @@
        \brief Algorithm to control de robot along a trajectory defined by a set of points
        @author authorname
 */
+class TrajectoryState
+{
+	public:
+		TrajectoryState() { state = "IDLE";}
+		~TrajectoryState() {};
+		void setElapsedTime(long t){ QMutexLocker l(&m); elapsedTime = t;};
+		void setEstimatedTime(long t){ QMutexLocker l(&m); estimatedTime = t;};
+		void setPlanningTime(long t){ QMutexLocker l(&m); planningTime = t;};
+		void setState(const std::string &state_){ state = state_;}
+		long getElapsedTime(){ QMutexLocker l(&m); return elapsedTime;};
+		long getEstimatedtime(){ QMutexLocker l(&m); return estimatedTime;};
+		long getPlanningTime(){ QMutexLocker l(&m); return planningTime;};
+		std::string getState(){ QMutexLocker l(&m); return state;};
+		RoboCompTrajectoryRobot2D::NavState toMiddleware( const RoboCompOmniRobot::TBaseState &bState, const WayPoints &road)
+		{
+			QMutexLocker l(&m);
+			RoboCompTrajectoryRobot2D::NavState n;
+			n.state = state;
+			n.elapsedTime = elapsedTime;
+			n.planningTime = planningTime;
+			n.estimatedTime = estimatedTime;
+			//////////// MORE DATA CAN GO HERE LIKE robot position, dist to targt, current road, etc
+			n.x = bState.x;
+			n.z = bState.z;
+			n.ang = bState.alpha;
+			n.advV = bState.advVz;
+			n.rotV = bState.rotV;
+			n.distanceToTarget = road.getRobotDistanceToTarget();
+			return n;
+		};
+	private:
+		QMutex m;
+		long elapsedTime;
+		long estimatedTime;
+		long planningTime;
+		std::string state;
+};
 
 class SpecificWorker : public GenericWorker
 {
@@ -50,17 +86,18 @@ public:
 	void setHeadingTo(const TargetPose& target);
 	void changeTarget(const TargetPose& target);
 	void stop();
-	RoboCompTrajectoryRobot2D::NavState 	getState		();
+	RoboCompTrajectoryRobot2D::NavState	getState();
 	void goBackwards(const TargetPose& target);
 		
 public slots:
- 	void 	compute		(); 	
+ 	void	compute(); 	
 	
 private:
 	//RoboCompDifferentialRobot::TBaseState 	bState;
 	RoboCompOmniRobot::TBaseState bState;
-	RoboCompTrajectoryRobot2D::NavState 	compState;
-	RoboCompCommonBehavior::ParameterList 	params;
+	//RoboCompTrajectoryRobot2D::NavState compState;
+	TrajectoryState tState;
+	RoboCompCommonBehavior::ParameterList params;
 	RoboCompLaser::TLaserData laserData;
 	RoboCompLaser::TLaserData datos;
 
@@ -76,36 +113,27 @@ private:
 	ElasticBand *elasticband;
 	PlannerOMPL *plannerOMPL;
 	PlannerPRM *plannerPRM, *planner;
-	//ForceField *forcefield;
 	Localizer *localizer;
 	
-	//Smoother smoother;
+	//Commands correspondign to servant methods, but running on local thread
+	bool gotoCommand(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &state, WayPoints& myRoad, const RoboCompLaser::TLaserData &lData);
+	bool setHeadingCommand(InnerModel* innerModel, float alfa, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad);
+	bool stopCommand( CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state);
+	bool changeTargetCommand(InnerModel* innerModel, CurrentTarget& target,  TrajectoryState &stat, WayPoints& myRoad);
+	bool goBackwardsCommand(InnerModel *innerModel, const QVec &target, CurrentTarget &current, TrajectoryState &state, WayPoints &myRoad);
+
+	bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
 	
+	//Smoother smoother;
 	void readRoadFromFile(string name, WayPoints *road);
 	void setRobotInitialPose(float x, float z, float alpha);
-	bool updateInnerModel(InnerModel* inner);
-	bool targetHasAPlan(InnerModel* inner);
+	bool targetHasAPlan(InnerModel* inner, CurrentTarget& target, TrajectoryState &state, WayPoints &myRoad);
 	void drawTarget(const QVec &target);
 	void drawGreenBoxOnTarget(const QVec &target);
 	void printNumberOfElementsInRCIS();
-	bool gotoCommand(InnerModel *innerModel);
-	bool setHeadingCommand(InnerModel *innerModel, float alfa);
-	bool stopCommand();
-	bool changeTargetCommand(InnerModel *innerModel);
-	bool goBackwardsCommand(InnerModel *innerModel, const QVec &target);
-	//bool avoidanceControl(InnerModel *innerModel, const TLaserData& laserData, float& vadvance, float& vrot, uint elapsed);
-	//std::vector<float> computeRobotOffsets(InnerModel& innerModel, const RoboCompLaser::TLaserData &laserData);
-	std::vector<float> baseOffsets;
-	//bool robotLaserCollision(const QVec& p1, const QVec& p2, const QVec& p3, const QVec& p);
-	void filter(float &vadvance, float &vrot);
-	//QVec repulsionVector;
-	//tuple< QVec, bool > checkInminentCollision(InnerModel& innerModel, const TLaserData& laserData, float vadv, float vrot, float delta);
-	float ad,ro;
-	bool newData;
 	void calcularModuloFloat(QVec &angles, float mod);
-	bool checkRobotValidStateAtTarget(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, QVec &target);
-	bool searchRobotValidStateCloseToTarget(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, QVec& target);
 	float angmMPI(float angle);
 };
+
 
 #endif

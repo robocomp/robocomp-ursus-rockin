@@ -25,12 +25,12 @@ CurrentTarget::CurrentTarget()
 void CurrentTarget::reset()
 {
 	QMutexLocker  ml(&mutex);
-	active = false;
 	withoutPlan = true;
 	targetTr = QVec::zeros(3);
 	targetRot = QVec::zeros(3);
 	reloj.start();
 	doRotation = false;
+	command  = Command::IDLE;
 }
 
 QVec CurrentTarget::getTranslation() const
@@ -55,18 +55,6 @@ void CurrentTarget::setRotation(const QVec& r)
 {
 	QMutexLocker ml(&mutex);
 	targetRot = r;
-}
-
-bool CurrentTarget::isActive() const
-{
-	QMutexLocker ml(&mutex);
-	return active;
-}
-
-void CurrentTarget::setActive(bool a)
-{
-	QMutexLocker ml(&mutex);
-	active = a;
 }
 
 void CurrentTarget::setHasRotation(bool a)
@@ -97,11 +85,10 @@ void CurrentTarget::print()
 	QMutexLocker ml(&mutex);
 	qDebug() << "------------------------------------";
 	qDebug() << "CurrentTarget  ---------------------";
-	qDebug() << "	Active:" << active;
 	qDebug() << "	Translation:" << targetTr;
 	qDebug() << "	Rotation:" << targetRot;
 	qDebug() << "	WithoutPlan" << withoutPlan;
 	qDebug() << "	ElapsedTime" << reloj.elapsed()/1000 << "sg";
-
+	
 	qDebug() << "------------------------------------";
 }

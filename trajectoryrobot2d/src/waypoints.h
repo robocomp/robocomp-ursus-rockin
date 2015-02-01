@@ -28,7 +28,7 @@
 #include "qline2d.h"
 #include "currenttarget.h"
 
-#define ROBOT_RADIUS 250
+#define ROBOT_RADIUS 250   //GET FROM XML
 
 class WayPoint
 {
@@ -69,17 +69,16 @@ class WayPoints : public QList< WayPoint >
 		void print() const;
 		bool draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, const CurrentTarget &currentTarget);  //Default in upTo means all list
 		void clearDraw(InnerModelManagerPrx innermodelmanager_proxy);
-		void removeFirst(InnerModelManagerPrx innermodelmanager_proxy);
+		QList<QVec> backList;
+		bool update();
+		
+		//GOOD ONES
 		float robotDistanceToCurrentPoint(InnerModel *innerModel);
 		float robotDistanceToNextPoint(InnerModel *innerModel);
 		WayPoint const getCurrentPoint() const 												{return (*this)[currentPointIndex];};
 		WayPoint const getNextPoint() const 												{return (*this)[nextPointIndex];};
 		QLine2D getRobotZAxis(InnerModel* innerModel);
 		void computeDistancesToNext();
-		QList<QVec> backList;
-		
-		
-		//GOOD ONES
 		QLine2D getTangentToCurrentPoint();
 		WayPoints::iterator getIndexOfClosestPointToRobot() const 							{ return indexOfClosestPointToRobot;};
 		QLine2D getTangentAtClosestPoint() const											{ return roadTangentAtClosestPoint;};
@@ -95,6 +94,7 @@ class WayPoints : public QList< WayPoint >
 		WayPoints::iterator getIndexOfLastVisiblePoint() const								{ return indexOfLastVisiblePoint;};
 		uint32_t getOrderOfClosestPointToRobot() const										{ return orderOfClosestPointToRobot;};
 		bool isBlocked() const																{ return blockedRoad;};
+		bool isFinished() const 															{ return finish;};
 		
 		void setIndexOfClosestPointToRobot(WayPoints::iterator it) 							{ indexOfClosestPointToRobot = it;};
 		void setTangentAtClosestPoint(const QLine2D &tangent) 								{ roadTangentAtClosestPoint = tangent;};
@@ -105,32 +105,20 @@ class WayPoints : public QList< WayPoint >
 		void setRobotDistanceToTarget( float dist)											{ robotDistanceToTarget = dist;};
 		void setRobotDistanceToLastVisible( float dist)										{ robotDistanceToLastVisible = dist;};
 		void setFinished( bool b)															{ QMutexLocker ml(&mutex); finish = b; }
-		bool isFinished() const 															{ return finish;};
 		void setRobotDistanceVariationToTarget(float dist)									{ robotDistanceVariationToTarget = dist;};
 		void setBlocked(bool b)																{ blockedRoad = b;};
 		void changeTarget(const QVec &target)												{ QMutexLocker ml(&mutex); replace(length()-1, target); antDist = std::numeric_limits< float >::max();};
+		void setETA();
+		void removeFirst(InnerModelManagerPrx innermodelmanager_proxy);
 		
 		int nextPointIndex;
-	//	float distanceToLastVisible;
-	//	bool isBlocked;
 		bool blockedRoad;
 		bool isLost;
 		int currentCollisionIndex;
 		float currentDistanceToFrontier;
 		bool requiresReplanning;
-		
-		
-		bool computeForces();
-		float computeRoadCurvature(WayPoints::iterator closestPoint, uint pointsAhead);
-		float computeDistanceToTarget(WayPoints::iterator closestPoint, const QVec &robotPos);
-		float computeDistanceToLastVisible(WayPoints::iterator closestPoint, const QVec &robotPos);
-		QLine2D computeTangentAt(WayPoints::iterator w) const;
-		void setETA();
-		WayPoints::iterator computeClosestPointToRobot(const QVec& robot);
-		
-		
+	
 	private:
-		
 		float robotDistanceToClosestPoint;
 		float robotPerpendicularDistanceToRoad;
 		QLine2D roadTangentAtClosestPoint;
@@ -152,7 +140,13 @@ class WayPoints : public QList< WayPoint >
 		float antDist; //To be used in robotDistanceVariationToTarget computation
 		
 		QMutex mutex;
-	
+		
+		float computeRoadCurvature(WayPoints::iterator closestPoint, uint pointsAhead);
+		float computeDistanceToTarget(WayPoints::iterator closestPoint, const QVec &robotPos);
+		float computeDistanceToLastVisible(WayPoints::iterator closestPoint, const QVec &robotPos);
+		QLine2D computeTangentAt(WayPoints::iterator w) const;
+		WayPoints::iterator computeClosestPointToRobot(const QVec& robot);
+		
 };
 
 #endif // WAYPOINTS_H

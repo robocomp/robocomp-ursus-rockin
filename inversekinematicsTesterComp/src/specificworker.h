@@ -153,6 +153,7 @@ private:
 	bool				existTarget;								// Se pone a TRU cuando hay un target o una lista de targets a enviar al RCIS o al ROBOT
 	QString 			tabName;									//Name of current tab
 	int 				tabIndex;									//Index of current tabIndex	
+	RoboCompBodyInverseKinematics::Axis axisCamera;
 	
 	////////////////  MÉTODOS PRIVADOS  ////////////////
 	/// MÉTODOS PRIVADOS DE ENVÍO ///

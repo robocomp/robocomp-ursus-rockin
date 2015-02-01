@@ -62,10 +62,12 @@ SpecificWorker::SpecificWorker(MapPrx& mprx,QWidget *parent) : GenericWorker(mpr
 	//innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinBIKTest2.xml");
 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/pablo/simulation.xml");
 	
+	axisCamera.x = 0; axisCamera.y = 0; axisCamera.z=1;
+	
 	try 
 	{	
-		bodyinversekinematics_proxy->begin_goHome("HEAD");
-		bodyinversekinematics_proxy->begin_goHome("RIGHTARM");
+		bodyinversekinematics_proxy->goHome("HEAD");
+		bodyinversekinematics_proxy->goHome("RIGHTARM");
 	//	bodyinversekinematics_proxy->setFingers(0);	
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
@@ -127,98 +129,30 @@ void SpecificWorker::compute( )
 	try
 	{
 		planningState = trajectoryrobot2d_proxy->getState();
-		bikState = bodyinversekinematics_proxy->getState("RIGHTARM");
-		
 		statusLabel->setText(QString::fromStdString( planningState.state ));
-		
 		if( planningState.state == "PLANNING" )
-		{
 			segsLcd->display(reloj.elapsed() );
-		}
 		if( planningState.state == "EXECUTING" )
 		{
 			float distance = (target - current).norm2();
-			//estimatedDurationLcd->display((int)state.estimatedTime);
 			estimatedDurationLcd->display(distance);
 			executionTimeLcd->display(distance / 300);			
 		}
+	}	
+	catch(const Ice::Exception &ex)
+	{	std::cout << ex << "Error talking to Trajectory in Compute" <<  std::endl;	}
+	
+	try
+	{
+		bikState = bodyinversekinematics_proxy->getState("RIGHTARM");		
 	}
 	catch(const Ice::Exception &ex)
 	{	std::cout << ex << "Error talking to BIK in Compute" <<  std::endl;	}
 	
-	actualizarInnermodel(listaMotores);
-
-	
+	actualizarInnermodel(listaMotores);	
 	doStateMachine();
 	
 }
-
-void SpecificWorker::addTransformInnerModel(const QString &name, const QString &parent, const QVec &pose6D)
-{
-		InnerModelNode *nodeParent = innerModel->getNode(parent);
-		if( innerModel->getNode(name) == NULL)
-		{
-			InnerModelTransform *node = innerModel->newTransform(name, "static", nodeParent, 0, 0, 0, 0, 0, 0, 0);
-			nodeParent->addChild(node);
-		}
-		innerModel->updateTransformValues(name, pose6D.x(), pose6D.y(), pose6D.z(), pose6D.rx(), pose6D.ry(), pose6D.rz());	
-}
-
-void SpecificWorker::addMeshInnerModel(const QString &name, const QString &parent, const meshType &mesh, const QVec &pose6D)
-{
-		InnerModelNode *nodeParent = innerModel->getNode(parent);
-		if( innerModel->getNode(name) == NULL)
-		{
-			InnerModelMesh *node = innerModel->newMesh(name, nodeParent, QString::fromStdString(mesh.meshPath), mesh.scaleX, mesh.scaleY, mesh.scaleZ, 1,
-																								 mesh.pose.x, mesh.pose.y, mesh.pose.z, mesh.pose.rx, mesh.pose.ry, mesh.pose.rz, false);
-			nodeParent->addChild(node);
-		}
-		innerModel->updateTransformValues(name, pose6D.x(), pose6D.y(), pose6D.z(), pose6D.rx(), pose6D.ry(), pose6D.rz());	
-}
-
-void SpecificWorker::addPlaneInnerModel(const QString &name, const QString &parent, const Plane3D &plane, const QVec &pose6D)
-{
-		InnerModelNode *nodeParent = innerModel->getNode(parent);
-		if( innerModel->getNode(name) == NULL)
-		{
-			InnerModelPlane *node = innerModel->newPlane(name, nodeParent, QString::fromStdString(plane.texture), plane.width, plane.height, plane.thickness, 0,
-																								  plane.nx, plane.ny, plane.nz, plane.py, plane.py, plane.pz, 0);
-			nodeParent->addChild(node);
-		}
-		innerModel->updateTransformValues(name, pose6D.x(), pose6D.y(), pose6D.z(), pose6D.rx(), pose6D.ry(), pose6D.rz());	
-}
-
-void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
-{
-	try
-	{
-		differentialrobot_proxy->getBaseState(bState);
-		current = QVec::vec3(bState.x, 0, bState.z);  //For widget
-		plantWidget->moveRobot( bState.x, bState.z, bState.alpha);	
-		innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
-		innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << "Error talking to Differentialrobot" << std::endl;
-	}
-	try 
-	{
-		RoboCompJointMotor::MotorList mList;
-		for(int i=0; i<listaJoints.size(); i++)
-			mList.push_back(listaJoints[i].toStdString());
-		
-		RoboCompJointMotor::MotorStateMap mMap = jointmotor_proxy->getMotorStateMap(mList);
-		
-		for(int j=0; j<listaJoints.size(); j++)
-			innerModel->updateJointValue(listaJoints[j], mMap.at(listaJoints[j].toStdString()).pos);
-
-	} catch (const Ice::Exception &ex) {
-		cout<<"--> Excepción en actualizar InnerModel: "<<ex<<endl;
-	}
-}
-
-
 
 void SpecificWorker::doStateMachine()
 {
@@ -231,7 +165,6 @@ void SpecificWorker::doStateMachine()
 				break;
 		case State::GO_KITCHEN:
 				state = go_kitchen();
-				qFatal("bye");
 				break;
 		case State::INIT_PREPARE_ARM:
 				state = initPrepareArm();
@@ -255,9 +188,11 @@ void SpecificWorker::doStateMachine()
 				state = initMoveArm();
 				break;
 		case State::GRASP:
+					qFatal("bye");
 				state = grasp();
 				break;
 		case State::DETACH_TO_GET:
+	
 				state = detachToGet();
 				break;
 		case State::INIT_REDRAW_ARM:
@@ -329,25 +264,26 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 	Tag tag12;
 	if( localTags.existId(12, tag12))
 	{
-		qDebug() << "Lo vi. servo should start here";
+		qDebug() << "I saw tag12. servo should start here";
 		stopRobot();
 		return State::INIT_APPROACH;
 	}
 	
 	if( planningState.state == "IDLE" )
 	{
-		qDebug() << __FUNCTION__ << "Made it...";
+		qDebug() << __FUNCTION__ << "robot at target but we can't see the target";
 		stopRobot();
-		return State::INIT_PREPARE_ARM;		
+		return State::IDLE;		
 	}
 
-	if( planningState.state == "EXECUTING" )
+	if( planningState.state == "EXECUTING" or  planningState.state == "EXECUTING-TURNING" )
 	{
 		qDebug() << __FUNCTION__ << "Working...";
 		gazeToTag("mugT");
 		
-	//if( close-to-the-target ) 
-	//	initPrepareArm;
+		qDebug() << "estimated time" << planningState.estimatedTime;
+		if(planningState.estimatedTime < 3000)
+			initPrepareArm();
 		
 		return State::GO_KITCHEN;
 	}
@@ -358,11 +294,6 @@ SpecificWorker::State SpecificWorker::go_kitchen()
 		return State::GO_KITCHEN;
 	}
 	
-	
-// 	initiated = false;
-// 	qDebug() << __FUNCTION__ << "Otherwise. Should not happen. Passing to IDLE" << QString::fromStdString(planningState.state) << tag12 << initiated;
-// 	return State::IDLE;
-
 	return State::GO_KITCHEN;
 
 }
@@ -375,20 +306,19 @@ SpecificWorker::State SpecificWorker::initPrepareArm()
 	closeFingers();
 	try
 	{
-		bodyinversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
+		bodyinversekinematics_proxy->setJoint("rightElbow", 1.6, 0.5);
 		bodyinversekinematics_proxy->setJoint("rightShoulder1", -0.08, 0.3);
 		bodyinversekinematics_proxy->setJoint("rightShoulder2", -1.2, 0.3);
 		bodyinversekinematics_proxy->setJoint("rightShoulder3", 0.39, 0.3);
 		bodyinversekinematics_proxy->setJoint("rightWrist1", 1, 0.3);
 		bodyinversekinematics_proxy->setJoint("rightWrist2", 0.5, 0.3);
-		sleep(3);
-		return State::PREPARE_ARM;
+// 		sleep(3);
+// 		return State::PREPARE_ARM;
 	}
 	catch(const Ice::Exception &ex)
 	{ std::cout << ex << std::endl; };
 	
-	qDebug() << __FUNCTION__ << "Something failed"; 
-	return State::IDLE;
+// 	
 }
 
 SpecificWorker::State SpecificWorker::prepareArm()
@@ -408,18 +338,23 @@ SpecificWorker::State SpecificWorker::initApproach()
 	qDebug() << __FUNCTION__;	
 	//go(QVec::vec3(1300,0,-1250), QVec::vec3(0,M_PI,0));
 	goToTag(12);
-	usleep(500000);
+	usleep(100000);
 	return State::APPROACH;
 }
 
 SpecificWorker::State SpecificWorker::approach()
 {
 	qDebug() << __FUNCTION__ << "planningState" << QString::fromStdString(planningState.state);
-	Tag tag11,tag12;
-	if( planningState.state  == "IDLE")
+	Tag tag12, tag11;
+	float distToTag = std::numeric_limits< float >::max();
+	if (localTags.existId(12, tag12))
+		distToTag = innerModel->transform("robot", tag12.getTrans(), "rgbd_transform").norm2();
+	
+	if( planningState.state  == "IDLE" or distToTag < 400)
 	{
-		if(/* localTags.existId(11, tag11) and */localTags.existId(12, tag12))  //OJO DESCOMENTAR
+		if( localTags.existId(11, tag11) and localTags.existId(12, tag12)) 
 		{
+			stopRobot();
 			openFingers();
 			sleep(1);
 			return State::GRASP;
@@ -432,8 +367,8 @@ SpecificWorker::State SpecificWorker::approach()
 	}
 	else
 	{
-		gazeBetweenTags("handMesh2","mugT");	
-		changeTargetToTag(12);
+		gazeBetweenTags(11,12);	
+		goToTag(12);
 		usleep(300000);
  		return State::APPROACH;
 	}
@@ -454,7 +389,8 @@ SpecificWorker::State SpecificWorker::servoing()
 		return State::IDLE;
  	}
 	gazeToTag("mugT");
-	changeTargetToTag(12);
+	//changeTargetToTag(12);
+	goToTag(12);
 	return State::SERVOING;
 }
 
@@ -477,9 +413,7 @@ SpecificWorker::State SpecificWorker::initMoveArm()
 		loc.print("loc");
 		target.rx=0; target.ry=0; target.rz=0; 	
 		target.x = loc.x()-80; target.y=loc.y(); target.z = loc.z();  
-		RoboCompBodyInverseKinematics::Axis axis; 
-		axis.x = 0; axis.y = -1; axis.z = 0;
-		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
+		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axisCamera, true, 0);
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 		{ std::cout << ex.text << "calling pointAxisTowardsTarget" << std::endl;}
@@ -1147,9 +1081,9 @@ bool SpecificWorker::goToTag(int id)
 	Tag tag;
 	if( localTags.existId(id, tag))
 	{
-		innerModel->transform("world","robot").print("currently robot at:");
+		//innerModel->transform("world","robot").print("currently robot at:");
 		QVec nTarget = innerModel->transform("world",tag.pose,"rgbd_transform");
-		nTarget.print("going to:");
+		//nTarget.print("going to:");
 		go(nTarget);
 	}
 	return true;
@@ -1165,8 +1099,8 @@ bool SpecificWorker::changeTargetToTag(int id)
 		
 		// Set in floor
 		tagInWorld(1) = innerModel->transform("world","robot").y();
-		innerModel->transform("world","robot").print("currently robot at:");
-		tagInWorld.print("going to new target:");
+		//innerModel->transform("world","robot").print("currently robot at:");
+		//tagInWorld.print("going to new target:");
 		try 
 		{	
 			RoboCompTrajectoryRobot2D::TargetPose tp;
@@ -1199,11 +1133,9 @@ bool SpecificWorker::gazeToTag(const QString &tag)
 		RoboCompBodyInverseKinematics::Pose6D target;
 		QVec loc = innerModel->transform("world",tag);  
 		target.rx=0; target.ry=0; target.rz=0; 	
-		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();  
-		RoboCompBodyInverseKinematics::Axis axis; 
-		//axis.x = 0; axis.y = -1; axis.z = 0;
-		axis.x = -1; axis.y = 0; axis.z = 0;
-		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
+		target.x = loc.x(); target.y=loc.y()-200; target.z = loc.z();  
+		qDebug() << __FUNCTION__ << target.x << target.y << target.z;		
+		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axisCamera, false, 0);  //NEEDED SPEED CONTROL
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 		{ std::cout << ex.text << "Exception calling BIK to move head towards" << tag.toStdString() << std::endl;}
@@ -1212,6 +1144,37 @@ bool SpecificWorker::gazeToTag(const QString &tag)
 		
 	return true;
 }
+
+bool SpecificWorker::gazeBetweenTags(int hand, int mug)
+{
+	QVec tHand,tMug;
+	Tag tagHand,tagMug;
+	if( localTags.existId(hand, tagHand))
+		tHand = innerModel->transform("world",tagHand.pose, "rgbd_transform");
+	else
+		tHand = innerModel->transform("world","handMesh2");			//HARCODEADO
+	
+	if( localTags.existId(mug, tagMug))
+		tMug = innerModel->transform("world",tagMug.pose, "rgbd_transform");
+	else
+		tMug = innerModel->transform("world","mugT");				//HARDCODEADO
+	
+	try 
+	{	
+		RoboCompBodyInverseKinematics::Pose6D target;
+		QVec loc = (tMug + tHand)/2.f;  
+		target.rx=0; target.ry=0; target.rz=0; 	
+		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();  
+		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axisCamera, true, 0);
+	} 
+	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
+		{ std::cout << ex.text << "Exception calling BIK to move head towards the middle of" << hand << "and" << mug << std::endl;}
+	catch (const Ice::Exception &ex) 
+		{ std::cout << ex << std::endl;}
+		
+	return true;
+}
+
 
 bool SpecificWorker::gazeBetweenTags(const QString &tag1, const QString &tag2)
 {
@@ -1229,9 +1192,7 @@ bool SpecificWorker::gazeBetweenTags(const QString &tag1, const QString &tag2)
 		QVec loc = (innerModel->transform("world",tag1) + innerModel->transform("world",tag2))/2.f;  
 		target.rx=0; target.ry=0; target.rz=0; 	
 		target.x = loc.x(); target.y=loc.y(); target.z = loc.z();  
-		RoboCompBodyInverseKinematics::Axis axis; 
-		axis.x = 0; axis.y = -1; axis.z = 0;
-		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axis, true, 0);
+		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", target, axisCamera, true, 0);
 	} 
 	catch (const RoboCompBodyInverseKinematics::BIKException &ex) 
 		{ std::cout << ex.text << "Exception calling BIK to move head towards the middle of" << tag1.toStdString() << "and" << tag2.toStdString() << std::endl;}
@@ -1390,8 +1351,6 @@ void SpecificWorker::removeAxis(const QString &name)
 	}
 }
 
-
-
 void SpecificWorker::goHome()
 {
 	try 
@@ -1410,11 +1369,83 @@ void SpecificWorker::goHome()
 
 ////////////////////////////////////////////////////////////////////
 
+void SpecificWorker::addTransformInnerModel(const QString &name, const QString &parent, const QVec &pose6D)
+{
+		InnerModelNode *nodeParent = innerModel->getNode(parent);
+		if( innerModel->getNode(name) == NULL)
+		{
+			InnerModelTransform *node = innerModel->newTransform(name, "static", nodeParent, 0, 0, 0, 0, 0, 0, 0);
+			nodeParent->addChild(node);
+		}
+		innerModel->updateTransformValues(name, pose6D.x(), pose6D.y(), pose6D.z(), pose6D.rx(), pose6D.ry(), pose6D.rz());	
+}
+
+void SpecificWorker::addMeshInnerModel(const QString &name, const QString &parent, const meshType &mesh, const QVec &pose6D)
+{
+		InnerModelNode *nodeParent = innerModel->getNode(parent);
+		if( innerModel->getNode(name) == NULL)
+		{
+			InnerModelMesh *node = innerModel->newMesh(name, nodeParent, QString::fromStdString(mesh.meshPath), mesh.scaleX, mesh.scaleY, mesh.scaleZ, 1,
+																								 mesh.pose.x, mesh.pose.y, mesh.pose.z, mesh.pose.rx, mesh.pose.ry, mesh.pose.rz, false);
+			nodeParent->addChild(node);
+		}
+		innerModel->updateTransformValues(name, pose6D.x(), pose6D.y(), pose6D.z(), pose6D.rx(), pose6D.ry(), pose6D.rz());	
+}
+
+void SpecificWorker::addPlaneInnerModel(const QString &name, const QString &parent, const Plane3D &plane, const QVec &pose6D)
+{
+		InnerModelNode *nodeParent = innerModel->getNode(parent);
+		if( innerModel->getNode(name) == NULL)
+		{
+			InnerModelPlane *node = innerModel->newPlane(name, nodeParent, QString::fromStdString(plane.texture), plane.width, plane.height, plane.thickness, 0,
+																								  plane.nx, plane.ny, plane.nz, plane.py, plane.py, plane.pz, 0);
+			nodeParent->addChild(node);
+		}
+		innerModel->updateTransformValues(name, pose6D.x(), pose6D.y(), pose6D.z(), pose6D.rx(), pose6D.ry(), pose6D.rz());	
+}
+
+void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
+{
+	try
+	{
+		differentialrobot_proxy->getBaseState(bState);
+		current = QVec::vec3(bState.x, 0, bState.z);  //For widget
+		plantWidget->moveRobot( bState.x, bState.z, bState.alpha);	
+		innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);
+		innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << "Error talking to Differentialrobot" << std::endl;
+	}
+	std::string traza;
+	try 
+	{
+		RoboCompJointMotor::MotorList mList;
+		for(int i=0; i<listaJoints.size(); i++)
+			mList.push_back(listaJoints[i].toStdString());
+		
+		RoboCompJointMotor::MotorStateMap mMap = jointmotor_proxy->getMotorStateMap(mList);
+		
+		for(int j=0; j<listaJoints.size(); j++)
+		{
+			traza = listaJoints[j].toStdString();
+			innerModel->updateJointValue(listaJoints[j], mMap.at(listaJoints[j].toStdString()).pos);
+		}
+
+	} catch (const Ice::Exception &ex) {
+		cout<<"--> Excepción en actualizar InnerModel with part: " << traza <<ex<<endl;
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////////
 /**
  * @brief Just for TrajectoryRobot2D. Go to t
  * 
- * @param t ...
- * @param r ...
+ * @param t translation target
+ * @param r rotation target
  * @return void
  */
 void SpecificWorker::go(const QVec& t, const QVec &r)
@@ -1425,6 +1456,7 @@ void SpecificWorker::go(const QVec& t, const QVec &r)
 	tp.x = t.x();
 	tp.z = t.z();
 	tp.y = 0;
+	
 	if( r.size() == 3 )
 	{
 		tp.rx = r.x(); tp.ry = r.y(); tp.rz = r.z();
@@ -1432,6 +1464,7 @@ void SpecificWorker::go(const QVec& t, const QVec &r)
 	}
 	else
 		tp.doRotation = false;
+	
 	target = t;
 	try
 	{
@@ -1577,6 +1610,6 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 {
 	
 	localTags.update(tags);
-	localTags.print();
+	//localTags.print();
 	
 }

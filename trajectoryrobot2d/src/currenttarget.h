@@ -30,22 +30,19 @@ class CurrentTarget
 		void setTranslation(const QVec &t);
 		QVec getRotation() const;		
 		void setRotation(const QVec &r);
-		bool isActive() const;
-		void setActive(bool a);
 		bool isWithoutPlan() const ;
 		void setWithoutPlan(bool w); 
 		void print();
 		ulong getElapsedTime() const;  //ms
 		bool hasRotation() const;
 		void setHasRotation(bool a);
-		enum class Command { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS};
+		enum class Command { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE};
 		Command command;
 		
 	private:
 		mutable QMutex mutex;
 		QVec targetTr;
 		QVec targetRot;
-		bool active;
 		bool withoutPlan;
 		QTime reloj;
 		bool doRotation;
