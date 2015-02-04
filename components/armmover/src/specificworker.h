@@ -20,6 +20,7 @@
 #define SPECIFICWORKER_H
 
 #include <genericworker.h>
+#include "reflexx.h"
 
 /**
        \brief
@@ -42,6 +43,14 @@ class SpecificWorker : public GenericWorker
 	private:
 		bool updateInnerModel(InnerModel *inner);
 		InnerModel *innerModel;
+		
+		struct Point
+		{
+			QVec p;
+			string name;
+		};
+		
+		void doReflexxes( const QList< QPair< QString, float > >& points );
 };
 
 #endif

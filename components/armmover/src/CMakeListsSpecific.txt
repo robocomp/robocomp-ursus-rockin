@@ -3,13 +3,18 @@
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
+  reflexx.cpp
 )
 
 # Headers set
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
+  reflexx.h
 )
 
 
 ADD_DEFINITIONS( -std=c++11 )
+SET ( LIBS ${LIBS} -lReflexxesTypeII )
+ADD_DEFINITIONS( -I/usr/local/include/Reflexxes )
+SET (LIBS ${LIBS} -lfcl -lboost_system  -lboost_filesystem -lrt -lompl -lboost_graph -losg -losgDB)

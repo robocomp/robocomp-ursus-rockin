@@ -32,11 +32,12 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QObject *parent) : GenericWorker(mp
 */
 SpecificWorker::~SpecificWorker()
 {
-
 }
+
 void SpecificWorker::compute( )
 {
-	
+		//The goal is to try Reflexxes by doing some pre-cooked trajectories
+		
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -44,6 +45,16 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	timer.start(Period);
 	return true;
 };
+
+void SpecificWorker::doReflexxes( const QList< QPair<QString, float> > &points )
+{
+	Reflexx *reflexx = new Reflexx(jointmotor_proxy, points);
+	//reflexx->updateMotorState(motors);
+	//reflexx->setSyncPosition( listGoals );
+	reflexx->start();
+	qDebug() << __FUNCTION__ << "Waiting for Reflexx...";
+	reflexx->wait(5000);
+}
 
 
 /**
