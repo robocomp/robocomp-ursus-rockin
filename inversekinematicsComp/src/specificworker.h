@@ -22,16 +22,9 @@
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
-#include <qt4/QtCore/qstring.h>
-#include <qt4/QtCore/qdebug.h>
-#include <qt4/QtCore/qstringlist.h>
-#include <qt4/QtCore/qmap.h>
-#include <qt4/QtCore/qpair.h>
-#include <qt4/QtCore/qqueue.h>
-
+#include <QtCore>
 #include <iostream>
 #include <fstream>
-
 #include "cinematica_inversa.h"
 #include "target.h"
 #include "bodypart.h"
@@ -52,11 +45,9 @@ class SpecificWorker : public GenericWorker
 	Q_OBJECT
 	
 	public:
-		////// CONSTRUCTORES Y DESTRUCTORES ///////
 		SpecificWorker	(MapPrx& mprx, QWidget *parent = 0);	
 		~SpecificWorker	();
-		
-		bool		setParams(RoboCompCommonBehavior::ParameterList params);
+		bool	setParams(RoboCompCommonBehavior::ParameterList params);
 		void  	setTargetPose6D(const string& bodyPart, const Pose6D& target, const WeightVector& weights, float radius);
 		void  	pointAxisTowardsTarget(const string& bodyPart, const Pose6D& target, const Axis &axis, bool axisConstraint, float axisAngleConstraint);
 		void  	advanceAlongAxis(const string& bodyPart, const Axis& ax, float dist);
@@ -68,10 +59,8 @@ class SpecificWorker : public GenericWorker
 		void 		setNewTip(const string &part, const string &transform, const Pose6D &pose); 
 		void  	setJoint(const string& joint, float speed, float maxSpeed);
 		
-		
 	public slots:
 		void compute(); 
-		void compute2();
 
 	private:
 				

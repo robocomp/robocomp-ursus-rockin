@@ -41,7 +41,7 @@ class Controller
 	private:
 		QTime time;
 		int delay;
-		bool avoidanceControl(InnerModel *innerModel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot);
+		bool avoidanceControl(InnerModel* innerModel, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot);
 		std::vector<float> computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData);
 		std::vector<float> baseOffsets;
 };
