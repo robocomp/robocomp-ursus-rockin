@@ -40,6 +40,9 @@ void DifferentialRobotI::getBaseState(RoboCompDifferentialRobot::TBaseState& sta
 	state.x     = ostate.x;
 	state.z     = ostate.z;
 	state.alpha = ostate.alpha;
+	state.correctedX = ostate.correctedX;
+	state.correctedZ = ostate.correctedZ;
+	state.correctedAlpha = ostate.correctedAlpha;
 }
 
 void DifferentialRobotI::getBasePose(Ice::Int& x, Ice::Int& z, Ice::Float& alpha, const Ice::Current&)

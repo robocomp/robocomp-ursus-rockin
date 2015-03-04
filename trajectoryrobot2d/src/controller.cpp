@@ -22,8 +22,8 @@
 
 Controller::Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, int delay)  //in secs
 {
-	time = QTime::currentTime();
-	this->delay = delay*1000;
+	this->time = QTime::currentTime();
+	this->delay = delay*1000;	//msecs
 
 	//compute offsets from laser center to the border of the robot base
 	baseOffsets = computeRobotOffsets(innerModel, laserData);
@@ -39,35 +39,33 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 	static long epoch = 100;
 
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
-
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
 
+	//Check robot state
 	if( (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
-// 		if( road.isFinished() ) qDebug() << "road finished";
-// 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
-// 		if( road.isLost ) qDebug() << "robot is lost";
+		// 		if( road.isFinished() ) qDebug() << "road finished";
+		// 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
+		// 		if( road.isLost ) qDebug() << "robot is lost";
 		stopTheRobot(omnirobot_proxy);
 		return false;
 	}
 
-		///ELIMINADO MOEMENTANME
-
-// 	if (road.distanceToLastVisible < 400 /*and road.distanceToLastVisible < road.distanceToTarget*/ )
-// 	{
-// 		qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to last point visible is" << road.distanceToLastVisible << "less than 400";
-// 		road.requiresReplanning = true;
-// 		stopTheRobot(omnirobot_proxy);
-// 		return false;
-// 	}
+	///ELIMINADO MOEMENTANME
+	// 	if (road.distanceToLastVisible < 400 /*and road.distanceToLastVisible < road.distanceToTarget*/ )
+	// 	{
+	// 		qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to last point visible is" << road.distanceToLastVisible << "less than 400";
+	// 		road.requiresReplanning = true;
+	// 		stopTheRobot(omnirobot_proxy);
+	// 		return false;
+	// 	}
 
 	/////////////////////////////////////////////////
 	//////  CHECK CPU AVAILABILITY
 	////////////////////////////////////////////////
 
-	if ( time.elapsed() > delay )   //Initial wait in secs
+	if ( time.elapsed() > delay )   //Initial wait in secs so the robot waits for everything is setup. Maybe it could be moved upwards
 	{
-		//qDebug() << "epoch" << epoch;
 		float MAX_ADV_SPEED = 600.f;
 		float MAX_ROT_SPEED = 0.7;
 		if( (epoch-100) > 0 )				//Damp max speeds if elapsed time is too long
@@ -105,12 +103,6 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		else
 			teta= 1;
 
-// 		if( (road.getRobotDistanceToTarget() < 1000) and (derRobotDistanceToTarget < 0) and (vadvance > 0))
-// 		{
-// 			sunk = 0;
-// 			road.
-// 		}
-
 		//VAdv is computed as a reduction of MAX_ADV_SPEED by three computed functions:
 		//				* road curvature reduces forward speed
 		//				* VRot reduces forward speed
@@ -135,24 +127,28 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
 
-// 		bool collision =
-		avoidanceControl(innerModel, road, laserData, vadvance, vrot);
+		bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
+// 		if( collision )
+// 			road.setBlocked(true);
 
 		/////////////////////////////////////////////////
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-// 		qDebug() << "------------------Controller Report ---------------;";
-//  		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
-// 		qDebug() << "---------------------------------------------------;";
+		// 		qDebug() << "------------------Controller Report ---------------;";
+		//  		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+		// 		qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(0, vadvance, vrot); }
    		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 	}
-	else
+	else		//Too long delay. Stopping robot.
+	{	
+		qDebug() << __FILE__ << __FUNCTION__ << "Processing delay" << epoch << "ms. too high. Stopping the robot for safety";
 		try { omnirobot_proxy->setSpeedBase( 0, 0, 0);	}
 		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
+	}
 
 	epoch = reloj.restart();  //epcoh time in ms
 	return false;
@@ -170,9 +166,8 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
  * @param vrot ...
  * @return void
  */
-bool Controller::avoidanceControl(InnerModel *innerModel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot)
+bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot)
 {
-	//compute repulsive forces from laser
 	QVec res = QVec::zeros(3);
 	float distN, distNorm;
 	int k=0;
@@ -193,7 +188,6 @@ bool Controller::avoidanceControl(InnerModel *innerModel, WayPoints& road, const
 			vrot = 0;
 		}
 	}
-	road.setBlocked(collision);
 	return collision;
 }
 

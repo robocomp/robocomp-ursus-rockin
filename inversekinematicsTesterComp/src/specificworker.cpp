@@ -45,6 +45,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	osgView->setCameraManipulator(new osgGA::TrackballManipulator); 	
 	osgView->getCameraManipulator()->setHomePosition(osg::Vec3(0.,0.,-2.),osg::Vec3(0.,0.,4.),osg::Vec3(0.,1,0.));
 	
+	axisCamera.x = 0; axisCamera.y = -1; axisCamera.z = 0;
+	
 	// Llamamos al método que se encarga de conectar los botones de la interfaz de usuario:
 	connectButtons();
 	
@@ -97,6 +99,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	// Ponemos también una ventana del innerModel en la última pestaña:
 
 	//imv = new InnerModelViewer (innerModel, "root", osgView->getRootGroup());
+
 
 	timer.start(Period);
 	return true;
@@ -746,7 +749,7 @@ void SpecificWorker::posicionInicial()
 
 		part = "HEAD";
 		RoboCompBodyInverseKinematics::Axis axis;
-		axis.x = 0; 		axis.y = -1; 		axis.z = 0;
+		axis.x = -1; 		axis.y = 0; 		axis.z = 0;
 // 		bodyinversekinematics_proxy->setRobot(1);
 		bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axis, false, 0);	
 
@@ -788,10 +791,8 @@ void SpecificWorker::posicionCoger()
 // 		bodyinversekinematics_proxy->setTargetPose6D(part, pose6D, weights, 250);
 
 		part = "HEAD";
-		RoboCompBodyInverseKinematics::Axis axis;
-		axis.x = 0; axis.y = -1; axis.z = 0;
-// 		bodyinversekinematics_proxy->setRobot(1);
-		bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axis, false, 0);	
+		bodyinversekinematics_proxy->setRobot(1);
+		bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axisCamera, false, 0);	
 
 // 		bodyinversekinematics_proxy->setRobot(0);
 // 		bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axis, false, 0);
@@ -980,10 +981,8 @@ void SpecificWorker::izquierdoOfrecer()
 // 		bodyinversekinematics_proxy->setTargetPose6D(part, pose6D, weights, 250);
 
 		part = "HEAD";
-		RoboCompBodyInverseKinematics::Axis axis;
-		axis.x = 0; axis.y = -1; axis.z = 0;
-// 		bodyinversekinematics_proxy->setRobot(1);
-		bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axis, false, 0);	
+		bodyinversekinematics_proxy->setRobot(1);
+		bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axisCamera, false, 0);	
 
 // 		bodyinversekinematics_proxy->setRobot(0);
 // 		bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axis, false, 0);	
@@ -1115,9 +1114,7 @@ void SpecificWorker::sendPose6D(QVec p)
 			{
 				if(part == "HEAD")
 				{
-					RoboCompBodyInverseKinematics::Axis axis;
-					axis.x = 0; axis.y = -1; axis.z = 0;
-					bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axis, false, 0);	
+					bodyinversekinematics_proxy->pointAxisTowardsTarget(part, pose6D, axisCamera, false, 0);	
 				}				
 				else
 				{ 	
@@ -1166,7 +1163,10 @@ void SpecificWorker::sendAxisAlign()
 			pose6D.rx = axisAlignRXSB->value();	pose6D.ry = axisAlignRYSB->value();	pose6D.rz = axisAlignRZSB->value();	
 			// Movemos el target en RCIS
 			QVec pose = QVec::zeros(6);
-			pose[0] = pose6D.x/1000; pose[1] = pose6D.y/1000; pose[2] = pose6D.z/1000;
+			
+			//pose[0] = pose6D.x/1000; pose[1] = pose6D.y/1000; pose[2] = pose6D.z/1000;
+			pose[0] = pose6D.x; pose[1] = pose6D.y; pose[2] = pose6D.z;
+			
 			moveTargetRCIS(pose);
 
 			bodyinversekinematics_proxy->pointAxisTowardsTarget(parte.toStdString(), pose6D, axis, false, 0 );

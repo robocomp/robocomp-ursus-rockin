@@ -1,0 +1,9 @@
+import "/robocomp/interfaces/IDSLs/OmniRobot.idsl";
+import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
+
+Component ArmMoverComp{
+	Communications{
+		requires JointMotor, OmniRobot;
+	};
+	language Cpp;
+};

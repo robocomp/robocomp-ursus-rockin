@@ -97,10 +97,6 @@
 							<mesh id="barracuello" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracuello.ive" tx="0" ty="0" tz="930" rx="3.14159265359" scale="1000"  />
  							<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850"  />
 
-
-
-
-
 							<transform id="base_bodypost" rx="1.5707963267948966" ty="0" tz="0" >
 								<transform id="base_head" tz="0" ty="1080"  rx="-1.5707963267948966"  >  <!-- Head begins -->
 									<!--<transform id="head_axes_1" >
@@ -119,6 +115,7 @@
 
 											<transform id="head_pre_tilt" ry="1.57079632679">
 												<joint id="head_pitch_joint" port="10068" min="-1" max="1" axis="z" >
+
 													<transform id="head_post_tilt" ry="-1.57079632679">
 														<!-- center mesh -->
 														<mesh id="head_center_mesh1" file="/home/robocomp/robocomp/files/osgModels/basics/cube.3ds" scale="95,20,20" ty="50" />

@@ -16,25 +16,23 @@
  */
 
 #include "elasticband.h"
-#include <boost/graph/graph_concepts.hpp>
 
-ElasticBand::ElasticBand(InnerModel *_innermodel)
+ElasticBand::ElasticBand()
 {
-	innermodel = _innermodel;
 }
 
 ElasticBand::~ElasticBand()
 {
 }
 
-bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laserData, const CurrentTarget &currentTarget, uint iter)
+bool ElasticBand::update(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData &laserData, const CurrentTarget &currentTarget, uint iter)
 {
-	qDebug() << __FILE__ << __FUNCTION__ << "road size"<<  road.size();
+	//qDebug() << __FILE__ << __FUNCTION__ << "road size"<<  road.size();
 	if( road.isFinished() == true )
 			return false;
 
 	//Tags all points in the road ar visible or blocked, depending on laser visibility. Only visible points are processed in this iteration
-	checkVisiblePoints(road, laserData);	
+	checkVisiblePoints(innermodel, road, laserData);	
 	 
 	//shortCut(road);
 	
@@ -45,9 +43,8 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
  	cleanPoints(road);
 	
 	//Compute the scalar magnitudes
-	computeForces(road, laserData); 	 
+	computeForces(innermodel, road, laserData); 	 
 		
-	
 	//Delete half the tail behind, if greater than 6, to release resources
 	if( road.getOrderOfClosestPointToRobot() > 6)
 	{
@@ -55,7 +52,6 @@ bool ElasticBand::update(WayPoints &road, const RoboCompLaser::TLaserData &laser
 			road.backList.append(it->pos);
 		road.erase(road.begin(), road.begin() + (road.getOrderOfClosestPointToRobot() / 2));
 	}
-		
 	return true;
 }
 
@@ -101,9 +97,7 @@ bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
 void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 {		
 	//qDebug() << __FUNCTION__ ;
-	//for(int i=0; i< road.size()-1; i++)
 	int offset = 1;
-	//if( road.last().hasRotation ) offset = 2; else offset = 1;
 	
 	for(int i=0; i< road.size()-offset; i++)	
 	{
@@ -181,7 +175,7 @@ void ElasticBand::cleanPoints(WayPoints &road)
  * @param laserData ...
  * @return float
  */
-float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserData& laserData)
+float ElasticBand::computeForces(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData& laserData)
 {
 	if(road.size() < 3 )
 		return 0;
@@ -207,28 +201,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 		WayPoint &w0 = road[i-1];
 		WayPoint &w1 = road[i];
 		WayPoint &w2 = road[i+1];
-		
-		//compute linear derivatives
-// 		QVec izq = QVec::zeros(3);
-// 		QVec der = QVec::zeros(3);
-// 		if( i == 0 )
-// 		{
-// 			der = (w2.pos-w1.pos).normalize();
-// 			atractionForce = der;	
-// 		}
-// 		else if( i == road.size()-1 )
-// 		{
-// 			izq = (w0.pos - w1.pos).normalize();
-// 			atractionForce = izq;
-// 		}		
-// 		else
-// 		{
-// 			izq = (w0.pos - w1.pos).normalize();
-// 			der = (w2.pos - w1.pos).normalize();
-// 			atractionForce = izq + der ;	
-// 			//atractionForce = atractionForce - ((w0.pos - w2.pos)) / (w0.pos - w2.pos).norm2(); 
-// 		}
-		
+			
 		//LINEAR FORCE II
 		float n = (w0.pos-w1.pos).norm2() / ( (w0.pos-w1.pos).norm2() + w1.initialDistanceToNext );
 		atractionForce = (w2.pos - w0.pos)*n - (w1.pos - w0.pos);	
@@ -236,7 +209,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
 		//REPULSION FORCE FROM OBSTACLEs Compute jacobian of free space wrt to x,y
 		QVec repulsionForce = QVec::zeros(3);
 		
-		computeDistanceField(w1, laserData, FORCE_DISTANCE_LIMIT);
+		computeDistanceField(innermodel, w1, laserData, FORCE_DISTANCE_LIMIT);
 		//qDebug() << ball.minDistHasChanged << ball.minDist << ball.minDistAnt;
 
 		float h = DELTA_H;  //CHECK THIS
@@ -285,7 +258,7 @@ float ElasticBand::computeForces(WayPoints &road, const RoboCompLaser::TLaserDat
  * @param laserData ...
  * @return bool
  */
-bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
+bool ElasticBand::checkVisiblePoints(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData &laserData)
 {	
 	assert(road.size()>1);
 	assert(laserData.size() > 0);
@@ -350,7 +323,7 @@ bool ElasticBand::checkVisiblePoints(WayPoints &road, const RoboCompLaser::TLase
 	return true;
 }
 
-void ElasticBand::computeDistanceField(WayPoint &ball, const RoboCompLaser::TLaserData &laserData, float forceDistanceLimit)
+void ElasticBand::computeDistanceField(InnerModel *innermodel, WayPoint &ball, const RoboCompLaser::TLaserData &laserData, float forceDistanceLimit)
 {
 	
 	ball.minDist = ball.bMinusX = ball.bPlusX = ball.bMinusY = ball.bPlusY = std::numeric_limits<float>::max();
@@ -405,7 +378,7 @@ void ElasticBand::computeDistanceField(WayPoint &ball, const RoboCompLaser::TLas
 		ball.minDist = forceDistanceLimit;
 }
 
-void ElasticBand::checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData &laserData)
+void ElasticBand::checkBlocked(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData &laserData)
 {
 	//Compute max and min angles in laser beam
 	float maxAngle, minAngle;
@@ -481,7 +454,7 @@ void ElasticBand::checkBlocked(WayPoints &road, const RoboCompLaser::TLaserData 
  * @param laserData ...
  * @return void
  */
-bool ElasticBand::computeFreePath(const WayPoint &w1, const WayPoint &w2, const RoboCompLaser::TLaserData &laserData )
+bool ElasticBand::computeFreePath(InnerModel *innermodel, const WayPoint &w1, const WayPoint &w2, const RoboCompLaser::TLaserData &laserData )
 {
 	QVec p(3);
 	bool free = true;
@@ -525,88 +498,7 @@ bool ElasticBand::computeFreePath(const WayPoint &w1, const WayPoint &w2, const 
 }
 
 
-// /**
-//  * @brief The path between two adjacent nodes is free if the line joining their centers is not crossed by a laser measure * 
-//  * @param w1 ...
-//  * @param w2 ...
-//  * @param laserData ...
-//  * @return void
-//  */
-// bool ElasticBand::computeFreePath(const WayPoint &w1, const WayPoint &w2, const RoboCompLaser::TLaserData &laserData )
-// {
-// 	QVec p(3);
-// 	float nSteps = 10;
-// 	bool free = true;
-// 	
-// 	for(float landa=0.; landa<=1; landa += 1./nSteps)
-// 	{
-// 			p = (w1.pos * (T)(1. - landa)) + (w2.pos * landa);
-// 			QVec pr = innermodel->transform("base", p, "world");
-// 			float angle = atan2(pr.x(),pr.z());
-// 			
-// 			//We go through the laser array until the nearest beam is found
-// 			uint i;
-// 			float init = laserData[0].angle;
-// 			
-// 			//qDebug() << "angle" << angle << "init" << init;
-// 			for(i=1; i< laserData.size();i++)
-// 			{
-// 				if( laserData[i].angle > init ) //ascending order
-// 				{	
-// 					if ( laserData[i].angle >= angle ) //already there
-// 						break;
-// 				}
-// 				else //descending
-// 				{
-// 					if( laserData[i].angle <= angle )
-// 						break;
-// 				}
-// 			}
-// 			//qDebug() << "i" << i;
-// 			//now we have the k index. we need a simple interpolation among neighboors and the final check
-// 			if( p.norm2() > laserData[i].dist ) // laser beam is beyond the p point. The path is crossed by an obstacle
-// 			{
-// 				free = false;
-// 				break;
-// 			}
-// 	}
-// 	return free;
-// }
-
-
-/**
- * @brief Compute the length of the chord of two intersecting circles
- *
- * @param b1 ...
- * @param b2 ...
- * @return float
- **/
-float ElasticBand::computeIntersectionChord( const WayPoint b1, const WayPoint b2)
-{
-	float d = (b1.pos-b2.pos).norm2();
-	float r1 = b1.minDist;
-	float r2 = b2.minDist;
-
-	//qDebug() << b1.pos << b2.pos << d << r1 << r2;
-	
-	if (d > (r1 + r2)) //not intersecting
-	{
-		qDebug() << "ComputeIntersectionChord:: Not intersecting";
-		return 0;
-	}
-	if ( d > 0.00001 ) 
-	{
-		qDebug() << "ComputeIntersectionChord:: chord";
-		return (1.f/d) * sqrt((-d+r2-r1)*(-d-r2+r1)*(-d+r2+r1)*(d+r2+r1));
-	}
-	else //they are equal
-	{
-		qDebug() << "ComputeIntersectionChord:: Equal";
-		return (r1>r2)?r2:r1;
-	}
-}
-
-bool ElasticBand::checkCollision(WayPoints &road, const RoboCompLaser::TLaserData& laserData, float robotRadius)
+bool ElasticBand::checkCollision(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData& laserData, float robotRadius)
 {
 	for(int i=0; i< road.size()-1; i++)
 	{
@@ -799,13 +691,6 @@ bool ElasticBand::checkCollision(WayPoints &road, const RoboCompLaser::TLaserDat
 // 	return target;
 // }
 // 
-
-
-
-
-
-
-
 
 
 //NECESITAMOS OTRA COMPROBACION DE BLOCKED
