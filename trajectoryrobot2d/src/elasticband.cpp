@@ -336,8 +336,7 @@ void ElasticBand::computeDistanceField(InnerModel *innermodel, WayPoint &ball, c
 	
 	for(uint i=0; i<laserData.size(); i++)
 	{
-		//QVec l = innermodel->laserToBase("laser",laserData[i].dist, laserData[i].angle);
-		QVec l = innermodel->laserToWorld("laser",laserData[i].dist, laserData[i].angle);
+		QVec l = innermodel->laserTo("world", "laser" , laserData[i].dist, laserData[i].angle);
 	
 		float dist = (l-c).norm2();
 		
@@ -361,7 +360,7 @@ void ElasticBand::computeDistanceField(InnerModel *innermodel, WayPoint &ball, c
 		if( dist < ball.bPlusY ) ball.bPlusY = dist;				
 	}
 
-	QVec lw = innermodel->laserToWorld("laser",laserData[index].dist, laserData[index].angle);
+	QVec lw = innermodel->laserTo("world", "laser" , laserData[index].dist, laserData[index].angle);
 	ball.minDistPoint = (lw - c).normalize();
 	
 	//qDebug() << "before if" << ball.minDist;
@@ -522,7 +521,7 @@ bool ElasticBand::checkCollision(InnerModel *innermodel, WayPoints &road, const 
 			//qDebug() << "point" << i << w1.pos << w2.pos << p;
 			for(uint j=0; j<laserData.size(); j++)
 			{
-				QVec l = innermodel->laserToBase("laser",laserData[j].dist, laserData[j].angle);
+				QVec l = innermodel->laserTo("base","laser",laserData[j].dist, laserData[j].angle);
 				float dist = (l-pr).norm2();
 		
 				if( dist < robotRadius ) 

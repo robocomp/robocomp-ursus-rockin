@@ -141,21 +141,23 @@ QLine2D WayPoints::getRobotZAxis(InnerModel* innerModel)
 {
 	Q_ASSERT(currentPoint+1<road.size() and road.size()>0);
 
-	QVec robot2DPos = QVec::vec2( innerModel->getBaseX(), innerModel->getBaseZ());
+	QVec robotPos = innerModel->transform("world", QVec::zeros(3),"base");
+	//QVec robot2DPos = QVec::vec2( innerModel->getBaseX(), innerModel->getBaseZ());
 	QVec nose = innerModel->transform("world", QVec::vec3(0,0,1000), "base");
-	QVec noseR = QVec::vec2(nose.x(),nose.z());
-	return QLine2D(robot2DPos, noseR);
+	//QVec noseR = QVec::vec2(nose.x(),nose.z());
+	return QLine2D(robotPos, nose);
+	
 }
 
 
 float WayPoints::robotDistanceToCurrentPoint(InnerModel* innerModel)
 {
-	return (innerModel->getBaseCoordinates() - (*this)[currentPointIndex].pos).norm2();
+	return (innerModel->transform("world", QVec::zeros(3), "base") - (*this)[currentPointIndex].pos).norm2();
 }
 
 float WayPoints::robotDistanceToNextPoint(InnerModel* innerModel)
 {
-	return (innerModel->getBaseCoordinates() - (*this)[nextPointIndex].pos).norm2();
+	return (innerModel->transform("world", QVec::zeros(3), "base") - (*this)[nextPointIndex].pos).norm2();
 }
 
 QLine2D WayPoints::getTangentToCurrentPoint()
@@ -194,6 +196,8 @@ void WayPoints::printRobotState(InnerModel* innerModel, const CurrentTarget &cur
 		qDebug() << "	ElapsedTime:" << elapsedTime/1000 << " sg";
 		qDebug() << "	Duration estimation:" << initialDurationEstimation << " sg";
 		qDebug() << "	Estimation error:" << initialDurationEstimation - elapsedTime/1000 << " sg";
+		qDebug() << "	Road BackList size:" << backList.size();
+		
 
 		qDebug() << "----------------------------------------------------";
 }

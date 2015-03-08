@@ -27,16 +27,29 @@
  */
 PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObject *parent)
 {
-	xMin = 0.;
-	xMax = 10000.;
-	zMin = -10000.;
-	zMax = 0.;
-
-	// 	innerModel = new InnerModel(*innerModel_);
 	innerModel = innerModel_;
-
+	
+	//Get outerRegion extension from floor definition
+	QRectF outerRegion;
+	InnerModelPlane *floor = innerModel->getPlane("floor_plane");
+	if(floor != NULL)
+	{
+		QVec center = innerModel->transform("world",QVec::zeros(3),"floor");
+		QVec upperLeft = innerModel->transform("world",QVec::vec3(center.x() - floor->width/2, center.y(), center.z() + floor->height/2),"floor");
+		QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2),"floor");
+		
+		outerRegion.setLeft( upperLeft.x() );
+		outerRegion.setRight( downRight.x() );
+		outerRegion.setBottom( downRight.z() );
+		outerRegion.setTop( upperLeft.z() );
+		
+		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
+	}
+	else
+		qFatal("Aborting. Cannot determine the size of the world. Please define a floor_plane");
+	
 	QList<QRectF> innerRegions;
-	QRectF outerRegion(-1920,3500,  4000,-7000);
+	//QRectF outerRegion(-1920,3500,  4000,-7000);
 
 	// for Rocking apartment
 	// innerRegions << QRectF(1500, 0, 4000, -3000) <<	QRectF(0, -8500, 4000, -1500) << QRectF(7500, -4000, 2500, -6000);
@@ -713,7 +726,7 @@ void PlannerPRM::readGraphFromFile(QString name)
     {
         std::cout << e.what() << std::endl;
     }
-    writeGraphToStream(std::cout);
+    //writeGraphToStream(std::cout);
 
 	data.resize(3,boost::num_vertices(graph));		//ONLY 3D POINTS SO FAR
 // 	qDebug() << __FUNCTION__ << "Graph size" << boost::num_vertices(graph);
@@ -836,10 +849,10 @@ bool PlannerPRM::learnForAWhile()
  */
 bool PlannerPRM::learnPath(const QList< QVec >& path)
 {
-// 	qDebug() << __FUNCTION__ << "Learning the path with" << path.size() << " points";
+ 	qDebug() << __FUNCTION__ << "Learning the path with" << path.size() << " points";
 
 //	const int nWays=10;   //Max number of point to be inserted
-	const int MIN_STEP = 550;
+	const int MIN_STEP = 350;
 
 	if( path.size() < 2)
 		return false;
@@ -858,28 +871,9 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
 		}
 	}
 
-// 	//Trim the path to a fixed number of waypoints
-// 	for(int i=0; i<path.size()-1; i++)
-// 		dist += (path[i]-path[i+1]).norm2();
-
-// 	float step = dist / nWays;
-//
-// 	dist = 0;
-// 	for(int i=0; i<path.size()-1; i++)
-// 	{
-// 		dist += (path[i]-path[i+1]).norm2();
-// 		if( dist > step )
-// 		{
-// 			sList << path[i];
-// 			dist = 0;
-// 		}
-// 	}
-
-// 	qDebug() << __FUNCTION__ << "Learning with shortened path of" << sList.size() << " points";
+ 	qDebug() << __FUNCTION__ << "Learning with shortened path of" << sList.size() << " points";
 	constructGraph( sList, 10, 2000, 400);
-
 	learnForAWhile();
-
 	return true;
 }
 
@@ -953,9 +947,9 @@ bool PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx inner
 	RoboCompInnerModelManager::Pose3D pose;
 	pose.rx = pose.ry = pose.z = 0.;pose.x = pose.y = pose.z = 0.;
 	RoboCompInnerModelManager::Plane3D plane;
-	plane.height = 100; plane.width = 100; plane.thickness = 10;
+	plane.height = 60; plane.width = 60; plane.thickness = 10;
 	plane.px = plane.py = plane.pz = 0; plane.nx = 0; plane.ny = 1; plane.nz = 0;
-	plane.texture = "#0000F0";
+	plane.texture = "#00A0A0";
 
 	cleanGraph(innermodelmanager_proxy);
 

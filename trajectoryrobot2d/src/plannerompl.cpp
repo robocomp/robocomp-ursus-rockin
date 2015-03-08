@@ -60,11 +60,11 @@ ob::ValidStateSamplerPtr PlannerOMPL::allocOBValidStateSampler(const ob::SpaceIn
 
 void PlannerOMPL::initialize(Sampler *sampler )
 {
-	
-	xMin = 0.;      ////OJO ARREGLAR ESTO
-	xMax = 10000.;
-	zMin = -10000.;
-	zMax = 0.;
+	QRectF outerRegion = sampler->getOuterRegion();
+	xMin = outerRegion.left();      
+	xMax = outerRegion.right();
+	zMin = outerRegion.top();
+	zMax = outerRegion.bottom();
 	
 	//Create state space as R2
 	ob::RealVectorStateSpace *space = new ob::RealVectorStateSpace();
@@ -82,38 +82,37 @@ void PlannerOMPL::initialize(Sampler *sampler )
 	//simpleSetUp->setStateValidityChecker(boost::bind(&PlannerOMPL::isStateValid, this, _1));
 	simpleSetUp->setStateValidityChecker(boost::bind(&Sampler::isStateValid, sampler, _1));
 	space->setup();
-	simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(0.01);
-	//simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(100 / space->getMaximumExtent());
+	
+	// Set the resolution at which state validity needs to be verified in order for a motion between two states to be considered valid. 
+	// This value is specified as a fraction of the space's extent.
+	simpleSetUp->getSpaceInformation()->setStateValidityCheckingResolution(0.01);  
+	
 	simpleSetUp->setPlanner(ob::PlannerPtr(new og::RRTConnect(simpleSetUp->getSpaceInformation())));
-	simpleSetUp->getPlanner()->as<og::RRTConnect>()->setRange(2000);
+	
+	//represents the maximum length of a motion to be added in the tree of motions.
+	simpleSetUp->getPlanner()->as<og::RRTConnect>()->setRange(2000);  
 }
 
-// bool PlannerOMPL::isStateValid(const ompl::base::State* state) const
-// {
-// 	const float x = std::min((int)state->as<ob::RealVectorStateSpace::StateType>()->values[0], (int)xMax);
-// 	const float z = std::max((int)state->as<ob::RealVectorStateSpace::StateType>()->values[1], (int)zMin);
-// 	
-// 	innerModel->updateTransformValues("robot", x, 0, z, 0, 0, 0);
-// 	
-// 	for (uint32_t in=0; in<robotNodes.size(); in++)
-// 	{
-// 		for (uint32_t out=0; out<restNodes.size(); out++)
-// 		{
-// 			if (innerModel->collide(robotNodes[in], restNodes[out]))
-// 			{
-// 				return false;
-// 			}
-// 		}
-// 	}
-// 	return true;
-// }
-
-//bool PlannerOMPL::computePath(const QVec& target, InnerModel* inner)
-bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTime)
+bool PlannerOMPL::setPath(const QVec& origin, const QVec &target)
 {
 	//Planning proper
 	if (simpleSetUp == NULL)
 		return false;
+
+	simpleSetUp->clear();
+	
+	ob::ScopedState<> start(simpleSetUp->getStateSpace());
+	start[0] = origin.x();	start[1] = origin.z();
+	ob::ScopedState<> goal(simpleSetUp->getStateSpace());
+	goal[0] = target.x();	goal[1] = target.z();
+	simpleSetUp->setStartAndGoalStates(start, goal);
+	simpleSetUp->getProblemDefinition()->print(std::cout);
+	
+	return true;
+}
+
+bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTime)  //maxTime in seconds
+{
 	
 	simpleSetUp->clear();
 	
@@ -124,6 +123,7 @@ bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTim
 	simpleSetUp->setStartAndGoalStates(start, goal);
 	simpleSetUp->getProblemDefinition()->print(std::cout);
 	
+	//Call the planner
 	ob::PlannerStatus solved = simpleSetUp->solve(maxTime);
 
 	if (solved)
@@ -152,33 +152,7 @@ bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTim
 		return false;
 }
 
-// void PlannerOMPL::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
-// {
-// 	if (node->id == robotId)
-// 	{
-// 		inside = true;
-// 	}
-// 	
-// 	InnerModelMesh *mesh;
-// 	InnerModelPlane *plane;
-// 	InnerModelTransform *transformation;
-// 
-// 	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))
-// 	{
-// 		for (int i=0; i<node->children.size(); i++)
-// 		{
-// 			recursiveIncludeMeshes(node->children[i], robotId, inside, in, out);
-// 		}
-// 	}
-// 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
-// 	{
-// 		if (inside)
-// 		{
-// 			in.push_back(node->id);
-// 		}
-// 		else
-// 		{
-// 			out.push_back(node->id);
-// 		}
-// 	}
-// }
+ob::PlannerStatus PlannerOMPL::getPlanState()
+{
+	return simpleSetUp->getLastPlannerStatus();
+}

@@ -26,8 +26,9 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 	innerModel = inner;
 	innerRegions = innerRegions_;
 	outerRegion = outerRegion_;
-	robotNodes.clear(); restNodes.clear();
-	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes);
+	robotNodes.clear(); restNodes.clear(); 
+	excludedNodes.insert("floor_plane");
+	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes, excludedNodes);
 	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );
@@ -191,7 +192,7 @@ bool Sampler::isStateValid(const ompl::base::State *state)
 // PRIVATE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
+void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out, std::set<QString> &excluded)
 {
 	if (node->id == robotId)
 	{
@@ -206,19 +207,20 @@ void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 	{
 		for (int i=0; i<node->children.size(); i++)
 		{
-			recursiveIncludeMeshes(node->children[i], robotId, inside, in, out);
+			recursiveIncludeMeshes(node->children[i], robotId, inside, in, out, excluded);
 		}
 	}
 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
 	{
-		if (inside)
-		{
-			in.push_back(node->id);
-		}
-		else
-		{
-			out.push_back(node->id);
-		}
+		if( std::find(excluded.begin(), excluded.end(), node->id) == excluded.end() )			
+			if (inside)
+			{
+				in.push_back(node->id);
+			}
+			else
+			{
+				out.push_back(node->id);
+			}
 	}
 }
 
