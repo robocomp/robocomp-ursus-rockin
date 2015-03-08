@@ -26,7 +26,6 @@ Ui_guiDlg()
 #else
 QObject()
 #endif
-
 {
 	jointmotor_proxy = (*(JointMotorPrx*)mprx["JointMotorProxy"]);
 	agmagenttopic = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
