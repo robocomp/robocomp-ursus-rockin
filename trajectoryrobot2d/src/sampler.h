@@ -40,14 +40,16 @@ class Sampler
 		bool checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint) const;
 		bool checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target) const;
 		bool searchRobotValidStateCloseToTarget(QVec &target);
+		QRectF getOuterRegion() const { return outerRegion;};
 	private:
 		std::vector<QString> robotNodes;
 		std::vector<QString> restNodes;
+		std::set<QString> excludedNodes;
 		QList<QRectF> innerRegions;
 		QRectF outerRegion;
 		InnerModel *innerModel;
 		
-		void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
+		void recursiveIncludeMeshes(InnerModelNode* node, QString robotId, bool inside, std::vector< QString >&in, std::vector< QString >&out, std::set<QString>&excluded);
 		
 };
 

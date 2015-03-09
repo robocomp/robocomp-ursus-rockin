@@ -77,10 +77,10 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	M_wheels_2_vels(0,1) = +1./4.;
 	M_wheels_2_vels(0,2) = +1./4.;
 	M_wheels_2_vels(0,3) = +1./4.;
-	M_wheels_2_vels(1,0) = -1./4.;
-	M_wheels_2_vels(1,1) = +1./4.;
-	M_wheels_2_vels(1,2) = +1./4.;
-	M_wheels_2_vels(1,3) = -1./4.;
+	M_wheels_2_vels(1,0) = +1./4.;
+	M_wheels_2_vels(1,1) = -1./4.;
+	M_wheels_2_vels(1,2) = -1./4.;
+	M_wheels_2_vels(1,3) = +1./4.;
 	M_wheels_2_vels(2,0) = +ill;
 	M_wheels_2_vels(2,1) = -ill;
 	M_wheels_2_vels(2,2) = +ill;
@@ -94,10 +94,10 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	M_vels_2_wheels(1,0) = +1.;
 	M_vels_2_wheels(2,0) = +1.;
 	M_vels_2_wheels(3,0) = +1.;
-	M_vels_2_wheels(0,1) = -1.;
-	M_vels_2_wheels(1,1) = +1.;
-	M_vels_2_wheels(2,1) = +1.;
-	M_vels_2_wheels(3,1) = -1.;
+	M_vels_2_wheels(0,1) = +1.;
+	M_vels_2_wheels(1,1) = -1.;
+	M_vels_2_wheels(2,1) = -1.;
+	M_vels_2_wheels(3,1) = +1.;
 	M_vels_2_wheels(0,2) = +ll; // In contrast with the paper this code is based on, the
 	M_vels_2_wheels(1,2) = -ll; // third column of the matrix is inverted because we use
 	M_vels_2_wheels(2,2) = +ll; // the left-hand rule for angles.
@@ -127,19 +127,19 @@ void SpecificWorker::SpecificWorker::computeOdometry(bool forced)
 		deltaPos.print("delta");
 
 		// Raw odometry
-		innermodel->updateTransformValues("newPose",           deltaPos(0), 0, deltaPos(1),            0,       deltaPos(2), 0);
+		innermodel->updateTransformValues("newPose",     deltaPos(0), 0, deltaPos(1),       0,       deltaPos(2), 0);
 		newP = innermodel->transform("root", "newPose");
-		innermodel->updateTransformValues("backPose",              newP(0), 0,     newP(2),            0, deltaPos(2)+angle, 0);
-		innermodel->updateTransformValues("newPose",                     0, 0,           0,            0,                 0, 0);
+		innermodel->updateTransformValues("backPose",        newP(0), 0,     newP(2),       0, deltaPos(2)+angle, 0);
+		innermodel->updateTransformValues("newPose",               0, 0,           0,       0,                 0, 0);
 		x = newP(0);
 		z = newP(2);
 		angle += deltaPos(2);
 
 		// Corrected odometry
-		innermodel->updateTransformValues("corrNewPose",       deltaPos(0), 0, deltaPos(1),            0,       deltaPos(2), 0);
+		innermodel->updateTransformValues("corrNewPose",    deltaPos(0), 0, deltaPos(1),    0,       deltaPos(2), 0);
 		newP = innermodel->transform("root", "corrNewPose");
-		innermodel->updateTransformValues("corrBackPose",          newP(0), 0,     newP(2),            0, deltaPos(2)+angle, 0);
-		innermodel->updateTransformValues("corrNewPose",                 0, 0,           0,            0,                 0, 0);
+		innermodel->updateTransformValues("corrBackPose",       newP(0), 0,     newP(2),    0, deltaPos(2)+angle, 0);
+		innermodel->updateTransformValues("corrNewPose",              0, 0,           0,    0,                 0, 0);
 		corrX = newP(0);
 		corrZ = newP(2);
 		corrAngle += deltaPos(2);

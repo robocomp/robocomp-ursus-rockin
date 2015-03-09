@@ -33,8 +33,7 @@ class Controller
 	public:
 		Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, int delay); //in secs
 		~Controller();
-	
-		bool update(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx differentialrobot_proxy, WayPoints& road);
+		bool update(InnerModel *innerModel, RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints &road);
 		void stopTheRobot(RoboCompOmniRobot::OmniRobotPrx differentialrobot_proxy);
 		float exponentialFunction(float value, float xValue, float yValue, float min = 0.f);
 

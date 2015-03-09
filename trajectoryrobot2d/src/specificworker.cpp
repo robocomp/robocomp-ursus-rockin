@@ -80,8 +80,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//Planning
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
 	planner = plannerPRM;
- 	//planner->cleanGraph(innermodelmanager_proxy);
- 	//planner->drawGraph(innermodelmanager_proxy);
+ 	planner->cleanGraph(innermodelmanager_proxy);
+ 	planner->drawGraph(innermodelmanager_proxy);
 
 	// 	qDebug() << "----------------inserting" ;
 
@@ -121,6 +121,7 @@ void SpecificWorker::compute( )
 		stopCommand(currentTarget, road, tState);
 		tState.setState("DISCONNECTED");
 	}	
+	
 	switch( currentTarget.command )
 	{
 		case CurrentTarget::Command::STOP:
@@ -152,7 +153,7 @@ void SpecificWorker::compute( )
 	{
 		road.clearDraw(innermodelmanager_proxy);
 		road.draw(innermodelmanager_proxy, innerModel, currentTarget);
-		qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed()/cont << "State";
+		qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed()/cont << "State. Robot at:" << innerModel->transform("world","robot");
 		cont = 0;
 		reloj.restart();
 	}
@@ -254,9 +255,14 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
  * @param innerModel ...
  * @return bool
  */
+<<<<<<< HEAD
 bool SpecificWorker::
 gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, 
 								 const RoboCompLaser::TLaserData &lData)
+=======
+bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, 
+								 RoboCompLaser::TLaserData &lData)
+>>>>>>> 9b9374d7ce24989e4cd2b1627a7a163a8c6fe50f
 {
 	// 	qDebug() << __FUNCTION__;
 	if( targetHasAPlan(innerModel, target, state, myRoad) == true)
@@ -266,7 +272,8 @@ gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &stat
 
 		//compute all measures relating the robot to the road
 		myRoad.update();
-	
+		
+		myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
 		
@@ -285,8 +292,15 @@ gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &stat
 			}
 			else
 			{
+<<<<<<< HEAD
 				planner->learnPath( myRoad.backList );
 				target.command = CurrentTarget::Command::STOP;			
+=======
+				planner->learnPath( road.backList );
+				target.command = CurrentTarget::Command::STOP;	
+				planner->cleanGraph(innermodelmanager_proxy);
+				planner->drawGraph(innermodelmanager_proxy);
+>>>>>>> 9b9374d7ce24989e4cd2b1627a7a163a8c6fe50f
 			}
 		}
 
@@ -608,7 +622,11 @@ void SpecificWorker::go(const TargetPose& target)
 				currentTarget.setHasRotation(true);
 			drawTarget( QVec::vec3(target.x,target.y,target.z));
 			taskReloj.restart();
+<<<<<<< HEAD
 			qDebug() << __FUNCTION__ << "----------------------------------------------------------GO command received, robot at " << bState.x << bState.z << "with target (T,R)" << currentTarget.getTranslation() << currentTarget.getRotation();
+=======
+			qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
+>>>>>>> 9b9374d7ce24989e4cd2b1627a7a163a8c6fe50f
 		}
 		else
 		{
