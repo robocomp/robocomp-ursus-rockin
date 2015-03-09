@@ -28,6 +28,7 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 	outerRegion = outerRegion_;
 	robotNodes.clear(); restNodes.clear();
 	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes);
+	qDebug() << __FUNCTION__ << "Outer region:" << outerRegion;
 	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );

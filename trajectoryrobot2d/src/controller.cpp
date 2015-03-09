@@ -128,8 +128,8 @@ bool Controller::update(InnerModel *innerModel, const RoboCompLaser::TLaserData 
 		////////////////////////////////////////////////
 
 		bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
-// 		if( collision )
-// 			road.setBlocked(true);
+ 		if( collision )
+ 			road.setBlocked(true);
 
 		/////////////////////////////////////////////////
 		//////   EXECUTION
@@ -181,7 +181,7 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 		//qDebug() << distNorm;
 		QVec p = innerModel->laserTo("laser", "laser" , distNorm, i.angle);  //Watch the laser to tobot offset to compute final corrections
 		res += (p * (T)(-1));
-		if( distN < 3)
+		if( i.dist < 300.f)
 		{
 			collision = true;
 			vadvance = 0;

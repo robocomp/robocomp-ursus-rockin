@@ -36,7 +36,7 @@ SpecificWorker::~SpecificWorker()
 {
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Reads run time parameters from config file
@@ -65,7 +65,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	//Update InnerModel from robot
 	//try { differentialrobot_proxy->getBaseState(bState); }
-	try {  omnirobot_proxy->getBaseState(bState); }
+	
+ 	try {  omnirobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with robot proxy");}
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
@@ -140,6 +141,9 @@ void SpecificWorker::compute( )
 		case CurrentTarget::Command::GOBACKWARDS:
 			goBackwardsCommand(innerModel, currentTarget.getTranslation(), currentTarget, tState, road);
 			break;
+		case CurrentTarget::Command::UNBLOCK:
+			currentTarget.command = unBlock(innerModel, currentTarget, tState, laserData);
+			break;
 		case CurrentTarget::Command::IDLE:
 			break;
 	}
@@ -156,6 +160,39 @@ void SpecificWorker::compute( )
 }
 
 /////////////////////////////////////////////////////////
+
+CurrentTarget::Command SpecificWorker::unBlock(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &tState, RoboCompLaser::TLaserData &laserData)
+{
+  bool static firstTime = true;
+  float UMBRAL = 300.f;
+  float K1 = 0.5f;
+  float K2 = 0.5f;
+  
+  std::sort( laserData.begin(), laserData.end(), [] (TData a, TData b) { return a.dist < b.dist; } );
+
+  if( firstTime == true )
+  {
+    QVec hit = innerModel->laserToWorld("laser", laserData.front().dist, laserData.front().angle);
+    hit * (T)-1.f;
+    try
+    {
+	omnirobot_proxy->setSpeedBase(K1 * hit.x(), K2 * hit.z(), 0.f);
+	firstTime = false;
+    }
+    catch(const Ice::Exception &ex){
+	  cout << ex << endl;
+    }
+  }
+  if( laserData.front().dist > UMBRAL)
+  {
+    omnirobot_proxy->setSpeedBase(0.f, 0.f, 0.f);
+    firstTime = true;
+    return CurrentTarget::Command::GOTO;
+  }
+  return CurrentTarget::Command::UNBLOCK;
+}
+
+
 
 
 /**
@@ -217,20 +254,26 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
  * @param innerModel ...
  * @return bool
  */
-bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, 
+bool SpecificWorker::
+gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, 
 								 const RoboCompLaser::TLaserData &lData)
 {
 	// 	qDebug() << __FUNCTION__;
-	if( targetHasAPlan(innerModel, target, state, road) == true)
+	if( targetHasAPlan(innerModel, target, state, myRoad) == true)
 	{
 		//project road to the laserData so it adjust to real geometry
-		elasticband->update( innerModel, road, laserData, target);
+		elasticband->update( innerModel, myRoad, laserData, target);
 
 		//compute all measures relating the robot to the road
 		myRoad.update();
 	
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
+		
+		if(myRoad.isBlocked() == true)
+		{
+		    target.command = CurrentTarget::Command::UNBLOCK;
+		}
 		
 		if (myRoad.isFinished() == true)
 		{
@@ -242,7 +285,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 			}
 			else
 			{
-				planner->learnPath( road.backList );
+				planner->learnPath( myRoad.backList );
 				target.command = CurrentTarget::Command::STOP;			
 			}
 		}
@@ -565,7 +608,7 @@ void SpecificWorker::go(const TargetPose& target)
 				currentTarget.setHasRotation(true);
 			drawTarget( QVec::vec3(target.x,target.y,target.z));
 			taskReloj.restart();
-			qDebug() << __FUNCTION__ << "-------------------------------------------------------------------------GO command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
+			qDebug() << __FUNCTION__ << "----------------------------------------------------------GO command received, robot at " << bState.x << bState.z << "with target (T,R)" << currentTarget.getTranslation() << currentTarget.getRotation();
 		}
 		else
 		{

@@ -121,7 +121,7 @@ private:
 	bool stopCommand( CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state);
 	bool changeTargetCommand(InnerModel* innerModel, CurrentTarget& target,  TrajectoryState &stat, WayPoints& myRoad);
 	bool goBackwardsCommand(InnerModel *innerModel, const QVec &target, CurrentTarget &current, TrajectoryState &state, WayPoints &myRoad);
-
+	CurrentTarget::Command unBlock(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &tState, RoboCompLaser::TLaserData &laserData);
 	bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
 	
 	//Smoother smoother;
@@ -133,6 +133,7 @@ private:
 	void printNumberOfElementsInRCIS();
 	void calcularModuloFloat(QVec &angles, float mod);
 	float angmMPI(float angle);
+	
 };
 
 

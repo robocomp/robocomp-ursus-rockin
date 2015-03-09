@@ -230,7 +230,7 @@ float ElasticBand::computeForces(InnerModel *innermodel, WayPoints &road, const 
 // 		repulsionForce = w1.minDistPoint * (FORCE_DISTANCE_LIMIT - w1.minDist);
 		
 		float alpha = -0.4;//0.6
-		float beta = 0.30; //0.09
+		float beta = 0.80; //0.09
 			
 		QVec change = (atractionForce*alpha) + (repulsionForce*beta);		
 		
@@ -383,9 +383,9 @@ void ElasticBand::checkBlocked(InnerModel *innermodel, WayPoints &road, const Ro
 	//Compute max and min angles in laser beam
 	float maxAngle, minAngle;
 	if(laserData[0].angle > laserData.back().angle)
-	{		maxAngle = laserData[0].angle;	minAngle = laserData.back().angle;	}
+	{	maxAngle = laserData[0].angle;	minAngle = laserData.back().angle;	}
 	else 
-	{		minAngle = laserData[0].angle;	maxAngle = laserData.back().angle;	}
+	{	minAngle = laserData[0].angle;	maxAngle = laserData.back().angle;	}
 		
 	road.setBlocked( false );
 	for(int i=0; i< road.size()-1; i++)
