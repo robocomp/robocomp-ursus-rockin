@@ -3,7 +3,7 @@
 
 // Comment out this line if your application has a QtGui
 #define USE_QTGUI
-#define PROGRAM_NAME    "lokiArmComp"
-#define SERVER_FULL_NAME   "RoboComplokiArmComp::lokiArmComp"
+#define PROGRAM_NAME    "BIK"
+#define SERVER_FULL_NAME   "RoboCompBIK::BIK"
 
 #endif

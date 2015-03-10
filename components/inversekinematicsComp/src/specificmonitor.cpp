@@ -1,4 +1,3 @@
-
 /*
  *    Copyright (C) 2010 by RoboLab - University of Extremadura
  *
@@ -86,12 +85,10 @@ bool SpecificMonitor::sendParamsToWorker(RoboCompCommonBehavior::ParameterList p
 ///We need to supply a list of accepted values to each call
 void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 {
-	//Read params from config file
-	//Example
-	
 	RoboCompCommonBehavior::Parameter aux;
+
 	aux.editable = true;
-	configGetString( "BIK.InnerModel", aux.value,"no file");
+	configGetString( "BIK.InnerModel", aux.value, "");
 	params["BIK.InnerModel"] = aux;
 }
 
@@ -99,14 +96,6 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 bool SpecificMonitor::checkParams(RoboCompCommonBehavior::ParameterList l)
 {
 	bool correct = true;
-	//Check parameters
-	//Example
-// 	    if(l["DRobot.Handler"].value != "Robex" and l["DRobot.Handler"].value != "Gazebo" and l["DRobot.Handler"].value != "Player")
-// 		    correct = false;
-	
-	//copy parameters
-// 	if(correct)
-// 		config_params = l;
 	return correct;
 }
 

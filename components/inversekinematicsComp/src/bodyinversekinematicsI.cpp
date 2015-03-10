@@ -68,8 +68,8 @@ void BodyInverseKinematicsI::setNewTip(const string& part, const string& transfo
 	worker->setNewTip(part,transform,pose);
 }
 
-void BodyInverseKinematicsI::setJoint(const string& joint, Ice::Float speed, Ice::Float maxSpeed, const Ice::Current&){
-	worker->setJoint(joint,speed,maxSpeed);
+void BodyInverseKinematicsI::setJoint(const string& joint, Ice::Float position, Ice::Float maxSpeed, const Ice::Current&){
+	worker->setJoint(joint,position,maxSpeed);
 }
 
 

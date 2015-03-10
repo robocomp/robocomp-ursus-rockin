@@ -29,6 +29,7 @@
  */
 SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mprx)
 {
+	INITIALIZE_READY = false;
 	qDebug() << __FUNCTION__;
 	correlativeID = 0;		//Unique ID to name provisional targets
 	hide();
@@ -65,13 +66,9 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
 			innerModel = new InnerModel(par.value);
 			convertInnerModelFromMilimetersToMeters(innerModel->getRoot());
-//			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
 		}
 		else
-		{
-//			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
 			qFatal("Exiting now.");
-		}
 	}
 	catch(std::exception e)
 	{
@@ -79,12 +76,18 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	}
 
 	init();
+	
+	mutex->lock();
+		INITIALIZE_READY = true;
+	mutex->unlock();
+	
 	timer.start(50);
 	return true;
 }
 
 /**
- * @brief Initializing procedures to be done once params are read
+ * @brief INIT.
+ * Method that initializing procedures to be done once params are read
  *
  * @return void
  */
@@ -92,11 +95,13 @@ void SpecificWorker::init()
 {
 	// RECONFIGURABLE PARA CADA ROBOT: Listas de motores de las distintas partes del robot --------------- OJO CON EL ORDEN!!!!!!!!!!!!!!!!!!!!!!!!!!
 	listaBrazoIzquierdo	<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2";
-	listaBrazoDerecho 	<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2";
+	listaBrazoDerecho 	<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" /*<< "rightWrist1" << "rightWrist2"*/;
+	
+	
 	listaCabeza 		<< "head_yaw_joint" << "head_pitch_joint";
 	listaMotores 		<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
-									<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
-									<< "head_yaw_joint" << "head_pitch_joint";
+						<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
+						<< "head_yaw_joint" << "head_pitch_joint";
 				
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
@@ -125,10 +130,9 @@ void SpecificWorker::init()
 	sleep(1);
 	actualizarInnermodel(listaMotores);
 
-// 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
-// 	innerModel->transform("world", QVec::zeros(3),tipLeft).print("LeftTip in World");
-// 	innerModel->transform("world", QVec::zeros(3),"mugTag").print("mug in World");
-
+/* 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
+ 	innerModel->transform("world", QVec::zeros(3),tipLeft).print("LeftTip in World");
+ 	innerModel->transform("world", QVec::zeros(3),"mugTag").print("mug in World");*/
 
 	//Open file to write errors
 	fichero.open("errores.txt", ios::out);
@@ -143,7 +147,6 @@ void SpecificWorker::init()
 	planner = new PlannerOMPL(*innerModel);
 	planner->initialize(&sampler);
 
-
 	qDebug();
 	qDebug() << "---------------------------------";
 	qDebug() << "BodyInverseKinematics --> Waiting for requests!";
@@ -151,7 +154,8 @@ void SpecificWorker::init()
 
 
 /**
- * @brief Transforms all InnerModel in mm to meters until BIK can operate in meters directly
+ * @brief CONVERT  INNERMODEL FROM MILIMETERS TO METERS
+ * This method transforms all InnerModel in mm to meters until BIK can operate in meters directly
  *
  * @param node starting node of InnerModel
  * @return void
@@ -293,9 +297,10 @@ void SpecificWorker::compute( )
 	{
 		if(iterador.value().noTargets() == false)
 		{
+
 			Target &target = iterador.value().getHeadFromTargets();
 	
- 			if ( target.getType() == Target::TargetType::ALIGNAXIS or  targetHasAPlan( *innerModel, target ) == true)
+ 			//if ( target.getType() == Target::TargetType::ALIGNAXIS or  targetHasAPlan( *innerModel, target ) == true)
 				{
 					target.annotateInitialTipPose();
 					target.setInitialAngles(iterador.value().getMotorList());
@@ -303,7 +308,7 @@ void SpecificWorker::compute( )
 					target.print("BEFORE PROCESSING");
 
 					iterador.value().getInverseKinematics()->resolverTarget(target);
-				
+					
 					if(target.getError() <= 0.9 and target.isAtTarget() == false) //local goal achieved: execute the solution
 					{
 						moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
@@ -337,10 +342,17 @@ void SpecificWorker::compute( )
 	}//for
 }
 
-
+/**
+ * @brief TARGET HAS A PLAN
+ * This method 
+ *
+ * @param innerModel the innerModel
+ * @param target the target point of the space
+ * @return bool
+ */ 
 bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 {
-	//Convert to ROBOT referece frame to faciitate SAMPLING procedure
+	//Convert to ROBOT referece frame to facilitate SAMPLING procedure
 	QVec origin = innerModel.transform("robot","grabPositionHandR");
 	QVec targetR = innerModel.transform("robot", target.getPose(), "world");
 
@@ -350,7 +362,6 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 		return true;
 
 	//clearDraw();
-
 	if( (origin-target.getTranslation()).norm2() < 0.020 )  //already there !!!!
 	{
 		qDebug() << __FUNCTION__ << "Origin and target too close. Diff: "  << (origin-target.getTranslation()).norm2() << origin << target.getTranslation() << ". Returning void";
@@ -374,7 +385,6 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 
 	qDebug() << __FUNCTION__ << "Plan length: " << planner->getPath().size();
 	QList<QVec> path = planner->getPath();
-
 	qDebug() << path;
 
 	//Convert back to world reference system
@@ -433,6 +443,7 @@ void SpecificWorker::createInnerModelTarget(Target &target)
 	innerModel->updateTransformValues(target.getNameInInnerModel(),p.x(), p.y(), p.z(), p.rx(), p.ry(), p.rz(), "world");
 
 }
+
 void SpecificWorker::removeInnerModelTarget(const Target& target)
 {
 	innerModel->removeNode(target.getNameInInnerModel());
@@ -440,17 +451,51 @@ void SpecificWorker::removeInnerModelTarget(const Target& target)
 
 
 ///////////////////////////////////////////////
+/// SUBSCRIBER  OJO se ejecuta en el  hilo de ICE
+//////////////////////////////////////////////
+/**
+ * @brief SED DATA
+ * 		  The BodyInverseKinematics component is subscribed to
+ * 		  joystickAdapter in order to take the position that the
+ * 		  publisher joystick (FALCON) send to him.
+ * @param data struct with the axis coordinates, the speed and the buttons clicked.
+ * @return void
+ */ 
+void SpecificWorker::sendData(const TData& data)
+{
+	if( INITIALIZE_READY == true)
+	{
+		// Con los datos que recibimos, mover el robot a
+		// la posicion indicada por el falcon
+		// 	qDebug()<<"Datos recibidos...";
+		// 	for(auto a : data.axes)
+		// 		std::cout << "	" << a.name << " " << a.value << std::endl;
+		// 	for(auto b: data.buttons)
+		// 		std::cout << "	" << b.clicked << std::endl;
+		
+		//Preparamos los datos para enviarlo al BIK:
+		RoboCompBodyInverseKinematics::Axis axis;
+		for(auto a : data.axes)
+		{
+			if( a.name == "x") axis.x = a.value;
+			if( a.name == "y") axis.y = a.value;
+			if( a.name == "z") axis.z = a.value;	
+		}
+		advanceAlongAxis("RIGHTARM", axis, 250);
+	}
+}
+
+///////////////////////////////////////////////
 /// SERVANTS  OJO se ejecuta en el  hilo de ICE
 //////////////////////////////////////////////
 
-
-
 /**
- * @brief Takes bodyPart to target pose, defined in the WORLD reference system
+ * @brief SET TARGET POSE 6D
+ * 		Takes bodyPart to target pose, defined in the WORLD reference system
  *
- * @param bodyPart ...
- * @param target ...
- * @param weights ...
+ * @param bodyPart The part of the body that we want to move to the target point.
+ * @param target the target point
+ * @param weights the weights each coordinate and rotations.
  * @param radius NOT USED
  * @return void
  */
@@ -495,7 +540,7 @@ void SpecificWorker::setTargetPose6D(const string& bodyPart, const Pose6D& targe
 }
 
 /**
- * @brief ...
+ * @brief POINT AXIS TOWARDS TARGET
  *
  * @param bodyPart ...
  * @param target ...
@@ -573,11 +618,12 @@ void SpecificWorker::advanceAlongAxis(const string& bodyPart, const Axis& ax, fl
 	Target t(Target::ADVANCEAXIS, innerModel, bodyParts[partName].getTip(), axis, dist);
 
 	mutex->lock();
-		bodyParts[partName].addTargetToList(t);
+		if( bodyParts[partName].getTargets().size() < 2 ) 
+			bodyParts[partName].addTargetToList(t);
 	mutex->unlock();
 
 	qDebug() << "-----------------------------------------------------------------------";
-	qDebug() <<  __FILE__ << __FUNCTION__ << __LINE__<< "New target arrived: " << partName;
+	qDebug() <<  __FILE__ << __FUNCTION__ << "New target arrived: " << partName << "dist" << dist << "axis" << axis;
 }
 
 /**
@@ -892,35 +938,6 @@ void SpecificWorker::moveRobotPart(QVec angles, const QStringList &listaJoints)
 	}
 }
 
-
-/*
- * Método moverTarget versión 2.
- * Mueve el target a una posición que se le pasa como parámetro de entrada.
- * Crea una pose3D a cero y actualiza sus traslaciones tx, ty y tz y sus
- * rotaciones rx, ry y rz con los datos del parámetro de entrada.
- * Sirve para colocar el target en el innerModel. Para nada más.
- */
-// void SpecificWorker::moverTarget(const QVec &pose)
-// {
-// 	try
-// 	{
-// 		RoboCompInnerModelManager::Pose3D p;
-// 		p.x=p.y=p.z=p.rx=p.ry=p.rz=0.0; //Primero inicializamos a cero.
-//
-// 		p.x = pose[0]; p.y = pose[1]; p.z = pose[2];
-// 		p.rx = pose[3]; p.ry = pose[4]; p.rz = pose[5];
-//
-// 		innermodelmanager_proxy->setPoseFromParent("target",p);
-// 		innerModel->updateTransformValues("target",p.x,p.y,p.z,p.rx,p.ry,p.rz);
-// 		}
-// 	catch (const Ice::Exception &ex)
-// 	{
-// 		cout<<"Excepción en moverTarget: "<<ex<<endl;
-// 	}
-// }
-
-
-
 /*-----------------------------------------------------------------------------*
  * 			                MÉTODOS    AUXILIARES                              *
  *-----------------------------------------------------------------------------*/
@@ -957,8 +974,7 @@ void SpecificWorker::calcularModuloFloat(QVec &angles, float mod)
 }
 
 void SpecificWorker::clearDraw()
-{
-		
+{	
 	try
 	{	
 		innermodelmanager_proxy->removeNode("road");		
@@ -1001,6 +1017,7 @@ bool SpecificWorker::draw(InnerModelManagerPrx innermodelmanager_proxy, const QL
 	}
 	return false;
 }
+
 /*
  * Método getRotacionMano
  * Devuelve la rotación de la mano del robot
@@ -1076,3 +1093,29 @@ bool SpecificWorker::draw(InnerModelManagerPrx innermodelmanager_proxy, const QL
 // 	}
 // }
 //
+
+/*
+ * Método moverTarget versión 2.
+ * Mueve el target a una posición que se le pasa como parámetro de entrada.
+ * Crea una pose3D a cero y actualiza sus traslaciones tx, ty y tz y sus
+ * rotaciones rx, ry y rz con los datos del parámetro de entrada.
+ * Sirve para colocar el target en el innerModel. Para nada más.
+ */
+// void SpecificWorker::moverTarget(const QVec &pose)
+// {
+// 	try
+// 	{
+// 		RoboCompInnerModelManager::Pose3D p;
+// 		p.x=p.y=p.z=p.rx=p.ry=p.rz=0.0; //Primero inicializamos a cero.
+//
+// 		p.x = pose[0]; p.y = pose[1]; p.z = pose[2];
+// 		p.rx = pose[3]; p.ry = pose[4]; p.rz = pose[5];
+//
+// 		innermodelmanager_proxy->setPoseFromParent("target",p);
+// 		innerModel->updateTransformValues("target",p.x,p.y,p.z,p.rx,p.ry,p.rz);
+// 		}
+// 	catch (const Ice::Exception &ex)
+// 	{
+// 		cout<<"Excepción en moverTarget: "<<ex<<endl;
+// 	}
+// }
