@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rcmanager>
+
+ <generalInformation>
+  <editor path="kate" />
+  <timeouts fixed="1000" blink="300" />
+  <clicks switch="2" interval="400" />
+  <graph alpha="80" active="true" scale="200" />
+  <graphTiming idletime="1000" focustime="500" fasttime="10" fastperiod="2000" />
+ </generalInformation>
+
+ <node alias="icestorm" endpoint="IceStorm/TopicManager:default -p 9999">
+  <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
+  <upCommand command="icebox --Ice.Config=ursus.conf" />
+  <downCommand command="killall -9 icebox" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <xpos value="0" />
+  <ypos value="02" />
+  <radius value="10.0" />
+ </node>
+
+ 
+ <!--
+ <node alias="icestorm" endpoint="IceStorm/TopicManager:default -p 9999">
+  <dependence alias="icestorm" />
+  <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
+  <upCommand command="bin/component --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf --prefix=ACPI" />
+  <downCommand command="killall -9 acpi" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <xpos value="0" />
+  <ypos value="-100" />
+  <radius value="10.0" />
+ </node>
+-->
+
+
+</rcmanager>
