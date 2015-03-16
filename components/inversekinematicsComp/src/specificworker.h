@@ -48,16 +48,19 @@ class SpecificWorker : public GenericWorker
 		SpecificWorker	(MapPrx& mprx, QWidget *parent = 0);	
 		~SpecificWorker	();
 		bool	setParams(RoboCompCommonBehavior::ParameterList params);
-		void  	setTargetPose6D(const string& bodyPart, const Pose6D& target, const WeightVector& weights, float radius);
-		void  	pointAxisTowardsTarget(const string& bodyPart, const Pose6D& target, const Axis &axis, bool axisConstraint, float axisAngleConstraint);
-		void  	advanceAlongAxis(const string& bodyPart, const Axis& ax, float dist);
-		void  	setFingers(float d);
-		void  	goHome(const string& part);
-		void  	setRobot(const int type) ;
-		void  	stop(const string& part);
+		void	setTargetPose6D(const string& bodyPart, const Pose6D& target, const WeightVector& weights, float radius);
+		void	pointAxisTowardsTarget(const string& bodyPart, const Pose6D& target, const Axis &axis, bool axisConstraint, float axisAngleConstraint);
+		void	advanceAlongAxis(const string& bodyPart, const Axis& ax, float dist);
+		void	setFingers(float d);
+		void	goHome(const string& part);
+		void	setRobot(const int type) ;
+		void	stop(const string& part);
 		RoboCompBodyInverseKinematics::TargetState	getState(const string &part);
-		void 		setNewTip(const string &part, const string &transform, const Pose6D &pose); 
-		void  	setJoint(const string& joint, float speed, float maxSpeed);
+		void	setNewTip(const string &part, const string &transform, const Pose6D &pose); 
+		void	setJoint(const string& joint, float speed, float maxSpeed);
+		
+		//subscribe
+		void  sendData(const TData& data);
 		
 	public slots:
 		void compute(); 
@@ -95,8 +98,10 @@ class SpecificWorker : public GenericWorker
 		Sampler sampler;
 		FCLModelPtr fclMesh;
 		
+	private:
+		/// METODOS PRIVADOS DE LA CLASE ///
+		// METODOS PARA INICIALIZAR //
 		void init();							// Things to do after params are set
-
 		
 		// MÉTODOS PARA ACTUALIZAR //
 		void	 actualizarInnermodel					(const QStringList &listaJoints);
@@ -119,6 +124,8 @@ class SpecificWorker : public GenericWorker
 		
 		bool draw(InnerModelManagerPrx innermodelmanager_proxy, const QList<QVec> &path);
 		void clearDraw();
+		
+		bool INITIALIZE_READY;
 	
 };
 

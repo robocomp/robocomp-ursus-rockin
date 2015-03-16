@@ -31,6 +31,7 @@
 #include <JointMotor.h>
 #include <OmniRobot.h>
 #include <BodyInverseKinematics.h>
+#include <JoystickAdapter.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -47,6 +48,7 @@ using namespace RoboCompInnerModelManager;
 using namespace RoboCompJointMotor;
 using namespace RoboCompOmniRobot;
 using namespace RoboCompBodyInverseKinematics;
+using namespace RoboCompJoystickAdapter;
 class GenericWorker :
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
@@ -77,7 +79,9 @@ public:
 	virtual TargetState getState(const string& part) = 0;
 	virtual void  stop(const string& part) = 0;
 	virtual void  setNewTip(const string& part, const string& transform, const Pose6D& pose) = 0;
-	virtual void  setJoint(const string& joint, float speed, float maxSpeed) = 0;
+	virtual void  setJoint(const string& joint, float position, float maxSpeed) = 0;
+	virtual void  sendData(const TData& data) = 0;
+
 protected:
 	QTimer timer;
 	int Period;

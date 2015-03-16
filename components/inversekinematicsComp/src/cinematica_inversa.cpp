@@ -94,7 +94,7 @@ void Cinematica_Inversa::resolverTarget(Target& target)
 		else
 			r = rot.subVector(3,5);
 		inner->updateTransformValues(target.getNameInInnerModel(),p.x(), p.y(), p.z(), r.x(), r.y(), r.z(), "world");
-	
+
 		levenbergMarquardt(target);
 	}
 	else  //POSE6D
@@ -535,13 +535,15 @@ void Cinematica_Inversa::levenbergMarquardt(Target &target)
 	QVec error = We * computeErrorVector(target); //error de la posición actual con la deseada.
 	//QMat J = jacobian(motores);
 	QMat J = Jacobian::jac(inner, listaJoints, motores, endEffector);
-	QMat H = J.transpose()*(We*J);			
+	QMat H = J.transpose()*(We*J);// ERROR
 	QVec g = J.transpose()*(error);		
 	bool stop = (g.maxAbs(auxInt) <= e1);
 	bool smallInc = false;
 	bool nanInc = false;
 	float ro = 0; 
 	float n = t*H.getDiagonal().max(auxInt); 
+
+
 			
 	while((stop==false) and (k<kMax) and (smallInc == false) and (nanInc == false))
 	{
