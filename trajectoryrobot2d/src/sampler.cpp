@@ -26,15 +26,10 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 	innerModel = inner;
 	innerRegions = innerRegions_;
 	outerRegion = outerRegion_;
-<<<<<<< HEAD
-	robotNodes.clear(); restNodes.clear();
-	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes);
-	qDebug() << __FUNCTION__ << "Outer region:" << outerRegion;
-=======
+
 	robotNodes.clear(); restNodes.clear(); 
 	excludedNodes.insert("floor_plane");
 	recursiveIncludeMeshes(inner->getRoot(), "robot", false, robotNodes, restNodes, excludedNodes);
->>>>>>> 9b9374d7ce24989e4cd2b1627a7a163a8c6fe50f
 	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );
@@ -219,6 +214,7 @@ void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
 	{
 		if( std::find(excluded.begin(), excluded.end(), node->id) == excluded.end() )			
+		{
 			if (inside)
 			{
 				in.push_back(node->id);
@@ -227,6 +223,7 @@ void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 			{
 				out.push_back(node->id);
 			}
+		}
 	}
 }
 
@@ -453,7 +450,7 @@ bool Sampler::searchRobotValidStateCloseToTarget(QVec& target)
 	const float radius = 1000.f;
 	QVec lastPoint, minVertex, vertex;
 	float fi,vert;
-	float dist, minDist = radius;
+	float minDist = radius;
 	
 	for(int i=0; i< nVertices; i++)
 	{

@@ -39,13 +39,13 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The program to use to edit the cache.
-CMAKE_EDIT_COMMAND = /usr/bin/ccmake
+CMAKE_EDIT_COMMAND = /usr/bin/cmake-gui
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pbustos/robocomp/components/robocomp-ursus-rockin/components/trajtester
+CMAKE_SOURCE_DIR = /home/daniel/robocomp/components/robocomp-ursus-rockin/components/trajtester
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pbustos/robocomp/components/robocomp-ursus-rockin/components/trajtester
+CMAKE_BINARY_DIR = /home/daniel/robocomp/components/robocomp-ursus-rockin/components/trajtester
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -53,7 +53,7 @@ CMAKE_BINARY_DIR = /home/pbustos/robocomp/components/robocomp-ursus-rockin/compo
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/usr/bin/cmake-gui -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -72,9 +72,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pbustos/robocomp/components/robocomp-ursus-rockin/components/trajtester/CMakeFiles /home/pbustos/robocomp/components/robocomp-ursus-rockin/components/trajtester/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/daniel/robocomp/components/robocomp-ursus-rockin/components/trajtester/CMakeFiles /home/daniel/robocomp/components/robocomp-ursus-rockin/components/trajtester/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pbustos/robocomp/components/robocomp-ursus-rockin/components/trajtester/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/daniel/robocomp/components/robocomp-ursus-rockin/components/trajtester/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

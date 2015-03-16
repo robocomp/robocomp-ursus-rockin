@@ -142,9 +142,6 @@ void SpecificWorker::compute( )
 		case CurrentTarget::Command::GOBACKWARDS:
 			goBackwardsCommand(innerModel, currentTarget.getTranslation(), currentTarget, tState, road);
 			break;
-		case CurrentTarget::Command::UNBLOCK:
-			currentTarget.command = unBlock(innerModel, currentTarget, tState, laserData);
-			break;
 		case CurrentTarget::Command::IDLE:
 			break;
 	}
@@ -161,38 +158,6 @@ void SpecificWorker::compute( )
 }
 
 /////////////////////////////////////////////////////////
-
-CurrentTarget::Command SpecificWorker::unBlock(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &tState, RoboCompLaser::TLaserData &laserData)
-{
-  bool static firstTime = true;
-  float UMBRAL = 300.f;
-  float K1 = 0.5f;
-  float K2 = 0.5f;
-  
-  std::sort( laserData.begin(), laserData.end(), [] (TData a, TData b) { return a.dist < b.dist; } );
-
-  if( firstTime == true )
-  {
-    QVec hit = innerModel->laserToWorld("laser", laserData.front().dist, laserData.front().angle);
-    hit * (T)-1.f;
-    try
-    {
-	omnirobot_proxy->setSpeedBase(K1 * hit.x(), K2 * hit.z(), 0.f);
-	firstTime = false;
-    }
-    catch(const Ice::Exception &ex){
-	  cout << ex << endl;
-    }
-  }
-  if( laserData.front().dist > UMBRAL)
-  {
-    omnirobot_proxy->setSpeedBase(0.f, 0.f, 0.f);
-    firstTime = true;
-    return CurrentTarget::Command::GOTO;
-  }
-  return CurrentTarget::Command::UNBLOCK;
-}
-
 
 
 
@@ -255,14 +220,10 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
  * @param innerModel ...
  * @return bool
  */
-<<<<<<< HEAD
-bool SpecificWorker::
-gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, 
-								 const RoboCompLaser::TLaserData &lData)
-=======
+
 bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, 
 								 RoboCompLaser::TLaserData &lData)
->>>>>>> 9b9374d7ce24989e4cd2b1627a7a163a8c6fe50f
+
 {
 	// 	qDebug() << __FUNCTION__;
 	if( targetHasAPlan(innerModel, target, state, myRoad) == true)
@@ -277,11 +238,6 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
 		
-		if(myRoad.isBlocked() == true)
-		{
-		    target.command = CurrentTarget::Command::UNBLOCK;
-		}
-		
 		if (myRoad.isFinished() == true)
 		{
 			if( target.hasRotation() )
@@ -292,15 +248,12 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 			}
 			else
 			{
-<<<<<<< HEAD
-				planner->learnPath( myRoad.backList );
-				target.command = CurrentTarget::Command::STOP;			
-=======
+
 				planner->learnPath( road.backList );
 				target.command = CurrentTarget::Command::STOP;	
 				planner->cleanGraph(innermodelmanager_proxy);
 				planner->drawGraph(innermodelmanager_proxy);
->>>>>>> 9b9374d7ce24989e4cd2b1627a7a163a8c6fe50f
+
 			}
 		}
 
@@ -622,11 +575,9 @@ void SpecificWorker::go(const TargetPose& target)
 				currentTarget.setHasRotation(true);
 			drawTarget( QVec::vec3(target.x,target.y,target.z));
 			taskReloj.restart();
-<<<<<<< HEAD
-			qDebug() << __FUNCTION__ << "----------------------------------------------------------GO command received, robot at " << bState.x << bState.z << "with target (T,R)" << currentTarget.getTranslation() << currentTarget.getRotation();
-=======
+
 			qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
->>>>>>> 9b9374d7ce24989e4cd2b1627a7a163a8c6fe50f
+
 		}
 		else
 		{

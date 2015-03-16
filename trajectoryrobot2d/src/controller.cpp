@@ -127,15 +127,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
 
-<<<<<<< HEAD
 		bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
  		if( collision )
  			road.setBlocked(true);
-=======
-//		bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
-// 		if( collision )
-// 			road.setBlocked(true);
->>>>>>> 9b9374d7ce24989e4cd2b1627a7a163a8c6fe50f
 
 		
 		/////////////////////////////////////////////////
@@ -202,7 +196,7 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 		//qDebug() << distNorm;
 		QVec p = innerModel->laserTo("laser", "laser" , distNorm, i.angle);  //Watch the laser to tobot offset to compute final corrections
 		res += (p * (T)(-1));
-		if( i.dist < 300.f)
+		if( i.dist < 100.f)
 		{
 			collision = true;
 			vadvance = 0;
