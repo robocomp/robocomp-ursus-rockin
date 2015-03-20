@@ -533,8 +533,7 @@ void Cinematica_Inversa::levenbergMarquardt(Target &target)
 		We = QMat::makeDiagonal(target.getWeights());  //matriz de pesos para compensar milímietros con radianes.
 	
 	QVec error = We * computeErrorVector(target); //error de la posición actual con la deseada.
-	//QMat J = jacobian(motores);
-	QMat J = Jacobian::jac(inner, listaJoints, motores, endEffector);
+	QMat J = inner->jacobian(listaJoints, motores, endEffector); //QMat J = Jacobian::jac(inner, listaJoints, motores, endEffector);
 	QMat H = J.transpose()*(We*J);// ERROR
 	QVec g = J.transpose()*(error);		
 	bool stop = (g.maxAbs(auxInt) <= e1);
@@ -542,8 +541,6 @@ void Cinematica_Inversa::levenbergMarquardt(Target &target)
 	bool nanInc = false;
 	float ro = 0; 
 	float n = t*H.getDiagonal().max(auxInt); 
-
-
 			
 	while((stop==false) and (k<kMax) and (smallInc == false) and (nanInc == false))
 	{
@@ -582,8 +579,8 @@ void Cinematica_Inversa::levenbergMarquardt(Target &target)
 				{
 					// Recalculamos el Jacobiano, el Hessiano y el vector g. El error es el mismo que antes
 					// puesto que NO aplicamos los cambios (los ángulos nuevos).
-					//J = jacobian(motores);
-					J = Jacobian::jac(inner, listaJoints, motores, endEffector);
+					//J = Jacobian::jac(inner, listaJoints, motores, endEffector);
+					J = inner->jacobian(listaJoints, motores, endEffector);
 					H = J.transpose()*(We*J);
 					g = J.transpose()*(error);
 				}
@@ -602,7 +599,8 @@ void Cinematica_Inversa::levenbergMarquardt(Target &target)
 					// Recalculamos con nuevos datos.
 					error = We*computeErrorVector(target);						
 					//J = jacobian(motores);
-					J = Jacobian::jac(inner, listaJoints, motores, endEffector);
+					//J = Jacobian::jac(inner, listaJoints, motores, endEffector);
+					J = inner->jacobian(listaJoints, motores, endEffector);
 					H = J.transpose()*(We*J);
 					g = J.transpose()*(error);
 		

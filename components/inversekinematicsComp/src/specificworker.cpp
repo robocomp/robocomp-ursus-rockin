@@ -481,7 +481,7 @@ void SpecificWorker::sendData(const TData& data)
 			if( a.name == "y") axis.y = a.value;
 			if( a.name == "z") axis.z = a.value;	
 		}
-		advanceAlongAxis("RIGHTARM", axis, 250);
+		advanceAlongAxis("RIGHTARM", axis, 150);
 	}
 }
 
@@ -662,7 +662,6 @@ void SpecificWorker::setFingers(float d)  ///ONLY RIGHT HAND. FIX
 	// Ahora cinemática inversa: ang = asin(D/l)
 	// ang1  = ang - 1;
 	// ang2 = -ang + 1;
-
 }
 
 /**
