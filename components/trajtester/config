@@ -1,10 +1,9 @@
 # Endpoints for subscriptions
-RCISMousePickerTopic.Endpoints=tcp -p 13204 
+RCISMousePickerTopic.Endpoints=tcp -p 13000
 
 
 # Proxies for required interfaces
-TrajectoryRobot2DProxy = trajectoryrobot2d:tcp -h localhost -p 12204
-
+TrajectoryRobot2DProxy = trajectoryrobot2d:tcp -h localhost -p 12204 
 
 
 # This property is used by the clients to connect to IceStorm.
