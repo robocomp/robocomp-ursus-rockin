@@ -102,6 +102,8 @@ void SpecificWorker::init()
 	listaMotores 		<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
 						<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
 						<< "head_yaw_joint" << "head_pitch_joint";
+						
+	qDebug()<<"HOLA----------->"<<listaMotores<<" "<<listaMotores.size();
 				
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
@@ -120,14 +122,19 @@ void SpecificWorker::init()
 
 	//Initialize proxy to RCIS
 	proxy = jointmotor0_proxy;
+	
+	qDebug()<<"DEBUGEANDO 1";
 
 	actualizarInnermodel(listaMotores);  // actualizamos los ángulos de los motores del brazo derecho
+
+	qDebug()<<"DEBUGEANDO 2";
 
 	//goHomePosition(listaMotores);
  	foreach(BodyPart p, bodyParts)
  		goHome(p.getPartName().toStdString());
 	setFingers(0);
 	sleep(1);
+	
 	actualizarInnermodel(listaMotores);
 
 /* 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
@@ -142,6 +149,8 @@ void SpecificWorker::init()
 	limits.append(qMakePair((float)-0.4,(float)0.4)); 	 //x in robot RS
 	limits.append(qMakePair((float)0.2,(float)1.4)); 	 //y
 	limits.append(qMakePair((float)-0.2,(float)1.f));  	 //z
+
+			qDebug()<<"DEBUGEANDO 6";
 
 	sampler.initialize3D(innerModel, limits);
 	planner = new PlannerOMPL(*innerModel);
@@ -190,10 +199,10 @@ void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* nod
 		plane->height /= FACTOR;
 		plane->depth /= FACTOR;
 		printf("%s --------------------> %f %f %f\n", plane->id.toStdString().c_str(), plane->width, plane->height, plane->depth);
-plane->collisionObject->computeAABB();
-fcl::AABB a1 = plane->collisionObject->getAABB();
-fcl::Vec3f v1 = a1.center();
-printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
+		plane->collisionObject->computeAABB();
+		fcl::AABB a1 = plane->collisionObject->getAABB();
+		fcl::Vec3f v1 = a1.center();
+		//printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
 
 
 		// SCALE FACTOR
@@ -242,11 +251,12 @@ printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plan
 				fclMesh->endModel();
 				plane->collisionObject = new fcl::CollisionObject(fclMesh);
 		}
-plane->collisionObject->computeAABB();
-a1 = plane->collisionObject->getAABB();
-v1 = a1.center();
-printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
+		plane->collisionObject->computeAABB();
+		a1 = plane->collisionObject->getAABB();
+		v1 = a1.center();
+	//printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
 	}
+	
 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)))
 	{
 		mesh->tx /= FACTOR; mesh->ty /= FACTOR; mesh->tz /= FACTOR;
@@ -868,24 +878,31 @@ void SpecificWorker::setJoint(const std::string& joint, float value, float maxSp
  */
 void SpecificWorker::actualizarInnermodel(const QStringList &listaJoints)
 {
+	int i=0, j=0;
 	try
 	{
 		MotorList mList;
-		for (int i=0; i<listaJoints.size(); i++)
+		for (i=0; i<listaJoints.size(); i++)
 		{
 			mList.push_back(listaJoints[i].toStdString());
+			qDebug() << listaJoints[i];
 		}
 
-		RoboCompJointMotor::MotorStateMap mMap = proxy->getMotorStateMap(mList);
+		qDebug()<<"ANTES";
+		/*RoboCompJointMotor::MotorParamsList lis = jointmotor0_proxy->getAllMotorParams();
+		for( auto l : lis)
+			std::cout << l.name << std::cout;*/
+		RoboCompJointMotor::MotorStateMap mMap = jointmotor0_proxy->getMotorStateMap(mList);
+		qDebug()<<"DESPUES";
 
-		for (int j=0; j<listaJoints.size(); j++)
+		for (/*int*/ j=0; j<listaJoints.size(); j++)
 		{
 			innerModel->updateJointValue(listaJoints[j], mMap.at(listaJoints[j].toStdString()).pos);
 		}
 	}
 	catch (const Ice::Exception &ex)
 	{
-		cout<<"--> Excepción en actualizar InnerModel: "<<ex<<endl;
+		cout<<"--> Excepción en actualizar InnerModel: (i,j)"<<": "<<i<<"," <<j<<" "<<ex<<endl;
 	}
 
 	try
