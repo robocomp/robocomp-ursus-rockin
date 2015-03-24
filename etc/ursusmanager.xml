@@ -9,7 +9,19 @@
   <graph alpha="80" active="true" scale="200" />
   <graphTiming idletime="1000" focustime="500" fasttime="10" fastperiod="2000" />
  </generalInformation>
+ 
+<!--REPASA EL FICHERO PORFA, No estoy segura de que este todo bien-->
+ <node alias="dunker" endpoint="tcp -h robonuc2.local -p 10066">
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="ssh robolab@robonuc2.local /home/robocomp/robocomp/components/robocomp-robolab/components/dunkermotorenComp/bin/dunkermotorenComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/dunker.conf" />
+  <downCommand command="ssh robolab@robonuc1.local killall -9 dunkermotorenComp" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <xpos value="40" />
+  <ypos value="-40" />
+  <radius value="10.0" />
+ </node>
 
+ 
  <node alias="icestorm" endpoint="IceStorm/TopicManager:default -p 9999">
   <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
   <upCommand command="icebox --Ice.Config=ursus.conf" />
@@ -20,19 +32,61 @@
   <radius value="10.0" />
  </node>
 
- 
- <!--
- <node alias="icestorm" endpoint="IceStorm/TopicManager:default -p 9999">
+ <node alias="dynamixel" endpoint="jointmotor:tcp -h robonuc1.local -p 10068">
   <dependence alias="icestorm" />
-  <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
-  <upCommand command="bin/component --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf --prefix=ACPI" />
-  <downCommand command="killall -9 acpi" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="ssh robolab@robonuc1.local /home/robocomp/robocomp/components/robocomp-robolab/components/dynamixelComp/bin/dynamixelComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/dynamixel.conf" />
+  <downCommand command="ssh robolab@robonuc1.local killall -9 dynamixelComp" />
   <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
-  <xpos value="0" />
+  <xpos value="20" />
   <ypos value="-100" />
   <radius value="10.0" />
  </node>
--->
 
+ <node alias="faulhaber" endpoint="jointmotor:tcp -h robonuc1.local -p 10067">
+  <dependence alias="icestorm" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="ssh robolab@robonuc1.local /home/robocomp/robocomp/components/robocomp-ursus/components/faulhaberComp/bin/faulhaberComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/faulhaber.conf" />
+  <downCommand command="ssh robolab@robonuc1.local killall -9 faulhaberComp" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <xpos value="-20" />
+  <ypos value="-100" />
+  <radius value="10.0" />
+ </node>
+ 
+  <node alias="CommonJoint" endpoint="jointmotor:tcp -h robonuc1.local -p 10067">
+  <dependence alias="faulhaber" />
+  <dependence alias="dynamixel" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="ssh robolab@robonuc1.local /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint/bin/ursuscommonjointcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursusCommon.conf" />
+  <downCommand command="ssh robolab@robonuc1.local killall -9 ursuscommonjointcomp" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <xpos value="0" />
+  <ypos value="-200" />
+  <radius value="10.0" />
+ </node>
+ 
+ <node alias="baseUrsus" endpoint="jointmotor:tcp -h robonuc1.local -p 10066">
+  <dependence alias="dunker" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="ssh robolab@robonuc1.local /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/baseursus/bin/baseursuscomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/base.conf" />
+  <downCommand command="ssh robolab@robonuc1.local killall -9 baseursus" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <xpos value="10" />
+  <ypos value="-100" />
+  <radius value="10.0" />
+ </node>
+ 
+ <node alias="joystick" endpoint="omnirobot:tcp -h localhost -p 10004">
+  <dependence alias="base" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="ssh robolab@robonuc1.local /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/bin/joystickOmniComp --Ice.Config=config" />
+  <downCommand command="ssh robolab@robonuc1.local killall -9 joystickOmniComp" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <xpos value="10" />
+  <ypos value="100" />
+  <radius value="10.0" />
+ </node>
+ 
 
 </rcmanager>
