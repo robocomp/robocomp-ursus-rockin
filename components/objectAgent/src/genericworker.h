@@ -91,7 +91,7 @@ public:
 	virtual void  modelUpdated(const RoboCompAGMWorldModel::Node& modification) = 0;
 
 	virtual void  newAprilTag(const tagsList& tags) = 0;
-
+	
 protected:
 	QTimer timer;
 	int Period;
