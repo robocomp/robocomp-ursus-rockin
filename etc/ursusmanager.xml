@@ -95,18 +95,19 @@
   <radius value="10.0" />
  </node>
 
- <node alias="aprilTecho" endpoint="jointmotor:tcp -h robonuc2.local -p 120066">
+ <node alias="aprilTecho" endpoint="commonbehavior:tcp -h robonuc2.local -p 11258">
+  <dependence alias="icestorm" />
   <dependence alias="camaraTecho" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote robonuc2.local dunker /home/robocomp/robocomp/components/robocomp-robolab/components/dunkermotorenComp/bin/ ./dunkermotorenComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/dunker.conf" />
-  <downCommand command="ssh robolab@robonuc2.local killall -9 dunkermotorenComp" />
+  <upCommand command="rcremote robonuc2.local aprilTecho /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp/ ./bin/apriltagscomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilTecho.conf" />
+  <downCommand command="ssh robolab@robonuc2.local killall -9 apriltagscomp" />
   <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
   <xpos value="-168.692968504" />
   <ypos value="-7.34786809896" />
   <radius value="10.0" />
  </node>
 
- <node alias="relocalizadorTecho" endpoint="commonbehavior:tcp -h robonuc2.local -p 122441">
+ <node alias="relocalizadorTecho" endpoint="commonbehavior:tcp -h robonuc2.local -p 12244">
   <dependence alias="icestorm" />
   <dependence alias="aprilTecho" />
   <dependence alias="base" />
@@ -119,12 +120,11 @@
   <radius value="10.0" />
  </node>
 
- <node alias="algo" endpoint="jointmotor:tcp -h robonuc2.local -p 10066">
-  <dependence alias="icestorm" />
+ <node alias="inverseKinematics" endpoint="commonbehavior:tcp -h robonuc1.local -p 12207">
   <dependence alias="relocalizadorTecho" />
   <dependence alias="commonjoint" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote robonuc2.local relocalizadorTecho /home/robocomp/robocomp/components/robocomp-robolab/components/aprilBasedLocalizationComp/ ./bin/aprilbasedlocalization --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilLocalization.conf" />
+  <upCommand command="rcremote robonuc1.local inverseKinematics /home/robocomp/robocomp/components/robocomp-robolab/components/ree/ ./bin/apdedee--Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilLocalization.conf" />
   <downCommand command="ssh robolab@robonuc2.local killall -9 aprilbasedlocalization" />
   <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilLocalization.conf" />
   <xpos value="2.08531880272" />
