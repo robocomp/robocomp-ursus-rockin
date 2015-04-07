@@ -33,7 +33,7 @@
   <radius value="10.0" />
  </node>
 
- <node alias="commonjoint" endpoint="jointmotor:tcp -h robonuc1.local -p 10067">
+ <node alias="commonjoint" endpoint="jointmotor:tcp -h robonuc1.local -p 20000">
   <dependence alias="faulhaber" />
   <dependence alias="dynamixel" />
   <workingDir path="/home/robocomp/" />
@@ -133,3 +133,6 @@
  </node>
 
 </rcmanager>
+
+
+
