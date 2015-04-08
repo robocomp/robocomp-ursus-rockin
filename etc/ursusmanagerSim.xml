@@ -16,7 +16,7 @@
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost joystick /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/ ./bin/joystickOmniComp --Ice.Config=config" />
   <downCommand command="ssh robolab@localhost killall -9 joystickOmniComp" />
-  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <configFile path="xxx" />
   <xpos value="60.369482167" />
   <ypos value="-0.194231817479" />
   <radius value="10.0" />
@@ -26,7 +26,7 @@
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
   <downCommand command="ssh robolab@localhost killall -9 baseursuscomp" />
-  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <configFile path="xxx" />
   <xpos value="-14.000427968" />
   <ypos value="11.9071261521" />
   <radius value="10.0" />
@@ -38,7 +38,7 @@
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost commonjoint /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint/bin/ ./ursuscommonjointcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursusCommonSim.conf" />
   <downCommand command="ssh robolab@localhost killall -9 ursuscommonjointcomp" />
-  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <configFile path="xxx" />
   <xpos value="139.211604545" />
   <ypos value="18.2467229155" />
   <radius value="10.0" />
@@ -48,7 +48,7 @@
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
   <downCommand command="ssh robolab@localhost killall -9 faulhaberComp" />
-  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <configFile path="xxx" />
   <xpos value="202.408568474" />
   <ypos value="96.4099117814" />
   <radius value="10.0" />
@@ -58,7 +58,7 @@
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
   <downCommand command="ssh robolab@localhost killall -9 dynamixelComp" />
-  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <configFile path="xxx" />
   <xpos value="104.925106085" />
   <ypos value="100.153869339" />
   <radius value="10.0" />
@@ -68,7 +68,7 @@
   <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
   <upCommand command="rcremote localhost icestorm /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ icebox --Ice.Config=ursus.conf" />
   <downCommand command="ssh robolab@localhost killall -9 icebox" />
-  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursus.conf" />
+  <configFile path="xxx" />
   <xpos value="-13.6332297432" />
   <ypos value="-69.0763350886" />
   <radius value="10.0" />
@@ -76,17 +76,27 @@
 
 
 
- <node alias="inverseKinematics" endpoint="commonbehavior:tcp -h localhost -p 12207">
-  <dependence alias="relocalizadorTecho" />
+ <node alias="bik" endpoint="commonbehavior:tcp -h localhost -p 12207">
   <dependence alias="commonjoint" />
   <dependence alias="icestorm" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost inverseKinematics /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp/ ./bin/apdedee--Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilLocalization.conf" />
+  <upCommand command="rcremote localhost inverseKinematics /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp/ ./bin/bik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicsSim.conf" />
   <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
-  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilLocalization.conf" />
+  <configFile path="xxx" />
   <xpos value="2.08531880272" />
   <ypos value="-240.060246272" />
+  <radius value="10.0" />
+ </node>
+
+ <node alias="bikTester" endpoint="commonbehavior:tcp -h localhost -p 12211">
+  <dependence alias="bik" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost inverseKinematics /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/ ./bin/lokiarmtestercomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicstester.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
+  <configFile path="xxx" />
+  <xpos value="-52.08531880272" />
+  <ypos value="-310.060246272" />
   <radius value="10.0" />
  </node>
 
