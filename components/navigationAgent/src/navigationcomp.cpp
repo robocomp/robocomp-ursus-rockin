@@ -111,99 +111,6 @@ public:
 	virtual int run(int, char*[]);
 };
 
-bool GenericMonitor::configGetString( const std::string name, std::string&value,  const std::string default_value, QStringList *list)
-{
-	value = communicator->getProperties()->getProperty( name );
-
-	if ( value.length() == 0)
-	{
-		if (default_value.length() != 0)
-		{
-			value = default_value;
-			return false;
-		}
-		else if (default_value.length() == 0)
-		{
-			QString error = QString("empty configuration string, not default value for")+QString::fromStdString(name);
-			qDebug() << error;
-			throw error;
-		}
-	}
-
-	if (list != NULL)
-	{
-		if (list->contains(QString::fromStdString(value)) == false)
-		{
-			qFatal("Reading config file: %s is not a valid string", name.c_str());
-			rError("Reading config file:"+name+" is not a valid string");
-		}
-		QString error = QString("not valid configuration value");
-		qDebug() << error;
-		throw error;
-	}
-
-	auto parts = QString::fromStdString(value).split("@");
-	QString variableName=QString::fromStdString(name);
-	
-	
-	if (parts.size() > 1)
-	{
-		if (parts[0].size() > 0)
-		{
-			variableName = parts[0];
-		}
-		parts.removeFirst();
-		value = std::string("@") + parts.join("@").toStdString();
-	}
-	
-// 	printf("variableName = %s\n", variableName.toStdString().c_str());
-// 	printf("value = %s\n", value.c_str());
-	
-	
-	if (value[0]=='@')
-	{
-		QString qstr = QString::fromStdString(value).remove(0,1);
-		QFile ff(qstr);
-		if (not ff.exists())
-		{
-			qFatal("Not such file: %s\n", qstr.toStdString().c_str());
-		}
-		if (!ff.open(QIODevice::ReadOnly | QIODevice::Text))
-		{
-			qFatal("Can't open file: %s\n", qstr.toStdString().c_str());
-		}
-
-		bool found = false;
-		while (!ff.atEnd())
-		{
-			QString content = QString(ff.readLine()).simplified();
-// 			printf("line: %s\n", content.toStdString().c_str());
-			
-			if (content.startsWith(variableName))
-			{
-// 				printf("swn %s\n", content.toStdString().c_str());
-				content = content.right(content.size()-variableName.size()).simplified();
-// 				printf("swn %s\n", content.toStdString().c_str());
-				if (content.startsWith("="))
-				{
-					content = content.remove(0,1).simplified();
-					value = content.toStdString();
-					found = true;
-				}
-				else
-				{
-					printf("warning (=) %s\n", content.toStdString().c_str());
-				}
-				
-			}
-		}
-		if (not found)
-		{
-		}
-	}
-	std::cout << name << " " << value << std::endl;
-	return true; 
-}
 
 void navigationComp::initialize()
 {
@@ -285,22 +192,22 @@ OmniRobotPrx omnirobot_proxy;
 			try{
 				agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic"); // communicator()->getProperties()->getProperty("AGMAgentTopic") does not work!
 			}catch (const IceStorm::NoSuchTopic&){
-				//Error. Topic does not exist.	
+				//Error. Topic does not exist.
 			}
 		}
 	}
 	Ice::ObjectPrx agmagenttopic_pub = agmagenttopic_topic->getPublisher()->ice_oneway();
 	AGMAgentTopicPrx agmagenttopic = AGMAgentTopicPrx::uncheckedCast(agmagenttopic_pub);
 	mprx["AGMAgentTopicPub"] = (::IceProxy::Ice::Object*)(&agmagenttopic);
-	
-	
+
+
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
 	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor,SIGNAL(kill()),&a,SLOT(quit()));
 	QObject::connect(worker,SIGNAL(kill()),&a,SLOT(quit()));
 	monitor->start();
-	
+
 	if ( !monitor->isRunning() )
 		return status;
 	try

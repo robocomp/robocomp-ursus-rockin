@@ -126,10 +126,11 @@
 															<transform id="rgbd_transform" tz="20">
 																<rgbd id="rgbd" focal="525" width="640" height="480" port="10096" ifconfig="10068,10004" />
 																<transform id="head_axes_0" >
+<!--
 																	<plane id="head_x_0" px="100" nz="1" size="200,30,30" repeat="1" texture="#ff0000" />
 																	<plane id="head_y_0" py="100" nz="1" size="30,200,30" repeat="1" texture="#00ff00" />
 																	<plane id="head_z_0" pz="100" nz="1" size="30,30,200" repeat="1" texture="#0000ff" />
-											
+-->											
 																	</transform>
 															</transform>
 															<mesh id="sensorRGBD" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/cube.3ds" scale="100,21,30" />

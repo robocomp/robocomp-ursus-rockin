@@ -11,24 +11,68 @@
   <simulation hookes="0.07" springlength="0.5" friction="0.4" step="0.5" fieldforce="20000.0" />
  </generalInformation>
 
- <node alias="joystick" endpoint="joystick:tcp -h localhost -p 10002">
-  <dependence alias="base" />
+ <node alias="executive" endpoint="agmexecutive:tcp -h localhost -p 10198">
+  <dependence alias="bik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost joystick /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/ ./bin/joystickOmniComp --Ice.Config=config" />
-  <downCommand command="ssh robolab@localhost killall -9 joystickOmniComp" />
+  <upCommand command="rcremote localhost AGMExecutive /home/robocomp/AGM/tools/AGMExecutive_robocomp python AGMExecutive_robocomp.py --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/executiveCOFFEE.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
   <configFile path="xxx" />
-  <xpos value="60.369482167" />
-  <ypos value="-0.194231817479" />
+  <xpos value="-102.23541564" />
+  <ypos value="-209.034499284" />
   <radius value="10.0" />
  </node>
 
- <node alias="base" endpoint="omnirobot:tcp -h localhost -p 12238">
+ <node alias="bikTester" endpoint="commonbehavior:tcp -h localhost -p 12211">
+  <dependence alias="bik" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost bikTester /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/ ./bin/lokiarmtestercomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicstester.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
+  <configFile path="xxx" />
+  <xpos value="87.0077720354" />
+  <ypos value="-34.6669518692" />
+  <radius value="10.0" />
+ </node>
+
+ <node alias="bik" endpoint="commonbehavior:tcp -h localhost -p 12207">
+  <dependence alias="commonjoint" />
+  <dependence alias="icestorm" />
+  <dependence alias="base" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost BIK /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp/ ./bin/bik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicsSim.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
+  <configFile path="xxx" />
+  <xpos value="43.7634249819" />
+  <ypos value="-95.4688311979" />
+  <radius value="10.0" />
+ </node>
+
+ <node alias="icestorm" endpoint="IceStorm/TopicManager:default -h localhost -p 9999">
+  <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
+  <upCommand command="rcremote localhost icestorm /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ icebox --Ice.Config=ursus.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 icebox" />
+  <configFile path="xxx" />
+  <xpos value="-98.3240562288" />
+  <ypos value="-39.7616640715" />
+  <radius value="10.0" />
+ </node>
+
+ <node alias="dynamixel" endpoint="jointmotor:tcp -h localhost -p 10068">
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
-  <downCommand command="ssh robolab@localhost killall -9 baseursuscomp" />
+  <downCommand command="ssh robolab@localhost killall -9 dynamixelComp" />
   <configFile path="xxx" />
-  <xpos value="-14.000427968" />
-  <ypos value="11.9071261521" />
+  <xpos value="20.6199955298" />
+  <ypos value="131.221212686" />
+  <radius value="10.0" />
+ </node>
+
+ <node alias="faulhaber" endpoint="jointmotor:tcp -h localhost -p 10067">
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
+  <downCommand command="ssh robolab@localhost killall -9 faulhaberComp" />
+  <configFile path="xxx" />
+  <xpos value="117.973349838" />
+  <ypos value="127.087353534" />
   <radius value="10.0" />
  </node>
 
@@ -39,68 +83,30 @@
   <upCommand command="rcremote localhost commonjoint /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint/bin/ ./ursuscommonjointcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursusCommonSim.conf" />
   <downCommand command="ssh robolab@localhost killall -9 ursuscommonjointcomp" />
   <configFile path="xxx" />
-  <xpos value="139.211604545" />
-  <ypos value="18.2467229155" />
+  <xpos value="54.2726031018" />
+  <ypos value="48.4209098281" />
   <radius value="10.0" />
  </node>
 
- <node alias="faulhaber" endpoint="jointmotor:tcp -h localhost -p 10067">
+ <node alias="base" endpoint="omnirobot:tcp -h localhost -p 12238">
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
-  <downCommand command="ssh robolab@localhost killall -9 faulhaberComp" />
+  <downCommand command="ssh robolab@localhost killall -9 baseursuscomp" />
   <configFile path="xxx" />
-  <xpos value="202.408568474" />
-  <ypos value="96.4099117814" />
+  <xpos value="-98.346916389" />
+  <ypos value="41.2725248003" />
   <radius value="10.0" />
  </node>
 
- <node alias="dynamixel" endpoint="jointmotor:tcp -h localhost -p 10068">
-  <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
-  <downCommand command="ssh robolab@localhost killall -9 dynamixelComp" />
-  <configFile path="xxx" />
-  <xpos value="104.925106085" />
-  <ypos value="100.153869339" />
-  <radius value="10.0" />
- </node>
-
- <node alias="icestorm" endpoint="IceStorm/TopicManager:default -h localhost -p 9999">
-  <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
-  <upCommand command="rcremote localhost icestorm /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ icebox --Ice.Config=ursus.conf" />
-  <downCommand command="ssh robolab@localhost killall -9 icebox" />
-  <configFile path="xxx" />
-  <xpos value="-13.6332297432" />
-  <ypos value="-69.0763350886" />
-  <radius value="10.0" />
- </node>
-
-
-
- <node alias="bik" endpoint="commonbehavior:tcp -h localhost -p 12207">
-  <dependence alias="commonjoint" />
-  <dependence alias="icestorm" />
+ <node alias="joystick" endpoint="joystick:tcp -h localhost -p 10002">
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost inverseKinematics /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp/ ./bin/bik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicsSim.conf" />
-  <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
+  <upCommand command="rcremote localhost joystick /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/ ./bin/joystickOmniComp --Ice.Config=config" />
+  <downCommand command="ssh robolab@localhost killall -9 joystickOmniComp" />
   <configFile path="xxx" />
-  <xpos value="2.08531880272" />
-  <ypos value="-240.060246272" />
-  <radius value="10.0" />
- </node>
-
- <node alias="bikTester" endpoint="commonbehavior:tcp -h localhost -p 12211">
-  <dependence alias="bik" />
-  <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost inverseKinematics /home/robocomp/robocomp/components/robocomp-ursus-rockin/inversekinematicsTesterComp/ ./bin/lokiarmtestercomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicstester.conf" />
-  <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
-  <configFile path="xxx" />
-  <xpos value="-52.08531880272" />
-  <ypos value="-310.060246272" />
+  <xpos value="-24.7307572289" />
+  <ypos value="30.9299455744" />
   <radius value="10.0" />
  </node>
 
 </rcmanager>
-
-
-
