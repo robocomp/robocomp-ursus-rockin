@@ -2,6 +2,8 @@
 	<transform id="world">
 
 		<transform id="floor" />
+		<plane id="floor_plane" ny="1" size="4500,7000,10" />
+
 		<transform id="offset">
 			
 			<!--<transform id="target" ty="1800" >

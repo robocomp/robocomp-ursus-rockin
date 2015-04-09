@@ -108,5 +108,29 @@
   <ypos value="30.9299455744" />
   <radius value="10.0" />
  </node>
+ 
+ 
+ <node alias="laserRGBD" endpoint="laser:tcp -h localhost -p 10003">
+  <dependence alias="base" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost laserRGBD /home/robocomp/robocomp/components/robocomp-robolab/experimental/laserRGBDComp/ ./bin/laserrgbdComp --Ice.Config=bin/laserrgbdComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/laserrgbd.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 laserrgbdComp" />
+  <configFile path="xxx" />
+  <xpos value="-200.7307572289" />
+  <ypos value="30.9299455744" />
+  <radius value="10.0" />
+ </node>
+
+ <node alias="trajectory" endpoint="trajectoryrobot2d:tcp -h localhost -p 12204">
+  <dependence alias="base" />
+  <dependence alias="laserRGBD" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost trajectory /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/ ./bin/trajectoryrobot2dcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/trajectoryrobot2d.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 trajectoryrobot2dcomp" />
+  <configFile path="xxx" />
+  <xpos value="-200.7307572289" />
+  <ypos value="-30.9299455744" />
+  <radius value="10.0" />
+ </node>
 
 </rcmanager>
