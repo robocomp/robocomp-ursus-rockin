@@ -82,7 +82,7 @@
   <dependence alias="faulhaber" />
   <dependence alias="dynamixel" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost commonjoint /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint/bin/ ./ursuscommonjointcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursusCommonSim.conf" />
+  <upCommand command="rcremote localhost commonjoint /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint/bin/ ./ursuscommonjointcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursusCommon.conf" />
   <downCommand command="ssh robolab@localhost killall -9 ursuscommonjointcomp" />
   <configFile path="xxx" />
   <xpos value="54.2726031018" />
