@@ -346,7 +346,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 	}
 	else
 	{
-		float vadv = -0.5 * error;  //Proportional controller
+		float vadv = -0.1 * error;  //Proportional controller
 		if( vadv < -MAX_ADV_SPEED ) vadv = -MAX_ADV_SPEED;
 		try
 		{

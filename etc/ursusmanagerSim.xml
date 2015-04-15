@@ -12,8 +12,8 @@
  </generalInformation>
 
  <node alias="executive" endpoint="agmexecutive:tcp -h localhost -p 10198">
-  <dependence alias="bik" />
   <dependence alias="navigationAg" />
+  <dependence alias="graspingAg" />
   <dependence alias="icestorm" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost AGMExecutive /home/robocomp/AGM/tools/AGMExecutive_robocomp python AGMExecutive_robocomp.py --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/executiveCOFFEE.conf" />

@@ -66,12 +66,12 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 
 	if ( time.elapsed() > delay )   //Initial wait in secs so the robot waits for everything is setup. Maybe it could be moved upwards
 	{
-		float MAX_ADV_SPEED = 600.f;
-		float MAX_ROT_SPEED = 0.7;
+		float MAX_ADV_SPEED = 200.f;
+		float MAX_ROT_SPEED = 0.3;
 		if( (epoch-100) > 0 )				//Damp max speeds if elapsed time is too long
 		{
-			MAX_ADV_SPEED = 600 * exponentialFunction(epoch-100, 200, 0.2);
-			MAX_ROT_SPEED = 0.7 * exponentialFunction(epoch-100, 200, 0.2);
+			MAX_ADV_SPEED = 200 * exponentialFunction(epoch-100, 200, 0.2);
+			MAX_ROT_SPEED = 0.3 * exponentialFunction(epoch-100, 200, 0.2);
 		}
 
 		float vadvance = 0;
@@ -140,8 +140,8 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		std::sort(laserData.begin(), laserData.end(), [](auto a, auto b){ return a.dist < b.dist;});
 		if(laserData.front().dist < 100 and fabs(laserData.front().angle)>0.3)
 		{
-			if( laserData.front().angle > 0) vside  = -300;
-			else vside = 300;
+			if( laserData.front().angle > 0) vside  = -100;
+			else vside = 100;
 		}
 		else
 			vside = 0;
