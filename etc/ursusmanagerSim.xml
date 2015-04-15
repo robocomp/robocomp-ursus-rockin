@@ -31,7 +31,7 @@
   <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
   <configFile path="xxx" />
   <xpos value="87.0077720354" />
-  <ypos value="-34.6669518692" />
+  <ypos value="-20" />
   <radius value="10.0" />
  </node>
 
@@ -43,8 +43,8 @@
   <upCommand command="rcremote localhost BIK /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp/ ./bin/bik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematicsSim.conf" />
   <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
   <configFile path="xxx" />
-  <xpos value="43.7634249819" />
-  <ypos value="-95.4688311979" />
+  <xpos value="0" />
+  <ypos value="-60" />
   <radius value="10.0" />
  </node>
 
@@ -54,7 +54,7 @@
   <downCommand command="ssh robolab@localhost killall -9 icebox" />
   <configFile path="xxx" />
   <xpos value="-98.3240562288" />
-  <ypos value="-39.7616640715" />
+  <ypos value="-20" />
   <radius value="10.0" />
  </node>
 
@@ -143,6 +143,18 @@
   <downCommand command="ssh robolab@localhost killall -9 navigationcomp" />
   <configFile path="xxx" />
   <xpos value="-200.7307572289" />
+  <ypos value="-130.9299455744" />
+  <radius value="10.0" />
+ </node>
+
+ <node alias="graspingAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10332">
+  <dependence alias="bik" />
+  <dependence alias="icestorm" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 navigationcomp" />
+  <configFile path="xxx" />
+  <xpos value="0" />
   <ypos value="-130.9299455744" />
   <radius value="10.0" />
  </node>

@@ -46,7 +46,9 @@ void SpecificWorker::compute( )
 
 	// ACTION EXECUTION
 	//
+// 	printf("<ae\n");
 	actionExecution();
+// 	printf("ae>\n");
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -156,6 +158,7 @@ void SpecificWorker::modelUpdated(const RoboCompAGMWorldModel::Node& modificatio
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
+	printf("<<< setParametersAndPossibleActivation\n");
 	// We didn't reactivate the component
 	reactivated = false;
 
@@ -192,6 +195,8 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 		active = true;
 		reactivated = true;
 	}
+
+	printf("setParametersAndPossibleActivation >>>\n");
 
 	return true;
 }
@@ -576,7 +581,7 @@ void SpecificWorker::action_SetObjectReach()
 	}
 	catch(...)
 	{
-		printf("object %d not in our model\n");
+		printf("object %d not in our model\n", objectId);
 		return;
 	}
 	const float x = str2float(goalObject->getAttribute("x"));
@@ -594,14 +599,14 @@ void SpecificWorker::action_SetObjectReach()
 			qFatal("navigation: unknown object to reach");
 			break;
 	}
-// 	printf("object (%f, %f, %f)\n", x, z, alpha);
+	printf("object (%f, %f, %f)\n", x, z, alpha);
 
 	const int32_t robotId = worldModel->getIdentifierByType("robot");
 	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
 	const float rx = str2float(robot->getAttribute("x"));
 	const float rz = str2float(robot->getAttribute("z"));
 	const float ralpha = str2float(robot->getAttribute("alpha"));
-// 	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
+	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
 
 	// Avoid repeating the same goal and confuse the navigator
 	const float errX = abs(rx-x);
@@ -619,16 +624,18 @@ void SpecificWorker::action_SetObjectReach()
 		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
 		{
 			proceed = false;
-			printf("proceed because the coordinates do not differ\n");
+			printf("do not proceed because the coordinates do not differ\n");
 		}
 		else
 		{
+			proceed = true;
 			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
 		}
 	}
 	else
 	{
-		printf("proceed because it's already working\n");
+		proceed = true;
+		printf("proceed because it's not planning or executing\n");
 	}
 
 	static bool backp = true;
@@ -649,6 +656,8 @@ void SpecificWorker::action_SetObjectReach()
 		printf("not proceeding %s\n", planningState.state.c_str());
 		backp = false;
 	}
+	
+	printf("aaAdigejr\n");
 }
 
 void SpecificWorker::action_GraspObject()

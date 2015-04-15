@@ -563,11 +563,12 @@ void SpecificWorker::go(const TargetPose& target)
 	}
 	else
 	{
+		tState.setState("EXECUTING");
 		currentTarget.command = CurrentTarget::Command::CHANGETARGET;	
 		QTime reloj = QTime::currentTime();
-		while(tState.getState() != "IDLE" and reloj.elapsed() < 3000){};
-		if( reloj.elapsed() < 3000 )
-		{
+// 		while(tState.getState() != "IDLE" or reloj.elapsed() < 3000){};
+// 		if( reloj.elapsed() < 3000 )
+// 		{
 			currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 			currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
 			currentTarget.command = CurrentTarget::Command::GOTO;
@@ -578,13 +579,13 @@ void SpecificWorker::go(const TargetPose& target)
 
 			qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
 
-		}
-		else
-		{
-			qDebug() <<__FUNCTION__ << "Returning. Could not cancel current target";
-			RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Returning. Could not cancel current target";
-			throw ex;
-		}
+// 		}
+// 		else
+// 		{
+// 			qDebug() <<__FUNCTION__ << "Returning. Could not cancel current target";
+// 			RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Returning. Could not cancel current target";
+// 			throw ex;
+// 		}
 	}
 }
 

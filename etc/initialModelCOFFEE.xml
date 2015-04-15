@@ -44,7 +44,7 @@
 	<link src="5" dst="6" label="noExplored" />
 
 	<!-- mug -->
-<!--	<symbol id="9" type="object">
+	<symbol id="9" type="object">
 		<attribute key="x" value="1000" />
 		<attribute key="z" value="1100" />
 		<attribute key="tag" value="14" />
@@ -61,7 +61,5 @@
 	<link src="9" dst="10" label="position" />
 	<link src="9" dst="10" label="classified" />
 	<link src="9" dst="10" label="mug" />
--->
-
 
 </AGMModel>
