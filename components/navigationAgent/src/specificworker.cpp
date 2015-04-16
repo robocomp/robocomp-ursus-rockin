@@ -241,6 +241,10 @@ void SpecificWorker::go(float x, float z, float alpha, bool rot)
 	{
 		std::cout << ex << std::endl;
 	}
+	catch(...)
+	{
+		printf("something else %d\n", __LINE__);
+	}
 }
 
 
@@ -253,6 +257,10 @@ void SpecificWorker::stop()
 	catch(const Ice::Exception &ex)
 	{
 		std::cout << ex << std::endl;
+	}
+	catch(...)
+	{
+		printf("something else %d\n", __LINE__);
 	}
 }
 
@@ -276,6 +284,11 @@ void SpecificWorker::actionExecution()
 	{
 		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
 	}
+	catch(...)
+	{
+		printf("something else %d\n", __LINE__);
+	}
+
 	if (action == "changeroom")
 	{
 		action_ChangeRoom();
@@ -600,12 +613,17 @@ void SpecificWorker::action_SetObjectReach()
 			break;
 	}
 	printf("object (%f, %f, %f)\n", x, z, alpha);
-
+printf("line: %d %s\n", __LINE__, __FILE__);
 	const int32_t robotId = worldModel->getIdentifierByType("robot");
+printf("%d line: %d %s\n", robotId, __LINE__, __FILE__);
 	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
+printf("line: %d %s\n", __LINE__, __FILE__);
 	const float rx = str2float(robot->getAttribute("x"));
+printf("%f line: %d %s\n", rx,  __LINE__, __FILE__);
 	const float rz = str2float(robot->getAttribute("z"));
+printf("%f line: %d %s\n", rz,  __LINE__, __FILE__);
 	const float ralpha = str2float(robot->getAttribute("alpha"));
+printf("%f line: %d %s\n", ralpha, __LINE__, __FILE__);
 	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
 
 	// Avoid repeating the same goal and confuse the navigator
@@ -656,7 +674,7 @@ void SpecificWorker::action_SetObjectReach()
 		printf("not proceeding %s\n", planningState.state.c_str());
 		backp = false;
 	}
-	
+
 	printf("aaAdigejr\n");
 }
 
