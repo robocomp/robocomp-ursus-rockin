@@ -24,6 +24,19 @@
   <radius value="10.0" />
  </node>
 
+ <node alias="mission" endpoint="agmcommonbehavior:tcp -h localhost -p 10349">
+  <dependence alias="executive" />
+  <dependence alias="graspingAg" />
+  <dependence alias="icestorm" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost AGMExecutive /home/robocomp/AGM/tools/AGMExecutive_robocomp python AGMExecutive_robocomp.py --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/executiveCOFFEE.conf" />
+  <downCommand command="ssh robolab@localhost killall -9 aprilbasedlocalization" />
+  <configFile path="xxx" />
+  <xpos value="-102.23541564" />
+  <ypos value="-209.034499284" />
+  <radius value="10.0" />
+ </node>
+
  <node alias="bikTester" endpoint="commonbehavior:tcp -h localhost -p 12211">
   <dependence alias="bik" />
   <workingDir path="/home/robocomp/" />
