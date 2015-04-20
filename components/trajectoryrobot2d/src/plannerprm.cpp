@@ -32,13 +32,24 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	
 	//Get outerRegion extension from floor definition
 	QRectF outerRegion;
-	InnerModelPlane *floor = innerModel->getPlane("floor_plane");  ///TIENE QUE HABER UN FLOOR_PLANE
-	if(floor != NULL)
+	InnerModelPlane *floor = NULL;
+	try
 	{
-		QVec center = innerModel->transform("world",QVec::zeros(3),"floor");
-		QVec upperLeft = innerModel->transform("world",QVec::vec3(center.x() - floor->width/2, center.y(), center.z() + floor->height/2),"floor");
-		QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2),"floor");
-		
+		floor = innerModel->getPlane("floor_plane");  ///TIENE QUE HABER UN FLOOR_PLANE
+	}
+	catch (QString err)
+	{
+		printf("We need a plane named 'floor_plane'\n");
+		throw err;
+	}
+
+	if (floor != NULL)
+	{
+		QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
+		QVec upperLeft = innerModel->transform("world",QVec::vec3(center.x() - floor->width/2, center.y(), center.z() + floor->height/2), "floor");
+		QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2), "floor");
+		upperLeft.print("UL");
+		downRight.print("DR");
 		outerRegion.setLeft( upperLeft.x() );
 		outerRegion.setRight( downRight.x() );
 		outerRegion.setBottom( downRight.z() );

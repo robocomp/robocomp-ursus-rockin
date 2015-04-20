@@ -51,7 +51,9 @@ void SpecificWorker::compute( )
 
 	// ACTION EXECUTION
 	//
-	actionExecution();
+// 	actionExecution();
+	
+	saccadic3D(QVec::vec3(1000, 800, 1100), QVec::vec3(0,0,1));
 
 }
 
@@ -388,10 +390,15 @@ void SpecificWorker::action_SetObjectReach(bool first)
 			setRightArmUp_Reflex();
 	}
 
-	int32_t objectId = str2int(params["object"].value);
+#warning XXX
+	int32_t objectId = 9;//str2int(params["object"].value);
 	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
 	const float x = str2float(goalObject->getAttribute("x"));
+	const float y = str2float(goalObject->getAttribute("y"));
 	const float z = str2float(goalObject->getAttribute("z"));
+	
+	saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+
 	float alpha;
 	switch (objectId)
 	{
@@ -420,6 +427,7 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
 	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
 	errAlpha = abs(errAlpha);
+	
 	printf("%f %f %f\n", rx, rz, ralpha);
 	printf("%f %f %f\n",  x,  z,  alpha);
 	printf("%f %f %f\n", errX, errZ, errAlpha);
@@ -468,13 +476,10 @@ void SpecificWorker::saccadic3D(QVec point, QVec axis)
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
 	printf("saccadic3D\n");
-// 	tx = -3000;
-// 	ty = 500;
-// 	tz = 1000;
-	QVec::vec3(tx, ty, tz).print("desde el robot");
-// 	innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "robot").print("");
-	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "robot");
+	
+	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "world");
 	rel.print("desde la camara");
+
 	float errYaw   = -atan2(rel(0), rel(2));
 	float errPitch = +atan2(rel(1), rel(2));
 	printf("%f  %f\n", errYaw, errPitch);
@@ -490,27 +495,30 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 	goal.maxSpeed = 0.5;
 	goal.position = jointmotor_proxy->getMotorState("head_pitch_joint").pos - errPitch;
 	jointmotor_proxy->setPosition(goal);
-	
-// 	RoboCompBodyInverseKinematics::Pose6D targetSight;
-// 	targetSight.x = tx;
-// 	targetSight.y = ty;
-// 	targetSight.z = tz;
-// 	RoboCompBodyInverseKinematics::Axis axSight;
-// 	axSight.x = axx;
-// 	axSight.y = axy;
-// 	axSight.z = axz;
-// 	bool axisConstraint = false;
-// 	float axisAngleConstraint = 0;
-// 	try
-// 	{
-// 		bodyinversekinematics_proxy->stop("HEAD");
-// 		usleep(500000);
-// 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
-// 	}
-// 	catch(...)
-// 	{
-// 		printf("IK connection error\n");
-// 	}
+
+/*
+	RoboCompBodyInverseKinematics::Pose6D targetSight;
+	targetSight.x = tx;
+	targetSight.y = ty;
+	targetSight.z = tz;
+	RoboCompBodyInverseKinematics::Axis axSight;
+	axSight.x = axx;
+	axSight.y = axy;
+	axSight.z = axz;
+	bool axisConstraint = false;
+	float axisAngleConstraint = 0;
+	try
+	{
+		bodyinversekinematics_proxy->stop("HEAD");
+		usleep(500000);
+		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
+	}
+	catch(...)
+	{
+		printf("IK connection error\n");
+	}
+*/
+
 }
 
 

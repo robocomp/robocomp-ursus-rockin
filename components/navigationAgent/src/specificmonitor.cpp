@@ -90,7 +90,7 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 
 	RoboCompCommonBehavior::Parameter aux;
 	aux.editable = false;
-	configGetString("NavigationAgent.InnerModel", aux.value,"no file");
+	configGetString("NavigationAgent", "InnerModel", aux.value,"no file");
 	params["NavigationAgent.InnerModel"] = aux;
 }
 

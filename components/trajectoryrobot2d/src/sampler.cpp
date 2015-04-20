@@ -46,24 +46,30 @@ QList<QVec> Sampler::sampleFreeSpaceR2(uint nPoints)
 	QVec p,q,res(3,0.f);
 	QList<QVec> list;
 	
+	
+	printf("hola %f %f\n", outerRegion.left(), outerRegion.right());
+	printf("hola %f %f\n", outerRegion.top(), outerRegion.bottom());
+	
 	for(uint32_t i=0; i<nPoints;i++)
 	{
 		while( validState == false )   ///CHECK ALSO FOR TIMEOUT
 		{
-			p =	QVec::uniformVector(1,outerRegion.left(), outerRegion.right());
-			q =	QVec::uniformVector(1,outerRegion.top(), outerRegion.bottom());
-			
+			p =	QVec::uniformVector(1, outerRegion.left(), outerRegion.right());
+			q =	QVec::uniformVector(1, outerRegion.top(), outerRegion.bottom());
 			QPointF s(p.x(),q.x());
 			bool in = false;
 			foreach(QRectF rect, innerRegions)
+			{
 				if( rect.contains(s))
 				{
 					in = true;
 					break;
 				}
-			if( in == false) 
+			}
+			if (in == false) 
 			{
-				res[0] = p.x(); res[2] = q.x();
+				res[0] = p.x();
+				res[2] = q.x();
 				validState = checkRobotValidStateAtTarget(res);
 			}
 		}
