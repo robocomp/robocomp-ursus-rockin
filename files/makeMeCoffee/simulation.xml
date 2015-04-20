@@ -25,7 +25,7 @@
 		<transform id="mugT" tx="1000" ty="805" tz="1100">
 			<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00012.png" />
 <!-- 			<plane id="april-mug" px="0" py="50" pz="0" ny="1" size="71.25,71.25,2.5" repeat="1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-12.png" /> -->
-			<mesh id="mesh-mug" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/mug.3ds" scale="170,107,170" ty="-15" tz="0" rx="1.57079632679"/>
+			<mesh id="mesh-mug" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/mug.3ds" scale="170,170,170" ty="-15" tz="0" rx="1.57079632679"/>
 		</transform>
 
 

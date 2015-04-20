@@ -13,9 +13,8 @@ SET ( SOURCES
   ${SOURCES}
   objectcomp.cpp
   agmcommonbehaviorI.cpp
-agmexecutivetopicI.cpp
-apriltagsI.cpp
-
+  agmexecutivetopicI.cpp
+  apriltagsI.cpp
   genericmonitor.cpp
   commonbehaviorI.cpp
   genericworker.cpp
@@ -27,9 +26,8 @@ apriltagsI.cpp
 SET ( HEADERS
   ${HEADERS}
   agmcommonbehaviorI.h
-agmexecutivetopicI.h
-apriltagsI.h
-
+  agmexecutivetopicI.h
+  apriltagsI.h
   genericmonitor.h
   commonbehaviorI.h
   genericworker.h
@@ -38,6 +36,11 @@ apriltagsI.h
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning AprilTags JointMotor AGMAgent  AGMWorldModel)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
+
+set(CMAKE_BUILD_TYPE Debug)
+
+
+
 
 # Qt4
 ADD_DEFINITIONS( -Wall -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB )

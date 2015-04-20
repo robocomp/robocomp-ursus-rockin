@@ -642,7 +642,7 @@ printf("%f line: %d %s\n", ralpha, __LINE__, __FILE__);
 		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
 		{
 			proceed = false;
-			printf("do not proceed because the coordinates do not differ\n");
+			printf("do not proceed because the coordinates do not differ (%s)\n", planningState.state.c_str());
 		}
 		else
 		{
