@@ -1,4 +1,4 @@
-# Install script for directory: /home/daniel/robocomp/components/robocomp-ursus-rockin/trajectoryrobot2d
+# Install script for directory: /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -41,12 +41,12 @@ IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
   IF (CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   ENDIF (CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
-FILE(INSTALL DESTINATION "/opt/robocomp/etc-default" TYPE FILE RENAME "trajectoryrobot2dcomp.conf" FILES "/home/daniel/robocomp/components/robocomp-ursus-rockin/trajectoryrobot2d/etc/config")
+FILE(INSTALL DESTINATION "/opt/robocomp/etc-default" TYPE FILE RENAME "trajectoryrobot2dcomp.conf" FILES "/home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/etc/config")
 ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
 
 IF(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  INCLUDE("/home/daniel/robocomp/components/robocomp-ursus-rockin/trajectoryrobot2d/src/cmake_install.cmake")
+  INCLUDE("/home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/src/cmake_install.cmake")
 
 ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)
 
@@ -56,7 +56,7 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
-FILE(WRITE "/home/daniel/robocomp/components/robocomp-ursus-rockin/trajectoryrobot2d/${CMAKE_INSTALL_MANIFEST}" "")
+FILE(WRITE "/home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  FILE(APPEND "/home/daniel/robocomp/components/robocomp-ursus-rockin/trajectoryrobot2d/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  FILE(APPEND "/home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 ENDFOREACH(file)
