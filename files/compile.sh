@@ -5,7 +5,7 @@
 cd /home/robocomp/AGM
 git pull
 # robocomp
-cd /home/robocomp/robocomp/build
+cd /home/robocomp/robocomp
 git pull
 # robocomp-robolab
 cd /home/robocomp/robocomp/components/robocomp-robolab
@@ -20,7 +20,7 @@ git pull
 ###
 ### RoboComp
 ###
-cd /home/robocomp/robocomp
+cd /home/robocomp/robocomp/build
 make
 sudo make install
 
@@ -69,7 +69,7 @@ cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/objectAge
 make -j5
 
 # apriltags
-cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/apriltagsComp/
+cd /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp/
 make -j5
 
 

@@ -182,7 +182,6 @@
  </node>
 
  <node alias="rgbd" endpoint="rgbd:tcp -h localhost -p 10096">
-  <dependence alias="rgbd" />
   <dependence alias="icestorm" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
