@@ -53,6 +53,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 
 	///CHECK ROBOT INMINENT COLLISION
 	int j=0;
+	road.setBlocked(false);
 	for(auto i : laserData)
 	{
 		if( i.dist < baseOffsets[j++] )
@@ -154,9 +155,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
- 		qDebug() << "------------------Controller Report ---------------;";
-  		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
- 		qDebug() << "---------------------------------------------------;";
+//  		qDebug() << "------------------Controller Report ---------------;";
+//   		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+//  		qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot); }

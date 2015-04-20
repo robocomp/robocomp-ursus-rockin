@@ -119,21 +119,21 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	searchClosestPoints(robot, target, robotVertex, targetVertex);
 
 	//Obtain a free path from [robot] to [robotVertex] using RRTConnect. Return if fail.
-	QList<QVec> path;
-	if (planWithRRT(robot, graph[robotVertex].pose, path) )
-	{
-		if(path.size() > 1)  //has to be. We trim the last element to avoid duplicating it
-		{
-			path.removeLast();
-			currentPath += path;
-// 			qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan." << " So far" << path;
-		}
-		else
-			if (path.size() == 1)
-				qFatal("Fary en path");
-	}
-	else
-		 return false;
+ 	QList<QVec> path;
+// 	if (planWithRRT(robot, graph[robotVertex].pose, path) )
+// 	{
+// 		if(path.size() > 1)  //has to be. We trim the last element to avoid duplicating it
+// 		{
+// 			path.removeLast();
+// 			currentPath += path;
+// // 			qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan." << " So far" << path;
+// 		}
+// 		else
+// 			if (path.size() == 1)
+// 				qFatal("Fary en path");
+// 	}
+// 	else
+// 		 return false;
 
 	//Now we are in the graph
 	//Search in graph minimun path. Return if fail
@@ -146,7 +146,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 		else //No path found. The path does not connect to target's closest point in graph
 		{
 // 			qDebug() << __FUNCTION__ << "No path through graph. Starting RRTConnect from " << graph[robotVertex].pose << " to" <<  target;
-			if ( planWithRRT(graph[robotVertex].pose, target, path) )
+		 if ( planWithRRT(graph[robotVertex].pose, target, path) )
 			{
 				path.removeFirst();
 				currentPath += path;
@@ -159,21 +159,21 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 		currentPath += graph[robotVertex].pose;
 
 	//Obtain a free path from [target] to [targetVertex] using RRTConnect. Return if fail.
-	path.clear();
-	if (planWithRRT(graph[targetVertex].pose, target, path) )
-	{
-		if( path.size() > 1) //Should be !!  We trimm the first elemen to avoid duplicating it since it already came in searchGraph
-		{
-			path.removeFirst();
-			currentPath += path;
-// 			qDebug() << __FUNCTION__ << "RRTConnect succeeded for TARGET with a " << path.size() << "plan" << ". So end" << path;
-		}
-		else
-			if(path.size() == 1)
-				qFatal("Fary en path target");
-	}
-	else
-		 return false;
+//	path.clear();
+// 	if (planWithRRT(graph[targetVertex].pose, target, path) )
+// 	{
+// 		if( path.size() > 1) //Should be !!  We trimm the first elemen to avoid duplicating it since it already came in searchGraph
+// 		{
+// 			path.removeFirst();
+// 			currentPath += path;
+// // 			qDebug() << __FUNCTION__ << "RRTConnect succeeded for TARGET with a " << path.size() << "plan" << ". So end" << path;
+// 		}
+// 		else
+// 			if(path.size() == 1)
+// 				qFatal("Fary en path target");
+// 	}
+// 	else
+// 		 return false;
 
 	if( currentPath.size() < 2 )
 		return false;

@@ -140,7 +140,7 @@ void SpecificWorker::compute( )
 			setHeadingCommand(innerModel, currentTarget.getRotation().y(), currentTarget, tState, road);
 			break;
 		case CurrentTarget::Command::GOBACKWARDS:
-			goBackwardsCommand(innerModel, QVec::vec3(0,0,-200), currentTarget, tState, road);
+			goBackwardsCommand(innerModel, currentTargetAnt, tState, road);
 			break;
 		case CurrentTarget::Command::IDLE:
 			break;
@@ -234,17 +234,18 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 		//compute all measures relating the robot to the road
 		myRoad.update();
 		
-		myRoad.printRobotState(innerModel, target);
+		//myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
 		
-		if (myRoad.isFinished() == true)
-		{
-			if( road.isBlocked() )
+		if( myRoad.isBlocked() )
 			{
+				currentTargetAnt.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-200),"robot"));
 				target.command = CurrentTarget::Command::GOBACKWARDS;
 			}
-			
+		
+		if (myRoad.isFinished() == true)
+		{
 			
 			if( target.hasRotation() )
 			{
@@ -309,12 +310,13 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  Curr
  * @brief Sends the robot bakcwards on a stright line until target is reached.
  * 
  * @param innerModel ...
- * @param target position in Robot Reference System
+ * @param target position in World Reference System
  * @return bool
  */
-bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &target, CurrentTarget &current, TrajectoryState &state, WayPoints &myRoad )
+bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &current, TrajectoryState &state, WayPoints &myRoad )
 {
 	//CHECK PARAMETERS
+	QVec target = current.getTranslation();
 	if( target.size() < 3 or std::isnan(target.x()) or std::isnan(target.y()) or std::isnan(target.z()))
 	{
 		qDebug() << __FUNCTION__ << "Returning. Invalid target";
@@ -322,14 +324,15 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		throw ex;
 		return false;
 	}
+
 	
 	float MAX_ADV_SPEED = 600.f;
 	const float MAX_POSITIONING_ERROR  = 50;  //mm
 
-	//QVec rPose = innerModel->transform("world","robot");
-	//float error = (rPose-target).norm2();
-	float error = target.norm2();
-	
+	QVec rPose = innerModel->transform("world","robot");
+	float error = (rPose-target).norm2();
+	//float error = target.norm2();
+	qDebug()<< error;
 	state.setState("EXECUTING");
 	// 	qDebug() << __FUNCTION__ << "Error: " << error;
 
@@ -350,6 +353,9 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		  omnirobot_proxy->setSpeedBase(0, 0, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 		myRoad.requiresReplanning = true;
+					
+		qDebug()<<"FIN GOBACKWARDS, PASANDO A GOTOCOMMAND";
+		current.setWithoutPlan(true);
 		current.command = CurrentTarget::Command::GOTO;
 	}
 	else
@@ -363,7 +369,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		  omnirobot_proxy->setSpeedBase(0, vadv, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
-
+	
 	return true;
 }
 
