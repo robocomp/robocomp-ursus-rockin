@@ -51,14 +51,20 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		return false;
 	}
 
-	///ELIMINADO MOEMENTANME
-	// 	if (road.distanceToLastVisible < 400 /*and road.distanceToLastVisible < road.distanceToTarget*/ )
-	// 	{
-	// 		qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to last point visible is" << road.distanceToLastVisible << "less than 400";
-	// 		road.requiresReplanning = true;
-	// 		stopTheRobot(omnirobot_proxy);
-	// 		return false;
-	// 	}
+	///CHECK ROBOT INMINENT COLLISION
+	int j=0;
+	road.setBlocked(false);
+	for(auto i : laserData)
+	{
+		if( i.dist < baseOffsets[j++] )
+		{
+			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j];
+			//road.requiresReplanning = true;
+			stopTheRobot(omnirobot_proxy);
+			road.setBlocked(true);
+			return false;
+		}
+	}
 
 	/////////////////////////////////////////////////
 	//////  CHECK CPU AVAILABILITY
@@ -110,7 +116,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
 
 		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
-								 * exponentialFunction(vrot, 0.8, 0.1)
+								 * exponentialFunction(vrot, 0.8, 0.01)
 								 * teta;
 								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
 								 //* sunk;
@@ -128,17 +134,16 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		////////////////////////////////////////////////
 
 		bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
- 		if( collision )
- 			road.setBlocked(true);
+//  		if( collision )
+//  			road.setBlocked(true);
 
-		
 		/////////////////////////////////////////////////
 		///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
 		///
 		/////////////////////////////////////////////////
 		float vside = 0;
 		std::sort(laserData.begin(), laserData.end(), [](auto a, auto b){ return a.dist < b.dist;});
-		if(laserData.front().dist < 100 and fabs(laserData.front().angle)>0.3)
+		if(laserData.front().dist < 100)// and fabs(laserData.front().angle)>0.3)
 		{
 			if( laserData.front().angle > 0) vside  = -100;
 			else vside = 100;
@@ -150,9 +155,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
- 		qDebug() << "------------------Controller Report ---------------;";
-  		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
- 		qDebug() << "---------------------------------------------------;";
+//  		qDebug() << "------------------Controller Report ---------------;";
+//   		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+//  		qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot); }
@@ -216,17 +221,18 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData)
 {
 	//Base geometry GET FROM IM!!!
-	QRectF base( QPointF(-200, 200), QPointF(200, -200));
+	//QRectF base( QPointF(-200, 200), QPointF(200, -200));
 	std::vector<float> baseOffsets;
 	QVec p(3,0.f);
 	int k;
 
 	for(auto i : laserData)
 	{
-		for(k=10; k<4000; k++)
+		for(k = 10; k < 4000; k++)
 		{
 			p = innerModel->laserTo("robot","laser",k,i.angle);
-			if( base.contains( QPointF( p.x(), p.z() ) ) == false )
+			if( p.x()*p.x() + p.z()*p.z() - 2*200*200 >= 0) 
+			//if( base.contains( QPointF( p.x(), p.z() ) ) == false )
 				break;
 		}
 		baseOffsets.push_back(k);

@@ -140,7 +140,7 @@ void SpecificWorker::compute( )
 			setHeadingCommand(innerModel, currentTarget.getRotation().y(), currentTarget, tState, road);
 			break;
 		case CurrentTarget::Command::GOBACKWARDS:
-			goBackwardsCommand(innerModel, currentTarget.getTranslation(), currentTarget, tState, road);
+			goBackwardsCommand(innerModel, currentTargetAnt, tState, road);
 			break;
 		case CurrentTarget::Command::IDLE:
 			break;
@@ -235,12 +235,19 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 		//compute all measures relating the robot to the road
 		myRoad.update();
 		
-		myRoad.printRobotState(innerModel, target);
+		//myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
 		
+		if( myRoad.isBlocked() )
+			{
+				currentTargetAnt.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-200),"robot"));
+				target.command = CurrentTarget::Command::GOBACKWARDS;
+			}
+		
 		if (myRoad.isFinished() == true)
 		{
+			
 			if( target.hasRotation() )
 			{
 				// qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
@@ -254,7 +261,6 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 				target.command = CurrentTarget::Command::STOP;	
 				planner->cleanGraph(innermodelmanager_proxy);
 				planner->drawGraph(innermodelmanager_proxy);
-
 			}
 		}
 
@@ -304,17 +310,17 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  Curr
 	return true;
 }
 
-
 /**
  * @brief Sends the robot bakcwards on a stright line until target is reached.
  * 
  * @param innerModel ...
- * @param target ...
+ * @param target position in World Reference System
  * @return bool
  */
-bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &target, CurrentTarget &current, TrajectoryState &state, WayPoints &myRoad )
+bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &current, TrajectoryState &state, WayPoints &myRoad )
 {
 	//CHECK PARAMETERS
+	QVec target = current.getTranslation();
 	if( target.size() < 3 or std::isnan(target.x()) or std::isnan(target.y()) or std::isnan(target.z()))
 	{
 		qDebug() << __FUNCTION__ << "Returning. Invalid target";
@@ -322,24 +328,27 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		throw ex;
 		return false;
 	}
+
 	
 	float MAX_ADV_SPEED = 600.f;
 	const float MAX_POSITIONING_ERROR  = 50;  //mm
 
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
+	//float error = target.norm2();
+	qDebug()<< error;
 	state.setState("EXECUTING");
 	// 	qDebug() << __FUNCTION__ << "Error: " << error;
 
 	if( error < MAX_POSITIONING_ERROR)		//TASK IS FINISHED
 	{
-		current.setHasRotation(false);
-		myRoad.setFinished(true);
+//		current.setHasRotation(false);
+//		myRoad.setFinished(true);
 		drawGreenBoxOnTarget( current.getTranslation() );
-		current.print();
-		current.reset();
-		myRoad.reset();
-		myRoad.endRoad();
+// 		current.print();
+// 		current.reset();
+// 		myRoad.reset();
+// 		myRoad.endRoad();
 		state.setElapsedTime(taskReloj.elapsed());
 		state.setState("IDLE");
 		try
@@ -347,10 +356,16 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		  //differentialrobot_proxy->setSpeedBase(0, 0);
 		  omnirobot_proxy->setSpeedBase(0, 0, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+		myRoad.requiresReplanning = true;
+					
+		qDebug()<<"FIN GOBACKWARDS, PASANDO A GOTOCOMMAND";
+		current.setWithoutPlan(true);
+		current.command = CurrentTarget::Command::GOTO;
 	}
 	else
 	{
-		float vadv = -0.1 * error;  //Proportional controller
+		qDebug()<<"haciendo marcha atras";
+		float vadv = -0.5 * error;  //Proportional controller
 		if( vadv < -MAX_ADV_SPEED ) vadv = -MAX_ADV_SPEED;
 		try
 		{
@@ -358,7 +373,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, const QVec &targ
 		  omnirobot_proxy->setSpeedBase(0, vadv, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
-
+	
 	return true;
 }
 
