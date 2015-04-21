@@ -1,5 +1,5 @@
 # AGM
-echo "AGM"
+echo "AGM (pulsa tecla)"
 read a;
 echo $a
 cd /home/robocomp/AGM
@@ -10,7 +10,7 @@ git push
 
 
 # robocomp
-echo "robocomp"
+echo "robocomp (pulsa tecla)"
 read a;
 cd /home/robocomp/robocomp/build
 git diff
@@ -20,7 +20,7 @@ git push
 
 
 # robocomp-robolab
-echo "robocomp-robolab"
+echo "robocomp-robolab (pulsa tecla)"
 read a;
 cd /home/robocomp/robocomp/components/robocomp-robolab
 git diff
@@ -30,7 +30,7 @@ git push
 
 
 # robocomp-ursus
-echo "robocomp-ursus"
+echo "robocomp-ursus (pulsa tecla)"
 read a;
 cd /home/robocomp/robocomp/components/robocomp-ursus
 git diff
@@ -40,7 +40,7 @@ git push
 
 
 # robocomp-ursus-rockin
-echo "robocomp-ursus-rockin"
+echo "robocomp-ursus-rockin (pulsa tecla)"
 read a;
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin
 git diff
