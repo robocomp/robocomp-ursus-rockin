@@ -52,11 +52,12 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	}
 
 	///CHECK ROBOT INMINENT COLLISION
+	float vside = 0;
 	int j=0;
 	road.setBlocked(false);
 	for(auto i : laserData)
 	{
-		if( i.dist < baseOffsets[j++] )
+		if( i.dist < baseOffsets[j] )
 		{
 			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j];
 			//road.requiresReplanning = true;
@@ -64,6 +65,11 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			road.setBlocked(true);
 			return false;
 		}
+		else 
+			if(i.dist < baseOffsets[j]+100) 
+				if( i.angle > 0) vside  = -100;
+				else vside = 100;
+		j++;
 	}
 
 	/////////////////////////////////////////////////
@@ -133,7 +139,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
 
-		bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
+		//bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
 //  		if( collision )
 //  			road.setBlocked(true);
 
@@ -141,15 +147,15 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
 		///
 		/////////////////////////////////////////////////
-		float vside = 0;
-		std::sort(laserData.begin(), laserData.end(), [](auto a, auto b){ return a.dist < b.dist;});
-		if(laserData.front().dist < 100)// and fabs(laserData.front().angle)>0.3)
-		{
-			if( laserData.front().angle > 0) vside  = -100;
-			else vside = 100;
-		}
-		else
-			vside = 0;
+// 		float vside = 0;
+// 		std::sort(laserData.begin(), laserData.end(), [](auto a, auto b){ return a.dist < b.dist;});
+// 		if(laserData.front().dist < 100)// and fabs(laserData.front().angle)>0.3)
+// 		{
+// 			if( laserData.front().angle > 0) vside  = -100;
+// 			else vside = 100;
+// 		}
+// 		else
+// 			vside = 0;
 		
 		/////////////////////////////////////////////////
 		//////   EXECUTION
