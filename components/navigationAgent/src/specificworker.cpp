@@ -267,6 +267,8 @@ void SpecificWorker::stop()
 
 void SpecificWorker::actionExecution()
 {
+	QMutexLocker locker(mutex);
+
 	static std::string previousAction = "";
 	if (previousAction != action)
 	{
