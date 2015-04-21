@@ -54,7 +54,7 @@ public slots:
 private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	bool active;
-	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
 
 
 	void manageReachedObjects();

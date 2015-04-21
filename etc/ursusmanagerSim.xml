@@ -152,7 +152,7 @@
   <dependence alias="trajectory" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost navigationAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/navigationAgent/ ./bin/navigationcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/navigationAgent.conf" />
-  <downCommand command="ssh robolab@localhost killall -9 navigationcomp" />
+  <downCommand command="killall -9 navigationcomp" />
   <configFile path="xxx" />
   <xpos value="0" />
   <ypos value="-75" />
@@ -163,7 +163,7 @@
   <dependence alias="bik" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
-  <downCommand command="ssh robolab@localhost killall -9 navigationcomp" />
+  <downCommand command="killall -9 graspingcomp" />
   <configFile path="xxx" />
   <xpos value="87.3440730926" />
   <ypos value="-75" />
@@ -174,7 +174,7 @@
   <dependence alias="aprilCamera" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost objectAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/objectAgent/ ./bin/objectcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/objectAgent.conf" />
-  <downCommand command="ssh robolab@localhost killall -9 navigationcomp" />
+  <downCommand command="killall -9 objectcomp" />
   <configFile path="xxx" />
   <xpos value="-170" />
   <ypos value="-75" />

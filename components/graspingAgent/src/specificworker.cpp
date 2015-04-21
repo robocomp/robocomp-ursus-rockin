@@ -56,25 +56,26 @@ void SpecificWorker::compute( )
 	
 }
 
-#define THRESHOLD 500.
+#define THRESHOLD 400.
 
 void SpecificWorker::manageReachedObjects()
 {
-	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 
 	bool changed = false;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 
-	for (auto node : *newModel)
+	for (AGMModel::iterator symbol_itr=newModel->begin(); symbol_itr!=newModel->end(); symbol_itr++)
 	{
+		AGMModelSymbol::SPtr node = *symbol_itr;
 		if (node->symboltype() == "object")
 		{
 			// Avoid working with rooms
 			bool isRoom = false;
-			for (auto edge : *node)
+			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
+				AGMModelEdge edge = *edge_itr;
 				if (edge->getLabel() == "room")
 				{
 					isRoom = true;
@@ -91,8 +92,9 @@ void SpecificWorker::manageReachedObjects()
 			/// Compute distance and new state
 			const float distance = innerModel->transform("base_head", QVec::vec3(x,y,z), "world").norm2();
 			printf("object %d: %f\n", node->identifier, distance);
-			for (auto edge : *node)
+			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
+				AGMModelEdge &edge = *edge_itr;
 				if (edge->getLabel() == "reach" and distance > THRESHOLD)
 				{
 					edge->setLabel("noReach");
@@ -102,6 +104,7 @@ void SpecificWorker::manageReachedObjects()
 				else if (edge->getLabel() == "noReach" and distance < THRESHOLD)
 				{
 					edge->setLabel("reach");
+					printf("___ %s ___\n", edge->getLabel().c_str());
 					printf("object %d STARTS REACH\n", node->identifier);
 					changed = true;
 				}
@@ -112,15 +115,15 @@ void SpecificWorker::manageReachedObjects()
 	/// Publish new model if changed
 	if (changed)
 	{
-		sendModificationProposal(worldModel, newModel);
+		printf("PUBLISH!!!!\n");
+		AGMModelPrinter::printWorld(newModel);
+
+		sendModificationProposal(newModel, worldModel);
 	}
 
 
 	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
 	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
-	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
-
-
 
 
 /*
@@ -174,7 +177,7 @@ void SpecificWorker::manageReachedObjects()
 		{
 			try
 			{
-				sendModificationProposal(worldModel, newModel);
+				sendModificationProposal(newModel, worldModel);
 				printf("sent reach\n");
 			}
 			catch(const Ice::Exception& ex)
@@ -339,7 +342,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 	return true;
 }
 
-void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
+void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel)
 {
 	try
 	{
@@ -438,7 +441,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 // 			{
 // 				printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
 // 			}
-// 			sendModificationProposal(worldModel, newModel);
+// 			sendModificationProposal(newModel, worldModel);
 // 		}
 // 		catch(...)
 // 		{
@@ -499,7 +502,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				{
 					printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
 				}
-				sendModificationProposal(worldModel, newModel);
+				sendModificationProposal(newModel, worldModel);
 			}
 			catch(...)
 			{
