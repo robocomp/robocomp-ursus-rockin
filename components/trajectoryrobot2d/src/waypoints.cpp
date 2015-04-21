@@ -215,6 +215,8 @@ void WayPoints::print() const
 
 bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, const CurrentTarget &currentTarget)
 {
+	if (size() == 0) return false;
+
 	RoboCompInnerModelManager::Pose3D pose;
 	pose.y = 0;	pose.x = 0;	pose.z = 0;
 	pose.rx = pose.ry = pose.z = 0.;

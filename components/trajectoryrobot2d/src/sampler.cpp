@@ -435,12 +435,13 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 		
 	//Check collision of the box with the world
 	for (auto it : restNodes)
+	{
 		if ( innerModel->collide(it, &robotBoxCol))
 		{
 			//Debug() << __FUNCTION__ << "collide with " << it;
 			return false;
 		}
-		
+	}
 	return true;
 }
 

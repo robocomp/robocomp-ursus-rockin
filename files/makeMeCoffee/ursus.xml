@@ -5,10 +5,19 @@
 		<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
 			<rgbd id="laser" focal="120" width="160" height="120" port="10097" ifconfig="10068,10004" />
 		</transform>
+
+		<transform id="monitor_pose" ty="700" tz="35" >
+			<plane id="monitor_mesh" size="300,400,50" texture="#222266"/>
+		</transform>
+		<transform id="caja_pose" ty="330" tz="-120" >
+			<plane id="caja_mesh" size="350,250,150" texture="#662222"/>
+		</transform>
 		
-		
+
 		<transform  id="base_trans" >
+			
 			<joint id="base" port="10067" axis="y" home="0">
+
 				<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.3ds"  tx="0" ty="10" tz="0" rx="1.5707963267949" scale="1000"  />
 				<transform id="base_body" rx="-1.5707963267948966" ty="0" tz="0" >
 					<!-- Gira en Z -->
@@ -16,7 +25,9 @@
 						<mesh id="barrahombro" file="/home/robocomp/robocomp/files/osgModels/robexarm/barrahombro.3ds" tx="-150" ty="0" tz="945" ry="-1.5707963267948966" scale="1000"  />
 						<mesh id="barracuello" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracuello.ive" tx="0" ty="0" tz="930" rx="3.14159265359" scale="1000"  />
 						<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850"  />
-						
+
+							
+							
 						<transform id="base_bodypost" rx="1.5707963267948966" ty="0" tz="0" >
 							<transform id="base_head" tz="0" ty="1080"  rx="-1.5707963267948966" >  <!-- Head begins -->
 								<joint id="head_yaw_joint" port="10067" axis="z" home="0" min="-1" max="1">

@@ -221,13 +221,14 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
  * @return bool
  */
 
-bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, 
-								 RoboCompLaser::TLaserData &lData)
+bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, RoboCompLaser::TLaserData &lData)
 
 {
 	// 	qDebug() << __FUNCTION__;
+	printf("%d\n", __LINE__);
 	if( targetHasAPlan(innerModel, target, state, myRoad) == true)
 	{
+		printf("%d\n", __LINE__);
 		//project road to the laserData so it adjust to real geometry
 		elasticband->update( innerModel, myRoad, laserData, target);
 
@@ -270,8 +271,11 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 			//computePlan(innerModel);
 		}
 
+		printf("%d\n", __LINE__);
 		state.setEstimatedTime(myRoad.getETA());
+		printf("%d\n", __LINE__);
 	}
+	printf("%d\n", __LINE__);
 	return true;
 }
 
@@ -397,7 +401,10 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
 	if ( planner->computePath(localTarget, inner) == false)
 	{
 		qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
+		state.setState("IDLE");
+printf("%d\n", __LINE__);
 		target.reset();
+printf("%d\n", __LINE__);
 		return false;
 	}
 	target.setTranslation( localTarget );

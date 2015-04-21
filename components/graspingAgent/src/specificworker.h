@@ -57,7 +57,7 @@ private:
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 
 
-
+	void manageReachedObjects();
 
 
 	void actionExecution();

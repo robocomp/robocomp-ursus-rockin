@@ -117,6 +117,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	}
 	//Check if the target is in "plain sight"
 	QVec point;
+	qDebug() << __LINE__;
 	if ( sampler.checkRobotValidDirectionToTargetOneShot( robot, target) )
 	{
  		qDebug() << __FILE__ << __FUNCTION__ << "-------- Target on sight. Proceeding";
@@ -212,31 +213,41 @@ bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec>
 // 	qDebug() << __FUNCTION__ << "RRTConnect start...";
 
 	//bool reachEnd;
-	if( (origin-target).norm2() < 200 )  //HALF ROBOT RADIOUS. GET FORM INNERMODEL !!!!
+	const float diffV = (origin-target).norm2();
+	if (diffV < 200) // HALF ROBOT RADIOUS
 	{
-// 		qDebug() << __FUNCTION__ << "Origin and target too close. Diff: "  << (origin-target).norm2() << origin << target << ". Returning void";
+		printf("plannerprm.cpp:%d Origin and target too close. %f returning true", __LINE__, diffV);
 		return true;
 	}
 
 	QVec point;
-	if( sampler.checkRobotValidDirectionToTargetOneShot( origin, target ) )
+	qDebug() << __LINE__;
+	if (sampler.checkRobotValidDirectionToTargetOneShot( origin, target ))
 	{
+		printf("plannerprm.cpp:%d Found target directly in line of sight\n", __LINE__);
+		fflush(stdout);
 		path << origin << target;
-// 		qDebug() << __FUNCTION__ << "Found target directly in line of sight";
 		return true;
 	}
-	else
+
+/*
+	printf("%s Calling Full Power of RRTConnect OMPL planner. This may take a while\n", __FUNCTION__);
+	fflush(stdout);
+	try
 	{
-// 		qDebug() << __FUNCTION__ << "Calling Full Power of RRTConnect OMPL planner. This may take a while";
 		plannerRRT.initialize(&sampler);  //QUITAR DE AQUI
 		if (plannerRRT.computePath(origin, target, 60))
 		{
 			path += plannerRRT.getPath();
 			return true;
 		}
-		else
-			return false;
 	}
+	catch (...)
+	{
+	}
+*/
+	printf("%s: %d\n", __FILE__, __LINE__);
+	return false;
 }
 
 void PlannerPRM::searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex)
@@ -444,9 +455,11 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 			if( (distsTo(k,j) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,j) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
 			{
 				QVec lastPoint;
-				reachEnd = sampler.checkRobotValidDirectionToTargetOneShot(QVec::vec3(data(0,i), data(1,i), data(2,i)),
-																					   QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI)));
-				//qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
+				const QVec iiv = QVec::vec3(data(0,i), data(1,i), data(2,i));
+				const QVec ijdie = QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI));
+				qDebug() << __LINE__;
+				reachEnd = sampler.checkRobotValidDirectionToTargetOneShot(iiv, ijdie);
+				qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
 
 				// If free path to neighboor, insert it in the graph
 				if( reachEnd == true)
@@ -555,8 +568,10 @@ bool PlannerPRM::connectIsolatedComponents(int32_t &numConnections)
 	{
 		Vertex v = vertexMapL.value(indicesL(0,i));
 		Vertex vv = vertexMapLL.value(i);
+		qDebug() << __LINE__;
 		if( sampler.checkRobotValidDirectionToTargetOneShot( graph[v].pose , graph[vv].pose) )
 		{
+			qDebug() << "aqui";
 			EdgePayload edge;
 			edge.dist = distsToL(i);
 			boost::add_edge(v, vv, edge, graph);
@@ -902,6 +917,7 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
  */
 void PlannerPRM::smoothPath( const QList<QVec> & list)
 {
+	qDebug() << __LINE__;
 	if ( sampler.checkRobotValidDirectionToTargetOneShot( list.first(), list.last()) )
 	{
 		if(currentSmoothedPath.contains(list.first()) == false)
@@ -934,6 +950,7 @@ void PlannerPRM::smoothPathIter(QList<QVec> & list)
 		QList<QVec>::iterator it = list.begin()+first;
 		QList<QVec>::iterator itt = list.begin()+second;
 
+		qDebug() << __LINE__;
 		if ( sampler.checkRobotValidDirectionToTargetOneShot( *it, *itt ))
 		{
 			for(QList<QVec>::iterator ir = it + 1; ir != itt-1; ++ir)
