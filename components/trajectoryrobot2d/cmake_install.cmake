@@ -46,7 +46,7 @@ ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unsp
 
 IF(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  INCLUDE("/home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/src/cmake_install.cmake")
+  INCLUDE("/home/daniel/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/src/cmake_install.cmake")
 
 ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)
 
@@ -56,7 +56,7 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
-FILE(WRITE "/home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/${CMAKE_INSTALL_MANIFEST}" "")
+FILE(WRITE "/home/daniel/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  FILE(APPEND "/home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  FILE(APPEND "/home/daniel/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 ENDFOREACH(file)
