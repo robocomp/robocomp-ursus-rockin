@@ -27,7 +27,7 @@ git pull
 ###
 echo "make robocomp"
 cd /home/robocomp/robocomp/build
-make
+make -j4
 echo "make install robocomp"
 sudo make install
 
@@ -36,7 +36,7 @@ sudo make install
 ###
 echo "make agm"
 cd /home/robocomp/AGM
-make
+make -j4
 echo "make install agm"
 sudo make install
 
