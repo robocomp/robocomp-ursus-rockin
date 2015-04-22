@@ -56,12 +56,12 @@ void SpecificWorker::compute( )
 	
 }
 
-#define THRESHOLD 400.
+#define THRESHOLD 500.
 
 void SpecificWorker::manageReachedObjects()
 {
-	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
-	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
+// 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
+// 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 
 	bool changed = false;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
@@ -91,7 +91,7 @@ void SpecificWorker::manageReachedObjects()
 			const float z = str2float(node->getAttribute("z"));
 			/// Compute distance and new state
 			const float distance = innerModel->transform("base_head", QVec::vec3(x,y,z), "world").norm2();
-			printf("object %d: %f\n", node->identifier, distance);
+// 			printf("object %d: %f\n", node->identifier, distance);
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
 				AGMModelEdge &edge = *edge_itr;
@@ -122,8 +122,8 @@ void SpecificWorker::manageReachedObjects()
 	}
 
 
-	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
-	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
+// 	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
+// 	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
 
 
 /*
@@ -416,9 +416,9 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 // 			WeightVector weights;
 // 			try
 // 			{
-// 				target.x = str2float(symbols["object"]->getAttribute("tx"));
-// 				target.y = str2float(symbols["object"]->getAttribute("ty"));
-// 				target.z = str2float(symbols["object"]->getAttribute("tz"));
+// 				target.x = str2float(symbols["object"]->getAttribute("x"));
+// 				target.y = str2float(symbols["object"]->getAttribute("y"));
+// 				target.z = str2float(symbols["object"]->getAttribute("z"));
 // 				target.rx = str2float(symbols["object"]->getAttribute("rx"));
 // 				target.ry = str2float(symbols["object"]->getAttribute("ry"));
 // 				target.rz = str2float(symbols["object"]->getAttribute("rz"));
@@ -477,9 +477,9 @@ void SpecificWorker::action_GraspObject(bool first)
 				WeightVector weights;
 				try
 				{
-					target.x = str2float(symbols["object"]->getAttribute("tx"));
-					target.y = str2float(symbols["object"]->getAttribute("ty"));
-					target.z = str2float(symbols["object"]->getAttribute("tz"));
+					target.x = str2float(symbols["object"]->getAttribute("x"));
+					target.y = str2float(symbols["object"]->getAttribute("y"));
+					target.z = str2float(symbols["object"]->getAttribute("z"));
 					target.rx = str2float(symbols["object"]->getAttribute("rx"));
 					target.ry = str2float(symbols["object"]->getAttribute("ry"));
 					target.rz = str2float(symbols["object"]->getAttribute("rz"));
@@ -571,14 +571,14 @@ void SpecificWorker::saccadic3D(QVec point, QVec axis)
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
-	printf("saccadic3D\n");
+// 	printf("saccadic3D\n");
 	
 	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "world");
-	rel.print("desde la camara");
+// 	rel.print("desde la camara");
 
 	float errYaw   = -atan2(rel(0), rel(2));
 	float errPitch = +atan2(rel(1), rel(2));
-	printf("%f  %f\n", errYaw, errPitch);
+// 	printf("%f  %f\n", errYaw, errPitch);
 
 	RoboCompJointMotor::MotorGoalPosition goal;
 	

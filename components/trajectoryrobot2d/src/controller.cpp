@@ -65,10 +65,20 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			road.setBlocked(true);
 			return false;
 		}
-		else 
-			if(i.dist < baseOffsets[j]+100) 
-				if( i.angle > 0) vside  = -100;
-				else vside = 100;
+		else
+		{
+			if (i.dist < baseOffsets[j] + 100) 
+			{
+				if (i.angle > 0)
+				{
+					vside  = -100;
+				}
+				else
+				{
+					vside = 100;
+				}
+			}
+		}
 		j++;
 	}
 
