@@ -53,7 +53,7 @@ void SpecificWorker::compute( )
 
 	// ACTION EXECUTION
 	actionExecution();
-	
+
 }
 
 #define THRESHOLD 500.
@@ -111,7 +111,7 @@ void SpecificWorker::manageReachedObjects()
 			}
 		}
 	}
-	
+
 	/// Publish new model if changed
 	if (changed)
 	{
@@ -155,7 +155,7 @@ void SpecificWorker::manageReachedObjects()
 	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
 	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
 	errAlpha = abs(errAlpha);
-	
+
 	printf("%f %f %f\n", rx, rz, ralpha);
 	printf("%f %f %f\n",  x,  z,  alpha);
 	printf("%f %f %f\n", errX, errZ, errAlpha);
@@ -379,7 +379,7 @@ void SpecificWorker::actionExecution()
 	{
 		previousAction = action;
 		printf("New action: %s\n", action.c_str());
-	}	
+	}
 }
 
 void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
@@ -464,13 +464,13 @@ void SpecificWorker::action_GraspObject(bool first)
 		auto symbols = newModel->getSymbolsMap(params, "object", "table");
 		newModel->removeEdge(symbols["object"], symbols["table"], "in");
 		newModel->addEdge(   symbols["object"], symbols["table"], "in");
-		
-		
+
+
 		if (first) state = 0;
-		
+
 		if (state == 0)
 		{
-			
+
 			try
 			{
 				Pose6D target;
@@ -492,7 +492,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				}
 				catch (...)
 				{
-					printf("graspingAgent: Error reading data from cognitive model: (%s:%d)\n", __FILE__, __LINE__);
+					printf("graspingAgent: Error reading data from cognitive model (symbol %d): (%s:%d)\n", symbols["object"]->identifier, __FILE__, __LINE__);
 				}
 				try
 				{
@@ -509,7 +509,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				printf("graspingAgent: Couldn't publish new model\n");
 			}
 		}
-		
+
 	}
 	catch(...)
 	{
@@ -531,8 +531,8 @@ void SpecificWorker::action_SetObjectReach(bool first)
 			printf("first time, set arm for manipulation\n");
 			setRightArmUp_Reflex();
 	}
-	
-	
+
+
 	///
 	/// Track the target
 	///
@@ -572,7 +572,7 @@ void SpecificWorker::saccadic3D(QVec point, QVec axis)
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
 // 	printf("saccadic3D\n");
-	
+
 	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "world");
 // 	rel.print("desde la camara");
 
@@ -581,7 +581,7 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 // 	printf("%f  %f\n", errYaw, errPitch);
 
 	RoboCompJointMotor::MotorGoalPosition goal;
-	
+
 	goal.name = "head_yaw_joint";
 	goal.maxSpeed = 0.5;
 	goal.position = jointmotor_proxy->getMotorState("head_yaw_joint").pos - errYaw;
