@@ -121,7 +121,7 @@ private:
 	bool setHeadingCommand(InnerModel* innerModel, float alfa, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad);
 	bool stopCommand( CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state);
 	bool changeTargetCommand(InnerModel* innerModel, CurrentTarget& target,  TrajectoryState &stat, WayPoints& myRoad);
-	bool goBackwardsCommand(InnerModel *innerModel, CurrentTarget &current, TrajectoryState &state, WayPoints &myRoad);
+	bool goBackwardsCommand(InnerModel* innerModel, CurrentTarget& current,CurrentTarget &currentT, TrajectoryState& state, WayPoints& myRoad);
 	bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
 	
 	//Smoother smoother;

@@ -31,7 +31,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel->name = "worldModel";
 
 // 	bodyinversekinematics_proxy->goHome("RIGHTARM");
-	setRightArmUp_Reflex();
+// 	setRightArmUp_Reflex();
 
 }
 
@@ -45,17 +45,156 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	QMutexLocker locker(mutex);
+
 	// STUFF
-	//
 	updateInnerModel();
+	manageReachedObjects();
 
 	// ACTION EXECUTION
-	//
-// 	actionExecution();
-	
-	saccadic3D(QVec::vec3(1000, 800, 1100), QVec::vec3(0,0,1));
+	actionExecution();
 
 }
+
+#define THRESHOLD 500.
+
+void SpecificWorker::manageReachedObjects()
+{
+// 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
+// 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
+
+	bool changed = false;
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+	for (AGMModel::iterator symbol_itr=newModel->begin(); symbol_itr!=newModel->end(); symbol_itr++)
+	{
+		AGMModelSymbol::SPtr node = *symbol_itr;
+		if (node->symboltype() == "object")
+		{
+			// Avoid working with rooms
+			bool isRoom = false;
+			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
+			{
+				AGMModelEdge edge = *edge_itr;
+				if (edge->getLabel() == "room")
+				{
+					isRoom = true;
+				}
+			}
+			if (isRoom)
+			{
+				continue;
+			}
+			/// Get coordinates
+			const float x = str2float(node->getAttribute("x"));
+			const float y = str2float(node->getAttribute("y"));
+			const float z = str2float(node->getAttribute("z"));
+			/// Compute distance and new state
+			const float distance = innerModel->transform("base_head", QVec::vec3(x,y,z), "world").norm2();
+// 			printf("object %d: %f\n", node->identifier, distance);
+			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
+			{
+				AGMModelEdge &edge = *edge_itr;
+				if (edge->getLabel() == "reach" and distance > THRESHOLD)
+				{
+					edge->setLabel("noReach");
+					printf("object %d STOPS REACH\n", node->identifier);
+					changed = true;
+				}
+				else if (edge->getLabel() == "noReach" and distance < THRESHOLD)
+				{
+					edge->setLabel("reach");
+					printf("___ %s ___\n", edge->getLabel().c_str());
+					printf("object %d STARTS REACH\n", node->identifier);
+					changed = true;
+				}
+			}
+		}
+	}
+
+	/// Publish new model if changed
+	if (changed)
+	{
+		printf("PUBLISH!!!!\n");
+		AGMModelPrinter::printWorld(newModel);
+
+		sendModificationProposal(newModel, worldModel);
+	}
+
+
+// 	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
+// 	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
+
+
+/*
+	float alpha;
+	switch (objectId)
+	{
+		case 7:
+			alpha = -3.141592;
+			break;
+		case 9:
+			alpha = 0;
+			break;
+		default:
+			qFatal("ee");
+			break;
+	}
+	// printf("object (%f, %f, %f)\n", x, z, alpha);
+
+	const int32_t robotId = worldModel->getIdentifierByType("robot");
+	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
+	const float rx = str2float(robot->getAttribute("x"));
+	const float rz = str2float(robot->getAttribute("z"));
+	const float ralpha = str2float(robot->getAttribute("alpha"));
+
+	// Avoid repeating the same goal and confuse the navigator
+	const float errX = abs(rx-x);
+	const float errZ = abs(rz-z);
+	float errAlpha = abs(ralpha-alpha);
+	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+	errAlpha = abs(errAlpha);
+
+	printf("%f %f %f\n", rx, rz, ralpha);
+	printf("%f %f %f\n",  x,  z,  alpha);
+	printf("%f %f %f\n", errX, errZ, errAlpha);
+	if (errX<300 and errZ<300 and errAlpha<0.4)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		std::map<std::string, AGMModelSymbol::SPtr> symbols;
+		try
+		{
+			symbols = newModel->getSymbolsMap(params, "object", "status");
+		}
+		catch(...)
+		{
+			printf("graspingAgent: Couldn't retrieve action's parameters\n");
+			return;
+		}
+
+		if (newModel->renameEdge(symbols["object"], symbols["status"], "noReach", "reach"))
+		{
+			try
+			{
+				sendModificationProposal(newModel, worldModel);
+				printf("sent reach\n");
+			}
+			catch(const Ice::Exception& ex)
+			{
+				printf("graspingAgent: Couldn't publish new model\n");
+				cout << "Exception: " << ex << endl;
+				return ;
+			}
+		}
+		else
+		{
+			printf("already reaching??\n");
+		}
+	}
+*/
+}
+
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
@@ -203,7 +342,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 	return true;
 }
 
-void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
+void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel)
 {
 	try
 	{
@@ -240,7 +379,7 @@ void SpecificWorker::actionExecution()
 	{
 		previousAction = action;
 		printf("New action: %s\n", action.c_str());
-	}	
+	}
 }
 
 void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
@@ -277,9 +416,9 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 // 			WeightVector weights;
 // 			try
 // 			{
-// 				target.x = str2float(symbols["object"]->getAttribute("tx"));
-// 				target.y = str2float(symbols["object"]->getAttribute("ty"));
-// 				target.z = str2float(symbols["object"]->getAttribute("tz"));
+// 				target.x = str2float(symbols["object"]->getAttribute("x"));
+// 				target.y = str2float(symbols["object"]->getAttribute("y"));
+// 				target.z = str2float(symbols["object"]->getAttribute("z"));
 // 				target.rx = str2float(symbols["object"]->getAttribute("rx"));
 // 				target.ry = str2float(symbols["object"]->getAttribute("ry"));
 // 				target.rz = str2float(symbols["object"]->getAttribute("rz"));
@@ -302,7 +441,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 // 			{
 // 				printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
 // 			}
-// 			sendModificationProposal(worldModel, newModel);
+// 			sendModificationProposal(newModel, worldModel);
 // 		}
 // 		catch(...)
 // 		{
@@ -325,22 +464,22 @@ void SpecificWorker::action_GraspObject(bool first)
 		auto symbols = newModel->getSymbolsMap(params, "object", "table");
 		newModel->removeEdge(symbols["object"], symbols["table"], "in");
 		newModel->addEdge(   symbols["object"], symbols["table"], "in");
-		
-		
+
+
 		if (first) state = 0;
-		
+
 		if (state == 0)
 		{
-			
+
 			try
 			{
 				Pose6D target;
 				WeightVector weights;
 				try
 				{
-					target.x = str2float(symbols["object"]->getAttribute("tx"));
-					target.y = str2float(symbols["object"]->getAttribute("ty"));
-					target.z = str2float(symbols["object"]->getAttribute("tz"));
+					target.x = str2float(symbols["object"]->getAttribute("x"));
+					target.y = str2float(symbols["object"]->getAttribute("y"));
+					target.z = str2float(symbols["object"]->getAttribute("z"));
 					target.rx = str2float(symbols["object"]->getAttribute("rx"));
 					target.ry = str2float(symbols["object"]->getAttribute("ry"));
 					target.rz = str2float(symbols["object"]->getAttribute("rz"));
@@ -353,7 +492,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				}
 				catch (...)
 				{
-					printf("graspingAgent: Error reading data from cognitive model: (%s:%d)\n", __FILE__, __LINE__);
+					printf("graspingAgent: Error reading data from cognitive model (symbol %d): (%s:%d)\n", symbols["object"]->identifier, __FILE__, __LINE__);
 				}
 				try
 				{
@@ -363,14 +502,14 @@ void SpecificWorker::action_GraspObject(bool first)
 				{
 					printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
 				}
-				sendModificationProposal(worldModel, newModel);
+				sendModificationProposal(newModel, worldModel);
 			}
 			catch(...)
 			{
 				printf("graspingAgent: Couldn't publish new model\n");
 			}
 		}
-		
+
 	}
 	catch(...)
 	{
@@ -383,88 +522,45 @@ void SpecificWorker::action_SetObjectReach(bool first)
 {
 	printf("void SpecificWorker::action_SetObjectReach()\n");
 
-	if (backAction != "setobjectreach")
+	///
+	///  Lift the hand if it's down, to avoid collisions
+	///
+	if (backAction != "setobjectreach" or innerModel->transform("root", "finger_right_1_1_tip")(1)<1000)
 	{
 			backAction = action;
 			printf("first time, set arm for manipulation\n");
 			setRightArmUp_Reflex();
 	}
 
-#warning XXX
-	int32_t objectId = 9;//str2int(params["object"].value);
-	AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-	const float x = str2float(goalObject->getAttribute("x"));
-	const float y = str2float(goalObject->getAttribute("y"));
-	const float z = str2float(goalObject->getAttribute("z"));
-	
-	saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
 
-	float alpha;
-	switch (objectId)
+	///
+	/// Track the target
+	///
+	int32_t objectId = -1;
+	try
 	{
-		case 7:
-			alpha = -3.141592;
-			break;
-		case 9:
-			alpha = 0;
-			break;
-		default:
-			qFatal("ee");
-			break;
+		objectId = str2int(params["object"].value);
 	}
-	// printf("object (%f, %f, %f)\n", x, z, alpha);
-
-	const int32_t robotId = worldModel->getIdentifierByType("robot");
-	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-	const float rx = str2float(robot->getAttribute("x"));
-	const float rz = str2float(robot->getAttribute("z"));
-	const float ralpha = str2float(robot->getAttribute("alpha"));
-
-	// Avoid repeating the same goal and confuse the navigator
-	const float errX = abs(rx-x);
-	const float errZ = abs(rz-z);
-	float errAlpha = abs(ralpha-alpha);
-	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
-	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
-	errAlpha = abs(errAlpha);
-	
-	printf("%f %f %f\n", rx, rz, ralpha);
-	printf("%f %f %f\n",  x,  z,  alpha);
-	printf("%f %f %f\n", errX, errZ, errAlpha);
-	if (errX<100 and errZ<100 and errAlpha<0.1)
+	catch (...)
 	{
-		AGMModel::SPtr newModel(new AGMModel(worldModel));
-		std::map<std::string, AGMModelSymbol::SPtr> symbols;
-		try
-		{
-			symbols = newModel->getSymbolsMap(params, "object", "status");
-		}
-		catch(...)
-		{
-			printf("graspingAgent: Couldn't retrieve action's parameters\n");
-			return;
-		}
-
-		if (newModel->renameEdge(symbols["object"], symbols["status"], "noReach", "reach"))
-		{
-			try
-			{
-				sendModificationProposal(worldModel, newModel);
-				printf("sent reach\n");
-			}
-			catch(const Ice::Exception& ex)
-			{
-				printf("graspingAgent: Couldn't publish new model\n");
-				cout << "Exception: " << ex << endl;
-				return ;
-			}
-		}
-		else
-		{
-			printf("already reaching??\n");
-		}
+		printf("%s %d\n", __FILE__, __LINE__);
+	}
+	if (objectId > 0)
+	{
+		AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+		const float x = str2float(goalObject->getAttribute("x"));
+		const float y = str2float(goalObject->getAttribute("y"));
+		const float z = str2float(goalObject->getAttribute("z"));
+		saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+	}
+	else
+	{
+		printf ("don't have the object to reach in my model %d\n", objectId);
 	}
 
+	///
+	/// No more work to do. The label is set passively (from this agent's point of view)
+	///
 }
 
 
@@ -475,17 +571,17 @@ void SpecificWorker::saccadic3D(QVec point, QVec axis)
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
-	printf("saccadic3D\n");
-	
+// 	printf("saccadic3D\n");
+
 	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "world");
-	rel.print("desde la camara");
+// 	rel.print("desde la camara");
 
 	float errYaw   = -atan2(rel(0), rel(2));
 	float errPitch = +atan2(rel(1), rel(2));
-	printf("%f  %f\n", errYaw, errPitch);
+// 	printf("%f  %f\n", errYaw, errPitch);
 
 	RoboCompJointMotor::MotorGoalPosition goal;
-	
+
 	goal.name = "head_yaw_joint";
 	goal.maxSpeed = 0.5;
 	goal.position = jointmotor_proxy->getMotorState("head_yaw_joint").pos - errYaw;

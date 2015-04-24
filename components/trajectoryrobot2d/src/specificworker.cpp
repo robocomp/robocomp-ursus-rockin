@@ -140,7 +140,7 @@ void SpecificWorker::compute( )
 			setHeadingCommand(innerModel, currentTarget.getRotation().y(), currentTarget, tState, road);
 			break;
 		case CurrentTarget::Command::GOBACKWARDS:
-			goBackwardsCommand(innerModel, currentTargetAnt, tState, road);
+			goBackwardsCommand(innerModel, currentTargetAnt, currentTarget, tState, road);
 			break;
 		case CurrentTarget::Command::IDLE:
 			break;
@@ -225,11 +225,12 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 
 {
 	// 	qDebug() << __FUNCTION__;
-	printf("%d\n", __LINE__);
+	//printf("%d\n", __LINE__);
 	if( targetHasAPlan(innerModel, target, state, myRoad) == true)
 	{
-		printf("%d\n", __LINE__);
+		//printf("%d\n", __LINE__);
 		//project road to the laserData so it adjust to real geometry
+
 		elasticband->update( innerModel, myRoad, laserData, target);
 
 		//compute all measures relating the robot to the road
@@ -238,11 +239,11 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 		//myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
-		
 		if( myRoad.isBlocked() )
 			{
 				currentTargetAnt.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-200),"robot"));
 				target.command = CurrentTarget::Command::GOBACKWARDS;
+				qDebug()<<"haciendo marcha atras";
 			}
 		
 		if (myRoad.isFinished() == true)
@@ -271,11 +272,11 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 			//computePlan(innerModel);
 		}
 
-		printf("%d\n", __LINE__);
+		//printf("%d\n", __LINE__);
 		state.setEstimatedTime(myRoad.getETA());
-		printf("%d\n", __LINE__);
+		//printf("%d\n", __LINE__);
 	}
-	printf("%d\n", __LINE__);
+	//printf("%d\n", __LINE__);
 	return true;
 }
 
@@ -317,7 +318,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  Curr
  * @param target position in World Reference System
  * @return bool
  */
-bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &current, TrajectoryState &state, WayPoints &myRoad )
+bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &current,CurrentTarget &currentT, TrajectoryState &state, WayPoints &myRoad )
 {
 	//CHECK PARAMETERS
 	QVec target = current.getTranslation();
@@ -336,7 +337,6 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
 	//float error = target.norm2();
-	qDebug()<< error;
 	state.setState("EXECUTING");
 	// 	qDebug() << __FUNCTION__ << "Error: " << error;
 
@@ -350,21 +350,19 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 // 		myRoad.reset();
 // 		myRoad.endRoad();
 		state.setElapsedTime(taskReloj.elapsed());
-		state.setState("IDLE");
+		//state.setState("IDLE");
 		try
 		{
 		  //differentialrobot_proxy->setSpeedBase(0, 0);
 		  omnirobot_proxy->setSpeedBase(0, 0, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
-		myRoad.requiresReplanning = true;
-					
-		qDebug()<<"FIN GOBACKWARDS, PASANDO A GOTOCOMMAND";
-		current.setWithoutPlan(true);
-		current.command = CurrentTarget::Command::GOTO;
+		//myRoad.requiresReplanning = true;
+
+		currentT.setWithoutPlan(false);
+		currentT.command = CurrentTarget::Command::GOTO;
 	}
 	else
 	{
-		qDebug()<<"haciendo marcha atras";
 		float vadv = -0.5 * error;  //Proportional controller
 		if( vadv < -MAX_ADV_SPEED ) vadv = -MAX_ADV_SPEED;
 		try

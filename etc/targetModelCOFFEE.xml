@@ -6,8 +6,8 @@
 	<symbol id="v10" type="objectSt" />
 
 	<link  src="v9"  dst="v10"     label="mug" />
-	<link  src="v9"  dst="v10"     label="reach" />
-<!-- 	<link  src="v9"  dst="1"     label="in" /> -->
+<!-- 	<link  src="v9"  dst="v10"     label="reach" /> -->
+	<link  src="v9"  dst="1"     label="in" />
 <!-- 	<link  src="1"      dst="v9"     label="know" /> -->
 
 

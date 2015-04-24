@@ -252,7 +252,7 @@ void SpecificWorker::stop()
 {
 	try
 	{
-// 		trajectoryrobot2d_proxy->stop();
+		trajectoryrobot2d_proxy->stop();
 	}
 	catch(const Ice::Exception &ex)
 	{
@@ -267,14 +267,13 @@ void SpecificWorker::stop()
 
 void SpecificWorker::actionExecution()
 {
-	static std::string previousAction = "";
-	if (previousAction != action)
-	{
-		previousAction = action;
-		printf("New action: %s\n", action.c_str());
-	}
+	QMutexLocker locker(mutex);
 
-	printf(" action: %s\n", action.c_str());
+	static std::string previousAction = "";
+	bool newAction = (previousAction != action);
+
+	if (newAction)
+		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
 
 	try
 	{
@@ -291,19 +290,19 @@ void SpecificWorker::actionExecution()
 
 	if (action == "changeroom")
 	{
-		action_ChangeRoom();
+		action_ChangeRoom(newAction);
 	}
 	else if (action == "findobjectvisuallyintable")
 	{
-		action_FindObjectVisuallyInTable();
+		action_FindObjectVisuallyInTable(newAction);
 	}
 	else if (action == "setobjectreach")
 	{
-		action_SetObjectReach();
+		action_SetObjectReach(newAction);
 	}
 	else if (action == "graspobject")
 	{
-		action_GraspObject();
+		action_GraspObject(newAction);
 	}
 	else
 	{
@@ -473,7 +472,7 @@ void SpecificWorker::setIdentifierOfRobotsLocation(AGMModel::SPtr &model, int32_
 }
 
 
-void SpecificWorker::action_ChangeRoom()
+void SpecificWorker::action_ChangeRoom(bool newAction)
 {
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
@@ -508,8 +507,11 @@ void SpecificWorker::action_ChangeRoom()
 }
 
 
-void SpecificWorker::action_FindObjectVisuallyInTable()
+void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 {
+	stop();
+
+
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
 
@@ -581,7 +583,7 @@ printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 
-void SpecificWorker::action_SetObjectReach()
+void SpecificWorker::action_SetObjectReach(bool newAction)
 {
 	printf("void SpecificWorker::action_SetObjectReach()\n");
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
@@ -597,7 +599,7 @@ void SpecificWorker::action_SetObjectReach()
 		printf("object %d not in our model\n", objectId);
 		return;
 	}
-	const float x = str2float(goalObject->getAttribute("x"));
+	const float x = str2float(goalObject->getAttribute("x")) - 200.;
 	const float z = str2float(goalObject->getAttribute("z"));
 	float alpha;
 	switch (objectId)
@@ -678,12 +680,14 @@ printf("%f line: %d %s\n", ralpha, __LINE__, __FILE__);
 	printf("aaAdigejr\n");
 }
 
-void SpecificWorker::action_GraspObject()
+void SpecificWorker::action_GraspObject(bool newAction)
 {
 	printf("SpecificWorker::action_GraspObject\n");
 	int32_t objectId;
 	AGMModelSymbol::SPtr goalObject;
 	AGMModelSymbol::SPtr robot;
+
+	stop();
 
 	try
 	{
@@ -724,7 +728,7 @@ void SpecificWorker::action_GraspObject()
 		return;
 	}
 
-	omnirobot_proxy->setSpeedBase(errX, errZ, errAlpha);
+// 	omnirobot_proxy->setSpeedBase(errX, errZ, errAlpha);
 }
 
 
@@ -790,7 +794,7 @@ void SpecificWorker::odometryAndLocationIssues()
 }
 
 
-void SpecificWorker::action_NoAction()
+void SpecificWorker::action_NoAction(bool newAction)
 {
 		stop();
 }

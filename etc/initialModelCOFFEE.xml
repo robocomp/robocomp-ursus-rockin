@@ -51,6 +51,9 @@
 		<attribute key="x" value="1000" />
 		<attribute key="y" value="800" />
 		<attribute key="z" value="1100" />
+		<attribute key="rx" value="0.0" />
+		<attribute key="ry" value="-1.0" />
+		<attribute key="rz" value="3.14" />
 		<attribute key="tag" value="14" />
 	</symbol>
 	<link src="1" dst="9" label="know" />
