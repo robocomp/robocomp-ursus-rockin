@@ -402,62 +402,12 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 }
 
 
-// void SpecificWorker::action_RobotMovesObjectFromContainer()
-// {
-// 	AGMModel::SPtr newModel(new AGMModel(worldModel));
-// 	try
-// 	{
-// 		auto symbols = newModel->getSymbolsMap(params, "object", "c1", "c2");
-// 		newModel->removeEdge(symbols["object"], symbols["c1"], "in");
-// 		newModel->addEdge(   symbols["object"], symbols["c2"], "in");
-// 		try
-// 		{
-// 			Pose6D target;
-// 			WeightVector weights;
-// 			try
-// 			{
-// 				target.x = str2float(symbols["object"]->getAttribute("x"));
-// 				target.y = str2float(symbols["object"]->getAttribute("y"));
-// 				target.z = str2float(symbols["object"]->getAttribute("z"));
-// 				target.rx = str2float(symbols["object"]->getAttribute("rx"));
-// 				target.ry = str2float(symbols["object"]->getAttribute("ry"));
-// 				target.rz = str2float(symbols["object"]->getAttribute("rz"));
-// 				weights.x = 1;
-// 				weights.y = 1;
-// 				weights.z = 1;
-// 				weights.rx = 1;
-// 				weights.ry = 0;
-// 				weights.rz = 1;
-// 			}
-// 			catch (...)
-// 			{
-// 				printf("graspingAgent: Error reading data from cognitive model: (%s:%d)\n", __FILE__, __LINE__);
-// 			}
-// 			try
-// 			{
-// 				bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
-// 			}
-// 			catch (...)
-// 			{
-// 				printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
-// 			}
-// 			sendModificationProposal(newModel, worldModel);
-// 		}
-// 		catch(...)
-// 		{
-// 			printf("graspingAgent: Couldn't publish new model\n");
-// 		}
-// 	}
-// 	catch(...)
-// 	{
-// 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
-// 	}
-// }
-
 
 void SpecificWorker::action_GraspObject(bool first)
 {
+	const QVec offset = QVec::vec3(100, 0, 0);
 	static int32_t state = 0;
+	static QTime time;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
@@ -467,42 +417,61 @@ void SpecificWorker::action_GraspObject(bool first)
 
 
 		if (first) state = 0;
+		printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
 
 		if (state == 0)
 		{
+			bodyinversekinematics_proxy->setFingers(100);
+			usleep(500000);
+			sendRightArmToTargetPosition(symbols["object"], offset);
 
+			time = QTime::currentTime();
+			state = 1;
+		}
+		else if (state == 1)
+		{
+			if (time.elapsed() > 4000) { state = 0; }
+			else
+			{
+				auto distance = innerModel->transform("finger_right_1_1_tip", getObjectsLocation(symbols["object"])+offset, "world").norm2();
+				printf("state==1: %f\n", distance);
+				if (distance < 80)
+				{
+					state = 2;
+				}
+			}
+		}
+		else if (state == 2)
+		{
+			bodyinversekinematics_proxy->setFingers(100);
+			usleep(500000);
+			sendRightArmToTargetFullPose(symbols["object"], offset);
+			time = QTime::currentTime();
+			state = 3;
+		}
+		else if (state == 3)
+		{
+			if (time.elapsed() > 4000) { state = 0; }
+			else
+			{
+				auto distance = innerModel->transform("finger_right_1_1_tip", getObjectsLocation(symbols["object"])+offset, "world").norm2();
+				printf("state==3: %f\n", distance);
+				if (distance < 80)
+				{
+					state = 4;
+				}
+			}
+		}
+		else if (state == 4)
+		{
 			try
 			{
-				Pose6D target;
-				WeightVector weights;
-				try
-				{
-					target.x = str2float(symbols["object"]->getAttribute("x"));
-					target.y = str2float(symbols["object"]->getAttribute("y"));
-					target.z = str2float(symbols["object"]->getAttribute("z"));
-					target.rx = str2float(symbols["object"]->getAttribute("rx"));
-					target.ry = str2float(symbols["object"]->getAttribute("ry"));
-					target.rz = str2float(symbols["object"]->getAttribute("rz"));
-					weights.x = 1;
-					weights.y = 1;
-					weights.z = 1;
-					weights.rx = 1;
-					weights.ry = 0;
-					weights.rz = 1;
-				}
-				catch (...)
-				{
-					printf("graspingAgent: Error reading data from cognitive model (symbol %d): (%s:%d)\n", symbols["object"]->identifier, __FILE__, __LINE__);
-				}
-				try
-				{
-					bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
-				}
-				catch (...)
-				{
-					printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
-				}
+				bodyinversekinematics_proxy->setFingers(50);
+				usleep(500000);
+				qFatal("got it!!!! :-D");
 				sendModificationProposal(newModel, worldModel);
+				time = QTime::currentTime();
+				state = 1;
 			}
 			catch(...)
 			{
@@ -517,6 +486,85 @@ void SpecificWorker::action_GraspObject(bool first)
 	}
 }
 
+
+QVec SpecificWorker::getObjectsLocation(AGMModelSymbol::SPtr &object)
+{
+	return QVec::vec3(
+	 str2float(object->getAttribute("x")),
+	 str2float(object->getAttribute("y")),
+	 str2float(object->getAttribute("z"))
+	);
+}
+
+void SpecificWorker::sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec offset)
+{
+	Pose6D target;
+	WeightVector weights;
+	try
+	{
+		QVec targetPos = getObjectsLocation(targetObject) + offset;
+		targetPos.print("targetFullPose");
+		target.x = targetPos(0);
+		target.y = targetPos(1);
+		target.z = targetPos(2);
+		weights.x = 1;
+		weights.y = 1;
+		weights.z = 1;
+		target.rx = str2float(targetObject->getAttribute("rx"));
+		target.ry = str2float(targetObject->getAttribute("ry"));
+		target.rz = str2float(targetObject->getAttribute("rz"));
+		weights.rx = 1;
+		weights.ry = 1;
+		weights.rz = 1;
+	}
+	catch (...)
+	{
+		printf("graspingAgent: Error reading data from cognitive model (symbol %d): (%s:%d)\n", targetObject->identifier, __FILE__, __LINE__);
+	}
+	try
+	{
+		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+	}
+	catch (...)
+	{
+		printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
+	}
+}
+
+void SpecificWorker::sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetObject, QVec offset)
+{
+	Pose6D target;
+	WeightVector weights;
+	try
+	{
+		QVec targetPos = getObjectsLocation(targetObject) + offset;
+		targetPos.print("targetPosition");
+		target.x = targetPos(0);
+		target.y = targetPos(1);
+		target.z = targetPos(2);
+		weights.x = 1;
+		weights.y = 1;
+		weights.z = 1;
+		target.rx = 0;
+		target.ry = 0;
+		target.rz = 0;
+		weights.rx = 0;
+		weights.ry = 0;
+		weights.rz = 0;
+	}
+	catch (...)
+	{
+		printf("graspingAgent: Error reading data from cognitive model (symbol %d): (%s:%d)\n", targetObject->identifier, __FILE__, __LINE__);
+	}
+	try
+	{
+		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+	}
+	catch (...)
+	{
+		printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
+	}
+}
 
 void SpecificWorker::action_SetObjectReach(bool first)
 {
