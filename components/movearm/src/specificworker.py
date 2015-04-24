@@ -44,15 +44,19 @@ class SpecificWorker(GenericWorker):
 		self.timer.timeout.connect(self.compute)
 		self.Period = 2000
 		self.timer.start(self.Period)
+		
+		# CARGAMOS LAS POSICIONES DE LOS CUBOS TARGETS
+		self.ui.botonCargar.clicked.connect(self.cargar)
 
 	def setParams(self, params):
-		#try:
-		#	par = params["InnerModelPath"]
-		#	innermodel_path=par.value
+		try:
+			par = params["BIK"]
+			self.innermodel_path=par.value
+			print 'Charged the world.xml file'
 		#	innermodel = InnerModel(innermodel_path)
-		#except:
-		#	traceback.print_exc()
-		#	print "Error reading config params"
+		except:
+			traceback.print_exc()
+			print "Error reading config params"
 		return True
 
 	@QtCore.Slot()
@@ -65,7 +69,18 @@ class SpecificWorker(GenericWorker):
 		#	print e
 		return True
 
-
+	@QtCore.Slot()
+	def cargar(self):
+		print 'Cargando cubos...'
+		#Del xml sacamos los cubos: para buscarlos tenemos que encontrar el patron CUBO_
+		infile = open(self.innermodel_path, 'r')
+		
+		for line in infile:
+			#Recorremos el fichero linea linea, buscando el transform de cada cubo:
+			print line
+		infile.close()
+		
+		
 
 
 

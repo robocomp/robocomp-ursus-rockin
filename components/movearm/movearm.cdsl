@@ -5,4 +5,5 @@ Component movearmComp{
 		requires JointMotor;
 	};
 	language python;
+	gui Qt(QWidget);
 };

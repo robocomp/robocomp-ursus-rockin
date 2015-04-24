@@ -1,12 +1,12 @@
 # Proxies for required interfaces
 # JointMotorProxy = jointmotor:tcp -h localhost -p 0
-JointMotor0Proxy = jointmotor:tcp -p 20000 
+JointMotorProxy = jointmotor:tcp -p 20000 
 
 
 # This property is used by the clients to connect to IceStorm.
-TopicManager.Proxy=IceStorm/TopicManager:default -p 9999
+#TopicManager.Proxy=IceStorm/TopicManager:default -p 9999
 
-BIK.InnerModel=/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ursus.xml
+BIK=/home/robocomp/robocomp/files/innermodel/worlds/pruebaRockin.xml
 
 Ice.Warn.Connections=0
 Ice.Trace.Network=0
