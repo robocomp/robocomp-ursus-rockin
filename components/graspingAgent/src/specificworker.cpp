@@ -405,85 +405,113 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 
 void SpecificWorker::action_GraspObject(bool first)
 {
-	const QVec offset = QVec::vec3(100, 0, 0);
+	const QVec offset = QVec::vec3(150, 0, 0);
 	static int32_t state = 0;
 	static QTime time;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+	if (first) state = 0;
+	printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
+
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
 	{
-		auto symbols = newModel->getSymbolsMap(params, "object", "table");
-		newModel->removeEdge(symbols["object"], symbols["table"], "in");
-		newModel->addEdge(   symbols["object"], symbols["table"], "in");
-
-
-		if (first) state = 0;
-		printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
-
-		if (state == 0)
-		{
-			bodyinversekinematics_proxy->setFingers(100);
-			usleep(500000);
-			sendRightArmToTargetPosition(symbols["object"], offset);
-
-			time = QTime::currentTime();
-			state = 1;
-		}
-		else if (state == 1)
-		{
-			if (time.elapsed() > 4000) { state = 0; }
-			else
-			{
-				auto distance = innerModel->transform("finger_right_1_1_tip", getObjectsLocation(symbols["object"])+offset, "world").norm2();
-				printf("state==1: %f\n", distance);
-				if (distance < 80)
-				{
-					state = 2;
-				}
-			}
-		}
-		else if (state == 2)
-		{
-			bodyinversekinematics_proxy->setFingers(100);
-			usleep(500000);
-			sendRightArmToTargetFullPose(symbols["object"], offset);
-			time = QTime::currentTime();
-			state = 3;
-		}
-		else if (state == 3)
-		{
-			if (time.elapsed() > 4000) { state = 0; }
-			else
-			{
-				auto distance = innerModel->transform("finger_right_1_1_tip", getObjectsLocation(symbols["object"])+offset, "world").norm2();
-				printf("state==3: %f\n", distance);
-				if (distance < 80)
-				{
-					state = 4;
-				}
-			}
-		}
-		else if (state == 4)
-		{
-			try
-			{
-				bodyinversekinematics_proxy->setFingers(50);
-				usleep(500000);
-				qFatal("got it!!!! :-D");
-				sendModificationProposal(newModel, worldModel);
-				time = QTime::currentTime();
-				state = 1;
-			}
-			catch(...)
-			{
-				printf("graspingAgent: Couldn't publish new model\n");
-			}
-		}
-
+		symbols = newModel->getSymbolsMap(params, "object", "table");
 	}
 	catch(...)
 	{
 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
 	}
+
+
+	if (state == 0) // 1º approach hand
+	{
+		bodyinversekinematics_proxy->setFingers(100);
+		usleep(100000);
+		sendRightArmToTargetFullPose(symbols["object"], offset);
+
+		time = QTime::currentTime();
+		state = 1;
+	}
+	else if (state == 1) // wait
+	{
+		if (time.elapsed() > 4000) { state = 0; }
+		else
+		{
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"])+offset, "world").norm2();
+			printf("state==1: %f\n", distance);
+			if (distance < 50)
+			{
+				state = 2;
+			}
+		}
+	}
+	else if (state == 2) // 2º get the hand into the object
+	{
+		bodyinversekinematics_proxy->setFingers(100);
+		usleep(100000);
+		sendRightArmToTargetFullPose(symbols["object"], offset.operator*(0.4));
+		time = QTime::currentTime();
+		state = 3;
+	}
+	else if (state == 3) // wait
+	{
+		if (time.elapsed() > 4000) { state = 0; }
+		else
+		{
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"]) + offset.operator*(0.4), "world").norm2();
+			printf("state==3: %f\n", distance);
+			if (distance < 5)
+			{
+				state = 4;
+			}
+		}
+	}
+	else if (state == 4) // 3º get the hand into the object
+	{
+		bodyinversekinematics_proxy->setFingers(50);
+		time = QTime::currentTime();
+		state = 5;
+	}
+	else if (state == 5) // wait
+	{
+		if (time.elapsed() > 4000) { state = 0; }
+		else
+		{
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"]) + offset.operator*(0.4), "world").norm2();
+			printf("state==5: %f\n", distance);
+			if (distance < 5)
+			{
+				state = 6;
+			}
+		}
+	}
+	else if (state == 6)
+	{
+		try
+		{
+			bodyinversekinematics_proxy->setFingers(50);
+			usleep(500000);
+// 			qFatal("got it!!!! :-D");
+			newModel->removeEdge(symbols["object"], symbols["table"], "in");
+			newModel->addEdge(   symbols["object"], symbols["robot"], "in");
+			sendModificationProposal(newModel, worldModel);
+			time = QTime::currentTime();
+			state = 7;
+		}
+		catch(...)
+		{
+			printf("graspingAgent: Couldn't publish new model\n");
+		}
+	}
+	else
+	{
+		if (time.elapsed() > 4000)
+		{
+			state = 0;
+		}
+	}
+
 }
 
 
@@ -573,7 +601,7 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
-	if (backAction != "setobjectreach" or innerModel->transform("root", "finger_right_1_1_tip")(1)<1000)
+	if (backAction != "setobjectreach" or innerModel->transform("root", "grabPositionHandR")(1)<1000)
 	{
 			backAction = action;
 			printf("first time, set arm for manipulation\n");
