@@ -124,9 +124,9 @@
   <dependence alias="relocalizadorTecho" />
   <dependence alias="commonjoint" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote robonuc1.local inverseKinematics /home/robocomp/robocomp/components/robocomp-robolab/components/ree/ ./bin/apdedee--Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilLocalization.conf" />
-  <downCommand command="ssh robolab@robonuc2.local killall -9 aprilbasedlocalization" />
-  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/aprilLocalization.conf" />
+  <upCommand command="rcremote robonuc1.local inverseKinematics /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp ./bin/bik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematics.conf" />
+  <downCommand command="ssh robolab@robonuc2.local killall -9 lokiarmcomp" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/inversekinematics.conf" />
   <xpos value="2.08531880272" />
   <ypos value="-240.060246272" />
   <radius value="10.0" />

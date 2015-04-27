@@ -55,7 +55,7 @@
 #
 #
 
-import sys, traceback, Ice, IceStorm, subprocess, threading, time, Queue, os
+import sys, traceback, Ice, IceStorm, subprocess, threading, time, Queue, os, copy
 
 # Ctrl+c handling
 import signal
@@ -110,7 +110,11 @@ class CommonBehaviorI(RoboCompCommonBehavior.CommonBehavior):
 
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
-	ic = Ice.initialize(sys.argv)
+	params = copy.deepcopy(sys.argv)
+	if len(params) > 1:
+		if not params[1].startswith('--Ice.Config='):
+			params[1] = '--Ice.Config=' + params[1]
+	ic = Ice.initialize(params)
 	status = 0
 	mprx = {}
 	try:

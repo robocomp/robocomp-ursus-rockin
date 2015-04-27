@@ -17,13 +17,10 @@
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys, os, Ice, traceback
-import time
-
+import sys, os, Ice, traceback, time
 
 from PySide import *
 from genericworker import *
-from PyQt4 import QtGui
 
 ROBOCOMP = ''
 try:
@@ -38,6 +35,7 @@ if len(ROBOCOMP)<1:
 preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
 Ice.loadSlice(preStr+"JointMotor.ice")
 from RoboCompJointMotor import *
+
 
 #------------------------------------------------------#
 #         VARIABLES GLOBALES DEL PROGRAMA              #
@@ -69,21 +67,18 @@ class SpecificWorker(GenericWorker):
 		
 		# Pueba compleja
 		self.ui.botonCargar.clicked.connect(self.cargarCubos)
-		self.ui.botonIR1.clicked.connect(self.BIK)
-		self.ui.botonIR2.clicked.connect(self.BIK)
-		self.ui.botonIR3.clicked.connect(self.BIK)
-		
-
+		self.ui.botonIR1.clicked.connect(self.llamarBIK)
+		#self.ui.botonIR2.clicked.connect(self.llamarBIK)
+		#self.ui.botonIR3.clicked.connect(self.llamarBIK)
 
 	def setParams(self, params):
-		try:
-			par = params["BIK"]
-			innermodel_path=par.value
-			print "Cargado fichero XML..."
+		#try:
+		#	par = params["InnerModelPath"]
+		#	innermodel_path=par.value
 		#	innermodel = InnerModel(innermodel_path)
-		except:
-			tracebak.print_exc()
-			print "Error reading config params"
+		#except:
+		#	traceback.print_exc()
+		#	print "Error reading config params"
 		return True
 
 	@QtCore.Slot()
@@ -92,9 +87,10 @@ class SpecificWorker(GenericWorker):
 		#try:
 		#	differentialrobot_proxy.setSpeed(100, 0)
 		#except Ice.Exception, e:
-		#	tracebak.print_exc()
+		#	traceback.print_exc()
 		#	print e
 		return True
+
 
 	########################################################################################################
 	########################################################################################################
@@ -117,7 +113,7 @@ class SpecificWorker(GenericWorker):
 			goal.name = motor
 			goal.maxSpeed = 0.5
 			self.jointmotor_proxy.setPosition(goal)
-			
+
 	@QtCore.Slot()
 	def arriba_R(self):
 		mapa = {'rightShoulder1':-0.5, 'rightShoulder2':-0.70, 'rightShoulder3':.50 , 'rightElbow':1.30 , 'rightForeArm':-.689, 'head_yaw_joint':0.30, 'head_pitch_joint':0.20}
@@ -174,6 +170,7 @@ class SpecificWorker(GenericWorker):
 		
 		self.abajo_R()
 
+
 	########################################################################################################
 	########################################################################################################
 	@QtCore.Slot()
@@ -222,12 +219,9 @@ class SpecificWorker(GenericWorker):
 				self.ui.botonIR3.setEnabled(True)
 			i = i+1
 
-			
 		print 'FIN CARGAR CUBOS: '
 		
-		@QtCore.Slot()
-		def BIK(self):
-			# LLamar al BIK y pasarle el vector POSE:
-			
-
-
+	@QtCore.Slot()
+	def llamarBIK(self):
+		# LLamar al BIK y pasarle el vector POSE:
+		print 'Llamando a BIK'
