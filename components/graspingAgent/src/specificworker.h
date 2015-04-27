@@ -57,7 +57,12 @@ private:
 	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
 
 
+	QVec getObjectsLocation(AGMModelSymbol::SPtr &object);
+	void sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
+	void sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
+
 	void manageReachedObjects();
+
 
 
 	void actionExecution();

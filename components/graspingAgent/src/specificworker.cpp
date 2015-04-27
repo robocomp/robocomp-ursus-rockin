@@ -402,121 +402,197 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 }
 
 
-// void SpecificWorker::action_RobotMovesObjectFromContainer()
-// {
-// 	AGMModel::SPtr newModel(new AGMModel(worldModel));
-// 	try
-// 	{
-// 		auto symbols = newModel->getSymbolsMap(params, "object", "c1", "c2");
-// 		newModel->removeEdge(symbols["object"], symbols["c1"], "in");
-// 		newModel->addEdge(   symbols["object"], symbols["c2"], "in");
-// 		try
-// 		{
-// 			Pose6D target;
-// 			WeightVector weights;
-// 			try
-// 			{
-// 				target.x = str2float(symbols["object"]->getAttribute("x"));
-// 				target.y = str2float(symbols["object"]->getAttribute("y"));
-// 				target.z = str2float(symbols["object"]->getAttribute("z"));
-// 				target.rx = str2float(symbols["object"]->getAttribute("rx"));
-// 				target.ry = str2float(symbols["object"]->getAttribute("ry"));
-// 				target.rz = str2float(symbols["object"]->getAttribute("rz"));
-// 				weights.x = 1;
-// 				weights.y = 1;
-// 				weights.z = 1;
-// 				weights.rx = 1;
-// 				weights.ry = 0;
-// 				weights.rz = 1;
-// 			}
-// 			catch (...)
-// 			{
-// 				printf("graspingAgent: Error reading data from cognitive model: (%s:%d)\n", __FILE__, __LINE__);
-// 			}
-// 			try
-// 			{
-// 				bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
-// 			}
-// 			catch (...)
-// 			{
-// 				printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
-// 			}
-// 			sendModificationProposal(newModel, worldModel);
-// 		}
-// 		catch(...)
-// 		{
-// 			printf("graspingAgent: Couldn't publish new model\n");
-// 		}
-// 	}
-// 	catch(...)
-// 	{
-// 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
-// 	}
-// }
-
 
 void SpecificWorker::action_GraspObject(bool first)
 {
+	const QVec offset = QVec::vec3(150, 0, 0);
 	static int32_t state = 0;
+	static QTime time;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+	if (first) state = 0;
+	printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
+
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
 	{
-		auto symbols = newModel->getSymbolsMap(params, "object", "table");
-		newModel->removeEdge(symbols["object"], symbols["table"], "in");
-		newModel->addEdge(   symbols["object"], symbols["table"], "in");
-
-
-		if (first) state = 0;
-
-		if (state == 0)
-		{
-
-			try
-			{
-				Pose6D target;
-				WeightVector weights;
-				try
-				{
-					target.x = str2float(symbols["object"]->getAttribute("x"));
-					target.y = str2float(symbols["object"]->getAttribute("y"));
-					target.z = str2float(symbols["object"]->getAttribute("z"));
-					target.rx = str2float(symbols["object"]->getAttribute("rx"));
-					target.ry = str2float(symbols["object"]->getAttribute("ry"));
-					target.rz = str2float(symbols["object"]->getAttribute("rz"));
-					weights.x = 1;
-					weights.y = 1;
-					weights.z = 1;
-					weights.rx = 1;
-					weights.ry = 0;
-					weights.rz = 1;
-				}
-				catch (...)
-				{
-					printf("graspingAgent: Error reading data from cognitive model (symbol %d): (%s:%d)\n", symbols["object"]->identifier, __FILE__, __LINE__);
-				}
-				try
-				{
-					bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
-				}
-				catch (...)
-				{
-					printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
-				}
-				sendModificationProposal(newModel, worldModel);
-			}
-			catch(...)
-			{
-				printf("graspingAgent: Couldn't publish new model\n");
-			}
-		}
-
+		symbols = newModel->getSymbolsMap(params, "object", "table");
 	}
 	catch(...)
 	{
 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
 	}
+
+
+	if (state == 0) // 1º approach hand
+	{
+		bodyinversekinematics_proxy->setFingers(100);
+		usleep(100000);
+		sendRightArmToTargetFullPose(symbols["object"], offset);
+
+		time = QTime::currentTime();
+		state = 1;
+	}
+	else if (state == 1) // wait
+	{
+		if (time.elapsed() > 4000) { state = 0; }
+		else
+		{
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"])+offset, "world").norm2();
+			printf("state==1: %f\n", distance);
+			if (distance < 50)
+			{
+				state = 2;
+			}
+		}
+	}
+	else if (state == 2) // 2º get the hand into the object
+	{
+		bodyinversekinematics_proxy->setFingers(100);
+		usleep(100000);
+		sendRightArmToTargetFullPose(symbols["object"], offset.operator*(0.4));
+		time = QTime::currentTime();
+		state = 3;
+	}
+	else if (state == 3) // wait
+	{
+		if (time.elapsed() > 4000) { state = 0; }
+		else
+		{
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"]) + offset.operator*(0.4), "world").norm2();
+			printf("state==3: %f\n", distance);
+			if (distance < 5)
+			{
+				state = 4;
+			}
+		}
+	}
+	else if (state == 4) // 3º get the hand into the object
+	{
+		bodyinversekinematics_proxy->setFingers(50);
+		time = QTime::currentTime();
+		state = 5;
+	}
+	else if (state == 5) // wait
+	{
+		if (time.elapsed() > 4000) { state = 0; }
+		else
+		{
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"]) + offset.operator*(0.4), "world").norm2();
+			printf("state==5: %f\n", distance);
+			if (distance < 5)
+			{
+				state = 6;
+			}
+		}
+	}
+	else if (state == 6)
+	{
+		try
+		{
+			bodyinversekinematics_proxy->setFingers(50);
+			usleep(500000);
+// 			qFatal("got it!!!! :-D");
+			newModel->removeEdge(symbols["object"], symbols["table"], "in");
+			newModel->addEdge(   symbols["object"], symbols["robot"], "in");
+			sendModificationProposal(newModel, worldModel);
+			time = QTime::currentTime();
+			state = 7;
+		}
+		catch(...)
+		{
+			printf("graspingAgent: Couldn't publish new model\n");
+		}
+	}
+	else
+	{
+		if (time.elapsed() > 4000)
+		{
+			state = 0;
+		}
+	}
+
 }
 
+
+QVec SpecificWorker::getObjectsLocation(AGMModelSymbol::SPtr &object)
+{
+	return QVec::vec3(
+	 str2float(object->getAttribute("x")),
+	 str2float(object->getAttribute("y")),
+	 str2float(object->getAttribute("z"))
+	);
+}
+
+void SpecificWorker::sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec offset)
+{
+	Pose6D target;
+	WeightVector weights;
+	try
+	{
+		QVec targetPos = getObjectsLocation(targetObject) + offset;
+		targetPos.print("targetFullPose");
+		target.x = targetPos(0);
+		target.y = targetPos(1);
+		target.z = targetPos(2);
+		weights.x = 1;
+		weights.y = 1;
+		weights.z = 1;
+		target.rx = str2float(targetObject->getAttribute("rx"));
+		target.ry = str2float(targetObject->getAttribute("ry"));
+		target.rz = str2float(targetObject->getAttribute("rz"));
+		weights.rx = 1;
+		weights.ry = 1;
+		weights.rz = 1;
+	}
+	catch (...)
+	{
+		printf("graspingAgent: Error reading data from cognitive model (symbol %d): (%s:%d)\n", targetObject->identifier, __FILE__, __LINE__);
+	}
+	try
+	{
+		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+	}
+	catch (...)
+	{
+		printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
+	}
+}
+
+void SpecificWorker::sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetObject, QVec offset)
+{
+	Pose6D target;
+	WeightVector weights;
+	try
+	{
+		QVec targetPos = getObjectsLocation(targetObject) + offset;
+		targetPos.print("targetPosition");
+		target.x = targetPos(0);
+		target.y = targetPos(1);
+		target.z = targetPos(2);
+		weights.x = 1;
+		weights.y = 1;
+		weights.z = 1;
+		target.rx = 0;
+		target.ry = 0;
+		target.rz = 0;
+		weights.rx = 0;
+		weights.ry = 0;
+		weights.rz = 0;
+	}
+	catch (...)
+	{
+		printf("graspingAgent: Error reading data from cognitive model (symbol %d): (%s:%d)\n", targetObject->identifier, __FILE__, __LINE__);
+	}
+	try
+	{
+		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+	}
+	catch (...)
+	{
+		printf("graspingAgent: Couldn't set RIGHTARM target (maybe a communication problem?)\n");
+	}
+}
 
 void SpecificWorker::action_SetObjectReach(bool first)
 {
@@ -525,7 +601,7 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
-	if (backAction != "setobjectreach" or innerModel->transform("root", "finger_right_1_1_tip")(1)<1000)
+	if (backAction != "setobjectreach" or innerModel->transform("root", "grabPositionHandR")(1)<1000)
 	{
 			backAction = action;
 			printf("first time, set arm for manipulation\n");

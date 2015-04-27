@@ -76,11 +76,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	}
 
 	init();
-	
+
 	mutex->lock();
 		INITIALIZE_READY = true;
 	mutex->unlock();
-	
+
 	timer.start(50);
 	return true;
 }
@@ -95,16 +95,16 @@ void SpecificWorker::init()
 {
 	// RECONFIGURABLE PARA CADA ROBOT: Listas de motores de las distintas partes del robot --------------- OJO CON EL ORDEN!!!!!!!!!!!!!!!!!!!!!!!!!!
 	listaBrazoIzquierdo	<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2";
-	listaBrazoDerecho 	<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" /*<< "rightWrist1" << "rightWrist2"*/;
-	
-	
+	listaBrazoDerecho 	<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2";
+
+
 	listaCabeza 		<< "head_yaw_joint" << "head_pitch_joint";
 	listaMotores 		<< "leftShoulder1" << "leftShoulder2" << "leftShoulder3" << "leftElbow" << "leftForeArm" << "leftWrist1" << "leftWrist2"
 						<< "rightShoulder1" << "rightShoulder2" << "rightShoulder3" << "rightElbow"<< "rightForeArm" << "rightWrist1" << "rightWrist2"
 						<< "head_yaw_joint" << "head_pitch_joint";
-						
+
 	qDebug()<<"HOLA----------->"<<listaMotores<<" "<<listaMotores.size();
-				
+
 	// PREPARA LA CINEMATICA INVERSA: necesita el innerModel, los motores y el tip:
 	QString tipRight = "grabPositionHandR";
 	QString tipLeft = "grabPositionHandL";
@@ -113,8 +113,8 @@ void SpecificWorker::init()
 
 	IK_BrazoDerecho = new Cinematica_Inversa(innerModel, listaBrazoDerecho, tipRight);
 	IK_BrazoIzquierdo = new Cinematica_Inversa(innerModel, listaBrazoIzquierdo, tipLeft);
-	IK_Cabeza = new Cinematica_Inversa(innerModel, listaCabeza, nose);	
-	
+	IK_Cabeza = new Cinematica_Inversa(innerModel, listaCabeza, nose);
+
 	// CREA EL MAPA DE PARTES DEL CUERPO: por ahora los brazos.
 	bodyParts.insert("LEFTARM", BodyPart(innerModel, IK_BrazoIzquierdo, "LEFTARM", tipLeft, listaBrazoIzquierdo));
 	bodyParts.insert("RIGHTARM", BodyPart(innerModel, IK_BrazoDerecho, "RIGHTARM", tipRight, listaBrazoDerecho));
@@ -122,7 +122,7 @@ void SpecificWorker::init()
 
 	//Initialize proxy to RCIS
 	proxy = jointmotor0_proxy;
-	
+
 	qDebug()<<"DEBUGEANDO 1";
 
 	actualizarInnermodel(listaMotores);  // actualizamos los ángulos de los motores del brazo derecho
@@ -134,7 +134,7 @@ void SpecificWorker::init()
  		goHome(p.getPartName().toStdString());
 	setFingers(0);
 	sleep(1);
-	
+
 	actualizarInnermodel(listaMotores);
 
 /* 	innerModel->transform("world", QVec::zeros(3),tipRight).print("RightTip in World");
@@ -256,7 +256,7 @@ void SpecificWorker::convertInnerModelFromMilimetersToMeters(InnerModelNode* nod
 		v1 = a1.center();
 	//printf("%s -------------------->      (%f,  %f,  %f) --- [%f , %f , %f]\n", plane->id.toStdString().c_str(), v1[0], v1[1], v1[2], a1.width(), a1.height(), a1.depth());
 	}
-	
+
 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)))
 	{
 		mesh->tx /= FACTOR; mesh->ty /= FACTOR; mesh->tz /= FACTOR;
@@ -309,7 +309,7 @@ void SpecificWorker::compute( )
 		{
 
 			Target &target = iterador.value().getHeadFromTargets();
-	
+
  			//if ( target.getType() == Target::TargetType::ALIGNAXIS or  targetHasAPlan( *innerModel, target ) == true)
 				{
 					target.annotateInitialTipPose();
@@ -318,7 +318,7 @@ void SpecificWorker::compute( )
 					target.print("BEFORE PROCESSING");
 
 					iterador.value().getInverseKinematics()->resolverTarget(target);
-					
+
 					if(target.getError() <= 0.9 and target.isAtTarget() == false) //local goal achieved: execute the solution
 					{
 						moveRobotPart(target.getFinalAngles(), iterador.value().getMotorList());
@@ -345,7 +345,7 @@ void SpecificWorker::compute( )
 			{
 					mutex->lock();
 						iterador.value().removeHeadFromTargets(); //eliminamos el target resuelt
-						iterador.value().cleanJointStep();						
+						iterador.value().cleanJointStep();
 					mutex->unlock();
 			}
 		}//if
@@ -354,12 +354,12 @@ void SpecificWorker::compute( )
 
 /**
  * @brief TARGET HAS A PLAN
- * This method 
+ * This method
  *
  * @param innerModel the innerModel
  * @param target the target point of the space
  * @return bool
- */ 
+ */
 bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 {
 	//Convert to ROBOT referece frame to facilitate SAMPLING procedure
@@ -418,7 +418,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel &innerModel,  Target& target)
 // 		if(i==path.size()-1)																					///NO ROTATION DURING PATH PLANNING
 // 			t.setWeights( lastTarget.getWeights() );
 		bodyParts["RIGHTARM"].addTargetToList(t);
-	}	
+	}
 	return true;
 }
 
@@ -470,7 +470,7 @@ void SpecificWorker::removeInnerModelTarget(const Target& target)
  * 		  publisher joystick (FALCON) send to him.
  * @param data struct with the axis coordinates, the speed and the buttons clicked.
  * @return void
- */ 
+ */
 void SpecificWorker::sendData(const TData& data)
 {
 	if( INITIALIZE_READY == true)
@@ -482,14 +482,14 @@ void SpecificWorker::sendData(const TData& data)
 		// 		std::cout << "	" << a.name << " " << a.value << std::endl;
 		// 	for(auto b: data.buttons)
 		// 		std::cout << "	" << b.clicked << std::endl;
-		
+
 		//Preparamos los datos para enviarlo al BIK:
 		RoboCompBodyInverseKinematics::Axis axis;
 		for(auto a : data.axes)
 		{
 			if( a.name == "x") axis.x = a.value;
 			if( a.name == "y") axis.y = a.value;
-			if( a.name == "z") axis.z = a.value;	
+			if( a.name == "z") axis.z = a.value;
 		}
 		advanceAlongAxis("RIGHTARM", axis, 150);
 	}
@@ -546,7 +546,7 @@ void SpecificWorker::setTargetPose6D(const string& bodyPart, const Pose6D& targe
 
 	qDebug() << "--------------------------------------------------------------------------";
 	qDebug() << __FUNCTION__<< "New target arrived: " << partName << ". For target:" << tar << ". With weights: " << w;
-	
+
 }
 
 /**
@@ -628,7 +628,7 @@ void SpecificWorker::advanceAlongAxis(const string& bodyPart, const Axis& ax, fl
 	Target t(Target::ADVANCEAXIS, innerModel, bodyParts[partName].getTip(), axis, dist);
 
 	mutex->lock();
-		if( bodyParts[partName].getTargets().size() < 2 ) 
+		if( bodyParts[partName].getTargets().size() < 2 )
 			bodyParts[partName].addTargetToList(t);
 	mutex->unlock();
 
@@ -684,7 +684,7 @@ void SpecificWorker::goHome(const string& part)
 {
 	QString partName = QString::fromStdString(part);
 	//clearDraw();
-	
+
 	if ( bodyParts.contains(partName)==false)
 	{
 		qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Not recognized body part";
@@ -770,7 +770,7 @@ TargetState SpecificWorker::getState(const std::string &part)
 			state.elapsedTime = bodyParts[partName].getHeadFromTargets().getElapsedTime();
 			state.finish = false;
 		}
-		
+
 		mutex->unlock();
 	}
 	return state;
@@ -990,14 +990,14 @@ void SpecificWorker::calcularModuloFloat(QVec &angles, float mod)
 }
 
 void SpecificWorker::clearDraw()
-{	
+{
 	try
-	{	
-		innermodelmanager_proxy->removeNode("road");		
+	{
+		innermodelmanager_proxy->removeNode("road");
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
 	{ std::cout << ex << std::endl;}
-	
+
 }
 
 bool SpecificWorker::draw(InnerModelManagerPrx innermodelmanager_proxy, const QList<QVec> &path)
@@ -1010,23 +1010,23 @@ bool SpecificWorker::draw(InnerModelManagerPrx innermodelmanager_proxy, const QL
 	plane.nx = 0; plane.ny = 1; plane.nz = 0;
 	plane.width = 20; 	plane.height = 20;	plane.thickness = 20;
 	plane.texture = "#05ff00";
-	
+
 	try
 	{	std::string  parentAll = "road";
-		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);		
+		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);
 	}
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
 	{ std::cout << ex << std::endl;}
-	
+
 	for(int i=0; i<path.size(); i++)
 	{
-		QString item = "p_" + QString::number(i);		
+		QString item = "p_" + QString::number(i);
 		pose.x = path[i].x()*1000;	pose.y = path[i].y()*1000; pose.z = path[i].z()*1000 ;
 		try
 		{
 			//	qDebug() << "punto" << path[i];
 			innermodelmanager_proxy->addTransform(item.toStdString(),"static","road",pose);
-			innermodelmanager_proxy->addPlane(item.toStdString() + "_point", item.toStdString(), plane);	
+			innermodelmanager_proxy->addPlane(item.toStdString() + "_point", item.toStdString(), plane);
 		}
 		catch(const Ice::Exception &ex){ std::cout << ex << std::endl;}
 		//RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#005500" );
