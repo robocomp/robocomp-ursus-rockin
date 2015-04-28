@@ -1,0 +1,12 @@
+import "/robocomp/interfaces/IDSLs/BodyInverseKinematics.idsl";
+
+Component VisualBIK
+{
+	Communications
+	{
+		implements BodyInverseKinematics;
+		requires BodyInverseKinematics;
+	};
+	language Cpp;
+};
+
