@@ -67,9 +67,9 @@ class SpecificWorker(GenericWorker):
 		
 		# Pueba compleja
 		self.ui.botonCargar.clicked.connect(self.cargarCubos)
-		self.ui.botonIR1.clicked.connect(self.llamarBIK)
-		#self.ui.botonIR2.clicked.connect(self.llamarBIK)
-		#self.ui.botonIR3.clicked.connect(self.llamarBIK)
+		self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
+		#self.ui.botonIR2.clicked.connect(self.llamarBIK_2)
+		#self.ui.botonIR3.clicked.connect(self.llamarBIK_3)
 
 	def setParams(self, params):
 		#try:
@@ -180,6 +180,7 @@ class SpecificWorker(GenericWorker):
 		print 'CARGANDO CUBOS...'
 		# Inicializamos el fichero de lectura
 		infile = open("/home/robocomp/robocomp/files/innermodel/worlds/pruebaRockin.xml", 'r') 
+		item = 0
 		for line in infile:
 			if line.find('<transform id="CUBO_')!=-1:
 				# Tenemos la linea con el patron: <transform id="CUBO_X" tx="X" ty="X" tz="X" [rx, ry rz]> 
@@ -191,7 +192,8 @@ class SpecificWorker(GenericWorker):
 				# Longitud minima: 5 (solo traslaciones)
 				vector = (line.split('>'))[0].split()
 				# Sacamos el nombre del cubo:
-				nombreCubo = str((vector[1].split('='))[1].split('"')[1])
+				#nombreCubo = str((vector[1].split('='))[1].split('"')[1])
+				#nombresCubos[i] = nombreCubo
 				
 				# Sacamos las tralaciones y las rotaciones eliminando todo lo que no sea numerico
 				for elemento in vector:
@@ -203,7 +205,8 @@ class SpecificWorker(GenericWorker):
 					if elemento.find('rz')!=-1: pose[5] = float((elemento.replace('rz="', '')).replace('"',''))
 					
 				# Guardamos la pose en el dicionario
-				posicionCubos[nombreCubo] = pose
+				posicionCubos[item] = pose
+				item = item+1
 		infile.close()
 
 		i=1
@@ -222,6 +225,34 @@ class SpecificWorker(GenericWorker):
 		print 'FIN CARGAR CUBOS: '
 		
 	@QtCore.Slot()
-	def llamarBIK(self):
+	def llamarBIK_1(self):
 		# LLamar al BIK y pasarle el vector POSE:
-		print 'Llamando a BIK'
+		print 'Preparando vector pose 6D'
+		print posicionCubos[0]
+		part = "LEFTARM"
+		pose6D = posicionCubos[0]
+		weights = [1,1,1,1,1,1]
+		self.bodyinversekinematics_proxy.setTargetPose6D(part, pose6D, weights, 250)
+		print 'Llamando a BIK con pose6D: '
+		
+		
+		
+		
+		##  try
+        #{
+                #RoboCompBodyInverseKinematics::Pose6D pose6D;
+                #pose6D.x = PX_6->value();               pose6D.y = PY_6->value();               pose6D.z = PZ_6->value();
+                #pose6D.rx = RX_6->value();              pose6D.ry = RY_6->value();              pose6D.rz = RZ_6->value();
+
+                #QVec pose = QVec::zeros(6);
+                #pose[0] = pose6D.x/1000;                pose[1] = pose6D.y/1000;                pose[2] = pose6D.z/1000;
+                #moveTargetRCIS(pose);
+
+                #RoboCompBodyInverseKinematics::WeightVector weights;
+                #weights.x = 1;          weights.y = 1;          weights.z = 1;
+                #weights.rx = 1;         weights.ry = 1;         weights.rz = 1;
+
+                #std::string part = "LEFTARM";
+                #bodyinversekinematics_proxy->setRobot(1);
+                #bodyinversekinematics_proxy->setTargetPose6D(part, pose6D, weights, 250);
+
