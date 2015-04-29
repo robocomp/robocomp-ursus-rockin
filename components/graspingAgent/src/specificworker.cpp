@@ -416,7 +416,7 @@ void SpecificWorker::action_GraspObject(bool first)
 	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
 	{
-		symbols = newModel->getSymbolsMap(params, "object", "table");
+		symbols = newModel->getSymbolsMap(params, "object", "table", "robot");
 	}
 	catch(...)
 	{

@@ -1,9 +1,0 @@
-#
-# This property is used to configure the endpoints of the subscriber adapter.
-#
-CommonBehavior.Endpoints=tcp -p 12204
-TrajectoryRobot2DComp.Endpoints=tcp -p 39349
-
-LaserProxy = laser:tcp -h localhost -p 10003
-InnerModelManagerProxy = innermodelmanager:tcp -h localhost -p 11175
-DifferentialRobotProxy = differentialrobot:tcp -h localhost -p 10004

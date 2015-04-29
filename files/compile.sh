@@ -99,6 +99,12 @@ cd /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp/
 cmake .
 make -j5
 
+# apriltags
+echo "make camara"
+cd /home/robocomp/robocomp/components/robocomp-robolab/components/cameraV4lComp/
+cmake .
+make -j5
+
 
 
 
