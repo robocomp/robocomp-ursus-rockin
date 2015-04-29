@@ -67,7 +67,7 @@
 
  <node alias="icestorm" endpoint="IceStorm/TopicManager:default -h robonuc1.local -p 9999">
   <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus/etc/" />
-  <upCommand command="rcremote robonuc1.local icestorm /home/robocomp/robocomp/components/robocomp-ursus/etc/ icebox --Ice.Config=ursus.conf" />
+  <upCommand command="rcremote robonuc1.local icestorm /home/robocomp/robocomp/components/robocomp-ursus/etc/ icebox --Ice.Config=icebox.conf" />
   <downCommand command="ssh robolab@robonuc1.local killall -9 icebox" />
   <configFile path="ursus.conf" />
   <xpos value="-13.6332297432" />
@@ -124,7 +124,7 @@
   <dependence alias="relocalizadorTecho" />
   <dependence alias="commonjoint" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote robonuc1.local inverseKinematics /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp ./bin/bik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematics.conf" />
+  <upCommand command="rcremote robonuc1.local inverseKinematics /home/robocomp/robocomp/components/robocomp-ursus/components/bikComp ./bin/bik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematics.conf" />
   <downCommand command="ssh robolab@robonuc2.local killall -9 lokiarmcomp" />
   <configFile path="/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematics.conf" />
   <xpos value="2.08531880272" />
