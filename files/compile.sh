@@ -47,7 +47,7 @@ sudo make install
 
 # bik
 echo "make bik"
-cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp/
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/bikComp/
 cmake .
 make -j5
 
