@@ -77,7 +77,7 @@ private:
 
 bool isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node);
 float distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr symbol);
-float distanceToPolygon(QVec reference, std::string polygon_str);
+float distanceToPolygon(QVec reference, QVec position, std::string polygon_str);
 
 	void setRightArmUp_Reflex();
 	void setRightArm_GRASP_0_Reflex();

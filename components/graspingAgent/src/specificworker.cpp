@@ -62,7 +62,7 @@ void SpecificWorker::compute( )
 
 }
 
-#define THRESHOLD 500.
+#define THRESHOLD 400.
 
 void SpecificWorker::manageReachedObjects()
 {
@@ -79,7 +79,7 @@ void SpecificWorker::manageReachedObjects()
 		{
 			// Avoid working with rooms
 			if (isRoom(newModel, node)) continue;
-			
+
 			/// Compute distance and new state
 			float d2n = distanceToNode("base_head", newModel, node);
 			printf("distance: %d(%s)=%f\n", node->identifier, node->symbolType.c_str(), d2n);
@@ -135,8 +135,8 @@ void SpecificWorker::manageReachedObjects()
 
 	const int32_t robotId = worldModel->getIdentifierByType("robot");
 	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-	const float rx = str2float(robot->getAttribute("x"));
-	const float rz = str2float(robot->getAttribute("z"));
+	const float rx = str2float(robot->getAttribute("tx"));
+	const float rz = str2float(robot->getAttribute("tz"));
 	const float ralpha = str2float(robot->getAttribute("alpha"));
 
 	// Avoid repeating the same goal and confuse the navigator
@@ -199,49 +199,61 @@ bool SpecificWorker::isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 	return false;
 }
 
+// std::vector<std::pair<float, float>> getCoordinates
 
 float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 {
+	printf("distance node %d\n", node->identifier);
 	bool isPolygon = false;
 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
 	{
 		if ((*edge_itr)->getLabel() == "table") isPolygon = true;
 	}
 
+	printf("isPolygon: %d\n", isPolygon);
+
+	const float x = str2float(node->getAttribute("tx"));
+	const float y = str2float(node->getAttribute("ty"));
+	const float z = str2float(node->getAttribute("tz"));
+
 	if (isPolygon)
 	{
 		const std::string polygon = node->getAttribute("polygon");
 		const QVec head_in_floor = innerModel->transform("world", reference_name.c_str());
-		return distanceToPolygon(head_in_floor, polygon);
+		return distanceToPolygon(head_in_floor, QVec::vec3(x, y, z), polygon);
 	}
 	else
 	{
-		const float x = str2float(node->getAttribute("x"));
-		const float y = str2float(node->getAttribute("y"));
-		const float z = str2float(node->getAttribute("z"));
 		return innerModel->transform("base_head", QVec::vec3(x,y,z), "world").norm2();
 	}
 }
 
-float SpecificWorker::distanceToPolygon(QVec reference, std::string polygon_str)
+float SpecificWorker::distanceToPolygon(QVec reference, QVec position, std::string polygon_str)
 {
 	boost::geometry::model::d2::point_xy<int> point(reference(0), reference(2));
 	boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<float> > poly;
-	
+
+// 	printf("p %s\n", polygon_str.c_str());
 	std::vector<std::string> strs;
 	boost::split(strs, polygon_str, boost::is_any_of(";"));
+// 	printf("æ %f  %f\n", position(0);
 	for (auto coords : strs)
 	{
+// 		printf("pp %s\n", coords.c_str());
 		std::vector<std::string> strs_coords;
 		boost::split(strs_coords, coords, boost::is_any_of("(),"));
 		if (strs_coords.size()<2)
 			return std::nan("1");
-		const float x = atoi(strs_coords[0].c_str());
-		const float z = atoi(strs_coords[1].c_str());
+// 		for (auto ss : strs_coords) printf("<%d %s\n", ddd++, ss.c_str());
+// 		printf(" s %d\n", strs_coords.size());
+		const float x = atof(strs_coords[1].c_str());
+		const float z = atof(strs_coords[2].c_str());
+		printf("< %f %f\n", x, z);
 		boost::geometry::model::d2::point_xy<float> vertex(x, z);
-		boost::geometry::append(poly, point);
+		boost::geometry::append(poly, vertex);
 	}
-	
+
+
 	return boost::geometry::distance(poly, point);
 }
 
@@ -437,8 +449,8 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 	try
 	{
 		AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
-		const float x = str2float(goalTable->getAttribute("x"));
-		const float z = str2float(goalTable->getAttribute("z"));
+		const float x = str2float(goalTable->getAttribute("tx"));
+		const float z = str2float(goalTable->getAttribute("tz"));
 		QVec worldRef = QVec::vec3(x, 800, z);
 		QVec robotRef = innerModel->transform("robot", worldRef, "world");
 		printf("saccadic3D\n");
@@ -567,9 +579,9 @@ void SpecificWorker::action_GraspObject(bool first)
 QVec SpecificWorker::getObjectsLocation(AGMModelSymbol::SPtr &object)
 {
 	return QVec::vec3(
-	 str2float(object->getAttribute("x")),
-	 str2float(object->getAttribute("y")),
-	 str2float(object->getAttribute("z"))
+	 str2float(object->getAttribute("tx")),
+	 str2float(object->getAttribute("ty")),
+	 str2float(object->getAttribute("tz"))
 	);
 }
 
@@ -673,9 +685,9 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	if (objectId > 0)
 	{
 		AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-		const float x = str2float(goalObject->getAttribute("x"));
-		const float y = str2float(goalObject->getAttribute("y"));
-		const float z = str2float(goalObject->getAttribute("z"));
+		const float x = str2float(goalObject->getAttribute("tx"));
+		const float y = str2float(goalObject->getAttribute("ty"));
+		const float z = str2float(goalObject->getAttribute("tz"));
 		saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
 	}
 	else
@@ -749,8 +761,8 @@ void SpecificWorker::updateInnerModel()
 	try
 	{
 		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
-		const float x     = str2float(robot->getAttribute("x"));
-		const float z     = str2float(robot->getAttribute("z"));
+		const float x     = str2float(robot->getAttribute("tx"));
+		const float z     = str2float(robot->getAttribute("tz"));
 		const float alpha = str2float(robot->getAttribute("alpha"));
 		innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
 

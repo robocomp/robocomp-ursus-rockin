@@ -58,7 +58,7 @@ private:
 
 
 
-	void action_FindObjectVisuallyInTable();
+	void action_FindObjectVisuallyInTable(bool newAction);
 
 
 

@@ -42,15 +42,16 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::compute( )
 {
 	static std::string previousAction = "";
+	bool newAction = false;
 	if (previousAction != action)
-	{
-		previousAction = action;
-		printf("New action: %s\n", action.c_str());
+		newAction = true;
 
-		if (action == "findobjectvisuallyintable")
-		{
-			action_FindObjectVisuallyInTable();
-		}
+	previousAction = action;
+	printf("New action: %s\n", action.c_str());
+
+	if (action == "findobjectvisuallyintable")
+	{
+		action_FindObjectVisuallyInTable(newAction);
 	}
 }
 
@@ -459,9 +460,30 @@ void SpecificWorker::getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t
 	printf("------------------------------->%d %d\n", objectSymbolID, objectStSymbolID);
 }
 
-void SpecificWorker::action_FindObjectVisuallyInTable()
+void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 {
-	
+	static QTime lastTime;
+
+	if (newAction)
+		lastTime = QTime::currentTime();
+
+	if (lastTime.elapsed() > 5000)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		auto symbols = newModel->getSymbolsMap(params, "container");
+		auto node = symbols["container"];
+
+		for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
+		{
+			if ((*edge_itr)->getLabel() == "noExplored")
+			{
+				(*edge_itr)->setLabel("explored");
+				sendModificationProposal(worldModel, newModel);
+				return;
+			}
+		}
+
+	}
 }
 
 

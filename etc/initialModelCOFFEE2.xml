@@ -2,9 +2,9 @@
 
 	<!-- R O O M -->
 	<symbol id="3" type="object">
-		<attribute key="x" value="200" />
-		<attribute key="y" value="0" />
-		<attribute key="z" value="0" />
+		<attribute key="tx" value="200" />
+		<attribute key="ty" value="0" />
+		<attribute key="tz" value="0" />
 		<attribute key="polygon" value="(-1920,3500);(2000,3500);(2000,-3300);(-1920,-3300)" />
 	</symbol>
 	<symbol id="4" type="roomSt" />
@@ -15,9 +15,9 @@
 
 	<!-- R O B O T -->
 	<symbol id="1" type="robot">
-		<attribute key="x" value="0" />
-		<attribute key="y" value="0" />
-		<attribute key="z" value="0" />
+		<attribute key="tx" value="0" />
+		<attribute key="ty" value="0" />
+		<attribute key="tz" value="0" />
 		<attribute key="alpha" value="0" />
 	</symbol>
 	<symbol id="2" type="robotSt">
@@ -27,9 +27,9 @@
 
 	<!-- non-Explored table -->
 	<symbol id="5" type="object">
-		<attribute key="x" value="1340" />
-		<attribute key="y" value="800" />
-		<attribute key="z" value="1200" />
+		<attribute key="tx" value="1340" />
+		<attribute key="ty" value="800" />
+		<attribute key="tz" value="1200" />
 		<attribute key="tag" value="0" />
 		<attribute key="polygon" value="(-842,1854);(775,1854);(775,751);(-842,751)" />
 	</symbol>
