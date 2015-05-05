@@ -60,7 +60,7 @@
 
  <node alias="icestorm" endpoint="IceStorm/TopicManager:default -h localhost -p 9999">
   <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
-  <upCommand command="rcremote localhost icestorm /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ icebox --Ice.Config=ursus.conf" />
+  <upCommand command="rcremote localhost icestorm /home/robocomp/robocomp/components/robocomp-ursus/etc/ icebox --Ice.Config=icebox.conf" />
   <downCommand command="killall -9 icebox" />
   <configFile path="xxx" />
   <xpos value="0" />
@@ -94,7 +94,7 @@
   <dependence alias="faulhaber" />
   <dependence alias="dynamixel" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost commonjoint /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint/ ./bin/ursuscommonjointcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ursusCommon.conf" />
+  <upCommand command="rcremote localhost commonjoint /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint/ ./bin/ursuscommonjointcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/ursusCommon.conf" />
   <downCommand command="killall -9 ursuscommonjointcomp" />
   <configFile path="xxx" />
   <xpos value="146.119764607" />
@@ -127,7 +127,7 @@
  <node alias="laserRGBD" endpoint="laser:tcp -h localhost -p 10003">
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost laserRGBD /home/robocomp/robocomp/components/robocomp-robolab/experimental/laserRGBDComp/ ./bin/laserrgbdComp --Ice.Config=bin/laserrgbdComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/laserrgbd.conf" />
+  <upCommand command="rcremote localhost laserRGBD /home/robocomp/robocomp/components/robocomp-robolab/experimental/laserRGBDComp/ ./bin/laserrgbdComp --Ice.Config=bin/laserrgbdComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/laserrgbd.conf" />
   <downCommand command="killall -9 laserrgbdComp" />
   <configFile path="xxx" />
   <xpos value="-106.302312459" />
@@ -139,7 +139,7 @@
   <dependence alias="base" />
   <dependence alias="laserRGBD" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost trajectory /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/ ./bin/trajectoryrobot2dcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/trajectoryrobot2d.conf" />
+  <upCommand command="rcremote localhost trajectory /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/ ./bin/trajectoryrobot2dcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/trajectoryrobot2d.conf" />
   <downCommand command="killall -9 trajectoryrobot2dcomp" />
   <configFile path="xxx" />
   <xpos value="-75.8880817451" />
@@ -195,7 +195,7 @@
  <node alias="aprilCamera" endpoint="commonbehavior:tcp -h localhost -p 11258">
   <dependence alias="rgbd" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost aprilCamera /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp/ ./bin/apriltagscomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/apriltags.conf" />
+  <upCommand command="rcremote localhost aprilCamera /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp/ ./bin/apriltagscomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/apriltags.conf" />
   <downCommand command="killall -9 apriltagscomp" />
   <configFile path="xxx" />
   <xpos value="-170" />

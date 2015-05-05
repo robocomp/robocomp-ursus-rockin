@@ -56,7 +56,6 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-
 	try
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("ObjectAgent.InnerModel") ;
@@ -76,7 +75,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	{
 		qFatal("Error reading config params");
 	}
-
 
 	timer.start(Period);
 	return true;
@@ -227,24 +225,39 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 		switch(ap.id)
 		{
 			case 0: // EXPLORED TABLE
-// 				printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateTable(ap, newModel)) publishModel = true;
+				if (updateTable(ap, newModel))
+				{
+					publishModel = true;
+					printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+				}
 				break;
 			case 1: // NON-EXPLORED TABLE
-// 				printf("TABLE NE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateTable(ap, newModel)) publishModel = true;
+				if (updateTable(ap, newModel))
+				{
+					publishModel = true;
+					printf("TABLE NE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+				}
 				break;
 			case 12: // MUG
-// 				printf("MUG %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateMug(ap, newModel)) publishModel = true;
+				if (updateMug(ap, newModel))
+				{
+					printf("MUG %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+					publishModel = true;
+				}
 				break;
 			case 13:
-// 				printf("MILK %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateMilk(ap, newModel)) publishModel = true;
-				break;
+				if (updateMilk(ap, newModel))
+				{
+					printf("MILK %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+					publishModel = true;
+				}
+					break;
 			case 14:
-// 				printf("E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateCoffee(ap, newModel)) publishModel = true;
+				if (updateCoffee(ap, newModel))
+				{
+					printf("COFFEE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+					publishModel = true;
+				}
 				break;
 		}
 	}

@@ -17,7 +17,13 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- #include "specificworker.h"
+#include "specificworker.h"
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+
+
 
 /**
 * \brief Default constructor
@@ -72,36 +78,21 @@ void SpecificWorker::manageReachedObjects()
 		if (node->symboltype() == "object")
 		{
 			// Avoid working with rooms
-			bool isRoom = false;
-			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
-			{
-				AGMModelEdge edge = *edge_itr;
-				if (edge->getLabel() == "room")
-				{
-					isRoom = true;
-				}
-			}
-			if (isRoom)
-			{
-				continue;
-			}
-			/// Get coordinates
-			const float x = str2float(node->getAttribute("x"));
-			const float y = str2float(node->getAttribute("y"));
-			const float z = str2float(node->getAttribute("z"));
+			if (isRoom(newModel, node)) continue;
+			
 			/// Compute distance and new state
-			const float distance = innerModel->transform("base_head", QVec::vec3(x,y,z), "world").norm2();
-// 			printf("object %d: %f\n", node->identifier, distance);
+			float d2n = distanceToNode("base_head", newModel, node);
+			printf("distance: %d(%s)=%f\n", node->identifier, node->symbolType.c_str(), d2n);
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
 				AGMModelEdge &edge = *edge_itr;
-				if (edge->getLabel() == "reach" and distance > THRESHOLD)
+				if (edge->getLabel() == "reach" and d2n > THRESHOLD)
 				{
 					edge->setLabel("noReach");
 					printf("object %d STOPS REACH\n", node->identifier);
 					changed = true;
 				}
-				else if (edge->getLabel() == "noReach" and distance < THRESHOLD)
+				else if (edge->getLabel() == "noReach" and d2n < THRESHOLD)
 				{
 					edge->setLabel("reach");
 					printf("___ %s ___\n", edge->getLabel().c_str());
@@ -195,6 +186,64 @@ void SpecificWorker::manageReachedObjects()
 */
 }
 
+bool SpecificWorker::isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node)
+{
+	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model); edge_itr++)
+	{
+		AGMModelEdge edge = *edge_itr;
+		if (edge->getLabel() == "room")
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
+{
+	bool isPolygon = false;
+	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
+	{
+		if ((*edge_itr)->getLabel() == "table") isPolygon = true;
+	}
+
+	if (isPolygon)
+	{
+		const std::string polygon = node->getAttribute("polygon");
+		const QVec head_in_floor = innerModel->transform("world", reference_name.c_str());
+		return distanceToPolygon(head_in_floor, polygon);
+	}
+	else
+	{
+		const float x = str2float(node->getAttribute("x"));
+		const float y = str2float(node->getAttribute("y"));
+		const float z = str2float(node->getAttribute("z"));
+		return innerModel->transform("base_head", QVec::vec3(x,y,z), "world").norm2();
+	}
+}
+
+float SpecificWorker::distanceToPolygon(QVec reference, std::string polygon_str)
+{
+	boost::geometry::model::d2::point_xy<int> point(reference(0), reference(2));
+	boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<float> > poly;
+	
+	std::vector<std::string> strs;
+	boost::split(strs, polygon_str, boost::is_any_of(";"));
+	for (auto coords : strs)
+	{
+		std::vector<std::string> strs_coords;
+		boost::split(strs_coords, coords, boost::is_any_of("(),"));
+		if (strs_coords.size()<2)
+			return std::nan("1");
+		const float x = atoi(strs_coords[0].c_str());
+		const float z = atoi(strs_coords[1].c_str());
+		boost::geometry::model::d2::point_xy<float> vertex(x, z);
+		boost::geometry::append(poly, point);
+	}
+	
+	return boost::geometry::distance(poly, point);
+}
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {

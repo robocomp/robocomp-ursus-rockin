@@ -27,9 +27,9 @@
 
 	<!-- non-Explored table -->
 	<symbol id="5" type="object">
-		<attribute key="x" value="1240" />
+		<attribute key="x" value="1340" />
 		<attribute key="y" value="800" />
-		<attribute key="z" value="1300" />
+		<attribute key="z" value="1200" />
 		<attribute key="tag" value="0" />
 		<attribute key="polygon" value="(-842,1854);(775,1854);(775,751);(-842,751)" />
 	</symbol>
@@ -45,6 +45,7 @@
 	<link src="5" dst="6" label="position" />
 	<link src="5" dst="6" label="reachable" />
 	<link src="5" dst="6" label="noExplored" />
+
 
 
 

@@ -604,6 +604,9 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	float alpha;
 	switch (objectId)
 	{
+		case 5:
+			alpha = -0;
+			break;
 		case 7:
 			alpha = -3.141592;
 			break;
@@ -611,21 +614,15 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 			alpha = 0;
 			break;
 		default:
-			qFatal("navigation: unknown object to reach");
+			qFatal("navigation: can't get orientation goal for reaching object %d\n", objectId);
 			break;
 	}
 	printf("object (%f, %f, %f)\n", x, z, alpha);
-printf("line: %d %s\n", __LINE__, __FILE__);
 	const int32_t robotId = worldModel->getIdentifierByType("robot");
-printf("%d line: %d %s\n", robotId, __LINE__, __FILE__);
 	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-printf("line: %d %s\n", __LINE__, __FILE__);
 	const float rx = str2float(robot->getAttribute("x"));
-printf("%f line: %d %s\n", rx,  __LINE__, __FILE__);
 	const float rz = str2float(robot->getAttribute("z"));
-printf("%f line: %d %s\n", rz,  __LINE__, __FILE__);
 	const float ralpha = str2float(robot->getAttribute("alpha"));
-printf("%f line: %d %s\n", ralpha, __LINE__, __FILE__);
 	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
 
 	// Avoid repeating the same goal and confuse the navigator
