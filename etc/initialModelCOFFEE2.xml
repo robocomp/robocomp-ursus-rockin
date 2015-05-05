@@ -1,0 +1,51 @@
+<AGMModel>
+
+	<!-- R O O M -->
+	<symbol id="3" type="object">
+		<attribute key="x" value="200" />
+		<attribute key="y" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="polygon" value="(-1920,3500);(2000,3500);(2000,-3300);(-1920,-3300)" />
+	</symbol>
+	<symbol id="4" type="roomSt" />
+	<link src="3" dst="4" label="isKitchen" />
+	<link src="3" dst="4" label="room" />
+	<link src="3" dst="4" label="explored" />
+
+
+	<!-- R O B O T -->
+	<symbol id="1" type="robot">
+		<attribute key="x" value="0" />
+		<attribute key="y" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="alpha" value="0" />
+	</symbol>
+	<symbol id="2" type="robotSt">
+	</symbol>
+	<link src="1" dst="2" label="free" />
+	<link src="1" dst="3" label="in" />
+
+	<!-- non-Explored table -->
+	<symbol id="5" type="object">
+		<attribute key="x" value="1240" />
+		<attribute key="y" value="800" />
+		<attribute key="z" value="1300" />
+		<attribute key="tag" value="0" />
+		<attribute key="polygon" value="(-842,1854);(775,1854);(775,751);(-842,751)" />
+	</symbol>
+	<link src="1" dst="5" label="know" />
+	<link src="5" dst="3" label="in" />
+	<symbol id="6" type="objectSt">
+	</symbol>
+	<link src="5" dst="6" label="table" />
+	<link src="5" dst="6" label="hasStatus" />
+	<link src="5" dst="6" label="noSee" />
+	<link src="5" dst="6" label="classified" />
+	<link src="5" dst="6" label="noReach" />
+	<link src="5" dst="6" label="position" />
+	<link src="5" dst="6" label="reachable" />
+	<link src="5" dst="6" label="noExplored" />
+
+
+
+</AGMModel>
