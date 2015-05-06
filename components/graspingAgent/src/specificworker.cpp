@@ -443,15 +443,15 @@ void SpecificWorker::actionExecution()
 	}
 }
 
-void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
+
+void SpecificWorker::directGazeTowards(AGMModelSymbol::SPtr symbol)
 {
-	int32_t tableId = str2int(params["container"].value);
 	try
 	{
-		AGMModelSymbol::SPtr goalTable = worldModel->getSymbol(tableId);
-		const float x = str2float(goalTable->getAttribute("tx"));
-		const float z = str2float(goalTable->getAttribute("tz"));
-		QVec worldRef = QVec::vec3(x, 800, z);
+		const float x = str2float(symbol->getAttribute("tx"));
+		const float y = str2float(symbol->getAttribute("ty"));
+		const float z = str2float(symbol->getAttribute("tz"));
+		QVec worldRef = QVec::vec3(x, y, z);
 		QVec robotRef = innerModel->transform("robot", worldRef, "world");
 		printf("saccadic3D\n");
 		printf("\n");
@@ -459,6 +459,23 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 	}
 	catch(...)
 	{
+		printf("directGazeTowards\n");
+		throw;
+	}
+}
+
+
+void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
+{
+	try
+	{
+		int32_t tableId = str2int(params["container"].value);
+		directGazeTowards(worldModel->getSymbol(tableId));
+	}
+	catch(...)
+	{
+		printf("Can't get the symbol for the container (table)\n[%s: %d]\n", __FILE__, __LINE__);
+		throw;
 	}
 }
 
@@ -694,6 +711,8 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	{
 		printf ("don't have the object to reach in my model %d\n", objectId);
 	}
+	
+	printf("--------------------\n");
 
 	///
 	/// No more work to do. The label is set passively (from this agent's point of view)
