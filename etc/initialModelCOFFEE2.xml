@@ -27,9 +27,9 @@
 
 	<!-- non-Explored table -->
 	<symbol id="5" type="object">
-		<attribute key="tx" value="1240" />
+		<attribute key="tx" value="1340" />
 		<attribute key="ty" value="800" />
-		<attribute key="tz" value="1300" />
+		<attribute key="tz" value="1200" />
 		<attribute key="tag" value="0" />
 		<attribute key="polygon" value="(-842,1854);(775,1854);(775,751);(-842,751)" />
 	</symbol>
@@ -46,27 +46,7 @@
 	<link src="5" dst="6" label="reachable" />
 	<link src="5" dst="6" label="noExplored" />
 
-	<!-- mug -->
-	<symbol id="9" type="object">
-		<attribute key="tx" value="1000" />
-		<attribute key="ty" value="800" />
-		<attribute key="tz" value="1100" />
-		<attribute key="rx" value="3.1415926535" />
-		<attribute key="ry" value="-1.5707" />
-		<attribute key="rz" value="0" />
-		<attribute key="tag" value="14" />
-	</symbol>
-	<link src="1" dst="9" label="know" />
-	<link src="9" dst="3" label="in" />
-	<link src="9" dst="5" label="in" />
-	<symbol id="10" type="objectSt">
-	</symbol>
-	<link src="9" dst="10" label="noSee" />
-	<link src="9" dst="10" label="hasStatus" />
-	<link src="9" dst="10" label="noReach" />
-	<link src="9" dst="10" label="reachable" />
-	<link src="9" dst="10" label="position" />
-	<link src="9" dst="10" label="classified" />
-	<link src="9" dst="10" label="mug" />
+
+
 
 </AGMModel>

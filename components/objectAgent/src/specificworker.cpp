@@ -42,21 +42,21 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::compute( )
 {
 	static std::string previousAction = "";
+	bool newAction = false;
 	if (previousAction != action)
-	{
-		previousAction = action;
-		printf("New action: %s\n", action.c_str());
+		newAction = true;
 
-		if (action == "findobjectvisuallyintable")
-		{
-			action_FindObjectVisuallyInTable();
-		}
+	previousAction = action;
+	printf("New action: %s\n", action.c_str());
+
+	if (action == "findobjectvisuallyintable")
+	{
+		action_FindObjectVisuallyInTable(newAction);
 	}
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-
 	try
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("ObjectAgent.InnerModel") ;
@@ -76,7 +76,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	{
 		qFatal("Error reading config params");
 	}
-
 
 	timer.start(Period);
 	return true;
@@ -227,24 +226,39 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 		switch(ap.id)
 		{
 			case 0: // EXPLORED TABLE
-// 				printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateTable(ap, newModel)) publishModel = true;
+				if (updateTable(ap, newModel))
+				{
+					publishModel = true;
+					printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+				}
 				break;
 			case 1: // NON-EXPLORED TABLE
-// 				printf("TABLE NE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateTable(ap, newModel)) publishModel = true;
+				if (updateTable(ap, newModel))
+				{
+					publishModel = true;
+					printf("TABLE NE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+				}
 				break;
 			case 12: // MUG
-// 				printf("MUG %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateMug(ap, newModel)) publishModel = true;
+				if (updateMug(ap, newModel))
+				{
+					printf("MUG %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+					publishModel = true;
+				}
 				break;
 			case 13:
-// 				printf("MILK %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateMilk(ap, newModel)) publishModel = true;
-				break;
+				if (updateMilk(ap, newModel))
+				{
+					printf("MILK %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+					publishModel = true;
+				}
+					break;
 			case 14:
-// 				printf("E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				if (updateCoffee(ap, newModel)) publishModel = true;
+				if (updateCoffee(ap, newModel))
+				{
+					printf("COFFEE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+					publishModel = true;
+				}
 				break;
 		}
 	}
@@ -446,9 +460,30 @@ void SpecificWorker::getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t
 	printf("------------------------------->%d %d\n", objectSymbolID, objectStSymbolID);
 }
 
-void SpecificWorker::action_FindObjectVisuallyInTable()
+void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 {
-	
+	static QTime lastTime;
+
+	if (newAction)
+		lastTime = QTime::currentTime();
+
+	if (lastTime.elapsed() > 5000)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		auto symbols = newModel->getSymbolsMap(params, "container");
+		auto node = symbols["container"];
+
+		for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
+		{
+			if ((*edge_itr)->getLabel() == "noExplored")
+			{
+				(*edge_itr)->setLabel("explored");
+				sendModificationProposal(worldModel, newModel);
+				return;
+			}
+		}
+
+	}
 }
 
 

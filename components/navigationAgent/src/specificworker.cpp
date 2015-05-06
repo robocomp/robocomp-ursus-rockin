@@ -478,8 +478,8 @@ void SpecificWorker::action_ChangeRoom(bool newAction)
 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
 
 	AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
-	const float x = str2float(goalRoom->getAttribute("x"));
-	const float z = str2float(goalRoom->getAttribute("z"));
+	const float x = str2float(goalRoom->getAttribute("tx"));
+	const float z = str2float(goalRoom->getAttribute("tz"));
 
 	bool proceed = true;
 	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
@@ -515,36 +515,30 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
 
-printf("%s: %d\n", __FILE__, __LINE__);
 	AGMModelSymbol::SPtr goalTable;
 	AGMModelSymbol::SPtr robot;
 	int32_t tableId;
 	try
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		tableId = str2int(params["container"].value);
 		goalTable = worldModel->getSymbol(tableId);
 		robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
-printf("%s: %d\n", __FILE__, __LINE__);
 	}
 	catch(...)
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		printf("can't access robot or table\n");
 		return;
-printf("%s: %d\n", __FILE__, __LINE__);
 	}
 
-printf("%s: %d\n", __FILE__, __LINE__);
-	const float x = str2float(goalTable->getAttribute("x"));
-	const float z = str2float(goalTable->getAttribute("z"));
+	const float x = str2float(goalTable->getAttribute("tx"));
+	const float z = str2float(goalTable->getAttribute("tz"));
 	float alpha = tableId==7?-3.141592:0;
-printf("%s: %d\n", __FILE__, __LINE__);
+// printf("%s: %d\n", __FILE__, __LINE__);
 
-	const float rx = str2float(robot->getAttribute("x"));
-	const float rz = str2float(robot->getAttribute("z"));
+	const float rx = str2float(robot->getAttribute("tx"));
+	const float rz = str2float(robot->getAttribute("tz"));
 	const float ralpha = str2float(robot->getAttribute("alpha"));
-printf("%s: %d\n", __FILE__, __LINE__);
+// printf("%s: %d\n", __FILE__, __LINE__);
 
 	// Avoid repeating the same goal and confuse the navigator
 	const float errX = abs(rx-x);
@@ -555,7 +549,7 @@ printf("%s: %d\n", __FILE__, __LINE__);
 	errAlpha = abs(errAlpha);
 	if (errX<20 and errZ<20 and errAlpha<0.02)
 		return;
-printf("%s: %d\n", __FILE__, __LINE__);
+// printf("%s: %d\n", __FILE__, __LINE__);
 
 	bool proceed = true;
 	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
@@ -599,11 +593,14 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		printf("object %d not in our model\n", objectId);
 		return;
 	}
-	const float x = str2float(goalObject->getAttribute("x")) - 200.;
-	const float z = str2float(goalObject->getAttribute("z"));
+	const float x = str2float(goalObject->getAttribute("tx")) - 200.;
+	const float z = str2float(goalObject->getAttribute("tz"));
 	float alpha;
 	switch (objectId)
 	{
+		case 5:
+			alpha = -0;
+			break;
 		case 7:
 			alpha = -3.141592;
 			break;
@@ -611,21 +608,15 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 			alpha = 0;
 			break;
 		default:
-			qFatal("navigation: unknown object to reach");
+			qFatal("navigation: can't get orientation goal for reaching object %d\n", objectId);
 			break;
 	}
 	printf("object (%f, %f, %f)\n", x, z, alpha);
-printf("line: %d %s\n", __LINE__, __FILE__);
 	const int32_t robotId = worldModel->getIdentifierByType("robot");
-printf("%d line: %d %s\n", robotId, __LINE__, __FILE__);
 	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-printf("line: %d %s\n", __LINE__, __FILE__);
-	const float rx = str2float(robot->getAttribute("x"));
-printf("%f line: %d %s\n", rx,  __LINE__, __FILE__);
-	const float rz = str2float(robot->getAttribute("z"));
-printf("%f line: %d %s\n", rz,  __LINE__, __FILE__);
+	const float rx = str2float(robot->getAttribute("tx"));
+	const float rz = str2float(robot->getAttribute("tz"));
 	const float ralpha = str2float(robot->getAttribute("alpha"));
-printf("%f line: %d %s\n", ralpha, __LINE__, __FILE__);
 	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
 
 	// Avoid repeating the same goal and confuse the navigator
@@ -701,13 +692,13 @@ void SpecificWorker::action_GraspObject(bool newAction)
 		return;
 	}
 
-	const float x = str2float(goalObject->getAttribute("x"));
-	const float z = str2float(goalObject->getAttribute("z"));
+	const float x = str2float(goalObject->getAttribute("tx"));
+	const float z = str2float(goalObject->getAttribute("tz"));
 	float alpha = (objectId==7 or objectId==100)?-3.141592:0;
 
-	const float rx = str2float(robot->getAttribute("x"));
-	const float rz = str2float(robot->getAttribute("z"));
-	const float ralpha = str2float(robot->getAttribute("z"));
+	const float rx = str2float(robot->getAttribute("tx"));
+	const float rz = str2float(robot->getAttribute("tz"));
+	const float ralpha = str2float(robot->getAttribute("tz"));
 
 	// Avoid repeating the same goal and confuse the navigator
 	const float errX = abs(rx-x);
@@ -759,8 +750,8 @@ void SpecificWorker::odometryAndLocationIssues()
 		AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
 		try
 		{
-			robot->setAttribute("x", float2str(bState.x));
-			robot->setAttribute("z", float2str(bState.z));
+			robot->setAttribute("tx", float2str(bState.x));
+			robot->setAttribute("tz", float2str(bState.z));
 			robot->setAttribute("alpha", float2str(bState.alpha));
 		}
 		catch (...)
