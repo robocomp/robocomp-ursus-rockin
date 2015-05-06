@@ -1,8 +1,0 @@
-import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
-
-Component movearmComp{
-	Communications{
-		requires JointMotor;
-	};
-	language python;
-};

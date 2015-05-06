@@ -57,7 +57,12 @@ private:
 	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
 
 
+	QVec getObjectsLocation(AGMModelSymbol::SPtr &object);
+	void sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
+	void sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
+
 	void manageReachedObjects();
+
 
 
 	void actionExecution();
@@ -69,6 +74,10 @@ private:
 	void saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz);
 	void updateInnerModel();
 
+
+bool isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node);
+float distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr symbol);
+float distanceToPolygon(QVec reference, QVec position, std::string polygon_str);
 
 	void setRightArmUp_Reflex();
 	void setRightArm_GRASP_0_Reflex();

@@ -84,11 +84,11 @@ private:
 
 
 private:
-	void action_ChangeRoom();
-	void action_FindObjectVisuallyInTable();
-	void action_SetObjectReach();
-	void action_GraspObject();
-	void action_NoAction();
+	void action_ChangeRoom(bool newAction = true);
+	void action_FindObjectVisuallyInTable(bool newAction = true);
+	void action_SetObjectReach(bool newAction = true);
+	void action_GraspObject(bool newAction = true);
+	void action_NoAction(bool newAction = true);
 
 
 	void odometryAndLocationIssues();

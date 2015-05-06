@@ -27,7 +27,7 @@ git pull
 ###
 echo "make robocomp"
 cd /home/robocomp/robocomp/build
-make
+make -j4
 echo "make install robocomp"
 sudo make install
 
@@ -36,7 +36,7 @@ sudo make install
 ###
 echo "make agm"
 cd /home/robocomp/AGM
-make
+make -j4
 echo "make install agm"
 sudo make install
 
@@ -47,7 +47,7 @@ sudo make install
 
 # bik
 echo "make bik"
-cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/bikComp/
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/bikComp/
 cmake .
 make -j5
 
@@ -96,6 +96,12 @@ make -j5
 # apriltags
 echo "make apriltags"
 cd /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp/
+cmake .
+make -j5
+
+# apriltags
+echo "make camara"
+cd /home/robocomp/robocomp/components/robocomp-robolab/components/cameraV4lComp/
 cmake .
 make -j5
 

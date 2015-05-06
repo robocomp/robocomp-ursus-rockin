@@ -1,5 +1,12 @@
+CommonBehavior.Endpoints=tcp -p 1
+
+
+# Endpoints for implemented interfaces
+BodyInverseKinematics.Endpoints=tcp -p 0
+
+
 # Proxies for required interfaces
-JointMotorProxy = jointmotor:tcp -h localhost -p 0
+BodyInverseKinematicsProxy = bodyinversekinematics:tcp -h localhost -p 0
 
 
 
