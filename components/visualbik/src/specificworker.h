@@ -25,7 +25,7 @@
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
- #include <iostream>
+#include <iostream>
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 #include "target.h"
@@ -54,12 +54,14 @@ public slots:
 	void compute(); 	
 
 private:
-	enum states {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, WAIT_TRASLACION, WAIT_ROTATION};
+	enum class states {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, WAIT_TRASLACION, WAIT_ROTATION};
 	states state;
 	tagsList tags;
 	
-	Target *currentTarget;
-	Target *nextTarget;
+	Target currentTarget;
+	Target nextTarget;
+	
+	QMutex mutex;
 	
 	
 	void metodo1_traslacion();
