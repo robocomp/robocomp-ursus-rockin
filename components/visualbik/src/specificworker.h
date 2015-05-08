@@ -28,7 +28,7 @@
  #include <iostream>
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
-
+#include "target.h"
 
 class SpecificWorker : public GenericWorker
 {
@@ -55,8 +55,11 @@ public slots:
 
 private:
 	enum states {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, WAIT_TRASLACION, WAIT_ROTATION};
-	string state;
+	states state;
 	tagsList tags;
+	
+	Target *currentTarget;
+	Target *nextTarget;
 	
 	
 	void metodo1_traslacion();

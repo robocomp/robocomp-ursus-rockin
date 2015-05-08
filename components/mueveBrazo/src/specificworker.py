@@ -106,17 +106,23 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en arriba_L: ",CollisionException
 
 	@QtCore.Slot()
 	def abajo_L(self):
-		mapa = {'leftShoulder1':0.0, 'leftShoulder2':0.0, 'leftShoulder3':0.0 , 'leftElbow':0.0 , 'leftForeArm':0.0 , 'leftWrist1':0.0 , 'leftWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
+		mapa = {'leftShoulder1':0.1, 'leftShoulder2':0.1, 'leftShoulder3':-0.1 , 'leftElbow':-0.1 , 'leftForeArm':0.0 , 'leftWrist1':0.0 , 'leftWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
 		for motor in mapa:
 			goal = MotorGoalPosition()
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException: 
+				print "Error en abajo_L: ",CollisionException().what
 
 	@QtCore.Slot()
 	def arriba_R(self):
@@ -126,7 +132,10 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en arriba_R: ",CollisionException
 
 	@QtCore.Slot()
 	def abajo_R(self):
@@ -136,7 +145,10 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en abajo_R: ", CollisionException
 			
 	@QtCore.Slot()
 	def abrir(self):
@@ -146,7 +158,10 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en abrir Finger: ",CollisionException	
 		
 	@QtCore.Slot()
 	def cerrar(self):
@@ -156,7 +171,10 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en cerrar Finger: ", CollisionException
 			
 	@QtCore.Slot()
 	def brazoDereho(self):
@@ -202,8 +220,10 @@ class SpecificWorker(GenericWorker):
 		weights.rz = 1
 		
 		radius = 150 #radio
-		
-		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en movimiento_con_Rotacion"
 		
 		
 	@QtCore.Slot()
@@ -233,7 +253,10 @@ class SpecificWorker(GenericWorker):
 		
 		radius = 150 #radio
 		
-		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en movimiento_sin_Rotacion"
 
 	########################################################################################################
 	########################################################################################################
@@ -315,7 +338,10 @@ class SpecificWorker(GenericWorker):
 		
 		radius = 150 #radio
 		
-		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en llamarBIK_1"
 		
 	@QtCore.Slot()
 	def llamarBIK_2(self):
@@ -344,7 +370,10 @@ class SpecificWorker(GenericWorker):
 		
 		radius = 250 #radio
 		
-		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en llamarBIK_2"
 		
 	@QtCore.Slot()
 	def llamarBIK_3(self):
@@ -373,4 +402,7 @@ class SpecificWorker(GenericWorker):
 		
 		radius = 250 #radio
 		
-		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en llamarBIK_3"

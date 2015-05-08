@@ -17,7 +17,6 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "specificworker.h"
-#include "target.h"
 
 /**
 * \brief Default constructor
@@ -27,7 +26,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	//Iniciamos con estado igual a IDLE:
 	this->state = IDLE;
 	cout<<"---------------------\nEstado inicial: "<<state<<"\n---------------------"<<endl;
-	qFatal("goodbye");
 }
 
 /**
@@ -58,13 +56,16 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-	/*switch(this->state)
+	switch(this->state)
 	{
 		case IDLE:
-			if target.active:
-				state = newTarget;
+			if (this->currentTarget->getState() == true)
+			{
+				this->state = TARGET_ARRIVE;
+				cout<<"Ha llegado un TARGET"<<endl;
+			}
 			break;
-		case "TARGET_ARRIVE":
+		/*case "TARGET_ARRIVE":
 			//compruebo target --> pesos
 			if pesos == 0
 				state.change("INIT_TRASLACION")
@@ -84,7 +85,7 @@ void SpecificWorker::compute()
 			if bodyinversekinematics_proxy->getState(target.currect.part)==true
 				//llamamos metodo2
 				
-			break;
+			break;*/
 	}
 // 	try
 // 	{
@@ -99,7 +100,7 @@ void SpecificWorker::compute()
 }
 
 
-void SpecificWorker::metodo1()
+void SpecificWorker::metodo1_traslacion()
 {/*
 	Tag tag11;
 	//Create hand as seen by head
@@ -111,7 +112,7 @@ void SpecificWorker::metodo1()
 		qDebug() << "No veo el 11";*/
 }
 
-void SpecificWorker::metodo2()
+void SpecificWorker::metodo2_rotacion()
 {
 	/*
 	qDebug() << __FUNCTION__;
@@ -326,15 +327,14 @@ void SpecificWorker::goHome(const string &part)
 
 void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &target, const WeightVector &weights, const float radius)
 {
-	         //MUTEX
-/*	if state.isState("IDLE")==TRUE
+	QMutex mutex;
+	mutex.lock();//MUTEX
+	if (this->state == IDLE)
 	{
-		//CIERRA MUTEX
-		this->targetPendiente = target; //copiamos target
-		//ABRE MUTEX
+		cout<<"Recibido target"<<endl;
+		//this->targetPendiente = target; //copiamos target
 	}
-	     */
-	
+	mutex.unlock();
 }
 
 void SpecificWorker::advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist)
