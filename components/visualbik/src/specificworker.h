@@ -25,6 +25,7 @@
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
+ #include <iostream>
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
@@ -53,12 +54,13 @@ public slots:
 	void compute(); 	
 
 private:
+	enum states {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, WAIT_TRASLACION, WAIT_ROTATION};
+	string state;
 	tagsList tags;
-	string states[4];
 	
 	
-	void metodo1();
-	void metodo2();
+	void metodo1_traslacion();
+	void metodo2_rotacion();
 };
 
 #endif

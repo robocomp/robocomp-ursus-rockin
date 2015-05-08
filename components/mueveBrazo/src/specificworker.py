@@ -61,15 +61,19 @@ class SpecificWorker(GenericWorker):
 		# MANO DERECHA:
 		self.ui.botonCerrar.clicked.connect(self.cerrar)
 		self.ui.botonAbrir.clicked.connect(self.abrir)
-		
 		# BRAZO DERECHO ENTERO
 		self.ui.botonBrazo.clicked.connect(self.brazoDereho)
+		
+		#Prueba visualBIK
+		self.ui.botonRotacion.clicked.connect(self.movimiento_con_Rotacion)
+		self.ui.botonTraslacion.clicked.connect(self.movimiento_sin_Rotacion)
+		self.ui.botonHome.clicked.connect(self.abajo_R)
 		
 		# Pueba compleja
 		self.ui.botonCargar.clicked.connect(self.cargarCubos)
 		self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
-		#self.ui.botonIR2.clicked.connect(self.llamarBIK_2)
-		#self.ui.botonIR3.clicked.connect(self.llamarBIK_3)
+		self.ui.botonIR2.clicked.connect(self.llamarBIK_2)
+		self.ui.botonIR3.clicked.connect(self.llamarBIK_3)
 
 	def setParams(self, params):
 		#try:
@@ -126,7 +130,7 @@ class SpecificWorker(GenericWorker):
 
 	@QtCore.Slot()
 	def abajo_R(self):
-		mapa = {'rightShoulder1':0.0, 'rightShoulder2':0.0, 'rightShoulder3':0.0 , 'rightElbow':0.0 , 'rightForeArm':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
+		mapa = {'rightShoulder1':-0.1, 'rightShoulder2':-0.1, 'rightShoulder3':0.1 , 'rightElbow':0.1 , 'rightForeArm':0.1, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
 		for motor in mapa:
 			goal = MotorGoalPosition()
 			goal.position = mapa[motor]
@@ -169,7 +173,67 @@ class SpecificWorker(GenericWorker):
 		time.sleep(2)
 		
 		self.abajo_R()
-
+	
+	########################################################################################################
+	########################################################################################################
+	@QtCore.Slot()
+	def movimiento_con_Rotacion(self):
+		# LLamar al BIK y pasarle el vector POSE:
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = 0
+		pose6D.y = 700
+		pose6D.z = 300
+		pose6D.rx =  0
+		pose6D.ry =  0
+		pose6D.rz =  0
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 1
+		weights.ry = 1
+		weights.rz = 1
+		
+		radius = 150 #radio
+		
+		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		
+		
+	@QtCore.Slot()
+	def movimiento_sin_Rotacion(self):
+			# LLamar al BIK y pasarle el vector POSE:
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = 0
+		pose6D.y = 700
+		pose6D.z = 300
+		pose6D.rx =  0
+		pose6D.ry =  0
+		pose6D.rz =  0
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 0
+		weights.ry = 0
+		weights.rz = 0
+		
+		radius = 150 #radio
+		
+		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
 
 	########################################################################################################
 	########################################################################################################
@@ -228,32 +292,85 @@ class SpecificWorker(GenericWorker):
 	def llamarBIK_1(self):
 		# LLamar al BIK y pasarle el vector POSE:
 		print 'Preparando vector pose 6D'
-		print posicionCubos[0]
-		part = "LEFTARM"
-		pose6D = posicionCubos[0]
-		weights = [1,1,1,1,1,1]
-		pose = RoboCompBodyInverseKinematics.Pose6()
-		self.bodyinversekinematics_proxy.setTargetPose6D(part, RoboCompBodyInverseKinematics::Pose6D(posicionCubos[0]), weights, 250)
-		print 'Llamando a BIK con pose6D: '
 		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
 		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = posicionCubos[0][0]
+		pose6D.y = posicionCubos[0][1]
+		pose6D.z = posicionCubos[0][2]
+		pose6D.rx =  posicionCubos[0][3]
+		pose6D.ry =  posicionCubos[0][4]
+		pose6D.rz =  posicionCubos[0][5]
+		print 'Llamando a BIK con pose6D: ',pose6D
 		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 0
+		weights.ry = 0
+		weights.rz = 0
 		
-		##  try
-        #{
-                #RoboCompBodyInverseKinematics::Pose6D pose6D;
-                #pose6D.x = PX_6->value();               pose6D.y = PY_6->value();               pose6D.z = PZ_6->value();
-                #pose6D.rx = RX_6->value();              pose6D.ry = RY_6->value();              pose6D.rz = RZ_6->value();
-
-                #QVec pose = QVec::zeros(6);
-                #pose[0] = pose6D.x/1000;                pose[1] = pose6D.y/1000;                pose[2] = pose6D.z/1000;
-                #moveTargetRCIS(pose);
-
-                #RoboCompBodyInverseKinematics::WeightVector weights;
-                #weights.x = 1;          weights.y = 1;          weights.z = 1;
-                #weights.rx = 1;         weights.ry = 1;         weights.rz = 1;
-
-                #std::string part = "LEFTARM";
-                #bodyinversekinematics_proxy->setRobot(1);
-                #bodyinversekinematics_proxy->setTargetPose6D(part, pose6D, weights, 250);
-
+		radius = 150 #radio
+		
+		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		
+	@QtCore.Slot()
+	def llamarBIK_2(self):
+		# LLamar al BIK y pasarle el vector POSE:
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = posicionCubos[1][0]
+		pose6D.y = posicionCubos[1][1]
+		pose6D.z = posicionCubos[1][2]
+		pose6D.rx =  posicionCubos[1][3]
+		pose6D.ry =  posicionCubos[1][4]
+		pose6D.rz =  posicionCubos[1][5]
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 0
+		weights.ry = 0
+		weights.rz = 0
+		
+		radius = 250 #radio
+		
+		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		
+	@QtCore.Slot()
+	def llamarBIK_3(self):
+		# LLamar al BIK y pasarle el vector POSE:
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = posicionCubos[2][0]
+		pose6D.y = posicionCubos[2][1]
+		pose6D.z = posicionCubos[2][2]
+		pose6D.rx =  posicionCubos[2][3]
+		pose6D.ry =  posicionCubos[2][4]
+		pose6D.rz =  posicionCubos[2][5]
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 0
+		weights.ry = 0
+		weights.rz = 0
+		
+		radius = 250 #radio
+		
+		self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)

@@ -17,12 +17,17 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "specificworker.h"
+#include "target.h"
 
 /**
 * \brief Default constructor
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
+	//Iniciamos con estado igual a IDLE:
+	this->state = IDLE;
+	cout<<"---------------------\nEstado inicial: "<<state<<"\n---------------------"<<endl;
+	qFatal("goodbye");
 }
 
 /**
@@ -53,29 +58,29 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-	switch(state)
+	/*switch(this->state)
 	{
-		case "IDLE":
+		case IDLE:
 			if target.active:
 				state = newTarget;
 			break;
-		case "newTarget":
+		case "TARGET_ARRIVE":
 			//compruebo target --> pesos
 			if pesos == 0
-				state.change("initTraslacion")
+				state.change("INIT_TRASLACION")
 				else
-					state.change("initRotacion");
+					state.change("INIT_ROTACION");
 			break;
-		case "initTraslacion":
+		case "INIT_TRASLACION":
 			bodyinversekinematics_proxy->setTargetPose6D(target.current.toPose6D) 
 			state = waitTraslacion;
 			break;
-		case "initRotacion":
+		case "INIT_ROTACION":
 			//Hay que llamar metodo
 			bodyinversekinematics_proxy->setTargetPose6D(target.current.toPose6D) 
 			state = waitRotacion;
 			break;
-		case "waitTraslacion":
+		case "WAIT_TRASLACION":
 			if bodyinversekinematics_proxy->getState(target.currect.part)==true
 				//llamamos metodo2
 				
@@ -90,12 +95,12 @@ void SpecificWorker::compute()
 // 	catch(const Ice::Exception &e)
 // 	{
 // 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
+// 	}*/
 }
 
 
 void SpecificWorker::metodo1()
-{
+{/*
 	Tag tag11;
 	//Create hand as seen by head
 	if( localTags.existId(11,tag11) == true)
@@ -103,11 +108,12 @@ void SpecificWorker::metodo1()
 		addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11.pose);
 	}
 	else
-		qDebug() << "No veo el 11";
+		qDebug() << "No veo el 11";*/
 }
 
 void SpecificWorker::metodo2()
 {
+	/*
 	qDebug() << __FUNCTION__;
 // 	if( bikState.finish == false )
 // 		return State::GRASP;			//REPLACE BY A POSITION CONTROL
@@ -285,7 +291,7 @@ void SpecificWorker::metodo2()
 	{
 		graspFingers();
 		return State::DETACH_TO_GET;
-	}	
+	}	*/
 }
 
 void SpecificWorker::setFingers(const float d)
@@ -321,13 +327,13 @@ void SpecificWorker::goHome(const string &part)
 void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &target, const WeightVector &weights, const float radius)
 {
 	         //MUTEX
-	if state.isState("IDLE")==TRUE
+/*	if state.isState("IDLE")==TRUE
 	{
 		//CIERRA MUTEX
 		this->targetPendiente = target; //copiamos target
 		//ABRE MUTEX
 	}
-	     
+	     */
 	
 }
 
