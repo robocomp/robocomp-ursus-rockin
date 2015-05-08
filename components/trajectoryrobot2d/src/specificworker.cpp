@@ -157,7 +157,7 @@ void SpecificWorker::compute( )
 	cont++;
 }
 
-/////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -400,9 +400,9 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
 	{
 		qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
 		state.setState("IDLE");
-printf("%d\n", __LINE__);
+//printf("%d\n", __LINE__);
 		target.reset();
-printf("%d\n", __LINE__);
+//printf("%d\n", __LINE__);
 		return false;
 	}
 	target.setTranslation( localTarget );
@@ -442,6 +442,7 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 		//differentialrobot_proxy->getBaseState(bState);
 		omnirobot_proxy->getBaseState(bState);
 		inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+		
 		try
 		{
 			laserData = laser_proxy->getLaserData();
@@ -568,7 +569,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 /**
  * @brief Sends the robot to the target position. 
  * The state of the process is recorded in the TrajectoryState structure that cnan be accessed through the getState() method
- * This method DOES NOT stop the robot before assigning a new target
+ * This method DOES NOT stop the robot before assigening a new target
  * @param target ...
  * @return void
  */
@@ -584,7 +585,7 @@ void SpecificWorker::go(const TargetPose& target)
 	else
 	{
 		tState.setState("EXECUTING");
-		currentTarget.command = CurrentTarget::Command::CHANGETARGET;	
+		//currentTarget.command = CurrentTarget::Command::CHANGETARGET;	
 		QTime reloj = QTime::currentTime();
 // 		while(tState.getState() != "IDLE" or reloj.elapsed() < 3000){};
 // 		if( reloj.elapsed() < 3000 )
@@ -592,6 +593,7 @@ void SpecificWorker::go(const TargetPose& target)
 			currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 			currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
 			currentTarget.command = CurrentTarget::Command::GOTO;
+			currentTarget.setWithoutPlan(true);
 			if( target.doRotation == true)
 				currentTarget.setHasRotation(true);
 			drawTarget( QVec::vec3(target.x,target.y,target.z));

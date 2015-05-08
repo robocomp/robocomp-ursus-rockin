@@ -59,11 +59,13 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	{
 		if( i.dist < baseOffsets[j] )
 		{
-			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j];
+			if(i.angle>-2.0 && i.angle<2.0){
+			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
 			//road.requiresReplanning = true;
 			stopTheRobot(omnirobot_proxy);
 			road.setBlocked(true);
 			return false;
+			}
 		}
 		else
 		{
