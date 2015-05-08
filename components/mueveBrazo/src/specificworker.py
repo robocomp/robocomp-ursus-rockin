@@ -232,7 +232,8 @@ class SpecificWorker(GenericWorker):
 		part = "LEFTARM"
 		pose6D = posicionCubos[0]
 		weights = [1,1,1,1,1,1]
-		self.bodyinversekinematics_proxy.setTargetPose6D(part, pose6D, weights, 250)
+		pose = RoboCompBodyInverseKinematics.Pose6()
+		self.bodyinversekinematics_proxy.setTargetPose6D(part, RoboCompBodyInverseKinematics::Pose6D(posicionCubos[0]), weights, 250)
 		print 'Llamando a BIK con pose6D: '
 		
 		

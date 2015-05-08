@@ -1,4 +1,5 @@
 import "/robocomp/interfaces/IDSLs/BodyInverseKinematics.idsl";
+import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
 
 Component VisualBIK
 {
@@ -6,6 +7,7 @@ Component VisualBIK
 	{
 		implements BodyInverseKinematics;
 		requires BodyInverseKinematics;
+		subscribesTo AprilTags;
 	};
 	language Cpp;
 };

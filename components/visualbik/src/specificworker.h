@@ -47,11 +47,18 @@ public:
 	void advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist);
 	void pointAxisTowardsTarget(const string &bodyPart, const Pose6D &target, const Axis &ax, const bool &axisConstraint, const float axisAngleConstraint);
 	void setJoint(const string &joint, const float position, const float maxSpeed);
+	void newAprilTag(const tagsList &tags);
 
 public slots:
 	void compute(); 	
 
 private:
+	tagsList tags;
+	string states[4];
+	
+	
+	void metodo1();
+	void metodo2();
 };
 
 #endif

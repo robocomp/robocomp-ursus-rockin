@@ -29,52 +29,52 @@ BodyInverseKinematicsI::~BodyInverseKinematicsI()
 {
 }
 
-void BodyInverseKinematicsI::setFingers(const float d, const Ice::Current&)
+void BodyInverseKinematicsI::setFingers(const float  d, const Ice::Current&)
 {
 	worker->setFingers(d);
 }
 
-void BodyInverseKinematicsI::setRobot(const int type, const Ice::Current&)
+void BodyInverseKinematicsI::setRobot(const int  type, const Ice::Current&)
 {
 	worker->setRobot(type);
 }
 
-TargetState BodyInverseKinematicsI::getState(const string &part, const Ice::Current&)
+TargetState BodyInverseKinematicsI::getState(const string  & part, const Ice::Current&)
 {
 	worker->getState(part);
 }
 
-void BodyInverseKinematicsI::setNewTip(const string &part, const string &transform, const Pose6D &pose, const Ice::Current&)
+void BodyInverseKinematicsI::setNewTip(const string  & part, const string  & transform, const Pose6D  & pose, const Ice::Current&)
 {
 	worker->setNewTip(part, transform, pose);
 }
 
-void BodyInverseKinematicsI::stop(const string &part, const Ice::Current&)
+void BodyInverseKinematicsI::stop(const string  & part, const Ice::Current&)
 {
 	worker->stop(part);
 }
 
-void BodyInverseKinematicsI::goHome(const string &part, const Ice::Current&)
+void BodyInverseKinematicsI::goHome(const string  & part, const Ice::Current&)
 {
 	worker->goHome(part);
 }
 
-void BodyInverseKinematicsI::setTargetPose6D(const string &bodyPart, const Pose6D &target, const WeightVector &weights, const float radius, const Ice::Current&)
+void BodyInverseKinematicsI::setTargetPose6D(const string  & bodyPart, const Pose6D  & target, const WeightVector  & weights, const float  radius, const Ice::Current&)
 {
 	worker->setTargetPose6D(bodyPart, target, weights, radius);
 }
 
-void BodyInverseKinematicsI::advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist, const Ice::Current&)
+void BodyInverseKinematicsI::advanceAlongAxis(const string  & bodyPart, const Axis  & ax, const float  dist, const Ice::Current&)
 {
 	worker->advanceAlongAxis(bodyPart, ax, dist);
 }
 
-void BodyInverseKinematicsI::pointAxisTowardsTarget(const string &bodyPart, const Pose6D &target, const Axis &ax, const bool &axisConstraint, const float axisAngleConstraint, const Ice::Current&)
+void BodyInverseKinematicsI::pointAxisTowardsTarget(const string  & bodyPart, const Pose6D  & target, const Axis  & ax,  bool  axisConstraint, const float  axisAngleConstraint, const Ice::Current&)
 {
 	worker->pointAxisTowardsTarget(bodyPart, target, ax, axisConstraint, axisAngleConstraint);
 }
 
-void BodyInverseKinematicsI::setJoint(const string &joint, const float position, const float maxSpeed, const Ice::Current&)
+void BodyInverseKinematicsI::setJoint(const string  & joint, const float  position, const float  maxSpeed, const Ice::Current&)
 {
 	worker->setJoint(joint, position, maxSpeed);
 }

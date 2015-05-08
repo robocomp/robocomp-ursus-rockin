@@ -38,16 +38,16 @@ public:
 	BodyInverseKinematicsI( GenericWorker *_worker, QObject *parent = 0 );
 	~BodyInverseKinematicsI();
 	
-	void setFingers(const float d, const Ice::Current&);
-	void setRobot(const int type, const Ice::Current&);
-	TargetState getState(const string &part, const Ice::Current&);
-	void setNewTip(const string &part, const string &transform, const Pose6D &pose, const Ice::Current&);
-	void stop(const string &part, const Ice::Current&);
-	void goHome(const string &part, const Ice::Current&);
-	void setTargetPose6D(const string &bodyPart, const Pose6D &target, const WeightVector &weights, const float radius, const Ice::Current&);
-	void advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist, const Ice::Current&);
-	void pointAxisTowardsTarget(const string &bodyPart, const Pose6D &target, const Axis &ax, const bool &axisConstraint, const float axisAngleConstraint, const Ice::Current&);
-	void setJoint(const string &joint, const float position, const float maxSpeed, const Ice::Current&);
+	void setFingers(const float  d, const Ice::Current&);
+	void setRobot(const int  type, const Ice::Current&);
+	TargetState getState(const string  & part, const Ice::Current&);
+	void setNewTip(const string  & part, const string  & transform, const Pose6D  & pose, const Ice::Current&);
+	void stop(const string  & part, const Ice::Current&);
+	void goHome(const string  & part, const Ice::Current&);
+	void setTargetPose6D(const string  & bodyPart, const Pose6D  & target, const WeightVector  & weights, const float  radius, const Ice::Current&);
+	void advanceAlongAxis(const string  & bodyPart, const Axis  & ax, const float  dist, const Ice::Current&);
+	void pointAxisTowardsTarget(const string  & bodyPart, const Pose6D  & target, const Axis  & ax,  bool  axisConstraint, const float  axisAngleConstraint, const Ice::Current&);
+	void setJoint(const string  & joint, const float  position, const float  maxSpeed, const Ice::Current&);
 
 	QMutex *mutex;
 private:
