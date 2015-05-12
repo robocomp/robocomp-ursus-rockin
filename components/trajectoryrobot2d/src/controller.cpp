@@ -57,6 +57,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	road.setBlocked(false);
 	for(auto i : laserData)
 	{
+		if(i.dist < 10) i.dist = 30000;
 		if( i.dist < baseOffsets[j] )
 		{
 			if(i.angle>-2.0 && i.angle<2.0){
@@ -173,9 +174,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-//  		qDebug() << "------------------Controller Report ---------------;";
-//   		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
-//  		qDebug() << "---------------------------------------------------;";
+  		qDebug() << "------------------Controller Report ---------------;";
+   		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+  		qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot); }

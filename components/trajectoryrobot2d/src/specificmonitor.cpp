@@ -90,7 +90,7 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 	//Example
 	    RoboCompCommonBehavior::Parameter aux;
 	    aux.editable = true;
-	    configGetString( "InnerModel", aux.value,"/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
+	    configGetString( "","InnerModel", aux.value,"/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
 	    params["InnerModel"] = aux;
 }
 

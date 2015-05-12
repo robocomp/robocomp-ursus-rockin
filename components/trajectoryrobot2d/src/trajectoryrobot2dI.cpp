@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -22,34 +22,40 @@ TrajectoryRobot2DI::TrajectoryRobot2DI(GenericWorker *_worker, QObject *parent) 
 {
 	worker = _worker;
 	mutex = worker->mutex;       // Shared worker mutex
-	// Component initialization...
 }
 
 
 TrajectoryRobot2DI::~TrajectoryRobot2DI()
 {
-	// Free component resources here
 }
 
-// Component functions, implementation
-void TrajectoryRobot2DI::go(const TargetPose& target, const Ice::Current&){
+void TrajectoryRobot2DI::go(const TargetPose  & target, const Ice::Current&)
+{
 	worker->go(target);
 }
 
-void TrajectoryRobot2DI::goBackwards(const TargetPose& target, const Ice::Current&){
+NavState TrajectoryRobot2DI::getState(const Ice::Current&)
+{
+	worker->getState();
+}
+
+void TrajectoryRobot2DI::goBackwards(const TargetPose  & target, const Ice::Current&)
+{
 	worker->goBackwards(target);
 }
 
-void TrajectoryRobot2DI::changeTarget(const TargetPose& target, const Ice::Current&){
+void TrajectoryRobot2DI::stop(const Ice::Current&)
+{
+	worker->stop();
+}
+
+void TrajectoryRobot2DI::changeTarget(const TargetPose  & target, const Ice::Current&)
+{
 	worker->changeTarget(target);
 }
 
-NavState TrajectoryRobot2DI::getState(const Ice::Current&){
-	return worker->getState();
-}
 
-void TrajectoryRobot2DI::stop(const Ice::Current&){
-	worker->stop();
-}
+
+
 
 

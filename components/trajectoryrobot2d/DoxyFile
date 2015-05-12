@@ -18,7 +18,7 @@
 DOXYFILE_ENCODING      = UTF-8
 
 # ROBOCOMP
-PROJECT_NAME           = trajectoryrobot2dcomp
+PROJECT_NAME           = TrajectoryRobot2DComp 
 PROJECT_NUMBER         =
 
 
