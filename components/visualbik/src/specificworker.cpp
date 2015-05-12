@@ -24,7 +24,7 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	//Iniciamos con estado igual a IDLE:
-	this->state = states::IDLE;
+	this->state = State::IDLE;
 }
 
 /**
@@ -59,40 +59,49 @@ void SpecificWorker::compute()
 	QMutexLocker ml(&mutex);
 	switch(this->state)
 	{
-		case states::IDLE:
-			if (this->currentTarget.active == true)
+		case State::IDLE:
+			if (this->currentTarget.getState() == Target::State::WAITING)
 			{
-				this->state = states::TARGET_ARRIVE;
+				this->state = State::TARGET_ARRIVE;
 				cout<<"Ha llegado un TARGET"<<endl;
 			}
 		break;
 			
-		case states::TARGET_ARRIVE:
-			if (this->currentTarget.weights.rx==0 and this->currentTarget.weights.ry==0 and this->currentTarget.weights.rz==0)
-				this->state = states::INIT_TRASLACION;
+		case State::TARGET_ARRIVE:
+			if (this->currentTarget.getWeights().rx==0 and this->currentTarget.getWeights().ry==0 and this->currentTarget.getWeights().rz==0)
+				this->state = State::INIT_TRASLACION;
 			else
-				this->state = states::INIT_ROTACION;
+				this->state = State::INIT_ROTACION;
 		break;
 			
-		case states::INIT_TRASLACION:
-			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.bodyPart, this->currentTarget.pose6D, this->currentTarget.weights, 250);
-			this->state = states::WAIT_TRASLACION;
+		case State::INIT_TRASLACION:
+			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.getBodyPart(), this->currentTarget.getPose6D(), this->currentTarget.getWeights(), 250);
+			
+			this->currentTarget.changeState(Target::State::IN_PROCESS);
+			this->state = State::WAIT_TRASLACION;
 		break;
 			
-		case states::INIT_ROTACION:
-			//Hay que llamar metodo
-			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.bodyPart, this->currentTarget.pose6D, this->currentTarget.weights, 250) ;
-			this->state = states::WAIT_ROTATION;
+		case State::INIT_ROTACION:
+			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.getBodyPart(), this->currentTarget.getPose6D(), this->currentTarget.getWeights(), 250);
+			
+			this->currentTarget.changeState(Target::State::IN_PROCESS);
+			this->state = State::WAIT_ROTATION;
 		break;
 			
-		case states::WAIT_TRASLACION:
-			//if bodyinversekinematics_proxy->getState(target.currect.part)==true
-				//llamamos metodo2
+		case State::WAIT_TRASLACION:
+			//if bodyinversekinematics_proxy->getState(target.currect.part)==true ¿aun no ha terminado de procesar?
+			//llamamos metodo2
+			// Cuando termina traslacion:
+			//this->currentTarget = this->nextTarget;
+			//this->currentTarget.changeState(Target::State::WAITING);
 				
 		break;
-		case states::WAIT_ROTATION:
+		case State::WAIT_ROTATION:
 			//if bodyinversekinematics_proxy->getState(target.currect.part)==true
 				//llamamos metodo2
+			// Cuando termina rotacion:
+			//this->currentTarget = this->nextTarget;
+			//this->currentTarget.changeState(Target::State::WAITING);
 				
 		break;
 		
@@ -331,20 +340,22 @@ void SpecificWorker::goHome(const string &part)
 void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &target, const WeightVector &weights, const float radius)
 {
 	QMutexLocker ml(&mutex);
-	if (this->state == states::IDLE)
+	if (this->state == State::IDLE)
 	{
 		cout<<"Recibido target"<<endl;
-		if(this->currentTarget.active==false)	
+		if(this->currentTarget.getState()==Target::State::IDLE)	
 		{
-			this->currentTarget.bodyPart = bodyPart;
-			this->currentTarget.pose6D = target;
-			this->currentTarget.weights = weights;
+			this->currentTarget.changeBodyPart(bodyPart);
+			this->currentTarget.changePose6D(target);
+			this->currentTarget.changeWeights(weights);
+			this->currentTarget.changeState(Target::State::WAITING);
 		}
 		else
 		{
-			this->nextTarget.bodyPart = bodyPart;
-			this->nextTarget.pose6D = target;
-			this->nextTarget.weights = weights;
+			this->nextTarget.changeBodyPart(bodyPart);
+			this->nextTarget.changePose6D(target);
+			this->nextTarget.changeWeights(weights);
+			this->nextTarget.changeState(Target::State::WAITING);
 		}
 	}
 }

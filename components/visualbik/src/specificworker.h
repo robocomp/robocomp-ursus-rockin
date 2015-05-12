@@ -54,8 +54,8 @@ public slots:
 	void compute(); 	
 
 private:
-	enum class states {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, WAIT_TRASLACION, WAIT_ROTATION};
-	states state;
+	enum class State {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, WAIT_TRASLACION, WAIT_ROTATION};
+	State state;
 	tagsList tags;
 	
 	Target currentTarget;
