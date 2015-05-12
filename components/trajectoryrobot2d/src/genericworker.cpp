@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -28,15 +28,19 @@ QObject()
 #endif
 
 {
-	laser_proxy = (*(LaserPrx*)mprx["LaserProxy"]);
 	innermodelmanager_proxy = (*(InnerModelManagerPrx*)mprx["InnerModelManagerProxy"]);
-	omnirobot_proxy = (*(OmniRobotPrx*)mprx["OmniRobotProxy"]);
+	laser_proxy = (*(LaserPrx*)mprx["LaserProxy"]);
+	omnirobot1_proxy = (*(OmniRobotPrx*)mprx["OmniRobotProxy1"]);
+	omnirobot2_proxy = (*(OmniRobotPrx*)mprx["OmniRobotProxy2"]);
+
 
 	mutex = new QMutex();
-	#ifdef USE_QTGUI
+
+#ifdef USE_QTGUI
 		setupUi(this);
 		show();
 	#endif
+		
 	Period = BASIC_PERIOD;
 	connect(&timer, SIGNAL(timeout()), this, SLOT(compute()));
 }

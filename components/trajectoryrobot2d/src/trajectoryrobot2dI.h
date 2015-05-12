@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -16,8 +16,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef TRAJECTORYROBOT2DI_H
-#define TRAJECTORYROBOT2DI_H
+#ifndef TRAJECTORYROBOT2D_H
+#define TRAJECTORYROBOT2D_H
 
 // QT includes
 #include <QtCore/QObject>
@@ -37,12 +37,12 @@ Q_OBJECT
 public:
 	TrajectoryRobot2DI( GenericWorker *_worker, QObject *parent = 0 );
 	~TrajectoryRobot2DI();
-	void  go(const TargetPose& target, const Ice::Current& = Ice::Current());
-void  goBackwards(const TargetPose& target, const Ice::Current& = Ice::Current());
-void  changeTarget(const TargetPose& target, const Ice::Current& = Ice::Current());
-NavState getState(const Ice::Current& = Ice::Current());
-void  stop(const Ice::Current& = Ice::Current());
-
+	
+	void go(const TargetPose  & target, const Ice::Current&);
+	NavState getState(const Ice::Current&);
+	void goBackwards(const TargetPose  & target, const Ice::Current&);
+	void stop(const Ice::Current&);
+	void changeTarget(const TargetPose  & target, const Ice::Current&);
 
 	QMutex *mutex;
 private:
