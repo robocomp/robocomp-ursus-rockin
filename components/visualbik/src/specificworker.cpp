@@ -24,8 +24,7 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	//Iniciamos con estado igual a IDLE:
-	this->state = IDLE;
-	cout<<"---------------------\nEstado inicial: "<<state<<"\n---------------------"<<endl;
+	this->state = states::IDLE;
 }
 
 /**
@@ -56,47 +55,50 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
+	
+	QMutexLocker ml(&mutex);
 	switch(this->state)
 	{
-		case IDLE:
-			if (this->currentTarget->getState() == true)
+		case states::IDLE:
+			if (this->currentTarget.active == true)
 			{
-				this->state = TARGET_ARRIVE;
+				this->state = states::TARGET_ARRIVE;
 				cout<<"Ha llegado un TARGET"<<endl;
 			}
-			break;
-		/*case "TARGET_ARRIVE":
-			//compruebo target --> pesos
-			if pesos == 0
-				state.change("INIT_TRASLACION")
-				else
-					state.change("INIT_ROTACION");
-			break;
-		case "INIT_TRASLACION":
-			bodyinversekinematics_proxy->setTargetPose6D(target.current.toPose6D) 
-			state = waitTraslacion;
-			break;
-		case "INIT_ROTACION":
+		break;
+			
+		case states::TARGET_ARRIVE:
+			if (this->currentTarget.weights.rx==0 and this->currentTarget.weights.ry==0 and this->currentTarget.weights.rz==0)
+				this->state = states::INIT_TRASLACION;
+			else
+				this->state = states::INIT_ROTACION;
+		break;
+			
+		case states::INIT_TRASLACION:
+			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.bodyPart, this->currentTarget.pose6D, this->currentTarget.weights, 250);
+			this->state = states::WAIT_TRASLACION;
+		break;
+			
+		case states::INIT_ROTACION:
 			//Hay que llamar metodo
-			bodyinversekinematics_proxy->setTargetPose6D(target.current.toPose6D) 
-			state = waitRotacion;
-			break;
-		case "WAIT_TRASLACION":
-			if bodyinversekinematics_proxy->getState(target.currect.part)==true
+			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.bodyPart, this->currentTarget.pose6D, this->currentTarget.weights, 250) ;
+			this->state = states::WAIT_ROTATION;
+		break;
+			
+		case states::WAIT_TRASLACION:
+			//if bodyinversekinematics_proxy->getState(target.currect.part)==true
 				//llamamos metodo2
 				
-			break;*/
+		break;
+		case states::WAIT_ROTATION:
+			//if bodyinversekinematics_proxy->getState(target.currect.part)==true
+				//llamamos metodo2
+				
+		break;
+		
+		default:
+			break;
 	}
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}*/
 }
 
 
@@ -192,7 +194,8 @@ void SpecificWorker::metodo2_rotacion()
 	if( localTags.existId(12, tag12) == true)
 	{
 		addTransformInnerModel("marca-segun-head", "rgbd_transform", tag12.pose);
- 		//drawAxis("marca-segun-head", "world");
+ 		//drawAxis("marca		if()
+-segun-head", "world");
  		//drawAxis("april-mug", "world");
 	}
 	else 
@@ -327,14 +330,23 @@ void SpecificWorker::goHome(const string &part)
 
 void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &target, const WeightVector &weights, const float radius)
 {
-	QMutex mutex;
-	mutex.lock();//MUTEX
-	if (this->state == IDLE)
+	QMutexLocker ml(&mutex);
+	if (this->state == states::IDLE)
 	{
 		cout<<"Recibido target"<<endl;
-		//this->targetPendiente = target; //copiamos target
+		if(this->currentTarget.active==false)	
+		{
+			this->currentTarget.bodyPart = bodyPart;
+			this->currentTarget.pose6D = target;
+			this->currentTarget.weights = weights;
+		}
+		else
+		{
+			this->nextTarget.bodyPart = bodyPart;
+			this->nextTarget.pose6D = target;
+			this->nextTarget.weights = weights;
+		}
 	}
-	mutex.unlock();
 }
 
 void SpecificWorker::advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist)
