@@ -439,7 +439,7 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 	{
 		if ( innerModel->collide(it, &robotBoxCol))
 		{
-			//qDebug() << __FUNCTION__ << "collide with " << it;
+			qDebug() << __FUNCTION__ << "collide with " << it;
 			return false;
 		}
 	}
