@@ -25,9 +25,10 @@
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
+#include <iostream>
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
-
+#include "target.h"
 
 class SpecificWorker : public GenericWorker
 {
@@ -47,11 +48,24 @@ public:
 	void advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist);
 	void pointAxisTowardsTarget(const string &bodyPart, const Pose6D &target, const Axis &ax, const bool &axisConstraint, const float axisAngleConstraint);
 	void setJoint(const string &joint, const float position, const float maxSpeed);
+	void newAprilTag(const tagsList &tags);
 
 public slots:
 	void compute(); 	
 
 private:
+	enum class State {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, WAIT_TRASLACION, WAIT_ROTATION};
+	State state;
+	tagsList tags;
+	
+	Target currentTarget;
+	Target nextTarget;
+	
+	QMutex mutex;
+	
+	
+	void metodo1_traslacion();
+	void metodo2_rotacion();
 };
 
 #endif

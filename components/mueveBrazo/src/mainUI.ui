@@ -158,6 +158,63 @@
       <attribute name="title">
        <string>Tab 2</string>
       </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Target: [0, 700, 500, 0, 0, 0]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="botonRotacion">
+           <property name="text">
+            <string>conRotacion</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Target: [0, 700, 500]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="botonTraslacion">
+           <property name="text">
+            <string>sinRotacion</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="Line" name="line_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="botonHome">
+         <property name="text">
+          <string>go Home</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_55">
+      <attribute name="title">
+       <string>Tab 3</string>
+      </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_12">
        <item>
         <widget class="QPushButton" name="botonCargar">

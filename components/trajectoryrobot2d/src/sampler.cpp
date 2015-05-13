@@ -386,11 +386,12 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
  * @param target ...
  * @return bool
  */
+
 bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target) const
 {
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
 	QVec finalPoint;
-	float wRob=420, hRob=1600;  //GET FROM INNERMODEL!!!
+	float wRob=420, hRob=1600;  //GET FROM INNERMODEL!!! 
 //	float wRob=0.1, hRob=0.1;  //GET FROM INNERMODEL!!!
 
 	
@@ -408,7 +409,7 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 	innerModel->updateTransformValues("robot", origin.x(), origin.y(), origin.z(), 0., alfa1, 0.);
 	
 	// Compute rotation matrix between robot and world. Should be the same as alfa
-	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");	
+	QMat r1q = innerModel->getRotationMatrixTo("world", "robot");
 	
 	//qDebug()<< "alfa1" << alfa1 << r1q.extractAnglesR_min().y() << "robot" << innerModel->transform("world","robot"); 
 	
@@ -438,7 +439,7 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 	{
 		if ( innerModel->collide(it, &robotBoxCol))
 		{
-			//Debug() << __FUNCTION__ << "collide with " << it;
+			//qDebug() << __FUNCTION__ << "collide with " << it;
 			return false;
 		}
 	}

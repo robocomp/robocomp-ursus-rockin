@@ -21,6 +21,7 @@ SET ( SOURCES
   genericworker.cpp
   specificworker.cpp
   bodyinversekinematicsI.cpp
+  apriltagsI.cpp
 )
 
 # Headers set
@@ -32,10 +33,11 @@ SET ( HEADERS
   genericworker.h
   specificworker.h
   bodyinversekinematicsI.h
+  apriltagsI.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior BodyInverseKinematics )
+ROBOCOMP_WRAP_ICE( CommonBehavior BodyInverseKinematics AprilTags )
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4

@@ -434,13 +434,13 @@ void ElasticBand::checkBlocked(InnerModel *innermodel, WayPoints &road, const Ro
 			}
 
 			//now we have the laser index we check if point is before or after the laser reading
-			if( pr.norm2() > laserData[j].dist ) // laser beam is smaller than p distance to robot. The path is crossed by an obstacle
-			{
-				road.setBlocked(true);
-				qDebug() << __FILE__ << "Blocked index" << i << "dist robot2point" << pr.norm2() << "laser" << laserData[j].dist << "k" << k << pr 
-									<< "laserIndex" << j << "laserAngle" << laserData[j].angle << "angle" << angle;;
-				break;
-			}		
+ 			if( pr.norm2() > laserData[j].dist ) // laser beam is smaller than p distance to robot. The path is crossed by an obstacle
+ 			{
+ 				road.setBlocked(true);
+ 				qDebug() << __FILE__ << "Blocked index" << i << "dist robot2point" << pr.norm2() << "laser" << laserData[j].dist << "k" << k << pr 
+ 									<< "laserIndex" << j << "laserAngle" << laserData[j].angle << "angle" << angle;;
+ 				break;
+ 			}		
 		}	
 	}
 }

@@ -57,7 +57,7 @@
 
  <node alias="dynamixel" endpoint="jointmotor:tcp -h robonuc1.local -p 10068">
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote robonuc1.local dynamixel /home/robocomp/robocomp/components/robocomp-robolab/components/dynamixelComp/ ./dynamixelComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/dynamixel.conf" />
+  <upCommand command="rcremote robonuc1.local dynamixel /home/robocomp/robocomp/components/robocomp-robolab/components/dynamixelComp/ ./bin/dynamixelComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/dynamixel.conf" />
   <downCommand command="ssh robolab@robonuc1.local killall -9 dynamixelComp" />
   <configFile path="ursus.conf" />
   <xpos value="104.925106085" />

@@ -112,19 +112,18 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	//If target on obstacle find a point close to it on the robot-target line
 	if( sampler.searchRobotValidStateCloseToTarget(target) == false )
 	{
-		// 		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
+		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		return false;
 	}
 	//Check if the target is in "plain sight"
 	QVec point;
-	qDebug() << __LINE__;
+	//qDebug() << __LINE__;
 	if ( sampler.checkRobotValidDirectionToTargetOneShot( robot, target) )
 	{
  		qDebug() << __FILE__ << __FUNCTION__ << "-------- Target on sight. Proceeding";
 		currentPath << robot << target;
 		return true;
 	}
-	
 	
 	//Now search in KD-tree for closest points to origin and target
 	Vertex robotVertex, targetVertex;
@@ -133,19 +132,19 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	//Obtain a free path from [robot] to [robotVertex] using RRTConnect. Return if fail.
  	QList<QVec> path;
 // 	if (planWithRRT(robot, graph[robotVertex].pose, path) )
-// 	{
-// 		if(path.size() > 1)  //has to be. We trim the last element to avoid duplicating it
-// 		{
-// 			path.removeLast();
-// 			currentPath += path;
-// // 			qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan." << " So far" << path;
-// 		}
-// 		else
-// 			if (path.size() == 1)
-// 				qFatal("Fary en path");
-// 	}
-// 	else
-// 		 return false;
+//  	{
+//  		if(path.size() > 1)  //has to be. We trim the last element to avoid duplicating it
+//  		{
+//  			path.removeLast();
+//  			currentPath += path;
+//  			qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan." << " So far" << path;
+//  		}
+//  		else
+// 	if (path.size() == 1)
+//  				qFatal("Fary en path");
+//  	}
+//  	else
+//  		 return false;
 
 	//Now we are in the graph
 	//Search in graph minimun path. Return if fail
