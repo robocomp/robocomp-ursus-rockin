@@ -157,7 +157,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 
 		/////////////////////////////////////////////////
 		///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
-		///
 		/////////////////////////////////////////////////
 // 		float vside = 0;
 // 		std::sort(laserData.begin(), laserData.end(), [](auto a, auto b){ return a.dist < b.dist;});
@@ -173,9 +172,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-//  		qDebug() << "------------------Controller Report ---------------;";
-//   		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
-//  		qDebug() << "---------------------------------------------------;";
+  		qDebug() << "------------------Controller Report ---------------;";
+   		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+  		qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot); }
@@ -188,7 +187,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 	}
 
-	epoch = reloj.restart();  //epcoh time in ms
+	epoch = reloj.restart();  //epoch time in ms
 	return false;
 
 }
