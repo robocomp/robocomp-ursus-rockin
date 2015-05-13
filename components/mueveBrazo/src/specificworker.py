@@ -61,15 +61,19 @@ class SpecificWorker(GenericWorker):
 		# MANO DERECHA:
 		self.ui.botonCerrar.clicked.connect(self.cerrar)
 		self.ui.botonAbrir.clicked.connect(self.abrir)
-		
 		# BRAZO DERECHO ENTERO
 		self.ui.botonBrazo.clicked.connect(self.brazoDereho)
 		
+		#Prueba visualBIK
+		self.ui.botonRotacion.clicked.connect(self.movimiento_con_Rotacion)
+		self.ui.botonTraslacion.clicked.connect(self.movimiento_sin_Rotacion)
+		self.ui.botonHome.clicked.connect(self.abajo_R)
+		
 		# Pueba compleja
 		self.ui.botonCargar.clicked.connect(self.cargarCubos)
-		self.ui.botonIR1.clicked.connect(self.llamarBIK)
-		#self.ui.botonIR2.clicked.connect(self.llamarBIK)
-		#self.ui.botonIR3.clicked.connect(self.llamarBIK)
+		self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
+		self.ui.botonIR2.clicked.connect(self.llamarBIK_2)
+		self.ui.botonIR3.clicked.connect(self.llamarBIK_3)
 
 	def setParams(self, params):
 		#try:
@@ -102,17 +106,23 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en arriba_L: ",CollisionException
 
 	@QtCore.Slot()
 	def abajo_L(self):
-		mapa = {'leftShoulder1':0.0, 'leftShoulder2':0.0, 'leftShoulder3':0.0 , 'leftElbow':0.0 , 'leftForeArm':0.0 , 'leftWrist1':0.0 , 'leftWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
+		mapa = {'leftShoulder1':0.1, 'leftShoulder2':0.1, 'leftShoulder3':-0.1 , 'leftElbow':-0.1 , 'leftForeArm':0.0 , 'leftWrist1':0.0 , 'leftWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
 		for motor in mapa:
 			goal = MotorGoalPosition()
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException: 
+				print "Error en abajo_L: ",CollisionException().what
 
 	@QtCore.Slot()
 	def arriba_R(self):
@@ -122,17 +132,23 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en arriba_R: ",CollisionException
 
 	@QtCore.Slot()
 	def abajo_R(self):
-		mapa = {'rightShoulder1':0.0, 'rightShoulder2':0.0, 'rightShoulder3':0.0 , 'rightElbow':0.0 , 'rightForeArm':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
+		mapa = {'rightShoulder1':-0.1, 'rightShoulder2':-0.1, 'rightShoulder3':0.1 , 'rightElbow':0.1 , 'rightForeArm':0.1, 'rightWrist1':0.0 , 'rightWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
 		for motor in mapa:
 			goal = MotorGoalPosition()
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en abajo_R: ", CollisionException
 			
 	@QtCore.Slot()
 	def abrir(self):
@@ -142,7 +158,10 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en abrir Finger: ",CollisionException	
 		
 	@QtCore.Slot()
 	def cerrar(self):
@@ -152,7 +171,10 @@ class SpecificWorker(GenericWorker):
 			goal.position = mapa[motor]
 			goal.name = motor
 			goal.maxSpeed = 0.5
-			self.jointmotor_proxy.setPosition(goal)
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en cerrar Finger: ", CollisionException
 			
 	@QtCore.Slot()
 	def brazoDereho(self):
@@ -169,7 +191,72 @@ class SpecificWorker(GenericWorker):
 		time.sleep(2)
 		
 		self.abajo_R()
-
+	
+	########################################################################################################
+	########################################################################################################
+	@QtCore.Slot()
+	def movimiento_con_Rotacion(self):
+		# LLamar al BIK y pasarle el vector POSE:
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = 0
+		pose6D.y = 700
+		pose6D.z = 300
+		pose6D.rx =  0
+		pose6D.ry =  0
+		pose6D.rz =  0
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 1
+		weights.ry = 1
+		weights.rz = 1
+		
+		radius = 150 #radio
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en movimiento_con_Rotacion"
+		
+		
+	@QtCore.Slot()
+	def movimiento_sin_Rotacion(self):
+			# LLamar al BIK y pasarle el vector POSE:
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = 0
+		pose6D.y = 700
+		pose6D.z = 300
+		pose6D.rx =  0
+		pose6D.ry =  0
+		pose6D.rz =  0
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 0
+		weights.ry = 0
+		weights.rz = 0
+		
+		radius = 150 #radio
+		
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en movimiento_sin_Rotacion"
 
 	########################################################################################################
 	########################################################################################################
@@ -180,6 +267,7 @@ class SpecificWorker(GenericWorker):
 		print 'CARGANDO CUBOS...'
 		# Inicializamos el fichero de lectura
 		infile = open("/home/robocomp/robocomp/files/innermodel/worlds/pruebaRockin.xml", 'r') 
+		item = 0
 		for line in infile:
 			if line.find('<transform id="CUBO_')!=-1:
 				# Tenemos la linea con el patron: <transform id="CUBO_X" tx="X" ty="X" tz="X" [rx, ry rz]> 
@@ -191,7 +279,8 @@ class SpecificWorker(GenericWorker):
 				# Longitud minima: 5 (solo traslaciones)
 				vector = (line.split('>'))[0].split()
 				# Sacamos el nombre del cubo:
-				nombreCubo = str((vector[1].split('='))[1].split('"')[1])
+				#nombreCubo = str((vector[1].split('='))[1].split('"')[1])
+				#nombresCubos[i] = nombreCubo
 				
 				# Sacamos las tralaciones y las rotaciones eliminando todo lo que no sea numerico
 				for elemento in vector:
@@ -203,7 +292,8 @@ class SpecificWorker(GenericWorker):
 					if elemento.find('rz')!=-1: pose[5] = float((elemento.replace('rz="', '')).replace('"',''))
 					
 				# Guardamos la pose en el dicionario
-				posicionCubos[nombreCubo] = pose
+				posicionCubos[item] = pose
+				item = item+1
 		infile.close()
 
 		i=1
@@ -222,6 +312,97 @@ class SpecificWorker(GenericWorker):
 		print 'FIN CARGAR CUBOS: '
 		
 	@QtCore.Slot()
-	def llamarBIK(self):
+	def llamarBIK_1(self):
 		# LLamar al BIK y pasarle el vector POSE:
-		print 'Llamando a BIK'
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = posicionCubos[0][0]
+		pose6D.y = posicionCubos[0][1]
+		pose6D.z = posicionCubos[0][2]
+		pose6D.rx =  posicionCubos[0][3]
+		pose6D.ry =  posicionCubos[0][4]
+		pose6D.rz =  posicionCubos[0][5]
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 0
+		weights.ry = 0
+		weights.rz = 0
+		
+		radius = 150 #radio
+		
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en llamarBIK_1"
+		
+	@QtCore.Slot()
+	def llamarBIK_2(self):
+		# LLamar al BIK y pasarle el vector POSE:
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = posicionCubos[1][0]
+		pose6D.y = posicionCubos[1][1]
+		pose6D.z = posicionCubos[1][2]
+		pose6D.rx =  posicionCubos[1][3]
+		pose6D.ry =  posicionCubos[1][4]
+		pose6D.rz =  posicionCubos[1][5]
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 0
+		weights.ry = 0
+		weights.rz = 0
+		
+		radius = 250 #radio
+		
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en llamarBIK_2"
+		
+	@QtCore.Slot()
+	def llamarBIK_3(self):
+		# LLamar al BIK y pasarle el vector POSE:
+		print 'Preparando vector pose 6D'
+		
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		
+		import RoboCompBodyInverseKinematics
+		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x = posicionCubos[2][0]
+		pose6D.y = posicionCubos[2][1]
+		pose6D.z = posicionCubos[2][2]
+		pose6D.rx =  posicionCubos[2][3]
+		pose6D.ry =  posicionCubos[2][4]
+		pose6D.rz =  posicionCubos[2][5]
+		print 'Llamando a BIK con pose6D: ',pose6D
+		
+		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
+		weights.x = 1
+		weights.y = 1
+		weights.z = 1
+		weights.rx = 0
+		weights.ry = 0
+		weights.rz = 0
+		
+		radius = 250 #radio
+		
+		try:
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+		except:
+			print "Error en llamarBIK_3"

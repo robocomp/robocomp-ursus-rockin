@@ -80,6 +80,8 @@ Ice.loadSlice(preStr+"CommonBehavior.ice")
 import RoboCompCommonBehavior
 Ice.loadSlice(preStr+"JointMotor.ice")
 import RoboCompJointMotor
+Ice.loadSlice(preStr+"BodyInverseKinematics.ice")
+import RoboCompBodyInverseKinematics
 
 
 class CommonBehaviorI(RoboCompCommonBehavior.CommonBehavior):
@@ -133,6 +135,23 @@ if __name__ == '__main__':
 		except Ice.Exception, e:
 			print e
 			print 'Cannot get JointMotorProxy property.'
+			status = 1
+
+
+		# Remote object connection for BodyInverseKinematics
+		try:
+			proxyString = ic.getProperties().getProperty('BodyInverseKinematicsProxy')
+			try:
+				basePrx = ic.stringToProxy(proxyString)
+				bodyinversekinematics_proxy = RoboCompBodyInverseKinematics.BodyInverseKinematicsPrx.checkedCast(basePrx)
+				mprx["BodyInverseKinematicsProxy"] = bodyinversekinematics_proxy
+			except Ice.Exception:
+				print 'Cannot connect to the remote object (BodyInverseKinematics)', proxyString
+				#traceback.print_exc()
+				status = 1
+		except Ice.Exception, e:
+			print e
+			print 'Cannot get BodyInverseKinematicsProxy property.'
 			status = 1
 
 	except:

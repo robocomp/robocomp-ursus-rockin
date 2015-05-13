@@ -27,6 +27,7 @@
 
 #include <CommonBehavior.h>
 #include <BodyInverseKinematics.h>
+#include <AprilTags.h>
 
 
 #define CHECK_PERIOD 5000
@@ -37,6 +38,7 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 using namespace std;
 
 using namespace RoboCompBodyInverseKinematics;
+using namespace RoboCompAprilTags;
 
 class GenericWorker : 
 public QObject
@@ -63,6 +65,7 @@ public:
 	virtual void advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist) = 0;
 	virtual void pointAxisTowardsTarget(const string &bodyPart, const Pose6D &target, const Axis &ax, const bool &axisConstraint, const float axisAngleConstraint) = 0;
 	virtual void setJoint(const string &joint, const float position, const float maxSpeed) = 0;
+	virtual void newAprilTag(const tagsList &tags) = 0;
 
 
 protected:

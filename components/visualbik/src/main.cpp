@@ -79,8 +79,10 @@
 #include "commonbehaviorI.h"
 
 #include <bodyinversekinematicsI.h>
+#include <apriltagsI.h>
 
 #include <BodyInverseKinematics.h>
+#include <AprilTags.h>
 
 
 // User includes here
@@ -90,6 +92,7 @@ using namespace std;
 using namespace RoboCompCommonBehavior;
 
 using namespace RoboCompBodyInverseKinematics;
+using namespace RoboCompAprilTags;
 
 
 
@@ -140,6 +143,7 @@ int VisualBIK::run(int argc, char* argv[])
 	rInfo("BodyInverseKinematicsProxy initialized Ok!");
 	mprx["BodyInverseKinematicsProxy"] = (::IceProxy::Ice::Object*)(&bodyinversekinematics_proxy);//Remote server proxy creation example
 
+IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
 
 	GenericWorker *worker = new SpecificWorker(mprx);
@@ -179,6 +183,34 @@ int VisualBIK::run(int argc, char* argv[])
 
 
 		// Server adapter creation and publication
+		if (not GenericMonitor::configGetString(communicator(), prefix, "AprilTagsTopic", tmp, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AprilTagsProxy";
+		}
+		Ice::ObjectAdapterPtr AprilTags_adapter = communicator()->createObjectAdapterWithEndpoints("apriltags", tmp);
+		AprilTagsPtr apriltagsI_ = new AprilTagsI(worker);
+		Ice::ObjectPrx apriltags = AprilTags_adapter->addWithUUID(apriltagsI_)->ice_oneway();
+		IceStorm::TopicPrx apriltags_topic;
+		if(!apriltags_topic){
+		try {
+			apriltags_topic = topicManager->create("AprilTags");
+		}
+		catch (const IceStorm::TopicExists&) {
+		//Another client created the topic
+		try{
+			apriltags_topic = topicManager->retrieve("AprilTags");
+		}
+		catch(const IceStorm::NoSuchTopic&)
+		{
+			//Error. Topic does not exist
+			}
+		}
+		IceStorm::QoS qos;
+		apriltags_topic->subscribeAndGetPublisher(qos, apriltags);
+		}
+		AprilTags_adapter->activate();
+
+		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )
@@ -210,17 +242,17 @@ int VisualBIK::run(int argc, char* argv[])
 int main(int argc, char* argv[])
 {
 	string arg;
-	
+
 	// Set config file
 	std::string configFile = "config";
 	if (argc > 1)
 	{
 		std::string initIC("--Ice.Config=");
-		size_t pos = std::string(argv[1]).find(initIC)
+		size_t pos = std::string(argv[1]).find(initIC);
 		if (pos == 0)
 			configFile = std::string(argv[1]+initIC.size());
 	}
-		
+
 	// Search in argument list for --prefix= argument (if exist)
 	QString prefix("");
 	QString prfx = QString("--prefix=");
@@ -237,6 +269,6 @@ int main(int argc, char* argv[])
 	}
 	VisualBIK app(prefix);
 
-	return app.main(argc, argv, configFile);
+	return app.main(argc, argv, configFile.c_str());
 }
 

@@ -106,5 +106,12 @@ cmake .
 make -j5
 
 
+# base
+echo "make base"
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/baseursus/
+cmake .
+make -j5
+
+
 
 
