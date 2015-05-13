@@ -192,10 +192,10 @@
   <radius value="10.0" />
  </node>
 
- <node alias="aprilCamera" endpoint="commonbehavior:tcp -h localhost -p 11258">
+ <node alias="aprilCamera" endpoint="commonbehavior:tcp -h localhost -p 14358">
   <dependence alias="rgbd" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost aprilCamera /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp/ ./bin/apriltagscomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/apriltags.conf" />
+  <upCommand command="rcremote localhost aprilCamera /home/robocomp/robocomp/components/robocomp-robolab/components/apriltagsComp/ ./bin/apriltagscomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/apriltagsSim.conf" />
   <downCommand command="killall -9 apriltagscomp" />
   <configFile path="xxx" />
   <xpos value="-170" />
