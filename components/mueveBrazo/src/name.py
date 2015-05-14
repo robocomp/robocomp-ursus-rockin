@@ -120,7 +120,6 @@ if __name__ == '__main__':
 	status = 0
 	mprx = {}
 	try:
-
 		# Remote object connection for JointMotor
 		try:
 			proxyString = ic.getProperties().getProperty('JointMotorProxy')
@@ -128,6 +127,7 @@ if __name__ == '__main__':
 				basePrx = ic.stringToProxy(proxyString)
 				jointmotor_proxy = RoboCompJointMotor.JointMotorPrx.checkedCast(basePrx)
 				mprx["JointMotorProxy"] = jointmotor_proxy
+
 			except Ice.Exception:
 				print 'Cannot connect to the remote object (JointMotor)', proxyString
 				#traceback.print_exc()
@@ -141,10 +141,15 @@ if __name__ == '__main__':
 		# Remote object connection for BodyInverseKinematics
 		try:
 			proxyString = ic.getProperties().getProperty('BodyInverseKinematicsProxy')
+
 			try:
 				basePrx = ic.stringToProxy(proxyString)
-				bodyinversekinematics_proxy = RoboCompBodyInverseKinematics.BodyInverseKinematicsPrx.checkedCast(basePrx)
+				print "Llego 1"
+				bodyinversekinematics_proxy = RoboCompBodyInverseKinematics.BodyInverseKinematicsPrx.checkedCast(basePrx) # SE ATASCA AQUI
+				print "Llego 2"
 				mprx["BodyInverseKinematicsProxy"] = bodyinversekinematics_proxy
+				print "Llego 3"
+
 			except Ice.Exception:
 				print 'Cannot connect to the remote object (BodyInverseKinematics)', proxyString
 				#traceback.print_exc()

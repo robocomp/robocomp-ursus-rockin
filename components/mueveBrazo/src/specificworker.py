@@ -47,7 +47,10 @@ posicionCubos = dict()
 #------------------------------------------------------#
 class SpecificWorker(GenericWorker):
 	def __init__(self, proxy_map):
+		print "HOLA DESDE EL CONSTRUCTOR DEL SPECIFIC"
+		
 		super(SpecificWorker, self).__init__(proxy_map)
+		
 		self.timer.timeout.connect(self.compute)
 		self.Period = 2000
 		self.timer.start(self.Period)
@@ -70,10 +73,10 @@ class SpecificWorker(GenericWorker):
 		self.ui.botonHome.clicked.connect(self.abajo_R)
 		
 		# Pueba compleja
-		self.ui.botonCargar.clicked.connect(self.cargarCubos)
-		self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
-		self.ui.botonIR2.clicked.connect(self.llamarBIK_2)
-		self.ui.botonIR3.clicked.connect(self.llamarBIK_3)
+	#	self.ui.botonCargar.clicked.connect(self.cargarCubos)
+	#	self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
+	#	self.ui.botonIR2.clicked.connect(self.llamarBIK_2)
+	#	self.ui.botonIR3.clicked.connect(self.llamarBIK_3)
 
 	def setParams(self, params):
 		#try:
@@ -205,7 +208,7 @@ class SpecificWorker(GenericWorker):
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
 		pose6D.x = 0
 		pose6D.y = 700
-		pose6D.z = 300
+		pose6D.z = 500
 		pose6D.rx =  0
 		pose6D.ry =  0
 		pose6D.rz =  0
@@ -237,7 +240,7 @@ class SpecificWorker(GenericWorker):
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
 		pose6D.x = 0
 		pose6D.y = 700
-		pose6D.z = 300
+		pose6D.z = 500
 		pose6D.rx =  0
 		pose6D.ry =  0
 		pose6D.rz =  0

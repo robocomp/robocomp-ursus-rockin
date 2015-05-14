@@ -60,14 +60,20 @@ void SpecificWorker::compute()
 	switch(this->state)
 	{
 		case State::IDLE:
+			
+			std::cout<<"ESTADO IDLE.."<<std::endl;
+			
 			if (this->currentTarget.getState() == Target::State::WAITING)
 			{
 				this->state = State::TARGET_ARRIVE;
-				cout<<"Ha llegado un TARGET"<<endl;
+				std::cout<<"Ha llegado un TARGET"<<std::endl;
 			}
 		break;
 			
 		case State::TARGET_ARRIVE:
+			
+			std::cout<<"ESTADO TARGET_ARRIVE.."<<std::endl;
+			
 			if (this->currentTarget.getWeights().rx==0 and this->currentTarget.getWeights().ry==0 and this->currentTarget.getWeights().rz==0)
 				this->state = State::INIT_TRASLACION;
 			else
@@ -75,6 +81,9 @@ void SpecificWorker::compute()
 		break;
 			
 		case State::INIT_TRASLACION:
+
+			std::cout<<"ESTADO INIT_TRASLACION.."<<std::endl;
+
 			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.getBodyPart(), this->currentTarget.getPose6D(), this->currentTarget.getWeights(), 250);
 			
 			this->currentTarget.changeState(Target::State::IN_PROCESS);
@@ -82,6 +91,9 @@ void SpecificWorker::compute()
 		break;
 			
 		case State::INIT_ROTACION:
+			
+			std::cout<<"ESTADO INIT_ROTACION.."<<std::endl;
+
 			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.getBodyPart(), this->currentTarget.getPose6D(), this->currentTarget.getWeights(), 250);
 			
 			this->currentTarget.changeState(Target::State::IN_PROCESS);
@@ -89,6 +101,9 @@ void SpecificWorker::compute()
 		break;
 			
 		case State::WAIT_TRASLACION:
+
+			std::cout<<"ESTADO WAIT_TRASLACION.."<<std::endl;
+
 			//if bodyinversekinematics_proxy->getState(target.currect.part)==true ¿aun no ha terminado de procesar?
 			//llamamos metodo2
 			// Cuando termina traslacion:
@@ -97,6 +112,9 @@ void SpecificWorker::compute()
 				
 		break;
 		case State::WAIT_ROTATION:
+			
+			std::cout<<"ESTADO WAIT_ROTATION.."<<std::endl;
+
 			//if bodyinversekinematics_proxy->getState(target.currect.part)==true
 				//llamamos metodo2
 			// Cuando termina rotacion:
@@ -381,8 +399,21 @@ void SpecificWorker::setJoint(const string &joint, const float position, const f
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {
 	//Recibimos las marcas que la camara esta viendo: marca mano y marca target.
-	std::cout<<"April Tags: "<<tags.size()<<endl;
-	this->tags = tags;
+	for (auto tag : tags)
+	{
+		if (tag.id == 25)
+		{
+			printf("RIGHT HAND SEEN: (tag id %d)\n", tag.id);
+			QMutexLocker l(&this->mutex);
+			this->rightHand.setVisualPose(tag);
+		}
+		else if (tag.id == 24)
+		{
+			printf("LEFT HAND SEEN: (tag id %d)\n", tag.id);
+			QMutexLocker l(&this->mutex);
+			this->leftHand.setVisualPose(tag);
+		}
+	}
 }
 
 

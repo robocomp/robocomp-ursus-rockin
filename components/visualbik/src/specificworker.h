@@ -28,7 +28,10 @@
 #include <iostream>
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
-#include "target.h"
+#include <target.h>
+#include <visualhand.h>
+
+
 
 class SpecificWorker : public GenericWorker
 {
@@ -54,16 +57,19 @@ public slots:
 	void compute(); 	
 
 private:
+	// ESTADOS POR LOS QUE PASA LA MAQUINA DE ESTADOS DEL VISUAL BIK:
 	enum class State {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, WAIT_TRASLACION, WAIT_ROTATION};
+	// LA VARIABLE QUE GUARDA EL ESTADO DEL VISUAL BIK
 	State state;
-	tagsList tags;
-	
+	// VARIABLES QUE GUARDAN LA POSE INTERNA Y VISUAL DE LAS MARCAS DE LAS MANOS DEL ROBOT
+	VisualHand rightHand, leftHand; //CONSULTE LOS FICHEROS src/visualhand.h Y src/visualhand.cpp
+	// VARIABLES QUE GUARDAN EL TARGET QUE SE ESTA EJECUTANDO Y EL SIGUIENTE A EJECUTAR.
 	Target currentTarget;
 	Target nextTarget;
-	
+	// MUTEX PARA ZONAS CRITICAS
 	QMutex mutex;
 	
-	
+	// METODOS PRIVADOS
 	void metodo1_traslacion();
 	void metodo2_rotacion();
 };

@@ -51,6 +51,12 @@ cd /home/robocomp/robocomp/components/robocomp-ursus/components/bikComp/
 cmake .
 make -j5
 
+# bik visual
+echo "make bik visual"
+cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/visualbik/
+cmake .
+make -j5
+
 # ursuscommonjoint
 echo "make ursuscommonjoint"
 cd /home/robocomp/robocomp/components/robocomp-ursus/components/ursusCommonJoint/
