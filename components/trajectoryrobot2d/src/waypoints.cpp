@@ -122,12 +122,12 @@ void WayPoints::computeDistancesToNext()
 	}
 }
 
-void WayPoints::removeFirst(InnerModelManagerPrx innermodelmanager_proxy)
+void WayPoints::removeFirst(InnerModelViewer *innerViewer)
 {
-	RcisDraw::removeObject(innermodelmanager_proxy, first().centerTransformName);
-	RcisDraw::removeObject(innermodelmanager_proxy, first().centerMeshName);
-	RcisDraw::removeObject(innermodelmanager_proxy, first().ballTransformName);
-	RcisDraw::removeObject(innermodelmanager_proxy, first().ballMeshName);
+	InnerModelDraw::removeObject(innerViewer, first().centerTransformName);
+	InnerModelDraw::removeObject(innerViewer, first().centerMeshName);
+	InnerModelDraw::removeObject(innerViewer, first().ballTransformName);
+	InnerModelDraw::removeObject(innerViewer, first().ballMeshName);
 
 	QList< WayPoint >::removeFirst();
 }
@@ -213,22 +213,14 @@ void WayPoints::print() const
 	}
 }
 
-bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, const CurrentTarget &currentTarget)
+bool WayPoints::draw(InnerModelViewer *innerViewer, InnerModel *innerModel, const CurrentTarget &currentTarget)
 {
 	if (size() == 0) return false;
-
-	RoboCompInnerModelManager::Pose3D pose;
-	pose.y = 0;	pose.x = 0;	pose.z = 0;
-	pose.rx = pose.ry = pose.z = 0.;
-
-	try
-	{
-		std::string  parentAll = "road";
-		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);
-	}
-	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
-	{ std::cout << ex << std::endl;}
-
+printf("%d\n", __LINE__);
+	printf("ROAD %s\n", innerViewer->innerModel->getNode("road")?"existe":"no existe");
+	InnerModelDraw::addTransform_ignoreExisting(innerViewer, "road", "floor");
+	printf("ROAD %s\n", innerViewer->innerModel->getNode("road")?"existe":"no existe");
+printf("%d\n", __LINE__);
 	//Draw all points now
 	for(int i=1; i<size(); i++)
 	{
@@ -239,15 +231,25 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		QVec normal = lp.getNormalForOSGLineDraw();  //3D vector
 		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();		//OJO, PETA SI NO ESTA LA TG CALCULADA ANTES
 		QString item = "p_" + QString::number(i);
-		pose.x = w.pos.x();	pose.y = 10; pose.z = w.pos.z();
 
-		RcisDraw::addTransform_ignoreExisting(innermodelmanager_proxy, item, "road", pose);
-		if ( (int)i == (int)currentPointIndex+1 )	//CHANGE TO getIndexOfClosestPointToRobot()
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, tangent, 600, 30, "#000055" );
+printf("%d\n", __LINE__);
+		printf("item %s\n", innerViewer->innerModel->getNode(item)?"existe":"no existe");
+		InnerModelDraw::addTransform_ignoreExisting(innerViewer, item, "road");
+		printf("item %s\n", innerViewer->innerModel->getNode(item)?"existe":"no existe");
+printf("%d\n", __LINE__);
+		innerViewer->innerModel->updateTransformValues(item, w.pos.x(), 10, w.pos.z(),    0,0,0);
+printf("%d\n", __LINE__);
+		if ( (int)i == (int)currentPointIndex+1 ) //CHANGE TO getIndexOfClosestPointToRobot()
+		{
+			printf("item_line %s\n", innerViewer->innerModel->getNode(item+"_line")?"existe":"no existe");
+			InnerModelDraw::drawLine(innerViewer, item+"_line", item, tangent, 600, 30, "#000055" );
+			printf("item_line %s\n", innerViewer->innerModel->getNode(item+"_line")?"existe":"no existe");
+		}
 		if (w.isVisible)
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#005500" );
+			InnerModelDraw::drawLine(innerViewer, item + "_point", item, normal, 250, 50, "#005500" );
 		else
-			RcisDraw::drawLine(innermodelmanager_proxy, item + "_point", item, normal, 250, 50, "#550099" );  //Morado
+			InnerModelDraw::drawLine(innerViewer, item + "_point", item, normal, 250, 50, "#550099" );  //Morado
+printf("%d\n", __LINE__);
 	}
 	if( currentTarget.hasRotation() == true) 	//Draw an arrow indicating final desired orientation
 	{
@@ -256,7 +258,7 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 		QLine2D l(w.pos, w.pos + QVec::vec3((T)(500*sin(rot)),0,(T)(500*cos(rot))));
 		QVec ln = l.getNormalForOSGLineDraw();
 		QString item = "p_" + QString::number(this->size()-1);
-		RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, ln, 600, 30, "#400055" );
+		InnerModelDraw::drawLine(innerViewer, item + "_line", item, ln, 600, 30, "#400055" );
 	}
 	
 	return true;
@@ -264,17 +266,10 @@ bool WayPoints::draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *i
 
 
 
-void WayPoints::clearDraw(InnerModelManagerPrx innermodelmanager_proxy)
+void WayPoints::clearDraw(InnerModelViewer *innerViewer)
 {
-	try
-	{
- 		//qDebug() << __FUNCTION__ << "deleting ROAD";
- 		innermodelmanager_proxy->removeNode("road");
- 	}
-	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
-	{
-		//std::cout << e.text << std::endl;
-	}
+	if (innerViewer->innerModel->getNode("road"))
+		InnerModelDraw::removeNode(innerViewer, "road");
 }
 
 

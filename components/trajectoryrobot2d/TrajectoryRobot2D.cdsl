@@ -7,7 +7,7 @@ Component TrajectoryRobot2DComp
 {
 	Communications
 	{
-		requires Laser, OmniRobot, OmniRobot, InnerModelManager;
+		requires Laser, OmniRobot;
 		implements TrajectoryRobot2D;
 	};
 	language Cpp;

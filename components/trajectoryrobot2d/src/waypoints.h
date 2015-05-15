@@ -23,7 +23,7 @@
 #include <innermodel/innermodel.h>
 #include <iostream>
 #include <fstream>
-#include "rcisdraw.h"
+#include <innermodeldraw.h>
 #include <float.h>
 #include "qline2d.h"
 #include "currenttarget.h"
@@ -67,8 +67,8 @@ class WayPoints : public QList< WayPoint >
 		void readRoadFromList(QList<QVec> list);
 		void printRobotState(InnerModel* innerModel, const CurrentTarget& currentTarget);
 		void print() const;
-		bool draw(InnerModelManagerPrx innermodelmanager_proxy, InnerModel *innerModel, const CurrentTarget &currentTarget);  //Default in upTo means all list
-		void clearDraw(InnerModelManagerPrx innermodelmanager_proxy);
+		bool draw(InnerModelViewer *innerViewer, InnerModel *innerModel, const CurrentTarget &currentTarget);  //Default in upTo means all list
+		void clearDraw(InnerModelViewer *innerViewer);
 		QList<QVec> backList;
 		bool update();
 		
@@ -109,7 +109,7 @@ class WayPoints : public QList< WayPoint >
 		void setBlocked(bool b)																{ blockedRoad = b;};
 		void changeTarget(const QVec &target)												{ QMutexLocker ml(&mutex); replace(length()-1, target); antDist = std::numeric_limits< float >::max();};
 		void setETA();
-		void removeFirst(InnerModelManagerPrx innermodelmanager_proxy);
+		void removeFirst(InnerModelViewer *innerViewer);
 		
 		int nextPointIndex;
 		bool blockedRoad;

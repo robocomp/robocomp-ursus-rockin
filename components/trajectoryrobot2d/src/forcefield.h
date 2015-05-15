@@ -21,15 +21,14 @@
 #include <qmat/QMatAll>
 #include <innermodel/innermodel.h>
 #include "qline2d.h"
-#include <InnerModelManager.h>
-#include "rcisdraw.h"
+#include <innermodeldraw.h>
 #include "waypoints.h"
 
 class ForceField : public QObject
 {
     Q_OBJECT
 	public:
-		ForceField(InnerModel *innermodel, InnerModelManagerPrx _innermodelmanager_proxy);
+		ForceField(InnerModel *innermodel, InnerModelViewer *innerViewer);
 		bool update(WayPoints& road);
 		
 		struct State

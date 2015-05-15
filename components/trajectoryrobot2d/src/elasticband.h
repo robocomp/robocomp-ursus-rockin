@@ -20,8 +20,8 @@
 
 #include <QtCore>
 #include <qmat/QMatAll>
-#include "rcisdraw.h"
 #include <innermodel/innermodel.h>
+#include <innermodeldraw.h>
 #include <Laser.h>
 #include <limits>       // std::numeric_limits
 #include "waypoints.h"

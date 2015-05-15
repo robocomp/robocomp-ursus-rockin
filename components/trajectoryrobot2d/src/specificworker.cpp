@@ -28,7 +28,20 @@ SpecificWorker::SpecificWorker(MapPrx& mprx, QWidget *parent) : GenericWorker(mp
 {
 	this->params = params;
 	tState.setState("IDLE");
+#ifdef USE_QTGUI
+	innerViewer = NULL;
+	osgView = new OsgView(this);
+	osgGA::TrackballManipulator *tb = new osgGA::TrackballManipulator;
+	osg::Vec3d eye(osg::Vec3(4000.,4000.,-1000.));
+	osg::Vec3d center(osg::Vec3(0.,0.,-0.));
+	osg::Vec3d up(osg::Vec3(0.,1.,0.));
+	tb->setHomePosition(eye, center, up, true);
+	tb->setByMatrix(osg::Matrixf::lookAt(eye,center,up));
+ 	osgView->setCameraManipulator(tb);
+#else
 	hide();
+#endif
+
 }
 
 /**
@@ -54,7 +67,14 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("InnerModel");
 		if( QFile::exists(QString::fromStdString(par.value)) )
+		{
 			innerModel = new InnerModel(par.value);
+#ifdef USE_QTGUI
+			innerVisual = new InnerModel(par.value);
+			innerViewer = new InnerModelViewer(innerVisual, "root", osgView->getRootGroup(), true);
+			show();
+#endif
+		}
 		else
 		{
 			std::cout << "Innermodel path " << par.value << " not found. "; qFatal("Abort");
@@ -68,7 +88,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//Update InnerModel from robot
 	//try { differentialrobot_proxy->getBaseState(bState); }
 	
- 	try {  omnirobot1_proxy->getBaseState(bState); }
+ 	try {  omnirobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with robot proxy");}
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
@@ -82,9 +102,9 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//Planning
 	plannerPRM = new PlannerPRM(innerModel, 100, 30);
 	planner = plannerPRM;
-#ifdef RCIS
-	planner->cleanGraph(innermodelmanager_proxy);
- 	planner->drawGraph(innermodelmanager_proxy);
+#ifdef USE_QTGUI
+	planner->cleanGraph(innerViewer);
+ 	planner->drawGraph(innerViewer);
 #endif
 
 	// 	qDebug() << "----------------inserting" ;
@@ -121,8 +141,7 @@ void SpecificWorker::compute( )
 	// Check for connection failure
 	if ( updateInnerModel(innerModel, tState) == false )
 	{
-		controller->stopTheRobot(omnirobot1_proxy);
-		controller->stopTheRobot(omnirobot2_proxy);
+		controller->stopTheRobot(omnirobot_proxy);
 		stopCommand(currentTarget, road, tState);
 		tState.setState("DISCONNECTED");
 	}	
@@ -153,15 +172,20 @@ void SpecificWorker::compute( )
 
 	if(reloj.elapsed() > 2000)	//to draw only every 2 secs
 	{
-#ifdef RCIS
-		road.clearDraw(innermodelmanager_proxy);
-		road.draw(innermodelmanager_proxy, innerModel, currentTarget);
+#ifdef USE_QTGUI
+		road.clearDraw(innerViewer);
+		road.draw(innerViewer, innerModel, currentTarget);
 #endif
 		qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed()/cont << "State. Robot at:" << innerModel->transform("world","robot");
 		cont = 0;
 		reloj.restart();
 	}
 	cont++;
+	
+#ifdef USE_QTGUI
+	if (innerViewer) innerViewer->update();
+	osgView->frame();
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -176,13 +200,12 @@ void SpecificWorker::compute( )
 bool SpecificWorker::stopCommand(CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state)
 {
 	// 	qDebug() << __FUNCTION__ ;
-	controller->stopTheRobot(omnirobot1_proxy);
-	controller->stopTheRobot(omnirobot2_proxy);
+	controller->stopTheRobot(omnirobot_proxy);
 	myRoad.setFinished(true);
 	myRoad.reset();
 	myRoad.endRoad();
-#ifdef RCIS
-	myRoad.clearDraw(innermodelmanager_proxy);
+#ifdef USE_QTGUI
+	myRoad.clearDraw(innerViewer);
 #endif
 	drawGreenBoxOnTarget( target.getTranslation() );
 	target.reset();
@@ -204,8 +227,8 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
 	myRoad.setFinished(true);
 	myRoad.reset();
 	myRoad.endRoad();
-#ifdef RCIS
-	myRoad.clearDraw(innermodelmanager_proxy);
+#ifdef USE_QTGUI
+	myRoad.clearDraw(innerViewer);
 #endif
 	target.reset();
 	target.command  = CurrentTarget::Command::IDLE;
@@ -224,9 +247,9 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
  *  The insert-delete operators should be put here
  *  A new function could be inserted to check model validity: i.e. real laser profile against synthetic laser profile
  *  If a big difference is detected, it will be whether additive or substractive.
- *  If additive a new object can be inserted into innerModel and RCIS innerModel,
+ *  If additive a new object can be inserted into innerModel and IMV,
  *  then the difference should be cancelled and currentTarget.isWithoutPlan can be set to True for replanning
- *  If substractive the innerModel object should be removed bacause someone already removed it in RCIS (or the world),
+ *  If substractive the innerModel object should be removed bacause someone already removed it in IMV (or the world),
  *  no replanning es necessary here.
  * 
  * @param innerModel ...
@@ -250,8 +273,8 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 		
 		//myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
-		controller->update(innerModel, lData, omnirobot1_proxy, myRoad);
-                controller->update(innerModel, lData, omnirobot2_proxy, myRoad);
+		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
+// 		controller->update(innerModel, lData, omnirobot2_proxy, myRoad);
 		if( myRoad.isBlocked() )
 			{
 				currentTargetAnt.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-200),"robot"));
@@ -273,9 +296,9 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 
 				planner->learnPath( road.backList );
 				target.command = CurrentTarget::Command::STOP;	
-#ifdef RCIS
-				planner->cleanGraph(innermodelmanager_proxy);
-				planner->drawGraph(innermodelmanager_proxy);
+#ifdef USE_QTGUI
+				planner->cleanGraph(innerViewer);
+				planner->drawGraph(innerViewer);
 #endif
 			}
 		}
@@ -320,8 +343,8 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  Curr
 		try
 		{
 		  //differentialrobot_proxy->setSpeedBase(0, vrot);
-		  omnirobot1_proxy->setSpeedBase(0, 0, vrot);
-		  omnirobot2_proxy->setSpeedBase(0, 0, vrot);
+		  omnirobot_proxy->setSpeedBase(0, 0, vrot);
+// 		  omnirobot2_proxy->setSpeedBase(0, 0, vrot);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 	return true;
@@ -370,8 +393,8 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		try
 		{
 		  //differentialrobot_proxy->setSpeedBase(0, 0);
-		  omnirobot1_proxy->setSpeedBase(0, 0, 0);
-		  omnirobot2_proxy->setSpeedBase(0.,0.,0.);
+		  omnirobot_proxy->setSpeedBase(0, 0, 0);
+// 		  omnirobot2_proxy->setSpeedBase(0.,0.,0.);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 		//myRoad.requiresReplanning = true;
 
@@ -385,8 +408,8 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		try
 		{
 		  //differentialrobot_proxy->setSpeedBase(vadv, 0);
-		  omnirobot1_proxy->setSpeedBase(0, vadv, 0);
-		  omnirobot2_proxy->setSpeedBase(0, vadv, 0);
+		  omnirobot_proxy->setSpeedBase(0, vadv, 0);
+// 		  omnirobot2_proxy->setSpeedBase(0, vadv, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
 	
@@ -430,8 +453,9 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
 	updateInnerModel(inner, state);
 	target.setWithoutPlan( false );
 	target.print();
-#ifdef RCIS
-	planner->cleanGraph(innermodelmanager_proxy);
+#ifdef USE_QTGUI
+	planner->cleanGraph(innerViewer);
+ 	planner->drawGraph(innerViewer);
 #endif
 	state.setState("EXECUTING");
 	//Init road
@@ -440,12 +464,12 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
 	//road.last() = currentTarget.getRotation();
 	myRoad.requiresReplanning = false;
 	myRoad.computeDistancesToNext();
-// 		road.print();
+//  	road.print();
 	myRoad.update();  //NOT SURE IF NEEDED HERE
 	myRoad.startRoad();
 	state.setPlanningTime(reloj.elapsed());
-#ifdef RCIS
-	myRoad.draw(innermodelmanager_proxy, inner, target);
+#ifdef USE_QTGUI
+	myRoad.draw(innerViewer, inner, target);
 #endif
 	//compState.planningTime = reloj.elapsed();
 	return true;
@@ -459,12 +483,12 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
  */
 bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 {
+
 	try
 	{
-		//differentialrobot_proxy->getBaseState(bState);
-		omnirobot1_proxy->getBaseState(bState);
+		omnirobot_proxy->getBaseState(bState);
 		inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-		
+		innerVisual->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
 		try
 		{
 			laserData = laser_proxy->getLaserData();
@@ -491,55 +515,19 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 {
 	// 	qDebug()<< __FUNCTION__ << "Sending robot to initial position";
-#ifdef RCIS
-	try
-	{
-		RoboCompInnerModelManager::Pose3D p;
-		p.x =  0;
-		p.y =  0;
-		p.z =  0;
-		p.rx = 0;
-		p.ry = 0;
-		p.rz = 0;
-		innermodelmanager_proxy->setPoseFromParent("initialRobotPose", p);
-	}
-	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
-	{
-// 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting initialRobotPose";
-	}
-
-	usleep(125000);
-
-	try
-	{
-		RoboCompInnerModelManager::Pose3D p;
-		p.x =  x;
-		p.y =  0;
-		p.z =  z;
-		p.rx = 0;
-		p.ry = alpha;
-		p.rz = 0;
-		innermodelmanager_proxy->setPoseFromParent("robot", p);
-	}
-	catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
-	{
-// 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot pose";
-	}
-	usleep(125000);
+#ifdef USE_QTGUI
+	innerVisual->updateTransformValues("initialRobotPose", 0,0,0,  0,0,0);
+	innerVisual->updateTransformValues("robot", x,0,z,  0,alpha,0);
 #endif
-	
+
 	try
 	{
-		omnirobot1_proxy->setOdometerPose(x, z, alpha);
-		omnirobot2_proxy->setOdometerPose(x, z, alpha);
-
+		omnirobot_proxy->setOdometerPose(x, z, alpha);
 	}
 	catch(...)
 	{
-// 		qDebug() << __FUNCTION__ << QString::fromStdString(e.text) << "Error setting robot odometer";
+		qDebug() << __FUNCTION__ << "Error setting robot odometer";
 	}
-
-	usleep(125000);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -548,29 +536,24 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 
 void SpecificWorker::drawTarget(const QVec &target)
 {
-#ifdef RCIS
+#ifdef USE_QTGUI
 	//Draw target as red box
-	RoboCompInnerModelManager::Plane3D plane;
-	plane.px = target.x();	plane.py = 5; plane.pz = target.z();
-	plane.nx = 1;plane.texture = "#990000";	plane.thickness = 80;
-	plane.height = plane.width = 80;
-	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+	InnerModelDraw::addPlane_ignoreExisting(innerViewer, "target", "world", QVec::vec3(target(0), 5, target(2)), QVec::vec3(1,0,0), "#990000", QVec::vec3(80,80,80));
 #endif
 }
 
 void SpecificWorker::drawGreenBoxOnTarget(const QVec& target)
 {
-#ifdef RCIS
-	RoboCompInnerModelManager::Plane3D plane;
-	plane.px = target.x(); plane.py = 1800;	plane.pz = target.z();	plane.nx = 1;	plane.ny = 0;	plane.nz = 0;
-	plane.texture = "#009900";	plane.thickness = 150;	plane.height = plane.width = 100;
-	RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, "target", "world", plane);
+ #ifdef USE_QTGUI
+	InnerModelDraw::addPlane_ignoreExisting(innerViewer, "target", "world", QVec::vec3(target(0), 1800, target(2)), QVec::vec3(1,0,0), "#009900", QVec::vec3(100,100,150));
 #endif
+
 }
 
-void SpecificWorker::printNumberOfElementsInRCIS()
+void SpecificWorker::printNumberOfElementsInIMV()
 {
-#ifdef RCIS
+/*
+#ifdef USE_QTGUI
 	try
 	{	RoboCompInnerModelManager::NodeInformationSequence ni;
 		innermodelmanager_proxy->getAllNodeInformation(ni);
@@ -579,6 +562,8 @@ void SpecificWorker::printNumberOfElementsInRCIS()
 	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
 	{ std::cout << ex << std::endl;}
 #endif
+*/
+	
 }
 
 
@@ -606,6 +591,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
  */
 void SpecificWorker::go(const TargetPose& target)
 {
+	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
 	//PARAMETERS CHECK
 	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) ) 
 	{
@@ -617,7 +603,7 @@ void SpecificWorker::go(const TargetPose& target)
 	{
 		tState.setState("EXECUTING");
 		//currentTarget.command = CurrentTarget::Command::CHANGETARGET;	
-		QTime reloj = QTime::currentTime();
+// 		QTime reloj = QTime::currentTime();
 // 		while(tState.getState() != "IDLE" or reloj.elapsed() < 3000){};
 // 		if( reloj.elapsed() < 3000 )
 // 		{
@@ -939,4 +925,6 @@ float SpecificWorker::angmMPI(float angle)
 // 	}
 // 	return true;
 // }
+
+
 

@@ -6,10 +6,8 @@ TrajectoryRobot2D.Endpoints=tcp -p 0
 
 
 # Proxies for required interfaces
-InnerModelManagerProxy = innermodelmanager:tcp -h localhost -p 0
 LaserProxy = laser:tcp -h localhost -p 0
-OmniRobot1Proxy = omnirobot:tcp -h localhost -p 0
-OmniRobot2Proxy = omnirobot:tcp -h localhost -p 0
+OmniRobotProxy = omnirobot:tcp -h localhost -p 0
 
 
 

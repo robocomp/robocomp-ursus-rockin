@@ -62,10 +62,8 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
 
-	InnerModelManagerPrx innermodelmanager_proxy;
 	LaserPrx laser_proxy;
-	OmniRobotPrx omnirobot1_proxy;
-	OmniRobotPrx omnirobot2_proxy;
+	OmniRobotPrx omnirobot_proxy;
 
 	virtual void go(const TargetPose &target) = 0;
 	virtual NavState getState() = 0;

@@ -36,7 +36,7 @@ void TrajectoryRobot2DI::go(const TargetPose  & target, const Ice::Current&)
 
 NavState TrajectoryRobot2DI::getState(const Ice::Current&)
 {
-	worker->getState();
+	return worker->getState();
 }
 
 void TrajectoryRobot2DI::goBackwards(const TargetPose  & target, const Ice::Current&)
