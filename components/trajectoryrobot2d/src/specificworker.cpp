@@ -55,7 +55,7 @@ SpecificWorker::~SpecificWorker()
 
 /**
  * @brief Reads run time parameters from config file
- * 
+ *
  * @param params ...
  * @return bool
  */
@@ -87,7 +87,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	//Update InnerModel from robot
 	//try { differentialrobot_proxy->getBaseState(bState); }
-	
+
  	try {  omnirobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with robot proxy");}
 	try { laserData = laser_proxy->getLaserData(); }
@@ -122,7 +122,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
  	//Localizer stuff
  	localizer = new Localizer(innerModel);
-	
+
 	timer.start(20);
 	return true;
 };
@@ -144,8 +144,8 @@ void SpecificWorker::compute( )
 		controller->stopTheRobot(omnirobot_proxy);
 		stopCommand(currentTarget, road, tState);
 		tState.setState("DISCONNECTED");
-	}	
-	
+	}
+
 	switch( currentTarget.command )
 	{
 		case CurrentTarget::Command::STOP:
@@ -181,10 +181,14 @@ void SpecificWorker::compute( )
 		reloj.restart();
 	}
 	cont++;
-	
+
 #ifdef USE_QTGUI
-	if (innerViewer) innerViewer->update();
-	osgView->frame();
+	if (innerViewer)
+	{
+		innerViewer->update();
+		osgView->autoResize();
+		osgView->frame();
+	}
 #endif
 }
 
@@ -194,7 +198,7 @@ void SpecificWorker::compute( )
 
 /**
  * @brief Stops the robot
- * 
+ *
  * @return bool
  */
 bool SpecificWorker::stopCommand(CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state)
@@ -218,7 +222,7 @@ bool SpecificWorker::stopCommand(CurrentTarget& target, WayPoints& myRoad, Traje
 /**
  * @brief Changes current target without interrupting the ongoing process. Introduced to support visual-servoing
  *
- * @param innerModel 
+ * @param innerModel
  * @return bool
  */
 bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad)
@@ -237,13 +241,13 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
 }
 
 /**
- * @brief Sends the robot to the target in currentTarget variable. 
- * Calls in order 
+ * @brief Sends the robot to the target in currentTarget variable.
+ * Calls in order
  * 		planner (if currentTarget has not a plan)
  * 			elasticband (to project the road against the laserData)
  * 				road (to  compute all parameters relating the robot to the robot )
  * 					controller (to compute control outputs for the robot to follow the road)
- * 
+ *
  *  The insert-delete operators should be put here
  *  A new function could be inserted to check model validity: i.e. real laser profile against synthetic laser profile
  *  If a big difference is detected, it will be whether additive or substractive.
@@ -251,7 +255,7 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
  *  then the difference should be cancelled and currentTarget.isWithoutPlan can be set to True for replanning
  *  If substractive the innerModel object should be removed bacause someone already removed it in IMV (or the world),
  *  no replanning es necessary here.
- * 
+ *
  * @param innerModel ...
  * @return bool
  */
@@ -270,7 +274,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 
 		//compute all measures relating the robot to the road
 		myRoad.update();
-		
+
 		//myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
@@ -281,10 +285,10 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 				target.command = CurrentTarget::Command::GOBACKWARDS;
 				qDebug()<<"haciendo marcha atras";
 			}
-		
+
 		if (myRoad.isFinished() == true)
 		{
-			
+
 			if( target.hasRotation() )
 			{
 				// qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
@@ -295,7 +299,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 			{
 
 				planner->learnPath( road.backList );
-				target.command = CurrentTarget::Command::STOP;	
+				target.command = CurrentTarget::Command::STOP;
 #ifdef USE_QTGUI
 				planner->cleanGraph(innerViewer);
 				planner->drawGraph(innerViewer);
@@ -319,11 +323,11 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 }
 
 /**
- * @brief Turns the robot until it reaches the desired orientation. 
- * 
+ * @brief Turns the robot until it reaches the desired orientation.
+ *
  * @param innerModel ...
  * @param alfa angle between robot's z axis and worlds Z axis
- * @return bool Not used 
+ * @return bool Not used
  */
 bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad)
 {
@@ -334,7 +338,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  Curr
 	float error = angmMPI(angRobot-alfa);
 	state.setState("EXECUTING-TURNING");
 	//qDebug() << __FUNCTION__ <<"Error" << fabs(error);
-	
+
 	if( fabs(error) < MAX_ORIENTATION_ERROR)
 		target.command = CurrentTarget::Command::STOP;
 	else
@@ -352,7 +356,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  Curr
 
 /**
  * @brief Sends the robot bakcwards on a stright line until target is reached.
- * 
+ *
  * @param innerModel ...
  * @param target position in World Reference System
  * @return bool
@@ -369,7 +373,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		return false;
 	}
 
-	
+
 	float MAX_ADV_SPEED = 600.f;
 	const float MAX_POSITIONING_ERROR  = 50;  //mm
 
@@ -412,7 +416,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 // 		  omnirobot2_proxy->setSpeedBase(0, vadv, 0);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 	}
-	
+
 	return true;
 }
 
@@ -436,7 +440,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
 
 	state.setState("PLANNING");
 	QVec localTarget = target.getTranslation();
-	
+
 	if ( planner->computePath(localTarget, inner) == false)
 	{
 		qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
@@ -477,7 +481,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
 
 /**
  * @brief Updates an InnerModel from values read from the robot. Reads laserData too.
- * 
+ *
  * @param inner InnerModel that is to be updated
  * @return bool
  */
@@ -493,18 +497,18 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 		{
 			laserData = laser_proxy->getLaserData();
 		}
-		catch(const Ice::Exception &ex) 
-		{ 
-			cout << ex << endl; 
+		catch(const Ice::Exception &ex)
+		{
+			cout << ex << endl;
 			state.setState("DISCONNECTED");
-			return false; 
+			return false;
 		}
 	}
-	catch(const Ice::Exception &ex) 
-	{ 
-		cout << ex << endl; 
+	catch(const Ice::Exception &ex)
+	{
+		cout << ex << endl;
 		state.setState("DISCONNECTED");
-		return false; 
+		return false;
 	}
 
 	if( state.getState() == "DISCONNECTED")
@@ -563,7 +567,7 @@ void SpecificWorker::printNumberOfElementsInIMV()
 	{ std::cout << ex << std::endl;}
 #endif
 */
-	
+
 }
 
 
@@ -573,7 +577,7 @@ void SpecificWorker::printNumberOfElementsInIMV()
 
 /**
  * @brief Changes final point in current trajectory
- * 
+ *
  * @param target New target pose. Only fist three elements are used as translation
  * @return void
  */
@@ -583,7 +587,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
 }
 
 /**
- * @brief Sends the robot to the target position. 
+ * @brief Sends the robot to the target position.
  * The state of the process is recorded in the TrajectoryState structure that cnan be accessed through the getState() method
  * This method DOES NOT stop the robot before assigening a new target
  * @param target ...
@@ -593,7 +597,7 @@ void SpecificWorker::go(const TargetPose& target)
 {
 	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
 	//PARAMETERS CHECK
-	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) ) 
+	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
 	{
 		qDebug() <<__FUNCTION__ << "Returning. Input parameter -target- is not valid";
 		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Doing nothing. Invalid Target with nan in it";
@@ -602,7 +606,7 @@ void SpecificWorker::go(const TargetPose& target)
 	else
 	{
 		tState.setState("EXECUTING");
-		//currentTarget.command = CurrentTarget::Command::CHANGETARGET;	
+		//currentTarget.command = CurrentTarget::Command::CHANGETARGET;
 // 		QTime reloj = QTime::currentTime();
 // 		while(tState.getState() != "IDLE" or reloj.elapsed() < 3000){};
 // 		if( reloj.elapsed() < 3000 )
@@ -654,7 +658,7 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
 
 /**
  * @brief Moves the rogbot backwards
- * 
+ *
  * @param target ...
  * @return void
  */
@@ -663,7 +667,7 @@ void SpecificWorker::goBackwards(const TargetPose& target)
 	qDebug() << __FUNCTION__ << "GOBACKWARDS command received";
 
 	//PARAMETERS CHECK
-	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) ) 
+	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
 	{
 		qDebug() <<__FUNCTION__ << "Returning. Input parameter -target- is not valid";
 		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Doing nothing. Invalid Target with nan in it";
@@ -853,23 +857,23 @@ float SpecificWorker::angmMPI(float angle)
 // 	float height = innerModel->transform("world","robot").y();
 // 	//qDebug() << __FUNCTION__ << "height" << height << target.y();
 // 	innerModel->updateTransformValues("robot", target.x(), target.y(), target.z(), 0, 0, 0);
-// 
+//
 // 	// Three points of rectangle approximating the robot base
 // 	QVec p1 = innerModel->transform("world", QVec::vec3(-220,10,220), "robot" );
 // 	QVec p2 = innerModel->transform("world", QVec::vec3(220,10,220), "robot" );
 // 	QVec p3 = innerModel->transform("world", QVec::vec3(-220,10,-220), "robot" );
 // 	//QVec p4 = innerModel->transform("world", QVec::vec3(220,0,-220), "robot" );
-// 
+//
 // 	QVec p21 = p2-p1;
 // 	QVec p31 = p3-p1;
 // 	//put back the robot to where it was
 // 	innerModel->updateTransformValues("robot", bState.x, height, bState.z, 0, bState.alpha, 0);
-// 
+//
 // 	// 	target.print("target");
 // 	// 	p1.print("p1");
 // 	// 	p2.print("p2");
 // 	// 	p3.print("p3");
-// 
+//
 // 	//Check if any laser point falls inside the rectangle using an angle criterium
 // 	QVec p(3,0.f);
 // 	for(auto i : laserData)
@@ -887,27 +891,27 @@ float SpecificWorker::angmMPI(float angle)
 // 	}
 // 	return true;
 // }
-// 
+//
 // bool SpecificWorker::searchRobotValidStateCloseToTarget(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, QVec& target)
 // {
 // 	QVec lastPoint;
-// 
+//
 // 	QVec origin = innerModel->transform("world","robot");
 // 	float stepSize = 30.f; //100 mms chunks  SHOULD BE RELATED TO THE ACTUAL SIZE OF THE ROBOT!!!!!
 // 	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);
 // 	float step;
-// 
+//
 // 	//if too close return target
 // 	if (nSteps == 0)
 // 	{
 // 		return false;
 // 	}
 // 	step = 1./nSteps;
-// 
+//
 // 	//go along visual ray connecting robot pose and target pos in world coordinates. l*robot + (1-r)*roiPos = 0
 // 	QVec point(3);
 // 	float landa = step;
-// 
+//
 // 	lastPoint = origin;
 // 	for(uint i=1 ; i<=nSteps; i++)
 // 	{
