@@ -111,7 +111,7 @@ class SpecificWorker(GenericWorker):
 				print errX, errZ, errAlpha
 
 				relErrX = errX*math.cos(self.state.ry) - errZ*math.sin(self.state.ry)
-				relErrZ = errX*math.sin(self.state.ry) + errZ*math.cos(self.state.ry)
+				relErrZ = errX*math.sin(self.state.ry) + errZ*math.cos(self.state.ry)-250.
 				print 'command', relErrX, relErrZ
 
 				command = np.array([relErrX, relErrZ])
