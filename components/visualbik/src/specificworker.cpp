@@ -18,6 +18,9 @@
  */
 #include "specificworker.h"
 
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
+ * 								CONSTRUCTORES Y DESTRUCTORES												   *
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
 /**
 * \brief Default constructor
 */
@@ -25,6 +28,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	//Iniciamos con estado igual a IDLE:
 	this->state = State::IDLE;
+	
+#ifdef USE_QTGUI
+	osgView = new OsgView(this);
+ 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml");
+	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
+	show();
+#endif
 }
 
 /**
@@ -53,9 +63,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	return true;
 }
 
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
+ * 										SLOTS DEL PROGRAMA													   *
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
 void SpecificWorker::compute()
 {
-	
 	QMutexLocker ml(&mutex);
 	switch(this->state)
 	{
@@ -66,10 +78,13 @@ void SpecificWorker::compute()
 			if (this->currentTarget.getState() == Target::State::WAITING)
 			{
 				this->state = State::TARGET_ARRIVE;
+				//Marcamos la posicion del target en la ventana de simulacion
+				innerModel->updateTransformValues("target", this->currentTarget.getPose6D().x, this->currentTarget.getPose6D().y, this->currentTarget.getPose6D().z,
+												            this->currentTarget.getPose6D().rx, this->currentTarget.getPose6D().ry, this->currentTarget.getPose6D().rz);
 				std::cout<<"Ha llegado un TARGET"<<std::endl;
 			}
 		break;
-			
+		//---------------------------------------------------------------------------------------------	
 		case State::TARGET_ARRIVE:
 			
 			std::cout<<"ESTADO TARGET_ARRIVE.."<<std::endl;
@@ -79,7 +94,7 @@ void SpecificWorker::compute()
 			else
 				this->state = State::INIT_ROTACION;
 		break;
-			
+		//---------------------------------------------------------------------------------------------				
 		case State::INIT_TRASLACION:
 
 			std::cout<<"ESTADO INIT_TRASLACION.."<<std::endl;
@@ -87,9 +102,9 @@ void SpecificWorker::compute()
 			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.getBodyPart(), this->currentTarget.getPose6D(), this->currentTarget.getWeights(), 250);
 			
 			this->currentTarget.changeState(Target::State::IN_PROCESS);
-			this->state = State::WAIT_TRASLACION;
+			this->state = State::CORRECT_TRASLACION;
 		break;
-			
+		//---------------------------------------------------------------------------------------------				
 		case State::INIT_ROTACION:
 			
 			std::cout<<"ESTADO INIT_ROTACION.."<<std::endl;
@@ -97,12 +112,21 @@ void SpecificWorker::compute()
 			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.getBodyPart(), this->currentTarget.getPose6D(), this->currentTarget.getWeights(), 250);
 			
 			this->currentTarget.changeState(Target::State::IN_PROCESS);
-			this->state = State::WAIT_ROTATION;
+			this->state = State::CORRECT_ROTATION;
 		break;
+		//---------------------------------------------------------------------------------------------				
+		case State::CORRECT_TRASLACION:
 			
-		case State::WAIT_TRASLACION:
-
-			std::cout<<"ESTADO WAIT_TRASLACION.."<<std::endl;
+			std::cout<<"ESTADO CORRECT_TRASLACION.."<<std::endl;
+			if (bodyinversekinematics_proxy->getState(this->currentTarget.getBodyPart()).finish == true)	
+			{
+				std::cout<<"Todo va bien..."<<std::endl;
+				this->metodo1_traslacion();
+			}
+			else
+				std::cout<<"Esto va de puta pena"<<std::endl;
+			
+			this->state = State::IDLE;
 
 			//if bodyinversekinematics_proxy->getState(target.currect.part)==true ¿aun no ha terminado de procesar?
 			//llamamos metodo2
@@ -111,9 +135,20 @@ void SpecificWorker::compute()
 			//this->currentTarget.changeState(Target::State::WAITING);
 				
 		break;
-		case State::WAIT_ROTATION:
+		//---------------------------------------------------------------------------------------------	
+		case State::CORRECT_ROTATION:
 			
-			std::cout<<"ESTADO WAIT_ROTATION.."<<std::endl;
+			std::cout<<"ESTADO CORRECT_ROTATION.."<<std::endl;
+			if (bodyinversekinematics_proxy->getState(this->currentTarget.getBodyPart()).finish == true)	
+			{
+				std::cout<<"Todo va bien..."<<std::endl;
+				this->metodo2_rotacion();
+			}
+			else
+				std::cout<<"Esto va de puta pena"<<std::endl;
+			
+			this->state = State::IDLE;
+
 
 			//if bodyinversekinematics_proxy->getState(target.currect.part)==true
 				//llamamos metodo2
@@ -126,11 +161,29 @@ void SpecificWorker::compute()
 		default:
 			break;
 	}
+	/*
+	innerModel->updateTransformValues("target", 200, 1000, 500,      0, 0, 0);
+	innerModel->updateTransformValues("hand",   240, 1200, 500,      0, 0.2, 0.3);*/
+
+#ifdef USE_QTGUI
+	if (innerViewer)
+	{
+		innerViewer->update();
+		osgView->autoResize();
+		osgView->frame();
+	}
+#endif
 }
 
-
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
+ * 											METODOS PRIVADOS												   *
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
 void SpecificWorker::metodo1_traslacion()
-{/*
+{
+	// Pintamos la marca de la mano donde la camara la esta viendo
+	innerModel->updateTransformValues("hand", this->rightHand.getVisualPose().x, this->rightHand.getVisualPose().y, this->rightHand.getVisualPose().z,
+									          this->rightHand.getVisualPose().rx, this->rightHand.getVisualPose().ry, this->rightHand.getVisualPose().rz);
+	/*
 	Tag tag11;
 	//Create hand as seen by head
 	if( localTags.existId(11,tag11) == true)
@@ -140,6 +193,7 @@ void SpecificWorker::metodo1_traslacion()
 	else
 		qDebug() << "No veo el 11";*/
 }
+
 
 void SpecificWorker::metodo2_rotacion()
 {
@@ -325,6 +379,9 @@ void SpecificWorker::metodo2_rotacion()
 	}	*/
 }
 
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
+ * 								METODOS DE LA INTERFAZ DEL COMPONENTE										   *
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
 void SpecificWorker::setFingers(const float d)
 {
 	bodyinversekinematics_proxy->setFingers(d);
@@ -394,8 +451,9 @@ void SpecificWorker::setJoint(const string &joint, const float position, const f
 }
 
 
-
-
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
+ * 								METODOS A LOS QUE SE SUBSCRIBE												   *
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {
 	//Recibimos las marcas que la camara esta viendo: marca mano y marca target.

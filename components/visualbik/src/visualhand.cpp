@@ -99,4 +99,34 @@ RoboCompBodyInverseKinematics::Pose6D VisualHand::getError()
 	return error;
 }
 
+/**
+ * \brief Metodo GET VISUAL POSE
+ * Devuelve las coordenadas de traslacion y de orientacion de la marca vista
+ * por la camara del robot (¿hay que poner algun elapsed time?)
+ * @return pose6D
+ */ 
+RoboCompBodyInverseKinematics::Pose6D VisualHand::getVisualPose()
+{
+	RoboCompBodyInverseKinematics::Pose6D poseVisual;
+	poseVisual.x = this->x;
+	poseVisual.y = this->y;
+	poseVisual.z = this->z;
+	
+	poseVisual.rx = this->rx;
+	poseVisual.ry = this->ry;
+	poseVisual.rz = this->rz;
+	
+	return poseVisual;
+}
+
+/**
+ * \brief Metodo GET INTERNAL POSE
+ * Devuelve las coordenadas de traslacion y de rotacion de la marca
+ * que el robot cree tener en cierta posicion.
+ * @return pose6d
+ */ 
+RoboCompBodyInverseKinematics::Pose6D VisualHand::getInternalPose()
+{
+	return this->internalPose;
+}
 

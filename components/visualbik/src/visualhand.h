@@ -29,6 +29,8 @@ public:
 	double secondsElapsed();
 	
  	RoboCompBodyInverseKinematics::Pose6D getError();
+	RoboCompBodyInverseKinematics::Pose6D getVisualPose();
+	RoboCompBodyInverseKinematics::Pose6D getInternalPose();
 	
 private:
 	RoboCompBodyInverseKinematics::Pose6D internalPose;
