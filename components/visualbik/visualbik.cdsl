@@ -10,5 +10,6 @@ Component VisualBIK
 		subscribesTo AprilTags;
 	};
 	language Cpp;
+	gui Qt(QWidget);
 };
 

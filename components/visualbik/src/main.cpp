@@ -118,7 +118,11 @@ void VisualBIK::initialize()
 
 int VisualBIK::run(int argc, char* argv[])
 {
+#ifdef USE_QTGUI
+	QApplication a(argc, argv);  // GUI application
+#else
 	QCoreApplication a(argc, argv);  // NON-GUI application
+#endif
 	int status=EXIT_SUCCESS;
 
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
@@ -175,9 +179,10 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 		{
 			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy BodyInverseKinematics";
 		}
-		Ice::ObjectAdapterPtr adapterBodyInverseKinematics = communicator()->createObjectAdapterWithEndpoints("bodyinversekinematics", tmp);
+		Ice::ObjectAdapterPtr adapterBodyInverseKinematics = communicator()->createObjectAdapterWithEndpoints("BodyInverseKinematics", tmp);
 		BodyInverseKinematicsI *bodyinversekinematics = new BodyInverseKinematicsI(worker);
 		adapterBodyInverseKinematics->add(bodyinversekinematics, communicator()->stringToIdentity("bodyinversekinematics"));
+		adapterBodyInverseKinematics->activate();
 
 
 

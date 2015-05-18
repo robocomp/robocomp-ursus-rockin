@@ -125,7 +125,7 @@ class SpecificWorker(GenericWorker):
 			try:
 				self.jointmotor_proxy.setPosition(goal)
 			except CollisionException: 
-				print "Error en abajo_L: ",CollisionException().what
+				print "Error en abajo_L: ",CollisionException
 
 	@QtCore.Slot()
 	def arriba_R(self):

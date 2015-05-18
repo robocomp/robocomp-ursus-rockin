@@ -16,51 +16,26 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "genericworker.h"
-/**
-* \brief Default constructor
-*/
-GenericWorker::GenericWorker(MapPrx& mprx) :
-#ifdef USE_QTGUI
-Ui_guiDlg()
-#else
-QObject()
-#endif
+#include "apriltagsI.h"
 
+AprilTagsI::AprilTagsI(GenericWorker *_worker, QObject *parent) : QObject(parent)
 {
-	bodyinversekinematics_proxy = (*(BodyInverseKinematicsPrx*)mprx["BodyInverseKinematicsProxy"]);
-
-
-	mutex = new QMutex();
-
-#ifdef USE_QTGUI
-		setupUi(this);
-		show();
-	#endif
-		
-	Period = BASIC_PERIOD;
-	connect(&timer, SIGNAL(timeout()), this, SLOT(compute()));
+	worker = _worker;
+	mutex = worker->mutex;       // Shared worker mutex
 }
 
-/**
-* \brief Default destructor
-*/
-GenericWorker::~GenericWorker()
-{
 
-}
-void GenericWorker::killYourSelf()
+AprilTagsI::~AprilTagsI()
 {
-	rDebug("Killing myself");
-	emit kill();
 }
-/**
-* \brief Change compute period
-* @param per Period in ms
-*/
-void GenericWorker::setPeriod(int p)
+
+void AprilTagsI::newAprilTag(const tagsList  &tags, const Ice::Current&)
 {
-	rDebug("Period changed"+QString::number(p));
-	Period = p;
-	timer.start(Period);
+	worker->newAprilTag(tags);
 }
+
+
+
+
+
+

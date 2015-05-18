@@ -20,7 +20,7 @@
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# \mainpage RoboComp::name
+# \mainpage RoboComp::dumbTrajectoryRobot2DComp
 #
 # \section intro_sec Introduction
 #
@@ -48,7 +48,7 @@
 #
 # \subsection execution_ssec Execution
 #
-# Just: "${PATH_TO_BINARY}/name --Ice.Config=${PATH_TO_CONFIG_FILE}"
+# Just: "${PATH_TO_BINARY}/dumbTrajectoryRobot2DComp --Ice.Config=${PATH_TO_CONFIG_FILE}"
 #
 # \subsection running_ssec Once running
 #
@@ -78,10 +78,12 @@ if len(ROBOCOMP)<1:
 preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
 Ice.loadSlice(preStr+"CommonBehavior.ice")
 import RoboCompCommonBehavior
-Ice.loadSlice(preStr+"JointMotor.ice")
-import RoboCompJointMotor
-Ice.loadSlice(preStr+"BodyInverseKinematics.ice")
-import RoboCompBodyInverseKinematics
+Ice.loadSlice(preStr+"OmniRobot.ice")
+import RoboCompOmniRobot
+Ice.loadSlice(preStr+"TrajectoryRobot2D.ice")
+import RoboCompTrajectoryRobot2D
+Ice.loadSlice(preStr+"Laser.ice")
+import RoboCompLaser
 
 
 class CommonBehaviorI(RoboCompCommonBehavior.CommonBehavior):
@@ -123,37 +125,37 @@ if __name__ == '__main__':
 	mprx = {}
 	try:
 
-		# Remote object connection for JointMotor
+		# Remote object connection for Laser
 		try:
-			proxyString = ic.getProperties().getProperty('JointMotorProxy')
+			proxyString = ic.getProperties().getProperty('LaserProxy')
 			try:
 				basePrx = ic.stringToProxy(proxyString)
-				jointmotor_proxy = RoboCompJointMotor.JointMotorPrx.checkedCast(basePrx)
-				mprx["JointMotorProxy"] = jointmotor_proxy
+				laser_proxy = RoboCompLaser.LaserPrx.checkedCast(basePrx)
+				mprx["LaserProxy"] = laser_proxy
 			except Ice.Exception:
-				print 'Cannot connect to the remote object (JointMotor)', proxyString
+				print 'Cannot connect to the remote object (Laser)', proxyString
 				#traceback.print_exc()
 				status = 1
 		except Ice.Exception, e:
 			print e
-			print 'Cannot get JointMotorProxy property.'
+			print 'Cannot get LaserProxy property.'
 			status = 1
 
 
-		# Remote object connection for BodyInverseKinematics
+		# Remote object connection for OmniRobot
 		try:
-			proxyString = ic.getProperties().getProperty('BodyInverseKinematicsProxy')
+			proxyString = ic.getProperties().getProperty('OmniRobotProxy')
 			try:
 				basePrx = ic.stringToProxy(proxyString)
-				bodyinversekinematics_proxy = RoboCompBodyInverseKinematics.BodyInverseKinematicsPrx.checkedCast(basePrx)
-				mprx["BodyInverseKinematicsProxy"] = bodyinversekinematics_proxy
+				omnirobot_proxy = RoboCompOmniRobot.OmniRobotPrx.checkedCast(basePrx)
+				mprx["OmniRobotProxy"] = omnirobot_proxy
 			except Ice.Exception:
-				print 'Cannot connect to the remote object (BodyInverseKinematics)', proxyString
+				print 'Cannot connect to the remote object (OmniRobot)', proxyString
 				#traceback.print_exc()
 				status = 1
 		except Ice.Exception, e:
 			print e
-			print 'Cannot get BodyInverseKinematicsProxy property.'
+			print 'Cannot get OmniRobotProxy property.'
 			status = 1
 
 	except:
@@ -163,6 +165,11 @@ if __name__ == '__main__':
 
 	if status == 0:
 		worker = SpecificWorker(mprx)
+
+
+		adapter = ic.createObjectAdapter('TrajectoryRobot2D')
+		adapter.add(TrajectoryRobot2DI(worker), ic.stringToIdentity('trajectoryrobot2d'))
+		adapter.activate()
 
 
 #		adapter.add(CommonBehaviorI(<LOWER>I, ic), ic.stringToIdentity('commonbehavior'))

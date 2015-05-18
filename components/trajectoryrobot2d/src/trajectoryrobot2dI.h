@@ -38,11 +38,12 @@ public:
 	TrajectoryRobot2DI( GenericWorker *_worker, QObject *parent = 0 );
 	~TrajectoryRobot2DI();
 	
-	void go(const TargetPose  & target, const Ice::Current&);
 	NavState getState(const Ice::Current&);
-	void goBackwards(const TargetPose  & target, const Ice::Current&);
+	void goBackwards(const TargetPose  &target, const Ice::Current&);
 	void stop(const Ice::Current&);
-	void changeTarget(const TargetPose  & target, const Ice::Current&);
+	void goReferenced(const TargetPose  &target, const float  xRef, const float  zRef, const Ice::Current&);
+	void changeTarget(const TargetPose  &target, const Ice::Current&);
+	void go(const TargetPose  &target, const Ice::Current&);
 
 	QMutex *mutex;
 private:

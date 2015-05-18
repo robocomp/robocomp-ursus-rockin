@@ -20,9 +20,8 @@
 
 #include "pointstoroad.h"
 
-PointsToRoad::PointsToRoad(InnerModel *innermodel, InnerModelManagerPrx _innermodelmanager_proxy): 
+PointsToRoad::PointsToRoad(InnerModel *innermodel): 
 	innerModel(innermodel), 
-	innermodelmanager_proxy(_innermodelmanager_proxy)
 {
 }
 
@@ -78,7 +77,6 @@ bool PointsToRoad::update(WayPoints &road)
 		if( road.nextPointIndex == road.size()-1 ) //The final goal is reached
 		{
 			road.finish = true; 
-			road.removeFirst(innermodelmanager_proxy); 
 			qDebug() <<__FILE__ << __FUNCTION__  << "PointsToRoad::update-Road finished!";
 			return false;
 		}
@@ -92,7 +90,6 @@ bool PointsToRoad::update(WayPoints &road)
 		for(int i=0; i<road.currentPointIndex; i++)
 		{
 			qDebug() << "removing point " << i;
-			road.removeFirst(innermodelmanager_proxy);
 		}
 		road.currentPointIndex = 0;
 		road.nextPointIndex = 1;
@@ -137,7 +134,6 @@ bool PointsToRoad::getRobotFrontierCondition(WayPoints &road)
 			// To draw perpendicular lines to robot through next point
 // 		QString item = "p_" + QString::number(road.nextPoint);
 // 		QVec n = frontier.getIntersectionPointOfNormalThroughOrigin();
-// 		RcisDraw::drawLine(innermodelmanager_proxy, item + "_line", item, QVec::vec3(n.x(),0,n.y()), 900, 25, "#005555" );
 		//Get the sign of the signed distance of the robot to the line
 		QVec robot2DPos = QVec::vec2( innerModel->getBaseX(), innerModel->getBaseZ());
 		float dist = frontier.perpendicularDistanceToPoint( robot2DPos );

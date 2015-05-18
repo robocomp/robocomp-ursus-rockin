@@ -214,9 +214,15 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	}
 }
 
-void SpecificWorker::go(float x, float z, float alpha, bool rot)
+void SpecificWorker::go(float x, float z, float alpha, bool rot, float xRef, float zRef, float threshold)
 {
-	printf("go: %f %f %f\n", x, z, alpha);
+	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
+	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
+	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
+	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
+	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
+	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
+	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.x = x;
 	tp.z = z;
@@ -235,7 +241,7 @@ void SpecificWorker::go(float x, float z, float alpha, bool rot)
 	}
 	try
 	{
-		trajectoryrobot2d_proxy->go(tp);
+		trajectoryrobot2d_proxy->goReferenced(tp, 80, 350, threshold);
 	}
 	catch(const Ice::Exception &ex)
 	{
@@ -569,7 +575,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 		lastX = x;
 		lastZ = z;
 		printf("find objects in table %d\n", tableId);
-		go(x, tableId==7?z+550:z-550, tableId==7?-3.141592:0, true);
+		go(x, tableId==7?z+550:z-550, tableId==7?-3.141592:0, true, 0, 500, 500);
 	}
 	else
 	{
@@ -593,7 +599,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		printf("object %d not in our model\n", objectId);
 		return;
 	}
-	const float x = str2float(goalObject->getAttribute("tx")) - 200.;
+	const float x = str2float(goalObject->getAttribute("tx"));
 	const float z = str2float(goalObject->getAttribute("tz"));
 	float alpha;
 	switch (objectId)
@@ -659,7 +665,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		float zz = z;
 // 		objectId==7?z+550:z-550
 		float aa = objectId==7?-3.141592:0;
-		go(xx, zz, aa, true);
+		go(xx, zz, aa, true, 80, 180, 50);
 		backp = true;
 	}
 	else if (backp)
@@ -719,7 +725,7 @@ void SpecificWorker::action_GraspObject(bool newAction)
 		return;
 	}
 
-// 	omnirobot_proxy->setSpeedBase(errX, errZ, errAlpha);
+	omnirobot_proxy->setSpeedBase(errX, errZ, errAlpha);
 }
 
 
@@ -787,7 +793,7 @@ void SpecificWorker::odometryAndLocationIssues()
 
 void SpecificWorker::action_NoAction(bool newAction)
 {
-		stop();
+	stop();
 }
 
 
