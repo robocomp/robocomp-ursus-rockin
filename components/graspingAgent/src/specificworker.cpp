@@ -62,13 +62,14 @@ void SpecificWorker::compute( )
 
 }
 
-#define THRESHOLD 400.
 
 void SpecificWorker::manageReachedObjects()
 {
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
-
+	float THRESHOLD_object = 400;
+	float THRESHOLD_table = 600;
+	
 	bool changed = false;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 
@@ -83,6 +84,16 @@ void SpecificWorker::manageReachedObjects()
 			/// Compute distance and new state
 			float d2n = distanceToNode("base_head", newModel, node);
 			printf("distance: %d(%s)=%f\n", node->identifier, node->symbolType.c_str(), d2n);
+			float THRESHOLD = THRESHOLD_object;
+			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
+			{
+				AGMModelEdge &edge = *edge_itr;
+				if (edge->getLabel() == "table")
+				{
+					THRESHOLD = THRESHOLD_table;
+				}
+			}
+				
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
 				AGMModelEdge &edge = *edge_itr;
@@ -616,12 +627,15 @@ void SpecificWorker::action_GraspObject(bool first)
 
 QVec SpecificWorker::getObjectsLocation(AGMModelSymbol::SPtr &object)
 {
+printf("%s: %d (%d)\n", __FILE__, __LINE__, object->identifier);
+	const float x = str2float(object->getAttribute("tx"));
 printf("%s: %d\n", __FILE__, __LINE__);
-	return QVec::vec3(
-	 str2float(object->getAttribute("tx")),
-	 str2float(object->getAttribute("ty")),
-	 str2float(object->getAttribute("tz"))
-	);
+	const float y = str2float(object->getAttribute("ty"));
+printf("%s: %d\n", __FILE__, __LINE__);
+	const float z = str2float(object->getAttribute("tz"));
+printf("%s: %d\n", __FILE__, __LINE__);
+
+	return QVec::vec3(x, y, z);
 }
 
 void SpecificWorker::sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec offset)

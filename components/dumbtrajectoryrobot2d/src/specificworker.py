@@ -76,7 +76,7 @@ class SpecificWorker(GenericWorker):
 		target.rx = 0
 		target.ry = self.state.ry
 		target.rz = 0
-		self.goReferenced(target, 0, 0)
+		self.goReferenced(target, 0, 0, 0)
 		self.stop()
 
 		#self.rere = 0
@@ -134,16 +134,21 @@ class SpecificWorker(GenericWorker):
 				# Final relative coordinates of the target
 				print 'command', relErrX, relErrZ
 				
+				proceed = True
 				command = np.array([relErrX, relErrZ])
-				if np.linalg.norm(command)>20 or abs(errAlpha)>0.08:
-					maxspeed = 500.
+				#print 'norm', np.linalg.norm(command), 'threshold', self.threshold
+				if np.linalg.norm(command)<=self.threshold and abs(errAlpha) < 0.08:
+					print 'stop by threshold'
+					proceed = False
+				if proceed:
+					maxspeed = 300.
 					if np.linalg.norm(command)<0.1:
 						command = np.array([0,0])
 					else:
 						speed = np.linalg.norm(command)
 						if speed > maxspeed: speed = maxspeed
 						command = command / (np.linalg.norm(command)/speed)
-					commandAlpha = saturate_minabs_BothSigns(errAlpha, 0.05, 0.5)
+					commandAlpha = saturate_minabs_BothSigns(errAlpha, 0.05, 0.3)
 					self.omnirobot_proxy.setSpeedBase(command[0], command[1], commandAlpha)
 				else:
 					print '<Now IDLE'
@@ -163,17 +168,21 @@ class SpecificWorker(GenericWorker):
 	#
 	# go
 	def go(self, target):
-		self.goReferenced(target, 0, 0)
+		self.goReferenced(target, 0, 0, 0)
 
 
 	# goReferenced
 	#
-	def goReferenced(self, target, xRef, zRef):
+	def goReferenced(self, target, xRef, zRef, threshold):
 		l = QtCore.QMutexLocker(self.mutex)
 		self.state.state = "EXECUTING"
 		self.target = target
 		self.xRef = xRef
 		self.zRef = zRef
+		self.threshold = threshold
+		if self.threshold < 20.:
+			self.threshold = 20.
+		
 
 
 	#
@@ -197,7 +206,7 @@ class SpecificWorker(GenericWorker):
 	#
 	# changeTarget
 	def changeTarget(self, target):
-		self.goReferenced(target, 0, 0)
+		self.goReferenced(target, 0, 0, 0)
 
 
 
