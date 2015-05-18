@@ -931,4 +931,9 @@ float SpecificWorker::angmMPI(float angle)
 // }
 
 
+void SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef)
+{
+}
+
+
 

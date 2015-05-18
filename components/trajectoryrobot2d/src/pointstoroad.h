@@ -25,18 +25,16 @@
 #include <qmat/QMatAll>
 #include <innermodel/innermodel.h>
 #include "qline2d.h"
-#include <InnerModelManager.h>
 #include "waypoints.h"
 
 using namespace RMat;
-using namespace RoboCompInnerModelManager;
 
 class PointsToRoad : public QObject
 {
 	Q_OBJECT
 	
 	public:
-		PointsToRoad( InnerModel *innermodel, InnerModelManagerPrx _innermodelmanager_proxy);
+		PointsToRoad( InnerModel *innermodel);
 		~PointsToRoad();
 	
 		bool update(WayPoints &road);
@@ -58,7 +56,6 @@ class PointsToRoad : public QObject
 		InnerModel *innerModel;
 		//int currentPoint, nextPoint;
 		bool currentSign;
-		InnerModelManagerPrx innermodelmanager_proxy;
 	
 		float getAngleWithTangent(WayPoints &road, const QVec &robot2DPos);
 		float distanceToRoad(WayPoints &road, const QVec &robot2DPos);
