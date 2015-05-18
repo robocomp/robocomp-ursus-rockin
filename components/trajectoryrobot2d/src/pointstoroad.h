@@ -26,7 +26,6 @@
 #include <innermodel/innermodel.h>
 #include "qline2d.h"
 #include <InnerModelManager.h>
-#include "rcisdraw.h"
 #include "waypoints.h"
 
 using namespace RMat;

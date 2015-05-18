@@ -128,30 +128,11 @@ int TrajectoryRobot2DComp::run(int argc, char* argv[])
 #endif
 	int status=EXIT_SUCCESS;
 
-	InnerModelManagerPrx innermodelmanager_proxy;
 	LaserPrx laser_proxy;
-	OmniRobotPrx omnirobot1_proxy;
-	OmniRobotPrx omnirobot2_proxy;
+	OmniRobotPrx omnirobot_proxy;
 
 	string proxy, tmp;
 	initialize();
-
-
-	try
-	{
-		if (not GenericMonitor::configGetString(communicator(), prefix, "InnerModelManagerProxy", proxy, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy InnerModelManagerProxy\n";
-		}
-		innermodelmanager_proxy = InnerModelManagerPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("InnerModelManagerProxy initialized Ok!");
-	mprx["InnerModelManagerProxy"] = (::IceProxy::Ice::Object*)(&innermodelmanager_proxy);//Remote server proxy creation example
 
 
 	try
@@ -173,36 +154,19 @@ int TrajectoryRobot2DComp::run(int argc, char* argv[])
 
 	try
 	{
-		if (not GenericMonitor::configGetString(communicator(), prefix, "OmniRobot1Proxy", proxy, ""))
+		if (not GenericMonitor::configGetString(communicator(), prefix, "OmniRobotProxy", proxy, ""))
 		{
 			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy OmniRobotProxy\n";
 		}
-		omnirobot1_proxy = OmniRobotPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+		omnirobot_proxy = OmniRobotPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
 	}
 	catch(const Ice::Exception& ex)
 	{
 		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
 		return EXIT_FAILURE;
 	}
-	rInfo("OmniRobotProxy1 initialized Ok!");
-	mprx["OmniRobotProxy1"] = (::IceProxy::Ice::Object*)(&omnirobot1_proxy);//Remote server proxy creation example
-
-
-	try
-	{
-		if (not GenericMonitor::configGetString(communicator(), prefix, "OmniRobot2Proxy", proxy, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy OmniRobotProxy\n";
-		}
-		omnirobot2_proxy = OmniRobotPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("OmniRobotProxy2 initialized Ok!");
-	mprx["OmniRobotProxy2"] = (::IceProxy::Ice::Object*)(&omnirobot2_proxy);//Remote server proxy creation example
+	rInfo("OmniRobotProxy initialized Ok!");
+	mprx["OmniRobotProxy"] = (::IceProxy::Ice::Object*)(&omnirobot_proxy);//Remote server proxy creation example
 
 
 
@@ -235,9 +199,10 @@ int TrajectoryRobot2DComp::run(int argc, char* argv[])
 		{
 			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy TrajectoryRobot2D";
 		}
-		Ice::ObjectAdapterPtr adapterTrajectoryRobot2D = communicator()->createObjectAdapterWithEndpoints("trajectoryrobot2d", tmp);
+		Ice::ObjectAdapterPtr adapterTrajectoryRobot2D = communicator()->createObjectAdapterWithEndpoints("TrajectoryRobot2D", tmp);
 		TrajectoryRobot2DI *trajectoryrobot2d = new TrajectoryRobot2DI(worker);
 		adapterTrajectoryRobot2D->add(trajectoryrobot2d, communicator()->stringToIdentity("trajectoryrobot2d"));
+		adapterTrajectoryRobot2D->activate();
 
 
 
@@ -282,7 +247,13 @@ int main(int argc, char* argv[])
 		std::string initIC("--Ice.Config=");
 		size_t pos = std::string(argv[1]).find(initIC);
 		if (pos == 0)
+		{
 			configFile = std::string(argv[1]+initIC.size());
+		}
+		else
+		{
+			configFile = std::string(argv[1]);
+		}
 	}
 
 	// Search in argument list for --prefix= argument (if exist)

@@ -705,7 +705,7 @@ QVec Planner::trySegmentToTargetBinarySearch(const QVec & origin , const QVec & 
 ////  Tree Drawing
 ///////////////////////////////////////////////
 
-void Planner::drawTree(InnerModelManagerPrx innermodelmanager_proxy)
+void Planner::drawTree(InnerModelViewer *innerViewer)
 {
 	tree<QVec>::pre_order_iterator begin = arbol->begin();
 	tree<QVec>::pre_order_iterator end = arbol->end();
@@ -716,7 +716,6 @@ void Planner::drawTree(InnerModelManagerPrx innermodelmanager_proxy)
 	*/	
 	QString name;
 	int i=0;
-	RoboCompInnerModelManager::Plane3D p;
 	while(begin!=end) 
 	{
 		padre = arbol->parent(begin);
@@ -726,13 +725,10 @@ void Planner::drawTree(InnerModelManagerPrx innermodelmanager_proxy)
 			name = "t_" + QString::number(i++);
 			float len = (QVec::vec3((*padre).x(), 600, (*padre).z()) -  QVec::vec3((*begin).x(), 600, (*begin).z())).norm2() ;
 			QVec midPoint = (QVec::vec3((*padre).x(), 600, (*padre).z()) + QVec::vec3((*begin).x(), 600, (*begin).z()) )*(T)0.5; ;
-			p.px = midPoint.x(); p.py = midPoint.y();	p.pz = midPoint.z();
 			QLine2D line(QVec::vec3((*padre).x(), 600, (*padre).z()),QVec::vec3((*begin).x(), 600, (*begin).z()));
 			QVec normal = line.getNormalForOSGLineDraw();
-			p.nx = normal.x();	p.ny = normal.y();	p.nz = normal.z();
-			p.height = 20;	p.width = len;	p.thickness = 20;
-			p.texture = "#0000FF";
-			RcisDraw::addPlane_ignoreExisting(innermodelmanager_proxy, name, "floor", p);
+			midPoint(1) = 1000;
+			InnerModelDraw::addPlane_ignoreExisting(innerViewer, name, "floor", midPoint, normal, "#0000FF", QVec::vec3(len, 20, 20));
 		}
 		++begin;
 	}

@@ -18,11 +18,11 @@
 #include "forcefield.h"
 #include <boost/graph/graph_concepts.hpp>
 
-ForceField::ForceField(InnerModel *innermodel, InnerModelManagerPrx _innermodelmanager_proxy): 
+ForceField::ForceField(InnerModel *innermodel, InnerModelViewer *innerViewer_): 
 	innerModel(innermodel), 
-	innermodelmanager_proxy(_innermodelmanager_proxy)
+	innerViewer = innerViewer_;
 {
-	
+
 }
 
 /**

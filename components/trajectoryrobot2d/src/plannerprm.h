@@ -39,9 +39,8 @@
 #include <boost/property_map/dynamic_property_map.hpp> 
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/iteration_macros.hpp>
-#include <InnerModelManager.h>
-#include "nabo/nabo.h"
-#include "rcisdraw.h"
+#include <nabo/nabo.h>
+#include <innermodeldraw.h>
 #include "sampler.h"
 #include "plannerompl.h"
 
@@ -49,14 +48,14 @@ struct VertexPayload
 {	
 	QVec pose; //3D
 	std::size_t vertex_id;
-	VertexPayload(){};
-	VertexPayload(std::size_t i, const QVec &p){ vertex_id = i; pose=p; };
+	VertexPayload() {}
+	VertexPayload(std::size_t i, const QVec &p) { vertex_id = i; pose=p; }
 };	
 struct EdgePayload
 {
 	float dist;
-	EdgePayload(){ dist = -1;};
-	EdgePayload(float d) { dist = d;};
+	EdgePayload(){ dist = -1;}
+	EdgePayload(float d) { dist = d;}
 };
 typedef boost::adjacency_list<boost::listS,boost::listS, boost::undirectedS, VertexPayload, EdgePayload, boost::listS> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
@@ -84,12 +83,12 @@ class PlannerPRM : public QObject
 		bool computePath(QVec& target,  InnerModel* inner);
 		void setInnerModel(InnerModel *innerModel_);
 		QList<QVec> getPath() { return currentPath; }
-		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax)		{xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;};
-		bool drawGraph(InnerModelManagerPrx innermodelmanager_proxy);
-		void cleanGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy);
+		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax) {xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;}
+		bool drawGraph(InnerModelViewer *innerViewer);
+		void cleanGraph(InnerModelViewer *innerViewer);
 		bool learnPath(const QList<QVec> &path);
 		bool learnForAWhile();
-		const Sampler & getSampler() const  { return sampler; };
+		const Sampler & getSampler() const  { return sampler; }
 		
 	private:
 		Graph graph;

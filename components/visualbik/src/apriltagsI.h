@@ -16,33 +16,29 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef TRAJECTORYROBOT2D_H
-#define TRAJECTORYROBOT2D_H
+#ifndef APRILTAGS_H
+#define APRILTAGS_H
 
 // QT includes
 #include <QtCore/QObject>
 
 // Ice includes
 #include <Ice/Ice.h>
-#include <TrajectoryRobot2D.h>
+#include <AprilTags.h>
 
 #include <config.h>
 #include "genericworker.h"
 
-using namespace RoboCompTrajectoryRobot2D;
+using namespace RoboCompAprilTags;
 
-class TrajectoryRobot2DI : public QObject , public virtual RoboCompTrajectoryRobot2D::TrajectoryRobot2D
+class AprilTagsI : public QObject , public virtual RoboCompAprilTags::AprilTags
 {
 Q_OBJECT
 public:
-	TrajectoryRobot2DI( GenericWorker *_worker, QObject *parent = 0 );
-	~TrajectoryRobot2DI();
+	AprilTagsI( GenericWorker *_worker, QObject *parent = 0 );
+	~AprilTagsI();
 	
-	void go(const TargetPose  &target, const Ice::Current&);
-	NavState getState(const Ice::Current&);
-	void goBackwards(const TargetPose  &target, const Ice::Current&);
-	void stop(const Ice::Current&);
-	void changeTarget(const TargetPose  &target, const Ice::Current&);
+	void newAprilTag(const tagsList  &tags, const Ice::Current&);
 
 	QMutex *mutex;
 private:

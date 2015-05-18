@@ -968,43 +968,25 @@ void PlannerPRM::smoothPathIter(QList<QVec> & list)
 /// DRAW
 ////////////////////////////////////////////////////////////////////////
 
-bool PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy)
+bool PlannerPRM::drawGraph(InnerModelViewer *innerViewer)
 {
-// 	if( graphDirtyBit == false)
-// 		return false;
-
-	RoboCompInnerModelManager::Pose3D pose;
-	pose.rx = pose.ry = pose.z = 0.;pose.x = pose.y = pose.z = 0.;
-	RoboCompInnerModelManager::Plane3D plane;
-	plane.height = 60; plane.width = 60; plane.thickness = 10;
-	plane.px = plane.py = plane.pz = 0; plane.nx = 0; plane.ny = 1; plane.nz = 0;
-	plane.texture = "#00A0A0";
-
-	cleanGraph(innermodelmanager_proxy);
-
-	try
-	{	std::string  parentAll = "graph";
-		innermodelmanager_proxy->addTransform(parentAll,"static","floor", pose);
-	}
-	catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
-	{ std::cout << ex << std::endl;}
+	cleanGraph(innerViewer);
+	InnerModelDraw::addTransform(innerViewer, "graph", "floor");
 
 	QString item;
+
 	int i=0;
 	BGL_FORALL_VERTICES(v, graph, Graph)
     {
 		item = "g_" + QString::number(i);
-		pose.x = graph[v].pose.x();	pose.y = 10; pose.z = graph[v].pose.z();
-		try
-		{	std::string  parentT = QString("g_" + QString::number(i)).toStdString();
-			innermodelmanager_proxy->addTransform(parentT,"static","graph", pose);
-			innermodelmanager_proxy->addPlane(QString("g_" + QString::number(i) + "_plane").toStdString(), parentT, plane);
-			//qDebug() << "Vertices inserted " << item << item + "_plane";
-		}
-		catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
-		{ std::cout << ex << std::endl;}
+		QString  parentT = QString("g_") + QString::number(i);
+		InnerModelDraw::addTransform(innerViewer, parentT, "graph");
+		innerViewer->innerModel->updateTransformValues(parentT, graph[v].pose.x(), 10, graph[v].pose.z(), 0,0,0);
+		InnerModelDraw::addPlane_ignoreExisting(innerViewer, item+"_plane", parentT, QVec::vec3(0,0,0), QVec::vec3(0,1,0), "#00A0A0", QVec::vec3(60,60,10));
+		//qDebug() << "Vertices inserted " << item << item + "_plane";
 		i++;
 	}
+
 	i=0;
 	BGL_FORALL_EDGES(e, graph, Graph)
     {
@@ -1012,32 +994,20 @@ bool PlannerPRM::drawGraph(RoboCompInnerModelManager::InnerModelManagerPrx inner
 		QVec p1 = graph[boost::source(e,graph)].pose;
 		QVec p2 = graph[boost::target(e,graph)].pose;
 		QVec center = (p2-p1)/(T)2.f;
-		pose.x = p1.x() + center.x(); pose.y = p1.y() + center.y(); pose.z = p1.z() + center.z();
-		pose.rx = pose.rz = 0; pose.ry = QLine2D(p1,p2).getAngleWithZAxis()+M_PI/2;
-		try
-		{	plane.thickness = 15;	plane.width = (p1-p2).norm2();	plane.height = 15;
-			std::string  parentTE = QString("ge_" + QString::number(i)).toStdString();
-			innermodelmanager_proxy->addTransform(parentTE,"static","graph", pose);
-			innermodelmanager_proxy->addPlane(QString("ge_" + QString::number(i) + "_plane").toStdString(), parentTE, plane);
-			//qDebug() << "Edges inserted " << item << item + "_plane";
-		}
-		catch(const RoboCompInnerModelManager::InnerModelManagerError &ex)
-		{ std::cout << ex.text  << std::endl;}
+
+		QString  parentTE = QString("ge_") + QString::number(i);
+		InnerModelDraw::addTransform(innerViewer, parentTE, "graph");
+		innerViewer->innerModel->updateTransformValues(parentTE, p1.x()+center.x(), p1.y()+center.y(), p1.z()+center.z(),  0, QLine2D(p1,p2).getAngleWithZAxis()+M_PI/2, 0 );
+		InnerModelDraw::addPlane_ignoreExisting(innerViewer, QString("ge_")+QString::number(i)+"_plane", parentTE, QVec::vec3(0,0,0), QVec::vec3(0,1,0), "#00A0A0", QVec::vec3((p1-p2).norm2(), 15 , 15));
 		i++;
 	}
-	//graphDirtyBit = false;
 	return true;
 }
 
-void PlannerPRM::cleanGraph(RoboCompInnerModelManager::InnerModelManagerPrx innermodelmanager_proxy)
+void PlannerPRM::cleanGraph(InnerModelViewer *innerViewer)
 {
-	try
-	{
-//  		qDebug() << __FUNCTION__ << "deleting GRAPH";
- 		innermodelmanager_proxy->removeNode("graph");
- 	}
-	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
-	{	std::cout << e.text << std::endl;	}
+	if (innerViewer->innerModel->getNode("graph"))
+		InnerModelDraw::removeNode(innerViewer, "graph");
 }
 
 // std::tuple<std::vector<Vertex>, QMap<u_int32_t, VertexIndex> > PlannerPRM::connectedComponents()

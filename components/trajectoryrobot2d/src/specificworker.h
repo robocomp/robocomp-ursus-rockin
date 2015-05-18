@@ -32,6 +32,12 @@
 
 //#include "ParabolicPathSmooth/smoother.h"
 
+#ifdef USE_QTGUI
+	#include <osgviewer/osgview.h>
+	#include <innermodel/innermodelviewer.h>
+	#include <innermodeldraw.h>
+#endif
+
 /**
        \brief Algorithm to control de robot along a trajectory defined by a set of points
        @author authorname
@@ -104,7 +110,8 @@ private:
 	CurrentTarget currentTarget;
 	CurrentTarget currentTargetAnt;
 	
-	InnerModel *innerModel, *innerClon;
+	InnerModel *innerModel;
+
 	QVec target;
 	QTime taskReloj;
  	
@@ -130,9 +137,17 @@ private:
 	bool targetHasAPlan(InnerModel* inner, CurrentTarget& target, TrajectoryState &state, WayPoints &myRoad);
 	void drawTarget(const QVec &target);
 	void drawGreenBoxOnTarget(const QVec &target);
-	void printNumberOfElementsInRCIS();
+	void printNumberOfElementsInIMV();
 	void calcularModuloFloat(QVec &angles, float mod);
 	float angmMPI(float angle);
+	
+	
+#ifdef USE_QTGUI
+	OsgView *osgView;
+	InnerModelViewer *innerViewer;
+	InnerModel *innerVisual;
+
+#endif
 	
 };
 

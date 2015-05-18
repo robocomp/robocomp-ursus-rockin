@@ -24,8 +24,7 @@
 #include <qmat/QMatAll>
 #include "tree.hh"
 #include <innermodel/innermodel.h>
-#include <InnerModelManager.h>
-#include "rcisdraw.h"
+
 #include "qline2d.h"
 #include "waypoints.h"
 
@@ -34,7 +33,6 @@
 #define MAX_ITER_INIT 5000
 
 
-using namespace RoboCompInnerModelManager;
 
 class Planner : public QObject
 {
@@ -46,7 +44,7 @@ public:
 	void setMaxIter( int v) { MAX_ITER = v; }
 	bool computePath(const QVec &target, InnerModel *inner);
 	WayPoints smoothRoad( WayPoints road);
-	void drawTree( InnerModelManagerPrx innermodelmanager_proxy );
+	void drawTree(InnerModel *innerVisual);
 	QList<QVec> getPath() { return currentSmoothedPath; }
 
 	bool collisionDetector(const QVec &position, const QVec &rotation, InnerModel *im);

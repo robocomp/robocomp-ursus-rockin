@@ -1,13 +1,10 @@
-CommonBehavior.Endpoints=tcp -p 1
-
-
 # Endpoints for implemented interfaces
-TrajectoryRobot2D.Endpoints=tcp -p 0
+TrajectoryRobot2D.Endpoints=tcp -p 12204
 
 
 # Proxies for required interfaces
-LaserProxy = laser:tcp -h localhost -p 0
-OmniRobotProxy = omnirobot:tcp -h localhost -p 0
+LaserProxy = laser:tcp -h localhost -p 10003
+OmniRobotProxy = omnirobot:tcp -h localhost -p 12238
 
 
 

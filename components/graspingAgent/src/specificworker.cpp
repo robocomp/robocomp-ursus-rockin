@@ -504,9 +504,30 @@ void SpecificWorker::action_GraspObject(bool first)
 
 	if (state == 0) // 1º approach hand
 	{
-		bodyinversekinematics_proxy->setFingers(100);
+		printf("%s: %d\n", __FILE__, __LINE__);
+		try
+		{
+			bodyinversekinematics_proxy->setFingers(80);
+		}
+		catch(...)
+		{
+			qFatal("%s: %d\n", __FILE__, __LINE__);
+		}
+		printf("%s: %d\n", __FILE__, __LINE__);
 		usleep(100000);
-		sendRightArmToTargetFullPose(symbols["object"], offset);
+		AGMModelSymbol::SPtr symbol;
+		try
+		{
+			printf("%s: %d\n", __FILE__, __LINE__);
+			symbol = symbols["object"];
+			printf("%s: %d\n", __FILE__, __LINE__);
+			sendRightArmToTargetFullPose(symbol, offset);
+			printf("%s: %d\n", __FILE__, __LINE__);
+		}
+		catch (...)
+		{
+			printf("%s: %d\n", __FILE__, __LINE__);
+		}
 
 		time = QTime::currentTime();
 		state = 1;
@@ -595,6 +616,7 @@ void SpecificWorker::action_GraspObject(bool first)
 
 QVec SpecificWorker::getObjectsLocation(AGMModelSymbol::SPtr &object)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	return QVec::vec3(
 	 str2float(object->getAttribute("tx")),
 	 str2float(object->getAttribute("ty")),
@@ -606,22 +628,29 @@ void SpecificWorker::sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetOb
 {
 	Pose6D target;
 	WeightVector weights;
+printf("%s: %d\n", __FILE__, __LINE__);
 	try
 	{
+		printf("%s: %d\n", __FILE__, __LINE__);
 		QVec targetPos = getObjectsLocation(targetObject) + offset;
+		printf("%s: %d\n", __FILE__, __LINE__);
 		targetPos.print("targetFullPose");
+		printf("%s: %d\n", __FILE__, __LINE__);
 		target.x = targetPos(0);
 		target.y = targetPos(1);
 		target.z = targetPos(2);
 		weights.x = 1;
 		weights.y = 1;
 		weights.z = 1;
+		printf("%s: %d\n", __FILE__, __LINE__);
 		target.rx = str2float(targetObject->getAttribute("rx"));
 		target.ry = str2float(targetObject->getAttribute("ry"));
 		target.rz = str2float(targetObject->getAttribute("rz"));
+		printf("%s: %d\n", __FILE__, __LINE__);
 		weights.rx = 1;
 		weights.ry = 1;
 		weights.rz = 1;
+		printf("%s: %d\n", __FILE__, __LINE__);
 	}
 	catch (...)
 	{
@@ -701,17 +730,24 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	}
 	if (objectId > 0)
 	{
-		AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-		const float x = str2float(goalObject->getAttribute("tx"));
-		const float y = str2float(goalObject->getAttribute("ty"));
-		const float z = str2float(goalObject->getAttribute("tz"));
-		saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+		try
+		{
+			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+			const float x = str2float(goalObject->getAttribute("tx"));
+			const float y = str2float(goalObject->getAttribute("ty"));
+			const float z = str2float(goalObject->getAttribute("tz"));
+			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+		}
+		catch (...)
+		{
+			printf("%s %d\n", __FILE__, __LINE__);
+		}
 	}
 	else
 	{
 		printf ("don't have the object to reach in my model %d\n", objectId);
 	}
-	
+
 	printf("--------------------\n");
 
 	///
