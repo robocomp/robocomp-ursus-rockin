@@ -139,7 +139,7 @@
   <dependence alias="base" />
   <dependence alias="laserRGBD" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost trajectory /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/ ./bin/trajectoryrobot2dcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/trajectoryrobot2d.conf" />
+  <upCommand command="rcremote localhost trajectory /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/ ./bin/TrajectoryRobot2DComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/trajectoryrobot2d.conf" />
   <downCommand command="killall -9 trajectoryrobot2dcomp" />
   <configFile path="xxx" />
   <xpos value="-75.8880817451" />
