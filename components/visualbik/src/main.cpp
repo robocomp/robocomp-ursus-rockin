@@ -175,9 +175,10 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 		{
 			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy BodyInverseKinematics";
 		}
-		Ice::ObjectAdapterPtr adapterBodyInverseKinematics = communicator()->createObjectAdapterWithEndpoints("bodyinversekinematics", tmp);
+		Ice::ObjectAdapterPtr adapterBodyInverseKinematics = communicator()->createObjectAdapterWithEndpoints("BodyInverseKinematics", tmp);
 		BodyInverseKinematicsI *bodyinversekinematics = new BodyInverseKinematicsI(worker);
 		adapterBodyInverseKinematics->add(bodyinversekinematics, communicator()->stringToIdentity("bodyinversekinematics"));
+		adapterBodyInverseKinematics->activate();
 
 
 
