@@ -114,6 +114,8 @@ private:
 
 	QVec target;
 	QTime taskReloj;
+	
+	QMutex mutex_state;
  	
 	QVec P;
 	WayPoints road;

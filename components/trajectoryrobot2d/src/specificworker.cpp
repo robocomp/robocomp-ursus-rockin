@@ -392,9 +392,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		//state.setState("IDLE");
 		try
 		{
-		  //differentialrobot_proxy->setSpeedBase(0, 0);
 		  omnirobot_proxy->setSpeedBase(0, 0, 0);
-// 		  omnirobot2_proxy->setSpeedBase(0.,0.,0.);
 		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
 		//myRoad.requiresReplanning = true;
 

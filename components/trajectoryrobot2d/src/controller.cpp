@@ -36,7 +36,7 @@ Controller::~Controller()
 bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints &road)
 {
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
-	static long epoch = 100;
+	/*static*/ long epoch = 100;
 
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
@@ -44,10 +44,11 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//Check robot state
 	if( (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
-		// 		if( road.isFinished() ) qDebug() << "road finished";
-		// 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
-		// 		if( road.isLost ) qDebug() << "robot is lost";
+		 		if( road.isFinished() ) qDebug() << "road finished";
+		 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
+		 		if( road.isLost ) qDebug() << "robot is lost";
 		stopTheRobot(omnirobot_proxy);
+
 		return false;
 	}
 
@@ -87,8 +88,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 
 	/////////////////////////////////////////////////
 	//////  CHECK CPU AVAILABILITY
-	////////////////////////////////////////////////
-
+	/////////////////////////////////////////////////
 	if ( time.elapsed() > delay )   //Initial wait in secs so the robot waits for everything is setup. Maybe it could be moved upwards
 	{
 		float MAX_ADV_SPEED = 200.f;
@@ -101,7 +101,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 
 		float vadvance = 0;
 		float vrot = 0;
-
 		/////////////////////////////////////////////////
 		//////   ROTATION SPEED
 		////////////////////////////////////////////////
@@ -139,7 +138,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 								 * teta;
 								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
 								 //* sunk;
-
 		//Pre-limiting filter to avoid displacements in very closed turns
 		if( fabs(vrot) > 0.8)
 			vadvance = 0;

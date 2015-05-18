@@ -216,11 +216,8 @@ void WayPoints::print() const
 bool WayPoints::draw(InnerModelViewer *innerViewer, InnerModel *innerModel, const CurrentTarget &currentTarget)
 {
 	if (size() == 0) return false;
-printf("%d\n", __LINE__);
-	printf("ROAD %s\n", innerViewer->innerModel->getNode("road")?"existe":"no existe");
 	InnerModelDraw::addTransform_ignoreExisting(innerViewer, "road", "floor");
-	printf("ROAD %s\n", innerViewer->innerModel->getNode("road")?"existe":"no existe");
-printf("%d\n", __LINE__);
+	
 	//Draw all points now
 	for(int i=1; i<size(); i++)
 	{
@@ -231,25 +228,17 @@ printf("%d\n", __LINE__);
 		QVec normal = lp.getNormalForOSGLineDraw();  //3D vector
 		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();		//OJO, PETA SI NO ESTA LA TG CALCULADA ANTES
 		QString item = "p_" + QString::number(i);
-
-printf("%d\n", __LINE__);
-		printf("item %s\n", innerViewer->innerModel->getNode(item)?"existe":"no existe");
 		InnerModelDraw::addTransform_ignoreExisting(innerViewer, item, "road");
-		printf("item %s\n", innerViewer->innerModel->getNode(item)?"existe":"no existe");
-printf("%d\n", __LINE__);
-		innerViewer->innerModel->updateTransformValues(item, w.pos.x(), 10, w.pos.z(),    0,0,0);
-printf("%d\n", __LINE__);
+		innerViewer->innerModel->updateTransformValues(item, w.pos.x(), 10, w.pos.z(), 0,0,0);
+		
 		if ( (int)i == (int)currentPointIndex+1 ) //CHANGE TO getIndexOfClosestPointToRobot()
 		{
-			printf("item_line %s\n", innerViewer->innerModel->getNode(item+"_line")?"existe":"no existe");
 			InnerModelDraw::drawLine(innerViewer, item+"_line", item, tangent, 600, 30, "#000055" );
-			printf("item_line %s\n", innerViewer->innerModel->getNode(item+"_line")?"existe":"no existe");
 		}
 		if (w.isVisible)
 			InnerModelDraw::drawLine(innerViewer, item + "_point", item, normal, 250, 50, "#005500" );
 		else
 			InnerModelDraw::drawLine(innerViewer, item + "_point", item, normal, 250, 50, "#550099" );  //Morado
-printf("%d\n", __LINE__);
 	}
 	if( currentTarget.hasRotation() == true) 	//Draw an arrow indicating final desired orientation
 	{
@@ -263,7 +252,6 @@ printf("%d\n", __LINE__);
 	
 	return true;
 }
-
 
 
 void WayPoints::clearDraw(InnerModelViewer *innerViewer)
@@ -498,8 +486,9 @@ bool WayPoints::update()
 	if((((int)getCurrentPointIndex()+1 == (int)size())  and  ( getRobotDistanceToTarget()< 80) )
 		or ( (getRobotDistanceToTarget() < 1000) and ( getRobotDistanceVariationToTarget() > 0) ) )
 	{
-		setFinished(true);
-// 		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
+	
+		setFinished(true);		
+//		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
 // 		getIndexOfClosestPointToRobot()->pos.print("closest point");
 	}
 
