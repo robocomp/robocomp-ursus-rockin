@@ -57,8 +57,6 @@ class SpecificWorker(GenericWorker):
 	def __init__(self, proxy_map):
 		super(SpecificWorker, self).__init__(proxy_map)
 		self.hide()
-		self.timer.timeout.connect(self.compute)
-		self.Period = 100
 
 		self.state = NavState()
 		self.updateStatePose()
@@ -69,24 +67,30 @@ class SpecificWorker(GenericWorker):
 		self.state.planningTime = 0
 		self.state.state = "IDLE"
 
-
+		self.updateStatePose()
 		target = TargetPose()
 		target.doRotation = False
-		target.x  = 0
+		target.x  = self.state.x
 		target.y  = 0
-		target.z  = 0
+		target.z  = self.state.z
 		target.rx = 0
-		target.ry = 0
+		target.ry = self.state.ry
 		target.rz = 0
-		self.go(target)
+		self.goReferenced(target, 0, 0)
+		self.stop()
 
+		#self.rere = 0
+
+		self.Period = 100
 		self.timer.start(self.Period)
+		self.timer.timeout.connect(self.compute)
 
 	def normalize_s_pi(self, angle):
 		r = float(angle) - (math.pi*2.) * math.floor( angle / (math.pi*2.) )
 		if r > math.pi:
 			r -= 2.*math.pi
 		return r
+
 	def updateStatePose(self):
 		self.state.x, self.state.z, self.state.ry = self.omnirobot_proxy.getBasePose()
 		print 'POSE', self.state.x, self.state.z, self.state.ry
@@ -100,6 +104,19 @@ class SpecificWorker(GenericWorker):
 
 	@QtCore.Slot()
 	def compute(self):
+		# UPDATE TARGET MANUALLY (JUST FOR DEBUGGING PURPOSES!!!!)
+		#target = TargetPose()
+		#target.doRotation = False
+		#target.x  = 1000
+		#target.y  = 0
+		#target.z  = 1100
+		#target.rx = 0
+		#target.ry = self.rere
+		#target.rz = 0
+		#self.goReferenced(target, 100, 300)
+		#self.rere += 0.01
+		#print self.rere
+
 		l = QtCore.QMutexLocker(self.mutex)
 
 		if self.state.state == 'IDLE':
@@ -108,31 +125,37 @@ class SpecificWorker(GenericWorker):
 			try:
 				self.updateStatePose()
 				errX, errZ, errAlpha = self.getError(self.state, self.target)
-				print errX, errZ, errAlpha
-
+				# Compute initial relative error
 				relErrX = errX*math.cos(self.state.ry) - errZ*math.sin(self.state.ry)
-				relErrZ = errX*math.sin(self.state.ry) + errZ*math.cos(self.state.ry)-250.
+				relErrZ = errX*math.sin(self.state.ry) + errZ*math.cos(self.state.ry)
+				# Now we take into account the target reference
+				relErrX -= self.xRef
+				relErrZ -= self.zRef
+				# Final relative coordinates of the target
 				print 'command', relErrX, relErrZ
-
+				
 				command = np.array([relErrX, relErrZ])
-				if np.linalg.norm(command)>0.1 or abs(errAlpha)>0.05:
-					maxspeed = 400.
+				if np.linalg.norm(command)>20 or abs(errAlpha)>0.08:
+					maxspeed = 500.
 					if np.linalg.norm(command)<0.1:
 						command = np.array([0,0])
 					else:
 						speed = np.linalg.norm(command)
 						if speed > maxspeed: speed = maxspeed
 						command = command / (np.linalg.norm(command)/speed)
-					commandAlpha = saturate_minabs_BothSigns(errAlpha, 0.05, 0.3)
+					commandAlpha = saturate_minabs_BothSigns(errAlpha, 0.05, 0.5)
 					self.omnirobot_proxy.setSpeedBase(command[0], command[1], commandAlpha)
 				else:
+					print '<Now IDLE'
 					self.stop()
 					self.state.state = 'IDLE'
+					print 'Now IDLE>'
 
 			except Ice.Exception, e:
 				traceback.print_exc()
 				print e
 		else:
+			print 'Internal error: unknown state:', self.state.state
 			return False
 		return True
 
@@ -140,7 +163,17 @@ class SpecificWorker(GenericWorker):
 	#
 	# go
 	def go(self, target):
-		self.changeTarget(target)
+		self.goReferenced(target, 0, 0)
+
+
+	# goReferenced
+	#
+	def goReferenced(self, target, xRef, zRef):
+		l = QtCore.QMutexLocker(self.mutex)
+		self.state.state = "EXECUTING"
+		self.target = target
+		self.xRef = xRef
+		self.zRef = zRef
 
 
 	#
@@ -164,10 +197,7 @@ class SpecificWorker(GenericWorker):
 	#
 	# changeTarget
 	def changeTarget(self, target):
-		l = QtCore.QMutexLocker(self.mutex)
-		self.state.state = "EXECUTING"
-		self.target = target
-		print self.target.x, self.target.z
+		self.goReferenced(target, 0, 0)
 
 
 

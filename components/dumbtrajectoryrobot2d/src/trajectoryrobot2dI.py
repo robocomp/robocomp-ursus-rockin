@@ -38,16 +38,18 @@ class TrajectoryRobot2DI(TrajectoryRobot2D):
 	def __init__(self, worker):
 		self.worker = worker
 
-	def go(self, target, c):
-		return self.worker.go(target)
 	def getState(self, c):
 		return self.worker.getState()
 	def goBackwards(self, target, c):
 		return self.worker.goBackwards(target)
 	def stop(self, c):
 		return self.worker.stop()
+	def goReferenced(self, target, xRef, zRef, c):
+		return self.worker.goReferenced(target, xRef, zRef)
 	def changeTarget(self, target, c):
 		return self.worker.changeTarget(target)
+	def go(self, target, c):
+		return self.worker.go(target)
 
 
 

@@ -142,6 +142,8 @@ private:
 	float angmMPI(float angle);
 	
 	
+	void goReferenced(const TargetPose &target, const float xRef, const float zRef);
+
 #ifdef USE_QTGUI
 	OsgView *osgView;
 	InnerModelViewer *innerViewer;
