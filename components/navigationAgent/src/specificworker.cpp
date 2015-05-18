@@ -787,7 +787,7 @@ void SpecificWorker::odometryAndLocationIssues()
 
 void SpecificWorker::action_NoAction(bool newAction)
 {
-		stop();
+	stop();
 }
 
 
