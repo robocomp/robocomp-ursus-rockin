@@ -9,7 +9,7 @@
  */ 
 VisualHand::VisualHand(InnerModel *im_)
 {
-	im = im_;
+	this->im = im_;
 	this->x = this->y = this->z = this->rx = this->ry = this->rz = 0;
 	this->lastUpdate = new timeval;
 }
@@ -29,40 +29,13 @@ VisualHand::~VisualHand()
  * \brief Metodo SET VISUAL POSE
  * Almacena en sus atributos [X, Y, Z, RX, RY, RZ] las coordenadas de traslacion y rotacion
  * de la marcda de apriltags que recibe como parametro de entrada. Actualiza el tiempo de
- * lastUpdate.
+ * lastUpdate. PASA DE RGBD A ROOT!!!!!!!!!
  * @param tag marca de apriltags con la posicion de la mano.
  */ 
 void VisualHand::setVisualPose(RoboCompAprilTags::tag tag)
 {
-// 	printf("To: (%f, %f, %f)\n", tag.tx, tag.ty, tag.tz);
-// // 	const QMat root2rgb = im->getTransformationMatrix("rgbd", "root");
-// 	const QMat rgbd2tag = RTMat(tag.rx, tag.ry, tag.rz, tag.tx, tag.ty, tag.tz);
-// 	const QMat total = rgbd2tag /** root2rgb*/;
-// 
-// 	total.print("TF");
-// 
-// 	this->x = total(0,3);
-// 	this->y = total(1,3);
-// 	this->z = total(2,3);
-// 	printf("Tf: (%f, %f, %f)\n", x, y, z);
-// 
-// 	QMat R (3,3);
-// 	for (int f=0; f<3; f++)
-// 	{
-// 		for (int c=0; c<3; c++)
-// 		{
-// 			R(f,c) = total(f,c);
-// 		}
-// 	}
-// 	R.print("R");
-// 	
-// 	QVec angles = R.extractAnglesR_min();
-// 	this->rx = angles(0);
-// 	this->ry = angles(1);
-// 	this->rz = angles(2);
-
 	QVec tagPose = QVec::vec6(tag.tx, tag.ty, tag.tz, tag.rx, tag.ry, tag.rz);
-	QVec ret = im->transform("root", tagPose, "rgbd");
+	QVec ret = this->im->transform("root", tagPose, "rgbd");
 	this->x = ret(0);
 	this->y = ret(1);
 	this->z = ret(2);

@@ -82,8 +82,8 @@ private:
 #endif
 
 	// METODOS PRIVADOS
-	bool metodo1_traslacion();
-	void metodo2_rotacion();
+	bool correctTraslation();
+	bool correctRotation();
 	void addTransformToInnerModel(const QString &name, const QString &parent, const RoboCompBodyInverseKinematics::Pose6D &pose6D);
 	void actualizarInnermodel();
 

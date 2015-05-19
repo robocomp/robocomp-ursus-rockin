@@ -29,14 +29,14 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	//Iniciamos con estado igual a IDLE:
 	this->state = State::IDLE;
 	
- 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml");
+ 	this->innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml");
 
-	rightHand = new VisualHand(innerModel);
-	leftHand = new VisualHand(innerModel);
+	this->rightHand = new VisualHand(this->innerModel);
+	this->leftHand = new VisualHand(this->innerModel);
 	
 #ifdef USE_QTGUI
-	osgView = new OsgView(this);
-	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
+	this->osgView = new OsgView(this);
+	this->innerViewer = new InnerModelViewer(this->innerModel, "root", this->osgView->getRootGroup(), true);
 	show();
 #endif
 }
@@ -72,14 +72,13 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
 void SpecificWorker::compute()
 {
-	actualizarInnermodel();
+	this->actualizarInnermodel();
 	const Pose6D tt = this->trueTarget.getPose6D();
-	innerModel->updateTransformValues("target", tt.x, tt.y, tt.z, tt.rx, tt.ry, tt.rz);
+	this->innerModel->updateTransformValues("target", tt.x, tt.y, tt.z, tt.rx, tt.ry, tt.rz);
 	const Pose6D p = *(this->rightHand);
-	innerModel->updateTransformValues("hand", p.x, p.y, p.z, p.rx, p.ry, p.rz);
+	this->innerModel->updateTransformValues("hand", p.x, p.y, p.z, p.rx, p.ry, p.rz);
 
-
-	QMutexLocker ml(&mutex);
+	QMutexLocker ml(&this->mutex);
 	switch(this->state)
 	{
 		case State::IDLE:
@@ -90,7 +89,7 @@ void SpecificWorker::compute()
 			{
 				this->state = State::TARGET_ARRIVE;
 				//Marcamos la posicion del target en la ventana de simulacion
-				std::cout<<"Ha llegado un TARGET: "<<this->trueTarget.getPose6D().x<<", "<<this->trueTarget.getPose6D().y<<", "<<this->trueTarget.getPose6D().z<<std::endl;
+				printf("Ha llegado un TARGET: (%f, %f, %f,   %f, %f, %f)",tt.x, tt.y, tt.z, tt.rx, tt.ry, tt.rz);
 			}
 		break;
 		//---------------------------------------------------------------------------------------------	
@@ -135,10 +134,10 @@ void SpecificWorker::compute()
 			std::cout<<"ESTADO CORRECT_TRASLACION.."<<std::endl;
 			if (bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish == true)	
 			{
-				std::cout<<"Todo va bien..."<<std::endl;
-				if(	this->metodo1_traslacion())
+				// Si el brazo se ha parado --> fin del BIK, empezamos a corregir
+				if(	this->correctTraslation())
 				{
-					if (this->nextTarget.getState() == Target::State::WAITING)
+					if (this->nextTarget.getState() == Target::State::RESOLVED)
 					{
 						this->trueTarget = this->nextTarget;
 					}
@@ -152,11 +151,12 @@ void SpecificWorker::compute()
 			std::cout<<"ESTADO CORRECT_ROTATION.."<<std::endl;
 			if (bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish == true)	
 			{
-				std::cout<<"Todo va bien..."<<std::endl;
-				this->metodo2_rotacion();
-				
-				this->trueTarget = this->nextTarget;
-				this->state = State::IDLE;
+				if(this->correctRotation())
+				{
+					if (this->nextTarget.getState() == Target::State::RESOLVED)
+						this->trueTarget = this->nextTarget;
+					this->state = State::IDLE;
+				}
 			}
 		break;
 		//---------------------------------------------------------------------------------------------			
@@ -178,27 +178,38 @@ void SpecificWorker::compute()
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 											METODOS PRIVADOS												   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
-bool SpecificWorker::metodo1_traslacion()
+/**
+ * \brief Metodo CORRECT TRASLATION
+ */ 
+bool SpecificWorker::correctTraslation()
 {
-	cout<<"HOLA"<<endl;
-	sleep(1);
-	// Pintamos la marca de la mano donde la camara la esta viendo
+	float umbralError = 0.01;
+	Pose6D error = this->rightHand->getError();
+	error.rx = error.ry = error.rz = 0; //anumalos los errores de rotacion
+	printf("ERROR: (%f, %f, %f,    %f, %f, %f)", error.x, error.y, error.z, error.rx, error.ry, error.rz);
+	// Si el error es miserable no hacemos nada y acabamos la corrección.
+	//Para hacer la norma lo pasamos a vec6
+	QVec e = QVec::vec6(error.x, error.y, error.z, error.rx, error.ry, error.rz);
+	if(e.norm2()<0.01)
+	{
+		this->trueTarget.changeState(Target::State::RESOLVED);
+		return true;
+	}
 	
-	//Vemos el error:
-	std::cout<<"ERROR: "<<this->rightHand->getError().x<<", "<<this->rightHand->getError().y<<", "<<this->rightHand->getError().z<<std::endl;
-	std::cout<<this->rightHand->getError().rx<<", "<<this->rightHand->getError().ry<<", "<<this->rightHand->getError().rz<<std::endl;
+	// Corregimos error de traslacion:
+	Pose6D corregir;
+	corregir.x = this->rightHand->getInternalPose()+error.x;
+	corregir.y = this->rightHand->getInternalPose()+error.y;
+	corregir.z = this->rightHand->getInternalPose()+error.z;
 	
 	return true;
 }
 
 
-void SpecificWorker::metodo2_rotacion()
+bool SpecificWorker::correctRotation()
 {
-	cout<<"HOLA"<<endl;
-	sleep(1);
-
-	std::cout<<"ERROR: "<<this->rightHand->getError().x<<", "<<this->rightHand->getError().y<<", "<<this->rightHand->getError().z<<std::endl;
-	std::cout<<this->rightHand->getError().rx<<", "<<this->rightHand->getError().ry<<", "<<this->rightHand->getError().rz<<std::endl;	
+	Pose6D error = this->rightHand->getError();
+	printf("ERROR: (%f, %f, %f,    %f, %f, %f)", error.x, error.y, error.z, error.rx, error.ry, error.rz);
 	
 	
 	
