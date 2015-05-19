@@ -29,9 +29,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	//Iniciamos con estado igual a IDLE:
 	this->state = State::IDLE;
 	
+ 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml");
+
+	rightHand = new VisualHand(innerModel);
+	leftHand = new VisualHand(innerModel);
+	
 #ifdef USE_QTGUI
 	osgView = new OsgView(this);
- 	innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml");
 	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
 	show();
 #endif
@@ -68,6 +72,13 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
 void SpecificWorker::compute()
 {
+	actualizarInnermodel();
+	const Pose6D tt = this->trueTarget.getPose6D();
+	innerModel->updateTransformValues("target", tt.x, tt.y, tt.z, tt.rx, tt.ry, tt.rz);
+	const Pose6D p = *(this->rightHand);
+	innerModel->updateTransformValues("hand", p.x, p.y, p.z, p.rx, p.ry, p.rz);
+
+
 	QMutexLocker ml(&mutex);
 	switch(this->state)
 	{
@@ -75,13 +86,11 @@ void SpecificWorker::compute()
 			
 			std::cout<<"ESTADO IDLE.."<<std::endl;
 			
-			if (this->currentTarget.getState() == Target::State::WAITING)
+			if (this->trueTarget.getState() == Target::State::WAITING)
 			{
 				this->state = State::TARGET_ARRIVE;
 				//Marcamos la posicion del target en la ventana de simulacion
-				innerModel->updateTransformValues("target", this->currentTarget.getPose6D().x, this->currentTarget.getPose6D().y, this->currentTarget.getPose6D().z,
-												            this->currentTarget.getPose6D().rx, this->currentTarget.getPose6D().ry, this->currentTarget.getPose6D().rz);
-				std::cout<<"Ha llegado un TARGET"<<std::endl;
+				std::cout<<"Ha llegado un TARGET: "<<this->trueTarget.getPose6D().x<<", "<<this->trueTarget.getPose6D().y<<", "<<this->trueTarget.getPose6D().z<<std::endl;
 			}
 		break;
 		//---------------------------------------------------------------------------------------------	
@@ -89,7 +98,7 @@ void SpecificWorker::compute()
 			
 			std::cout<<"ESTADO TARGET_ARRIVE.."<<std::endl;
 			
-			if (this->currentTarget.getWeights().rx==0 and this->currentTarget.getWeights().ry==0 and this->currentTarget.getWeights().rz==0)
+			if (this->trueTarget.getWeights().rx==0 and this->trueTarget.getWeights().ry==0 and this->trueTarget.getWeights().rz==0)
 				this->state = State::INIT_TRASLACION;
 			else
 				this->state = State::INIT_ROTACION;
@@ -99,9 +108,12 @@ void SpecificWorker::compute()
 
 			std::cout<<"ESTADO INIT_TRASLACION.."<<std::endl;
 
-			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.getBodyPart(), this->currentTarget.getPose6D(), this->currentTarget.getWeights(), 250);
-			
-			this->currentTarget.changeState(Target::State::IN_PROCESS);
+			try
+			{
+				bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), this->trueTarget.getPose6D(), this->trueTarget.getWeights(), 250);				
+			}catch (const Ice::Exception &ex){ std::cout<<"EXCEPCION EN SET TARGET POSE 6D --> INIT TRALACION: "<<ex<<std::endl;}
+						
+			this->trueTarget.changeState(Target::State::IN_PROCESS);
 			this->state = State::CORRECT_TRASLACION;
 		break;
 		//---------------------------------------------------------------------------------------------				
@@ -109,62 +121,50 @@ void SpecificWorker::compute()
 			
 			std::cout<<"ESTADO INIT_ROTACION.."<<std::endl;
 
-			bodyinversekinematics_proxy->setTargetPose6D(this->currentTarget.getBodyPart(), this->currentTarget.getPose6D(), this->currentTarget.getWeights(), 250);
+			try
+			{
+				bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), this->trueTarget.getPose6D(), this->trueTarget.getWeights(), 250);
+			}catch (const Ice::Exception &ex){ std::cout<<"EXCEPCION EN SET TARGET POSE 6D --> INIT ROTACION: "<<ex<<std::endl;}
 			
-			this->currentTarget.changeState(Target::State::IN_PROCESS);
+			this->trueTarget.changeState(Target::State::IN_PROCESS);
 			this->state = State::CORRECT_ROTATION;
 		break;
 		//---------------------------------------------------------------------------------------------				
 		case State::CORRECT_TRASLACION:
 			
 			std::cout<<"ESTADO CORRECT_TRASLACION.."<<std::endl;
-			if (bodyinversekinematics_proxy->getState(this->currentTarget.getBodyPart()).finish == true)	
+			if (bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish == true)	
 			{
 				std::cout<<"Todo va bien..."<<std::endl;
-				this->metodo1_traslacion();
-			}
-			else
-				std::cout<<"Esto va de puta pena"<<std::endl;
-			
-			this->state = State::IDLE;
-
-			//if bodyinversekinematics_proxy->getState(target.currect.part)==true ¿aun no ha terminado de procesar?
-			//llamamos metodo2
-			// Cuando termina traslacion:
-			//this->currentTarget = this->nextTarget;
-			//this->currentTarget.changeState(Target::State::WAITING);
-				
+				if(	this->metodo1_traslacion())
+				{
+					if (this->nextTarget.getState() == Target::State::WAITING)
+					{
+						this->trueTarget = this->nextTarget;
+					}
+					this->state = State::IDLE;
+				}
+			}	
 		break;
 		//---------------------------------------------------------------------------------------------	
 		case State::CORRECT_ROTATION:
 			
 			std::cout<<"ESTADO CORRECT_ROTATION.."<<std::endl;
-			if (bodyinversekinematics_proxy->getState(this->currentTarget.getBodyPart()).finish == true)	
+			if (bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish == true)	
 			{
 				std::cout<<"Todo va bien..."<<std::endl;
 				this->metodo2_rotacion();
-			}
-			else
-				std::cout<<"Esto va de puta pena"<<std::endl;
-			
-			this->state = State::IDLE;
-
-
-			//if bodyinversekinematics_proxy->getState(target.currect.part)==true
-				//llamamos metodo2
-			// Cuando termina rotacion:
-			//this->currentTarget = this->nextTarget;
-			//this->currentTarget.changeState(Target::State::WAITING);
 				
+				this->trueTarget = this->nextTarget;
+				this->state = State::IDLE;
+			}
 		break;
-		
+		//---------------------------------------------------------------------------------------------			
 		default:
 			break;
 	}
-	/*
-	innerModel->updateTransformValues("target", 200, 1000, 500,      0, 0, 0);
-	innerModel->updateTransformValues("hand",   240, 1200, 500,      0, 0.2, 0.3);*/
 
+	
 #ifdef USE_QTGUI
 	if (innerViewer)
 	{
@@ -178,25 +178,31 @@ void SpecificWorker::compute()
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 											METODOS PRIVADOS												   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
-void SpecificWorker::metodo1_traslacion()
+bool SpecificWorker::metodo1_traslacion()
 {
+	cout<<"HOLA"<<endl;
+	sleep(1);
 	// Pintamos la marca de la mano donde la camara la esta viendo
-	innerModel->updateTransformValues("hand", this->rightHand.getVisualPose().x, this->rightHand.getVisualPose().y, this->rightHand.getVisualPose().z,
-									          this->rightHand.getVisualPose().rx, this->rightHand.getVisualPose().ry, this->rightHand.getVisualPose().rz);
-	/*
-	Tag tag11;
-	//Create hand as seen by head
-	if( localTags.existId(11,tag11) == true)
-	{
-		addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11.pose);
-	}
-	else
-		qDebug() << "No veo el 11";*/
+	
+	//Vemos el error:
+	std::cout<<"ERROR: "<<this->rightHand->getError().x<<", "<<this->rightHand->getError().y<<", "<<this->rightHand->getError().z<<std::endl;
+	std::cout<<this->rightHand->getError().rx<<", "<<this->rightHand->getError().ry<<", "<<this->rightHand->getError().rz<<std::endl;
+	
+	return true;
 }
 
 
 void SpecificWorker::metodo2_rotacion()
 {
+	cout<<"HOLA"<<endl;
+	sleep(1);
+
+	std::cout<<"ERROR: "<<this->rightHand->getError().x<<", "<<this->rightHand->getError().y<<", "<<this->rightHand->getError().z<<std::endl;
+	std::cout<<this->rightHand->getError().rx<<", "<<this->rightHand->getError().ry<<", "<<this->rightHand->getError().rz<<std::endl;	
+	
+	
+	
+	
 	/*
 	qDebug() << __FUNCTION__;
 // 	if( bikState.finish == false )
@@ -418,12 +424,12 @@ void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &targe
 	if (this->state == State::IDLE)
 	{
 		cout<<"Recibido target"<<endl;
-		if(this->currentTarget.getState()==Target::State::IDLE)	
+		if(this->trueTarget.getState()==Target::State::IDLE)	
 		{
-			this->currentTarget.changeBodyPart(bodyPart);
-			this->currentTarget.changePose6D(target);
-			this->currentTarget.changeWeights(weights);
-			this->currentTarget.changeState(Target::State::WAITING);
+			this->trueTarget.changeBodyPart(bodyPart);
+			this->trueTarget.changePose6D(target);
+			this->trueTarget.changeWeights(weights);
+			this->trueTarget.changeState(Target::State::WAITING);
 		}
 		else
 		{
@@ -463,17 +469,52 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
 		{
 			printf("RIGHT HAND SEEN: (tag id %d)\n", tag.id);
 			QMutexLocker l(&this->mutex);
-			this->rightHand.setVisualPose(tag);
+			this->rightHand->setVisualPose(tag);
 		}
 		else if (tag.id == 24)
 		{
 			printf("LEFT HAND SEEN: (tag id %d)\n", tag.id);
 			QMutexLocker l(&this->mutex);
-			this->leftHand.setVisualPose(tag);
+			this->leftHand->setVisualPose(tag);
 		}
 	}
 }
 
 
+void SpecificWorker::actualizarInnermodel()
+{
+	try
+	{
+		RoboCompJointMotor::MotorStateMap mMap;
+		jointmotor_proxy->getAllMotorState(mMap);
+
+		for (auto j : mMap)
+		{
+			innerModel->updateJointValue(QString::fromStdString(j.first), j.second.pos);
+		}
+	}
+	catch (const Ice::Exception &ex)
+	{
+		cout<<"--> Excepción en actualizar InnerModel: (i)";
+	}
+
+	try
+	{
+		RoboCompOmniRobot::TBaseState bState;
+		omnirobot_proxy->getBaseState(bState);
+		try
+		{
+			innerModel->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+		}
+		catch (const Ice::Exception &ex)
+		{
+			cout<<"--> Exception updating transform values: "<<ex<<endl;
+		}
+	}
+	catch (const Ice::Exception &ex)
+	{
+		cout<<"--> Excepción reading OmniRobot: "<<ex<<endl;
+	}
+}
 
 

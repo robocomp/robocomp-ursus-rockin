@@ -35,6 +35,7 @@
 #ifdef USE_QTGUI
 	#include <osgviewer/osgview.h>
 	#include <innermodel/innermodelviewer.h>
+
 #endif
 
 class SpecificWorker : public GenericWorker
@@ -58,7 +59,7 @@ public:
 	void newAprilTag(const tagsList &tags);
 
 public slots:
-	void compute(); 	
+	void compute();
 
 private:
 	// ESTADOS POR LOS QUE PASA LA MAQUINA DE ESTADOS DEL VISUAL BIK:
@@ -66,9 +67,9 @@ private:
 	// LA VARIABLE QUE GUARDA EL ESTADO DEL VISUAL BIK
 	State state;
 	// VARIABLES QUE GUARDAN LA POSE INTERNA Y VISUAL DE LAS MARCAS DE LAS MANOS DEL ROBOT
-	VisualHand rightHand, leftHand; //CONSULTE LOS FICHEROS src/visualhand.h Y src/visualhand.cpp
+	VisualHand *rightHand, *leftHand; //CONSULTE LOS FICHEROS src/visualhand.h Y src/visualhand.cpp
 	// VARIABLES QUE GUARDAN EL TARGET QUE SE ESTA EJECUTANDO Y EL SIGUIENTE A EJECUTAR.
-	Target currentTarget;
+	Target trueTarget;
 	Target nextTarget;
 	// MUTEX PARA ZONAS CRITICAS
 	QMutex mutex;
@@ -81,9 +82,11 @@ private:
 #endif
 
 	// METODOS PRIVADOS
-	void metodo1_traslacion();
+	bool metodo1_traslacion();
 	void metodo2_rotacion();
 	void addTransformToInnerModel(const QString &name, const QString &parent, const RoboCompBodyInverseKinematics::Pose6D &pose6D);
+	void actualizarInnermodel();
+
 };
 
 #endif

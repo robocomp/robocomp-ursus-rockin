@@ -83,6 +83,8 @@
 
 #include <BodyInverseKinematics.h>
 #include <AprilTags.h>
+#include <JointMotor.h>
+#include <OmniRobot.h>
 
 
 // User includes here
@@ -93,6 +95,8 @@ using namespace RoboCompCommonBehavior;
 
 using namespace RoboCompBodyInverseKinematics;
 using namespace RoboCompAprilTags;
+using namespace RoboCompJointMotor;
+using namespace RoboCompOmniRobot;
 
 
 
@@ -126,6 +130,8 @@ int VisualBIK::run(int argc, char* argv[])
 	int status=EXIT_SUCCESS;
 
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
+	JointMotorPrx jointmotor_proxy;
+	OmniRobotPrx omnirobot_proxy;
 
 	string proxy, tmp;
 	initialize();
@@ -146,6 +152,40 @@ int VisualBIK::run(int argc, char* argv[])
 	}
 	rInfo("BodyInverseKinematicsProxy initialized Ok!");
 	mprx["BodyInverseKinematicsProxy"] = (::IceProxy::Ice::Object*)(&bodyinversekinematics_proxy);//Remote server proxy creation example
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "JointMotorProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy JointMotorProxy\n";
+		}
+		jointmotor_proxy = JointMotorPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("JointMotorProxy initialized Ok!");
+	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);//Remote server proxy creation example
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "OmniRobotProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy OmniRobotProxy\n";
+		}
+		omnirobot_proxy = OmniRobotPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("OmniRobotProxy initialized Ok!");
+	mprx["OmniRobotProxy"] = (::IceProxy::Ice::Object*)(&omnirobot_proxy);//Remote server proxy creation example
 
 IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 

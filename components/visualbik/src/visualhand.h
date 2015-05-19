@@ -16,12 +16,13 @@
 
 #include <sys/time.h>
 
+#include <innermodel/innermodel.h>
 
 class VisualHand : public RoboCompBodyInverseKinematics::Pose6D
 {
 public:
 	//CONSTRUCTORES Y DESTRUCTORES DE LA CLASE:
-	VisualHand();
+	VisualHand(InnerModel *im_);
 	~VisualHand();
 	
 	void setVisualPose(RoboCompAprilTags::tag tag);
@@ -35,4 +36,5 @@ public:
 private:
 	RoboCompBodyInverseKinematics::Pose6D internalPose;
 	timeval *lastUpdate;
+	InnerModel *im;
 };

@@ -209,7 +209,7 @@ class SpecificWorker(GenericWorker):
 		pose6D.x = 0
 		pose6D.y = 700
 		pose6D.z = 500
-		pose6D.rx =  0
+		pose6D.rx =  3.14
 		pose6D.ry =  0
 		pose6D.rz =  0
 		print 'Llamando a BIK con pose6D: ',pose6D
@@ -239,8 +239,8 @@ class SpecificWorker(GenericWorker):
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
 		pose6D.x = 0
-		pose6D.y = 700
-		pose6D.z = 500
+		pose6D.y = 900
+		pose6D.z = 400
 		pose6D.rx =  0
 		pose6D.ry =  0
 		pose6D.rz =  0

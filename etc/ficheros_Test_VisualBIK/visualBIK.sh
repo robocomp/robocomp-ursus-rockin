@@ -18,7 +18,7 @@ sleep 2
 # Levantamos el RCREMOTESERVER
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /robocomp/components/robocomp-ursus/etc'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd robocomp/components/robocomp-ursus/etc'
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'rcremoteserver'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'Rcremoteserver'
 sleep 3
@@ -26,7 +26,7 @@ sleep 3
 # Levantamos el RCMANAGER
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /robocomp/components/robocomp-ursus-rockin/etc'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd robocomp/components/robocomp-ursus-rockin/etc/'
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'rcmanager ursusmanagerSim.xml'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'Rcmanager'
 sleep 3  

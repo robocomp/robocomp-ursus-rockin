@@ -29,6 +29,8 @@ QObject()
 
 {
 	bodyinversekinematics_proxy = (*(BodyInverseKinematicsPrx*)mprx["BodyInverseKinematicsProxy"]);
+	jointmotor_proxy = (*(JointMotorPrx*)mprx["JointMotorProxy"]);
+	omnirobot_proxy = (*(OmniRobotPrx*)mprx["OmniRobotProxy"]);
 
 
 	mutex = new QMutex();

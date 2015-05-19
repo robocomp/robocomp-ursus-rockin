@@ -11,6 +11,8 @@ AprilTags.Endpoints=tcp -p 0
 
 # Proxies for required interfaces
 BodyInverseKinematicsProxy = bodyinversekinematics:tcp -h localhost -p 0
+JointMotorProxy = jointmotor:tcp -h localhost -p 0
+OmniRobotProxy = omnirobot:tcp -h localhost -p 0
 
 
 
