@@ -47,7 +47,7 @@ void SpecificWorker::compute( )
 	// ACTION EXECUTION
 	//
 // 	printf("<ae\n");
-	actionExecution();
+// 	actionExecution();
 // 	printf("ae>\n");
 }
 
@@ -216,6 +216,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::go(float x, float z, float alpha, bool rot, float xRef, float zRef, float threshold)
 {
+	return;
 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
@@ -258,7 +259,19 @@ void SpecificWorker::stop()
 {
 	try
 	{
-		trajectoryrobot2d_proxy->stop();
+		static QTime time;
+		static bool first = true;
+		if (first)
+		{
+			first = false;
+			time = QTime::currentTime();
+			trajectoryrobot2d_proxy->stop();
+		}
+		else if (time.elapsed()>3000)
+		{
+			time = QTime::currentTime();
+			trajectoryrobot2d_proxy->stop();
+		}
 	}
 	catch(const Ice::Exception &ex)
 	{
@@ -343,6 +356,7 @@ void SpecificWorker::updateRobotsCognitiveLocation()
 	// propose the change to the executive
 	if (newLocation != currentLocation and newLocation != -1)
 	{
+		printf("sending modification!\n");
 		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		setIdentifierOfRobotsLocation(newModel, newLocation);
 		AGMModelPrinter::printWorld(newModel);
@@ -665,7 +679,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		float zz = z;
 // 		objectId==7?z+550:z-550
 		float aa = objectId==7?-3.141592:0;
-		go(xx, zz, aa, true, 80, 180, 50);
+		go(xx, zz, aa, true, 80, 150, 50);
 		backp = true;
 	}
 	else if (backp)
@@ -702,30 +716,16 @@ void SpecificWorker::action_GraspObject(bool newAction)
 	const float z = str2float(goalObject->getAttribute("tz"));
 	float alpha = (objectId==7 or objectId==100)?-3.141592:0;
 
-	const float rx = str2float(robot->getAttribute("tx"));
-	const float rz = str2float(robot->getAttribute("tz"));
-	const float ralpha = str2float(robot->getAttribute("tz"));
-
-	// Avoid repeating the same goal and confuse the navigator
-	const float errX = abs(rx-x);
-	const float errZ = abs(rz-z);
-	float errAlpha = abs(ralpha-alpha);
-	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
-	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
-	errAlpha = abs(errAlpha);
-
-	QVec::vec3(rx,rz,ralpha).print("robot");
 	QVec::vec3( x, z, alpha).print("object");
-	printf("errX:%f errZ:%f errAlpha:%f\n", errX, errZ, errAlpha);
 
-
-	if (errX<20 and errZ<20 and errAlpha<0.1)
-	{
-		printf("we got there\n");
-		return;
-	}
-
-	omnirobot_proxy->setSpeedBase(errX, errZ, errAlpha);
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	tp.x = x;
+	tp.z = z;
+	tp.y = 0;
+	tp.rx = 0;
+	tp.ry = alpha;
+	tp.rz = 0;
+	trajectoryrobot2d_proxy->goReferenced(tp, 80, 350, 50);
 }
 
 
@@ -766,7 +766,17 @@ void SpecificWorker::odometryAndLocationIssues()
 			return;
 		}
 // 		printf("a %d\n", __LINE__);
-		AGMMisc::publishNodeUpdate(robot, agmagenttopic);
+                static float bStatex = 0;
+                static float bStatez = 0;
+                static float bStatealpha = 0;
+                if (fabs(bStatex - bState.x)>20 or fabs(bStatez - bState.z)>20 or fabs(bStatealpha - bState.alpha)>0.16)
+                {
+                        AGMMisc::publishNodeUpdate(robot, agmagenttopic);
+                        bStatex = bState.x;
+                        bStatez = bState.z;
+                        bStatealpha = bState.alpha;
+
+                }
 // 		printf("a %d\nv", __LINE__);
 	}
 	catch (Ice::Exception &e)
