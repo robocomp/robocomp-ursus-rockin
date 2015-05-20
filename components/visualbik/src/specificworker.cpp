@@ -27,7 +27,7 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	//Iniciamos con estado igual a IDLE:
-	this->state = State::IDLE;
+	this->stateMachine = State::IDLE;
 	
  	this->innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml");
 
@@ -70,6 +70,21 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 										SLOTS DEL PROGRAMA													   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
+/**
+ * \brief Slot COMPUTE
+ * Bucle ejecutado por el hilo del programa. Se encarga de actualizar el innermodel de la clase y de pintar la
+ * posicion del target que ha llegado y la posición de la marca que esta viendo la camara.
+ * MAQUINA DE ESTADOS:
+ * 	-IDLE: estado en espera. Inicialmente el trueTarget se crea con estado IDLE, indicando que no tiene nada
+ * 		   Pero cuando cambia a WAITING indica que ha llegado un target que espera ser ejecutado. En ese momento 
+ * 		   pasamos a INIT_BIK.
+ * 	-INIT_BIK: independientemente de los pesos del trueTarget, enviamos el target al BIK para que se ejecute.
+ * 			   Luego pasamos al estado WAIT_BIK.
+ * 	-WAIT_BIK: esperamos a que el brazo deje de moverse para empezar con la correccion. Cuando se pare pasamos
+ * 			   al estado CORRECT_ROTATION o CORRECT_TRASLATION dependiendo de los pesos del target.
+ * 	-CORRECT_ROTATION: corrige los errores de la pose del tip del robot, arreglando tanto traslacion como rotacion.
+ * 	-CORRECT_TRASLATION: corrige solo los errores de traslacion del tip.
+ */ 
 void SpecificWorker::compute()
 {
 	this->actualizarInnermodel();
@@ -79,85 +94,82 @@ void SpecificWorker::compute()
 	this->innerModel->updateTransformValues("hand", p.x, p.y, p.z, p.rx, p.ry, p.rz);
 
 	QMutexLocker ml(&this->mutex);
-	switch(this->state)
+	switch(this->stateMachine)
 	{
 		case State::IDLE:
-			
-			std::cout<<"ESTADO IDLE.."<<std::endl;
-			
+			std::cout<<"ESTADO IDLE.\n"<<std::endl;
+			// Estado inicial en espera hasta que trueTarget tenga un valor aceptable y este esperando a
+			// ser ejecutado. Cambiamos a INIT_BIK
 			if (this->trueTarget.getState() == Target::State::WAITING)
 			{
-				this->state = State::TARGET_ARRIVE;
-				//Marcamos la posicion del target en la ventana de simulacion
+				this->stateMachine = State::INIT_BIK;
 				printf("Ha llegado un TARGET: (%f, %f, %f,   %f, %f, %f)",tt.x, tt.y, tt.z, tt.rx, tt.ry, tt.rz);
 			}
 		break;
 		//---------------------------------------------------------------------------------------------	
-		case State::TARGET_ARRIVE:
-			
-			std::cout<<"ESTADO TARGET_ARRIVE.."<<std::endl;
-			
-			if (this->trueTarget.getWeights().rx==0 and this->trueTarget.getWeights().ry==0 and this->trueTarget.getWeights().rz==0)
-				this->state = State::INIT_TRASLACION;
-			else
-				this->state = State::INIT_ROTACION;
-		break;
-		//---------------------------------------------------------------------------------------------				
-		case State::INIT_TRASLACION:
-
-			std::cout<<"ESTADO INIT_TRASLACION.."<<std::endl;
-
+		case State::INIT_BIK:
+			std::cout<<"ESTADO INIT_BIK.\n"<<std::endl;
+			// Nos da igual si el target tiene en cuenta las rotaciones o las traslaciones, lo enviamos al BIK
+			// que ya se encargará de manejar los dos casos.
 			try
 			{
-				bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), this->trueTarget.getPose6D(), this->trueTarget.getWeights(), 250);				
-			}catch (const Ice::Exception &ex){ std::cout<<"EXCEPCION EN SET TARGET POSE 6D --> INIT TRALACION: "<<ex<<std::endl;}
-						
-			this->trueTarget.changeState(Target::State::IN_PROCESS);
-			this->state = State::CORRECT_TRASLACION;
+				this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), this->trueTarget.getPose6D(), this->trueTarget.getWeights(), 250);				
+			}catch (const Ice::Exception &ex)
+			{ 
+				std::cout<<"EXCEPCION EN SET TARGET POSE 6D --> INIT BIK: "<<ex<<std::endl;
+			}
+			
+			this->trueTarget.changeState(Target::State::IN_PROCESS); // El trueTarget pasa a estar siendo ejecutado:
+			this->stateMachine = State::WAIT_BIK; // Esperamos a que el BIK termine.
 		break;
 		//---------------------------------------------------------------------------------------------				
-		case State::INIT_ROTACION:
-			
-			std::cout<<"ESTADO INIT_ROTACION.."<<std::endl;
+		case State::WAIT_BIK:
+			std::cout<<"ESTADO WAIT_BIK.\n"<<std::endl;
+			// Espermos a que el BIK termine de mover el brazo para comenzar con las correcciones.
+			// Dependiendo de si las rotaciones pesan o no tendremos dos metodos de correccion:
+			if(this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish == true)
+			{
+				qDebug()<<"---> El BIK ha terminado.";
 
-			try
-			{
-				bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), this->trueTarget.getPose6D(), this->trueTarget.getWeights(), 250);
-			}catch (const Ice::Exception &ex){ std::cout<<"EXCEPCION EN SET TARGET POSE 6D --> INIT ROTACION: "<<ex<<std::endl;}
-			
-			this->trueTarget.changeState(Target::State::IN_PROCESS);
-			this->state = State::CORRECT_ROTATION;
+				const WeightVector weights = this->trueTarget.getWeights();
+				if(weights.rx==0 and weights.ry==0 and weights.rz==0)
+					this->stateMachine = State::CORRECT_TRASLATION;
+				else
+					this->stateMachine = State::CORRECT_ROTATION;
+			}
 		break;
-		//---------------------------------------------------------------------------------------------				
-		case State::CORRECT_TRASLACION:
+		//---------------------------------------------------------------------------------------------						
+		case State::CORRECT_TRASLATION:
+			std::cout<<"ESTADO CORRECT_TRASLATION.\n"<<std::endl;
 			
-			std::cout<<"ESTADO CORRECT_TRASLACION.."<<std::endl;
-			if (bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish == true)	
+			if(this->correctTraslation()==true)
 			{
-				// Si el brazo se ha parado --> fin del BIK, empezamos a corregir
-				if(	this->correctTraslation())
+				// Si la correccion ha terminado y hay un target esperando
+				if (this->nextTarget.getState() == Target::State::WAITING)
 				{
-					if (this->nextTarget.getState() == Target::State::RESOLVED)
-					{
-						this->trueTarget = this->nextTarget;
-					}
-					this->state = State::IDLE;
+					std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
+					this->trueTarget = this->nextTarget;
+					qDebug()<<this->trueTarget.getState();
 				}
+				this->stateMachine = State::IDLE;
 			}	
 		break;
 		//---------------------------------------------------------------------------------------------	
 		case State::CORRECT_ROTATION:
+			std::cout<<"ESTADO CORRECT_ROTATION.\n"<<std::endl;
 			
-			std::cout<<"ESTADO CORRECT_ROTATION.."<<std::endl;
-			if (bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish == true)	
+			if(this->correctTraslation()==true)
 			{
-				if(this->correctRotation())
+				// Si la correccion ha terminado y el target ha sido resuelto, pasamos al siguiente target.
+				if (this->nextTarget.getState() == Target::State::WAITING)
 				{
-					if (this->nextTarget.getState() == Target::State::RESOLVED)
-						this->trueTarget = this->nextTarget;
-					this->state = State::IDLE;
+					std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
+					this->trueTarget = this->nextTarget;
+					qDebug()<<this->trueTarget.getState();
 				}
+				this->stateMachine = State::IDLE;
 			}
+			
 		break;
 		//---------------------------------------------------------------------------------------------			
 		default:
@@ -166,11 +178,11 @@ void SpecificWorker::compute()
 
 	
 #ifdef USE_QTGUI
-	if (innerViewer)
+	if (this->innerViewer)
 	{
-		innerViewer->update();
-		osgView->autoResize();
-		osgView->frame();
+		this->innerViewer->update();
+		this->osgView->autoResize();
+		this->osgView->frame();
 	}
 #endif
 }
@@ -179,7 +191,15 @@ void SpecificWorker::compute()
  * 											METODOS PRIVADOS												   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
 /**
- * \brief Metodo CORRECT TRASLATION
+ * \brief Metodo CORRECT TRASLATION.
+ * Se encarga de corregir los errores de traslacion del tip del robot (donde esta realmente la mano). Calcula el
+ * error entre la posicion en la que deberia estar (donde el cree que esta, internalPose) y la posicion en la que
+ * verdaderamente esta (la pose que esta viendo la camara RGBD). 
+ * 		- Si el error es miserable no hace nada e indica que el target ha sido resueltoy devolvemos TRUE. 
+ * 		- Si el error es superior al umbral, calcula la pose a la que debe mover la mano y la manda al BIK.
+ *		  Quedamos en espera de que el BIK termine de mover el brazo y devolvemos FALSE.
+ * TODO MIRAR UMBRAL.
+ *@return bool TRUE si el target esta perfecto o FALSE si no lo esta. 
  */ 
 bool SpecificWorker::correctTraslation()
 {
@@ -187,8 +207,8 @@ bool SpecificWorker::correctTraslation()
 	Pose6D error = this->rightHand->getError();
 	error.rx = error.ry = error.rz = 0; //anumalos los errores de rotacion
 	printf("ERROR: (%f, %f, %f,    %f, %f, %f)", error.x, error.y, error.z, error.rx, error.ry, error.rz);
-	// Si el error es miserable no hacemos nada y acabamos la corrección.
-	//Para hacer la norma lo pasamos a vec6
+	
+	// Si el error es miserable no hacemos nada y acabamos la corrección. Para hacer la norma lo pasamos a vec6
 	QVec e = QVec::vec6(error.x, error.y, error.z, error.rx, error.ry, error.rz);
 	if(e.norm2()<0.01)
 	{
@@ -196,13 +216,17 @@ bool SpecificWorker::correctTraslation()
 		return true;
 	}
 	
-	// Corregimos error de traslacion:
+	// Corregimos error de traslacion entre la pose interna (la que cree) y el target:
 	Pose6D corregir;
 	corregir.x = this->rightHand->getInternalPose()+error.x;
 	corregir.y = this->rightHand->getInternalPose()+error.y;
 	corregir.z = this->rightHand->getInternalPose()+error.z;
 	
-	return true;
+	//Llamamos al BIK con el nuevo target corregido y esperamos
+	this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), corregir, this->trueTarget.getWeights(), 250);
+	while(this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish != true);
+	
+	return false;
 }
 
 
@@ -396,6 +420,41 @@ bool SpecificWorker::correctRotation()
 	}	*/
 }
 
+void SpecificWorker::actualizarInnermodel()
+{
+	try
+	{
+		RoboCompJointMotor::MotorStateMap mMap;
+		jointmotor_proxy->getAllMotorState(mMap);
+
+		for (auto j : mMap)
+		{
+			innerModel->updateJointValue(QString::fromStdString(j.first), j.second.pos);
+		}
+	}
+	catch (const Ice::Exception &ex)
+	{
+		cout<<"--> Excepción en actualizar InnerModel: (i)";
+	}
+
+	try
+	{
+		RoboCompOmniRobot::TBaseState bState;
+		omnirobot_proxy->getBaseState(bState);
+		try
+		{
+			innerModel->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+		}
+		catch (const Ice::Exception &ex)
+		{
+			cout<<"--> Exception updating transform values: "<<ex<<endl;
+		}
+	}
+	catch (const Ice::Exception &ex)
+	{
+		cout<<"--> Excepción reading OmniRobot: "<<ex<<endl;
+	}
+}
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 								METODOS DE LA INTERFAZ DEL COMPONENTE										   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
@@ -432,8 +491,8 @@ void SpecificWorker::goHome(const string &part)
 void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &target, const WeightVector &weights, const float radius)
 {
 	QMutexLocker ml(&mutex);
-	if (this->state == State::IDLE)
-	{
+	//if (this->stateMachine == State::IDLE)
+	//{
 		cout<<"Recibido target"<<endl;
 		if(this->trueTarget.getState()==Target::State::IDLE)	
 		{
@@ -449,7 +508,7 @@ void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &targe
 			this->nextTarget.changeWeights(weights);
 			this->nextTarget.changeState(Target::State::WAITING);
 		}
-	}
+	//}
 }
 
 void SpecificWorker::advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist)
@@ -481,6 +540,9 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
 			printf("RIGHT HAND SEEN: (tag id %d)\n", tag.id);
 			QMutexLocker l(&this->mutex);
 			this->rightHand->setVisualPose(tag);
+			//Calculamos la pose interna de la mano en este momento
+			innerModel->transform("root", "grabPositionHandR")
+			this->rightHand->setInternalPose(pose);
 		}
 		else if (tag.id == 24)
 		{
@@ -492,40 +554,6 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
 }
 
 
-void SpecificWorker::actualizarInnermodel()
-{
-	try
-	{
-		RoboCompJointMotor::MotorStateMap mMap;
-		jointmotor_proxy->getAllMotorState(mMap);
 
-		for (auto j : mMap)
-		{
-			innerModel->updateJointValue(QString::fromStdString(j.first), j.second.pos);
-		}
-	}
-	catch (const Ice::Exception &ex)
-	{
-		cout<<"--> Excepción en actualizar InnerModel: (i)";
-	}
-
-	try
-	{
-		RoboCompOmniRobot::TBaseState bState;
-		omnirobot_proxy->getBaseState(bState);
-		try
-		{
-			innerModel->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-		}
-		catch (const Ice::Exception &ex)
-		{
-			cout<<"--> Exception updating transform values: "<<ex<<endl;
-		}
-	}
-	catch (const Ice::Exception &ex)
-	{
-		cout<<"--> Excepción reading OmniRobot: "<<ex<<endl;
-	}
-}
 
 

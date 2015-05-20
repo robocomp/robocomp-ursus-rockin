@@ -63,9 +63,9 @@ public slots:
 
 private:
 	// ESTADOS POR LOS QUE PASA LA MAQUINA DE ESTADOS DEL VISUAL BIK:
-	enum class State {IDLE, TARGET_ARRIVE, INIT_TRASLACION, INIT_ROTACION, CORRECT_TRASLACION, CORRECT_ROTATION};
+	enum class State {IDLE, INIT_BIK, WAIT_BIK, CORRECT_TRASLATION, CORRECT_ROTATION};
 	// LA VARIABLE QUE GUARDA EL ESTADO DEL VISUAL BIK
-	State state;
+	State stateMachine;
 	// VARIABLES QUE GUARDAN LA POSE INTERNA Y VISUAL DE LAS MARCAS DE LAS MANOS DEL ROBOT
 	VisualHand *rightHand, *leftHand; //CONSULTE LOS FICHEROS src/visualhand.h Y src/visualhand.cpp
 	// VARIABLES QUE GUARDAN EL TARGET QUE SE ESTA EJECUTANDO Y EL SIGUIENTE A EJECUTAR.
@@ -84,7 +84,6 @@ private:
 	// METODOS PRIVADOS
 	bool correctTraslation();
 	bool correctRotation();
-	void addTransformToInnerModel(const QString &name, const QString &parent, const RoboCompBodyInverseKinematics::Pose6D &pose6D);
 	void actualizarInnermodel();
 
 };

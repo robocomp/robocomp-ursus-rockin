@@ -1,0 +1,12 @@
+<!-- FICHERO MUNDO PARA HACER PRUEBA DE ROCKIN: PONER OBJETOS DELANTE DEL ROBOT PARA QUE LOS ALCANCE CON LA MANO-->
+<innerModel>
+	<transform id="world">
+		<transform id="floor">
+			<transform id="robot_en_suelo" tx="0" ty="-10" tz="0">	
+				<include path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml"/>
+			</transform>
+			<plane id="ddG" ny="1"  px="-0" py="0" pz="0" size="5000,5000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+		</transform>
+	
+	</transform>
+</innerModel>
