@@ -51,14 +51,16 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-	QMutexLocker locker(mutex);
-
+// 	printf("compute %d\n\n", __LINE__);
 	// STUFF
 	updateInnerModel();
+// 	printf("compute %d\n\n", __LINE__);
 	manageReachedObjects();
 
+// 	printf("compute %d\n\n", __LINE__);
 	// ACTION EXECUTION
 	actionExecution();
+// 	printf("compute %d\n\n", __LINE__);
 
 }
 
@@ -67,11 +69,15 @@ void SpecificWorker::manageReachedObjects()
 {
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
-	float THRESHOLD_object = 400;
+	float THRESHOLD_object = 450;
 	float THRESHOLD_table = 600;
 	
 	bool changed = false;
+	mutex->lock();
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	mutex->unlock();
+	
+// 	innerModel->transform("world", "arm_right_1").print("arm_right_1");
 
 	for (AGMModel::iterator symbol_itr=newModel->begin(); symbol_itr!=newModel->end(); symbol_itr++)
 	{
@@ -82,7 +88,7 @@ void SpecificWorker::manageReachedObjects()
 			if (isRoom(newModel, node)) continue;
 
 			/// Compute distance and new state
-			float d2n = distanceToNode("base_head", newModel, node);
+			float d2n = distanceToNode("arm_right_1", newModel, node);
 			printf("distance: %d(%s)=%f\n", node->identifier, node->symbolType.c_str(), d2n);
 			float THRESHOLD = THRESHOLD_object;
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
@@ -120,7 +126,9 @@ void SpecificWorker::manageReachedObjects()
 		printf("PUBLISH!!!!\n");
 		AGMModelPrinter::printWorld(newModel);
 
+		mutex->lock();
 		sendModificationProposal(newModel, worldModel);
+		mutex->unlock();
 	}
 
 
@@ -235,7 +243,7 @@ float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr 
 	}
 	else
 	{
-		return innerModel->transform("base_head", QVec::vec3(x,y,z), "world").norm2();
+		return innerModel->transform(QString::fromStdString(reference_name), QVec::vec3(x,y,z), "world").norm2();
 	}
 }
 
@@ -481,7 +489,9 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 	try
 	{
 		int32_t tableId = str2int(params["container"].value);
+		mutex->lock();
 		directGazeTowards(worldModel->getSymbol(tableId));
+		mutex->unlock();
 	}
 	catch(...)
 	{
@@ -497,7 +507,9 @@ void SpecificWorker::action_GraspObject(bool first)
 	const QVec offset = QVec::vec3(150, 0, 0);
 	static int32_t state = 0;
 	static QTime time;
+	mutex->lock();
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	mutex->unlock();
 
 	if (first) state = 0;
 	printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
@@ -605,7 +617,9 @@ void SpecificWorker::action_GraspObject(bool first)
 // 			qFatal("got it!!!! :-D");
 			newModel->removeEdge(symbols["object"], symbols["table"], "in");
 			newModel->addEdge(   symbols["object"], symbols["robot"], "in");
+			mutex->lock();
 			sendModificationProposal(newModel, worldModel);
+			mutex->unlock();
 			time = QTime::currentTime();
 			state = 7;
 		}
@@ -722,7 +736,7 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
-	if (backAction != "setobjectreach" or innerModel->transform("root", "grabPositionHandR")(1)<1000)
+	if (backAction != "setobjectreach" or innerModel->transform("world", "grabPositionHandR")(1)<1000)
 	{
 			backAction = action;
 			printf("first time, set arm for manipulation\n");
@@ -746,7 +760,9 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	{
 		try
 		{
+			mutex->lock();
 			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+			mutex->unlock();
 			const float x = str2float(goalObject->getAttribute("tx"));
 			const float y = str2float(goalObject->getAttribute("ty"));
 			const float z = str2float(goalObject->getAttribute("tz"));
@@ -827,6 +843,7 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 
 void SpecificWorker::updateInnerModel()
 {
+	mutex->lock();
 	try
 	{
 		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
@@ -834,7 +851,7 @@ void SpecificWorker::updateInnerModel()
 		const float z     = str2float(robot->getAttribute("tz"));
 		const float alpha = str2float(robot->getAttribute("alpha"));
 		innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
-
+                printf("%f %f __ %f\n", x, z, alpha);
 		MotorStateMap mstateMap;
 		jointmotor_proxy->getAllMotorState(mstateMap);
 		for (auto &joint : mstateMap)
@@ -845,8 +862,8 @@ void SpecificWorker::updateInnerModel()
 	}
 	catch(...)
 	{
-		return;
 	}
+	mutex->unlock();
 }
 
 
