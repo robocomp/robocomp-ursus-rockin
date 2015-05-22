@@ -29,7 +29,7 @@ public:
 	void setInternalPose(RoboCompBodyInverseKinematics::Pose6D pose);
 	double secondsElapsed();
 	
- 	RoboCompBodyInverseKinematics::Pose6D getError();
+ 	RoboCompBodyInverseKinematics::Pose6D getError(Pose6D target);
 	RoboCompBodyInverseKinematics::Pose6D getVisualPose();
 	RoboCompBodyInverseKinematics::Pose6D getInternalPose();
 	

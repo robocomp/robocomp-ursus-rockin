@@ -10,7 +10,7 @@
 VisualHand::VisualHand(InnerModel *im_)
 {
 	this->im = im_;
-	this->x = this->y = this->z = this->rx = this->ry = this->rz = 0;
+	this->x = this->y = this->z = this->rx = this->ry = this->rz = -9999;
 	this->lastUpdate = new timeval;
 }
 
@@ -73,6 +73,9 @@ void VisualHand::setInternalPose(RoboCompBodyInverseKinematics::Pose6D pose)
  */ 
 double VisualHand::secondsElapsed()
 {
+	if(this->x==-9999 and this->y==-9999 and this->z==-9999)
+		return 0;
+
 	static timeval currentTimeval;
 	gettimeofday(&currentTimeval, NULL);
 	
@@ -83,15 +86,17 @@ double VisualHand::secondsElapsed()
 
 /**
  * \brief Metodo GET ERROR
- * Calcula el error que existe entre la pose en la que el robot cree que 
- * tiene la mano colocada y la posicion de la mano que la camara esta viendo
+ * Calcula el error que existe entre la pose de la mano que la camara esta viendo
+ * y la posicion del target al que quiere ir.
  * TODO ARREGLAR EL ERROR ENTRE ANGULOS
+ * @param target target al que quiere ir.
  * @return pose6D error
  */ 
-RoboCompBodyInverseKinematics::Pose6D VisualHand::getError()
+RoboCompBodyInverseKinematics::Pose6D VisualHand::getError(Pose6D target)
 {
 	RoboCompBodyInverseKinematics::Pose6D error;
 	
+	/* ERROR ENTRE MARCA INTERNA Y MARCA VISUAL
 	error.x = this->internalPose.x - this->x;
 	error.y = this->internalPose.y - this->y;
 	error.z = this->internalPose.z - this->z;
@@ -99,6 +104,14 @@ RoboCompBodyInverseKinematics::Pose6D VisualHand::getError()
 	error.rx = this->internalPose.rx - this->rx;
 	error.ry = this->internalPose.ry - this->ry;
 	error.rz = this->internalPose.rz - this->rz;
+	*/
+	error.x = target.x - this->x;
+	error.y = target.y - this->y;
+	error.z = target.z - this->z;
+	
+	error.rx = target.rx - this->rx;
+	error.ry = target.ry - this->ry;
+	error.rz = target.rz - this->rz;
 	
 	return error;
 }

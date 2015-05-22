@@ -142,7 +142,7 @@ class SpecificWorker(GenericWorker):
 
 	@QtCore.Slot()
 	def abajo_R(self):
-		mapa = {'rightShoulder1':-0.1, 'rightShoulder2':-0.1, 'rightShoulder3':0.1 , 'rightElbow':0.1 , 'rightForeArm':0.1, 'rightWrist1':0.0 , 'rightWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.0}
+		mapa = {'rightShoulder1':-0.1, 'rightShoulder2':-0.1, 'rightShoulder3':0.1 , 'rightElbow':0.1 , 'rightForeArm':0.1, 'rightWrist1':0.0 , 'rightWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.85}
 		for motor in mapa:
 			goal = MotorGoalPosition()
 			goal.position = mapa[motor]

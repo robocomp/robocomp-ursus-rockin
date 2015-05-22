@@ -97,13 +97,13 @@ void SpecificWorker::compute()
 	switch(this->stateMachine)
 	{
 		case State::IDLE:
-			std::cout<<"ESTADO IDLE.\n"<<std::endl;
+			//std::cout<<"ESTADO IDLE.\n"<<std::endl;
 			// Estado inicial en espera hasta que trueTarget tenga un valor aceptable y este esperando a
 			// ser ejecutado. Cambiamos a INIT_BIK
 			if (this->trueTarget.getState() == Target::State::WAITING)
 			{
 				this->stateMachine = State::INIT_BIK;
-				printf("Ha llegado un TARGET: (%f, %f, %f,   %f, %f, %f)",tt.x, tt.y, tt.z, tt.rx, tt.ry, tt.rz);
+				printf("Ha llegado un TARGET: (%f, %f, %f,   %f, %f, %f)\n",tt.x, tt.y, tt.z, tt.rx, tt.ry, tt.rz);
 			}
 		break;
 		//---------------------------------------------------------------------------------------------	
@@ -149,7 +149,7 @@ void SpecificWorker::compute()
 				{
 					std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
 					this->trueTarget = this->nextTarget;
-					qDebug()<<this->trueTarget.getState();
+					qDebug() <<"HOLA: "<< (int)this->trueTarget.getState();
 				}
 				this->stateMachine = State::IDLE;
 			}	
@@ -165,7 +165,7 @@ void SpecificWorker::compute()
 				{
 					std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
 					this->trueTarget = this->nextTarget;
-					qDebug()<<this->trueTarget.getState();
+					qDebug()<< (int)this->trueTarget.getState();
 				}
 				this->stateMachine = State::IDLE;
 			}
@@ -176,7 +176,6 @@ void SpecificWorker::compute()
 			break;
 	}
 
-	
 #ifdef USE_QTGUI
 	if (this->innerViewer)
 	{
@@ -199,32 +198,58 @@ void SpecificWorker::compute()
  * 		- Si el error es superior al umbral, calcula la pose a la que debe mover la mano y la manda al BIK.
  *		  Quedamos en espera de que el BIK termine de mover el brazo y devolvemos FALSE.
  * TODO MIRAR UMBRAL.
+ * TODO ¿Que pasa cuando no ve la marca?
  *@return bool TRUE si el target esta perfecto o FALSE si no lo esta. 
  */ 
 bool SpecificWorker::correctTraslation()
 {
+	float umbralElapsedTime = 1.5; //un segundo y medio.
 	float umbralError = 0.01;
-	Pose6D error = this->rightHand->getError();
-	error.rx = error.ry = error.rz = 0; //anumalos los errores de rotacion
-	printf("ERROR: (%f, %f, %f,    %f, %f, %f)", error.x, error.y, error.z, error.rx, error.ry, error.rz);
 	
+	//Si hemos perdido la marca decimos que marca = internalPose.
+	if(this->rightHand->secondsElapsed() > umbralElapsedTime)
+	{
+		this->rightHand->x = this->rightHand->getInternalPose().x;
+		this->rightHand->y = this->rightHand->getInternalPose().y;
+		this->rightHand->z = this->rightHand->getInternalPose().z;
+		
+		this->rightHand->rx = this->rightHand->getInternalPose().rx;
+		this->rightHand->ry = this->rightHand->getInternalPose().ry;
+		this->rightHand->rz = this->rightHand->getInternalPose().rz;
+	}
+	
+	// COMPROBAMOS EL ERROR:
+	Pose6D error = this->rightHand->getError(this->trueTarget.getPose6D());
+	error.rx = error.ry = error.rz = 0; //anumalos los errores de rotacion
+	printf("ERROR: (%f, %f, %f,    %f, %f, %f)\n", error.x, error.y, error.z, error.rx, error.ry, error.rz);
+		
 	// Si el error es miserable no hacemos nada y acabamos la corrección. Para hacer la norma lo pasamos a vec6
-	QVec e = QVec::vec6(error.x, error.y, error.z, error.rx, error.ry, error.rz);
-	if(e.norm2()<0.01)
+	QVec eP = QVec::vec3(error.x, error.y, error.z);
+	QVec eR = QVec::vec3(error.rx, error.ry, error.rz);
+	if(eP.norm2()< umbralError)
 	{
 		this->trueTarget.changeState(Target::State::RESOLVED);
 		return true;
 	}
+
+	eP.operator*(0.5);
 	
 	// Corregimos error de traslacion entre la pose interna (la que cree) y el target:
 	Pose6D corregir;
-	corregir.x = this->rightHand->getInternalPose()+error.x;
-	corregir.y = this->rightHand->getInternalPose()+error.y;
-	corregir.z = this->rightHand->getInternalPose()+error.z;
+	corregir.x = this->rightHand->getInternalPose().x + error.x; 
+	corregir.y = this->rightHand->getInternalPose().y + error.y;
+	corregir.z = this->rightHand->getInternalPose().z + error.z;
 	
 	//Llamamos al BIK con el nuevo target corregido y esperamos
 	this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), corregir, this->trueTarget.getWeights(), 250);
 	while(this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish != true);
+	
+	//Tomo la pose internal del robot
+	QVec pose = this->innerModel->transform("root", "grabPositionHandR");
+	Pose6D internalPose;
+	internalPose.x = pose.x();		internalPose.y = pose.y(); 		internalPose.z = pose.z();
+	internalPose.rx = pose.rx();	internalPose.ry = pose.ry();	internalPose.rz = pose.rz();
+	this->rightHand->setInternalPose(internalPose);
 	
 	return false;
 }
@@ -232,192 +257,7 @@ bool SpecificWorker::correctTraslation()
 
 bool SpecificWorker::correctRotation()
 {
-	Pose6D error = this->rightHand->getError();
-	printf("ERROR: (%f, %f, %f,    %f, %f, %f)", error.x, error.y, error.z, error.rx, error.ry, error.rz);
-	
-	
-	
-	
-	/*
-	qDebug() << __FUNCTION__;
-// 	if( bikState.finish == false )
-// 		return State::GRASP;			//REPLACE BY A POSITION CONTROL
-		
-	//AprilTags Z axis points outwards the mark, X to the right and Y upwards (left hand convention)
-	Tag tag11;
-	//Create hand as seen by head
-	if( localTags.existId(11,tag11) == true)
-	{
-		addTransformInnerModel("mano-segun-head", "rgbd_transform", tag11.pose);
-	}
-	else
-		qDebug() << "No veo el 11";
-// 	else
-// 	{
-// 		addTransformInnerModel("mano-segun-head", "rgbd_transform", innerModel->transform("rgbd_transform", QVec::zeros(6), "grabPositionHandR"));
-// 		qFatal("fary");
-// 	}
-		
-	//innerModel->transform("world", QVec::zeros(6), "mano-segun-head").print("mano-segun-head en world");
-	//drawAxis("mano-segun-head", "rgbd_transform");
-	//drawAxis("mano-segun-head", "world");		
-	//Compute hand as felt in world
-	//innerModel->transform("world",QVec::zeros(6),"ThandMesh2").print("mano through arm in world");
-	//Difference should be zero if correctly calibrated
-	//qDebug() << "Diferencia entre felt-hand y seen-hand (should be zero)" << innerModel->transform("world", QVec::zeros(6), "mano-segun-head")-innerModel->transform("world",QVec::zeros(6),"ThandMesh2");
-	
-	// Ponemos la marca de la mano vista desde la cámara en el sistma de coordenadas de la marca de la mano, si el target se ha alcanzado error debería ser todo cero
-	QVec visualMarcaTInHandMarca = innerModel->transform("ThandMesh2", QVec::zeros(3), "mano-segun-head");
-	//qDebug() << "Marca vista por la camara en el sistema de la marca de la mano (deberia ser cero si no hay errores)" << innerModel->transform("ThandMesh2", QVec::zeros(6), "mano-segun-head");
-	
-	///CALIBRACION
-	
-	// Cogemos la matriz de rotación dek tHandMesh2 (marca en la mano) con respecto al padre para que las nuevas rotaciones y translaciones que 
-	// hemos calculado (visualMarcaInHandMarca) sean añadidas a las ya esistentes en ThandMesh2
-	QMat visualMarcaRInHandMarcaMat = innerModel->getRotationMatrixTo("ThandMesh2","mano-segun-head");
-	QMat handMarcaRInParentMat = innerModel->getRotationMatrixTo("ThandMesh2_pre","ThandMesh2");
-	
-	// Multiplicamos las matrices de rotación para sumar la nueva rotación visualMarcaRInHandMarcaMat a la ya existente con respecto al padre
-	QMat finalHandMarcaRMat = handMarcaRInParentMat * visualMarcaRInHandMarcaMat;
-	//QMat finalHandMarcaRMat = visualMarcaRInHandMarcaMat;
-	QVec finalHandMarcaR = finalHandMarcaRMat.extractAnglesR_min();
-	
-	// Pasamos también las translaciones nuevas (visualMarcaTInHandMarca) al padre y las sumamos con las existentes
-	QVec handMarcaTInParent = innerModel->transform("ThandMesh2_pre", QVec::zeros(3), "ThandMesh2");
-	QVec finalHandMarcaT = handMarcaTInParent + (handMarcaRInParentMat* visualMarcaTInHandMarca);
-	//QVec finalHandMarcaT = visualMarcaTInHandMarca;
-
-	// Esto es sólo para mostar como está el ThandMesh2 respecto al padre antes de las modificaciones
-	//innerModel->transform("ThandMesh2_pre", QVec::zeros(3), "ThandMesh2").print("Posicion inicial del ThandMesh2 respecto al padre");
-
-	/// Creamos el vector final con las rotaciones y translaciones del tHandMesh1 con respecto al padre
-	
-	QVec finalHandMarca(6);
-	finalHandMarca.inject(finalHandMarcaT,0);
-	finalHandMarca.inject(finalHandMarcaR,3);
-	//qDebug() << "Posicion final corregida del ThandMesh2 respecto al padre" << finalHandMarca;
-
-	//Actualizamos el transform de la marca en la mano (ThandMesh1) con las rotaciones y translaciones calculadas
-	innerModel->updateTransformValues("ThandMesh2",finalHandMarca.x(), finalHandMarca.y(), finalHandMarca.z(), finalHandMarca.rx(), finalHandMarca.ry(), finalHandMarca.rz());	
-
-	//Escribimos por pantalla como está el grab en el mundo despues de hacer las modificaciones
-	qDebug() << "Grab en el mundo despues de modificar" << innerModel->transform("world", QVec::zeros(6), "grabPositionHandR");
-	
-	qDebug() << "-----------------------------------------------------------------------------------------------------\n";
-	
-
-	/////////////////////////////////////////////
-	
-	/// MODOFICAR LA POSICION DEL TIP EN EL BIK AQUI
-	
-	/////////////////////////////////////////////
-	
-	Tag tag12;
-	if( localTags.existId(12, tag12) == true)
-	{
-		addTransformInnerModel("marca-segun-head", "rgbd_transform", tag12.pose);
- 		//drawAxis("marca		if()
--segun-head", "world");
- 		//drawAxis("april-mug", "world");
-	}
-	else 
-	{
-		//addTransformInnerModel("marca-segun-head", "rgbd_transform", innerModel->transform("rgbd_transform", QVec::zeros(6), "mesh-mug"));
-		qDebug() << "Didn't see the mark 12";
- 	}
-	
-	//innerModel->transform("world", QVec::zeros(6),"marca-segun-head").print("marca-segun-head en world");
-	//innerModel->transform("world", QVec::zeros(6),"mesh-mug").print("marca en world");
-	//qDebug() << "Differencia entre mano y marca visual" << innerModel->transform("rgbd_transform", QVec::zeros(6),"marca-segun-head") -
-	//															innerModel->transform("rgbd_transform", QVec::zeros(6),"mano-segun-head"); 
-	//qDebug() << "Differencia entre mano y marca visual en el SR de la mano" << innerModel->transform("mano-segun-head", QVec::zeros(6),"marca-segun-head");
-																
-	
-	//Build a CHANGING temporary target position close to the real target. SHOULD CHANGE TO APPROXIMATE INCREMTANLLY THE OBJECT 
-	QVec nearTarget(6,0.f);	
-	//nearTarget[0] = -initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = -M_PI/2;nearTarget[5] = 0;  //OJJOO MARCA X REVES
-	nearTarget[0] = -initialDistance; nearTarget[1] = 0 ;nearTarget[2] = 0 ;nearTarget[3] = M_PI/2;nearTarget[4] = M_PI/2;nearTarget[5] = 0;  //OJJOO MARCA X REVES por lo que giro en Y al reves
-	
-	//Add a node in IM, hanging from marca-segun-head with a pose showing where we want the hand to be (adding a translation to the right)
-	addTransformInnerModel("marca-segun-head-cercana", "marca-segun-head", nearTarget);
-	
-	//Add a node in IM, hanging from marca-segun-head with a pose showing where we to be in its final position (without translation to the right)
-	QVec nearTargetR(6,0.f);
-	nearTargetR[3] = M_PI/2; nearTargetR[4] = M_PI/2;; 
-	addTransformInnerModel("marca-segun-head-orientada", "marca-segun-head", nearTargetR);
-	
-	//Rotatin matrices that must be equal. grabPositionHandR to ThandMesh2  must be equal than marca-segun-head-orientada to mano-segun-head
-	QMat m = innerModel->getRotationMatrixTo("ThandMesh2", "grabPositionHandR");
-	QMat mm = innerModel->getRotationMatrixTo("mano-segun-head", "marca-segun-head-orientada");
-	//m.print("m");
-	//mm.print("mm");
-	
-	//(mm * m.transpose()).print("RESTO6");
-	//(mm * m.transpose()).extractAnglesR_min().print("angles");
-	QVec anglesDiff = (mm*m.transpose()).extractAnglesR_min();
-	
-	
-	//QVec mh = innerModel->transform("mano-segun-head",QVec::zeros(6),"marca-segun-head-cercana"); mh.print("mm");
-	//QVec gp = innerModel->transform("ThandMesh2",QVec::zeros(6),"grabPositionHandR"); gp.print("grabPositionHandR");
-	//innerModel->transform("world",QVec::zeros(6),"marca-segun-head-orientada").print("marca segun head orientada");
-	
-	//innerModel->transform("world",QVec::zeros(6),"mano-segun-head").print("mano-segun head");
-	//innerModel->transform("world",QVec::zeros(6),"ThandMesh2").print("Thandmesh2");
-	
-// 	Rot3D mhm(mh.rx(),mh.ry(), mh.rz());
-// 	mhm.print("mhm");
-// 	Rot3D gpm(gp.rx(),gp.ry(), gp.rz());
-// 	gpm.print("gpm");
-		
-	//drawAxis("marca-segun-head-cercana", "rgbd_transform");
-// 	drawAxis("marca-segun-head-orientada", "rgbd_transform");
-// 	drawAxis("mano-segun-head", "rgbd_transform");
-	
-	//Error between where the hand is and where it should end up
-	float distCenters = innerModel->transform("mano-segun-head","marca-segun-head-orientada").norm2();
-	qDebug() << "initialDistance" << initialDistance << "dist among centers" << distCenters << "angular distance" << anglesDiff;
-
-	if( distCenters > 136 or anglesDiff.norm2() > 0.1) //120 is the distance along Z of grabPositionHandR wrt to hand mark
-	{
-		initialDistance = initialDistance - (distCenters/10.); 
- 		if(initialDistance < 0 ) 
- 			initialDistance = 0;
-	
-				//qDebug() << "Differencia entre mano y marca cercana visual" << innerModel->transform("rgbd_transform", QVec::zeros(6),"marca-segun-head-cercana") -
-				//															innerModel->transform("rgbd_transform", QVec::zeros(6),"mano-segun-head"); 
-				//qDebug() << "Differencia entre mano y marca cercana visual en el SR de la mano" << innerModel->transform("marca-segun-head-cercana", QVec::zeros(6),"mano-segun-head");
-				
-				//drawAxis("marca-segun-head", "rgbd_transform");
-				//drawAxis("marca-segun-head-cercana", "rgbd_transform");
-				//drawAxis("marca-segun-head-cercana", "world");
-			try 
-			{
-				RoboCompBodyInverseKinematics::Pose6D pose;
-				QVec p = innerModel->transform("world",QVec::zeros(6),"marca-segun-head-cercana");
-				pose.x = p.x();pose.y = p.y();pose.z = p.z();
-				pose.rx = p.rx();pose.ry = p.ry();pose.rz = p.rz();
-						
-				RoboCompBodyInverseKinematics::WeightVector weights;
-				weights.x = 1; 		weights.y = 1; 		weights.z = 1;
-				weights.rx = 1; 	weights.ry = 1; 	weights.rz = 1; 
-				//qDebug() << __FUNCTION__ << "Sent to target in RCIS" << p;
-				bodyinversekinematics_proxy->setRobot(0); //Para enviar al RCIS-->0 Para enviar al robot-->1
-				qDebug() << "anteS";
-				bodyinversekinematics_proxy->setTargetPose6D( "RIGHTARM", pose, weights,0);
-				usleep(50000);
-				qDebug() << "despues";
-			} 
-			catch (const Ice::Exception &ex) 
-			{
-				std::cout << ex << endl;
-			} 				
-			return State::GRASP;
-	}	
-	else
-	{
-		graspFingers();
-		return State::DETACH_TO_GET;
-	}	*/
+	return false;
 }
 
 void SpecificWorker::actualizarInnermodel()
@@ -454,6 +294,15 @@ void SpecificWorker::actualizarInnermodel()
 	{
 		cout<<"--> Excepción reading OmniRobot: "<<ex<<endl;
 	}
+	
+	//AÑADIDO: ACTUALIZAMOS LA POSE INTERNA DLE ROBOT
+	//POSE INTERNA:
+	//Calculamos la pose interna de la mano en este momento
+	QVec pose = this->innerModel->transform("root", "grabPositionHandR");
+	Pose6D internalPose;
+	internalPose.x = pose.x();		internalPose.y = pose.y(); 		internalPose.z = pose.z();
+	internalPose.rx = pose.rx();	internalPose.ry = pose.ry();	internalPose.rz = pose.rz();
+	this->rightHand->setInternalPose(internalPose);
 }
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 								METODOS DE LA INTERFAZ DEL COMPONENTE										   *
@@ -539,16 +388,31 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
 		{
 			printf("RIGHT HAND SEEN: (tag id %d)\n", tag.id);
 			QMutexLocker l(&this->mutex);
+			//POSE VISUAL:
 			this->rightHand->setVisualPose(tag);
+			
+			//POSE INTERNA:
 			//Calculamos la pose interna de la mano en este momento
-			innerModel->transform("root", "grabPositionHandR")
-			this->rightHand->setInternalPose(pose);
+			QVec pose = this->innerModel->transform("root", "grabPositionHandR");
+			Pose6D internalPose;
+			internalPose.x = pose.x();		internalPose.y = pose.y(); 		internalPose.z = pose.z();
+			internalPose.rx = pose.rx();	internalPose.ry = pose.ry();	internalPose.rz = pose.rz();
+			this->rightHand->setInternalPose(internalPose);
 		}
 		else if (tag.id == 24)
 		{
 			printf("LEFT HAND SEEN: (tag id %d)\n", tag.id);
 			QMutexLocker l(&this->mutex);
+			//POSE VISUAL:
 			this->leftHand->setVisualPose(tag);
+			
+			//POSE INTERNA:
+			//Calculamos la pose interna de la mano en este momento
+			QVec pose = this->innerModel->transform("root", "grabPositionHandL");
+			Pose6D internalPose;
+			internalPose.x = pose.x();		internalPose.y = pose.y(); 		internalPose.z = pose.z();
+			internalPose.rx = pose.rx();	internalPose.ry = pose.ry();	internalPose.rz = pose.rz();
+			this->leftHand->setInternalPose(internalPose);
 		}
 	}
 }
