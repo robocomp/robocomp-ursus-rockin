@@ -1,6 +1,15 @@
 <!-- FICHERO MUNDO PARA HACER PRUEBA DE ROCKIN: PONER OBJETOS DELANTE DEL ROBOT PARA QUE LOS ALCANCE CON LA MANO-->
 <innerModel>
 	<transform id="world">
+		
+	<transform id="target">
+		<axes id="targetAxes" length="120" width="10" />
+	</transform>
+
+	<transform id="hand">
+		<axes id="handAxes" length="80" width="20" />
+	</transform>
+	
 		<transform id="floor">
 			<transform id="robot_en_suelo" tx="0" ty="-10" tz="0">	
 				<include path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml"/>

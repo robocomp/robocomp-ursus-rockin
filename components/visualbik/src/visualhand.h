@@ -22,10 +22,10 @@ class VisualHand : public RoboCompBodyInverseKinematics::Pose6D
 {
 public:
 	//CONSTRUCTORES Y DESTRUCTORES DE LA CLASE:
-	VisualHand(InnerModel *im_);
+	VisualHand(InnerModel *im_, QString tip_);
 	~VisualHand();
 	
-	void setVisualPose(RoboCompAprilTags::tag tag);
+	void setVisualPose_APRIL(RoboCompAprilTags::tag tag);
 	void setInternalPose(RoboCompBodyInverseKinematics::Pose6D pose);
 	double secondsElapsed();
 	
@@ -37,4 +37,5 @@ private:
 	RoboCompBodyInverseKinematics::Pose6D internalPose;
 	timeval *lastUpdate;
 	InnerModel *im;
+	QString tip;
 };

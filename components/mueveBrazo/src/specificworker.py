@@ -55,6 +55,16 @@ class SpecificWorker(GenericWorker):
 		self.Period = 2000
 		self.timer.start(self.Period)
 		
+		
+		self.ui.txsb.setValue(0)
+		self.ui.tysb.setValue(700)
+		self.ui.tzsb.setValue(300)
+		self.ui.rxsb.setValue(0)
+		self.ui.rysb.setValue(0)
+		self.ui.rzsb.setValue(3.1415)
+
+		
+		
 		# BRAZO IZQUIERDO
 		self.ui.botonArriba_L.clicked.connect(self.arriba_L)
 		self.ui.botonAbajo_L.clicked.connect(self.abajo_L)
@@ -206,13 +216,14 @@ class SpecificWorker(GenericWorker):
 		
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
-		pose6D.x = 0
-		pose6D.y = 700
-		pose6D.z = 500
-		pose6D.rx =  3.14
-		pose6D.ry =  0
-		pose6D.rz =  0
+		pose6D.x  = float(self.ui.txsb.value())
+		pose6D.y  = float(self.ui.tysb.value())
+		pose6D.z  = float(self.ui.tzsb.value())
+		pose6D.rx = float(self.ui.rxsb.value())
+		pose6D.ry = float(self.ui.rysb.value())
+		pose6D.rz = float(self.ui.rzsb.value())
 		print 'Llamando a BIK con pose6D: ',pose6D
+		self.ui.rotacion.setText('('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+') ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 		
 		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
 		weights.x = 1
@@ -238,13 +249,14 @@ class SpecificWorker(GenericWorker):
 		
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
-		pose6D.x = 0
-		pose6D.y = 900
-		pose6D.z = 400
-		pose6D.rx =  0
-		pose6D.ry =  0
-		pose6D.rz =  0
+		pose6D.x  = float(self.ui.txsb.value())
+		pose6D.y  = float(self.ui.tysb.value())
+		pose6D.z  = float(self.ui.tzsb.value())
+		pose6D.rx = float(self.ui.rxsb.value())
+		pose6D.ry = float(self.ui.rysb.value())
+		pose6D.rz = float(self.ui.rzsb.value())
 		print 'Llamando a BIK con pose6D: ',pose6D
+		self.ui.rotacion.setText('('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+') ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 		
 		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
 		weights.x = 1

@@ -25,7 +25,7 @@ public:
 	//Atributos, estructuras y enumerados publicos:
 	enum class State {IDLE, WAITING, IN_PROCESS, RESOLVED};
 	
-private:
+ private:
 	//Atributos privados:
 	State state;
 	string bodyPart;

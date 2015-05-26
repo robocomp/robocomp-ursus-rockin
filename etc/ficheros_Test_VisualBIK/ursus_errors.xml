@@ -1,12 +1,7 @@
 ﻿<innerModel>
 <!-- 	<axes id="sl3" /> -->
 
-	<transform id="target">
-		<axes id="targetAxes" length="120" width="10" />
-	</transform>
-	<transform id="hand">
-		<axes id="handAxes" length="80" width="20" />
-	</transform>
+
 
 	<omnirobot id="robot" port="12238" >
 		<transform id="laserPose" tx="0" ty="240" tz="100" rx="-0.4" >
@@ -94,6 +89,7 @@
 						<!-- Right Arm CON LÍMITES -->
 						<transform id="arm_right_1" tx="172" tz="990" ry="1.5707963267948966" rz="1.570796326794896">
 							<!--Gira en Z -->
+							<transform id="arm_right_1_error" rz="0.1" > 
 							<mesh id="arm_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo1.ive" rz="0" tz="-55" ty="-30" scale="1000" collide="1" />
 							<joint id="rightShoulder1" port="10068" axis="z" min="-3.10" max="0.40" home="-0.1">
 								<mesh id="shoulder_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo2.ive" rz="0" tz="0" scale="1000" collide="1" />
@@ -115,7 +111,7 @@
 																<mesh id="wrist_right_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="2"  collide="1"  />
 
 
-																<transform id="arm_right_6" tz="58" >
+																<transform id="arm_right_6" tz="88" rz="0.1" >
 																	<!-- 																Gira en x -->
 																	<plane id="motorWrist1Mesh" py="0" pz="-20" ny="1" size="40,66,-40" repeat="1" texture="#152115" collide="1"/>
 																	<joint id="rightWrist1" port="10068" min="-1.570796326794" max="1.5707963267946" axis="x" home="0" >
@@ -178,10 +174,12 @@
 																								<transform id="ThandMesh2_4" rx="1.5707963267948966">
 
 																									<!--  Colocamos la marca -->
-																									<transform id="handMesh2_t" ty="0" tz="0" rx="0" ry="0,0" rz="0">
+																									<transform id="grabPositionHandR" ty="0" tz="0" rx="0" ry="0,0" rz="0">
+																										
+																										<axes id="handAjhxes2" length="800" width="1" />
+																										
 																										<plane id="handMeshBase" ny="1" size="85,-85,1" repeat="1" texture="#ffffff" />
 																										<plane id="handMesh2" ny="1" size="70,-70,2" repeat="1" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/april/tag36_11_00025.png" collide="1"/>
-																										<transform id="grabPositionHandR"  tz="95"  />
 																									</transform> <!-- handMesh2_t-->
 																								</transform> <!--ThandMesh2_4 -->
 																							</transform> <!--ThandMesh2_3 -->
@@ -202,6 +200,7 @@
 									</joint>
 								</transform>
 							</joint>
+							</transform>
 						</transform>
 						<!-- Right Arm End -->
 
