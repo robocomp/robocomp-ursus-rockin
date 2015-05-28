@@ -13,29 +13,35 @@
 
 #include <BodyInverseKinematics.h>
 #include <AprilTags.h>
-
 #include <sys/time.h>
 
 #include <innermodel/innermodel.h>
 
-class VisualHand : public RoboCompBodyInverseKinematics::Pose6D
+class VisualHand
 {
 public:
 	//CONSTRUCTORES Y DESTRUCTORES DE LA CLASE:
 	VisualHand(InnerModel *im_, QString tip_);
 	~VisualHand();
 	
-	void setVisualPose_APRIL(RoboCompAprilTags::tag tag);
+	void setVisualPose(RoboCompAprilTags::tag tag);
+	void setVisualPose(const RoboCompBodyInverseKinematics::Pose6D &pose);
 	void setInternalPose(RoboCompBodyInverseKinematics::Pose6D pose);
+	void setInternalPoseFromInnerModel(QString nodeName);
+
 	double secondsElapsed();
 	
- 	RoboCompBodyInverseKinematics::Pose6D getError(Pose6D target);
+ 	QVec getError(RoboCompBodyInverseKinematics::Pose6D target);
+ 	RoboCompBodyInverseKinematics::Pose6D getInternalPose();
+ 	QVec getErrorInverse(RoboCompBodyInverseKinematics::Pose6D target);
 	RoboCompBodyInverseKinematics::Pose6D getVisualPose();
-	RoboCompBodyInverseKinematics::Pose6D getInternalPose();
 	
 private:
 	RoboCompBodyInverseKinematics::Pose6D internalPose;
+	RoboCompBodyInverseKinematics::Pose6D visualPose;
 	timeval *lastUpdate;
 	InnerModel *im;
 	QString tip;
+	
+	InnerModelTransform *nodeMarca, *nodeMarca2;
 };

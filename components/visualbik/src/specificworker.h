@@ -70,7 +70,7 @@ private:
 	VisualHand *rightHand, *leftHand; //CONSULTE LOS FICHEROS src/visualhand.h Y src/visualhand.cpp
 	// VARIABLES QUE GUARDAN EL TARGET QUE SE ESTA EJECUTANDO Y EL SIGUIENTE A EJECUTAR.
 	Target trueTarget;
-	Target corregir;
+	Target correctedTarget;
 	Target nextTarget;
 	// MUTEX PARA ZONAS CRITICAS
 	QMutex mutex;

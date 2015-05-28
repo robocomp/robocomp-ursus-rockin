@@ -211,7 +211,7 @@
 							<transform id="niapa_arm_left_1" rz="0" >
 								<mesh id="arm_left_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo1.ive" rz="3.14159265359" tz="-55" tx="0" ty="30" scale="1000"  collide="1" />
 								<!-- Gira en Z -->
-								<joint id="leftShoulder1" port="10068" min="-0.54" max="3.14" axis="z" home="0.1">
+								<joint id="leftShoulder1" port="10068" min="-0.54" max="3.14" axis="z" home="0.01">
 									<mesh id="shoulder_left_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo2.ive" rz="0" tz="0" scale="1000" collide="1"   />
 									<transform id="arm_left_2" tz="41" rx="-1.5707963267948966">
 										<!-- 								Gira en X -->

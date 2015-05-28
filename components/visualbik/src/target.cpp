@@ -10,7 +10,7 @@ Target::Target()
 {
 	this->state = State::IDLE;
 	this->bodyPart = "";
-	this->pose6D.x = this->pose6D.y = this->pose6D.z = this->pose6D.rx = this->pose6D.ry = this->pose6D.rz = 0;
+	this->pose.x = this->pose.y = this->pose.z = this->pose.rx = this->pose.ry = this->pose.rz = 0;
 	this->weights.x = this->weights.y = this->weights.z = this->weights.rx =this->weights.ry = this->weights.rz = 0;
 }
 
@@ -18,14 +18,14 @@ Target::Target()
  * \brief Constructor parametrizado
  * Inicializa las estructuras que componen sus atributos de clase. 
  * @param bodyPart_ nombre de la parte del robot a la que pertenece el target.
- * @param pose6D_ pose de tres traslaciones y tres rotaciones que define las coordenadas y orientacion del target [X, Y, Z, RX, RY, RZ]
+ * @param pose_ pose de tres traslaciones y tres rotaciones que define las coordenadas y orientacion del target [X, Y, Z, RX, RY, RZ]
  * @param weights_ pesos de las traslaciones y las rotaciones
  */ 
-Target::Target(const string bodyPart_, const RoboCompBodyInverseKinematics::Pose6D &pose6D_, const RoboCompBodyInverseKinematics::WeightVector &weights_)
+Target::Target(const string bodyPart_, const RoboCompBodyInverseKinematics::Pose6D &pose_, const RoboCompBodyInverseKinematics::WeightVector &weights_)
 {
 	this->state = State::IDLE;
 	this->bodyPart = bodyPart_;
-	this->pose6D = pose6D_;
+	this->pose = pose_;
 	this->weights = weights_;
 }
 
@@ -39,6 +39,16 @@ Target::~Target()
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 													METODOS PUT												   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
+void Target::setPose(QVec correctTargetV)
+{
+	this->pose.x = correctTargetV.x();
+	this->pose.y = correctTargetV.y();
+	this->pose.z = correctTargetV.z();
+	this->pose.rx = correctTargetV.rx();
+	this->pose.ry = correctTargetV.ry();
+	this->pose.rz = correctTargetV.rz();
+}
+
 /**
  * \brief Metodo CHANGE STATE:
  * Cambia el valor del atributo STATE por el valor del parametro de entrada.
@@ -56,9 +66,9 @@ void Target::changeBodyPart(string bodyPart_)		{	this->bodyPart = bodyPart_; }
 /**
  * \brief Metodo CHANGE POSE 6D:
  * Cambia el valor del atributo POSE 6D por el valor del parametro de entrada.
- * @param pose6D_ nuevas coordenadas y orientación del target.
+ * @param pose_ nuevas coordenadas y orientación del target.
  */ 
-void Target::changePose6D(Pose6D pose6D_)			{	this->pose6D = pose6D_;	}
+void Target::changePose6D(Pose6D pose_)			{	this->pose = pose_;	}
 
 /**
  * \brief Metodo CHANGE WEIGHTS:
@@ -89,7 +99,7 @@ string Target::getBodyPart()						{ return this->bodyPart; }
  * Devuelve las coordenadas de traslacion y orientacion del target.
  * @return Pose6D.
  */
-Pose6D Target::getPose6D()							{ return this->pose6D;}
+Pose6D Target::getPose6D()							{ return this->pose;}
 
 /**
  * \brief Metodo GET WEIGHTS
