@@ -1,22 +1,13 @@
-CommonBehavior.Endpoints=tcp -p 1
+CommonBehavior.Endpoints=tcp -p 10910
+AprilTagsTopic=tcp -p 14383
+BodyInverseKinematics.Endpoints=tcp -p 10909
 
 
-# Endpoints for implemented interfaces
-BodyInverseKinematics.Endpoints=tcp -p 0
+BodyInverseKinematicsProxy = bodyinversekinematics:tcp -h localhost -p 10220
+JointMotorProxy = jointmotor:tcp -h localhost -p 20000
+OmniRobotProxy = omnirobot:tcp -h localhost -p 12238
 
 
-# Endpoints for subscriptions
-AprilTags.Endpoints=tcp -p 0
-
-
-# Proxies for required interfaces
-BodyInverseKinematicsProxy = bodyinversekinematics:tcp -h localhost -p 0
-JointMotorProxy = jointmotor:tcp -h localhost -p 0
-OmniRobotProxy = omnirobot:tcp -h localhost -p 0
-
-
-
-# This property is used by the clients to connect to IceStorm.
 TopicManager.Proxy=IceStorm/TopicManager:default -p 9999
 
 

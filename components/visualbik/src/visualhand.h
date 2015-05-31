@@ -9,7 +9,7 @@
  * 		Los propios de Pose6D, que hereda.(Consulte BodyInverseKinematics.ice)
  * 		internalPose: una pose6D para almacenar la posicion en la que el robot cree tener la mano.
  * 		lastUpdate: ultimo tiempo en el que actualizo sus valores de pose visual
- *########################################################*/ 
+ *########################################################*/
 
 #include <BodyInverseKinematics.h>
 #include <AprilTags.h>
@@ -23,25 +23,22 @@ public:
 	//CONSTRUCTORES Y DESTRUCTORES DE LA CLASE:
 	VisualHand(InnerModel *im_, QString tip_);
 	~VisualHand();
-	
+
 	void setVisualPose(RoboCompAprilTags::tag tag);
 	void setVisualPose(const RoboCompBodyInverseKinematics::Pose6D &pose);
-	void setInternalPose(RoboCompBodyInverseKinematics::Pose6D pose);
-	void setInternalPoseFromInnerModel(QString nodeName);
 
 	double secondsElapsed();
-	
+
  	QVec getError(RoboCompBodyInverseKinematics::Pose6D target);
  	RoboCompBodyInverseKinematics::Pose6D getInternalPose();
  	QVec getErrorInverse(RoboCompBodyInverseKinematics::Pose6D target);
 	RoboCompBodyInverseKinematics::Pose6D getVisualPose();
-	
+
 private:
-	RoboCompBodyInverseKinematics::Pose6D internalPose;
 	RoboCompBodyInverseKinematics::Pose6D visualPose;
 	timeval *lastUpdate;
 	InnerModel *im;
 	QString tip;
-	
+
 	InnerModelTransform *nodeMarca, *nodeMarca2;
 };
