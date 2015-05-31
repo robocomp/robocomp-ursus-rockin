@@ -46,11 +46,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 		InnerModelTransform *node = this->innerModel->newTransform("target", "static", nodeParent, 0, 0, 0,        0, 0., 0,      0.);
 		nodeParent->addChild(node);
 	}
-	if( this->innerModel->getNode("internal") == NULL)
-	{
-		InnerModelTransform *node = this->innerModel->newTransform("internal", "static", nodeParent, 0, 0, 0,        0, 0., 0,      0.);
-		nodeParent->addChild(node);
-	}
 
 }
 
@@ -179,6 +174,7 @@ void SpecificWorker::compute()
 		break;
 		//---------------------------------------------------------------------------------------------
 		case State::CORRECT_TRASLATION:
+			if (this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish != true) return;
 			if(this->correctTraslation()==true)
 			{
 				// Si la correccion ha terminado y hay un target esperando
@@ -195,6 +191,7 @@ void SpecificWorker::compute()
 		break;
 		//---------------------------------------------------------------------------------------------
 		case State::CORRECT_ROTATION:
+			if (this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish != true) return;
 			if (this->correctRotation()==true)
 			{
 				// Si la correccion ha terminado y hay un target esperando
@@ -241,57 +238,6 @@ void SpecificWorker::compute()
  */
 bool SpecificWorker::correctTraslation()
 {
-	printf("---------------------\n");
-	printf("---------------------\n");
-	float umbralElapsedTime = 0.5; //un segundo y medio.
-	float umbralError = 5;
-
-	//Si hemos perdido la marca decimos que marca = internalPose.
-	if (this->rightHand->secondsElapsed() > umbralElapsedTime)
-	{
-		std::cout<<"La camara no ve la marca..."<<std::endl;
-		this->rightHand->setVisualPose(this->rightHand->getInternalPose());
-	}
-
-	Pose6D inte = this->rightHand->getInternalPose();
-	this->innerModel->updateTransformValues("internal", inte.x, inte.y, inte.z, 0,0,0);
-	this->innerModel->transform6D("root", "internal").print("im internal");
-	this->innerModel->transform6D("root", "target").print("im target");
-	this->innerModel->transform6D("root", "visual_hand").print("im visual");
-
-	// COMPROBAMOS EL ERROR:
-	QVec errorInv = this->rightHand->getErrorInverse(this->trueTarget.getPose6D());
-// 	errorInv.print("errorInv");
-
-	// Si el error es miserable no hacemos nada y acabamos la corrección. Para hacer la norma lo pasamos a vec6
-	if (QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2() < umbralError and QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2()<0.3)
-	{
-		this->trueTarget.changeState(Target::State::RESOLVED);
-		printf("done!\n");
-		return true;
-	}
-
-	QVec errorInvP = QVec::vec3(errorInv(0), errorInv(1), errorInv(2));
-	QVec errorEnAbsoluto = this->innerModel->getRotationMatrixTo("root", "target")*errorInvP;
-	errorEnAbsoluto.print("errorInv en absoluto");
-
-
-
-
-	QVec poseCorregidaFinal = this->innerModel->transform("root", "internal")+errorEnAbsoluto;
-	correctedTarget.setPose(poseCorregidaFinal);
-	correctedTarget.setRX(trueTarget.getPose6D().rx);
-	correctedTarget.setRY(trueTarget.getPose6D().ry);
-	correctedTarget.setRZ(trueTarget.getPose6D().rz);
-
-
-
-	//Llamamos al BIK con el nuevo target corregido y esperamos
-	printf ("w %f %f %f [ %f %f %f ]", trueTarget.getWeights().x, trueTarget.getWeights().y, trueTarget.getWeights().z, trueTarget.getWeights().rx, trueTarget.getWeights().ry, trueTarget.getWeights().rz);
-	this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), correctedTarget.getPose6D(), this->trueTarget.getWeights(), 50);
-
-	while(this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish != true);
-
 	return false;
 }
 
@@ -306,16 +252,14 @@ bool SpecificWorker::correctRotation()
 	float umbralElapsedTime = 0.5; //un segundo y medio.
 	float umbralError = 5;
 
-	//Si hemos perdido la marca decimos que marca = internalPose.
+	// If the hand's tag is lost we assume that the internal possition (according to the direct kinematics) is correct
 	if (this->rightHand->secondsElapsed() > umbralElapsedTime)
 	{
 		std::cout<<"La camara no ve la marca..."<<std::endl;
 		this->rightHand->setVisualPose(this->rightHand->getInternalPose());
 	}
 
-	Pose6D inte = this->rightHand->getInternalPose();
-	this->innerModel->updateTransformValues("internal", inte.x, inte.y, inte.z, 0,0,0);
-	this->innerModel->transform6D("root", "internal").print("im internal");
+	this->innerModel->transform6D("root", this->rightHand->getTip()).print("im internal");
 	this->innerModel->transform6D("root", "target").print("im target");
 	this->innerModel->transform6D("root", "visual_hand").print("im visual");
 
@@ -324,7 +268,7 @@ bool SpecificWorker::correctRotation()
 // 	errorInv.print("errorInv");
 
 	// Si el error es miserable no hacemos nada y acabamos la corrección. Para hacer la norma lo pasamos a vec6
-	if (QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2() < umbralError and QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2()<0.3)
+	if (QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2() < umbralError and QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2()<0.07)
 	{
 		this->trueTarget.changeState(Target::State::RESOLVED);
 		printf("done!\n");
@@ -333,31 +277,39 @@ bool SpecificWorker::correctRotation()
 
 
 	QVec errorInvP = QVec::vec3(errorInv(0), errorInv(1), errorInv(2));
-	QVec errorEnAbsoluto = this->innerModel->getRotationMatrixTo("root", "target")*errorInvP;
-	errorEnAbsoluto.print("errorInv en absoluto");
+	QVec errorInvR = QVec::vec3(errorInv(2), errorInv(3), errorInv(4));
+	QVec errorInvPEnAbsoluto = this->innerModel->getRotationMatrixTo("root", this->rightHand->getTip())*errorInvP;
+	errorInvPEnAbsoluto.print("errorInv en absoluto");
 
 
 
 
-	QVec poseCorregidaFinal = this->innerModel->transform("root", "internal")+errorEnAbsoluto;
+	QVec poseCorregidaFinal = this->innerModel->transform("root", this->rightHand->getTip()) + errorInvPEnAbsoluto;
 	correctedTarget.setPose(poseCorregidaFinal);
+
+
+	QVec rotCorregidaFinal = (Rot3D(errorInvR(0),errorInvR(1),errorInvR(2)) * this->innerModel->getRotationMatrixTo(this->rightHand->getTip(), "root")).extractAnglesR_min();
+
 	correctedTarget.setRX(trueTarget.getPose6D().rx);
 	correctedTarget.setRY(trueTarget.getPose6D().ry);
 	correctedTarget.setRZ(trueTarget.getPose6D().rz);
 
 
-	printf("pose corregida objetivo %f %f %f\n", correctedTarget.getPose6D().x, correctedTarget.getPose6D().y, correctedTarget.getPose6D().z);
+	printf("pose corregida objetivo\n");
+	printf("                        %f %f %f\n", correctedTarget.getPose6D().x,  correctedTarget.getPose6D().y,  correctedTarget.getPose6D().z);
+	printf("                        %f %f %f\n", correctedTarget.getPose6D().rx, correctedTarget.getPose6D().ry, correctedTarget.getPose6D().rz);
+	rotCorregidaFinal.print("rot corregida");
 
 	//Llamamos al BIK con el nuevo target corregido y esperamos
-	printf ("w %f %f %f [ %f %f %f ]", trueTarget.getWeights().x, trueTarget.getWeights().y, trueTarget.getWeights().z, trueTarget.getWeights().rx, trueTarget.getWeights().ry, trueTarget.getWeights().rz);
+	printf ("w %f %f %f [ %f %f %f ]\n", trueTarget.getWeights().x, trueTarget.getWeights().y, trueTarget.getWeights().z, trueTarget.getWeights().rx, trueTarget.getWeights().ry, trueTarget.getWeights().rz);
 
 	float radius = errorInvP.norm2()>200?100:errorInvP.norm2()/2;
 	this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), correctedTarget.getPose6D(), this->trueTarget.getWeights(), radius);
 
-	while(this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish != true);
-
 	return false;
 }
+
+
 
 /**
  * \brief Metodo ACTUALIZAR INNERMODEL
@@ -427,24 +379,21 @@ void SpecificWorker::goHome(const string &part)
 void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &target, const WeightVector &weights, const float radius)
 {
 	QMutexLocker ml(&mutex);
-	//if (this->stateMachine == State::IDLE)
-	//{
-		cout<<"Recibido target"<<endl;
-		if(this->trueTarget.getState()==Target::State::IDLE)
-		{
-			this->trueTarget.changeBodyPart(bodyPart);
-			this->trueTarget.changePose6D(target);
-			this->trueTarget.changeWeights(weights);
-			this->trueTarget.changeState(Target::State::WAITING);
-		}
-		else
-		{
-			this->nextTarget.changeBodyPart(bodyPart);
-			this->nextTarget.changePose6D(target);
-			this->nextTarget.changeWeights(weights);
-			this->nextTarget.changeState(Target::State::WAITING);
-		}
-	//}
+	cout<<"Recibido target"<<endl;
+	if(this->trueTarget.getState()==Target::State::IDLE)
+	{
+		this->trueTarget.changeBodyPart(bodyPart);
+		this->trueTarget.changePose6D(target);
+		this->trueTarget.changeWeights(weights);
+		this->trueTarget.changeState(Target::State::WAITING);
+	}
+	else
+	{
+		this->nextTarget.changeBodyPart(bodyPart);
+		this->nextTarget.changePose6D(target);
+		this->nextTarget.changeWeights(weights);
+		this->nextTarget.changeState(Target::State::WAITING);
+	}
 }
 
 void SpecificWorker::advanceAlongAxis(const string &bodyPart, const Axis &ax, const float dist)
