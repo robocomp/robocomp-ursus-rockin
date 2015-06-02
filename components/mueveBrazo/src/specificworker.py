@@ -152,7 +152,7 @@ class SpecificWorker(GenericWorker):
 
 	@QtCore.Slot()
 	def abajo_R(self):
-		mapa = {'rightShoulder1':-0.1, 'rightShoulder2':-0.1, 'rightShoulder3':0.1 , 'rightElbow':0.1 , 'rightForeArm':0.1, 'rightWrist1':0.0 , 'rightWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.85}
+		mapa = {'rightShoulder1':-0.1, 'rightShoulder2':-0.1, 'rightShoulder3':0.1 , 'rightElbow':0.1 , 'rightForeArm':0.1, 'rightWrist1':0.0 , 'rightWrist2':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.85, 'leftShoulder1':0.1, 'leftShoulder2':0.1, 'leftShoulder3':-0.1 , 'leftElbow':-0.1 , 'leftForeArm':0.0 , 'leftWrist1':0.0 , 'leftWrist2':0.0}
 		for motor in mapa:
 			goal = MotorGoalPosition()
 			goal.position = mapa[motor]
@@ -212,7 +212,8 @@ class SpecificWorker(GenericWorker):
 		# LLamar al BIK y pasarle el vector POSE:
 		print 'Preparando vector pose 6D'
 
-		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		#part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		part = "LEFTARM"
 
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
@@ -245,7 +246,8 @@ class SpecificWorker(GenericWorker):
 			# LLamar al BIK y pasarle el vector POSE:
 		print 'Preparando vector pose 6D'
 
-		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		#part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		part = "LEFTARM"
 
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
