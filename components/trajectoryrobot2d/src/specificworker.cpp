@@ -183,8 +183,10 @@ void SpecificWorker::compute( )
 	cont++;
 
 #ifdef USE_QTGUI
+	
 	if (innerViewer)
 	{
+		QMutexLocker ml(&mutex_inner);
 		innerViewer->update();
 		osgView->autoResize();
 		osgView->frame();
@@ -201,7 +203,7 @@ void SpecificWorker::compute( )
  *
  * @return bool
  */
-bool SpecificWorker::stopCommand(CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state)
+bool SpecificWorker::stopCommand(CurrentTarget& target, WayPoints& myRoad, TrajectoryState& state)
 {
 	// 	qDebug() << __FUNCTION__ ;
 	controller->stopTheRobot(omnirobot_proxy);
@@ -213,7 +215,7 @@ bool SpecificWorker::stopCommand(CurrentTarget& target, WayPoints& myRoad, Traje
 #endif
 	drawGreenBoxOnTarget( target.getTranslation() );
 	target.reset();
-	target.command  = CurrentTarget::Command::IDLE;
+	changeCommand(target,CurrentTarget::Command::IDLE);
 	state.setElapsedTime(taskReloj.elapsed());
 	state.setState("IDLE");
 	return true;
@@ -235,7 +237,7 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
 	myRoad.clearDraw(innerViewer);
 #endif
 	target.reset();
-	target.command  = CurrentTarget::Command::IDLE;
+	changeCommand(target,CurrentTarget::Command::IDLE);
 	state.setState("IDLE");
 	return true;
 }
@@ -260,7 +262,7 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
  * @return bool
  */
 
-bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad, RoboCompLaser::TLaserData &lData)
+bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad, RoboCompLaser::TLaserData& lData)
 
 {
 	// 	qDebug() << __FUNCTION__;
@@ -281,8 +283,9 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 // 		controller->update(innerModel, lData, omnirobot2_proxy, myRoad);
 		if( myRoad.isBlocked() )
 			{
+				state.setState("BACKWARDS");
 				currentTargetAnt.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-200),"robot"));
-				target.command = CurrentTarget::Command::GOBACKWARDS;
+				changeCommand(target,CurrentTarget::Command::GOBACKWARDS);
 				qDebug()<<"haciendo marcha atras";
 			}
 
@@ -293,13 +296,13 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
 			{
 				// qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
 				myRoad.setFinished(false);
-				target.command = CurrentTarget::Command::SETHEADING;
+				changeCommand(target,CurrentTarget::Command::SETHEADING);
 			}
 			else
 			{
 
 				planner->learnPath( road.backList );
-				target.command = CurrentTarget::Command::STOP;
+				changeCommand(target,CurrentTarget::Command::STOP);
 #ifdef USE_QTGUI
 				planner->cleanGraph(innerViewer);
 				planner->drawGraph(innerViewer);
@@ -329,7 +332,7 @@ bool SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, 
  * @param alfa angle between robot's z axis and worlds Z axis
  * @return bool Not used
  */
-bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad)
+bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad)
 {
 	// 	qDebug() << __FUNCTION__;
 	const float MAX_ORIENTATION_ERROR  = 0.08726646259722222;
@@ -340,7 +343,7 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa,  Curr
 	//qDebug() << __FUNCTION__ <<"Error" << fabs(error);
 
 	if( fabs(error) < MAX_ORIENTATION_ERROR)
-		target.command = CurrentTarget::Command::STOP;
+		changeCommand(target,CurrentTarget::Command::STOP);
 	else
 	{
 		float vrot = -0.7 * error;  //Proportional controller
@@ -376,14 +379,13 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 
 	float MAX_ADV_SPEED = 600.f;
 	const float MAX_POSITIONING_ERROR  = 50;  //mm
-
+	state.setState("EXECUTING");
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
 	//float error = target.norm2();
-	state.setState("EXECUTING");
 	// 	qDebug() << __FUNCTION__ << "Error: " << error;
 
-	if( error < MAX_POSITIONING_ERROR)		//TASK IS FINISHED
+	if( error < MAX_POSITIONING_ERROR )		//TASK IS FINISHED
 	{
 //		current.setHasRotation(false);
 //		myRoad.setFinished(true);
@@ -401,7 +403,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		//myRoad.requiresReplanning = true;
 
 		currentT.setWithoutPlan(false);
-		currentT.command = CurrentTarget::Command::GOTO;
+		changeCommand(currentT,CurrentTarget::Command::GOTO);
 	}
 	else
 	{
@@ -476,6 +478,11 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
 	//compState.planningTime = reloj.elapsed();
 	return true;
 }
+void SpecificWorker::changeCommand(CurrentTarget& target, CurrentTarget::Command newCommand)
+{
+		QMutexLocker ml(&mutex_command);
+		target.command=newCommand;
+}
 
 /**
  * @brief Updates an InnerModel from values read from the robot. Reads laserData too.
@@ -536,10 +543,11 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 //// DRAWING METHODS
 ////////////////////////////////////////////////////////////////////////////
 
-void SpecificWorker::drawTarget(const QVec &target)
+void SpecificWorker::drawTarget(const QVec& target)
 {
 #ifdef USE_QTGUI
 	//Draw target as red box
+	QMutexLocker ml(&mutex_inner);
 	InnerModelDraw::addPlane_ignoreExisting(innerViewer, "target", "world", QVec::vec3(target(0), 5, target(2)), QVec::vec3(1,0,0), "#990000", QVec::vec3(80,80,80));
 #endif
 }
@@ -593,41 +601,43 @@ void SpecificWorker::changeTarget(const TargetPose& target)
  */
 void SpecificWorker::go(const TargetPose& target)
 {
-	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
-	//PARAMETERS CHECK
-	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
-	{
-		qDebug() <<__FUNCTION__ << "Returning. Input parameter -target- is not valid";
-		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Doing nothing. Invalid Target with nan in it";
-		throw ex;
-	}
-	else
-	{
-		tState.setState("EXECUTING");
-		//currentTarget.command = CurrentTarget::Command::CHANGETARGET;
-// 		QTime reloj = QTime::currentTime();
-// 		while(tState.getState() != "IDLE" or reloj.elapsed() < 3000){};
-// 		if( reloj.elapsed() < 3000 )
-// 		{
-			currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
-			currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
-			currentTarget.command = CurrentTarget::Command::GOTO;
-			currentTarget.setWithoutPlan(true);
-			if( target.doRotation == true)
-				currentTarget.setHasRotation(true);
-			drawTarget( QVec::vec3(target.x,target.y,target.z));
-			taskReloj.restart();
+	if(tState.getState() != "BACKWARDS"){
+		printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
+		//PARAMETERS CHECK
+		if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
+		{
+			qDebug() <<__FUNCTION__ << "Returning. Input parameter -target- is not valid";
+			RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Doing nothing. Invalid Target with nan in it";
+			throw ex;
+		}
+		else
+		{
+			tState.setState("EXECUTING");
+			//currentTarget.command = CurrentTarget::Command::CHANGETARGET;
+	// 		QTime reloj = QTime::currentTime();
+	// 		while(tState.getState() != "IDLE" or reloj.elapsed() < 3000){};
+	// 		if( reloj.elapsed() < 3000 )
+	// 		{
+				currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
+				currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+				changeCommand(currentTarget,CurrentTarget::Command::GOTO);
+				currentTarget.setWithoutPlan(true);
+				if( target.doRotation == true)
+					currentTarget.setHasRotation(true);
+				drawTarget( QVec::vec3(target.x,target.y,target.z));
+				taskReloj.restart();
 
-			qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
+				qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
 
-// 		}
-// 		else
-// 		{
-// 			qDebug() <<__FUNCTION__ << "Returning. Could not cancel current target";
-// 			RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Returning. Could not cancel current target";
-// 			throw ex;
-// 		}
-	}
+	// 		}
+	// 		else
+	// 		{
+	// 			qDebug() <<__FUNCTION__ << "Returning. Could not cancel current target";
+	// 			RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Returning. Could not cancel current target";
+	// 			throw ex;
+	// 		}
+		}
+	}else qDebug()<<"esta en backwards";
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -638,7 +648,7 @@ RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 void SpecificWorker::stop()
 {
 	// 	qDebug() << __FUNCTION__ << "STOP command received";
-	currentTarget.command = CurrentTarget::Command::STOP;
+	changeCommand(currentTarget,CurrentTarget::Command::STOP);
 }
 
 /**
@@ -650,7 +660,7 @@ void SpecificWorker::stop()
 void SpecificWorker::setHeadingTo(const TargetPose& target)
 {
 	//stop();
-	currentTarget.command = CurrentTarget::Command::SETHEADING;
+	changeCommand(currentTarget,CurrentTarget::Command::SETHEADING);
 	qDebug() << __FUNCTION__ << "SETHEADING command received";
 }
 
@@ -677,7 +687,7 @@ void SpecificWorker::goBackwards(const TargetPose& target)
 		while( tState.getState() != "IDLE"){};
 		currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 		currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
-		currentTarget.command = CurrentTarget::Command::GOBACKWARDS;
+		changeCommand(currentTarget,CurrentTarget::Command::GOBACKWARDS);
 		if( target.doRotation == true)
 			currentTarget.setHasRotation(true);
 		drawTarget( QVec::vec3(target.x,target.y,target.z));

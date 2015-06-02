@@ -79,7 +79,6 @@ class TrajectoryState
 		long planningTime;
 		std::string state;
 };
-
 class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
@@ -114,8 +113,7 @@ private:
 
 	QVec target;
 	QTime taskReloj;
-	
-	QMutex mutex_state;
+	QMutex mutex_inner,mutex_command; //mutex_inner es TEMPORAL HASTA QUE INNERMODEL TENGA SU PROPIO MUTEX
  	
 	QVec P;
 	WayPoints road;
@@ -125,6 +123,7 @@ private:
 	PlannerPRM *plannerPRM, *planner;
 	Localizer *localizer;
 	
+	
 	//Commands correspondign to servant methods, but running on local thread
 	bool gotoCommand(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &state, WayPoints& myRoad, RoboCompLaser::TLaserData &lData);
 	bool setHeadingCommand(InnerModel* innerModel, float alfa, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad);
@@ -133,6 +132,7 @@ private:
 	bool goBackwardsCommand(InnerModel* innerModel, CurrentTarget& current,CurrentTarget &currentT, TrajectoryState& state, WayPoints& myRoad);
 	bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
 	
+	void changeCommand(CurrentTarget& target, CurrentTarget::Command newCommand);
 	//Smoother smoother;
 	void readRoadFromFile(string name, WayPoints *road);
 	void setRobotInitialPose(float x, float z, float alpha);
