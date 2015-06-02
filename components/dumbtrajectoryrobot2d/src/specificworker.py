@@ -79,7 +79,6 @@ class SpecificWorker(GenericWorker):
 		self.goReferenced(target, 0, 0, 0)
 		self.stop()
 
-		#self.rere = 0
 
 		self.Period = 100
 		self.timer.start(self.Period)
@@ -104,19 +103,6 @@ class SpecificWorker(GenericWorker):
 
 	@QtCore.Slot()
 	def compute(self):
-		# UPDATE TARGET MANUALLY (JUST FOR DEBUGGING PURPOSES!!!!)
-		#target = TargetPose()
-		#target.doRotation = False
-		#target.x  = 1000
-		#target.y  = 0
-		#target.z  = 1100
-		#target.rx = 0
-		#target.ry = self.rere
-		#target.rz = 0
-		#self.goReferenced(target, 100, 300)
-		#self.rere += 0.01
-		#print self.rere
-
 		l = QtCore.QMutexLocker(self.mutex)
 
 		if self.state.state == 'IDLE':
@@ -126,16 +112,16 @@ class SpecificWorker(GenericWorker):
 				self.updateStatePose()
 				errX, errZ, errAlpha = self.getError(self.state, self.target)
 				# Compute initial relative error
-				relErrX = errX*math.cos(self.state.ry) - errZ*math.sin(self.state.ry)
-				relErrZ = errX*math.sin(self.state.ry) + errZ*math.cos(self.state.ry)
+				self.relErrX = errX*math.cos(self.state.ry) - errZ*math.sin(self.state.ry)
+				self.relErrZ = errX*math.sin(self.state.ry) + errZ*math.cos(self.state.ry)
 				# Now we take into account the target reference
-				relErrX -= self.xRef
-				relErrZ -= self.zRef
+				self.relErrX -= self.xRef
+				self.relErrZ -= self.zRef
 				# Final relative coordinates of the target
-				print 'command', relErrX, relErrZ
+				print 'command', self.relErrX, self.relErrZ
 				
 				proceed = True
-				command = np.array([relErrX, relErrZ])
+				command = np.array([self.relErrX, self.relErrZ])
 				#print 'norm', np.linalg.norm(command), 'threshold', self.threshold
 				if np.linalg.norm(command)<=self.threshold and abs(errAlpha) < 0.08:
 					print 'stop by threshold'
@@ -168,7 +154,8 @@ class SpecificWorker(GenericWorker):
 	#
 	# go
 	def go(self, target):
-		self.goReferenced(target, 0, 0, 0)
+		print target.x, target.z
+		return self.goReferenced(target, 0, 0, 0)
 
 
 	# goReferenced
@@ -177,12 +164,15 @@ class SpecificWorker(GenericWorker):
 		l = QtCore.QMutexLocker(self.mutex)
 		self.state.state = "EXECUTING"
 		self.target = target
-		self.xRef = xRef
-		self.zRef = zRef
+		self.xRef = float(xRef)
+		self.zRef = float(zRef)
 		self.threshold = threshold
 		if self.threshold < 20.:
 			self.threshold = 20.
 		
+		self.compute()
+		dist = math.sqrt(self.relErrX**2. + self.relErrZ**2.)
+		return dist
 
 
 	#
@@ -194,7 +184,7 @@ class SpecificWorker(GenericWorker):
 	#
 	# goBackwards
 	def goBackwards(self, target):
-		self.changeTarget(target)
+		return self.changeTarget(target)
 
 	#
 	# stop
@@ -206,7 +196,7 @@ class SpecificWorker(GenericWorker):
 	#
 	# changeTarget
 	def changeTarget(self, target):
-		self.goReferenced(target, 0, 0, 0)
+		return self.goReferenced(target, 0, 0, 0)
 
 
 

@@ -27,7 +27,9 @@
 #include <ui_mainUI.h>
 
 #include <CommonBehavior.h>
+#include <OmniRobot.h>
 #include <BodyInverseKinematics.h>
+#include <JointMotor.h>
 #include <AprilTags.h>
 
 
@@ -38,7 +40,9 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
 using namespace std;
 
+using namespace RoboCompOmniRobot;
 using namespace RoboCompBodyInverseKinematics;
+using namespace RoboCompJointMotor;
 using namespace RoboCompAprilTags;
 
 class GenericWorker : 
@@ -59,6 +63,8 @@ public:
 	QMutex *mutex;
 
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
+	JointMotorPrx jointmotor_proxy;
+	OmniRobotPrx omnirobot_proxy;
 
 	virtual void setFingers(const float d) = 0;
 	virtual void setRobot(const int type) = 0;
