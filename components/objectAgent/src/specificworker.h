@@ -44,8 +44,9 @@ public:
 	void  killAgent();
 	Ice::Int uptimeAgent();
 	bool reloadConfigAgent();
-	void  modelModified(const RoboCompAGMWorldModel::Event& modification);
-	void  modelUpdated(const RoboCompAGMWorldModel::Node& modification);
+	void  structuralChange(const RoboCompAGMWorldModel::Event& modification);
+	void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
+	void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
 
 
 public slots:

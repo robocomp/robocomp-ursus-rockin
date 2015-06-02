@@ -47,7 +47,7 @@ void SpecificWorker::compute( )
 	// ACTION EXECUTION
 	//
 // 	printf("<ae\n");
-// 	actionExecution();
+	actionExecution();
 // 	printf("ae>\n");
 }
 
@@ -140,7 +140,7 @@ bool SpecificWorker::reloadConfigAgent()
 }
 
 
-void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modification)
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
@@ -149,7 +149,13 @@ void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modificat
 	mutex->unlock();
 }
 
-void SpecificWorker::modelUpdated(const RoboCompAGMWorldModel::Node& modification)
+void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
+{
+	mutex->lock();
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	mutex->unlock();
+}
+void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
@@ -216,7 +222,6 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::go(float x, float z, float alpha, bool rot, float xRef, float zRef, float threshold)
 {
-	return;
 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
@@ -679,6 +684,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		float zz = z;
 // 		objectId==7?z+550:z-550
 		float aa = objectId==7?-3.141592:0;
+// 		qDebug() << xx << zz << aa;
 		go(xx, zz, aa, true, 80, 150, 50);
 		backp = true;
 	}
@@ -766,16 +772,16 @@ void SpecificWorker::odometryAndLocationIssues()
 			return;
 		}
 // 		printf("a %d\n", __LINE__);
-                static float bStatex = 0;
-                static float bStatez = 0;
-                static float bStatealpha = 0;
-                if (fabs(bStatex - bState.x)>20 or fabs(bStatez - bState.z)>20 or fabs(bStatealpha - bState.alpha)>0.16)
-                {
-                        AGMMisc::publishNodeUpdate(robot, agmagenttopic);
-                        bStatex = bState.x;
-                        bStatez = bState.z;
-                        bStatealpha = bState.alpha;
-
+		static float bStatex = 0;
+		static float bStatez = 0;
+		static float bStatealpha = 0;
+		if (fabs(bStatex - bState.x)>20 or fabs(bStatez - bState.z)>20 or fabs(bStatealpha - bState.alpha)>0.16)
+		{
+			AGMMisc::publishNodeUpdate(robot, agmagenttopic);
+			
+			bStatex = bState.x;
+			bStatez = bState.z;
+			bStatealpha = bState.alpha;
                 }
 // 		printf("a %d\nv", __LINE__);
 	}
