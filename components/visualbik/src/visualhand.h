@@ -69,6 +69,10 @@ public:
 	RoboCompBodyInverseKinematics::Pose6D getInternalPose();
 
 
+	/**
+	 * \brief returns the name of the hand's tip.
+	 * @return QString tip
+	 */ 
 	QString getTip() { return tip; }
 
 private:

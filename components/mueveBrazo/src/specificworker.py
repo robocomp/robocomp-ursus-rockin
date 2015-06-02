@@ -212,8 +212,8 @@ class SpecificWorker(GenericWorker):
 		# LLamar al BIK y pasarle el vector POSE:
 		print 'Preparando vector pose 6D'
 
-		#part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
-		part = "LEFTARM"
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		#part = "LEFTARM"
 
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
@@ -246,8 +246,8 @@ class SpecificWorker(GenericWorker):
 			# LLamar al BIK y pasarle el vector POSE:
 		print 'Preparando vector pose 6D'
 
-		#part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
-		part = "LEFTARM"
+		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		#part = "LEFTARM"
 
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera

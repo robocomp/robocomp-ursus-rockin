@@ -85,7 +85,7 @@ private:
 	// METODOS PRIVADOS
 	bool correctTraslation();
 	bool correctRotation();
-	void actualizarInnermodel();
+	void actualizarTodo();
 
 };
 

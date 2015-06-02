@@ -37,9 +37,7 @@ void VisualHand::setVisualPose(RoboCompAprilTags::tag tag)
 	this->im->updateTransformValues("marca-" + this->tip + "-segun-head2", 0,0,0,   -M_PI_2,0,M_PI);
 
 	//Pasamos del marca-segun-head al mundo:
-// 	tagPose.print("t")
 	QVec ret = this->im->transform6D("root", tagPose, "rgbd");
-// 	ret.print("T");
 	this->visualPose.x = ret(0);
 	this->visualPose.y = ret(1);
 	this->visualPose.z = ret(2);
@@ -49,17 +47,13 @@ void VisualHand::setVisualPose(RoboCompAprilTags::tag tag)
 	this->visualPose.ry = ret2(4);
 	this->visualPose.rz = ret2(5);
 
-
 	gettimeofday(this->lastUpdate, NULL);
 }
-
 
 void VisualHand::setVisualPose(const RoboCompBodyInverseKinematics::Pose6D& pose)
 {
 	this->visualPose = pose;
 }
-
-
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 													METODOS GET												   *
@@ -67,7 +61,6 @@ void VisualHand::setVisualPose(const RoboCompBodyInverseKinematics::Pose6D& pose
 double VisualHand::secondsElapsed()
 {
 	static timeval currentTimeval;
-
 	gettimeofday(&currentTimeval, NULL);
 
 	static bool first = true;
@@ -98,7 +91,6 @@ RoboCompBodyInverseKinematics::Pose6D VisualHand::getVisualPose()
 {
 	return this->visualPose;
 }
-
 
 RoboCompBodyInverseKinematics::Pose6D VisualHand::getInternalPose()
 {
