@@ -280,17 +280,9 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 		//myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
-		if( myRoad.isBlocked() )
-			{
-				state.setState("BACKWARDS");
-				currentTargetAnt.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-200),"robot"));
-				changeCommand(target,CurrentTarget::Command::GOBACKWARDS);
-				qDebug()<<"haciendo marcha atras";
-			}
 
 		if (myRoad.isFinished() == true)
 		{
-
 			if( target.hasRotation() )
 			{
 				// qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
@@ -597,7 +589,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
  */
 void SpecificWorker::go(const TargetPose& target)
 {
-	if(tState.getState() != "BACKWARDS"){
+
 		printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
 		//PARAMETERS CHECK
 		if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
@@ -633,7 +625,6 @@ void SpecificWorker::go(const TargetPose& target)
 	// 			throw ex;
 	// 		}
 		}
-	}else qDebug()<<"esta en backwards";
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()

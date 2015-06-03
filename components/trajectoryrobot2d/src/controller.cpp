@@ -59,27 +59,27 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	for(auto i : laserData)
 	{
 		if(i.dist < 10) i.dist = 30000;
-		if( i.dist < baseOffsets[j] )
+		if( i.dist < baseOffsets[j] + 50 )
 		{
 			if(i.angle>-2.0 && i.angle<2.0){
 			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
-			//road.requiresReplanning = true;
 			stopTheRobot(omnirobot_proxy);
 			road.setBlocked(true);
-			return false;
+			qDebug()<<"marcha atras";
+ 			break;
 			}
 		}
 		else
 		{
-			if (i.dist < baseOffsets[j] + 100) 
+			if (i.dist < baseOffsets[j] + 120) 
 			{
 				if (i.angle > 0)
 				{
-					vside  = -100;
+					vside  = -50;
 				}
 				else
 				{
-					vside = 100;
+					vside = 50;
 				}
 			}
 		}
@@ -108,7 +108,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		// as descirbed in Thrun's paper on DARPA challenge
 
 		vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/350.) + 0.8 * road.getRoadCurvatureAtClosestPoint() ;
-		
 	// Limiting filter
  		if( vrot > MAX_ROT_SPEED )
  			vrot = MAX_ROT_SPEED;
@@ -125,7 +124,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
 		else
 			teta= 1;
-		
 		// Factor to be used in speed control when approaching the end of the road
 		float reduction=1;
 		int w=0;
@@ -148,7 +146,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//				* reduction is 1 if there are not obstacle.
 		//				* teta that applies when getting close to the target (1/roadGetCurvature)
 		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
-		qDebug()<<reduction;
+// 		qDebug()<<reduction;
 		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
 								 * reduction
 								 * exponentialFunction(vrot, 0.8, 0.01)
@@ -158,11 +156,18 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//Pre-limiting filter to avoid displacements in very closed turns
 		if( fabs(vrot) > 0.8)
 			vadvance = 0;
-
+		
  		// Limiting filter
  		if( vadvance > MAX_ADV_SPEED )
  			vadvance = MAX_ADV_SPEED;
-
+		
+		//Do backward
+		if(road.isBlocked())
+		{
+			vadvance=-80;
+			vrot = 0;
+			vside = 0;
+		}
 		/////////////////////////////////////////////////
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
