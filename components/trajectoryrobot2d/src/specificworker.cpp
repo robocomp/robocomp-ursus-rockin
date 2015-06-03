@@ -280,7 +280,6 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 		//myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
-// 		controller->update(innerModel, lData, omnirobot2_proxy, myRoad);
 		if( myRoad.isBlocked() )
 			{
 				state.setState("BACKWARDS");
@@ -300,7 +299,6 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 			}
 			else
 			{
-
 				planner->learnPath( road.backList );
 				changeCommand(target,CurrentTarget::Command::STOP);
 #ifdef USE_QTGUI
@@ -445,9 +443,7 @@ bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, Tr
 	{
 		qDebug() << __FUNCTION__ << "SpecificWorker: Path NOT found. Resetting";
 		state.setState("IDLE");
-//printf("%d\n", __LINE__);
 		target.reset();
-//printf("%d\n", __LINE__);
 		return false;
 	}
 	target.setTranslation( localTarget );

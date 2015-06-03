@@ -98,7 +98,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			MAX_ADV_SPEED = 200 * exponentialFunction(epoch-100, 200, 0.2);
 			MAX_ROT_SPEED = 0.3 * exponentialFunction(epoch-100, 200, 0.2);
 		}
-
 		float vadvance = 0;
 		float vrot = 0;
 		/////////////////////////////////////////////////
@@ -126,14 +125,32 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
 		else
 			teta= 1;
+		
+		// Factor to be used in speed control when approaching the end of the road
+		float reduction=1;
+		int w=0;
+		float constant;
+		for(auto i : laserData)
+		{
+			constant = baseOffsets[w] + 1000;
+			if (i.dist < constant)
+			{
+				if(reduction > i.dist/constant && i.angle>-1.57 && i.angle<1.57) //Rango deteccion de obstaculos [-pi/2,pi/2]
+					reduction=i.dist/constant;
+			}
+			w++;
+		}
+		
 
 		//VAdv is computed as a reduction of MAX_ADV_SPEED by three computed functions:
 		//				* road curvature reduces forward speed
 		//				* VRot reduces forward speed
+		//				* reduction is 1 if there are not obstacle.
 		//				* teta that applies when getting close to the target (1/roadGetCurvature)
 		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
-
+		qDebug()<<reduction;
 		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
+								 * reduction
 								 * exponentialFunction(vrot, 0.8, 0.01)
 								 * teta;
 								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
@@ -171,9 +188,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-//   		qDebug() << "------------------Controller Report ---------------;";
-//    		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
-//   		qDebug() << "---------------------------------------------------;";
+   		//qDebug() << "------------------Controller Report ---------------;";
+    	//	qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+   		//qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot); }
