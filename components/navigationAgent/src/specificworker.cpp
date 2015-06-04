@@ -222,13 +222,8 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::go(float x, float z, float alpha, bool rot, float xRef, float zRef, float threshold)
 {
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
+// 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
+	
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.x = x;
 	tp.z = z;
@@ -751,6 +746,7 @@ void SpecificWorker::odometryAndLocationIssues()
 
 	try
 	{
+		
 		int32_t robotId;
 		//AGMModelPrinter::printWorld(worldModel);
 		robotId = worldModel->getIdentifierByType("robot");
@@ -771,6 +767,33 @@ void SpecificWorker::odometryAndLocationIssues()
 			printf("Can't update odometry in the model A!!!\n");
 			return;
 		}
+		
+		
+		///link update
+		qDebug()<<bState.x<<bState.z<<bState.alpha;
+		
+                //AGMModelPrinter::printWorld(worldModel);                
+		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(20, 1, "RT");
+		std::cout<<"edge "<<edge.toString(worldModel);
+		std::cout<<edge.getAttribute("tx")<<" "<<edge.getAttribute("tz")<<" "<<edge.getAttribute("ry")<<"\n";
+		std::cout<<edge.getAttribute("tx")<<" "<<edge.getAttribute("tz")<<" "<<edge.getAttribute("ry")<<"\n";
+		std::cout<<edge.getAttribute("tx")<<" "<<edge.getAttribute("tz")<<" "<<edge.getAttribute("ry")<<"\n";
+		
+		
+		try
+		{
+			edge->setAttribute("tx", float2str(bState.x));
+			edge->setAttribute("tz", float2str(bState.z));
+			edge->setAttribute("ry", float2str(bState.alpha));
+		}
+		catch (...)
+		{
+			printf("Can't update odometry in RT !!!\n");
+			return;
+		}
+		
+		
+		
 // 		printf("a %d\n", __LINE__);
 		static float bStatex = 0;
 		static float bStatez = 0;
@@ -778,11 +801,14 @@ void SpecificWorker::odometryAndLocationIssues()
 		if (fabs(bStatex - bState.x)>20 or fabs(bStatez - bState.z)>20 or fabs(bStatealpha - bState.alpha)>0.16)
 		{
 			AGMMisc::publishNodeUpdate(robot, agmagenttopic);
+			qDebug()<<"AGMMisc::publishEdgeUpdate(edge, agmagenttopic)\n";
+			AGMMisc::publishEdgeUpdate(edge, agmagenttopic);
 			
 			bStatex = bState.x;
 			bStatez = bState.z;
 			bStatealpha = bState.alpha;
                 }
+                
 // 		printf("a %d\nv", __LINE__);
 	}
 	catch (Ice::Exception &e)
