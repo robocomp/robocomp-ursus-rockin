@@ -774,11 +774,6 @@ void SpecificWorker::odometryAndLocationIssues()
 		
                 //AGMModelPrinter::printWorld(worldModel);                
 		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(20, 1, "RT");
-		std::cout<<"edge "<<edge.toString(worldModel);
-		std::cout<<edge.getAttribute("tx")<<" "<<edge.getAttribute("tz")<<" "<<edge.getAttribute("ry")<<"\n";
-		std::cout<<edge.getAttribute("tx")<<" "<<edge.getAttribute("tz")<<" "<<edge.getAttribute("ry")<<"\n";
-		std::cout<<edge.getAttribute("tx")<<" "<<edge.getAttribute("tz")<<" "<<edge.getAttribute("ry")<<"\n";
-		
 		
 		try
 		{
@@ -801,7 +796,7 @@ void SpecificWorker::odometryAndLocationIssues()
 		if (fabs(bStatex - bState.x)>20 or fabs(bStatez - bState.z)>20 or fabs(bStatealpha - bState.alpha)>0.16)
 		{
 			AGMMisc::publishNodeUpdate(robot, agmagenttopic);
-			qDebug()<<"AGMMisc::publishEdgeUpdate(edge, agmagenttopic)\n";
+			//Publish update edge
 			AGMMisc::publishEdgeUpdate(edge, agmagenttopic);
 			
 			bStatex = bState.x;
