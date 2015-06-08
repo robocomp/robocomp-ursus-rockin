@@ -210,11 +210,7 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def movimiento_con_Rotacion(self):
 		# LLamar al BIK y pasarle el vector POSE:
-		print 'Preparando vector pose 6D'
-
-		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
-		#part = "LEFTARM"
-
+		#print 'Preparando vector pose 6D'
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
 		pose6D.x  = float(self.ui.txsb.value())
@@ -224,7 +220,6 @@ class SpecificWorker(GenericWorker):
 		pose6D.ry = float(self.ui.rysb.value())
 		pose6D.rz = float(self.ui.rzsb.value())
 		print 'Llamando a BIK con pose6D: ',pose6D
-		self.ui.rotacion.setText('('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+') ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 
 		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
 		weights.x = 1
@@ -233,23 +228,27 @@ class SpecificWorker(GenericWorker):
 		weights.rx = 1
 		weights.ry = 1
 		weights.rz = 1
+		
+		axis = RoboCompBodyInverseKinematics.Axis()
+		axis.x = 0
+		axis.y = 0
+		axis.z = 1
 
 		radius = 150 #radio
 		try:
+			part = "RIGHTARM"
 			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+			part = "HEAD"
+			self.bodyinversekinematics_proxy.pointAxisTowardsTarget(part, pose6D, axis, False, 0)
 		except Ice.Exception, e:
 			print "Error en movimiento_con_Rotacion", e
 
 
 	@QtCore.Slot()
 	def movimiento_sin_Rotacion(self):
-			# LLamar al BIK y pasarle el vector POSE:
-		print 'Preparando vector pose 6D'
-
-		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
-		#part = "LEFTARM"
-
+		# LLamar al BIK y pasarle el vector POSE:
 		import RoboCompBodyInverseKinematics
+		print 'Preparando vector pose 6D'
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
 		pose6D.x  = float(self.ui.txsb.value())
 		pose6D.y  = float(self.ui.tysb.value())
@@ -258,7 +257,6 @@ class SpecificWorker(GenericWorker):
 		pose6D.ry = float(self.ui.rysb.value())
 		pose6D.rz = float(self.ui.rzsb.value())
 		print 'Llamando a BIK con pose6D: ',pose6D
-		self.ui.rotacion.setText('('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+') ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 
 		weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
 		weights.x = 1
@@ -267,11 +265,18 @@ class SpecificWorker(GenericWorker):
 		weights.rx = 0
 		weights.ry = 0
 		weights.rz = 0
+				
+		axis = RoboCompBodyInverseKinematics.Axis()
+		axis.x = 0
+		axis.y = 0
+		axis.z = 1
 
 		radius = 150 #radio
-
 		try:
+			part = "RIGHTARM"
 			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+			part = "HEAD"
+			self.bodyinversekinematics_proxy.pointAxisTowardsTarget(part, pose6D, axis, False, 0)
 		except:
 			print "Error en movimiento_sin_Rotacion"
 
@@ -333,7 +338,7 @@ class SpecificWorker(GenericWorker):
 		# LLamar al BIK y pasarle el vector POSE:
 		print 'Preparando vector pose 6D'
 
-		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		part = "HEAD" #Parte del cuerpo dle robot que se movera.
 
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
@@ -365,7 +370,7 @@ class SpecificWorker(GenericWorker):
 		# LLamar al BIK y pasarle el vector POSE:
 		print 'Preparando vector pose 6D'
 
-		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		part = "HEAD" #Parte del cuerpo dle robot que se movera.
 
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
@@ -397,7 +402,7 @@ class SpecificWorker(GenericWorker):
 		# LLamar al BIK y pasarle el vector POSE:
 		print 'Preparando vector pose 6D'
 
-		part = "RIGHTARM" #Parte del cuerpo dle robot que se movera.
+		part = "HEAD" #Parte del cuerpo dle robot que se movera.
 
 		import RoboCompBodyInverseKinematics
 		pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera

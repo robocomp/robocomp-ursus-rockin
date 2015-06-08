@@ -306,34 +306,6 @@ bool SpecificWorker::correctRotation()
 	printf("---------------------\n");
 	printf("---------------------\n");
 	
-	/*QVec visualMarcaT_en_mano = innerModel->transform("grabPositionHandR", QVec::zeros(3), "visual_hand"); //<-- no sirve para nada
-	visualMarcaT_en_mano.print("Marca de la mano desde la mano");
-	
-	//CALIBRAMOS:
-	QMat visualMarcaR_en_mano = innerModel->getRotationMatrixTo("grabPositionHandR","visual_hand");
-	QMat internalMarcaR_en_padre_mano = innerModel->getRotationMatrixTo("ThandMesh2_pre","grabPositionHandR");
-	
-	//multiplicamos matrices de rotacion para sumar la nueva rotacion (de la visual a la interna:
-	QMat internalMarca_finalR = internalMarcaR_en_padre_mano * visualMarcaR_en_mano;
-	QVec angulos_finales = internalMarca_finalR.extractAnglesR_min();
-	angulos_finales.print("Angulos a rotar");
-	
-	//pasamos traslaciones:
-	QVec internalMarcaT_en_padre_mano = innerModel->transform("ThandMesh2_pre",QVec::zeros(3),"grabPositionHandR");
-	QVec internalMarca_finalT = internalMarcaT_en_padre_mano +(internalMarcaR_en_padre_mano*visualMarcaT_en_mano);
-	
-	Pose6D pose;
-	pose.x = internalMarca_finalT.x();
-	pose.y = internalMarca_finalT.y();
-	pose.z = internalMarca_finalT.z();
-	pose.rx = angulos_finales.x();
-	pose.ry = angulos_finales.y();
-	pose.rz = angulos_finales.z();
-
-	float radius = 0;
-	this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), pose, this->trueTarget.getWeights(), radius);
-	return false;*/
-	
 	float umbralElapsedTime = 0.5; //un segundo y medio.
 	float umbralError = 5;
 
