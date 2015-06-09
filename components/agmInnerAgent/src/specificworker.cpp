@@ -98,14 +98,16 @@ StateStruct SpecificWorker::getAgentState()
 {
 }
 
-void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event &modification)
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modification)
 {
 }
 
-void SpecificWorker::modelUpdated(const RoboCompAGMWorldModel::Node &modification)
+void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modification)
 {
 }
-
+void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
+{
+}
 
 
 
