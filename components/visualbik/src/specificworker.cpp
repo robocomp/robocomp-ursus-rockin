@@ -158,7 +158,8 @@ void SpecificWorker::compute()
 			if(this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish == true)
 			{
 				qDebug()<<"---> El BIK ha terminado.";
-				this->stateMachine = State::CORRECT_TRASLATION;
+				stateMachine = State::CORRECT_TRASLATION;
+				//stateMachine = State::CORRECT_ROTATION;
 			}
 		break;
 		//---------------------------------------------------------------------------------------------
@@ -327,7 +328,7 @@ bool SpecificWorker::correctRotation()
 	// Si el error es miserable no hacemos nada y acabamos la corrección. Para hacer la norma lo pasamos a vec6
 	qDebug()<<"Error Traslacion: "<<QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2();
 	qDebug()<<"Error Rotacion: "<<QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2();
-	if (QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2() < umbralError and QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2()<0.15)
+	if (QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2() < umbralError and QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2()<0.17)
 	{
 		this->trueTarget.changeState(Target::State::RESOLVED);
 		printf("done!\n");
