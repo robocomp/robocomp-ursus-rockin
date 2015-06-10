@@ -6,5 +6,8 @@ Name=GCC
 Path=gcc
 Type=GCC
 
+[MakeBuilder]
+Make Binary=make\s
+
 [Project]
 VersionControlSupport=kdevgit

@@ -61,7 +61,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		if(i.dist < 10) i.dist = 30000;
 		if( i.dist < baseOffsets[j] + 50 )
 		{
-			if(i.angle>-2.0 && i.angle<2.0){
+			if(i.angle>-1.57 && i.angle<1.57){
 			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
 			stopTheRobot(omnirobot_proxy);
 			road.setBlocked(true);
@@ -124,13 +124,14 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
 		else
 			teta= 1;
+		
 		// Factor to be used in speed control when approaching the end of the road
 		float reduction=1;
 		int w=0;
-		float constant;
+		float constant=1000;		//Empieza a reducir cuando encuentra obstaculos a una distancia menor a "constant"
 		for(auto i : laserData)
 		{
-			constant = baseOffsets[w] + 1000;
+			constant = baseOffsets[w] + constant;
 			if (i.dist < constant)
 			{
 				if(reduction > i.dist/constant && i.angle>-1.57 && i.angle<1.57) //Rango deteccion de obstaculos [-pi/2,pi/2]
