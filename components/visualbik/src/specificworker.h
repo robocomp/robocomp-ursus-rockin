@@ -26,6 +26,7 @@
 #define SPECIFICWORKER_H
 
 #include <iostream>
+#include <fstream>
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 #include <target.h>
@@ -71,11 +72,12 @@ private:
 	// VARIABLES QUE GUARDAN EL TARGET QUE SE ESTA EJECUTANDO Y EL SIGUIENTE A EJECUTAR.
 	Target trueTarget;
 	Target correctedTarget;
-	Target nextTarget;
-	// MUTEX PARA ZONAS CRITICAS
-	QMutex mutex;
-	// EL MODELO INTERNO DEL ROBOT
-	InnerModel *innerModel;
+	QQueue<Target> nextTarget;
+	QMutex 		mutex;					// MUTEX PARA ZONAS CRITICAS
+	InnerModel 	*innerModel;			// EL MODELO INTERNO DEL ROBOT
+	ofstream 	file;					// EL FICHERO DONDE GUARDAR DATOS
+	bool 		abortatraslacion;		// PARA QUE NO SE QUEDE COLGADO CUANDO CORRIGE TRASLACION
+	bool 		abortarotacion;			// PARA QUE NO SE QUEDE COLGADO CUANDO CORRIGE ROTACION
 
 #ifdef USE_QTGUI
 	OsgView *osgView;

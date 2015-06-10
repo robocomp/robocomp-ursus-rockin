@@ -27,6 +27,10 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	//Iniciamos con estado igual a IDLE:
+	file.open("datosObtenidos.txt", ios::out);
+	abortatraslacion 	= false;
+	abortarotacion 		= false;
+
 	this->stateMachine = State::IDLE;
 
  	this->innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml");
@@ -54,7 +58,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 */
 SpecificWorker::~SpecificWorker()
 {
-
+		file.close();
 }
 
 /**
@@ -131,6 +135,8 @@ void SpecificWorker::compute()
 			{
 				this->stateMachine = State::INIT_BIK;
 				const Pose6D tt = this->trueTarget.getPose6D();
+				abortatraslacion 	= false;
+				abortarotacion 		= false;
 				printf("Ha llegado un TARGET: (%f, %f, %f,   %f, %f, %f)\n",tt.x, tt.y, tt.z, tt.rx, tt.ry, tt.rz);
 			}
 		break;
@@ -165,7 +171,7 @@ void SpecificWorker::compute()
 		//---------------------------------------------------------------------------------------------
 		case State::CORRECT_TRASLATION:
 			if (this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish != true) return;
-			if(this->correctTraslation()==true)
+			if(this->correctTraslation()==true or abortatraslacion==true)
 			{
 				// Si la correccion ha terminado y hay que coregir la rotacion...
 				const WeightVector weights = this->trueTarget.getWeights();
@@ -177,31 +183,33 @@ void SpecificWorker::compute()
 				else
 				{
 					//Si no hay que orregir la rotacion pasamos al siguiente target...
-					if (this->nextTarget.getState() == Target::State::WAITING)
+					if(!nextTarget.isEmpty())
 					{
 						std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
-						this->trueTarget = this->nextTarget;
-						this->nextTarget.changeState(Target::State::IDLE);
+						this->trueTarget = this->nextTarget.head();
+						nextTarget.dequeue();
 					}
-					this->trueTarget.changeState(Target::State::IDLE);
+					else
+						this->trueTarget.changeState(Target::State::IDLE);
 				}
 			}
 		break;
 		//---------------------------------------------------------------------------------------------
 		case State::CORRECT_ROTATION:
 			if (this->bodyinversekinematics_proxy->getState(this->trueTarget.getBodyPart()).finish != true) return;
-			if (this->correctRotation()==true)
+			if (this->correctRotation()==true or abortarotacion==true)
 			{
 				// Si la correccion ha terminado y hay un target esperando
-				if (this->nextTarget.getState() == Target::State::WAITING)
+				if(!nextTarget.isEmpty())
 				{
 					std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
-					this->trueTarget = this->nextTarget;
-					this->nextTarget.changeState(Target::State::IDLE);
+					this->trueTarget = this->nextTarget.head();
+					nextTarget.dequeue();
 				}
 				else
 					this->trueTarget.changeState(Target::State::IDLE);
 				this->stateMachine = State::IDLE;
+				this->goHome("RIGHTHAND");
 			}
 		break;
 		//---------------------------------------------------------------------------------------------
@@ -236,8 +244,15 @@ void SpecificWorker::compute()
  */
 bool SpecificWorker::correctTraslation()
 {
-	float umbralElapsedTime = 0.5; //un segundo y medio.
-	float umbralError = 5;
+	static int iteraciones = 0, maxIteraciones = 20;    // Para evitar que se quede atascado.
+	float umbralElapsedTime = 0.5, umbralError = 5;
+
+	if(iteraciones > maxIteraciones)
+	{
+		abortatraslacion = true;
+		iteraciones = 0;
+		return false;
+	}
 
 	// If the hand's tag is lost we assume that the internal possition (according to the direct kinematics) is correct
 	//if (this->rightHand->secondsElapsed() > umbralElapsedTime)
@@ -253,12 +268,12 @@ bool SpecificWorker::correctTraslation()
 
 	// COMPROBAMOS EL ERROR:
 	QVec errorInv = this->rightHand->getErrorInverse(this->trueTarget.getPose6D());
-
 	// Si el error es miserable no hacemos nada y acabamos la corrección. Para hacer la norma lo pasamos a vec6
 	if (QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2() < umbralError)
 	{
 		this->trueTarget.changeState(Target::State::RESOLVED);
 		printf("done!\n");
+		iteraciones = 0;
 		return true;
 	}
 
@@ -294,6 +309,7 @@ bool SpecificWorker::correctTraslation()
 	weights.ry = 0;
 	weights.rz = 0;
 	this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), correctedTarget.getPose6D(), weights, radius);
+	iteraciones++;
 	return false;
 }
 
@@ -304,11 +320,8 @@ bool SpecificWorker::correctTraslation()
  */
 bool SpecificWorker::correctRotation()
 {
-	printf("---------------------\n");
-	printf("---------------------\n");
-	
-	float umbralElapsedTime = 0.5; //un segundo y medio.
-	float umbralError = 5;
+	static int iteraciones = 0, maxIteraciones = 20;    // Para evitar que se quede atascado.
+	float umbralElapsedTime = 0.5, umbralErrorT = 5, umbralErrorR=0.17;
 
 	// If the hand's tag is lost we assume that the internal possition (according to the direct kinematics) is correct
 	if (this->rightHand->secondsElapsed() > umbralElapsedTime)
@@ -316,7 +329,6 @@ bool SpecificWorker::correctRotation()
 		std::cout<<"La camara no ve la marca..."<<std::endl;
 		this->rightHand->setVisualPose(this->rightHand->getInternalPose());
 	}
-
 	this->innerModel->transform6D("root", this->rightHand->getTip()).print("im internal");
 	this->innerModel->transform6D("root", "target").print("im target");
 	this->innerModel->transform6D("root", "visual_hand").print("im visual");
@@ -324,14 +336,32 @@ bool SpecificWorker::correctRotation()
 	// COMPROBAMOS EL ERROR:
 	QVec errorInv = this->rightHand->getErrorInverse(this->trueTarget.getPose6D());
 // 	errorInv.print("errorInv");
-
+	if(iteraciones > maxIteraciones)
+	{
+		abortarotacion = true;
+		Pose6D pose = trueTarget.getPose6D();
+		file<<"P: ("      <<pose.x<<","<<pose.y<<","<<pose.z<<","<<pose.rx<<","<<pose.ry<<","<<pose.rz;
+		file<<") ERROR_T:"<<QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2();
+		file<<" ERROR_R:" <<QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2();
+		file<<" END: "    <<iteraciones<<"-->"<<abortatraslacion<<","<<abortarotacion<<endl;;
+		flush(file);
+		iteraciones = 0;
+		return false;
+	}
 	// Si el error es miserable no hacemos nada y acabamos la corrección. Para hacer la norma lo pasamos a vec6
 	qDebug()<<"Error Traslacion: "<<QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2();
 	qDebug()<<"Error Rotacion: "<<QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2();
-	if (QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2() < umbralError and QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2()<0.17)
+	if (QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2() < umbralErrorT and QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2()<umbralErrorR)
 	{
 		this->trueTarget.changeState(Target::State::RESOLVED);
 		printf("done!\n");
+		Pose6D pose = trueTarget.getPose6D();
+		file<<"P: ("      <<pose.x<<","<<pose.y<<","<<pose.z<<","<<pose.rx<<","<<pose.ry<<","<<pose.rz;
+		file<<") ERROR_T:"<<QVec::vec3(errorInv.x(), errorInv.y(), errorInv.z()).norm2();
+		file<<" ERROR_R:" <<QVec::vec3(errorInv.rx(), errorInv.ry(), errorInv.rz()).norm2();
+		file<<" END: "    <<iteraciones<<"-->"<<abortatraslacion<<","<<abortarotacion<<endl;
+		flush(file);
+		iteraciones = 0;
 		return true;
 	}
 
@@ -366,6 +396,7 @@ bool SpecificWorker::correctRotation()
 	float radius = 1;
 	this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), correctedTarget.getPose6D(), this->trueTarget.getWeights(), radius);
 
+	iteraciones++;
 	return false;
 }
 	
@@ -457,10 +488,13 @@ void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &targe
 	}
 	else
 	{
-		this->nextTarget.changeBodyPart(bodyPart);
-		this->nextTarget.changePose6D(target);
-		this->nextTarget.changeWeights(weights);
-		this->nextTarget.changeState(Target::State::WAITING);
+		Target auxnextTarget;
+		auxnextTarget.changeBodyPart(bodyPart);
+		auxnextTarget.changePose6D(target);
+		auxnextTarget.changeWeights(weights);
+		auxnextTarget.changeState(Target::State::WAITING);
+		
+		nextTarget.enqueue(auxnextTarget);
 	}
 }
 
