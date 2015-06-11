@@ -120,11 +120,7 @@ void SpecificWorker::compute()
 		}
 #endif
 	}
-
-
 	this->actualizarTodo();
-
-
 	QMutexLocker ml(&this->mutex);
 	switch(this->stateMachine)
 	{
@@ -165,7 +161,6 @@ void SpecificWorker::compute()
 			{
 				qDebug()<<"---> El BIK ha terminado.";
 				stateMachine = State::CORRECT_TRASLATION;
-				//stateMachine = State::CORRECT_ROTATION;
 			}
 		break;
 		//---------------------------------------------------------------------------------------------
@@ -183,7 +178,7 @@ void SpecificWorker::compute()
 				else
 				{
 					//Si no hay que orregir la rotacion pasamos al siguiente target...
-					if(!nextTarget.isEmpty())
+					if(nextTarget.isEmpty()==false)
 					{
 						std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
 						this->trueTarget = this->nextTarget.head();
@@ -200,7 +195,7 @@ void SpecificWorker::compute()
 			if (this->correctRotation()==true or abortarotacion==true)
 			{
 				// Si la correccion ha terminado y hay un target esperando
-				if(!nextTarget.isEmpty())
+				if(nextTarget.isEmpty()==false)
 				{
 					std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
 					this->trueTarget = this->nextTarget.head();
@@ -209,7 +204,7 @@ void SpecificWorker::compute()
 				else
 					this->trueTarget.changeState(Target::State::IDLE);
 				this->stateMachine = State::IDLE;
-				this->goHome("RIGHTHAND");
+				bodyinversekinematics_proxy->goHome("RIGHTARM");
 			}
 		break;
 		//---------------------------------------------------------------------------------------------
@@ -244,7 +239,7 @@ void SpecificWorker::compute()
  */
 bool SpecificWorker::correctTraslation()
 {
-	static int iteraciones = 0, maxIteraciones = 20;    // Para evitar que se quede atascado.
+	static int iteraciones = 0, maxIteraciones = 10;    // Para evitar que se quede atascado.
 	float umbralElapsedTime = 0.5, umbralError = 5;
 
 	if(iteraciones > maxIteraciones)
@@ -320,7 +315,7 @@ bool SpecificWorker::correctTraslation()
  */
 bool SpecificWorker::correctRotation()
 {
-	static int iteraciones = 0, maxIteraciones = 20;    // Para evitar que se quede atascado.
+	static int iteraciones = 0, maxIteraciones = 10;    // Para evitar que se quede atascado.
 	float umbralElapsedTime = 0.5, umbralErrorT = 5, umbralErrorR=0.17;
 
 	// If the hand's tag is lost we assume that the internal possition (according to the direct kinematics) is correct
@@ -392,7 +387,6 @@ bool SpecificWorker::correctRotation()
 	//Llamamos al BIK con el nuevo target corregido y esperamos
 	printf ("w %f %f %f [ %f %f %f ]\n", trueTarget.getWeights().x, trueTarget.getWeights().y, trueTarget.getWeights().z, trueTarget.getWeights().rx, trueTarget.getWeights().ry, trueTarget.getWeights().rz);
 
-// 	float radius = errorInvP.norm2()>200?100:errorInvP.norm2()/2;
 	float radius = 1;
 	this->bodyinversekinematics_proxy->setTargetPose6D(this->trueTarget.getBodyPart(), correctedTarget.getPose6D(), this->trueTarget.getWeights(), radius);
 
@@ -409,7 +403,6 @@ bool SpecificWorker::correctRotation()
  */
 void SpecificWorker::actualizarTodo()
 {
-	qDebug()<<"Actualizando...";
 	try
 	{
 		RoboCompJointMotor::MotorStateMap mMap;

@@ -290,7 +290,7 @@ class SpecificWorker(GenericWorker):
 		#                   400 - 200 en Z
 		import RoboCompBodyInverseKinematics
 		for i in range(0, 100):
-			print 'Preparando vector pose 6D...'
+			print 'i: ',i
 			pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
 			pose6D.x  = random.uniform(100.0, 200.0)
 			pose6D.y  = random.uniform(800.0, 900.0)
@@ -298,7 +298,8 @@ class SpecificWorker(GenericWorker):
 			pose6D.rx = 0
 			pose6D.ry = 0
 			pose6D.rz = 3.1416
-			print 'Llamando a BIK con pose6D: ',pose6D
+			#print 'Llamando a BIK con pose6D: ',pose6D
+			self.ui.label_13.setText(self.ui.label_13.getText()'\n('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+'), ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 
 			weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
 			weights.x = 1
