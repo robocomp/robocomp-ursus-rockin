@@ -299,7 +299,7 @@ class SpecificWorker(GenericWorker):
 			pose6D.ry = 0
 			pose6D.rz = 3.1416
 			#print 'Llamando a BIK con pose6D: ',pose6D
-			self.ui.label_13.setText(self.ui.label_13.getText()'\n('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+'), ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
+			self.ui.label_13.setText(self.ui.label_13.getText()+'\n('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+'), ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 
 			weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
 			weights.x = 1

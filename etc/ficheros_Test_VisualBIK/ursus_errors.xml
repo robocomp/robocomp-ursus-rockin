@@ -29,11 +29,16 @@
 
 						<transform id="base_bodypost" rx="1.5707963267948966" ty="0" tz="0" >
 							<transform id="base_head" tz="0" ty="1080"  rx="-1.5707963267948966" >  <!-- Head begins -->
+<!--							<transform id="base_head_error" ERRORESAQUI="" >-->
 								<joint id="head_yaw_joint" port="10067" axis="z" home="0" min="-1" max="1">
+<!--								<rotation id="head_yaw_joint_error" ERRORESAQUI="" >-->
 									<mesh id="head_base_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="25,25,87.5" tz="87.5" collide="1" />
 									<transform id="head_rot_tilt_pose" tz="175" rx="1.5707963267948966" >
+<!--									XX-->
 										<transform id="head_pre_tilt" ry="1.57079632679">
+<!--										XX-->
 											<joint id="head_pitch_joint" port="10067" axis="z" home="0" min="-1" max="1">
+<!--											XX-->
 												<!--<transform id="nose_pre" rz="-1.57079632679"> <transform id="nose" /> </transform></transform>-->
 												<transform id="head_post_tilt" ry="-1.57079632679">
 													<!-- center mesh -->
@@ -75,8 +80,10 @@
 										</transform>
 									</transform>
 <!-- 									</transform> -->
+<!--								</rotation>-->
 								</joint>
 								<!--<plane id="motorHeeeeeead1Mesh" pz="-23" nz="1" size="40,40,66" repeat="1" texture="#051105" /> -->
+<!--							</transform>-->
 							</transform>
 							 <!-- Head ends -->
 						</transform>

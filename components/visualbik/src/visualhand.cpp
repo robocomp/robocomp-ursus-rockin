@@ -48,6 +48,10 @@ void VisualHand::setVisualPose(RoboCompAprilTags::tag tag)
 	this->visualPose.rz = ret2(5);
 
 	gettimeofday(this->lastUpdate, NULL);
+	
+	//Calculo el error entre pose interna y pose visual.
+	
+	
 }
 
 void VisualHand::setVisualPose(const RoboCompBodyInverseKinematics::Pose6D& pose)

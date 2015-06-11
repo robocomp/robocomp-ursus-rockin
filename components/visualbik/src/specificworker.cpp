@@ -26,31 +26,19 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-	//Iniciamos con estado igual a IDLE:
 	file.open("datosObtenidos.txt", ios::out);
+
+	QMutexLocker im(&mutex);
+	INITIALIZED			= false;
+	stateMachine		= State::IDLE;
 	abortatraslacion 	= false;
 	abortarotacion 		= false;
-
-	this->stateMachine = State::IDLE;
-
- 	this->innerModel = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml");
-
-	this->rightHand = new VisualHand(this->innerModel, "grabPositionHandR");
-	this->leftHand = new VisualHand(this->innerModel, "grabPositionHandL");
-
-#ifdef USE_QTGUI
-	this->osgView = new OsgView(this);
-	this->innerViewer = new InnerModelViewer(this->innerModel, "root", this->osgView->getRootGroup(), true);
+	innerModel 			= NULL;
+#ifdef USE_QTGUI	
+	innerViewer 		= NULL;
+	osgView 			= new OsgView(this);
 	show();
 #endif
-
-	InnerModelNode *nodeParent = this->innerModel->getNode("root");
-	if( this->innerModel->getNode("target") == NULL)
-	{
-		InnerModelTransform *node = this->innerModel->newTransform("target", "static", nodeParent, 0, 0, 0,        0, 0., 0,      0.);
-		nodeParent->addChild(node);
-	}
-
 }
 
 /**
@@ -64,26 +52,44 @@ SpecificWorker::~SpecificWorker()
 /**
  * \brief Metodo SET PARAM
  * Metodo desde el cual se cargaran los elementos que especifiquemos dentro del fichero config
- * del componente.
+ * del componente. Carga el innermodel, el osgview y actualiza el nodo target.
  * @param params mapa de parametros
  */
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-// 	try
-// 	{
-// 		RoboCompCommonBehavior::Parameter par = params.at("InnerModelPath");
-//		if( QFile(QString::fromStdString(par.value)).exists() == true)
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-// 			this->innerModel = new InnerModel(par.value);
-// 		}
-// 		else
-// 			qFatal("IMpossible read the innerModel file. Exit now.");
-// 	}
-// 	catch(std::exception e) { qFatal("Error reading config params"); }
+	try
+	{
+		RoboCompCommonBehavior::Parameter par = params.at("InnerModel") ;
+		if( QFile(QString::fromStdString(par.value)).exists() == true)
+		{
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+			innerModel = new InnerModel(par.value);
+		}
+		else 
+			qFatal("Exiting now.");
+	}
+	catch(std::exception e) { qFatal("Error reading Innermodel param");}
 
-	timer.start(Period);
-
+#ifdef USE_QTGUI
+	if (innerViewer)
+	{
+		osgView->getRootGroup()->removeChild(innerViewer);
+		delete innerViewer;
+	}
+	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
+#endif
+	InnerModelNode *nodeParent = innerModel->getNode("root");
+	if( innerModel->getNode("target") == NULL)
+	{
+		InnerModelTransform *node = innerModel->newTransform("target", "static", nodeParent, 0, 0, 0,        0, 0., 0,      0.);
+		nodeParent->addChild(node);
+	}
+	rightHand 			= new VisualHand(innerModel, "grabPositionHandR");
+	leftHand 			= new VisualHand(innerModel, "grabPositionHandL");
+	
+	timer.start(Period);		
+	QMutexLocker im(&mutex);
+	INITIALIZED = true;
 	return true;
 }
 
@@ -178,11 +184,11 @@ void SpecificWorker::compute()
 				else
 				{
 					//Si no hay que orregir la rotacion pasamos al siguiente target...
-					if(nextTarget.isEmpty()==false)
+					if(nextTargets.isEmpty()==false)
 					{
 						std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
-						this->trueTarget = this->nextTarget.head();
-						nextTarget.dequeue();
+						this->trueTarget = this->nextTargets.head();
+						nextTargets.dequeue();
 					}
 					else
 						this->trueTarget.changeState(Target::State::IDLE);
@@ -195,11 +201,11 @@ void SpecificWorker::compute()
 			if (this->correctRotation()==true or abortarotacion==true)
 			{
 				// Si la correccion ha terminado y hay un target esperando
-				if(nextTarget.isEmpty()==false)
+				if(nextTargets.isEmpty()==false)
 				{
 					std::cout<<"--> Correccion completada.\nPasamos al siguiente target:\n";
-					this->trueTarget = this->nextTarget.head();
-					nextTarget.dequeue();
+					this->trueTarget = this->nextTargets.head();
+					nextTargets.dequeue();
 				}
 				else
 					this->trueTarget.changeState(Target::State::IDLE);
@@ -481,13 +487,13 @@ void SpecificWorker::setTargetPose6D(const string &bodyPart, const Pose6D &targe
 	}
 	else
 	{
-		Target auxnextTarget;
-		auxnextTarget.changeBodyPart(bodyPart);
-		auxnextTarget.changePose6D(target);
-		auxnextTarget.changeWeights(weights);
-		auxnextTarget.changeState(Target::State::WAITING);
+		Target auxnextTargets;
+		auxnextTargets.changeBodyPart(bodyPart);
+		auxnextTargets.changePose6D(target);
+		auxnextTargets.changeWeights(weights);
+		auxnextTargets.changeState(Target::State::WAITING);
 		
-		nextTarget.enqueue(auxnextTarget);
+		nextTargets.enqueue(auxnextTargets);
 	}
 }
 
@@ -513,17 +519,15 @@ void SpecificWorker::setJoint(const string &joint, const float position, const f
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {
 	//Recibimos las marcas que la camara esta viendo: marca mano y marca target.
-	for (auto tag : tags)
+	QMutexLocker ml(&mutex);
+	if(INITIALIZED == true)
 	{
-		if (tag.id == 25)
+		for (auto tag : tags)
 		{
-			QMutexLocker l(&this->mutex);
-			this->rightHand->setVisualPose(tag);
-		}
-		else if (tag.id == 24)
-		{
-			QMutexLocker l(&this->mutex);
-			this->leftHand->setVisualPose(tag);
+			if (tag.id == 25)
+				this->rightHand->setVisualPose(tag);
+			else if (tag.id == 24)
+				this->leftHand->setVisualPose(tag);
 		}
 	}
 }

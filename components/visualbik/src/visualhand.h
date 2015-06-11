@@ -80,6 +80,7 @@ private:
 	timeval *lastUpdate;
 	InnerModel *im;
 	QString tip;
+	QVec errorInterno_Visual;
 
 	InnerModelTransform *nodeMarca, *nodeMarca2;
 };
