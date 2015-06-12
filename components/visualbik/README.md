@@ -16,7 +16,7 @@ Basically the algorithm compares the aprilTag pose, that the camera sees, with t
 
 ##Component that completes inverse kinematics
 
-This component completes the correct behaviour of the inverse kinematics component. Its operation is simple, for now it only works with the right arm of the robot Ursus. In the Configuration parameters, we can connect this component with other components through the port 10240. Also, we need to connect this component with others, for example, look the visualBIK/etc/configDefinitivo file:
+This component completes the correct behaviour of the inverse kinematics component. Its operation is simple, for now it only works with the right arm of the robot Ursus, and save in a file the results. In the Configuration parameters, we can connect this component with other components through the port 10240. Also, we need to connect this component with others, for example, look the visualBIK/etc/configDefinitivo file:
 
     BodyInverseKinematics.Endpoints=tcp -p 10240
     CommonBehavior.Endpoints=tcp -p 10000
