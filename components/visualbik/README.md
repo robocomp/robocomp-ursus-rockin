@@ -41,11 +41,11 @@ Like you can see, we need to subscribe the visualBIK component to the aprilTags 
 ##Starting the component
 To avoid changing the *config* file in the repository, we can copy it to the component's home directory, so changes will remain untouched by future git pulls:
 
-    cd /robocomp/components/robocomp-ursus/components/inversekinematics
+    cd /robocomp/components/robocomp-ursus-rockin/components/visualBIK
     cp etc/config ourConfig
     
 After editing the new config file (ourConfig) we can run the component:
 
-    ./bin/inversekinematics ourConfig
+    ./bin/visualBIK ourConfig
     
 It's not necessary put --Ice.Config=.
