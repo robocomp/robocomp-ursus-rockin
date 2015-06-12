@@ -63,17 +63,17 @@ class SpecificWorker(GenericWorker):
 		self.ui.rysb.setValue(0)
 		self.ui.rzsb.setValue(3.1415)
 
-		# BRAZO IZQUIERDO
-		#self.ui.botonArriba_L.clicked.connect(self.arriba_L)
-		#self.ui.botonAbajo_L.clicked.connect(self.abajo_L)
-		# BRAZO DERECHO
-		#self.ui.botonArriba_R.clicked.connect(self.arriba_R)
-		#self.ui.botonAbajo_R.clicked.connect(self.abajo_R)
-		# MANO DERECHA:
-		#self.ui.botonCerrar.clicked.connect(self.cerrar)
-		#self.ui.botonAbrir.clicked.connect(self.abrir)
-		# BRAZO DERECHO ENTERO
-		#self.ui.botonBrazo.clicked.connect(self.brazoDereho)
+		#BRAZO IZQUIERDO
+		self.ui.botonArriba_L.clicked.connect(self.arriba_L)
+		self.ui.botonAbajo_L.clicked.connect(self.abajo_L)
+		#BRAZO DERECHO
+		self.ui.botonArriba_R.clicked.connect(self.arriba_R)
+		self.ui.botonAbajo_R.clicked.connect(self.abajo_R)
+		#MANO DERECHA:
+		self.ui.botonCerrar.clicked.connect(self.cerrar)
+		self.ui.botonAbrir.clicked.connect(self.abrir)
+		#BRAZO DERECHO ENTERO
+		self.ui.botonBrazo.clicked.connect(self.brazoDereho)
 
 		#Prueba visualBIK
 		self.ui.botonRotacion.clicked.connect(self.movimiento_con_Rotacion)
@@ -83,47 +83,47 @@ class SpecificWorker(GenericWorker):
 		#Prueba 2000 puntos
 		self.ui.entrenamientoButton.clicked.connect(self.prueba2000puntos)
 		
-		# Pueba compleja
-	#	self.ui.botonCargar.clicked.connect(self.cargarCubos)
-	#	self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
-	#	self.ui.botonIR2.clicked.connect(self.llamarBIK_2)
-	#	self.ui.botonIR3.clicked.connect(self.llamarBIK_3)
+		#Pueba compleja
+		#self.ui.botonCargar.clicked.connect(self.cargarCubos)
+		#self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
+		#self.ui.botonIR2.clicked.connect(self.llamarBIK_2)
+		#self.ui.botonIR3.clicked.connect(self.llamarBIK_3)
 
 	def setParams(self, params):
-		#try:
-		#	par = params["InnerModelPath"]
-		#	innermodel_path=par.value
-		#	innermodel = InnerModel(innermodel_path)
-		#except:
-		#	traceback.print_exc()
-		#	print "Error reading config params"
+		try:
+			par = params["InnerModelPath"]
+			innermodel_path=par.value
+			innermodel = InnerModel(innermodel_path)
+		except:
+			traceback.print_exc()
+			print "Error reading config params"
 		return True
 
 	@QtCore.Slot()
 	def compute(self):
 		print 'SpecificWorker.compute...'
-		#try:
-		#	differentialrobot_proxy.setSpeed(100, 0)
-		#except Ice.Exception, e:
-		#	traceback.print_exc()
-		#	print e
+		try:
+			differentialrobot_proxy.setSpeed(100, 0)
+		except Ice.Exception, e:
+			traceback.print_exc()
+			print e
 		return True
 
 
-	########################################################################################################
-	########################################################################################################
-	#@QtCore.Slot()
-	#def arriba_L(self):
-		#mapa = {'leftShoulder1':0.5, 'leftShoulder2':.70, 'leftShoulder3':-.50 , 'leftElbow':-1.30 , 'leftForeArm':.689 , 'leftWrist1':.10 , 'leftWrist2':-.0409, 'head_yaw_joint':-0.40, 'head_pitch_joint':0.20}
-		#for motor in mapa:
-			#goal = MotorGoalPosition()
-			#goal.position = mapa[motor]
-			#goal.name = motor
-			#goal.maxSpeed = 0.5
-			#try:
-				#self.jointmotor_proxy.setPosition(goal)
-			#except CollisionException:
-				#print "Error en arriba_L: ",CollisionException
+	#######################################################################################################
+	#######################################################################################################
+	@QtCore.Slot()
+	def arriba_L(self):
+		mapa = {'leftShoulder1':0.5, 'leftShoulder2':.70, 'leftShoulder3':-.50 , 'leftElbow':-1.30 , 'leftForeArm':.689 , 'leftWrist1':.10 , 'leftWrist2':-.0409, 'head_yaw_joint':-0.40, 'head_pitch_joint':0.20}
+		for motor in mapa:
+			goal = MotorGoalPosition()
+			goal.position = mapa[motor]
+			goal.name = motor
+			goal.maxSpeed = 0.5
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en arriba_L: ",CollisionException
 
 	@QtCore.Slot()
 	def abajo_L(self):
@@ -138,18 +138,18 @@ class SpecificWorker(GenericWorker):
 			except CollisionException:
 				print "Error en abajo_L: ",CollisionException
 
-	#@QtCore.Slot()
-	#def arriba_R(self):
-		#mapa = {'rightShoulder1':-0.5, 'rightShoulder2':-0.70, 'rightShoulder3':.50 , 'rightElbow':1.30 , 'rightForeArm':-.689, 'head_yaw_joint':0.30, 'head_pitch_joint':0.20}
-		#for motor in mapa:
-			#goal = MotorGoalPosition()
-			#goal.position = mapa[motor]
-			#goal.name = motor
-			#goal.maxSpeed = 0.5
-			#try:
-				#self.jointmotor_proxy.setPosition(goal)
-			#except CollisionException:
-				#print "Error en arriba_R: ",CollisionException
+	@QtCore.Slot()
+	def arriba_R(self):
+		mapa = {'rightShoulder1':-0.5, 'rightShoulder2':-0.70, 'rightShoulder3':.50 , 'rightElbow':1.30 , 'rightForeArm':-.689, 'head_yaw_joint':0.30, 'head_pitch_joint':0.20}
+		for motor in mapa:
+			goal = MotorGoalPosition()
+			goal.position = mapa[motor]
+			goal.name = motor
+			goal.maxSpeed = 0.5
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en arriba_R: ",CollisionException
 
 	@QtCore.Slot()
 	def abajo_R(self):
@@ -164,47 +164,47 @@ class SpecificWorker(GenericWorker):
 			except CollisionException:
 				print "Error en abajo_R: ", CollisionException
 
-	#@QtCore.Slot()
-	#def abrir(self):
-		#mapa = {'rightFinger1':-0.68 , 'rightFinger2':0.5}
-		#for motor in mapa:
-			#goal = MotorGoalPosition()
-			#goal.position = mapa[motor]
-			#goal.name = motor
-			#goal.maxSpeed = 0.5
-			#try:
-				#self.jointmotor_proxy.setPosition(goal)
-			#except CollisionException:
-				#print "Error en abrir Finger: ",CollisionException
+	@QtCore.Slot()
+	def abrir(self):
+		mapa = {'rightFinger1':-0.68 , 'rightFinger2':0.5}
+		for motor in mapa:
+			goal = MotorGoalPosition()
+			goal.position = mapa[motor]
+			goal.name = motor
+			goal.maxSpeed = 0.5
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en abrir Finger: ",CollisionException
 
-	#@QtCore.Slot()
-	#def cerrar(self):
-		#mapa = {'rightFinger1':-1 , 'rightFinger2':1}
-		#for motor in mapa:
-			#goal = MotorGoalPosition()
-			#goal.position = mapa[motor]
-			#goal.name = motor
-			#goal.maxSpeed = 0.5
-			#try:
-				#self.jointmotor_proxy.setPosition(goal)
-			#except CollisionException:
-				#print "Error en cerrar Finger: ", CollisionException
+	@QtCore.Slot()
+	def cerrar(self):
+		mapa = {'rightFinger1':-1 , 'rightFinger2':1}
+		for motor in mapa:
+			goal = MotorGoalPosition()
+			goal.position = mapa[motor]
+			goal.name = motor
+			goal.maxSpeed = 0.5
+			try:
+				self.jointmotor_proxy.setPosition(goal)
+			except CollisionException:
+				print "Error en cerrar Finger: ", CollisionException
 
-	#@QtCore.Slot()
-	#def brazoDereho(self):
-		#self.abajo_R()
-		#time.sleep(2)
+	@QtCore.Slot()
+	def brazoDereho(self):
+		self.abajo_R()
+		time.sleep(2)
 
-		#self.arriba_R()
-		#time.sleep(2)
+		self.arriba_R()
+		time.sleep(2)
 
-		#self.abrir()
-		#time.sleep(1)
+		self.abrir()
+		time.sleep(1)
 
-		#self.cerrar()
-		#time.sleep(2)
+		self.cerrar()
+		time.sleep(2)
 
-		#self.abajo_R()
+		self.abajo_R()
 
 	########################################################################################################
 	########################################################################################################
