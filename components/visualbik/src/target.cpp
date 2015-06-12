@@ -8,12 +8,11 @@
  */
 Target::Target()
 {
-	this->state = State::IDLE;
-	this->bodyPart = "";
-	this->pose.x = this->pose.y = this->pose.z = this->pose.rx = this->pose.ry = this->pose.rz = 0;
-	this->weights.x = this->weights.y = this->weights.z = this->weights.rx =this->weights.ry = this->weights.rz = 0;
+	state 		= State::IDLE;
+	bodyPart 	= "";
+	pose 		= QVec::vec6(0,0,0,0,0,0);
+	weights		= QVec::vec6(0,0,0,0,0,0);
 }
-
  /**
  * \brief Constructor parametrizado
  * Inicializa las estructuras que componen sus atributos de clase. 
@@ -23,12 +22,11 @@ Target::Target()
  */ 
 Target::Target(const string bodyPart_, const RoboCompBodyInverseKinematics::Pose6D &pose_, const RoboCompBodyInverseKinematics::WeightVector &weights_)
 {
-	this->state = State::IDLE;
-	this->bodyPart = bodyPart_;
-	this->pose = pose_;
-	this->weights = weights_;
+	state 		= State::IDLE;
+	bodyPart 	= bodyPart_;
+	pose 		= QVec::vec6(pose_.x, pose_.y, pose_.z, pose_.rx, pose_.ry, pose_.rz);
+	weights 	= QVec::vec6(weights_.x, weights_.y, weights_.z, weights_.rx, weights_.ry, weights_.rz);
 }
-
 /**
  * \brief Destructor por defecto
  */ 
@@ -39,44 +37,46 @@ Target::~Target()
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 													METODOS PUT												   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
-void Target::setPose(QVec correctTargetV)
-{
-	this->pose.x = correctTargetV.x();
-	this->pose.y = correctTargetV.y();
-	this->pose.z = correctTargetV.z();
-	this->pose.rx = correctTargetV.rx();
-	this->pose.ry = correctTargetV.ry();
-	this->pose.rz = correctTargetV.rz();
-}
-
 /**
- * \brief Metodo CHANGE STATE:
+ * \brief Metodo SET STATE:
  * Cambia el valor del atributo STATE por el valor del parametro de entrada.
  * @param state_ nuevo estado
  */ 
-void Target::changeState(Target::State state_)		{	this->state = state_; }
-
+void Target::setState(Target::State state_)		{	state = state_; }
 /**
- * \brief Metodo CHANGE BODY PART:
+ * \brief Metodo SET BODY PART:
  * Cambia el valor del atributo BODY PART por el valor del parametro de entrada.
  * @param bodyPart_ nombre de la parte del robot.
  */ 
-void Target::changeBodyPart(string bodyPart_)		{	this->bodyPart = bodyPart_; }
-
-/**
- * \brief Metodo CHANGE POSE 6D:
- * Cambia el valor del atributo POSE 6D por el valor del parametro de entrada.
- * @param pose_ nuevas coordenadas y orientación del target.
+void Target::setBodyPart(string bodyPart_)		{	bodyPart = bodyPart_; }
+/** 
+ * \brief: Este metodo asigna el valor de la posicion pose_ al target.
+ *@param pose_ es un QVEC
  */ 
-void Target::changePose6D(Pose6D pose_)			{	this->pose = pose_;	}
-
+void Target::setPose(QVec pose_)				{	pose	= pose_; }
 /**
- * \brief Metodo CHANGE WEIGHTS:
+ * \brief Metodo SET WEIGHTS:
  * Cambia el valor del atributo WEIGHTS por el valor del parametro de entrada.
  * @param weights_ nuevo vector de pesos para las coordenadas de traslacion y de orientacion
  */ 
-void Target::changeWeights(WeightVector weights_)	{	this->weights = weights_; }
-
+void Target::setWeights(QVec weights_)			{	weights = weights_; }
+/** 
+ * \brief: Este metodo asigna el valor de la posicion pose_ al target.
+ *@param pose_ es un RoboCompBodyInverseKinematics::Pose6D
+ */ 
+void Target::setPose(RoboCompBodyInverseKinematics::Pose6D pose6D_)
+{ 
+	pose	= QVec::vec6(pose6D_.x, pose6D_.y, pose6D_.z, pose6D_.rx, pose6D_.ry, pose6D_.rz); 
+}
+/**
+ * \brief Metodo SET WEIGHTS:
+ * Cambia el valor del atributo WEIGHTS por el valor del parametro de entrada.
+ * @param weights_ nuevo vector de pesos para las coordenadas de traslacion y de orientacion
+ */ 
+void Target::setWeights(RoboCompBodyInverseKinematics::WeightVector weights_)	
+{	
+	weights = QVec::vec6(weights_.x, weights_.y, weights_.z, weights_.rx, weights_.ry, weights_.rz); 
+}
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 													METODOS GET												   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/ 
@@ -85,29 +85,61 @@ void Target::changeWeights(WeightVector weights_)	{	this->weights = weights_; }
  * Devuelve el valor del atributo STATE: IDLE, IN PROCESS, RESOLVED
  * @return Target::State valor del state
  */ 
-Target::State Target::getState()					{ return this->state; 	}
+Target::State Target::getState()			{ return state; 	}
 
 /**
  * \brief Metodo GET BODY PART
  * Devuelve el nombre de la parte del robot a la que va destinado el target.
  * @return string nombre de la parte del robot.
  */ 
-string Target::getBodyPart()						{ return this->bodyPart; }
+string Target::getBodyPart()				{ return bodyPart; }
 
+/**
+ * \brief Metodo GET POSE 
+ * Devuelve las coordenadas de traslacion y orientacion del target.
+ * @return QVEC.
+ */
+QVec Target::getPose()						{ return pose;}
+/**
+ * \brief Metodo GET WEIGHTS
+ * Devuelve el vector de pesos de las coordenadas de traslacion y orientacion del target.
+ * @return QVEC
+ */ 
+QVec Target::getWeights()					{ return weights; }
 /**
  * \brief Metodo GET POSE 6D
  * Devuelve las coordenadas de traslacion y orientacion del target.
- * @return Pose6D.
+ * @return POSE6D
  */
-Pose6D Target::getPose6D()							{ return this->pose;}
-
+RoboCompBodyInverseKinematics::Pose6D Target::getPose6D	()
+{
+	Pose6D pose6D;
+	pose6D.x = pose.x();
+	pose6D.y = pose.y();
+	pose6D.z = pose.z();
+	pose6D.rx = pose.rx();
+	pose6D.ry = pose.ry();
+	pose6D.rz = pose.rz();
+		
+	return pose6D;
+}
 /**
- * \brief Metodo GET WEIGHTS
- * Devuelve el vector de pesos de las coordenadas de traslacion y orientacion 
- * del target.
- * @return weights
+ * \brief Metodo GET WEIGHTS 6D
+ * Devuelve el vector de pesos de las coordenadas de traslacion y orientacion del target.
+ * @return WeightVector
  */ 
-WeightVector Target::getWeights()					{return this->weights; }
+RoboCompBodyInverseKinematics::WeightVector Target::getWeights6D()
+{
+	WeightVector weights6D;
+	weights6D.x = weights.x();
+	weights6D.y = weights.y();
+	weights6D.z = weights.z();
+	weights6D.rx = weights.rx();
+	weights6D.ry = weights.ry();
+	weights6D.rz = weights.rz();
+		
+	return weights6D;
+}
 
 
 

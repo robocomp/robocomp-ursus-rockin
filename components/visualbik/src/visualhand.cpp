@@ -2,67 +2,100 @@
 
 #include <qmat/qrtmat.h>
 #include <time.h>
-
+/**
+* \brief The VisualHand constructor must receive a pointer to an InnerModel object and the name of the arm's tip.
+*/
 VisualHand::VisualHand(InnerModel *im_, QString tip_)
 {
-	this->im = im_;
-	this->tip = tip_;
-	this->lastUpdate = new timeval;
-	gettimeofday(this->lastUpdate, NULL);
+	im 						= im_;
+	tip 					= tip_;
+	visualPose 				= QVec::vec6(0,0,0,0,0,0);
+	errorInternal_Visual 	= QVec::vec6(0,0,0,0,0,0);
+	lastUpdate 				= new timeval;
+	gettimeofday(lastUpdate, NULL);
 
-	InnerModelNode *nodeParent = this->im->getNode("rgbd_transform");
-	if( this->im->getNode("marca-" + this->tip + "-segun-head") == NULL)
+	InnerModelNode *nodeParent = im->getNode("rgbd_transform");
+	if(im->getNode("marca-" + tip + "-segun-head") == NULL)
 	{
-		nodeMarca = this->im->newTransform("marca-" + this->tip + "-segun-head", "static", nodeParent, 0, 0, 0,        0, 0., 0,      0.);
+		nodeMarca = im->newTransform("marca-" + tip + "-segun-head", "static", nodeParent, 0, 0, 0,        0, 0., 0,      0.);
 		nodeParent->addChild(nodeMarca);
-		nodeMarca2 = this->im->newTransform("marca-" + this->tip + "-segun-head2", "static", nodeMarca, 0, 0, 0,       0., 0, 0,      0.);
+		nodeMarca2 = im->newTransform("marca-" + tip + "-segun-head2", "static", nodeMarca, 0, 0, 0,       0., 0, 0,      0.);
 		nodeMarca->addChild(nodeMarca2);
 	}
 }
 
+/**
+* \brief Destructor.
+*/
 VisualHand::~VisualHand()
 {
-	delete this->lastUpdate;
+	delete lastUpdate;
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 												METODOS PUT/SET												   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/**
+	* \brief Updates the hand's possition according to an April tag and the time.
+	*/
 void VisualHand::setVisualPose(RoboCompAprilTags::tag tag)
 {
 	QVec tagPose = QVec::vec6(tag.tx, tag.ty, tag.tz, tag.rx, tag.ry, tag.rz);
 
 	// Metemos en el InnerModel la marca vista por la RGBD:
-	this->im->updateTransformValues("marca-" + this->tip + "-segun-head", tag.tx, tag.ty, tag.tz,   tag.rx, tag.ry, tag.rz);
-	this->im->updateTransformValues("marca-" + this->tip + "-segun-head2", 0,0,0,   -M_PI_2,0,M_PI);
+	im->updateTransformValues("marca-" + tip + "-segun-head", tag.tx, tag.ty, tag.tz,   tag.rx, tag.ry, tag.rz);
+	im->updateTransformValues("marca-" + tip + "-segun-head2", 0,0,0,   -M_PI_2,0,M_PI);
 
 	//Pasamos del marca-segun-head al mundo:
-	QVec ret = this->im->transform6D("root", tagPose, "rgbd");
-	this->visualPose.x = ret(0);
-	this->visualPose.y = ret(1);
-	this->visualPose.z = ret(2);
+	QVec ret = im->transform6D("root", tagPose, "rgbd");
+	visualPose[0] = ret(0);
+	visualPose[1] = ret(1);
+	visualPose[2] = ret(2);
 
-	QVec ret2 = this->im->transform("root", tagPose, "marca-" + this->tip + "-segun-head2");
-	this->visualPose.rx = ret2(3);
-	this->visualPose.ry = ret2(4);
-	this->visualPose.rz = ret2(5);
+	QVec ret2 = im->transform("root", tagPose, "marca-" + tip + "-segun-head2");
+	visualPose[3] = ret2(3);
+	visualPose[4] = ret2(4);
+	visualPose[5] = ret2(5);
 
-	gettimeofday(this->lastUpdate, NULL);
+	gettimeofday(lastUpdate, NULL);
 	
-	//Calculo el error entre pose interna y pose visual.
-	
-	
+	//TODO Calculo el error entre pose interna y pose visual.
+	const QVec errorInv = im->transform6D(tip, "visual_hand");
+	QVec errorInvP      = QVec::vec3(errorInv(0), errorInv(1), errorInv(2));
+	errorInternal_Visual = im->getRotationMatrixTo("root", tip)*errorInvP;
 }
-
-void VisualHand::setVisualPose(const RoboCompBodyInverseKinematics::Pose6D& pose)
+/**
+* \brief Updates the hand's possition according to direct kinematics.
+*/
+void VisualHand::setVisualPose(const QVec pose_)
 {
-	this->visualPose = pose;
+	visualPose = pose_;
 }
+/**
+ * \brief Actualiza la posicion de la marca visual con la posicion de la marca interna 
+ * y el error calculado que existe entre la marca vista y la marca interna. Calcula la
+ * pose (trasladandola) y la rotacion la asimila como la rotacion del tip en el mundo.
+ */ 
+void VisualHand::setVisualPosewithInternal()
+{
+	QVec aux           = im->transform6D("root", tip);
+	QVec rotCorregida  = QVec::vec3(aux.rx(), aux.ry(), aux.rz());
+	QVec poseCorregida = im->transform("root", tip) + errorInternal_Visual;
+	QVec correccionFinal = QVec::vec6(0,0,0,0,0,0);
+	correccionFinal.inject(poseCorregida,0);
+	correccionFinal.inject(rotCorregida,3); 	//Diremos que la rotacion es la misma que el tip
 
+	visualPose = correccionFinal;
+}
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
  * 													METODOS GET												   *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-double VisualHand::secondsElapsed()
+/**
+* \brief Metodo SECONDS ELAPSED
+* Devuelve los segundos que han pasado desde que se actualizo la pose visual por ultima vez.
+* @return double segundos
+*/
+double VisualHand::getSecondsElapsed()
 {
 	static timeval currentTimeval;
 	gettimeofday(&currentTimeval, NULL);
@@ -78,36 +111,52 @@ double VisualHand::secondsElapsed()
 	const double usecs = currentTimeval.tv_usec - lastUpdate->tv_usec;
 	return secs + usecs/1000000;
 }
-
-QVec VisualHand::getError(RoboCompBodyInverseKinematics::Pose6D target)
+/**
+* \brief Computes the error from the visual position to a target position
+* @param target the target
+* @return pose6D error
+*/
+QVec VisualHand::getError()
 {
-	const QVec error = this->im->transform6D("target", "visual_hand");
+	const QVec error = im->transform6D("target", "visual_hand");
 	return error;
 }
-
-QVec VisualHand::getErrorInverse(RoboCompBodyInverseKinematics::Pose6D target)
+/**
+* \brief Computes the inverse of the error from the visual position to a target position
+* @param target the target
+* @return pose6D error
+*/
+QVec VisualHand::getErrorInverse()
 {
-	const QVec error = this->im->transform6D("visual_hand", "target");
+	const QVec error = im->transform6D("visual_hand", "target");
 	return error;
 }
-
-RoboCompBodyInverseKinematics::Pose6D VisualHand::getVisualPose()
+/**
+* \brief Metodo GET VISUAL POSE
+* Devuelve las coordenadas de traslacion y de orientacion de la marca vista
+* por la camara del robot.
+* @return QVEC
+*/
+QVec VisualHand::getVisualPose()
 {
-	return this->visualPose;
+	return visualPose;
 }
-
-RoboCompBodyInverseKinematics::Pose6D VisualHand::getInternalPose()
+/**
+* \brief Metodo GET INTERNAL POSE
+* Devuelve las coordenadas de traslacion y de orientacion de la marca que el robot 
+* siente internamente (lo que el cree)
+* @return QVEC
+*/
+QVec VisualHand::getInternalPose()
 {
-	QVec pose = this->im->transform6D("root", this->tip);
-
-	RoboCompBodyInverseKinematics::Pose6D internalPose;
-
-	internalPose.x = pose.x();
-	internalPose.y = pose.y();
-	internalPose.z = pose.z();
-	internalPose.rx = pose.rx();
-	internalPose.ry = pose.ry();
-	internalPose.rz = pose.rz();
-
+	QVec internalPose = im->transform6D("root", tip);
 	return internalPose;
+}
+/**
+* \brief returns the name of the hand's tip.
+* @return QString tip
+*/ 
+QString VisualHand::getTip() 
+{ 
+	return tip; 
 }

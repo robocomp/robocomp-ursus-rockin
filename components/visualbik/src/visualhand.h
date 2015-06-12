@@ -1,4 +1,3 @@
-
 #include <BodyInverseKinematics.h>
 #include <AprilTags.h>
 #include <sys/time.h>
@@ -7,80 +6,37 @@
 
 /**
  * \class VisualHand
- *
- * \brief Stores the necessary information and provides some helper methods to work with the visal feedback of the position of the robot's hand
- *
+ * \brief Stores the necessary information and provides some helper methods to work with the visual feedback of the position of the robot's hand
+ * 		-visualPose: visual pose of the apriltag.
+ * 		-lastUpdate: last time that the visual pose was updated.
+ * 		-im:		 InnerModel
+ * 		-errorInternal_Visual: error between the visual pose and the internal pose.
+ * 		-nodeMarca & nodeMarca2: auxiliar nodes 
  **/
 class VisualHand
 {
 public:
-	/**
-	* \brief The VisualHand constructor must receive a pointer to an InnerModel object and the name of the arm's tip.
-	*/
-	VisualHand(InnerModel *im_, QString tip_);
 
-	/**
-	 * \brief Destructor.
-	 */
-	~VisualHand();
+	VisualHand	(InnerModel *im_, QString tip_);
+	~VisualHand	();
 
-	/**
-	* \brief Updates the hand's possition according to an April tag and the time.
-	*/
-	void setVisualPose(RoboCompAprilTags::tag tag);
-
-	/**
-	* \brief Updates the hand's possition according to direct kinematics.
-	*/
-	void setVisualPose(const RoboCompBodyInverseKinematics::Pose6D &pose);
-
-
-	/**
-	* \brief Metodo SECONDS ELAPSED
-	* Devuelve los segundos que han pasado desde que se actualizo la pose visual por ultima vez.
-	* @return double segundos
-	*/
-	double secondsElapsed();
-
-	/**
-	* \brief Computes the error from the visual position to a target position
-	* @param target the target
-	* @return pose6D error
-	*/
- 	QVec getError(RoboCompBodyInverseKinematics::Pose6D target);
-
-	/**
-	* \brief Computes the inverse of the error from the visual position to a target position
-	* @param target the target
-	* @return pose6D error
-	*/
-	QVec getErrorInverse(RoboCompBodyInverseKinematics::Pose6D target);
-
-
-	/**
-	* \brief Metodo GET VISUAL POSE
-	* Devuelve las coordenadas de traslacion y de orientacion de la marca vista
-	* por la camara del robot (¿hay que poner algun elapsed time?)
-	* @return pose6D
-	*/
-	RoboCompBodyInverseKinematics::Pose6D getVisualPose();
-
-
-	RoboCompBodyInverseKinematics::Pose6D getInternalPose();
-
-
-	/**
-	 * \brief returns the name of the hand's tip.
-	 * @return QString tip
-	 */ 
-	QString getTip() { return tip; }
+	
+	void setVisualPose				(RoboCompAprilTags::tag tag);
+	void setVisualPose				(const QVec pose_);
+	void setVisualPosewithInternal	();
+	
+	double 	getSecondsElapsed	();
+ 	QVec 	getError			();
+	QVec 	getErrorInverse		();
+	QVec 	getVisualPose		();
+	QVec 	getInternalPose		();
+	QString getTip				();
 
 private:
-	RoboCompBodyInverseKinematics::Pose6D visualPose;
-	timeval *lastUpdate;
-	InnerModel *im;
-	QString tip;
-	QVec errorInterno_Visual;
-
+	QVec 				visualPose;
+	timeval 			*lastUpdate;
+	InnerModel 			*im;
+	QString 			tip;
+	QVec 				errorInternal_Visual;
 	InnerModelTransform *nodeMarca, *nodeMarca2;
 };
