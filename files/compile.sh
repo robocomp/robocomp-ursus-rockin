@@ -117,11 +117,7 @@ fi
 #echo "make trajectory"
 #cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/
 #cmake .
-<<<<<<< HEAD
-#make -j5
-=======
 #make -j$N
->>>>>>> 78711c4beda34b828fdbf4b621aa5a357de78d07
 #if [ $? -ne 0 ]; then
 #	echo "error compiling trajectory"
 #	exit
@@ -150,6 +146,16 @@ fi
 # objectAgent
 echo "make object agent"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/objectAgent/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling object agent"
+	exit
+fi
+
+# AgmInnerAgent
+echo "make AgmInnerAgent"
+cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/agmInnerAgent/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
