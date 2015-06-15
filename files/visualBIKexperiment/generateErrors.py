@@ -1,7 +1,7 @@
 import sys, copy
 import numpy
 
-def generateErrorsXML(input_file, output_file, t_err, r_err, f_err):
+def generateErrorsXML(input_file, output_file, stdDevT, stdDevR, stdDevF):
 	fields = dict()
 	fields["tx"] = stdDevT
 	fields["ty"] = stdDevT
@@ -10,7 +10,10 @@ def generateErrorsXML(input_file, output_file, t_err, r_err, f_err):
 	fields["ry"] = stdDevR
 	fields["rz"] = stdDevR
 	fields["focal"] = stdDevF
-	print fields
+	#print fields
+
+	entrada = open(input_file, "r")
+	salida  = open(output_file, "w")
 
 	for line in entrada.readlines():
 		lineOut = copy.deepcopy(line)
@@ -48,7 +51,10 @@ def cambiaError(line, fields):
 							base = float(base)
 						fl = s[i-1][:-1].strip()
 						#print 'field', fl
-						ret += first + str(base+numpy.random.normal(0., fields[fl], 1)[0])
+						err = 0
+						if fields[fl] > 0.:
+							err = numpy.random.normal(0., fields[fl], 1)[0]
+						ret += first + str(base+err)
 						first = '"'
 						done = True
 						break
@@ -68,8 +74,8 @@ if __name__ == '__main__':
 		print 'python', sys.argv[0], 'input.xml output.xml err_translation err_rotation err_focal'
 		sys.exit(-1)
 	else:
-		entrada = open(sys.argv[1], "r")
-		salida  = open(sys.argv[2], "w")
+		entrada = sys.argv[1]
+		salida  = sys.argv[2]
 		stdDevT = float(sys.argv[3])
 		stdDevR = float(sys.argv[4])
 		stdDevF = float(sys.argv[5])
