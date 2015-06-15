@@ -42,25 +42,26 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 
 //       THE FOLLOWING IS JUST AN EXAMPLE for AGENTS
-// 	try
-// 	{
-// 		RoboCompCommonBehavior::Parameter par = params.at("NameAgent.InnerModel") ;
-// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-// 			innerModel = new InnerModel(par.value);
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-// 		}
-// 		else
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-// 			qFatal("Exiting now.");
-// 		}
-// 	}
-// 	catch(std::exception e)
-// 	{
-// 		qFatal("Error reading config params");
-// 	}
+	try
+	{
+		RoboCompCommonBehavior::Parameter par = params.at("AgmInnerAgent.InnerModel") ;
+		qDebug()<<"hello";
+		if( QFile(QString::fromStdString(par.value)).exists() == true)
+		{
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+			innerModel = new InnerModel(par.value);
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+		}
+		else
+		{
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+			qFatal("Exiting now.");
+		}
+	}
+	catch(std::exception e)
+	{
+		qFatal("Error reading config params");
+	}
 
 	
 	timer.start(Period);
@@ -70,6 +71,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
+	//AGMModelPrinter::printWorld(worldModel);
 // 	try
 // 	{
 // 		camera_proxy->getYImage(0,img, cState, bState);
