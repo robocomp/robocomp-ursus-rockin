@@ -154,6 +154,7 @@ class SpecificWorker(GenericWorker):
 	#
 	# go
 	def go(self, target):
+		print target.x, target.z
 		return self.goReferenced(target, 0, 0, 0)
 
 

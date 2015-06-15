@@ -36,7 +36,7 @@ Controller::~Controller()
 bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints &road)
 {
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
-	static long epoch = 100;
+	/*static*/ long epoch = 100;
 
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
@@ -44,10 +44,11 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//Check robot state
 	if( (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
 	{
-		// 		if( road.isFinished() ) qDebug() << "road finished";
-		// 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
-		// 		if( road.isLost ) qDebug() << "robot is lost";
+		 		if( road.isFinished() ) qDebug() << "road finished";
+		 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
+		 		if( road.isLost ) qDebug() << "robot is lost";
 		stopTheRobot(omnirobot_proxy);
+
 		return false;
 	}
 
@@ -58,27 +59,27 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	for(auto i : laserData)
 	{
 		if(i.dist < 10) i.dist = 30000;
-		if( i.dist < baseOffsets[j] )
+		if( i.dist < baseOffsets[j] + 50 )
 		{
-			if(i.angle>-2.0 && i.angle<2.0){
+			if(i.angle>-1.57 && i.angle<1.57){
 			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
-			//road.requiresReplanning = true;
 			stopTheRobot(omnirobot_proxy);
 			road.setBlocked(true);
-			return false;
+			qDebug()<<"marcha atras";
+ 			break;
 			}
 		}
 		else
 		{
-			if (i.dist < baseOffsets[j] + 100) 
+			if (i.dist < baseOffsets[j] + 120) 
 			{
 				if (i.angle > 0)
 				{
-					vside  = -100;
+					vside  = -50;
 				}
 				else
 				{
-					vside = 100;
+					vside = 50;
 				}
 			}
 		}
@@ -87,8 +88,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 
 	/////////////////////////////////////////////////
 	//////  CHECK CPU AVAILABILITY
-	////////////////////////////////////////////////
-
+	/////////////////////////////////////////////////
 	if ( time.elapsed() > delay )   //Initial wait in secs so the robot waits for everything is setup. Maybe it could be moved upwards
 	{
 		float MAX_ADV_SPEED = 200.f;
@@ -98,10 +98,8 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			MAX_ADV_SPEED = 200 * exponentialFunction(epoch-100, 200, 0.2);
 			MAX_ROT_SPEED = 0.3 * exponentialFunction(epoch-100, 200, 0.2);
 		}
-
 		float vadvance = 0;
 		float vrot = 0;
-
 		/////////////////////////////////////////////////
 		//////   ROTATION SPEED
 		////////////////////////////////////////////////
@@ -110,7 +108,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		// as descirbed in Thrun's paper on DARPA challenge
 
 		vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/350.) + 0.8 * road.getRoadCurvatureAtClosestPoint() ;
-		
 	// Limiting filter
  		if( vrot > MAX_ROT_SPEED )
  			vrot = MAX_ROT_SPEED;
@@ -127,27 +124,51 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
 		else
 			teta= 1;
+		
+		// Factor to be used in speed control when approaching the end of the road
+		float reduction=1;
+		int w=0;
+		float constant=1000;		//Empieza a reducir cuando encuentra obstaculos a una distancia menor a "constant"
+		for(auto i : laserData)
+		{
+			constant = baseOffsets[w] + constant;
+			if (i.dist < constant)
+			{
+				if(reduction > i.dist/constant && i.angle>-1.57 && i.angle<1.57) //Rango deteccion de obstaculos [-pi/2,pi/2]
+					reduction=i.dist/constant;
+			}
+			w++;
+		}
+		
 
 		//VAdv is computed as a reduction of MAX_ADV_SPEED by three computed functions:
 		//				* road curvature reduces forward speed
 		//				* VRot reduces forward speed
+		//				* reduction is 1 if there are not obstacle.
 		//				* teta that applies when getting close to the target (1/roadGetCurvature)
 		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
-
+// 		qDebug()<<reduction;
 		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
+								 * reduction
 								 * exponentialFunction(vrot, 0.8, 0.01)
 								 * teta;
 								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
 								 //* sunk;
-
 		//Pre-limiting filter to avoid displacements in very closed turns
 		if( fabs(vrot) > 0.8)
 			vadvance = 0;
-
+		
  		// Limiting filter
  		if( vadvance > MAX_ADV_SPEED )
  			vadvance = MAX_ADV_SPEED;
-
+		
+		//Do backward
+		if(road.isBlocked())
+		{
+			vadvance=-80;
+			vrot = 0;
+			vside = 0;
+		}
 		/////////////////////////////////////////////////
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
@@ -173,9 +194,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-  		qDebug() << "------------------Controller Report ---------------;";
-   		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
-  		qDebug() << "---------------------------------------------------;";
+   		//qDebug() << "------------------Controller Report ---------------;";
+    	//	qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+   		//qDebug() << "---------------------------------------------------;";
 
 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot); }

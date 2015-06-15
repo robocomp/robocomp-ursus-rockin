@@ -1,6 +1,6 @@
 # Proxies for required interfaces
-JointMotorProxy = jointmotor:tcp -h localhost -p 0
-BodyInverseKinematicsProxy = bodyinversekinematics:tcp -h localhost -p 0
+JointMotorProxy = jointmotor:tcp -h localhost -p 20000
+BodyInverseKinematicsProxy = bodyinversekinematics:tcp -h localhost -p 10909
 
 
 
