@@ -73,7 +73,7 @@ fi
 
 # bik visual
 echo "make bik visual"
-cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/visualbik/
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/
 cmake .
 make -j5
 if [ $? -ne 0 ]; then
@@ -112,14 +112,14 @@ if [ $? -ne 0 ]; then
 fi
 
 # trajectory
-echo "make trajectory"
-cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/
-cmake .
-make -j5
-if [ $? -ne 0 ]; then
-	echo "error compiling trajectory"
-	exit
-fi
+#echo "make trajectory"
+#cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/
+#cmake .
+#make -j5
+#if [ $? -ne 0 ]; then
+#	echo "error compiling trajectory"
+#	exit
+#fi
 
 # navigationAgent
 echo "make navigation agent"

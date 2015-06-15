@@ -70,7 +70,7 @@ void SpecificWorker::manageReachedObjects()
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 	float THRESHOLD_object = 450;
-	float THRESHOLD_table = 600;
+	float THRESHOLD_table = 800;
 	
 	bool changed = false;
 	mutex->lock();

@@ -47,7 +47,7 @@ void SpecificWorker::compute( )
 	// ACTION EXECUTION
 	//
 // 	printf("<ae\n");
-// 	actionExecution();
+	actionExecution();
 // 	printf("ae>\n");
 }
 
@@ -216,12 +216,6 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::go(float x, float z, float alpha, bool rot, float xRef, float zRef, float threshold)
 {
-	return;
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	RoboCompTrajectoryRobot2D::TargetPose tp;
@@ -259,19 +253,7 @@ void SpecificWorker::stop()
 {
 	try
 	{
-		static QTime time;
-		static bool first = true;
-		if (first)
-		{
-			first = false;
-			time = QTime::currentTime();
-			trajectoryrobot2d_proxy->stop();
-		}
-		else if (time.elapsed()>3000)
-		{
-			time = QTime::currentTime();
-			trajectoryrobot2d_proxy->stop();
-		}
+		trajectoryrobot2d_proxy->stop();
 	}
 	catch(const Ice::Exception &ex)
 	{
@@ -537,7 +519,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 
 	AGMModelSymbol::SPtr goalTable;
 	AGMModelSymbol::SPtr robot;
-	int32_t tableId;
+	int32_t tableId = -1;
 	try
 	{
 		tableId = str2int(params["container"].value);
@@ -803,7 +785,19 @@ void SpecificWorker::odometryAndLocationIssues()
 
 void SpecificWorker::action_NoAction(bool newAction)
 {
-	stop();
+	static QTime time;
+	static bool first = true;
+	if (first)
+	{
+		first = false;
+		time = QTime::currentTime();
+		trajectoryrobot2d_proxy->stop();
+	}
+	else if (time.elapsed()>3000)
+	{
+		time = QTime::currentTime();
+		stop();
+	}
 }
 
 
