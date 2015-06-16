@@ -112,7 +112,7 @@ bool InnerModelDraw::addTransform(InnerModelViewer *innerViewer, QString item, Q
 // void InnerModelDraw::addPlane_ignoreExisting(InnerModelViewer *innerViewer, QString item, QString baseaseaseasease, const RoboCompInnerModelManager::Plane3D &p)
 bool InnerModelDraw::addPlane_ignoreExisting(InnerModelViewer *innerViewer, const QString &item, const QString &base, const QVec &p, const QVec &n, const QString &texture, const QVec &size)
 {
-
+	
 	if (innerViewer->innerModel->getNode(item))
 	{
 		removeNode(innerViewer, item);
@@ -125,7 +125,6 @@ bool InnerModelDraw::addPlane_ignoreExisting(InnerModelViewer *innerViewer, cons
 
 bool InnerModelDraw::addPlane_notExisting(InnerModelViewer *innerViewer, const QString &item, const QString &base, const QVec &p, const QVec &n, const QString &texture, const QVec &size)
 {
-			printf("%s %d\n",__FUNCTION__, __LINE__);
 	InnerModelNode *parent = innerViewer->innerModel->getNode(base);
 	if (parent == NULL)
 	{

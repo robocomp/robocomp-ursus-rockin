@@ -88,8 +88,9 @@ public:
 	virtual void  killAgent() = 0;
 	virtual Ice::Int uptimeAgent() = 0;
 	virtual bool reloadConfigAgent() = 0;
-	virtual void  modelModified(const RoboCompAGMWorldModel::Event& modification) = 0;
-	virtual void  modelUpdated(const RoboCompAGMWorldModel::Node& modification) = 0;
+	virtual void  structuralChange(const RoboCompAGMWorldModel::Event& modification) = 0;
+	virtual void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification) = 0;
+	virtual void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification) = 0;
 
 protected:
 	QTimer timer;

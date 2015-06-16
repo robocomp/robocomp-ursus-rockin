@@ -28,8 +28,8 @@
 
 #include <CommonBehavior.h>
 #include <OmniRobot.h>
+#include <DifferentialRobot.h>
 #include <Laser.h>
-#include <InnerModelManager.h>
 #include <TrajectoryRobot2D.h>
 
 
@@ -41,8 +41,8 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 using namespace std;
 
 using namespace RoboCompOmniRobot;
+using namespace RoboCompDifferentialRobot;
 using namespace RoboCompLaser;
-using namespace RoboCompInnerModelManager;
 using namespace RoboCompTrajectoryRobot2D;
 
 class GenericWorker : 
@@ -65,11 +65,12 @@ public:
 	LaserPrx laser_proxy;
 	OmniRobotPrx omnirobot_proxy;
 
-	virtual void go(const TargetPose &target) = 0;
 	virtual NavState getState() = 0;
 	virtual void goBackwards(const TargetPose &target) = 0;
 	virtual void stop() = 0;
+	virtual void goReferenced(const TargetPose &target, const float xRef, const float zRef) = 0;
 	virtual void changeTarget(const TargetPose &target) = 0;
+	virtual void go(const TargetPose &target) = 0;
 
 
 protected:

@@ -15,9 +15,10 @@
   <dependence alias="navigationAg" />
   <dependence alias="graspingAg" />
   <dependence alias="objectAg" />
+  <dependence alias="agmInnerAg" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost AGMExecutive /home/robocomp/AGM/tools/AGMExecutive_robocomp python AGMExecutive_robocomp.py --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/executiveCOFFEE.conf" />
-  <downCommand command="killall -9 aprilbasedlocalization" />
+  <downCommand command="pkill -9 -f AGMExecutive_robocomp.py" />
   <configFile path="xxx" />
   <xpos value="0" />
   <ypos value="-150" />
@@ -140,7 +141,7 @@
   <dependence alias="base" />
   <dependence alias="laserRGBD" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost trajectory /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/ ./bin/trajectoryrobot2dcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/trajectoryrobot2d.conf" />
+  <upCommand command="rcremote localhost trajectory /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/ ./bin/TrajectoryRobot2DComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/trajectoryrobot2d.conf" />
   <downCommand command="killall -9 trajectoryrobot2dcomp" />
   <configFile path="xxx" />
   <xpos value="-75.8880817451" />
@@ -180,6 +181,17 @@
   <xpos value="-170" />
   <ypos value="-75" />
   <radius value="10.0" />
+ </node>
+ 
+  <node alias="agmInnerAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10334">
+  <!--<dependence alias="aprilCamera" />-->
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost agmInnerAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/agmInnerAgent/ ./bin/agmInnerComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/agmInnerAgent.conf" />
+  <downCommand command="killall -9 agmInnerComp" />
+  <configFile path="xxx" />
+  <xpos value="95" />
+  <ypos value="-150" />
+  <radius value="10.0" />   
  </node>
 
  <node alias="rgbd" endpoint="rgbd:tcp -h localhost -p 10096">

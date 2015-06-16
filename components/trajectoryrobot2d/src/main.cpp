@@ -82,7 +82,6 @@
 
 #include <OmniRobot.h>
 #include <TrajectoryRobot2D.h>
-#include <InnerModelManager.h>
 #include <Laser.h>
 
 
@@ -94,7 +93,6 @@ using namespace RoboCompCommonBehavior;
 
 using namespace RoboCompOmniRobot;
 using namespace RoboCompTrajectoryRobot2D;
-using namespace RoboCompInnerModelManager;
 using namespace RoboCompLaser;
 
 

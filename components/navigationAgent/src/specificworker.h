@@ -44,8 +44,9 @@ public:
 	void  killAgent();
 	Ice::Int uptimeAgent();
 	bool reloadConfigAgent();
-	void  modelModified(const RoboCompAGMWorldModel::Event& modification);
-	void  modelUpdated(const RoboCompAGMWorldModel::Node& modification);
+	void  structuralChange(const RoboCompAGMWorldModel::Event& modification);
+	void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
+	void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
 
 
 public slots:
@@ -61,7 +62,7 @@ private:
 
 
 
-	void go(float x, float z, float alpha=0, bool rot=false);
+	void go(float x, float z, float alpha=0, bool rot=false, float threshold=200, float xRef=0, float zRef=0);
 	void stop();
 	void updateRobotsCognitiveLocation();
 	void actionExecution();

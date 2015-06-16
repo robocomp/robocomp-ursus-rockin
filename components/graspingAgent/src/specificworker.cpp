@@ -51,26 +51,33 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-	QMutexLocker locker(mutex);
-
+// 	printf("compute %d\n\n", __LINE__);
 	// STUFF
 	updateInnerModel();
+// 	printf("compute %d\n\n", __LINE__);
 	manageReachedObjects();
 
+// 	printf("compute %d\n\n", __LINE__);
 	// ACTION EXECUTION
 	actionExecution();
+// 	printf("compute %d\n\n", __LINE__);
 
 }
 
-#define THRESHOLD 400.
 
 void SpecificWorker::manageReachedObjects()
 {
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
-
+	float THRESHOLD_object = 450;
+	float THRESHOLD_table = 800;
+	
 	bool changed = false;
+	mutex->lock();
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	mutex->unlock();
+	
+// 	innerModel->transform("world", "arm_right_1").print("arm_right_1");
 
 	for (AGMModel::iterator symbol_itr=newModel->begin(); symbol_itr!=newModel->end(); symbol_itr++)
 	{
@@ -81,8 +88,18 @@ void SpecificWorker::manageReachedObjects()
 			if (isRoom(newModel, node)) continue;
 
 			/// Compute distance and new state
-			float d2n = distanceToNode("base_head", newModel, node);
+			float d2n = distanceToNode("arm_right_1", newModel, node);
 			printf("distance: %d(%s)=%f\n", node->identifier, node->symbolType.c_str(), d2n);
+			float THRESHOLD = THRESHOLD_object;
+			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
+			{
+				AGMModelEdge &edge = *edge_itr;
+				if (edge->getLabel() == "table")
+				{
+					THRESHOLD = THRESHOLD_table;
+				}
+			}
+				
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
 				AGMModelEdge &edge = *edge_itr;
@@ -109,7 +126,9 @@ void SpecificWorker::manageReachedObjects()
 		printf("PUBLISH!!!!\n");
 		AGMModelPrinter::printWorld(newModel);
 
+		mutex->lock();
 		sendModificationProposal(newModel, worldModel);
+		mutex->unlock();
 	}
 
 
@@ -224,7 +243,7 @@ float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr 
 	}
 	else
 	{
-		return innerModel->transform("base_head", QVec::vec3(x,y,z), "world").norm2();
+		return innerModel->transform(QString::fromStdString(reference_name), QVec::vec3(x,y,z), "world").norm2();
 	}
 }
 
@@ -346,19 +365,26 @@ bool SpecificWorker::reloadConfigAgent()
 }
 
 
-void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modification)
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	mutex->unlock();
 }
 
-void SpecificWorker::modelUpdated(const RoboCompAGMWorldModel::Node& modification)
+void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	mutex->unlock();
 }
+void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
+{
+	mutex->lock();
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	mutex->unlock();
+}
+
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
@@ -470,7 +496,9 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 	try
 	{
 		int32_t tableId = str2int(params["container"].value);
+		mutex->lock();
 		directGazeTowards(worldModel->getSymbol(tableId));
+		mutex->unlock();
 	}
 	catch(...)
 	{
@@ -486,7 +514,9 @@ void SpecificWorker::action_GraspObject(bool first)
 	const QVec offset = QVec::vec3(150, 0, 0);
 	static int32_t state = 0;
 	static QTime time;
+	mutex->lock();
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	mutex->unlock();
 
 	if (first) state = 0;
 	printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
@@ -504,9 +534,30 @@ void SpecificWorker::action_GraspObject(bool first)
 
 	if (state == 0) // 1º approach hand
 	{
-		bodyinversekinematics_proxy->setFingers(100);
+		printf("%s: %d\n", __FILE__, __LINE__);
+		try
+		{
+			bodyinversekinematics_proxy->setFingers(80);
+		}
+		catch(...)
+		{
+			qFatal("%s: %d\n", __FILE__, __LINE__);
+		}
+		printf("%s: %d\n", __FILE__, __LINE__);
 		usleep(100000);
-		sendRightArmToTargetFullPose(symbols["object"], offset);
+		AGMModelSymbol::SPtr symbol;
+		try
+		{
+			printf("%s: %d\n", __FILE__, __LINE__);
+			symbol = symbols["object"];
+			printf("%s: %d\n", __FILE__, __LINE__);
+			sendRightArmToTargetFullPose(symbol, offset);
+			printf("%s: %d\n", __FILE__, __LINE__);
+		}
+		catch (...)
+		{
+			printf("%s: %d\n", __FILE__, __LINE__);
+		}
 
 		time = QTime::currentTime();
 		state = 1;
@@ -573,7 +624,9 @@ void SpecificWorker::action_GraspObject(bool first)
 // 			qFatal("got it!!!! :-D");
 			newModel->removeEdge(symbols["object"], symbols["table"], "in");
 			newModel->addEdge(   symbols["object"], symbols["robot"], "in");
+			mutex->lock();
 			sendModificationProposal(newModel, worldModel);
+			mutex->unlock();
 			time = QTime::currentTime();
 			state = 7;
 		}
@@ -595,33 +648,44 @@ void SpecificWorker::action_GraspObject(bool first)
 
 QVec SpecificWorker::getObjectsLocation(AGMModelSymbol::SPtr &object)
 {
-	return QVec::vec3(
-	 str2float(object->getAttribute("tx")),
-	 str2float(object->getAttribute("ty")),
-	 str2float(object->getAttribute("tz"))
-	);
+printf("%s: %d (%d)\n", __FILE__, __LINE__, object->identifier);
+	const float x = str2float(object->getAttribute("tx"));
+printf("%s: %d\n", __FILE__, __LINE__);
+	const float y = str2float(object->getAttribute("ty"));
+printf("%s: %d\n", __FILE__, __LINE__);
+	const float z = str2float(object->getAttribute("tz"));
+printf("%s: %d\n", __FILE__, __LINE__);
+
+	return QVec::vec3(x, y, z);
 }
 
 void SpecificWorker::sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec offset)
 {
 	Pose6D target;
 	WeightVector weights;
+printf("%s: %d\n", __FILE__, __LINE__);
 	try
 	{
+		printf("%s: %d\n", __FILE__, __LINE__);
 		QVec targetPos = getObjectsLocation(targetObject) + offset;
+		printf("%s: %d\n", __FILE__, __LINE__);
 		targetPos.print("targetFullPose");
+		printf("%s: %d\n", __FILE__, __LINE__);
 		target.x = targetPos(0);
 		target.y = targetPos(1);
 		target.z = targetPos(2);
 		weights.x = 1;
 		weights.y = 1;
 		weights.z = 1;
+		printf("%s: %d\n", __FILE__, __LINE__);
 		target.rx = str2float(targetObject->getAttribute("rx"));
 		target.ry = str2float(targetObject->getAttribute("ry"));
 		target.rz = str2float(targetObject->getAttribute("rz"));
+		printf("%s: %d\n", __FILE__, __LINE__);
 		weights.rx = 1;
 		weights.ry = 1;
 		weights.rz = 1;
+		printf("%s: %d\n", __FILE__, __LINE__);
 	}
 	catch (...)
 	{
@@ -679,7 +743,7 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
-	if (backAction != "setobjectreach" or innerModel->transform("root", "grabPositionHandR")(1)<1000)
+	if (backAction != "setobjectreach" or innerModel->transform("world", "grabPositionHandR")(1)<1000)
 	{
 			backAction = action;
 			printf("first time, set arm for manipulation\n");
@@ -701,17 +765,26 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	}
 	if (objectId > 0)
 	{
-		AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-		const float x = str2float(goalObject->getAttribute("tx"));
-		const float y = str2float(goalObject->getAttribute("ty"));
-		const float z = str2float(goalObject->getAttribute("tz"));
-		saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+		try
+		{
+			mutex->lock();
+			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+			mutex->unlock();
+			const float x = str2float(goalObject->getAttribute("tx"));
+			const float y = str2float(goalObject->getAttribute("ty"));
+			const float z = str2float(goalObject->getAttribute("tz"));
+			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+		}
+		catch (...)
+		{
+			printf("%s %d\n", __FILE__, __LINE__);
+		}
 	}
 	else
 	{
 		printf ("don't have the object to reach in my model %d\n", objectId);
 	}
-	
+
 	printf("--------------------\n");
 
 	///
@@ -777,6 +850,7 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 
 void SpecificWorker::updateInnerModel()
 {
+	mutex->lock();
 	try
 	{
 		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
@@ -784,7 +858,7 @@ void SpecificWorker::updateInnerModel()
 		const float z     = str2float(robot->getAttribute("tz"));
 		const float alpha = str2float(robot->getAttribute("alpha"));
 		innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
-
+                printf("%f %f __ %f\n", x, z, alpha);
 		MotorStateMap mstateMap;
 		jointmotor_proxy->getAllMotorState(mstateMap);
 		for (auto &joint : mstateMap)
@@ -795,8 +869,8 @@ void SpecificWorker::updateInnerModel()
 	}
 	catch(...)
 	{
-		return;
 	}
+	mutex->unlock();
 }
 
 

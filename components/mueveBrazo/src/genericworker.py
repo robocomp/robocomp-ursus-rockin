@@ -38,10 +38,10 @@ class GenericWorker(QtGui.QWidget):
 
 		self.ui = Ui_guiDlg()
 		self.ui.setupUi(self)
-		self.show()
+		#self.show()
 		
 		
-		self.mutex = QtCore.QMutex()
+		self.mutex = QtCore.QMutex(QtCore.QMutex.Recursive)
 		self.Period = 30
 		self.timer = QtCore.QTimer(self)
 

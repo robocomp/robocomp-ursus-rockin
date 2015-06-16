@@ -1,0 +1,25 @@
+<!-- FICHERO MUNDO PARA HACER PRUEBA DE ROCKIN: PONER OBJETOS DELANTE DEL ROBOT PARA QUE LOS ALCANCE CON LA MANO-->
+<innerModel>
+	<transform id="world">
+		<transform id="floor">
+			<transform id="robot_en_suelo" tx="0" ty="-10" tz="0">
+				<include path="/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml"/>
+			</transform>
+			<plane id="ddG" ny="1"  px="-0" py="0" pz="0" size="5000,5000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+		</transform>
+		
+		<!-- SEGUNDO CUBO DE APRIL TAGS-->
+		<transform id="CUBO_11" tx="0" ty="700" tz="500"> 
+			<plane id="left_x" px="25" nz="1" size="50,5,5" repeat="1" texture="#ff0000" />
+			<plane id="left_y" py="25" nz="1" size="5,50,5" repeat="1" texture="#00ff00" />
+			<plane id="left_z" pz="25" nz="1" size="5,5,50" repeat="1" texture="#0000ff" />
+			<!--<plane id="C11_1" nx="1"  px="-50" py="50" pz="0" size="100,100,1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+			<plane id="C11_2" nx="1"  px="50" py="50" pz="0" size="100,100,1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+			<plane id="C11_3" ny="1"  px="0" py="100" pz="0" size="100,100,1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+			<plane id="C11_4" ny="1"  px="0" py="0" pz="0" size="100,100,1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+			<plane id="C11_5" nz="1"  px="0" py="50" pz="50" size="100,100,1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />
+			<plane id="C11_6" nz="1"  px="0" py="50" pz="-50" size="100,100,1" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-11.png" />-->
+		</transform>
+	
+	</transform>
+</innerModel>
