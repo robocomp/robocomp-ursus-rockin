@@ -18,6 +18,7 @@
 #
 
 import sys, os, Ice, traceback, time
+import os.path
 import random
 
 from PySide import *
@@ -85,6 +86,10 @@ class SpecificWorker(GenericWorker):
 		self.prueba2000puntos()
 		
 		while True:
+			if os.path.exists("/home/mercedes/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos.txt") == False:
+				print "El fichero no existe"
+				sys.exit(-1)
+				
 			if self.bodyinversekinematics_proxy.getState("RIGHTARM").finish:
 				sys.exit(0)
 		#Pueba compleja

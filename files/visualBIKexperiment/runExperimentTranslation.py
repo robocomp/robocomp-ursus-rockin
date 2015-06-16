@@ -11,7 +11,7 @@ step_value = 0.5
 
 i = 1
 
-os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/datosObtenidos.txt")
+os.system("rm /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos.txt")
 
 for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 	
@@ -58,7 +58,7 @@ for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 		print x*10
 
 	print 'hecho!'
-	os.system('mv /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/datosObtenidos.txt /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/datosObtenidos_'+str(i).zfill(5)+'.txt')
+	os.system('mv /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(i).zfill(5)+'.txt')
 	i += 1
 	
 	
