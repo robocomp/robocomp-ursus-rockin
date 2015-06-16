@@ -59,6 +59,7 @@
  </node>
 
  <node alias="icestorm" endpoint="IceStorm/TopicManager:default -h localhost -p 9999">
+  <color value="#4422FF" />
   <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
   <upCommand command="rcremote localhost icestorm /home/robocomp/robocomp/components/robocomp-ursus/etc/ icebox --Ice.Config=icebox.conf" />
   <downCommand command="killall -9 icebox" />
