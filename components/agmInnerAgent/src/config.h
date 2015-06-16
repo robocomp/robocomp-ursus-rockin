@@ -5,7 +5,7 @@
 #define USE_QTGUI
 
 
-#define PROGRAM_NAME    " agmInner"
-#define SERVER_FULL_NAME   "RoboComp agmInner:: agmInner"
+#define PROGRAM_NAME    "agmInnerComp"
+#define SERVER_FULL_NAME   "RoboComp agmInnerComp:: agmInnerComp"
 
 #endif

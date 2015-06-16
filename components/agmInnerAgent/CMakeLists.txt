@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 2.8 )
 
 SUBDIRS( src )
 
-INSTALL(FILES etc/config DESTINATION /opt/robocomp/etc-default/ RENAME agmInner.conf )
+INSTALL(FILES etc/config DESTINATION /opt/robocomp/etc-default/ RENAME agmInnerComp.conf )
 
 ADD_CUSTOM_TARGET(doc doxygen Doxyfile)
-ADD_CUSTOM_TARGET(installdoc mkdir -p /opt/robocomp/doc COMMAND cp -R doc/html /opt/robocomp/doc/agmInner )
+ADD_CUSTOM_TARGET(installdoc mkdir -p /opt/robocomp/doc COMMAND cp -R doc/html /opt/robocomp/doc/agmInnerComp )

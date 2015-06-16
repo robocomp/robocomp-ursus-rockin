@@ -22,12 +22,20 @@
        @author authorname
 */
 
+
+
+// THIS IS AN AGENT
+
+
+
+
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
+#include <agm.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -46,13 +54,21 @@ public:
 	bool deactivateAgent();
 	StateStruct getAgentState();
 	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
+	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 
 public slots:
 	void compute(); 	
 
 private:
+	std::string action;
+	ParameterMap params;
+	AGMModel::SPtr worldModel;
+	InnerModel *innerModel;
+	bool active;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+	
 };
 
 #endif
