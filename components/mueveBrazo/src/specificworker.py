@@ -82,7 +82,11 @@ class SpecificWorker(GenericWorker):
 
 		#Prueba 2000 puntos
 		self.ui.entrenamientoButton.clicked.connect(self.prueba2000puntos)
+		self.prueba2000puntos()
 		
+		while True:
+			if self.bodyinversekinematics_proxy.getState("RIGHTARM").finish:
+				sys.exit(0)
 		#Pueba compleja
 		#self.ui.botonCargar.clicked.connect(self.cargarCubos)
 		#self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
@@ -289,7 +293,7 @@ class SpecificWorker(GenericWorker):
 		#                   800 - 900 en Y
 		#                   400 - 200 en Z
 		import RoboCompBodyInverseKinematics
-		for i in range(0, 100):
+		for i in range(0, 10):
 			print 'i: ',i
 			pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
 			pose6D.x  = random.uniform(100.0, 200.0)
@@ -299,7 +303,7 @@ class SpecificWorker(GenericWorker):
 			pose6D.ry = 0
 			pose6D.rz = 3.1416
 			#print 'Llamando a BIK con pose6D: ',pose6D
-			self.ui.label_13.setText(self.ui.label_13.getText()+'\n('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+'), ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
+			#self.ui.label_13.setText(self.ui.label_13.getText()+'\n('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+'), ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 
 			weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
 			weights.x = 1
