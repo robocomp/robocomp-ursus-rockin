@@ -301,9 +301,9 @@ class SpecificWorker(GenericWorker):
 		for i in range(0, 10):
 			print 'i: ',i
 			pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
-			pose6D.x  = random.uniform(100.0, 200.0)
-			pose6D.y  = random.uniform(800.0, 900.0)
-			pose6D.z  = random.uniform(400.0, 250.0)
+			pose6D.x  = random.uniform(100.0, 150.0)
+			pose6D.y  = random.uniform(800.0, 890.0)
+			pose6D.z  = random.uniform(400.0, 300.0)
 			pose6D.rx = 0
 			pose6D.ry = 0
 			pose6D.rz = 3.1416
@@ -323,7 +323,7 @@ class SpecificWorker(GenericWorker):
 			axis.y = 0
 			axis.z = 1
 
-			radius = 150 #radio
+			radius = 5 #radio
 			try:
 				part = "RIGHTARM"
 				self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)

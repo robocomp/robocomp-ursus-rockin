@@ -6,8 +6,8 @@ import time, os
 import subprocess
 
 init_value = 0.0
-end_value = 50.0
-step_value = 0.5
+end_value = 30.0
+step_value = 3
 
 i = 1
 
@@ -16,7 +16,7 @@ os.system("rm /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/vis
 for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 	
 	print 'Running experiment with error in translation: stdDev_T='+str(stdDev_T)
-	for x in xrange(250):
+	for x in xrange(10):
 		os.system('killall -9 ursuscommonjointcomp apriltagscomp inversekinematics VisualBIK')
 		generateErrorsXML("ursus.xml", "/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml", stdDev_T, 0, 0)
 
