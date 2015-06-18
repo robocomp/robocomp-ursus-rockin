@@ -6,8 +6,8 @@ import time, os
 import subprocess
 
 init_value = 0.0
-end_value = 50.0
-step_value = 0.5
+end_value = 30.0
+step_value = 3
 
 i = 1
 
