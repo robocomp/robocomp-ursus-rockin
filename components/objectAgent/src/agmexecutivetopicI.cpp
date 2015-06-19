@@ -32,14 +32,7 @@ AGMExecutiveTopicI::~AGMExecutiveTopicI()
 }
 
 // Component functions, implementation
-<<<<<<< HEAD
-void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event& modification, const Ice::Current&){
-	worker->modelModified(modification);
-}
 
-void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node& modification, const Ice::Current&){
-	worker->modelUpdated(modification);
-=======
 void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event &modification, const Ice::Current&)
 {
 	worker->structuralChange(modification);
@@ -53,11 +46,7 @@ void AGMExecutiveTopicI::symbolUpdated(   const RoboCompAGMWorldModel::Node &nod
 void AGMExecutiveTopicI::edgeUpdated(     const RoboCompAGMWorldModel::Edge &edge,  const Ice::Current&)
 {
 	worker->edgeUpdated(edge);
->>>>>>> 78711c4beda34b828fdbf4b621aa5a357de78d07
 }
 
-void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification, const Ice::Current&){
-// 	worker->modelUpdated(modification);
-}
 
 
