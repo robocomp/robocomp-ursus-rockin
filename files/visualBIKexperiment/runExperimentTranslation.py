@@ -42,11 +42,11 @@ for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 		time.sleep(5)
 		
 		##LEVANTAMOS EL VISUAL INVERSEKINEMATICS
-		print i, x, '############################# ejecutando VIK'
-		os.system('killall -9 VisualBIK')
-		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/etc/configDefinitivo > /dev/null &')
-		#DORMIMOS 5 SEGUNDOS
-		time.sleep(5)
+	#	print i, x, '############################# ejecutando VIK'
+	#	os.system('killall -9 VisualBIK')
+	#	os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/etc/configDefinitivo > /dev/null &')
+	#	#DORMIMOS 5 SEGUNDOS
+	#	time.sleep(5)
 		
 		##LEVANTAMOS EL MUEVE BRAZO
 		print i, x, '############################# ejecutando M'
