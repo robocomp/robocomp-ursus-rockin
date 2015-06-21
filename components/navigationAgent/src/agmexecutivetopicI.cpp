@@ -31,21 +31,6 @@ AGMExecutiveTopicI::~AGMExecutiveTopicI()
 	// Free component resources here
 }
 
-<<<<<<< HEAD
-// Component functions, implementation
-void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event& modification, const Ice::Current&){
-	worker->modelModified(modification);
-}
-
-void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node& modification, const Ice::Current&){
-	worker->modelUpdated(modification);
-}
-
-void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification, const Ice::Current&){
-// 	worker->modelUpdated(modification);
-}
-
-=======
 
 void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event &modification, const Ice::Current&)
 {
@@ -61,5 +46,4 @@ void AGMExecutiveTopicI::edgeUpdated(     const RoboCompAGMWorldModel::Edge &edg
 {
 	worker->edgeUpdated(edge);
 }
->>>>>>> 78711c4beda34b828fdbf4b621aa5a357de78d07
 

@@ -34,7 +34,7 @@ class GenericWorker(QtGui.QWidget):
 
 
 		self.jointmotor_proxy = mprx["JointMotorProxy"]
-		self.bodyinversekinematics_proxy = mprx["BodyInverseKinematicsProxy"]
+		self.inversekinematics_proxy = mprx["InverseKinematicsProxy"]
 
 		self.ui = Ui_guiDlg()
 		self.ui.setupUi(self)
