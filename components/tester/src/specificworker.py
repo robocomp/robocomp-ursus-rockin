@@ -17,7 +17,7 @@
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys, os, Ice, traceback
+import sys, os, Ice, traceback, math, random
 from PySide import *
 from genericworker import *
 
@@ -55,10 +55,23 @@ class SpecificWorker(GenericWorker):
 		self.ui.rzbox.setValue(3.1415)
 		
 		self.ui.homebutton.clicked.connect(self.goHome)
+		self.ui.homebutton_2.clicked.connect(self.goHome)
 		self.ui.stopbutton.clicked.connect(self.stop)
-		self.ui.sendbutton.clicked.connect(self.sendPose)
+		self.ui.stopbutton_2.clicked.connect(self.stop)
+		self.ui.sendbutton.clicked.connect(self.sendPose6D)
+		self.ui.alignaxisbutton.clicked.connect(self.sendPoseAlignAxis)
+		#self.ui.advanceaxisbutton.clicked.connect(self.sendPoseAdvanceAxis)
 		self.mapa = {'rightShoulder1':-0.5, 'rightShoulder2':-0.70, 'rightShoulder3':.50 , 'rightElbow':1.30 , 'rightForeArm':-.689, 'head_yaw_joint':0.30, 'head_pitch_joint':0.20}
-		self.contador = 0
+		
+		self.prueba10puntos()
+		
+		while True:
+			if os.path.exists("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt") == False:
+				print "El fichero no existe"
+				sys.exit(-1)
+				
+			if self.inversekinematics_proxy.getPartState("RIGHTARM") == True:
+				sys.exit(0)
 
 	def setParams(self, params):
 		#try:
@@ -99,8 +112,8 @@ class SpecificWorker(GenericWorker):
 			print "Exception in tester (STOP): ", e
 	
 	@QtCore.Slot()
-	def sendPose(self):
-		print "SEND POSE contador: ", self.contador
+	def sendPose6D(self):
+		print "SEND POSE 6D"
 		import RoboCompInverseKinematics
 		pose6D = RoboCompInverseKinematics.Pose6D() #target al que se movera
 		pose6D.x  = float(self.ui.txbox.value())
@@ -124,12 +137,53 @@ class SpecificWorker(GenericWorker):
 			weights.rz = 0
 		try:
 			part = "RIGHTARM"
-			self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
+			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
+			
+			#state = RoboCompInverseKinematics.TargetState()
+			#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+			#while state.finish!=True:
+				#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+				#print state.finish
+			
+			#for motor in state.motors:
+				#print motor
+				#goal = MotorGoalPosition()
+				#goal.position = motor.angle
+				#goal.name = motor.name
+				#goal.maxSpeed = 0.5
+				#try:
+					#self.jointmotor_proxy.setPosition(goal)
+				#except CollisionException:
+					#print "Error en arriba_R: ",CollisionException
+		except RoboCompInverseKinematics.IKException, e:
+			print "Expection in tester (sendPose): ", e
+				
+	@QtCore.Slot()
+	def sendPoseAlignAxis(self):
+		#  setTargetAlignaxis(const string &bodyPart, const Pose6D &target, const Axis &ax)
+		print "SEND POSE ALIGN AXIS"
+		import RoboCompInverseKinematics
+		pose6D = RoboCompInverseKinematics.Pose6D() #target al que se movera
+		pose6D.x  = float(self.ui.txbox.value())
+		pose6D.y  = float(self.ui.tybox.value())
+		pose6D.z  = float(self.ui.tzbox.value())
+		pose6D.rx = float(self.ui.rxbox.value())
+		pose6D.ry = float(self.ui.rybox.value())
+		pose6D.rz = float(self.ui.rzbox.value())
+		print '---> ',pose6D
+		axis = RoboCompInverseKinematics.Axis() #vector de pesos
+		axis.x = 0
+		axis.y = 0
+		axis.z = 1
+		
+		try:
+			part = "HEAD"
+			identificador = self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
 			
 			state = RoboCompInverseKinematics.TargetState()
-			state = self.inversekinematics_proxy.getTargetState("RIGHTARM", self.contador)
+			state = self.inversekinematics_proxy.getTargetState("HEAD", identificador)
 			while state.finish!=True:
-				state = self.inversekinematics_proxy.getTargetState("RIGHTARM", self.contador)
+				state = self.inversekinematics_proxy.getTargetState("HEAD", identificador)
 				print state.finish
 			
 			for motor in state.motors:
@@ -144,9 +198,33 @@ class SpecificWorker(GenericWorker):
 					print "Error en arriba_R: ",CollisionException
 		except RoboCompInverseKinematics.IKException, e:
 			print "Expection in tester (sendPose): ", e
-		
-		self.contador = self.contador+1
+			
+	
+	def prueba10puntos(self):
+		import RoboCompInverseKinematics
+		for i in range(0, 10):
+			pose6D = RoboCompInverseKinematics.Pose6D() #target al que se movera
+			pose6D.x  = random.randint(100, 200)
+			pose6D.y  = random.randint(780, 850)
+			pose6D.z  = random.randint(370, 400)
+			pose6D.rx = 0
+			pose6D.ry = 0
+			pose6D.rz = 3.1416
+			print 'i: ',i," pose: ", pose6D
+			#print 'Llamando a BIK con pose6D: ',pose6D
+			#self.ui.label_13.setText(self.ui.label_13.getText()+'\n('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+'), ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 
-
+			weights = RoboCompInverseKinematics.WeightVector() #vector de pesos
+			weights.x = 1
+			weights.y = 1
+			weights.z = 1
+			weights.rx = 0.1
+			weights.ry = 0.1
+			weights.rz = 0.1
+			#try:
+			#part = "HEAD"
+			#self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
+			part = "RIGHTARM"
+			self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
 
 
