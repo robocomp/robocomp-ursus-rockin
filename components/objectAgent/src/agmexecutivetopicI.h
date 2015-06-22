@@ -37,16 +37,9 @@ Q_OBJECT
 public:
 	AGMExecutiveTopicI( GenericWorker *_worker, QObject *parent = 0 );
 	~AGMExecutiveTopicI();
-<<<<<<< HEAD
-	void  structuralChange(const RoboCompAGMWorldModel::Event& modification, const Ice::Current& = Ice::Current());
-void symbolUpdated(const RoboCompAGMWorldModel::Node& modification, const Ice::Current& = Ice::Current());
-void edgeUpdated(const RoboCompAGMWorldModel::Edge& modification, const Ice::Current& = Ice::Current());
-=======
 	void structuralChange(const RoboCompAGMWorldModel::Event&, const Ice::Current& = Ice::Current());
 	void symbolUpdated(   const RoboCompAGMWorldModel::Node&,  const Ice::Current& = Ice::Current());
 	void edgeUpdated(     const RoboCompAGMWorldModel::Edge&,  const Ice::Current& = Ice::Current());
-
->>>>>>> 78711c4beda34b828fdbf4b621aa5a357de78d07
 
 
 	QMutex *mutex;

@@ -150,7 +150,6 @@ private:
 	OsgView *osgView;
 	InnerModelViewer *innerViewer;
 	InnerModel *innerVisual;
-
 #endif
 	
 };
