@@ -11,7 +11,7 @@ step_value = 3
 
 i = 1
 
-os.system("rm /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos.txt")
+os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 
 for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 	
@@ -36,29 +36,29 @@ for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 		##LEVANTAMOS EL INVERSEKINEMATICS
 		print i, x, '############################# ejecutando IK'
 		os.system('killall -9 inversekinematics')
-		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/etc/configDefinitivo > /dev/null &')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/etc/configdefinitivo > /dev/null &')
 
 		#DORMIMOS 5 SEGUNDOS
 		time.sleep(5)
 		
 		##LEVANTAMOS EL VISUAL INVERSEKINEMATICS
-	#	print i, x, '############################# ejecutando VIK'
-	#	os.system('killall -9 VisualBIK')
-	#	os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/etc/configDefinitivo > /dev/null &')
-	#	#DORMIMOS 5 SEGUNDOS
-	#	time.sleep(5)
+		print i, x, '############################# ejecutando VIK'
+		os.system('killall -9 VisualBIK')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/etc/configDefinitivo > /dev/null &')
+		#DORMIMOS 5 SEGUNDOS
+		time.sleep(5)
 		
 		##LEVANTAMOS EL MUEVE BRAZO
-		print i, x, '############################# ejecutando M'
+		print i, x, '############################# ejecutando TESTER'
 		os.system('pkill -9 name.py')
-		os.system('python /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/mueveBrazo/src/name.py /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/mueveBrazo/etc/configDefinitivo')
+		os.system('python /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/tester/src/mueveBrazo.py /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/tester/etc/configDefinitivo')
 
 
 		#os.system('killall -9 ursuscommonjointcomp apriltagscomp inversekinematics VisualBIK')
 		print x*10
 
 	print 'hecho!'
-	os.system('mv /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(i).zfill(5)+'.txt')
+	os.system('mv /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(i).zfill(5)+'.txt')
 	i += 1
 	
 	
