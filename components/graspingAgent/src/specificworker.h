@@ -62,7 +62,6 @@ public slots:
 
 private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	bool active;
 	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
 
 
@@ -98,8 +97,6 @@ private:
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
 	bool active;
-	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 	
 };
 

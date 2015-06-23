@@ -35,7 +35,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 
-// 	bodyinversekinematics_proxy->goHome("RIGHTARM");
+// 	inversekinematics_proxy->goHome("RIGHTARM");
 // 	setRightArmUp_Reflex();
 
 }
@@ -431,7 +431,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel
 {
 	try
 	{
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "graspingAgent");
+		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, "graspingAgent");
 	}
 	catch(...)
 	{
@@ -535,7 +535,7 @@ void SpecificWorker::action_GraspObject(bool first)
 		printf("%s: %d\n", __FILE__, __LINE__);
 		try
 		{
-			bodyinversekinematics_proxy->setFingers(80);
+			//inversekinematics_proxy->setFingers(80);
 		}
 		catch(...)
 		{
@@ -575,7 +575,7 @@ void SpecificWorker::action_GraspObject(bool first)
 	}
 	else if (state == 2) // 2º get the hand into the object
 	{
-		bodyinversekinematics_proxy->setFingers(100);
+		//inversekinematics_proxy->setFingers(100);
 		usleep(100000);
 		sendRightArmToTargetFullPose(symbols["object"], offset.operator*(0.4));
 		time = QTime::currentTime();
@@ -596,7 +596,7 @@ void SpecificWorker::action_GraspObject(bool first)
 	}
 	else if (state == 4) // 3º get the hand into the object
 	{
-		bodyinversekinematics_proxy->setFingers(50);
+		//inversekinematics_proxy->setFingers(50);
 		time = QTime::currentTime();
 		state = 5;
 	}
@@ -617,7 +617,7 @@ void SpecificWorker::action_GraspObject(bool first)
 	{
 		try
 		{
-			bodyinversekinematics_proxy->setFingers(50);
+			//inversekinematics_proxy->setFingers(50);
 			usleep(500000);
 // 			qFatal("got it!!!! :-D");
 			newModel->removeEdge(symbols["object"], symbols["table"], "in");
@@ -691,7 +691,11 @@ printf("%s: %d\n", __FILE__, __LINE__);
 	}
 	try
 	{
-		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+		//Call to BodyInverseKinematics
+		//inversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+		//New call to InverseKinematics
+		inversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights);
+					
 	}
 	catch (...)
 	{
@@ -726,7 +730,10 @@ void SpecificWorker::sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetOb
 	}
 	try
 	{
-		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+		//Call to BodyInverseKinematics
+		//inversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 1.);
+		//New call to InverseKinematics
+		inversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights);
 	}
 	catch (...)
 	{
@@ -820,11 +827,11 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 	jointmotor_proxy->setPosition(goal);
 
 /*
-	RoboCompBodyInverseKinematics::Pose6D targetSight;
+	RoboCompInverseKinematics::Pose6D targetSight;
 	targetSight.x = tx;
 	targetSight.y = ty;
 	targetSight.z = tz;
-	RoboCompBodyInverseKinematics::Axis axSight;
+	RoboCompInverseKinematics::Axis axSight;
 	axSight.x = axx;
 	axSight.y = axy;
 	axSight.z = axz;
@@ -832,9 +839,9 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 	float axisAngleConstraint = 0;
 	try
 	{
-		bodyinversekinematics_proxy->stop("HEAD");
+		inversekinematics_proxy->stop("HEAD");
 		usleep(500000);
-		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
+		inversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
 	}
 	catch(...)
 	{
@@ -874,25 +881,25 @@ void SpecificWorker::updateInnerModel()
 
 void SpecificWorker::setRightArmUp_Reflex()
 {
-	bodyinversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
-	bodyinversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
+	inversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
+	inversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
+	inversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
+	inversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
 }
 
 
 void SpecificWorker::setRightArm_GRASP_0_Reflex()
 {
-	bodyinversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
-	bodyinversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
-	bodyinversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
+	inversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
+	inversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
+	inversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
+	inversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
 }
 
 

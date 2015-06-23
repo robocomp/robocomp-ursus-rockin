@@ -91,7 +91,7 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 	
 	RoboCompCommonBehavior::Parameter aux;
 	aux.editable = false;
-	configGetString( "GraspingAgent.InnerModel", aux.value,"no file");
+	configGetString( "GraspingAgent","InnerModel", aux.value,"no file");
 	params["GraspingAgent.InnerModel"] = aux;
 }
 
