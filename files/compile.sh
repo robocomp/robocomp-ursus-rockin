@@ -63,15 +63,17 @@ fi
 ### COMPONENTS
 ###
 
-# bik
-echo "make bik"
-cd /home/robocomp/robocomp/components/robocomp-ursus/components/bikComp/
+# inversekinematics
+echo "make ik"
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling bik"
+	echo "error compiling IK"
 	exit
 fi
+
+
 
 # bik visual
 echo "make bik visual"
