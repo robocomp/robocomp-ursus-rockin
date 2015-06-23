@@ -29,7 +29,7 @@
   <dependence alias="executive" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost mission /home/robocomp/robocomp/components/robocomp-ursus/components/missionAgent/ ./bin/missionagent  --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/mission.conf" />
-  <downCommand command="killall -9 mission" />
+  <downCommand command="killall -9 missionagent" />
   <configFile path="xxx" />
   <xpos value="0" />
   <ypos value="-200" />
