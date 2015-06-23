@@ -1,7 +1,7 @@
 visualIKtester
 ===============================
-##What is Visual Inverse Kinematic (visualIK)?
-In the [`inversekinematic` component](https://github.com/robocomp/robocomp-ursus/blob/master/components/inversekinematics/README.md) we explained the principles on which the inverse kinematics of a robot is based and the operation of it. But one of the problems that the inverse kinematics can not solve by itself is the problem of gaps and imperfections of the robot. These gaps and inaccuracies make the robot move its arm toward the target position improperly, so that the robot “thinks” that the end effector has reached the target but in reality has fallen far short of the target pose.
+##What is Visual Inverse Kinematic tester (visualIKtester)?
+In the [`visualik` component](https://github.com/robocomp/robocomp-ursus/tree/master/components/visualik/README.md) we explained the principles on which the inverse kinematics of a robot is based and the operation of it. But one of the problems that the inverse kinematics can not solve by itself is the problem of gaps and imperfections of the robot. These gaps and inaccuracies make the robot move its arm toward the target position improperly, so that the robot “thinks” that the end effector has reached the target but in reality has fallen far short of the target pose.
 
 In order to solve this last problem, we need visual feedback to correct the errors and mistakes introduced for the gaps and inaccuracies in the kinematic chain. The visual inverse kinematics (`visualik`) component is responsible for solve this visual feedback and correct the inverse kinematic. The operation of the algorithm is very simple and takes as its starting point the investigations of Seth Hutchinson, Greg Hager and Peter Corke, collected in [A Tutorial on Visual Servo Control](http://www-cvr.ai.uiuc.edu/~seth/ResPages/pdfs/HutHagCor96.pdf)
 

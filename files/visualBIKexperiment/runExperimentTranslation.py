@@ -51,7 +51,7 @@ for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 		##LEVANTAMOS EL MUEVE BRAZO
 		print i, x, '############################# ejecutando TESTER'
 		os.system('pkill -9 name.py')
-		os.system('python /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/tester/src/mueveBrazo.py /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/tester/etc/configDefinitivo')
+		os.system('python /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/visualIKtester/src/mueveBrazo.py /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/visualIKtester/etc/configDefinitivo')
 
 
 		#os.system('killall -9 ursuscommonjointcomp apriltagscomp inversekinematics VisualBIK')
