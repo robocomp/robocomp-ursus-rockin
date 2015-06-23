@@ -164,7 +164,7 @@
   <dependence alias="bik" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
-  <downCommand command="killall -9 graspingcomp" />
+  <downCommand command="killall -9 graspingComp" />
   <configFile path="xxx" />
   <xpos value="87.3440730926" />
   <ypos value="-75" />
