@@ -163,7 +163,7 @@
  <node alias="graspingAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10332">
   <dependence alias="bik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
+  <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
   <downCommand command="killall -9 graspingcomp" />
   <configFile path="xxx" />
   <xpos value="87.3440730926" />
