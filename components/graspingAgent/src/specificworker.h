@@ -44,24 +44,56 @@ public:
 	SpecificWorker(MapPrx& mprx);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
-
-	bool reloadConfigAgent();
-	bool activateAgent(const ParameterMap &prs);
-	bool setAgentParameters(const ParameterMap &prs);
-	ParameterMap getAgentParameters();
-	void killAgent();
-	int uptimeAgent();
+	bool activateAgent(const ParameterMap& prs);
 	bool deactivateAgent();
 	StateStruct getAgentState();
-	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
-	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	ParameterMap getAgentParameters();
+	bool setAgentParameters(const ParameterMap& prs);
+	void  killAgent();
+	Ice::Int uptimeAgent();
+	bool reloadConfigAgent();
+	void  structuralChange(const RoboCompAGMWorldModel::Event& modification);
+	void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
+	void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
+
 
 public slots:
 	void compute(); 	
 
 private:
-	std::string action;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	bool active;
+	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
+
+
+	QVec getObjectsLocation(AGMModelSymbol::SPtr &object);
+	void sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
+	void sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
+
+	void manageReachedObjects();
+
+
+
+	void actionExecution();
+	void action_FindObjectVisuallyInTable(bool first=false);
+	void action_SetObjectReach(bool first=false);
+	void action_GraspObject(bool first=false);
+
+	void directGazeTowards(AGMModelSymbol::SPtr symbol);
+	void saccadic3D(QVec point, QVec axis);
+	void saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz);
+	void updateInnerModel();
+
+
+bool isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node);
+float distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr symbol);
+float distanceToPolygon(QVec reference, QVec position, std::string polygon_str);
+
+	void setRightArmUp_Reflex();
+	void setRightArm_GRASP_0_Reflex();
+
+private:
+	std::string action, backAction;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
