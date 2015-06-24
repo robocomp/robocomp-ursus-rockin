@@ -11,6 +11,7 @@ step_value = 3
 
 i = 1
 
+os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
 os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 
 for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
@@ -61,6 +62,7 @@ for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 	os.system('mv /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(i).zfill(5)+'.txt')
 	i += 1
 	
-	
+os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
+
 	
 	
