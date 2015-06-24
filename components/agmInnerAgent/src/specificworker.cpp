@@ -71,7 +71,13 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-	//AGMModelPrinter::printWorld(worldModel);
+	qDebug()<<"\t\t************************";
+	AGMModelPrinter::printWorld(worldModel);
+	qDebug()<<"\t\t************************";
+	innerModel->treePrint();
+	qDebug()<<"\t\t************************";
+	
+	
 // 	try
 // 	{
 // 		camera_proxy->getYImage(0,img, cState, bState);
