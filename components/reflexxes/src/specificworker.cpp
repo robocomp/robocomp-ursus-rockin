@@ -59,15 +59,44 @@ void SpecificWorker::compute()
 // 	}
 }
 
-
+/**
+ * \brief 
+ */ 
 bool SpecificWorker::getStatePosition(const MotorAngleList &anglesOfMotors)
 {
-
+	bool todoOk = true;
+    RoboCompJointMotor::MotorState motorState;
+	
+	for(auto motor : anglesOfMotors)
+	{
+		try
+		{
+			motorState = jointmotor_proxy->getMotorState(motor.name);
+			if(fabs(motorState.pos - motor.angle)>0.1)
+				todoOk = false;
+		} 
+		catch (const Ice::Exception &ex) {	cout<<"EXCEPTION IN GET STATE POSITION: "<<ex<<endl;}
+	}
+	return todoOk;
 }
-
+/**
+ * TODO UTILIZAR LAS CLASES DE REFLEXX !!!
+ */ 
 void SpecificWorker::setJointPosition(const MotorAngleList &newAnglesOfMotors)
 {
-
+	for (auto motor : newAnglesOfMotors)
+	{
+		try
+		{
+			RoboCompJointMotor::MotorGoalPosition nodo;
+			
+			nodo.name = motor.name;
+			nodo.position = motor.angle; // posición en radianes
+			nodo.maxSpeed = motor.speed; //radianes por segundo TODO Bajar velocidad.
+			jointmotor_proxy->setPosition(nodo);
+		} 
+		catch (const Ice::Exception &ex) {	cout<<"EXCEPTION IN SET JOINT POSITION: "<<ex<<endl;}
+	}
 }
 
 
