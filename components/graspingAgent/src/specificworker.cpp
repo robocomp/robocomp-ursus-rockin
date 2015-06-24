@@ -535,7 +535,7 @@ void SpecificWorker::action_GraspObject(bool first)
 		printf("%s: %d\n", __FILE__, __LINE__);
 		try
 		{
-			//inversekinematics_proxy->setFingers(80);
+			inversekinematics_proxy->setFingers(80);
 		}
 		catch(...)
 		{
@@ -575,7 +575,7 @@ void SpecificWorker::action_GraspObject(bool first)
 	}
 	else if (state == 2) // 2º get the hand into the object
 	{
-		//inversekinematics_proxy->setFingers(100);
+		inversekinematics_proxy->setFingers(100);
 		usleep(100000);
 		sendRightArmToTargetFullPose(symbols["object"], offset.operator*(0.4));
 		time = QTime::currentTime();
@@ -596,7 +596,7 @@ void SpecificWorker::action_GraspObject(bool first)
 	}
 	else if (state == 4) // 3º get the hand into the object
 	{
-		//inversekinematics_proxy->setFingers(50);
+		inversekinematics_proxy->setFingers(50);
 		time = QTime::currentTime();
 		state = 5;
 	}
@@ -617,7 +617,7 @@ void SpecificWorker::action_GraspObject(bool first)
 	{
 		try
 		{
-			//inversekinematics_proxy->setFingers(50);
+			inversekinematics_proxy->setFingers(50);
 			usleep(500000);
 // 			qFatal("got it!!!! :-D");
 			newModel->removeEdge(symbols["object"], symbols["table"], "in");
