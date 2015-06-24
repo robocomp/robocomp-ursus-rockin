@@ -34,6 +34,9 @@
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
+#include "reflexxes.h"
+
+
 
 class SpecificWorker : public GenericWorker
 {
