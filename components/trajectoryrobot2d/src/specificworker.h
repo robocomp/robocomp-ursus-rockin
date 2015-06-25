@@ -87,12 +87,14 @@ public:
 	~SpecificWorker();
 			
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	void go(const TargetPose& target);
 	void setHeadingTo(const TargetPose& target);
-	void changeTarget(const TargetPose& target);
-	void stop();
 	RoboCompTrajectoryRobot2D::NavState	getState();
-	void goBackwards(const TargetPose& target);
+	
+	float goBackwards(const TargetPose &target);
+	void stop();
+	float goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold);
+	float changeTarget(const TargetPose &target);
+	float go(const TargetPose &target);
 		
 public slots:
  	void	compute(); 	
@@ -142,9 +144,6 @@ private:
 	void printNumberOfElementsInIMV();
 	void calcularModuloFloat(QVec &angles, float mod);
 	float angmMPI(float angle);
-	
-	
-	void goReferenced(const TargetPose &target, const float xRef, const float zRef);
 
 #ifdef USE_QTGUI
 	OsgView *osgView;

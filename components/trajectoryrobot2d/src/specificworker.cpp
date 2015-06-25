@@ -575,7 +575,7 @@ void SpecificWorker::printNumberOfElementsInIMV()
  * @param target New target pose. Only fist three elements are used as translation
  * @return void
  */
-void SpecificWorker::changeTarget(const TargetPose& target)
+float SpecificWorker::changeTarget(const TargetPose& target)
 {
 	qDebug() <<__FUNCTION__ << "DEPRECATED";
 }
@@ -587,7 +587,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
  * @param target ...
  * @return void
  */
-void SpecificWorker::go(const TargetPose& target)
+float SpecificWorker::go(const TargetPose& target)
 {
 
 		printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
@@ -657,7 +657,7 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
  * @param target ...
  * @return void
  */
-void SpecificWorker::goBackwards(const TargetPose& target)
+float SpecificWorker::goBackwards(const TargetPose& target)
 {
 	qDebug() << __FUNCTION__ << "GOBACKWARDS command received";
 
@@ -926,7 +926,7 @@ float SpecificWorker::angmMPI(float angle)
 // }
 
 
-void SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef)
+float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold)
 {
 }
 
