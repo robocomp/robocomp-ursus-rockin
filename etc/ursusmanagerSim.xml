@@ -37,7 +37,7 @@
  </node>
 
  <node alias="bikTester" endpoint="commonbehavior:tcp -h localhost -p 12211">
-  <dependence alias="bik" />
+  <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost bikTester /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/ ./bin/lokiarmtestercomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicstester.conf" />
   <downCommand command="killall -9 aprilbasedlocalization" />
@@ -47,7 +47,7 @@
   <radius value="10.0" />
  </node>
 
- <node alias="bik" endpoint="commonbehavior:tcp -h localhost -p 12207">
+ <node alias="ik" endpoint="commonbehavior:tcp -h localhost -p 12207">
   <dependence alias="commonjoint" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
@@ -161,7 +161,7 @@
  </node>
 
  <node alias="graspingAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10332">
-  <dependence alias="bik" />
+  <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
   <downCommand command="killall -9 graspingComp" />

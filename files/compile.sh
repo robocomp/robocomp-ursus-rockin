@@ -75,13 +75,13 @@ fi
 
 
 
-# bik visual
-echo "make bik visual"
-cd /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/
+# ik visual
+echo "make ik visual"
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling visualbik"
+	echo "error compiling visualik"
 	exit
 fi
 
