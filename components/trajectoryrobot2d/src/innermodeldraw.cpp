@@ -41,19 +41,19 @@ void InnerModelDraw::addMesh_ignoreExisting(InnerModelViewer *innerViewer, QStri
 	try
 	{
 		//qDebug() << __FILE__ << __FUNCTION__ << "parent" << parent << "mesh" << a;
-		innerVisual->addMesh(a.toStdString(),parent.toStdString(), m);
+		innerViewer->innerModel->addMesh(a.toStdString(),parent.toStdString(), m);
 	} 
 	catch (const RoboCompInnerModelManager::InnerModelManagerError &e )
 	{
 		try
 		{
-			innerVisual->removeNode(a.toStdString());
-			innerVisual->addMesh(a.toStdString(),parent.toStdString(), m);
+			innerViewer->innerModel->removeNode(a.toStdString());
+			innerViewer->innerModel->addMesh(a.toStdString(),parent.toStdString(), m);
 		}
-		catch(const RoboCompInnerModelManager::InnerModelManagerError &e )
+		catch(QString err )
 		{
-			qDebug() << __FUNCTION__ << "Error adding mesh.";
-			qDebug() << QString::fromStdString(e.text);
+		printf("%s:%s:%d: Exception: %s\n", __FILE__, __FUNCTION__, __LINE__, err.toStdString().c_str());
+		throw;
 		}
 	}
 */
