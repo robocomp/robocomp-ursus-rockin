@@ -34,6 +34,8 @@
 #include <Planning.h>
 #include <AGMCommonBehavior.h>
 
+#include <agm.h>
+
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -48,6 +50,15 @@ using namespace RoboCompInnerModelManager;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompPlanning;
 using namespace RoboCompAGMCommonBehavior;
+
+
+struct BehaviorParameters 
+{
+	RoboCompPlanning::Action action;
+	std::vector< std::vector <std::string> > plan;
+};
+
+
 
 class GenericWorker : 
 #ifdef USE_QTGUI
@@ -65,6 +76,11 @@ public:
 	
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
+	bool activate(const BehaviorParameters& parameters);
+	bool deactivate();
+	bool isActive() { return active; }
+	RoboCompAGMWorldModel::BehaviorResultType status();
+	
 
 	AGMAgentTopicPrx agmagenttopic_proxy;
 	InnerModelManagerPrx innermodelmanager_proxy;
@@ -85,6 +101,14 @@ public:
 protected:
 	QTimer timer;
 	int Period;
+	bool active;
+	AGMModel::SPtr worldModel;
+	BehaviorParameters p;
+	ParameterMap params;
+	int iter;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	RoboCompPlanning::Action createAction(std::string s);
+
 public slots:
 	virtual void compute() = 0;
 signals:

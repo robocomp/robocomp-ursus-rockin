@@ -1,8 +1,4 @@
 ﻿<innerModel>
-<!-- 	<axes id="sl3" /> -->
-	<transform id="target">
-		<axes id="target_axes" length="200" width="8" />
-	</transform>
 
 
 	<omnirobot id="robot" port="12238" >
@@ -29,8 +25,6 @@
 						<mesh id="barrahombro" file="/home/robocomp/robocomp/files/osgModels/robexarm/barrahombro.3ds" tx="-150" ty="0" tz="945" ry="-1.5707963267948966" scale="1000" collide="1" />
 						<mesh id="barracuello" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracuello.ive" tx="0" ty="0" tz="930" rx="3.14159265359" scale="1000" collide="1" />
 						<mesh id="barracolumna" file="/home/robocomp/robocomp/files/osgModels/robexarm/barracolumna.osg" tx="30" ty="-15" tz="930" rz="1.5707963267948966" scale="850" collide="1" />
-
-
 
 						<transform id="base_bodypost" rx="1.5707963267948966" ry="@ERROR" rz="@ERROR" tx="@ERROR" ty="0@ERROR" tz="0" >
 							<transform id="base_head" tx="@ERROR" ty="1080@ERROR" tz="0@ERROR" rx="-1.5707963267948966@ERROR" ry="@ERROR" rz="@ERROR" > <!-- Head begins -->

@@ -64,22 +64,22 @@ fi
 ###
 
 # bik
-echo "make bik"
-cd /home/robocomp/robocomp/components/robocomp-ursus/components/bikComp/
+echo "make ik"
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling bik"
+	echo "error compiling ik"
 	exit
 fi
 
 # bik visual
 echo "make bik visual"
-cd /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling visualbik"
+	echo "error compiling visualik"
 	exit
 fi
 
@@ -146,6 +146,16 @@ fi
 # objectAgent
 echo "make object agent"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/objectAgent/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling object agent"
+	exit
+fi
+
+# AgmInnerAgent
+echo "make AgmInnerAgent"
+cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/agmInnerAgent/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then

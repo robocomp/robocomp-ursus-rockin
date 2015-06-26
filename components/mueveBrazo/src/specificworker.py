@@ -18,6 +18,7 @@
 #
 
 import sys, os, Ice, traceback, time
+import os.path
 import random
 
 from PySide import *
@@ -82,7 +83,15 @@ class SpecificWorker(GenericWorker):
 
 		#Prueba 2000 puntos
 		self.ui.entrenamientoButton.clicked.connect(self.prueba2000puntos)
+		#self.prueba2000puntos()
 		
+	#	while True:
+	#		if os.path.exists("/home/mercedes/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos.txt") == False:
+	#			print "El fichero no existe"
+	#			sys.exit(-1)
+				
+	#		if self.bodyinversekinematics_proxy.getState("RIGHTARM").finish:
+	#			sys.exit(0)
 		#Pueba compleja
 		#self.ui.botonCargar.clicked.connect(self.cargarCubos)
 		#self.ui.botonIR1.clicked.connect(self.llamarBIK_1)
@@ -102,11 +111,11 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def compute(self):
 		print 'SpecificWorker.compute...'
-		try:
-			differentialrobot_proxy.setSpeed(100, 0)
-		except Ice.Exception, e:
-			traceback.print_exc()
-			print e
+	#	try:
+	#		differentialrobot_proxy.setSpeed(100, 0)
+	#	except Ice.Exception, e:
+	#		traceback.print_exc()
+	#		print e
 		return True
 
 
@@ -289,17 +298,17 @@ class SpecificWorker(GenericWorker):
 		#                   800 - 900 en Y
 		#                   400 - 200 en Z
 		import RoboCompBodyInverseKinematics
-		for i in range(0, 100):
+		for i in range(0, 10):
 			print 'i: ',i
 			pose6D = RoboCompBodyInverseKinematics.Pose6D() #target al que se movera
-			pose6D.x  = random.uniform(100.0, 200.0)
-			pose6D.y  = random.uniform(800.0, 900.0)
-			pose6D.z  = random.uniform(400.0, 250.0)
+			pose6D.x  = random.uniform(100.0, 150.0)
+			pose6D.y  = random.uniform(800.0, 850.0)
+			pose6D.z  = random.uniform(370.0, 420.0)
 			pose6D.rx = 0
 			pose6D.ry = 0
 			pose6D.rz = 3.1416
 			#print 'Llamando a BIK con pose6D: ',pose6D
-			self.ui.label_13.setText(self.ui.label_13.getText()+'\n('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+'), ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
+			#self.ui.label_13.setText(self.ui.label_13.getText()+'\n('+str(pose6D.x)+', '+str(pose6D.y)+', '+str(pose6D.z)+'), ['+str(pose6D.rx)+', '+str(pose6D.ry)+', '+str(pose6D.rz)+']')
 
 			weights = RoboCompBodyInverseKinematics.WeightVector() #vector de pesos
 			weights.x = 1
@@ -314,14 +323,20 @@ class SpecificWorker(GenericWorker):
 			axis.y = 0
 			axis.z = 1
 
-			radius = 150 #radio
-			try:
-				part = "RIGHTARM"
-				self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
-				part = "HEAD"
-				self.bodyinversekinematics_proxy.pointAxisTowardsTarget(part, pose6D, axis, False, 0)
-			except:
-				print "Error en movimiento_sin_Rotacion"
+			radius = 5 #radio
+			#try:
+			part = "HEAD"
+			self.bodyinversekinematics_proxy.pointAxisTowardsTarget(part, pose6D, axis, False, 0)
+			part = "RIGHTARM"
+			self.bodyinversekinematics_proxy.setTargetPose6D(part,pose6D, weights, radius)
+			time.sleep(6)
+			while self.bodyinversekinematics_proxy.getState("RIGHTARM").finish == False:
+				time.sleep(4)
+			print "ha terminado: ", i
+			self.bodyinversekinematics_proxy.goHome("RIGHTARM")
+			time.sleep(4)
+			#except:
+			#	print "Error en movimiento_sin_Rotacion"
 
 	########################################################################################################
 	########################################################################################################
