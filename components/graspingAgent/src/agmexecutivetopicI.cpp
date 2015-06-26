@@ -43,9 +43,3 @@ void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node  &modif
 {
 	worker->symbolUpdated(modification);
 }
-
-
-
-
-
-

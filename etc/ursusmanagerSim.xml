@@ -51,7 +51,11 @@
   <dependence alias="commonjoint" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
+<<<<<<< HEAD
+  <upCommand command="rcremote localhost IK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
+=======
   <upCommand command="rcremote localhost BIK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
+>>>>>>> 3d934bc4c2b9d55333ed849088f9b41f3252a2cf
   <downCommand command="killall -9 inversekinematics" />
   <configFile path="xxx" />
   <xpos value="89.1406595764" />

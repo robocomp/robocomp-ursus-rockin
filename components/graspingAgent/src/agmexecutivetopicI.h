@@ -42,6 +42,7 @@ public:
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node  &modification, const Ice::Current&);
 
+
 	QMutex *mutex;
 private:
 
