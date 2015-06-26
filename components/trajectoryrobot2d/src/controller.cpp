@@ -147,12 +147,12 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//				* reduction is 1 if there are not obstacle.
 		//				* teta that applies when getting close to the target (1/roadGetCurvature)
 		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
-// 		qDebug()<<reduction;
+ 		reduction=1; //TODO arreglar reduction del laser;
 		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
 								 * reduction
 								 * exponentialFunction(vrot, 0.8, 0.01)
 								 * teta;
-								 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
+                                                                                                                                //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
 								 //* sunk;
 		//Pre-limiting filter to avoid displacements in very closed turns
 		if( fabs(vrot) > 0.8)
@@ -195,11 +195,12 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		////////////////////////////////////////////////
 
    		//qDebug() << "------------------Controller Report ---------------;";
-    	//	qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+    		//qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
    		//qDebug() << "---------------------------------------------------;";
-
-
-   		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot); }
+                
+   		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);
+                    qDebug() << "iuuu";
+                }
    		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 	}
 	else		//Too long delay. Stopping robot.
