@@ -93,8 +93,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
 
-	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);   //"robot" should be an external parameter
-	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
+	innerModel->updateTranslationValues("robot", bState.correctedX, 0, bState.correctedZ);   //"robot" should be an external parameter
+	innerModel->updateRotationValues("robot", 0, bState.correctedAlpha, 0);
 
 	//	setRobotInitialPose(800, -1500, M_PI);
 	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
@@ -484,8 +484,8 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 	try
 	{
 		omnirobot_proxy->getBaseState(bState);
-		inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-		innerVisual->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+		inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
 		try
 		{
 			laserData = laser_proxy->getLaserData();
@@ -575,7 +575,7 @@ void SpecificWorker::printNumberOfElementsInIMV()
  * @param target New target pose. Only fist three elements are used as translation
  * @return void
  */
-void SpecificWorker::changeTarget(const TargetPose& target)
+float SpecificWorker::changeTarget(const TargetPose& target)
 {
 	qDebug() <<__FUNCTION__ << "DEPRECATED";
 }
@@ -587,7 +587,7 @@ void SpecificWorker::changeTarget(const TargetPose& target)
  * @param target ...
  * @return void
  */
-void SpecificWorker::go(const TargetPose& target)
+float SpecificWorker::go(const TargetPose& target)
 {
 
 		printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
@@ -657,7 +657,7 @@ void SpecificWorker::setHeadingTo(const TargetPose& target)
  * @param target ...
  * @return void
  */
-void SpecificWorker::goBackwards(const TargetPose& target)
+float SpecificWorker::goBackwards(const TargetPose& target)
 {
 	qDebug() << __FUNCTION__ << "GOBACKWARDS command received";
 
@@ -926,7 +926,7 @@ float SpecificWorker::angmMPI(float angle)
 // }
 
 
-void SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef)
+float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold)
 {
 }
 

@@ -27,6 +27,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
+	setPeriod(1000);
 }
 
 /**
@@ -71,18 +72,118 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-	//AGMModelPrinter::printWorld(worldModel);
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
+
+// 	AGMModelPrinter::printWorld(worldModel);
+// 	qDebug()<<"\t\t************************";
+// 	innerModel->treePrint();
+// 	qDebug()<<"\t\t************************";
+	
+	if (worldModel->numberOfSymbols()>0)
+	{
+		qDebug()<<"numberOfSymbols"<<worldModel->numberOfSymbols();
+		qDebug()<<"************************";
+		include_im("world",20);
+		qDebug()<<"************************";
+		qDebug()<<"numberOfSymbols"<<worldModel->numberOfSymbols();		
+		//innerModel->treePrint();
+		qDebug()<<"************************";
+		//AGMModelPrinter::printWorld(worldModel);
+		
+		
+// 		printf("sending modification!\n");
+// 		AGMModel::SPtr newModel(new AGMModel(worldModel));		
+// 		AGMModelPrinter::printWorld(newModel);
+// 		sendModificationProposal(worldModel, newModel);
+		
+	}
+	
+}	
+
+void SpecificWorker::include_im(QString idInnerModelNode, int idSymbol)
+{
+	InnerModelNode *node=innerModel->getNode(idInnerModelNode);
+	if (node==NULL)
+	{
+		qDebug()<<"node"<<idInnerModelNode<<"doesn't exist";
+		qFatal("abort");
+	}
+	AGMModelSymbol::SPtr symbol;
+	
+	try
+	{
+		symbol =worldModel->getSymbolByIdentifier(idSymbol);
+	}
+	catch (AGMModelException e )	
+	{
+		std::cout<<e.what();
+		qFatal("abort");
+	}
+	
+	
+	//int n=20;
+// 	recorrer(node,n);
+	int n=symbol->identifier;
+	innerToAGM(node,n);
+	
 }
+void SpecificWorker::recorrer(InnerModelNode *node, int &n)
+{
+	
+	QList<InnerModelNode*>::iterator i;
+	int p=n;
+	for (i=node->children.begin(); i!=node->children.end(); i++)
+	{		
+		n++;
+		
+	 	qDebug()<<node->id<<"link"<<(*i)->id<<p<<"--"<<n;
+		recorrer(*i,n);	
+	}
+	
+	
+}
+
+void SpecificWorker::innerToAGM(InnerModelNode* node ,  int &id)
+{
+	QList<InnerModelNode*>::iterator i;	
+	int p=id;
+	for (i=node->children.begin(); i!=node->children.end(); i++)
+	{
+		id++;
+		qDebug()<<node->id<<"link"<<(*i)->id<<p<<"--"<<id;
+		std::map<std::string, std::string> attrs;
+		attrs.insert ( std::pair<std::string,std::string>("name",(*i)->id.toStdString()) );
+		AGMModelSymbol::SPtr newSym;
+		if (worldModel->getIndexByIdentifier(id)==-1 )
+		{
+			qDebug()<<"newSymbol"<<id;
+			 newSym = worldModel->newSymbol(id,"transform",attrs);		
+		}
+		else
+		{
+			qDebug()<<"exist id"<<id;
+			 newSym =worldModel->getSymbolByIdentifier(id);		
+		}
+		
+		//edge 
+		std::map<std::string, std::string> linkAttrs;
+
+		linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str((*i)->getTr().x())) );
+		linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str((*i)->getTr().y())) );
+		linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str((*i)->getTr().z())) );
+		linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str((*i)->getRxValue())));
+		linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str((*i)->getRyValue())));
+		linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str((*i)->getRzValue())));
+		
+		if (worldModel->addEdgeByIdentifiers(p,id,"RT",linkAttrs))
+			qDebug()<<"addEdge"<<p<<"-- RT -->"<<newSym->identifier<<"\n";
+		else
+			qDebug()<<p<<"-- RT -->"<<newSym->identifier<<"el arco existe ya"<<"\n";
+		innerToAGM((*i),id);
+		
+	}	
+}
+	
+
 
 
 bool SpecificWorker::reloadConfigAgent()

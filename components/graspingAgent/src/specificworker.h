@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -16,24 +16,32 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SPECIFICWORKER_H
-#define SPECIFICWORKER_H
-
-#include <genericworker.h>
-
-#include <innermodel/innermodel.h>
-#include <agm.h>
 
 /**
        \brief
        @author authorname
 */
 
+
+
+// THIS IS AN AGENT
+
+
+
+
+#ifndef SPECIFICWORKER_H
+#define SPECIFICWORKER_H
+
+#include <genericworker.h>
+#include <innermodel/innermodel.h>
+
+#include <agm.h>
+
 class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx);
+	SpecificWorker(MapPrx& mprx);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	bool activateAgent(const ParameterMap& prs);
@@ -50,11 +58,10 @@ public:
 
 
 public slots:
- 	void compute();
+	void compute(); 	
 
 private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	bool active;
 	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
 
 
@@ -89,6 +96,9 @@ private:
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	bool active;
+	
 };
 
 #endif
+

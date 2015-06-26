@@ -29,7 +29,7 @@
   <dependence alias="executive" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost mission /home/robocomp/robocomp/components/robocomp-ursus/components/missionAgent/ ./bin/missionagent  --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/mission.conf" />
-  <downCommand command="killall -9 mission" />
+  <downCommand command="killall -9 missionagent" />
   <configFile path="xxx" />
   <xpos value="0" />
   <ypos value="-200" />
@@ -51,7 +51,11 @@
   <dependence alias="commonjoint" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
+<<<<<<< HEAD
   <upCommand command="rcremote localhost IK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
+=======
+  <upCommand command="rcremote localhost BIK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
+>>>>>>> 3d934bc4c2b9d55333ed849088f9b41f3252a2cf
   <downCommand command="killall -9 inversekinematics" />
   <configFile path="xxx" />
   <xpos value="89.1406595764" />
@@ -163,8 +167,8 @@
  <node alias="graspingAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10332">
   <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
-  <downCommand command="killall -9 graspingcomp" />
+  <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
+  <downCommand command="killall -9 graspingComp" />
   <configFile path="xxx" />
   <xpos value="87.3440730926" />
   <ypos value="-75" />
