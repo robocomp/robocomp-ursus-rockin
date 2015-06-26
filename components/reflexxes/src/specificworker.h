@@ -53,7 +53,7 @@ public slots:
 	void compute(); 	
 
 private:
-	
+	InnerModel					*innerModel;	
 };
 
 #endif

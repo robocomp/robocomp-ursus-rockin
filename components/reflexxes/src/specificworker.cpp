@@ -35,28 +35,33 @@ SpecificWorker::~SpecificWorker()
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
-{
-
-
-
+{	try
+	{
+		RoboCompCommonBehavior::Parameter par = params.at("InnerModel") ;
+		if( QFile(QString::fromStdString(par.value)).exists() == true)
+		{
+			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+			innerModel = new InnerModel(par.value);
+		}
+		else  	qFatal("Exiting now.");
+	}catch(std::exception e) { qFatal("Error reading Innermodel param");}
 	
 	timer.start(Period);
-
 	return true;
 }
 
 void SpecificWorker::compute()
 {
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
+	// ACTUALIZAMOS EL INNERMODEL
+	try
+	{
+		RoboCompJointMotor::MotorStateMap mMap;
+		jointmotor_proxy->getAllMotorState(mMap);
+
+		for (auto j : mMap)
+			innerModel->updateJointValue(QString::fromStdString(j.first), j.second.pos);
+		
+	}catch (const Ice::Exception &ex){ cout<<"--> Excepción en actualizar InnerModel";}
 }
 
 /**
@@ -84,19 +89,32 @@ bool SpecificWorker::getStatePosition(const MotorAngleList &anglesOfMotors)
  */ 
 void SpecificWorker::setJointPosition(const MotorAngleList &newAnglesOfMotors)
 {
-	for (auto motor : newAnglesOfMotors)
+	// 1) SACAMOS VALORES ACTUALES DE LOS MOTORES: (aprovechamos y sacamos motores
+	QVec firstAngles;
+	QStringList motors;
+	for(auto motor : newAnglesOfMotors)
 	{
-		try
-		{
-			RoboCompJointMotor::MotorGoalPosition nodo;
-			
-			nodo.name = motor.name;
-			nodo.position = motor.angle; // posición en radianes
-			nodo.maxSpeed = motor.speed; //radianes por segundo TODO Bajar velocidad.
-			jointmotor_proxy->setPosition(nodo);
-		} 
-		catch (const Ice::Exception &ex) {	cout<<"EXCEPTION IN SET JOINT POSITION: "<<ex<<endl;}
+		float angle = innerModel->getJoint(QString::fromStdString(motor.name))->getAngle();
+		firstAngles.push_back(angle);
+		motors<<QString::fromStdString(motor.name);
 	}
+	//  2) SACAMOS VALORES FINALES DE LOS MOTORES
+	QVec finalAngles;
+	for(auto motor : newAnglesOfMotors)
+	{
+		float angle = motor.angle;
+		finalAngles.push_back(angle);
+	}
+	
+	QList<QVec> jointValues;
+	jointValues.append(firstAngles);
+	jointValues.append(finalAngles);
+	
+	Reflexx *reflexx = new Reflexx(jointmotor_proxy, jointValues, motors);
+	reflexx->start();
+	qDebug() << __FUNCTION__ << "Waiting for Reflexx...";
+	reflexx->wait(5000);
+	qDebug()<<"FIN DEL WAIT";
 }
 
 
