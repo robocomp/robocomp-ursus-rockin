@@ -137,7 +137,6 @@ void SpecificWorker::compute( )
 {
 	static QTime reloj = QTime::currentTime();
 	static int cont = 0;
-
 	// Check for connection failure
 	if ( updateInnerModel(innerModel, tState) == false )
 	{
@@ -480,10 +479,11 @@ void SpecificWorker::changeCommand(CurrentTarget& target, CurrentTarget::Command
  */
 bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 {
-
 	try
 	{
 		omnirobot_proxy->getBaseState(bState);
+//                 qDebug()<<"corregido"<<bState.correctedX<<bState.correctedZ<<bState.correctedAlpha;
+//                 qDebug()<<"normal"<<bState.x<<bState.z<<bState.alpha;
 		inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
 		innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
 		try
