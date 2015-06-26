@@ -93,8 +93,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
 
-	innerModel->updateTranslationValues("robot", bState.x, 0, bState.z);   //"robot" should be an external parameter
-	innerModel->updateRotationValues("robot", 0, bState.alpha, 0);
+	innerModel->updateTranslationValues("robot", bState.correctedX, 0, bState.correctedZ);   //"robot" should be an external parameter
+	innerModel->updateRotationValues("robot", 0, bState.correctedAlpha, 0);
 
 	//	setRobotInitialPose(800, -1500, M_PI);
 	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
@@ -484,8 +484,8 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 	try
 	{
 		omnirobot_proxy->getBaseState(bState);
-		inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-		innerVisual->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+		inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
 		try
 		{
 			laserData = laser_proxy->getLaserData();
