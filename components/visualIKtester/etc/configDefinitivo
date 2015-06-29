@@ -1,7 +1,9 @@
 # Proxies for required interfaces
 JointMotorProxy = jointmotor:tcp -h localhost -p 20000
+
 # INVERSE KINEMATICS COMPONENT:
 #InverseKinematicsProxy = inversekinematics:tcp -h localhost -p 10220
+
 # VISUAL INVERSE KINEMATICS COMPONENT:
 InverseKinematicsProxy = inversekinematics:tcp -h localhost -p 10240
 
