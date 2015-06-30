@@ -47,8 +47,8 @@ QList<QVec> Sampler::sampleFreeSpaceR2(uint nPoints)
 	QList<QVec> list;
 	
 	
-	printf("hola %f %f\n", outerRegion.left(), outerRegion.right());
-	printf("hola %f %f\n", outerRegion.top(), outerRegion.bottom());
+	printf(" %f %f\n", outerRegion.left(), outerRegion.right());
+	printf(" %f %f\n", outerRegion.top(), outerRegion.bottom());
 	
 	for(uint32_t i=0; i<nPoints;i++)
 	{
