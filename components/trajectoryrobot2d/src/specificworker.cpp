@@ -484,8 +484,16 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 	try
 	{
 		omnirobot_proxy->getBaseState(bState);
-		inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
-		innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		if(state.getState()=="IDLE")
+		{
+		  inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		  innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		}
+		else
+		{
+		  inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+		  innerVisual->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
+		}
 		try
 		{
 			laserData = laser_proxy->getLaserData();
