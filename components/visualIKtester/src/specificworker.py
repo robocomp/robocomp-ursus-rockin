@@ -63,15 +63,15 @@ class SpecificWorker(GenericWorker):
 		#self.ui.advanceaxisbutton.clicked.connect(self.sendPoseAdvanceAxis)
 		self.mapa = {'rightShoulder1':-0.5, 'rightShoulder2':-0.70, 'rightShoulder3':.50 , 'rightElbow':1.30 , 'rightForeArm':-.689, 'head_yaw_joint':0.30, 'head_pitch_joint':0.20}
 		
-		#self.prueba10puntos()
+		self.prueba10puntos()
 		
-		#while True:
-		#	if os.path.exists("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt") == False:
-		#		print "El fichero no existe"
-		#		sys.exit(-1)
+		while True:
+			if os.path.exists("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt") == False:
+				print "El fichero no existe"
+				sys.exit(-1)
 				
-		#	if self.inversekinematics_proxy.getPartState("RIGHTARM") == True:
-		#		sys.exit(0)
+			if self.inversekinematics_proxy.getPartState("RIGHTARM") == True:
+				sys.exit(0)
 
 	def setParams(self, params):
 		#try:
@@ -138,23 +138,22 @@ class SpecificWorker(GenericWorker):
 		try:
 			part = "RIGHTARM"
 			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
-			
-			#state = RoboCompInverseKinematics.TargetState()
-			#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-			#while state.finish!=True:
-				#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-				#print state.finish
-			
-			#for motor in state.motors:
-				#print motor
-				#goal = MotorGoalPosition()
-				#goal.position = motor.angle
-				#goal.name = motor.name
-				#goal.maxSpeed = 0.5
-				#try:
-					#self.jointmotor_proxy.setPosition(goal)
-				#except CollisionException:
-					#print "Error en arriba_R: ",CollisionException
+			print 'Mirando estado'
+			state = RoboCompInverseKinematics.TargetState()
+			state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+			while state.finish!=True:
+				state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+			print 'Moviemdo motores'
+			for motor in state.motors:
+				print motor
+				goal = MotorGoalPosition()
+				goal.position = motor.angle
+				goal.name = motor.name
+				goal.maxSpeed = 0.5
+				try:
+					self.jointmotor_proxy.setPosition(goal)
+				except CollisionException:
+					print "Error en arriba_R: ",CollisionException
 		except RoboCompInverseKinematics.IKException, e:
 			print "Expection in tester (sendPose): ", e
 				
