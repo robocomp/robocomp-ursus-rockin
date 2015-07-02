@@ -63,15 +63,15 @@ class SpecificWorker(GenericWorker):
 		#self.ui.advanceaxisbutton.clicked.connect(self.sendPoseAdvanceAxis)
 		self.mapa = {'rightShoulder1':-0.5, 'rightShoulder2':-0.70, 'rightShoulder3':.50 , 'rightElbow':1.30 , 'rightForeArm':-.689, 'head_yaw_joint':0.30, 'head_pitch_joint':0.20}
 		
-		self.prueba10puntos()
+		#self.prueba10puntos()
 		
-		while True:
-			if os.path.exists("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt") == False:
-				print "El fichero no existe"
-				sys.exit(-1)
+		#while True:
+			#if os.path.exists("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt") == False:
+				#print "El fichero no existe"
+				#sys.exit(-1)
 				
-			if self.inversekinematics_proxy.getPartState("RIGHTARM") == True:
-				sys.exit(0)
+			#if self.inversekinematics_proxy.getPartState("RIGHTARM") == True:
+				#sys.exit(0)
 
 	def setParams(self, params):
 		#try:
@@ -143,17 +143,17 @@ class SpecificWorker(GenericWorker):
 			state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
 			while state.finish!=True:
 				state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-			print 'Moviemdo motores'
-			for motor in state.motors:
-				print motor
-				goal = MotorGoalPosition()
-				goal.position = motor.angle
-				goal.name = motor.name
-				goal.maxSpeed = 0.5
-				try:
-					self.jointmotor_proxy.setPosition(goal)
-				except CollisionException:
-					print "Error en arriba_R: ",CollisionException
+			print 'Moviemdo motores!!'
+			#for motor in state.motors:
+				#print motor
+				#goal = MotorGoalPosition()
+				#goal.position = motor.angle
+				#goal.name = motor.name
+				#goal.maxSpeed = 0.5
+				#try:
+					#self.jointmotor_proxy.setPosition(goal)
+				#except CollisionException:
+					#print "Error en arriba_R: ",CollisionException
 		except RoboCompInverseKinematics.IKException, e:
 			print "Expection in tester (sendPose): ", e
 				
@@ -203,7 +203,7 @@ class SpecificWorker(GenericWorker):
 		import RoboCompInverseKinematics
 		for i in range(0, 10):
 			pose6D = RoboCompInverseKinematics.Pose6D() #target al que se movera
-			pose6D.x  = random.randint(100, 200)
+			pose6D.x  = random.randint(140, 300)
 			pose6D.y  = random.randint(780, 850)
 			pose6D.z  = random.randint(370, 400)
 			pose6D.rx = 0

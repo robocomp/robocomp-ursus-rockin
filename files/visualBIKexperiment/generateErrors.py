@@ -54,6 +54,8 @@ def cambiaError(line, fields):
 						err = 0
 						if fields[fl] > 0.:
 							err = numpy.random.normal(0., fields[fl], 1)[0]
+							while err > 2.*fields[fl]:
+								err = numpy.random.normal(0., fields[fl], 1)[0]
 						ret += first + str(base+err)
 						first = '"'
 						done = True

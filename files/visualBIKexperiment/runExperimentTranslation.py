@@ -5,7 +5,7 @@ import commands
 import time, os
 import subprocess
 
-init_value = 0.0
+init_value = 30.0
 end_value = 30.0
 step_value = 3
 
@@ -59,6 +59,7 @@ for stdDev_T in np.arange(init_value, end_value+0.0001, step_value):
 		print x*10
 
 	print 'hecho!'
+	
 	os.system('mv /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(i).zfill(5)+'.txt')
 	i += 1
 	
