@@ -51,11 +51,7 @@
   <dependence alias="commonjoint" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-<<<<<<< HEAD
   <upCommand command="rcremote localhost IK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
-=======
-  <upCommand command="rcremote localhost BIK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
->>>>>>> 3d934bc4c2b9d55333ed849088f9b41f3252a2cf
   <downCommand command="killall -9 inversekinematics" />
   <configFile path="xxx" />
   <xpos value="89.1406595764" />
@@ -185,7 +181,7 @@
   <ypos value="-75" />
   <radius value="10.0" />
  </node>
- 
+
   <node alias="agmInnerAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10334">
   <!--<dependence alias="aprilCamera" />-->
   <workingDir path="/home/robocomp/" />
@@ -194,7 +190,7 @@
   <configFile path="xxx" />
   <xpos value="95" />
   <ypos value="-150" />
-  <radius value="10.0" />   
+  <radius value="10.0" />
  </node>
 
  <node alias="rgbd" endpoint="rgbd:tcp -h localhost -p 10096">

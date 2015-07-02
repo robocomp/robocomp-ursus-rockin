@@ -63,20 +63,6 @@ fi
 ### COMPONENTS
 ###
 
-<<<<<<< HEAD
-# bik
-echo "make ik"
-cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/
-cmake .
-make -j$N
-if [ $? -ne 0 ]; then
-	echo "error compiling ik"
-	exit
-fi
-
-# bik visual
-echo "make bik visual"
-=======
 # inversekinematics
 echo "make ik"
 cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics
@@ -91,7 +77,6 @@ fi
 
 # ik visual
 echo "make ik visual"
->>>>>>> 3d934bc4c2b9d55333ed849088f9b41f3252a2cf
 cd /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/
 cmake .
 make -j$N
