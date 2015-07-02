@@ -23,6 +23,8 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
+	INITIALIZED		= false;
+	COMPUTE_READY	= false;
 
 }
 
@@ -33,9 +35,12 @@ SpecificWorker::~SpecificWorker()
 {
 	
 }
-
+/**
+ * \brief setParams method. It stores the innermodel file
+ */ 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
-{	try
+{	
+	try
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("InnerModel") ;
 		if( QFile(QString::fromStdString(par.value)).exists() == true)
@@ -46,26 +51,44 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		else  	qFatal("Exiting now.");
 	}catch(std::exception e) { qFatal("Error reading Innermodel param");}
 	
+//	QMutexLocker ml(mutex);
+//	INITIALIZED = true;
+	qDebug()<<"INITIALIZED: "<<INITIALIZED;
+	
 	timer.start(Period);
+	
 	return true;
 }
-
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/**
+ * \brief slot compute
+ */ 
 void SpecificWorker::compute()
 {
-	// ACTUALIZAMOS EL INNERMODEL
-	try
-	{
-		RoboCompJointMotor::MotorStateMap mMap;
-		jointmotor_proxy->getAllMotorState(mMap);
+	
+	qDebug()<<"Hola desde Compute";
 
-		for (auto j : mMap)
-			innerModel->updateJointValue(QString::fromStdString(j.first), j.second.pos);
 		
-	}catch (const Ice::Exception &ex){ cout<<"--> Excepción en actualizar InnerModel";}
-}
+	updateInnerModel();
+	
 
+	QMutexLocker ml(mutex);
+	qDebug()<<COMPUTE_READY;
+	if(COMPUTE_READY == true)
+	{
+		qDebug()<<"READY";
+	}
+}
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
 /**
- * \brief 
+ * \brief this method returns true when the motors are in their goal position or false
+ * if they don't reach their goal position.
+ * @param anglesOfMotors the list of the motors with the goal positions.
+ * @return bool
  */ 
 bool SpecificWorker::getStatePosition(const MotorAngleList &anglesOfMotors)
 {
@@ -85,40 +108,62 @@ bool SpecificWorker::getStatePosition(const MotorAngleList &anglesOfMotors)
 	return todoOk;
 }
 /**
- * TODO UTILIZAR LAS CLASES DE REFLEXX !!!
+ * \brief This method stored the motors's names, the initial position of the motors and the goal
+ * position of them. When all is prepared, it raises up the flag READY.
+ * @param newAnglesOfMotors an structure with the name of the motors and the value os them.
  */ 
 void SpecificWorker::setJointPosition(const MotorAngleList &newAnglesOfMotors)
 {
-	// 1) SACAMOS VALORES ACTUALES DE LOS MOTORES: (aprovechamos y sacamos motores
-	QVec firstAngles;
-	QStringList motors;
-	for(auto motor : newAnglesOfMotors)
+	qDebug()<<"YEAH";
+	QMutexLocker ml(mutex);
+	if(INITIALIZED == true)
 	{
-		float angle = innerModel->getJoint(QString::fromStdString(motor.name))->getAngle();
-		firstAngles.push_back(angle);
-		motors<<QString::fromStdString(motor.name);
+		// 1) SACAMOS VALORES ACTUALES DE LOS MOTORES: (aprovechamos y sacamos motores disponibles)
+		QVec firstAngles;
+		for(auto motor : newAnglesOfMotors)
+		{
+			float angle = innerModel->getJoint(QString::fromStdString(motor.name))->getAngle();
+			firstAngles.push_back(angle);
+			selectedMotors<<QString::fromStdString(motor.name);
+		}
+		//  2) SACAMOS VALORES FINALES DE LOS MOTORES
+		QVec finalAngles;
+		for(auto motor : newAnglesOfMotors)
+		{
+			float angle = motor.angle;
+			finalAngles.push_back(angle);
+		}
+		jointValues.append(firstAngles);
+		jointValues.append(finalAngles);
+		
+		COMPUTE_READY = true;
+		
+		qDebug()<<"||------------------------------------------------";
+		qDebug()<<"|| setJointPosition: jointValues-->"<<jointValues;
+		qDebug()<<"||------------------------------------------------";
 	}
-	//  2) SACAMOS VALORES FINALES DE LOS MOTORES
-	QVec finalAngles;
-	for(auto motor : newAnglesOfMotors)
-	{
-		float angle = motor.angle;
-		finalAngles.push_back(angle);
-	}
-	
-	QList<QVec> jointValues;
-	jointValues.append(firstAngles);
-	jointValues.append(finalAngles);
-	
-	Reflexx *reflexx = new Reflexx(jointmotor_proxy, jointValues, motors);
-	reflexx->start();
-	qDebug() << __FUNCTION__ << "Waiting for Reflexx...";
-	reflexx->wait(5000);
-	qDebug()<<"FIN DEL WAIT";
 }
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/**
+ * \brief this method updates the innermodel of the component
+ */ 
+void SpecificWorker::updateInnerModel()
+{
+	// ACTUALIZAMOS EL INNERMODEL
+	try
+	{
+		RoboCompJointMotor::MotorStateMap mMap;
+		jointmotor_proxy->getAllMotorState(mMap);
 
-
-
+		for (auto j : mMap)
+			innerModel->updateJointValue(QString::fromStdString(j.first), j.second.pos);
+		
+	}catch (const Ice::Exception &ex){ 
+		cout<<"--> Excepción en actualizar InnerModel";
+	}
+}
 
 
 

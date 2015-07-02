@@ -42,18 +42,37 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx);	
-	~SpecificWorker();
-	bool setParams(RoboCompCommonBehavior::ParameterList params);
+			SpecificWorker		(MapPrx& mprx);	
+			~SpecificWorker		();
+	bool 	setParams			(RoboCompCommonBehavior::ParameterList params);
 
-	bool getStatePosition(const MotorAngleList &anglesOfMotors);
-	void setJointPosition(const MotorAngleList &newAnglesOfMotors);
+	bool 	getStatePosition	(const MotorAngleList &anglesOfMotors);
+	void 	setJointPosition	(const MotorAngleList &newAnglesOfMotors);
 
 public slots:
-	void compute(); 	
+	void 	compute				(); 	
 
 private:
-	InnerModel					*innerModel;	
+	InnerModel						*innerModel;	
+	ReflexxesAPI                	*RML;        
+	RMLPositionInputParameters  	*IP;           
+	RMLPositionOutputParameters 	*OP;                      
+	RMLPositionFlags				Flags;   
+	
+	bool							INITIALIZED;
+	bool							COMPUTE_READY;
+	int								ResultValue;    
+	int 							NUMBER_OF_DOFS;        
+	QHash<QString,int> 				hashMotors;
+	QList<QVec> 					jointValues;
+	QStringList 					selectedMotors;
+	QTimer							timer;
+	
+private:
+	void 	setSyncPosition		(const RoboCompJointMotor::MotorGoalPositionList &listGoals);
+	void 	updateMotorState	(RoboCompJointMotor::MotorStateMap motors);
+	void 	updateInnerModel	();
+	//void virtual run();
 };
 
 #endif

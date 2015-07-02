@@ -22,6 +22,8 @@ echo "update robocomp-ursus-rockin"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin
 git pull
 
+sleep 5
+
 N=2
 
 ###

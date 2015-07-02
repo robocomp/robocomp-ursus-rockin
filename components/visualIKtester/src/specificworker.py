@@ -66,12 +66,12 @@ class SpecificWorker(GenericWorker):
 		#self.prueba10puntos()
 		
 		#while True:
-		#	if os.path.exists("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt") == False:
-		#		print "El fichero no existe"
-		#		sys.exit(-1)
+			#if os.path.exists("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt") == False:
+				#print "El fichero no existe"
+				#sys.exit(-1)
 				
-		#	if self.inversekinematics_proxy.getPartState("RIGHTARM") == True:
-		#		sys.exit(0)
+			#if self.inversekinematics_proxy.getPartState("RIGHTARM") == True:
+				#sys.exit(0)
 
 	def setParams(self, params):
 		#try:
@@ -138,13 +138,12 @@ class SpecificWorker(GenericWorker):
 		try:
 			part = "RIGHTARM"
 			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
-			
-			#state = RoboCompInverseKinematics.TargetState()
-			#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-			#while state.finish!=True:
-				#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-				#print state.finish
-			
+			print 'Mirando estado'
+			state = RoboCompInverseKinematics.TargetState()
+			state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+			while state.finish!=True:
+				state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+			print 'Moviemdo motores!!'
 			#for motor in state.motors:
 				#print motor
 				#goal = MotorGoalPosition()
@@ -204,7 +203,7 @@ class SpecificWorker(GenericWorker):
 		import RoboCompInverseKinematics
 		for i in range(0, 10):
 			pose6D = RoboCompInverseKinematics.Pose6D() #target al que se movera
-			pose6D.x  = random.randint(100, 200)
+			pose6D.x  = random.randint(140, 300)
 			pose6D.y  = random.randint(780, 850)
 			pose6D.z  = random.randint(370, 400)
 			pose6D.rx = 0
