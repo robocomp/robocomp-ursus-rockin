@@ -36,10 +36,10 @@
   <radius value="10.0" />
  </node>
 
- <node alias="vik" endpoint="commonbehavior:tcp -h localhost -p 12207">
+ <node alias="vik" endpoint="inversekinematics:tcp -h localhost -p 10242">
   <dependence alias="gik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost VIK /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/ ./bin/visualik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/visualikSim.conf" />
+  <upCommand command="rcremote localhost VIK /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/ ./bin/visualik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/vikSim.conf" />
   <downCommand command="killall -9 visualik" />
   <configFile path="xxx" />
   <xpos value="79.1406595764" />
@@ -47,11 +47,11 @@
   <radius value="10.0" />
  </node>
 
- <node alias="gik" endpoint="commonbehavior:tcp -h localhost -p 12207">
+ <node alias="gik" endpoint="inversekinematics:tcp -h localhost -p 10241">
   <dependence alias="commonjoint" />
   <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost IK /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/ ./bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/ikgSim.conf" />
+  <upCommand command="rcremote localhost GIK /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/ ./bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/ikgSim.conf" />
   <downCommand command="killall -9 inversekinematics" />
   <configFile path="xxx" />
   <xpos value="99.1406595764" />
@@ -59,7 +59,7 @@
   <radius value="10.0" />
  </node>
 
- <node alias="ik" endpoint="commonbehavior:tcp -h localhost -p 12207">
+ <node alias="ik" endpoint="inversekinematics:tcp -h localhost -p 10240">
   <dependence alias="commonjoint" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
