@@ -34,6 +34,6 @@ if __name__ == '__main__':
 	
 	aux = Auxiliar(params)
 	app.exec_()
-		
+	
 	print "\n\nFIN DEL PROGRAMA\n\n"
 # FIN DEL MAIN
