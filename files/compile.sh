@@ -22,6 +22,8 @@ echo "update robocomp-ursus-rockin"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin
 git pull
 
+sleep 5
+
 N=2
 
 ###
@@ -63,23 +65,25 @@ fi
 ### COMPONENTS
 ###
 
-# bik
-echo "make bik"
-cd /home/robocomp/robocomp/components/robocomp-ursus/components/bikComp/
+# inversekinematics
+echo "make ik"
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling bik"
+	echo "error compiling IK"
 	exit
 fi
 
-# bik visual
-echo "make bik visual"
-cd /home/robocomp/robocomp/components/robocomp-ursus/components/visualbik/
+
+
+# ik visual
+echo "make ik visual"
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling visualbik"
+	echo "error compiling visualik"
 	exit
 fi
 

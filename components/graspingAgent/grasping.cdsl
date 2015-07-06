@@ -3,17 +3,18 @@ import "/robocomp/interfaces/IDSLs/AGMExecutive.idsl";
 import "/robocomp/interfaces/IDSLs/AGMCommonBehavior.idsl";
 import "/robocomp/interfaces/IDSLs/AGMWorldModel.idsl";
 import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
-import "/robocomp/interfaces/IDSLs/BodyInverseKinematics.idsl";
+import "/robocomp/interfaces/IDSLs/InverseKinematics.idsl";
 
 Component graspingComp
 {
 	Communications
 	{
-		requires JointMotor, BodyInverseKinematics; 
+		requires JointMotor, InverseKinematics; 
 		implements AGMCommonBehavior;
 		publishes AGMAgentTopic;
 		subscribesTo AGMExecutiveTopic;
 	};
 	language Cpp;
 	gui Qt(QWidget);
+	options agmagent;
 };

@@ -1,0 +1,13 @@
+import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
+import "/robocompinterfaces/IDSLs/Reflexxes.idsl";
+
+Component reflexxes
+{
+	Communications
+	{
+		implements Reflexxes;
+		requires JointMotor;
+	};
+	language Cpp;
+	gui Qt(QWidget);
+};

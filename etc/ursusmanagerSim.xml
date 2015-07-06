@@ -29,7 +29,7 @@
   <dependence alias="executive" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost mission /home/robocomp/robocomp/components/robocomp-ursus/components/missionAgent/ ./bin/missionagent  --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/mission.conf" />
-  <downCommand command="killall -9 mission" />
+  <downCommand command="killall -9 missionagent" />
   <configFile path="xxx" />
   <xpos value="0" />
   <ypos value="-200" />
@@ -37,7 +37,7 @@
  </node>
 
  <node alias="bikTester" endpoint="commonbehavior:tcp -h localhost -p 12211">
-  <dependence alias="bik" />
+  <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost bikTester /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/ ./bin/lokiarmtestercomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicstester.conf" />
   <downCommand command="killall -9 aprilbasedlocalization" />
@@ -47,12 +47,12 @@
   <radius value="10.0" />
  </node>
 
- <node alias="bik" endpoint="commonbehavior:tcp -h localhost -p 12207">
+ <node alias="ik" endpoint="commonbehavior:tcp -h localhost -p 12207">
   <dependence alias="commonjoint" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost BIK /home/robocomp/robocomp/components/robocomp-ursus/components/bikComp/ ./bin/bik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
-  <downCommand command="killall -9 bik" />
+  <upCommand command="rcremote localhost IK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
+  <downCommand command="killall -9 inversekinematics" />
   <configFile path="xxx" />
   <xpos value="89.1406595764" />
   <ypos value="0" />
@@ -162,10 +162,10 @@
  </node>
 
  <node alias="graspingAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10332">
-  <dependence alias="bik" />
+  <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
-  <downCommand command="killall -9 graspingcomp" />
+  <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
+  <downCommand command="killall -9 graspingComp" />
   <configFile path="xxx" />
   <xpos value="87.3440730926" />
   <ypos value="-75" />
@@ -182,7 +182,7 @@
   <ypos value="-75" />
   <radius value="10.0" />
  </node>
- 
+
   <node alias="agmInnerAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10334">
   <!--<dependence alias="aprilCamera" />-->
   <workingDir path="/home/robocomp/" />
@@ -191,7 +191,7 @@
   <configFile path="xxx" />
   <xpos value="95" />
   <ypos value="-150" />
-  <radius value="10.0" />   
+  <radius value="10.0" />
  </node>
 
  <node alias="rgbd" endpoint="rgbd:tcp -h localhost -p 10096">

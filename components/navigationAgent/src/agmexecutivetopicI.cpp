@@ -31,7 +31,6 @@ AGMExecutiveTopicI::~AGMExecutiveTopicI()
 	// Free component resources here
 }
 
-
 void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event &modification, const Ice::Current&)
 {
 	worker->structuralChange(modification);

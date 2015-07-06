@@ -32,7 +32,6 @@ AGMExecutiveTopicI::~AGMExecutiveTopicI()
 }
 
 // Component functions, implementation
-
 void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event &modification, const Ice::Current&)
 {
 	worker->structuralChange(modification);

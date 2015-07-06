@@ -1,0 +1,21 @@
+
+# Sources set
+SET ( SOURCES
+  specificworker.cpp
+  specificmonitor.cpp
+  
+  #reflexxes.cpp
+)
+
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+  
+  #reflexxes.h
+)
+
+INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)
+SET ( LIBS ${LIBS} -lReflexxesTypeII )
+ADD_DEFINITIONS( -I/usr/local/include/Reflexxes )
+ADD_DEFINITIONS( -std=c++11 )

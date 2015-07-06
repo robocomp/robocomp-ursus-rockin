@@ -68,6 +68,12 @@ private:
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+	void innerToAGM(InnerModelNode* node, int &id);
+	void include_im(QString idInnerModelNode, int idSymbol);
+	void recorrer(InnerModelNode *node, int &n);
+
+
+
 	
 };
 
