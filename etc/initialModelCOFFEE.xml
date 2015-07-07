@@ -27,7 +27,9 @@
 	<link src="1" dst="3" label="in" />
 	
 	<!--WORLD-->
-	<symbol id="20" type="world"/>
+	<symbol id="20" type="transform">
+		<attribute key="name" value="world" />
+	</symbol>
 	
 	<link src="20" dst="1" label="RT">
 		<linkAttribute key="tx" value="200" />

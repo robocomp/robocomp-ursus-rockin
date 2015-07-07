@@ -56,9 +56,11 @@ public:
 	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	
 
 public slots:
 	void compute(); 	
+	
 
 private:
 	std::string action;
@@ -68,13 +70,12 @@ private:
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-	void innerToAGM(InnerModelNode* node, int &id);
+	void innerToAGM(InnerModelNode* node, int &symbolID);
+	int findName(QString n);
 	void include_im(QString idInnerModelNode, int idSymbol);
-	void recorrer(InnerModelNode *node, int &n);
-
-
-
-	
+	InnerModel* extractInnerModel(QString imNodeName);
+	void recorrer(InnerModel* imNew, int& symbolID);
+	void symbolToImNode(AGMModelSymbol::SPtr symbol, AGMModelEdge edge, AGMModelSymbol::SPtr symbolSong, InnerModel* im);
 };
 
 #endif
