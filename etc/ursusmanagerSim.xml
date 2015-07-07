@@ -36,30 +36,43 @@
   <radius value="10.0" />
  </node>
 
- <node alias="bikTester" endpoint="commonbehavior:tcp -h localhost -p 12211">
+ <node alias="vik" endpoint="inversekinematics:tcp -h localhost -p 10242">
+  <dependence alias="gik" />
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote localhost VIK /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/ ./bin/visualik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/vikSim.conf" />
+  <downCommand command="killall -9 visualik" />
+  <configFile path="xxx" />
+  <xpos value="79.1406595764" />
+  <ypos value="-30" />
+  <radius value="10.0" />
+ </node>
+
+ <node alias="gik" endpoint="inversekinematics:tcp -h localhost -p 10241">
+  <dependence alias="commonjoint" />
   <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost bikTester /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematicsTesterComp/ ./bin/lokiarmtestercomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicstester.conf" />
-  <downCommand command="killall -9 aprilbasedlocalization" />
+  <upCommand command="rcremote localhost GIK /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/ ./bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/ikgSim.conf" />
+  <downCommand command="killall -9 inversekinematics" />
   <configFile path="xxx" />
-  <xpos value="129.367111768" />
+  <xpos value="99.1406595764" />
   <ypos value="0" />
   <radius value="10.0" />
  </node>
 
- <node alias="ik" endpoint="commonbehavior:tcp -h localhost -p 12207">
+ <node alias="ik" endpoint="inversekinematics:tcp -h localhost -p 10240">
   <dependence alias="commonjoint" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost IK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematicsSim.conf" />
   <downCommand command="killall -9 inversekinematics" />
   <configFile path="xxx" />
-  <xpos value="89.1406595764" />
-  <ypos value="0" />
+  <xpos value="79.1406595764" />
+  <ypos value="30" />
   <radius value="10.0" />
  </node>
 
  <node alias="icestorm" endpoint="IceStorm/TopicManager:default -h localhost -p 9999">
+  <color value="#4422FF" />
   <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
   <upCommand command="rcremote localhost icestorm /home/robocomp/robocomp/components/robocomp-ursus/etc/ icebox --Ice.Config=icebox.conf" />
   <downCommand command="killall -9 icebox" />
@@ -120,8 +133,8 @@
   <upCommand command="rcremote localhost joystick /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/ ./bin/joystickOmniComp --Ice.Config=config" />
   <downCommand command="killall -9 joystickOmniComp" />
   <configFile path="xxx" />
-  <xpos value="29.2051750585" />
-  <ypos value="100" />
+  <xpos value="50" />
+  <ypos value="80" />
   <radius value="10.0" />
  </node>
 
@@ -143,7 +156,7 @@
   <upCommand command="rcremote localhost trajectory /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/ ./bin/TrajectoryRobot2DComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/trajectoryrobot2d.conf" />
   <downCommand command="killall -9 trajectoryrobot2dcomp" />
   <configFile path="xxx" />
-  <xpos value="-75.8880817451" />
+  <xpos value="-45" />
   <ypos value="0" />
   <radius value="10.0" />
  </node>
@@ -161,12 +174,12 @@
  </node>
 
  <node alias="graspingAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10332">
-  <dependence alias="ik" />
+  <dependence alias="vik" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost graspingAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/graspingAgent/ ./bin/graspingComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/graspingAgent.conf" />
   <downCommand command="killall -9 graspingComp" />
   <configFile path="xxx" />
-  <xpos value="87.3440730926" />
+  <xpos value="170" />
   <ypos value="-75" />
   <radius value="10.0" />
  </node>
