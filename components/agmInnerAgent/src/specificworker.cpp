@@ -94,15 +94,14 @@ void SpecificWorker::compute()
 //  		qDebug()<<"\n\n ********** AGMModelPrinter::printWorld(worldModel) **************";
 //  		AGMModelPrinter::printWorld(worldModel);
 // 		
-//  		qDebug()<<"\n\n****** extract innerModel and print ****************";
-// 		//(extractInnerModel("world"))->treePrint();
-// // 		qDebug()<<"\n\n TODO ";
-// 		qDebug()<<"\n\n**********************";
+ 		qDebug()<<"\n\n****** extract innerModel and print ****************";
+		(extractInnerModel("world"))->treePrint();
+		qDebug()<<"\n\n**********************";
 		
-// 		printf("sending modification!\n");
-// 		AGMModel::SPtr newModel(new AGMModel(worldModel));		
-// 		AGMModelPrinter::printWorld(newModel);
-// 		sendModificationProposal(worldModel, newModel);
+		printf("sending modification!\n");
+		AGMModel::SPtr newModel(new AGMModel(worldModel));		
+		//AGMModelPrinter::printWorld(newModel);
+		sendModificationProposal(worldModel, newModel);
 		qFatal("fary");
 	}
 	
@@ -331,7 +330,7 @@ void SpecificWorker::include_im(QHash<QString, int32_t>  match)
 	
 
 }
-
+//innerToAGM (  "initialRobotPose" 25 ()  ) 
 void SpecificWorker::innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode)
 {
 	QList<InnerModelNode*>::iterator i;	
@@ -514,7 +513,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-		AGMModelPrinter::printWorld(newModel);
+		//AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"agmInnerCompAgent");
 	}
 	catch(...)
