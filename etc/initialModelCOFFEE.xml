@@ -11,9 +11,6 @@
 	<link src="3" dst="4" label="isKitchen" />
 	<link src="3" dst="4" label="room" />
 	<link src="3" dst="4" label="explored" />
-
-	
-	
 	<!-- R O B O T -->
 	<symbol id="1" type="robot">
 		<attribute key="tx" value="0" />
@@ -26,11 +23,17 @@
 	<link src="1" dst="2" label="free" />
 	<link src="1" dst="3" label="in" />
 	
+	<!--transform mock to join Inner-->
+	<symbol id="25" type="transform">
+		<attribute key="name" value="robotTransform" />
+	</symbol>		
+	<link src="25" dst="1" label="innerLink"/>
+	
 	<!--WORLD-->
 	<symbol id="20" type="transform">
 		<attribute key="name" value="world" />
 	</symbol>
-	
+
 	<link src="20" dst="1" label="RT">
 		<linkAttribute key="tx" value="200" />
 		<linkAttribute key="ty" value="0" />

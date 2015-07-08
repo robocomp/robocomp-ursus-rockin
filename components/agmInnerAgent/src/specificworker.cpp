@@ -84,15 +84,20 @@ void SpecificWorker::compute()
 		qDebug()<<"numberOfSymbols"<<worldModel->numberOfSymbols();
 		qDebug()<<"************************";
 		qDebug()<<"\n\n*********** include_im *************";
-		include_im("world",20);
-		qDebug()<<"\n\n******* treePrint first *****************";		
- 		innerModel->treePrint();
+// 		include_im("world",20);
+		QHash<QString, int32_t>  match1;
+		match1.insert("world",20);
+		match1.insert("initialRobotPose",25);
+		include_im(match1);
+// 		qDebug()<<"\n\n******* treePrint first *****************";		
+//  		innerModel->treePrint();
 //  		qDebug()<<"\n\n ********** AGMModelPrinter::printWorld(worldModel) **************";
 //  		AGMModelPrinter::printWorld(worldModel);
- 		qDebug()<<"\n\n****** extract innerModel and print ****************";
-		(extractInnerModel("world"))->treePrint();
-// 		qDebug()<<"\n\n TODO ";
-		qDebug()<<"\n\n**********************";
+// 		
+//  		qDebug()<<"\n\n****** extract innerModel and print ****************";
+// 		//(extractInnerModel("world"))->treePrint();
+// // 		qDebug()<<"\n\n TODO ";
+// 		qDebug()<<"\n\n**********************";
 		
 // 		printf("sending modification!\n");
 // 		AGMModel::SPtr newModel(new AGMModel(worldModel));		
@@ -248,24 +253,24 @@ void SpecificWorker::symbolToImNode(AGMModelSymbol::SPtr symbol, AGMModelEdge ed
 	QString nameA = QString::fromStdString(symbol->attributes["name"]);
 	QString nameB = QString::fromStdString(symbolSong->attributes["name"]);
 	
-	//TODO mirar que por defecto si en el .xml de agm no se especifican valores de RT ponerlos a 0.
+	//TODO hacer que por defecto si en el .xml de agm no se especifican valores de RT ponerlos a 0.
+	float tx,ty,tz,rx,ry,rz;
+	tx=ty=tz=rx=ry=rz=0.;
+// 	tx = str2float(edge->attributes["tx"]);
+// 	ty = str2float(edge->attributes["ty"]);
+// 	tz = str2float(edge->attributes["tz"]);
+// 
+// 	rx = str2float(edge->attributes["rx"]);
+// 	ry = str2float(edge->attributes["ry"]);
+// 	rz = str2float(edge->attributes["rz"]);
 	
-	float tx = str2float(edge->attributes["tx"]);
-	float ty = str2float(edge->attributes["ty"]);
-	float tz = str2float(edge->attributes["tz"]);
-
-	float rx = str2float(edge->attributes["rx"]);
-	float ry = str2float(edge->attributes["ry"]);
-	float rz = str2float(edge->attributes["rz"]);
-	
-	qDebug()<<"insertar"<<nameA<<"-->"<<nameB<<tx<<ty<<tz<<rx<<ry<<rz;
+	qDebug()<<"insertar"<<nameA<<"--"<< QString::fromStdString ( edge->getLabel() ) <<"-->"<<nameB;//<<tx<<ty<<tz<<rx<<ry<<rz;
 	
 	if (symbol->symbolType!="transform")		
 		qFatal("MAAAAAL symbolToImNode() no transform ");
 	//node father
 	nodeA=im->getNode(nameA);
-// 	InnerModelTransform *tr = d->innerModel->newTransform(QString::fromStdString(item), QString::fromStdString("static") ,parent, pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz);
-// 	parent->addChild(tr);
+
 	if (nodeA==NULL)
 	{
 		nodeA = im->newTransform(nameA, "static",im->getRoot(),tx,ty,tz,rx,ry,rz);
@@ -278,49 +283,103 @@ void SpecificWorker::symbolToImNode(AGMModelSymbol::SPtr symbol, AGMModelEdge ed
 		qFatal("MAAAAAL symbolToImNode() nodeB == null ");
 }
 
-	
-	
-	
-	/*
-	for (uint32_t i=0; i<worldModel->edges.size(); ++i)
+
+/**
+ * @brief Insert innermodel in AGM graph matching nodes from innerModel to their correspondent symbols. 
+ * Given the InnerModelNode ID as key in the hash, it inserts under the agm symbol specified by its ID in the value field the corresponding subtree.
+ * 
+ * @param matchNode hash innerModelNode symbolID. InnerModel nodes have to be inserted in order. First lower levels.
+ * @return void
+ */
+void SpecificWorker::include_im(QHash<QString, int32_t>  match)
+{
+	qDebug()<<match;
+	QHash<QString, int32_t>::const_iterator i = match.constBegin();
+	QList<QString> lNode =match.keys();
+	while (i != match.constEnd()) 
 	{
-		printf("%d -> %d  (%s)\n", worldModel->edges[i].symbolPair.first, worldModel->edges[i].symbolPair.second, worldModel->edges[i].linking.c_str());
-		
-		std::cout << worldModel->edges[i]->toString(worldModel)<<"\n";
-		
-		AGMModelSymbol::SPtr symbolA,symbolB;
-		symbolA = worldModel->getSymbolByIdentifier(worldModel->edges[i].symbolPair.first);
-		symbolB = worldModel->getSymbolByIdentifier(worldModel->edges[i].symbolPair.second);
-		std::string link = worldModel->edges[i].linking;	
-		
-		if ( worldModel->edges[i].linking=="RT")
+		qDebug() << i.key() << ":" << i.value() << endl;
+					
+		InnerModelNode *node=innerModel->getNode(i.key());
+		if (node==NULL)
 		{
-			//transform to innermodelNode
-			
-			InnerModelNode *imNode = imNew->getNode(QString::fromStdString(symbolA->attributes["name"]));			
-// 			if (imNode ==NULL)
-// 				InnerModelTransform *tr = imNew->newTransform(symbolB->attributes["name"], "static",  imNode, e.attribute("tx", "0").toFloat(), e.attribute("ty",
-// 			//InnerModelTransform *tr = imNew->newTransform(e.attribute("id"), e.attribute("engine", "static"),  imNode, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat());
-// 			InnerModelTransform *tr = imNew->newTransform(symbolB->attributes["name"], "static",  imNode, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat());
-// 			imNew->addChild(tr);
-			
+			qDebug()<<"node"<<i.key()<<"doesn't exist";
+			qFatal("abort");
 		}
+		AGMModelSymbol::SPtr symbol;
 		
-		
-// 		printf("attributes size %d\n", (int)worldModel->edges[i].attributes.size());
-// 		std::map<std::string, std::string>::const_iterator itr = w->edges[i].attributes.begin();
-// 		for(; itr!=w->edges[i].attributes.end(); ++itr)
-// 		{
-// 			printf("\t<%s> --> <%s>\n", itr->first.c_str(), itr->second.c_str());
-// 		}
-		std::cout<<"\n";
+		try
+		{
+			symbol =worldModel->getSymbolByIdentifier(i.value());
+			if (symbol->symbolType!="transform")
+			{
+				std::cout<<symbol->toString()<<"\n";
+				qFatal("AGMSymbol must be transform");
+			}
+		}
+		catch (AGMModelException e )	
+		{
+			std::cout<<e.what();
+			qFatal("abort");
+		}
+		int n=symbol->identifier;
+		lNode.removeAll(i.key());		
+		qDebug()<<"innerToAGM ( "<<node->id<<n<<lNode<<" ) ";
+		innerToAGM(node,n,lNode);
+		++i;
 	}
 	
-	return imNew;
+
+}
+
+void SpecificWorker::innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode)
+{
+	QList<InnerModelNode*>::iterator i;	
+	int p=symbolID;
 	
-}*/
+	for (i=node->children.begin(); i!=node->children.end(); i++)
+	{
+		if ( !lNode.contains((*i)->id) )
+		{	
+			//Search name (key) of the innerModel node in AGM
+			int existingID = findName ( (*i)->id ) ;
+			if ( existingID == -1 )
+			{	
+				int32_t id =worldModel->getNewId();
+				
+				qDebug()<<node->id<<"link"<<(*i)->id;
+				std::map<std::string, std::string> attrs;
+				attrs.insert ( std::pair<std::string,std::string>("name",(*i)->id.toStdString()) );
+				
+				AGMModelSymbol::SPtr newSym;
+				
+				//TODO innerModelNode cast to the type and translate the name.
+				// attribute "type" = mesh,plane,joint..
+				// newSym = nodeToSymbol(InnerModelNode * node);
+				newSym = worldModel->newSymbol(id,"transform",attrs);		
+								
+				//edge 
+				std::map<std::string, std::string> linkAttrs;
+
+				linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str((*i)->getTr().x())) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str((*i)->getTr().y())) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str((*i)->getTr().z())) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str((*i)->getRxValue())));
+				linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str((*i)->getRyValue())));
+				linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str((*i)->getRzValue())));
+				
+				worldModel->addEdgeByIdentifiers(p,id,"RT",linkAttrs);
+				innerToAGM((*i),id);
+			}
+			else
+				innerToAGM((*i),existingID);
+		}
+	}	
+}
 
 
+
+// ****** AGENTS *******
 bool SpecificWorker::reloadConfigAgent()
 {
 	return true;
