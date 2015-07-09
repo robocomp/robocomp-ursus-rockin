@@ -73,14 +73,14 @@ private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 	
-	void innerToAGM(InnerModelNode* node, int &symbolID);
+// 	void innerToAGM(InnerModelNode* node, int &symbolID);
 	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);	
 	int findName(QString n);
-	void include_im(QString idInnerModelNode, int idSymbol);
+// 	void include_im(QString idInnerModelNode, int idSymbol);
 	void include_im(QHash< QString, ::int32_t > match);
 	InnerModel* extractInnerModel(QString imNodeName);
 	void recorrer(InnerModel* imNew, int& symbolID);
-	void symbolToImNode(AGMModelSymbol::SPtr symbol, AGMModelEdge edge, AGMModelSymbol::SPtr symbolSong, InnerModel* im);
+	//void symbolToImNode(AGMModelSymbol::SPtr symbol, AGMModelEdge edge, AGMModelSymbol::SPtr symbolSong, InnerModel* im);
 	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
 };
 
