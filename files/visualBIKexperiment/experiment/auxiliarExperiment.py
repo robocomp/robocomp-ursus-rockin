@@ -75,6 +75,11 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		self.weights.rx = 0.1
 		self.weights.ry = 0.1
 		self.weights.rz = 0.1
+		
+		self.axis = Axis() #vector de ejes
+		self.axis.x = 0
+		self.axis.y = 0
+		self.axis.z = 1
 			
 		#Genero 100 targets aleatorios y los almaceno en un vector:
 		self.targets = []
@@ -95,8 +100,8 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		
 		#Variables del bucle:
 		self.init_value = 0.0 #0.0
-		self.end_value  = 0.0#0.0
-		self.step_value = 3
+		self.end_value  = 50.00#0.0
+		self.step_value = 5
 		self.i = 1
 
 		self.stdDev_T = self.init_value
@@ -154,6 +159,10 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 			self.ui.poseLabel.setText("Pose Actual: ["+str(pose.x)+", "+str(pose.y)+", "+str(pose.z)+", "+str(pose.rx)+", "+str(pose.ry)+", "+str(pose.rz)+"]")
 			print "Pose Actual: ["+str(pose.x)+", "+str(pose.y)+", "+str(pose.z)+", "+str(pose.rx)+", "+str(pose.ry)+", "+str(pose.rz)+"]"
 			try:
+				#Primero a la CABEZA para que mire:
+				part = "HEAD"
+				self.inversekinematics_proxy.setTargetAlignaxis(part, pose, self.axis)
+				
 				part = "RIGHTARM"
 				identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose, self.weights)
 				
