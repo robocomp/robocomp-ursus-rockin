@@ -81,6 +81,7 @@ private:
 	InnerModel* extractInnerModel(QString imNodeName);
 	void recorrer(InnerModel* imNew, int& symbolID);
 	void symbolToImNode(AGMModelSymbol::SPtr symbol, AGMModelEdge edge, AGMModelSymbol::SPtr symbolSong, InnerModel* im);
+	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
 };
 
 #endif
