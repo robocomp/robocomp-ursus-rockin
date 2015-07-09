@@ -84,23 +84,23 @@ void SpecificWorker::compute()
 		qDebug()<<"numberOfSymbols"<<worldModel->numberOfSymbols();
 		qDebug()<<"************************";
 		qDebug()<<"\n\n*********** include_im *************";
-// 		include_im("world",20);
 		QHash<QString, int32_t>  match1;
 		match1.insert("world",20);
-		match1.insert("initialRobotPose",25);
+		match1.insert("initialRobotPose",1);
+		//TODO If not RT between node match creat it
 		include_im(match1);
-// 		qDebug()<<"\n\n******* treePrint first *****************";		
-//  		innerModel->treePrint();
+		qDebug()<<"\n\n******* treePrint first *****************";		
+ 		innerModel->treePrint();
 //  		qDebug()<<"\n\n ********** AGMModelPrinter::printWorld(worldModel) **************";
 //  		AGMModelPrinter::printWorld(worldModel);
 // 		
  		qDebug()<<"\n\n****** extract innerModel and print ****************";
-		(extractInnerModel("world"))->treePrint();
+		(extractInnerModel("initialRobotPose"))->treePrint();
 		qDebug()<<"\n\n**********************";
-		
+// 		
 		printf("sending modification!\n");
 		AGMModel::SPtr newModel(new AGMModel(worldModel));		
-		//AGMModelPrinter::printWorld(newModel);
+// 		//AGMModelPrinter::printWorld(newModel);
 		sendModificationProposal(worldModel, newModel);
 		qFatal("fary");
 	}
@@ -202,10 +202,10 @@ int SpecificWorker::findName(QString n)
 InnerModel* SpecificWorker::extractInnerModel(QString imNodeName)
 {
 	
-	//innerModel imNew = AGM.extractInnerModel();
-	//0 Go through the graph 
-	//1 Find transform node transform_
-	//2 Read his attribute "name" to make the ide
+	//innerModel imNew = AGM.extractInnerModel();	
+	//1 Find transform node reading his attribute "name" to get his corresponding symbol ID
+	//2 Go through rt edge follow the agm symbol linked a-RT->b
+	//3 update new InnerModel with the information stored in the edge
 	InnerModel *imNew = new InnerModel() ;
 
 	int symbolID = findName(imNodeName);
@@ -216,32 +216,105 @@ InnerModel* SpecificWorker::extractInnerModel(QString imNodeName)
 	return imNew;
 }
 
+// void SpecificWorker::recorrer(InnerModel* imNew, int& symbolID)
+// {
+// 	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(symbolID);
+// 	
+// // 	std::cout<<symbol->toString(true)<<"\n";
+// // 	int first;
+// // 	int second;
+// 	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
+// 	{
+// // 		std::cout<<"\t"<<(*edge_itr)->getLabel()<<"\n";
+// 		string secondSymbolType = worldModel->getSymbol( (*edge_itr)->getSymbolPair().second)->symbolType;
+// 		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==symbolID && secondSymbolType=="transform")
+// 		{
+// // 			std::cout<<"\t\t"<<(*edge_itr)->toString(worldModel)<<"\n";
+// 			int first = (*edge_itr)->getSymbolPair().first;
+// 			int second = (*edge_itr)->getSymbolPair().second;
+// // 			qDebug()<<"\t\t\tfirst<<second<<symbolID"<<first<<second<<symbolID;
+// 			//qDebug()<<"insertar en innermodel, P->H: "<<QString::fromStdString(symbol->attributes["name"])<<"-->"<<QString::fromStdString( worldModel->getSymbol(second)->attributes["name"] );
+// 			//symbolToImNode();
+// 			symbolToImNode(symbol,(*edge_itr),worldModel->getSymbol(second),imNew);
+// 			recorrer(imNew,second);
+// // 			qDebug()<<"---";
+// 		}
+// 	}
+// 
+// }
+
+
 void SpecificWorker::recorrer(InnerModel* imNew, int& symbolID)
 {
 	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(symbolID);
-	
-// 	std::cout<<symbol->toString(true)<<"\n";
-// 	int first;
-// 	int second;
+	qDebug()<<"---";
 	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
 	{
-// 		std::cout<<"\t"<<(*edge_itr)->getLabel()<<"\n";
-		string secondSymbolType = worldModel->getSymbol( (*edge_itr)->getSymbolPair().second)->symbolType;
-		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==symbolID && secondSymbolType=="transform")
+		std::cout<<(*edge_itr).toString(worldModel)<<"\n";
+		//comprobamos el id del simbolo para evitar los arcos que le llegan y seguir solo los que salen del nodo
+		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==symbolID )
 		{
-// 			std::cout<<"\t\t"<<(*edge_itr)->toString(worldModel)<<"\n";
-			int first = (*edge_itr)->getSymbolPair().first;
 			int second = (*edge_itr)->getSymbolPair().second;
-// 			qDebug()<<"\t\t\tfirst<<second<<symbolID"<<first<<second<<symbolID;
-			//qDebug()<<"insertar en innermodel, P->H: "<<QString::fromStdString(symbol->attributes["name"])<<"-->"<<QString::fromStdString( worldModel->getSymbol(second)->attributes["name"] );
-			//symbolToImNode();
-			symbolToImNode(symbol,(*edge_itr),worldModel->getSymbol(second),imNew);
+			edgeToInnerModel((*edge_itr),imNew);
 			recorrer(imNew,second);
-// 			qDebug()<<"---";
 		}
 	}
-
 }
+
+/**
+ * @brief ..transform the information contains in an AGM edge in two InnerModelNode, adding the information stored in the label RT to the father's transformation .
+ * 
+ * @param edge ...
+ * @param imNew ...
+ * @return void
+ */
+void SpecificWorker::edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew)
+{
+	InnerModelNode* nodeA = NULL;
+	InnerModelNode* nodeB = NULL;
+
+	int first = edge->getSymbolPair().first;
+	int second = edge->getSymbolPair().second;	
+
+	const AGMModelSymbol::SPtr &symbolA = worldModel->getSymbol(first);
+	const AGMModelSymbol::SPtr &symbolB = worldModel->getSymbol(second);
+
+	QString nameA = QString::fromStdString(symbolA->attributes["name"]);
+	QString nameB = QString::fromStdString(symbolB->attributes["name"]);
+	
+	qDebug()<<"insertar en new InnerModel "<<nameA<<"--"<< QString::fromStdString ( edge->getLabel() ) <<"-->"<<nameB;//<<tx<<ty<<tz<<rx<<ry<<rz;
+	qDebug()<<"equivalente al enlace en AGM "<<QString::fromStdString (symbolA->toString())<<"--"<< QString::fromStdString ( edge->getLabel() ) <<"-->"<<QString::fromStdString (symbolB->toString());//<<tx<<ty<<tz<<rx<<ry<<rz;
+	
+	
+	//node father
+	nodeA=imNew->getNode(nameA);
+	//entiendo que sino exite lo cuelgo del root, Estará vacio...
+	if (nodeA==NULL)
+	{
+		nodeA = imNew->newTransform(nameA, "static",imNew->getRoot());
+		imNew->getRoot()->addChild(nodeA);
+		qDebug()<<"NODE A ERA NULL NO EXISTIA"<<nameA<<"node A->print(verbose):";
+		nodeA->print(true);
+		qDebug()<<"---------";
+	}
+	//TODO hacer que por defecto si en el .xml de agm no se especifican valores de RT ponerlos a 0.
+	float tx,ty,tz,rx,ry,rz;
+	tx=ty=tz=rx=ry=rz=0.;
+	tx = str2float(edge->attributes["tx"]);
+	ty = str2float(edge->attributes["ty"]);
+	tz = str2float(edge->attributes["tz"]);
+
+	rx = str2float(edge->attributes["rx"]);
+	ry = str2float(edge->attributes["ry"]);
+	rz = str2float(edge->attributes["rz"]);
+	nodeB = imNew->newTransform (nameB, "static",nodeA,tx,ty,tz,rx,ry,rz);	
+	if (nodeB==NULL)
+		qFatal("MAAAAAL edgeToInnerModel() nodeB == null ");
+	nodeA->addChild(nodeB);
+	nodeB->print(true);
+	
+}
+
 void SpecificWorker::symbolToImNode(AGMModelSymbol::SPtr symbol, AGMModelEdge edge, AGMModelSymbol::SPtr symbolSong, InnerModel* im)
 {
 	InnerModelNode* nodeA = NULL;
@@ -294,7 +367,66 @@ void SpecificWorker::include_im(QHash<QString, int32_t>  match)
 {
 	qDebug()<<match;
 	QHash<QString, int32_t>::const_iterator i = match.constBegin();
+	
 	QList<QString> lNode =match.keys();
+	
+	//check match
+	///To create RT between consecutive node
+	QList<int32_t> lSymbols =match.values();
+	for (int i = 0; i < lSymbols.size(); ++i) 
+	{
+		try
+		{
+			AGMModelSymbol::SPtr symbol =worldModel->getSymbolByIdentifier(lSymbols.at(i));
+			if (symbol->symbolType!="transform")
+			{
+				std::cout<<symbol->toString()<<"\n";
+				qDebug()<<"AGMSymbol must be the attribute name";
+				symbol->setAttribute("name",match.key(lSymbols.at(i)).toStdString());
+				
+			}
+		}
+		catch (AGMModelException e )	
+		{
+			std::cout<<e.what();
+			qFatal("abort symbol doesn't exist");
+		}
+	}
+	
+	//check nodes
+	for (int i = 0; i < lNode.size(); ++i) 
+	{
+		InnerModelNode *node=innerModel->getNode(lNode.at(i));
+		if (node==NULL)
+		{
+			qDebug()<<"node"<<lNode.at(i)<<"doesn't exist";
+			qFatal("abort");
+		}
+	}
+// 	
+//todo esta bien pues lo relleno
+	for (int i = 1; i < lSymbols.size(); ++i) 
+	{	
+		try
+		{	
+			worldModel->getEdgeByIdentifiers(lSymbols.at(i-1),lSymbols.at(i),"RT");
+		}
+		catch (AGMModelException e )
+		{
+			//edge 
+			std::map<std::string, std::string> linkAttrs;
+
+			linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str(0.0)) );
+			linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str(0.0)) );
+			linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str(0.0)) );
+			linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str(0.0)) );
+			linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str(0.0)) );
+			linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str(0.0)) );
+			worldModel->addEdgeByIdentifiers(lSymbols.at(i-1),lSymbols.at(i-1),"RT",linkAttrs);
+		}
+	}
+	
+	
 	while (i != match.constEnd()) 
 	{
 		qDebug() << i.key() << ":" << i.value() << endl;
@@ -313,17 +445,20 @@ void SpecificWorker::include_im(QHash<QString, int32_t>  match)
 			if (symbol->symbolType!="transform")
 			{
 				std::cout<<symbol->toString()<<"\n";
-				qFatal("AGMSymbol must be transform");
+				qDebug()<<"AGMSymbol must be the attribute name";
+				symbol->setAttribute("name",i.key().toStdString());
+				
 			}
 		}
 		catch (AGMModelException e )	
 		{
 			std::cout<<e.what();
-			qFatal("abort");
+			qFatal("abort symbol doesn't exist");
 		}
 		int n=symbol->identifier;
 		lNode.removeAll(i.key());		
 		qDebug()<<"innerToAGM ( "<<node->id<<n<<lNode<<" ) ";
+		
 		innerToAGM(node,n,lNode);
 		++i;
 	}
