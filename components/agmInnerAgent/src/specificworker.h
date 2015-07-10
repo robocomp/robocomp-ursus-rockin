@@ -80,6 +80,9 @@ private:
 	InnerModel* extractInnerModel(QString imNodeName);
 	void recorrer(InnerModel* imNew, int& symbolID);
 	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
+	
+	void checkLoop(int& symbolID, QList< int >& visited, string linkType, bool& loop);
+
 };
 
 #endif
