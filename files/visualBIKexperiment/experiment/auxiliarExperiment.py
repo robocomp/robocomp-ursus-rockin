@@ -139,7 +139,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando IK\n')
 		print '############################# ejecutando IK'
 		os.system('killall -9 inversekinematics')
-		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/etc/configdefinitivo > /dev/null &')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikSim.conf > /dev/null &')
 		#DORMIMOS 5 SEGUNDOS
 		time.sleep(5)
 		
@@ -147,7 +147,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando VIK\n')
 		print '############################# ejecutando VIK'
 		os.system('killall -9 VisualBIK')
-		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/etc/configDefinitivo > /dev/null &')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/vikSim.conf &> /visualDATA.txt &')
 		#DORMIMOS 5 SEGUNDOS
 		time.sleep(5)
 		
