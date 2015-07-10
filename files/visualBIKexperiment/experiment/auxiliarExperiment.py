@@ -95,7 +95,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 				self.targets.append(pose6D)
 				
 		#Eliminamos los ficheros que puedan contener basura:
-		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
+		#os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
 		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 		
 		#Variables del bucle:
