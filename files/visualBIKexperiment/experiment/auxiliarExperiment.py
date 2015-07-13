@@ -99,8 +99,8 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 		
 		#Variables del bucle:
-		self.init_value = 0.0 #0.0
-		self.end_value  = 50.00#0.0
+		self.init_value = 50.0 #0.0
+		self.end_value  = 150.00#0.0
 		self.step_value = 5
 		self.i = 1
 
