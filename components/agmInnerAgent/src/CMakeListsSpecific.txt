@@ -3,14 +3,14 @@
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
-  agmInner.cpp
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.cpp
 )
 
 # Headers set
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
-  agmInner.h
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.h
 )
 
 INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)

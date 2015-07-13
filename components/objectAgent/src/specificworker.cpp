@@ -40,6 +40,11 @@ SpecificWorker::~SpecificWorker()
 
 }
 
+//transform world->rgbd(6)
+///[ 0.000000 1340.000000 19.999367 0.000000 0.000000 0.000000 ]
+//innerModel de fichero transform world->rgbd(6)
+//[ 0.000000 1340.000000 19.999992 0.000000 0.000000 0.000000
+
 void SpecificWorker::compute( )
 {
 	static std::string previousAction = "";
@@ -49,13 +54,6 @@ void SpecificWorker::compute( )
 
 	previousAction = action;
 	printf("New action: %s\n", action.c_str());
-	
-	if (worldModel->numberOfSymbols() > 0)
-	{
-	agmInner.setWorld(worldModel);	
-	innerModel= agmInner.extractInnerModel("world");
-	innerModel->treePrint();
-	}
 
 	if (action == "findobjectvisuallyintable")
 	{
@@ -157,6 +155,8 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 {
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel("world");
 	mutex->unlock();
 }
 
@@ -164,12 +164,16 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 {
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel("world");
 	mutex->unlock();
 }
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel("world");
 	mutex->unlock();
 }
 

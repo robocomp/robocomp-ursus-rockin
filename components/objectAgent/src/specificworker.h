@@ -23,7 +23,7 @@
 
 #include <innermodel/innermodel.h>
 #include <agm.h>
-#include <agmInner.h>
+#include <agmInner/agmInner.h>
 
 /**
        \brief
