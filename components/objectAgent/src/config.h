@@ -3,7 +3,9 @@
 
 // Comment out this line if your application has a QtGui
 #define USE_QTGUI
+
+
 #define PROGRAM_NAME    "objectComp"
-#define SERVER_FULL_NAME   "RoboCompobjectComp::objectComp"
+#define SERVER_FULL_NAME   "RoboComp objectComp:: objectComp"
 
 #endif

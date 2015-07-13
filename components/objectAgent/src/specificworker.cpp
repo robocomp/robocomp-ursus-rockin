@@ -29,6 +29,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
+	innerModel = new InnerModel(); 
 }
 
 /**
@@ -48,6 +49,13 @@ void SpecificWorker::compute( )
 
 	previousAction = action;
 	printf("New action: %s\n", action.c_str());
+	
+	if (worldModel->numberOfSymbols() > 0)
+	{
+	agmInner.setWorld(worldModel);	
+	innerModel= agmInner.extractInnerModel("world");
+	innerModel->treePrint();
+	}
 
 	if (action == "findobjectvisuallyintable")
 	{
@@ -57,25 +65,25 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-	try
-	{
-		RoboCompCommonBehavior::Parameter par = params.at("ObjectAgent.InnerModel") ;
-		if( QFile(QString::fromStdString(par.value)).exists() == true)
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-			innerModel = new InnerModel(par.value);
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-		}
-		else
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-			qFatal("Exiting now.");
-		}
-	}
-	catch(std::exception e)
-	{
-		qFatal("Error reading config params");
-	}
+// 	try
+// 	{
+// 		RoboCompCommonBehavior::Parameter par = params.at("ObjectAgent.InnerModel") ;
+// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+// 			innerModel = new InnerModel(par.value);
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+// 		}
+// 		else
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+// 			qFatal("Exiting now.");
+// 		}
+// 	}
+// 	catch(std::exception e)
+// 	{
+// 		qFatal("Error reading config params");
+// 	}
 
 	timer.start(Period);
 	return true;
@@ -83,38 +91,39 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 bool SpecificWorker::activateAgent(const ParameterMap& prs)
 {
-	bool activated = false;
-	if (setParametersAndPossibleActivation(prs, activated))
-	{
-			if (not activated)
-			{
-				return activate(p);
-			}
-	}
-	else
-	{
-		return false;
-	}
+// 	bool activated = false;
+// 	if (setParametersAndPossibleActivation(prs, activated))
+// 	{
+// 			if (not activated)
+// 			{
+// 				return activate(p);
+// 			}
+// 	}
+// 	else
+// 	{
+// 		return false;
+// 	}
 	return true;
 }
 
 bool SpecificWorker::deactivateAgent()
 {
-		return deactivate();
+		//return deactivate();
+		return false;
 }
 
 StateStruct SpecificWorker::getAgentState()
 {
 	StateStruct s;
-	if (isActive())
-	{
-		s.state = Running;
-	}
-	else
-	{
-		s.state = Stopped;
-	}
-	s.info = p.action.name;
+// 	if (isActive())
+// 	{
+// 		s.state = Running;
+// 	}
+// 	else
+// 	{
+// 		s.state = Stopped;
+// 	}
+// 	s.info = p.action.name;
 	return s;
 }
 
@@ -211,8 +220,8 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-// 		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "objectAgent");
+// 		AGMModelPrinter::printWorld(newModel);		
+		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, "objectAgent");
 	}
 	catch(...)
 	{

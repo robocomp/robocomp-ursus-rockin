@@ -4,12 +4,14 @@ SET(LIBS ${LIBS} -lagm)
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
+  agmInner.cpp
 )
 
 # Headers set
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
+  agmInner.h
 )
 
 ADD_DEFINITIONS( -std=c++11 )

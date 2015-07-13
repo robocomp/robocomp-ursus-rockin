@@ -89,8 +89,8 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 	//Read params from config file
 
 	RoboCompCommonBehavior::Parameter aux;
-	aux.editable = false;
-	configGetString( "ObjectAgent.InnerModel", aux.value,"no file");
+	aux.editable = false;	
+	configGetString( "ObjectAgent","InnerModel", aux.value,"no file");	
 	params["ObjectAgent.InnerModel"] = aux;
 }
 
