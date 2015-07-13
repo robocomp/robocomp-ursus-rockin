@@ -90,13 +90,13 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 				self.targets.append(pose6D)
 				
 		#Eliminamos los ficheros que puedan contener basura:
-		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
+		#os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
 		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 		
 		#Variables del bucle:
 		self.init_value = 0.0 #0.0
-		self.end_value  = 0.0#0.0
-		self.step_value = 3
+		self.end_value  = 100.0#0.0
+		self.step_value = 5
 		self.i = 1
 
 		self.stdDev_T = self.init_value
@@ -161,10 +161,15 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 				state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
 				while state.finish!=True:
 					state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+                                print "Fin espera"
 					
 				#Ya hemos terminado: escribimos el dato
 				infile = open ("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt" ,"r" ) 
 				lines = infile.readlines () 
+				if len(lines)<=0:
+                                    print "FICHERO VACIO"
+                                    sys.exit(-1)
+                                    
 				infile.close () 
 				last_line = lines [ len ( lines ) -1 ] 
 				self.ui.textEdit.append(last_line+'\n')

@@ -9,7 +9,7 @@ from PyQt4.QtGui import QApplication, QDialog
 try:
 	from ui_MainWindow import *
 except:
-	print "Can't import UI file. Did you run 'make'? or pyuic4 mainUI.ui -o mainUI.py?"
+	print "Can't import UI file. Did you run 'make'? or pyuic4 mainUI.ui -o ui_MainWindow.py?"
 	sys.exit(-1)
 	
 from auxiliarExperiment import *
