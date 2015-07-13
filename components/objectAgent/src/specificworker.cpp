@@ -156,7 +156,8 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel("world");
+	innerModel = agmInner.extractInnerModel();
+	innerModel->treePrint();
 	mutex->unlock();
 }
 

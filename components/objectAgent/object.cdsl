@@ -1,8 +1,3 @@
-import "/robocomp/interfaces/IDSLs/AGMAgent.idsl";
-import "/robocomp/interfaces/IDSLs/AGMExecutive.idsl";
-import "/robocomp/interfaces/IDSLs/AGMCommonBehavior.idsl";
-import "/robocomp/interfaces/IDSLs/AGMWorldModel.idsl";
-
 import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
 import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
 
