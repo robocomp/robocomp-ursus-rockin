@@ -165,7 +165,7 @@
   <dependence alias="base" />
   <dependence alias="trajectory" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost navigationAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/navigationAgent/ ./bin/navigationcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/navigationAgent.conf" />
+  <upCommand command="rcremote localhost navigationAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/navigationAgent/ ./bin/navigationComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/navigationAgent.conf" />
   <downCommand command="killall -9 navigationcomp" />
   <configFile path="xxx" />
   <xpos value="0" />
@@ -187,7 +187,7 @@
  <node alias="objectAg" endpoint="agmcommonbehavior:tcp -h localhost -p 10331">
   <dependence alias="aprilCamera" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost objectAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/objectAgent/ ./bin/objectcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/objectAgent.conf" />
+  <upCommand command="rcremote localhost objectAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/objectAgent/ ./bin/objectComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/objectAgent.conf" />
   <downCommand command="killall -9 objectcomp" />
   <configFile path="xxx" />
   <xpos value="-170" />
