@@ -144,16 +144,16 @@ class SpecificWorker(GenericWorker):
 			while state.finish!=True:
 				state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
 			print 'Moviemdo motores!!'
-			for motor in state.motors:
-				print motor
-				goal = MotorGoalPosition()
-				goal.position = motor.angle
-				goal.name = motor.name
-				goal.maxSpeed = 0.5
-				try:
-					self.jointmotor_proxy.setPosition(goal)
-				except CollisionException:
-					print "Error en arriba_R: ",CollisionException
+#			for motor in state.motors:
+#				print motor
+#				goal = MotorGoalPosition()
+#				goal.position = motor.angle
+#				goal.name = motor.name
+#				goal.maxSpeed = 0.5
+#				try:
+#					self.jointmotor_proxy.setPosition(goal)
+#				except CollisionException:
+#					print "Error en arriba_R: ",CollisionException
 		except RoboCompInverseKinematics.IKException, e:
 			print "Expection in tester (sendPose): ", e
 				
@@ -177,24 +177,7 @@ class SpecificWorker(GenericWorker):
 		
 		try:
 			part = "HEAD"
-			identificador = self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
-			
-			state = RoboCompInverseKinematics.TargetState()
-			state = self.inversekinematics_proxy.getTargetState("HEAD", identificador)
-			while state.finish!=True:
-				state = self.inversekinematics_proxy.getTargetState("HEAD", identificador)
-				print state.finish
-			
-			for motor in state.motors:
-				print motor
-				goal = MotorGoalPosition()
-				goal.position = motor.angle
-				goal.name = motor.name
-				goal.maxSpeed = 0.5
-				try:
-					self.jointmotor_proxy.setPosition(goal)
-				except CollisionException:
-					print "Error en arriba_R: ",CollisionException
+			self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
 		except RoboCompInverseKinematics.IKException, e:
 			print "Expection in tester (sendPose): ", e
 			
