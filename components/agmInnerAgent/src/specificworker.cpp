@@ -46,9 +46,9 @@ void SpecificWorker::compute()
 		qDebug()<<"\n\n**********************";
 // 		
 		printf("sending modification!\n");
-		AGMModel::SPtr newModel(new AGMModel(worldModel));		
+		AGMModel::SPtr newModel(new AGMModel(agmInner.getWorld()));		
 // 		//AGMModelPrinter::printWorld(newModel);
-// 		sendModificationProposal(worldModel, newModel);
+		sendModificationProposal(worldModel, newModel);
 // 		int symbolID=20;
 // 		string linkType ="RT";
 // 		QList<int> visited;
