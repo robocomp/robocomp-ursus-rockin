@@ -89,39 +89,39 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 bool SpecificWorker::activateAgent(const ParameterMap& prs)
 {
-// 	bool activated = false;
-// 	if (setParametersAndPossibleActivation(prs, activated))
-// 	{
-// 			if (not activated)
-// 			{
-// 				return activate(p);
-// 			}
-// 	}
-// 	else
-// 	{
-// 		return false;
-// 	}
+	bool activated = false;
+	if (setParametersAndPossibleActivation(prs, activated))
+	{
+			if (not activated)
+			{
+				return activate(p);
+			}
+	}
+	else
+	{
+		return false;
+	}
 	return true;
 }
 
 bool SpecificWorker::deactivateAgent()
 {
-		//return deactivate();
-		return false;
+		return deactivate();
+		
 }
 
 StateStruct SpecificWorker::getAgentState()
 {
 	StateStruct s;
-// 	if (isActive())
-// 	{
-// 		s.state = Running;
-// 	}
-// 	else
-// 	{
-// 		s.state = Stopped;
-// 	}
-// 	s.info = p.action.name;
+	if (isActive())
+	{
+		s.state = Running;
+	}
+	else
+	{
+		s.state = Stopped;
+	}
+	s.info = p.action.name;
 	return s;
 }
 

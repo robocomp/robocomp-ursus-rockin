@@ -35,6 +35,7 @@
 #include <AGMCommonBehavior.h>
 #include <AprilTags.h>
 
+#include <agm.h>
 
 
 #define CHECK_PERIOD 5000
@@ -52,6 +53,12 @@ using namespace RoboCompJointMotor;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAprilTags;
 
+
+struct BehaviorParameters 
+{
+	RoboCompPlanning::Action action;
+	std::vector< std::vector <std::string> > plan;
+};
 
 
 
@@ -71,6 +78,10 @@ public:
 	
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
+	bool activate(const BehaviorParameters& parameters);
+	bool deactivate();
+	bool isActive() { return active; }
+	RoboCompAGMWorldModel::BehaviorResultType status();
 	
 
 	AGMAgentTopicPrx agmagenttopic_proxy;
@@ -93,6 +104,13 @@ public:
 protected:
 	QTimer timer;
 	int Period;
+	bool active;
+	AGMModel::SPtr worldModel;
+	BehaviorParameters p;
+	ParameterMap params;
+	int iter;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	RoboCompPlanning::Action createAction(std::string s);
 
 public slots:
 	virtual void compute() = 0;

@@ -53,7 +53,7 @@ void SpecificWorker::compute()
 // 		string linkType ="RT";
 // 		QList<int> visited;
 // 		visited.append(symbolID);
-		bool loop=false;
+//		bool loop=false;
 // 		agmInner.checkLoop(symbolID,visited,"RT",loop);
 		//qDebug()<<"CheckLoop from"<<symbolID<<"linkType"<<QString::fromStdString(linkType)<<"There is loop ?"<<loop<<visited;
 // 		qFatal("fary");
