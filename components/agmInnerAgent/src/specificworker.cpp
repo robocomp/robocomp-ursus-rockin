@@ -31,7 +31,7 @@ void SpecificWorker::compute()
 		QHash<QString, int32_t>  match1;
 		match1.insert("world",20);
 // 		//match1.insert("t_table0",5);
-// 		//match1.insert("initialRobotPose",1);
+		match1.insert("initialRobotPose",1);
 // 				
 		include_im(match1);
 // 		
@@ -39,10 +39,10 @@ void SpecificWorker::compute()
 //  		AGMModelPrinter::printWorld(worldModel);
 // 		
 		QString nodeName="world";
- 		qDebug()<<"\n\n****** extract innerModel from:"<<nodeName;
+//  		qDebug()<<"\n\n****** extract innerModel from:"<<nodeName;
 		//(extractInnerModel(nodeName))->treePrint();
 		agmInner.setWorld(worldModel);
-		(agmInner.extractInnerModel(nodeName))->treePrint();
+// 		(agmInner.extractInnerModel(nodeName))->treePrint();
 		qDebug()<<"\n\n**********************";
 // 		
 		printf("sending modification!\n");

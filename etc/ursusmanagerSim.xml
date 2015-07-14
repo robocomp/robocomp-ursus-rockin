@@ -39,8 +39,8 @@
  <node alias="vik" endpoint="inversekinematics:tcp -h localhost -p 10242">
   <dependence alias="gik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost VIK /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/ ./bin/visualik --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/vikSim.conf" />
-  <downCommand command="killall -9 visualik" />
+  <upCommand command="rcremote localhost VIK /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/ ./bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/vikSim.conf" />
+  <downCommand command="killall -9 VisualBIK" />
   <configFile path="xxx" />
   <xpos value="79.1406595764" />
   <ypos value="-30" />
@@ -52,7 +52,7 @@
   <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost GIK /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/ ./bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/ikgSim.conf" />
-  <downCommand command="killall -9 inversekinematics" />
+  <downCommand command="killall -9 ikGraphGenerator" />
   <configFile path="xxx" />
   <xpos value="99.1406595764" />
   <ypos value="0" />
@@ -166,7 +166,7 @@
   <dependence alias="trajectory" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost navigationAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/navigationAgent/ ./bin/navigationComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/navigationAgent.conf" />
-  <downCommand command="killall -9 navigationcomp" />
+  <downCommand command="killall -9 navigationComp" />
   <configFile path="xxx" />
   <xpos value="0" />
   <ypos value="-75" />
@@ -188,7 +188,7 @@
   <dependence alias="aprilCamera" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost objectAg /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/objectAgent/ ./bin/objectComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/objectAgent.conf" />
-  <downCommand command="killall -9 objectcomp" />
+  <downCommand command="killall -9 objectComp" />
   <configFile path="xxx" />
   <xpos value="-170" />
   <ypos value="-75" />
@@ -210,7 +210,7 @@
   <dependence alias="icestorm" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
-  <downCommand command="killall -9 navigationcomp" />
+  <downCommand command="killall -9 rcis" />
   <configFile path="xxx" />
   <xpos value="-170" />
   <ypos value="100" />
