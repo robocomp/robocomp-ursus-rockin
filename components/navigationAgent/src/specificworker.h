@@ -22,7 +22,6 @@
 #include <genericworker.h>
 
 #include <innermodel/innermodel.h>
-#include <agm.h>
 
 /**
        \brief
@@ -75,6 +74,7 @@ private:
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	
 
 	RoboCompOmniRobot::TBaseState bState;
 	RoboCompTrajectoryRobot2D::NavState planningState;

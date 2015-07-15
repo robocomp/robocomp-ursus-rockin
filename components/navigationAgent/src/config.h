@@ -3,7 +3,9 @@
 
 // Comment out this line if your application has a QtGui
 #define USE_QTGUI
+
+
 #define PROGRAM_NAME    "navigationComp"
-#define SERVER_FULL_NAME   "RoboCompnavigationComp::navigationComp"
+#define SERVER_FULL_NAME   "RoboComp navigationComp:: navigationComp"
 
 #endif
