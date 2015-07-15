@@ -144,12 +144,12 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		time.sleep(10)
 		
 		##LEVANTAMOS EL INVERSEKINEMATICSGRAPH
-		#self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando GIK\n')
-		#print '############################# ejecutando GIK'
-		#os.system('killall -9 ikGraphGenerator')
-		#os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikgSim.conf 2> graphDATA.tx &')
+		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando GIK\n')
+		print '############################# ejecutando GIK'
+		os.system('killall -9 ikGraphGenerator')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikgSim.conf 2> graphDATA.tx &')
 		#DORMIMOS 5 SEGUNDOS
-		#time.sleep(7)		
+		time.sleep(10)		
 		
 		##LEVANTAMOS EL VISUAL INVERSEKINEMATICS
 		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando VIK\n')
