@@ -89,11 +89,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 			pose6D.y  = random.randint(780, 800)
 			pose6D.z  = random.randint(300, 390)
 			pose6D.rx = 0
-<<<<<<< HEAD
 			pose6D.ry = -0.80
-=======
-			pose6D.ry = -0.8
->>>>>>> 84646df01b194064e81075315ed665ac858681a2
 			pose6D.rz = -3.1416
 			if (pose6D in self.targets) == False:
 				self.targets.append(pose6D)
@@ -104,11 +100,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		
 		#Variables del bucle:
 		self.init_value = 0.0 #0.0
-<<<<<<< HEAD
-		self.end_value  = 150.00#0.0
-=======
 		self.end_value  = 50.00#0.0
->>>>>>> 84646df01b194064e81075315ed665ac858681a2
 		self.step_value = 5
 		self.i = 1
 

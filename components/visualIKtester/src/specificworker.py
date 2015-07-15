@@ -136,19 +136,11 @@ class SpecificWorker(GenericWorker):
 			weights.ry = 0
 			weights.rz = 0
 		try:
-<<<<<<< HEAD
 			axis = RoboCompInverseKinematics.Axis() #vector de pesos
 			axis.x = 0
 			axis.y = 0
 			axis.z = 1
 			part = "HEAD"
-=======
-                        axis = RoboCompInverseKinematics.Axis() #vector de pesos
-                        axis.x = 0
-                        axis.y = 0
-                        axis.z = 1
-                        part = "HEAD"
->>>>>>> 84646df01b194064e81075315ed665ac858681a2
 			self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
 			
 			part = "RIGHTARM"
