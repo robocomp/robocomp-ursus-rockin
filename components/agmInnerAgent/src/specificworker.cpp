@@ -35,20 +35,38 @@ void SpecificWorker::compute()
 // 				
 		include_im(match1);
 // 		
-//  		qDebug()<<"\n\nnumberOfSymbols AFTER insert InnerModel"<<worldModel->numberOfSymbols();
+ 		qDebug()<<"\n\nnumberOfSymbols AFTER insert InnerModel"<<worldModel->numberOfSymbols();
 //  		AGMModelPrinter::printWorld(worldModel);
 // 		
 		QString nodeName="world";
 //  		qDebug()<<"\n\n****** extract innerModel from:"<<nodeName;
+		qDebug()<<"\n\n****** UPDATE INNERMODEL";
 		//(extractInnerModel(nodeName))->treePrint();
-		agmInner.setWorld(worldModel);
+		agmInner.setWorld(worldModel);	
+		qDebug()<<"\n\nnumberOfSymbols AFTER setWorld"<< agmInner.getWorld()->numberOfSymbols();
+// 		printf("sending modification!\n");
+// 		AGMModel::SPtr newModel(new AGMModel(agmInner.getWorld()));		
+// 		//AGMModelPrinter::printWorld(newModel);
+		//sendModificationProposal(worldModel, newModel);
+		usleep(100);
+		
 // 		(agmInner.extractInnerModel(nodeName))->treePrint();
+		
+		innerModel->updateTransformValues("floor",100.,200.,300.,.0,.0,.0);
+		innerModel->treePrint("a",true);
+		//agmInner.updateAgmWithInnerModel(worldModel,innerModel);
+		agmInner.updateAgmWithInnerModel(innerModel);
+		(agmInner.extractInnerModel(nodeName))->treePrint("d",true);
 		qDebug()<<"\n\n**********************";
+		
 // 		
 		printf("sending modification!\n");
-		AGMModel::SPtr newModel(new AGMModel(agmInner.getWorld()));		
-// 		//AGMModelPrinter::printWorld(newModel);
-		sendModificationProposal(worldModel, newModel);
+// // 		AGMModel::SPtr newModel(new AGMModel(worldModel))
+		AGMModel::SPtr newModel1(new AGMModel(agmInner.getWorld()));		
+// 		qDebug()<<"AGMModelPrinter::printWorld(newModel1)";
+// 		AGMModelPrinter::printWorld(newModel1);
+		qDebug()<<"-------------------------------------";
+		sendModificationProposal(worldModel, newModel1);
 // 		int symbolID=20;
 // 		string linkType ="RT";
 // 		QList<int> visited;
@@ -56,7 +74,7 @@ void SpecificWorker::compute()
 //		bool loop=false;
 // 		agmInner.checkLoop(symbolID,visited,"RT",loop);
 		//qDebug()<<"CheckLoop from"<<symbolID<<"linkType"<<QString::fromStdString(linkType)<<"There is loop ?"<<loop<<visited;
-// 		qFatal("fary");
+		qFatal("fary");
 	}
 	
 }	
@@ -570,7 +588,8 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-		//AGMModelPrinter::printWorld(newModel);
+		qDebug()<<"sendModificationProposal, printWorld";
+		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"agmInnerCompAgent");
 	}
 	catch(...)
