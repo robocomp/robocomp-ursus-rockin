@@ -38,6 +38,7 @@
 #include <agm.h>
 #include <qt4/QtCore/QHash>
 #include <qt4/QtCore/QList>
+#include <agmInner/agmInner.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -69,17 +70,22 @@ private:
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	AgmInner agmInner;
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 	
 
-	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);	
-	int findName(QString n);
+	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);		
 	void include_im(QHash< QString, ::int32_t > match);
-	InnerModel* extractInnerModel(QString imNodeName);
-	void recorrer(InnerModel* imNew, int& symbolID);
-	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
+	
+	int findName(QString n);	
+// 	InnerModel* extractInnerModel(QString imNodeName);
+// 	void recorrer(InnerModel* imNew, int& symbolID);
+// 	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
+	
+// 	void checkLoop(int& symbolID, QList< int >& visited, string linkType, bool& loop);
+
 };
 
 #endif

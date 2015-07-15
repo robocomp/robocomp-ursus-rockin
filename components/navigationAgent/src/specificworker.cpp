@@ -29,6 +29,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
+	innerModel = new InnerModel();
 }
 
 /**
@@ -53,25 +54,25 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-	try
-	{
-		RoboCompCommonBehavior::Parameter par = params.at("NavigationAgent.InnerModel") ;
-		if( QFile(QString::fromStdString(par.value)).exists() == true)
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-			innerModel = new InnerModel(par.value);
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-		}
-		else
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-			qFatal("Exiting now.");
-		}
-	}
-	catch(std::exception e)
-	{
-		qFatal("Error reading config params");
-	}
+// 	try
+// 	{
+// 		RoboCompCommonBehavior::Parameter par = params.at("NavigationAgent.InnerModel") ;
+// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+// 			innerModel = new InnerModel(par.value);
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+// 		}
+// 		else
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+// 			qFatal("Exiting now.");
+// 		}
+// 	}
+// 	catch(std::exception e)
+// 	{
+// 		qFatal("Error reading config params");
+// 	}
 
 	timer.start(Period);
 	return true;
@@ -146,6 +147,9 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
 		roomsPolygons = extractPolygonsFromModel(worldModel);
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel();
+
 	mutex->unlock();
 }
 
@@ -153,12 +157,17 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 {
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel();
+
 	mutex->unlock();
 }
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel();
 	mutex->unlock();
 }
 
@@ -212,7 +221,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigationAgent");
+		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, "navigationAgent");
 	}
 	catch(...)
 	{
@@ -782,9 +791,9 @@ void SpecificWorker::odometryAndLocationIssues()
 		static float bStatealpha = 0;
 		if (fabs(bStatex - bState.x)>20 or fabs(bStatez - bState.z)>20 or fabs(bStatealpha - bState.alpha)>0.16)
 		{
-			AGMMisc::publishNodeUpdate(robot, agmagenttopic);
+			AGMMisc::publishNodeUpdate(robot, agmagenttopic_proxy);
 			//Publish update edge
-			AGMMisc::publishEdgeUpdate(edge, agmagenttopic);
+			AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy);
 			
 			bStatex = bState.x;
 			bStatez = bState.z;

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -26,15 +26,19 @@ Ui_guiDlg()
 #else
 QObject()
 #endif
+
 {
 	jointmotor_proxy = (*(JointMotorPrx*)mprx["JointMotorProxy"]);
-	agmagenttopic = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
 
-	mutex = new QMutex();
+	agmagenttopic_proxy = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
+
+	mutex = new QMutex(QMutex::Recursive);
+
 	#ifdef USE_QTGUI
 		setupUi(this);
 		show();
 	#endif
+		
 	Period = BASIC_PERIOD;
 	connect(&timer, SIGNAL(timeout()), this, SLOT(compute()));
 }
@@ -61,8 +65,8 @@ void GenericWorker::setPeriod(int p)
 	Period = p;
 	timer.start(Period);
 }
-	
-	RoboCompPlanning::Action GenericWorker::createAction(std::string s)  /// ESTO PODRIA ESTAR AUTOGENERADO
+
+RoboCompPlanning::Action GenericWorker::createAction(std::string s)  // ESTO PODRIA ESTAR AUTOGENERADO
 	{
 		// Remove useless characters
 		char chars[]="()";
@@ -103,7 +107,7 @@ void GenericWorker::setPeriod(int p)
 		return RoboCompAGMWorldModel::StatusIdle;
 	}
 	
-	bool GenericWorker::activate(const BehaviorNavegacionParameters &prs)
+	bool GenericWorker::activate(const BehaviorParameters &prs)
 	{
 		printf("Worker::activate\n");
 		mutex->lock();

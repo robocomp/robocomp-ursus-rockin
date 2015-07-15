@@ -23,6 +23,7 @@
 
 #include <innermodel/innermodel.h>
 #include <agm.h>
+#include <agmInner/agmInner.h>
 
 /**
        \brief
@@ -79,6 +80,7 @@ private:
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	AgmInner agmInner;
 };
 
 #endif
