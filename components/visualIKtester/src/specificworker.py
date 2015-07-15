@@ -136,6 +136,13 @@ class SpecificWorker(GenericWorker):
 			weights.ry = 0
 			weights.rz = 0
 		try:
+                        axis = RoboCompInverseKinematics.Axis() #vector de pesos
+                        axis.x = 0
+                        axis.y = 0
+                        axis.z = 1
+                        part = "HEAD"
+			self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
+			
 			part = "RIGHTARM"
 			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
 			print 'Mirando estado'
