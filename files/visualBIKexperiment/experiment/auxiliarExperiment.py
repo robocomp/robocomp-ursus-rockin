@@ -99,10 +99,10 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 		
 		#Variables del bucle:
-		self.init_value = 5.0 #0.0
+		self.init_value = 0.0 #0.0
 		self.end_value  = 50.00#0.0
 		self.step_value = 5
-		self.i = 2 #change to 1
+		self.i = 1 #change to 1
 
 		self.stdDev_T = self.init_value
 		self.testTimer = QtCore.QTimer()
@@ -144,18 +144,18 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		time.sleep(5)
 		
 		##LEVANTAMOS EL INVERSEKINEMATICSGRAPH
-		#self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando GIK\n')
-		#print '############################# ejecutando GIK'
-		#os.system('killall -9 ikGraphGenerator')
-		#os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikgSim.conf 2> graphDATA.tx &')
+		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando GIK\n')
+		print '############################# ejecutando GIK'
+		os.system('killall -9 ikGraphGenerator')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikgSim.conf 2> graphDATA.tx &')
 		#DORMIMOS 5 SEGUNDOS
-		#time.sleep(7)		
+		time.sleep(10)		
 		
 		##LEVANTAMOS EL VISUAL INVERSEKINEMATICS
 		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando VIK\n')
 		print '############################# ejecutando VIK'
 		os.system('killall -9 VisualBIK')
-		os.system('nohup gdb /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/vikSim.conf 2> visualDATA.txt &')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/vikSim.conf 2> visualDATA.txt &')
 		#DORMIMOS 5 SEGUNDOS
 		time.sleep(5)
 		
