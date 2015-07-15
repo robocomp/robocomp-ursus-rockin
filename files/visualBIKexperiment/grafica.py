@@ -27,7 +27,7 @@ try:
                         else:
                             print 'pasando de este'
 		error_t.append(this)
-		eee.append(number*5)
+		eee.append((number*5)-5)
 except IOError, ioerr:
 	pass
 
