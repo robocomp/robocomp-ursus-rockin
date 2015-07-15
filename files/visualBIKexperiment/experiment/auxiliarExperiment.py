@@ -99,10 +99,10 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 		
 		#Variables del bucle:
-		self.init_value = 5.0 #0.0
+		self.init_value = 0.0 #0.0
 		self.end_value  = 50.00#0.0
 		self.step_value = 5
-		self.i = 2 #change to 1
+		self.i = 1 #change to 1
 
 		self.stdDev_T = self.init_value
 		self.testTimer = QtCore.QTimer()
@@ -141,7 +141,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		os.system('killall -9 inversekinematics')
 		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikSim.conf > /dev/null &')
 		#DORMIMOS 5 SEGUNDOS
-		time.sleep(5)
+		time.sleep(10)
 		
 		##LEVANTAMOS EL INVERSEKINEMATICSGRAPH
 		#self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando GIK\n')
@@ -155,9 +155,9 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando VIK\n')
 		print '############################# ejecutando VIK'
 		os.system('killall -9 VisualBIK')
-		os.system('nohup gdb /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/vikSim.conf 2> visualDATA.txt &')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/vikSim.conf 2> visualDATA.txt &')
 		#DORMIMOS 5 SEGUNDOS
-		time.sleep(5)
+		time.sleep(10)
 		
 		#### CREAR EL PROXY AL INVERSEKINEMATICS
 		self.initializeProxy()
@@ -183,9 +183,9 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 				infile = open ("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt" ,"r" ) 
 				lines = infile.readlines () 
 				if len(lines)<=0:
-                                    print "FICHERO VACIO"
-                                    sys.exit(-1)
-                                    
+					print "FICHERO VACIO"
+					sys.exit(-1)
+				
 				infile.close () 
 				last_line = lines [ len ( lines ) -1 ] 
 				self.ui.textEdit.append(last_line+'\n')
@@ -219,6 +219,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 			# Remote object connection for InverseKinematics
 			try:
 				proxyString = ic.getProperties().getProperty('InverseKinematicsProxy')
+				#print "----------------------->" + proxyString
 				try:
 					basePrx = ic.stringToProxy(proxyString)
 					self.inversekinematics_proxy = RoboCompInverseKinematics.InverseKinematicsPrx.checkedCast(basePrx)
