@@ -99,10 +99,10 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 		
 		#Variables del bucle:
-		self.init_value = 0.0 #0.0
+		self.init_value = 45.0 #0.0
 		self.end_value  = 50.00#0.0
 		self.step_value = 5
-		self.i = 1 #change to 1
+		self.i = 10 #change to 1
 
 		self.stdDev_T = self.init_value
 		self.testTimer = QtCore.QTimer()
@@ -183,8 +183,8 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 				infile = open ("/home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt" ,"r" ) 
 				lines = infile.readlines () 
 				if len(lines)<=0:
-                                    print "FICHERO VACIO"
-                                    sys.exit(-1)
+					print "FICHERO VACIO"
+					sys.exit(-1)
                                     
 				infile.close () 
 				last_line = lines [ len ( lines ) -1 ] 
