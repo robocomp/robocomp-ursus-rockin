@@ -36,6 +36,9 @@
 #include <innermodel/innermodel.h>
 
 #include <agm.h>
+#include <qt4/QtCore/QHash>
+#include <qt4/QtCore/QList>
+#include <agmInner/agmInner.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -56,25 +59,33 @@ public:
 	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	
 
 public slots:
 	void compute(); 	
+	
 
 private:
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	AgmInner agmInner;
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-	void innerToAGM(InnerModelNode* node, int &id);
-	void include_im(QString idInnerModelNode, int idSymbol);
-	void recorrer(InnerModelNode *node, int &n);
-
-
-
 	
+
+	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);		
+	void include_im(QHash< QString, ::int32_t > match);
+	
+	int findName(QString n);	
+// 	InnerModel* extractInnerModel(QString imNodeName);
+// 	void recorrer(InnerModel* imNew, int& symbolID);
+// 	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
+	
+// 	void checkLoop(int& symbolID, QList< int >& visited, string linkType, bool& loop);
+
 };
 
 #endif

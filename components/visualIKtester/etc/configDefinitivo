@@ -2,10 +2,9 @@
 JointMotorProxy = jointmotor:tcp -h localhost -p 20000
 
 # INVERSE KINEMATICS COMPONENT:
-#InverseKinematicsProxy = inversekinematics:tcp -h localhost -p 10220
-
+#InverseKinematicsProxy = inversekinematics:tcp -h localhost -p 10240
 # VISUAL INVERSE KINEMATICS COMPONENT:
-InverseKinematicsProxy = inversekinematics:tcp -h localhost -p 10240
+InverseKinematicsProxy = inversekinematics:tcp -h localhost -p 10242
 
 
 # This property is used by the clients to connect to IceStorm.

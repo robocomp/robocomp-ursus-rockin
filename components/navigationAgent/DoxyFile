@@ -18,7 +18,7 @@
 DOXYFILE_ENCODING      = UTF-8
 
 # ROBOCOMP
-PROJECT_NAME           = navigationcomp
+PROJECT_NAME           = navigationComp 
 PROJECT_NUMBER         =
 
 
