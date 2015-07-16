@@ -80,6 +80,7 @@ private:
 	void include_im(QHash< QString, ::int32_t > match);
 	
 	int findName(QString n);	
+	AGMModelSymbol::SPtr ImNodeToSymbol(InnerModelNode* node);
 // 	InnerModel* extractInnerModel(QString imNodeName);
 // 	void recorrer(InnerModel* imNew, int& symbolID);
 // 	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
