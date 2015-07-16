@@ -100,27 +100,28 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		
 		#Variables del bucle:
 		self.init_value = 0.0 #0.0
-		self.end_value  = 50.00#0.0
-		self.step_value = 5
+		self.end_value  = (15.0*math.pi)/180.0#0.0
+		self.step_value = self.end_value/10.0
 		self.i = 1 #change to 1
 
-		self.stdDev_T = self.init_value
+		self.stdDev_T  = 0.#self.init_value
+		self.stdDev_R  = self.init_value
 		self.testTimer = QtCore.QTimer()
 		self.testTimer.timeout.connect(self.doTest)
 		self.testTimer.start(1)
 		
 	#### TODO QUITAR COMENTARIOS	
 	def doTest(self):
-		if self.stdDev_T >= self.end_value:
+		if self.stdDev_R >= self.end_value:
 			self.testTimer.stop()
 			os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
 			self.ui.testButton.setEnabled(True)
 			
-		self.ui.errorLabel.setText('Running experiment with error in translation: stdDev_T='+str(self.stdDev_T))
-		print "Error: ", self.stdDev_T
+		self.ui.errorLabel.setText('Running experiment with error in translation: stdDev_R='+str(self.stdDev_R))
+		print "Error: ", self.stdDev_R
 		
 		os.system('killall -9 VisualBIK inversekinematics ursuscommonjointcomp apriltagscomp')
-		self.generateErrorsXML("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus.xml", "/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml", self.stdDev_T, 0, 0)
+		self.generateErrorsXML("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus.xml", "/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml", self.stdDev_T, self.stdDev_R, 0)
 		
 		##LEVANTAMOS EL URSUS COMMON JOINT
 		self.ui.textEdit_2.append(str(self.i)+'---> ejecutando ursus common joint\n')
@@ -204,7 +205,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		#GUARDAMOS LOS DATOS EN OTRO FICHERO
 		os.system('mv /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(self.i).zfill(5)+'.txt')
 		
-		self.stdDev_T += self.step_value
+		self.stdDev_R += self.step_value
 		self.i += 1
 				
 	#######################################################
