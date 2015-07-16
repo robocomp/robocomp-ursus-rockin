@@ -52,7 +52,7 @@
   <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote localhost GIK /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/ ./bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikgSim.conf" />
-  <downCommand command="killall -9 inversekinematics" />
+  <downCommand command="killall -9 ikGraphGenerator" />
   <configFile path="xxx" />
   <xpos value="99.1406595764" />
   <ypos value="0" />
