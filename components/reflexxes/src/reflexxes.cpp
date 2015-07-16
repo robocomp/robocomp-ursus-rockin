@@ -104,23 +104,22 @@ void Reflexx::run()
 {
 	// ********************************************************************
 	// Starting the control loop
-
+	
 	while (ResultValue != ReflexxesAPI::RML_FINAL_STATE_REACHED)
 	{
 		// Calling the Reflexxes OTG algorithm
 		ResultValue =   RML->RMLPosition( *IP, OP, Flags );
-		
 		if (ResultValue < 0)
 		{
 				printf("An error occurred (%d).\n", ResultValue );
 				break;
 		}
-			
+
 		foreach( QString name, this->selectedMotors )
 		{
 			qDebug() << "" << name << OP->NewPositionVector->VecData[hashMotors[name]] << OP->NewVelocityVector->VecData[hashMotors[name]];
 		}
-		
+
 		
 		// ****************************************************************
 		// Feed the output values of the current control cycle back to 
@@ -129,10 +128,10 @@ void Reflexx::run()
 		*IP->CurrentPositionVector      =   *OP->NewPositionVector      ;
 		*IP->CurrentVelocityVector      =   *OP->NewVelocityVector      ;
 		*IP->CurrentAccelerationVector  =   *OP->NewAccelerationVector  ;
-		
+
 		usleep(CYCLE_TIME_IN_SECONDS * 1000000);
 	}
-
+	
 	//Deactivate motors
 	for(int i=0; i<NUMBER_OF_DOFS; i++)
 	{
