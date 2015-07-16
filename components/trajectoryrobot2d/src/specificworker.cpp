@@ -480,21 +480,11 @@ void SpecificWorker::changeCommand(CurrentTarget& target, CurrentTarget::Command
  */
 bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 {
-    static QTime clockInner = QTime::currentTime();	//used only in this method
 	try
 	{
 		omnirobot_proxy->getBaseState(bState);
-		if(state.getState()=="IDLE" or clockInner.elapsed()>10000)
-		{
-		  inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
-		  innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
-		  clockInner.restart();
-		}
-		else
-		{
-		  inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-		  innerVisual->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-		}
+		inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
 		try
 		{
 			laserData = laser_proxy->getLaserData();
