@@ -36,19 +36,24 @@ void SpecificWorker::compute()
 		include_im(match1);
 // 		
  		qDebug()<<"\n\nnumberOfSymbols AFTER insert InnerModel"<<worldModel->numberOfSymbols();
-//  		AGMModelPrinter::printWorld(worldModel);
-// 		
+		agmInner.setWorld(worldModel);
+		worldModel=agmInner.extractAGM();
+		qDebug()<<"numberOfSymbols extractAGM"<<worldModel->numberOfSymbols();
+		qDebug()<<"***********  agmInner.extractAGM() print *************";
+		AGMModelPrinter::printWorld(worldModel);
+		qDebug()<<"************************";
+		
 		QString nodeName="world";
 //  		qDebug()<<"\n\n****** extract innerModel from:"<<nodeName;
-		qDebug()<<"\n\n****** UPDATE INNERMODEL";
+		//qDebug()<<"\n\n****** UPDATE INNERMODEL";
 		//(extractInnerModel(nodeName))->treePrint();
-		agmInner.setWorld(worldModel);	
-		qDebug()<<"\n\nnumberOfSymbols AFTER setWorld"<< agmInner.getWorld()->numberOfSymbols();
+// 		agmInner.setWorld(worldModel);	
+// 		qDebug()<<"\n\nnumberOfSymbols AFTER setWorld"<< agmInner.getWorld()->numberOfSymbols();
 // 		printf("sending modification!\n");
 // 		AGMModel::SPtr newModel(new AGMModel(agmInner.getWorld()));		
 // 		//AGMModelPrinter::printWorld(newModel);
 		//sendModificationProposal(worldModel, newModel);
-		usleep(100);
+		
 		
 // 		(agmInner.extractInnerModel(nodeName))->treePrint();
 		
@@ -61,12 +66,9 @@ void SpecificWorker::compute()
 		
 // 		
 		printf("sending modification!\n");
-// // 		AGMModel::SPtr newModel(new AGMModel(worldModel))
-		AGMModel::SPtr newModel1(new AGMModel(agmInner.getWorld()));		
-// 		qDebug()<<"AGMModelPrinter::printWorld(newModel1)";
-// 		AGMModelPrinter::printWorld(newModel1);
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		qDebug()<<"-------------------------------------";
-		sendModificationProposal(worldModel, newModel1);
+		sendModificationProposal(worldModel, newModel);
 // 		int symbolID=20;
 // 		string linkType ="RT";
 // 		QList<int> visited;
@@ -500,7 +502,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		//float nx, float ny, float nz, float px, float py, float pz, bool collidable)
 
 		InnerModelPlane* plane = dynamic_cast<InnerModelPlane*>(node);	
-		qDebug()<<"insert plane";
+		
 		attrs.insert ( std::pair<std::string,std::string>("width",float2str(plane->width) ));
 		attrs.insert ( std::pair<std::string,std::string>("height",float2str(plane->height)) );
 		attrs.insert ( std::pair<std::string,std::string>("depth",float2str(plane->depth)) );
@@ -508,7 +510,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("nx",float2str(plane->normal.x()) ));
 		attrs.insert ( std::pair<std::string,std::string>("ny",float2str(plane->normal.y()) ));
 		attrs.insert ( std::pair<std::string,std::string>("nz",float2str(plane->normal.z()) ));
-		qDebug()<<"insert plane *";
+		
 		attrs.insert ( std::pair<std::string,std::string>("px",float2str(plane->point.x()) ));
 		attrs.insert ( std::pair<std::string,std::string>("py",float2str(plane->point.y()) ));
 		attrs.insert ( std::pair<std::string,std::string>("pz",float2str(plane->point.z()) ));
@@ -520,7 +522,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("repeat",int2str(plane->repeat)) );
 		attrs.insert ( std::pair<std::string,std::string>("texture",plane->texture.toStdString()) );
 		type = "plane";
-		qDebug()<<"fin plane";
+		
 	}
 	else if (dynamic_cast<InnerModelRGBD*>(node) != NULL)
 	{
@@ -799,8 +801,8 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-		qDebug()<<"sendModificationProposal, printWorld";
-		AGMModelPrinter::printWorld(newModel);
+// 		qDebug()<<"sendModificationProposal, printWorld";
+// 		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"agmInnerCompAgent");
 	}
 	catch(...)
