@@ -2,9 +2,10 @@
 ### Update repositories
 ###
 # AGM
-echo "update agm"
-cd /home/robocomp/AGM
-git pull
+# echo "update agm"
+# cd /home/robocomp/AGM
+# git pull
+
 # robocomp
 echo "update robocomp"
 cd /home/robocomp/robocomp
@@ -43,27 +44,73 @@ if [ $? -ne 0 ]; then
 	exit
 fi
 
-###
-### AGM
-###
-echo "make agm"
-cd /home/robocomp/AGM
-make -j$N
-if [ $? -ne 0 ]; then
-	echo "error compiling agm"
-	exit
-fi
-echo "make install agm"
-sudo make install
-if [ $? -ne 0 ]; then
-	echo "error installing robocomp"
-	exit
-fi
+# ###
+# ### AGM
+# ###
+# echo "make agm"
+# cd /home/robocomp/AGM
+# make -j$N
+# if [ $? -ne 0 ]; then
+# 	echo "error compiling agm"
+# 	exit
+# fi
+# echo "make install agm"
+# sudo make install
+# if [ $? -ne 0 ]; then
+# 	echo "error installing robocomp"
+# 	exit
+# fi
 
 
 ###
 ### COMPONENTS
 ###
+
+# dunker
+echo "make dunker"
+cd /home/robocomp/robocomp/components/robocomp-robolab/components/dunkermotorenComp
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling dunker"
+	exit
+fi
+
+
+# hokuyo
+echo "make hokuyo"
+cd /home/robocomp/robocomp/components/robocomp-robolab/components/hokuyoComp
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling hokuyo"
+	exit
+fi
+
+# dunker
+echo "make dynamixel"
+cd /home/robocomp/robocomp/components/robocomp-robolab/components/dynamixelComp
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling dynamixel"
+	exit
+fi
+
+
+# faulhaber
+echo "make faulhaber"
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/faulhaberComp
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling faulhaber"
+	exit
+fi
+
+
+
+
 
 # inversekinematics
 echo "make ik"
@@ -72,6 +119,18 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling IK"
+	exit
+fi
+
+
+
+# gik visual
+echo "make gik"
+cd /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling gik"
 	exit
 fi
 
@@ -118,14 +177,14 @@ if [ $? -ne 0 ]; then
 fi
 
 # trajectory
-#echo "make trajectory"
-#cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/
-#cmake .
-#make -j$N
-#if [ $? -ne 0 ]; then
-#	echo "error compiling trajectory"
-#	exit
-#fi
+echo "make trajectory"
+cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/trajectoryrobot2d/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling trajectory"
+	exit
+fi
 
 # navigationAgent
 echo "make navigation agent"
@@ -210,6 +269,54 @@ fi
 
 
 
+# primesense
+echo "make primesense"
+cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/primeSenseComp/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling primeSenseComp"
+	exit
+fi
+
+
+
+
+# april localization
+echo "make april localization"
+cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/aprilBasedPublish/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling april localization"
+	exit
+fi
+
+
+
+
+# cgr
+echo "make cgr"
+cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/CGR/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling CGR"
+	exit
+fi
+
+
+
+
+# stable odometry
+echo "make stable odometry"
+cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/stableOdometry
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling stableOdometry"
+	exit
+fi
 
 
 
