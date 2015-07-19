@@ -198,9 +198,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
     		//qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
    		//qDebug() << "---------------------------------------------------;";
                 
-   		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);
-                    qDebug() << "iuuu";
-                }
+   		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
    		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 	}
 	else		//Too long delay. Stopping robot.
