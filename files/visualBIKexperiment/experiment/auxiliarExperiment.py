@@ -103,10 +103,10 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		#self.end_value  = 50.00#0.0
 		#self.step_value = 5
 		#self.i = 10 #change to 1
-		self.init_value = 0.0 #0.0
-		self.end_value  = (15.0*math.pi)/180.0#0.0
-		self.step_value = self.end_value/10.0
-		self.i = 1 #change to 1
+		self.init_value = 0.26179939 #0.0
+		self.end_value  =  0.26179939 #(15.0*math.pi)/180.0#0.0
+		self.step_value = ((15.0*math.pi)/180.0)/10#self.end_value/10.0
+		self.i = 11 #change to 1
 
 		self.stdDev_T  = 0.#self.init_value
 		self.stdDev_R  = self.init_value
