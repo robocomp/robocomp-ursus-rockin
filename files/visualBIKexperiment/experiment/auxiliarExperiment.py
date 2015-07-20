@@ -99,35 +99,31 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 		
 		#Variables del bucle:
-		#self.init_value = 45.0 #0.0
-		#self.end_value  = 50.00#0.0
-		#self.step_value = 5
-		#self.i = 10 #change to 1
-		self.init_value = 0.26179939 #0.0
-		self.end_value  =  0.26179939 #(15.0*math.pi)/180.0#0.0
-		self.step_value = ((15.0*math.pi)/180.0)/10#self.end_value/10.0
-		self.i = 11 #change to 1
+		self.init_value_T = 0.0
+		self.init_value_R = 0.26179939 #0.0
+		self.end_value_T  = 50.00
+		self.end_value_R  =  0.26179939 #(15.0*math.pi)/180.0#0.0
+		self.step_value_T = 5
+		self.step_value_R = ((15.0*math.pi)/180.0)/10#self.end_value/10.0
+		self.i = 1 #change to 1
 
-		self.stdDev_T  = 0.#self.init_value
-		self.stdDev_R  = self.init_value
+		self.stdDev_T  = self.init_value_T
+		self.stdDev_R  = self.init_value_R
 		self.testTimer = QtCore.QTimer()
 		self.testTimer.timeout.connect(self.doTest)
 		self.testTimer.start(1)
 		
 	#### TODO QUITAR COMENTARIOS	
 	def doTest(self):
-		if self.stdDev_R >= self.end_value:
+		if self.stdDev_R >= self.end_value_R or self.stdDev_T >= self.end_value_T:
 			self.testTimer.stop()
 			os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
-<<<<<<< HEAD
-			os.system('killall -9 VisualBIK inversekinematics ursuscommonjointcomp apriltagscomp')
-=======
+			#os.system('killall -9 VisualBIK inversekinematics ursuscommonjointcomp apriltagscomp')
 			os.system('killall -9 VisualBIK ikGraphGenerator inversekinematics ursuscommonjointcomp apriltagscomp')
->>>>>>> bf572a2b3acda0126400f850a48bc74c9abd848f
 			self.ui.testButton.setEnabled(True)
 			
-		self.ui.errorLabel.setText('Running experiment with error in translation: stdDev_R='+str(self.stdDev_R))
-		print "Error: ", self.stdDev_R
+		self.ui.errorLabel.setText('Running experiment with error in translation: stdDev_T='+str(self.stdDev_T)+' and error in rotation: stdDev_R='+str(self.stdDev_R))
+		print "Error: ER:", self.stdDev_R, " and ET:", self.stdDev_T
 		
 		os.system('killall -9 VisualBIK ikGraphGenerator inversekinematics ursuscommonjointcomp apriltagscomp')
 		self.generateErrorsXML("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus.xml", "/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml", self.stdDev_T, self.stdDev_R, 0)
@@ -214,7 +210,8 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		#GUARDAMOS LOS DATOS EN OTRO FICHERO
 		os.system('mv /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(self.i).zfill(5)+'.txt')
 		
-		self.stdDev_R += self.step_value
+		self.stdDev_R += self.step_value_R
+		self.stdDev_T += self.step_value_T
 		self.i += 1
 				
 	#######################################################
