@@ -291,13 +291,14 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 			}
 			else
 			{
-				planner->learnPath( road.backList );
+// 				planner->learnPath( road.backList );
 				changeCommand(target,CurrentTarget::Command::STOP);
 #ifdef USE_QTGUI
 				planner->cleanGraph(innerViewer);
 				planner->drawGraph(innerViewer);
 #endif
 			}
+			planner->learnPath( road.backList );
 		}
 
 		// Get here when robot is stuck

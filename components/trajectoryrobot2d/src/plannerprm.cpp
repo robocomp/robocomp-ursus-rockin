@@ -136,20 +136,20 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 
 	//Obtain a free path from [robot] to [robotVertex] using RRTConnect. Return if fail.
  	QList<QVec> path;
-// 	if (planWithRRT(robot, graph[robotVertex].pose, path) )
-//  	{
-//  		if(path.size() > 1)  //has to be. We trim the last element to avoid duplicating it
-//  		{
-//  			path.removeLast();
-//  			currentPath += path;
-//  			qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan." << " So far" << path;
-//  		}
-//  		else
-// 	if (path.size() == 1)
-//  				qFatal("Fary en path");
-//  	}
-//  	else
-//  		 return false;
+	if (planWithRRT(robot, graph[robotVertex].pose, path) )
+ 	{
+ 		if(path.size() > 1)  //has to be. We trim the last element to avoid duplicating it
+ 		{
+ 			path.removeLast();
+ 			currentPath += path;
+ 			qDebug() << __FUNCTION__ << "RRTConnect succeeded for ROBOT with a " << currentPath.size() << "plan." << " So far" << path;
+ 		}
+ 		else
+	if (path.size() == 1)
+ 				qFatal("Fary en path");
+ 	}
+ 	else
+ 		 return false;
 
 	//Now we are in the graph
 	//Search in graph minimun path. Return if fail
@@ -175,21 +175,21 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 		currentPath += graph[robotVertex].pose;
 
 	//Obtain a free path from [target] to [targetVertex] using RRTConnect. Return if fail.
-//	path.clear();
-// 	if (planWithRRT(graph[targetVertex].pose, target, path) )
-// 	{
-// 		if( path.size() > 1) //Should be !!  We trimm the first elemen to avoid duplicating it since it already came in searchGraph
-// 		{
-// 			path.removeFirst();
-// 			currentPath += path;
-// // 			qDebug() << __FUNCTION__ << "RRTConnect succeeded for TARGET with a " << path.size() << "plan" << ". So end" << path;
-// 		}
-// 		else
-// 			if(path.size() == 1)
-// 				qFatal("Fary en path target");
-// 	}
-// 	else
-// 		 return false;
+	path.clear();
+	if (planWithRRT(graph[targetVertex].pose, target, path) )
+	{
+		if( path.size() > 1) //Should be !!  We trimm the first elemen to avoid duplicating it since it already came in searchGraph
+		{
+			path.removeFirst();
+			currentPath += path;
+// 			qDebug() << __FUNCTION__ << "RRTConnect succeeded for TARGET with a " << path.size() << "plan" << ". So end" << path;
+		}
+		else
+			if(path.size() == 1)
+				qFatal("Fary en path target");
+	}
+	else
+		 return false;
 
 	if( currentPath.size() < 2 )
 		return false;
@@ -199,7 +199,8 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 // 		qDebug() << __FUNCTION__ << "Smoothing";
 		smoothPath(currentPath);
 		currentPath = currentSmoothedPath;
-// 		qDebug() << __FUNCTION__ << "Final path size " << currentPath.size();
+//  		qDebug() << __FUNCTION__ << "Final path size " << currentPath.size();
+// 		constructGraph(currentPath);
 
 		return true;
 	}
@@ -214,7 +215,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 
 bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec> &path)
 {
-// 	qDebug() << __FUNCTION__ << "RRTConnect start...";
+ 	qDebug() << __FUNCTION__ << "RRTConnect start...";
 
 	//bool reachEnd;
 	const float diffV = (origin-target).norm2();
@@ -234,22 +235,20 @@ bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec>
 		return true;
 	}
 
-/*
+
 	printf("%s Calling Full Power of RRTConnect OMPL planner. This may take a while\n", __FUNCTION__);
 	fflush(stdout);
 	try
 	{
 		plannerRRT.initialize(&sampler);  //QUITAR DE AQUI
-		if (plannerRRT.computePath(origin, target, 60))
+		if (plannerRRT.computePath(origin, target, 600))
 		{
 			path += plannerRRT.getPath();
 			return true;
 		}
 	}
-	catch (...)
-	{
-	}
-*/
+	catch(std::exception &ex){ std::cout << ex.what() << std::endl; qFatal("error initializing planerRRT");}
+
 	printf("%s: %d\n", __FILE__, __LINE__);
 	return false;
 }
@@ -905,6 +904,7 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
 
  	qDebug() << __FUNCTION__ << "Learning with shortened path of" << sList.size() << " points";
 	constructGraph( sList, 10, 2000, 400);
+	constructGraph(currentPath);
 	learnForAWhile();
 	return true;
 }
