@@ -44,22 +44,22 @@ if [ $? -ne 0 ]; then
 	exit
 fi
 
-# ###
-# ### AGM
-# ###
-# echo "make agm"
-# cd /home/robocomp/AGM
-# make -j$N
-# if [ $? -ne 0 ]; then
-# 	echo "error compiling agm"
-# 	exit
-# fi
-# echo "make install agm"
-# sudo make install
-# if [ $? -ne 0 ]; then
-# 	echo "error installing robocomp"
-# 	exit
-# fi
+###
+### AGM
+###
+echo "make agm"
+cd /home/robocomp/AGM
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling agm"
+	exit
+fi
+echo "make install agm"
+sudo make install
+if [ $? -ne 0 ]; then
+	echo "error installing robocomp"
+	exit
+fi
 
 
 ###
