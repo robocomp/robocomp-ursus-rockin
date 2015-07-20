@@ -2,9 +2,9 @@
 ### Update repositories
 ###
 # AGM
-# echo "update agm"
-# cd /home/robocomp/AGM
-# git pull
+echo "update agm"
+cd /home/robocomp/AGM
+git pull
 
 # robocomp
 echo "update robocomp"
