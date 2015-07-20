@@ -45,15 +45,20 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 
 	if (floor != NULL)
 	{
-		QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
-		QVec upperLeft = innerModel->transform("world",QVec::vec3(center.x() - floor->width/2, center.y(), center.z() + floor->height/2), "floor");
-		QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2), "floor");
-		upperLeft.print("UL");
-		downRight.print("DR");
-		outerRegion.setLeft( upperLeft.x() );
-		outerRegion.setRight( downRight.x() );
-		outerRegion.setBottom( downRight.z() );
-		outerRegion.setTop( upperLeft.z() );
+	//	QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
+	//	QVec upperLeft = innerModel->transform("world",QVec::vec3(center.x() - floor->width/2, center.y(), center.z() + floor->height/2), "floor");
+	//	QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2), "floor");
+	//	upperLeft.print("UL");
+	//	downRight.print("DR");
+	//	outerRegion.setLeft( upperLeft.x() );
+	//	outerRegion.setRight( downRight.x() );
+	//	outerRegion.setBottom( downRight.z() );
+	//	outerRegion.setTop( upperLeft.z() );
+		
+		outerRegion.setLeft( 0 );
+		outerRegion.setRight( 6500  );
+		outerRegion.setBottom( 0 );
+		outerRegion.setTop( 4000 );
 		
 		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
 	}
@@ -65,7 +70,7 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	//QRectF outerRegion(-2500,-2500,  5000, 5000);
 	
 	// for Rocking apartment
-	 innerRegions << QRectF(-5000, 5000, 3000, -10000) <<	QRectF(-5000, -5000, 10000, 3000) << QRectF(5000,5000, -3000,-10000) << QRectF(-5000, 5000, 5000, -2000) << QRectF(-5000, 5000, 3700, -5000);
+	// innerRegions << QRectF(-5000, 5000, 3000, -10000) <<	QRectF(-5000, -5000, 10000, 3000) << QRectF(5000,5000, -3000,-10000) << QRectF(-5000, 5000, 5000, -2000) << QRectF(-5000, 5000, 3700, -5000);
 	// QRectF outerRegion(0, 0, 10000, -10000);
 
 	sampler.initialize(innerModel, outerRegion, innerRegions);

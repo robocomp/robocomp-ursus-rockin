@@ -58,6 +58,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	road.setBlocked(false);
 	for(auto i : laserData)
 	{
+		printf("laser dist %f || baseOffsets %f \n",i.dist,baseOffsets[j]);
 		if(i.dist < 10) i.dist = 30000;
 		if( i.dist < baseOffsets[j] + 50 )
 		{
@@ -198,7 +199,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
     		//qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
    		//qDebug() << "---------------------------------------------------;";
                 
-   		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);
+   		try { omnirobot_proxy->setSpeedBase(vside/2, vadvance/2, vrot/2);
                     qDebug() << "iuuu";
                 }
    		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
