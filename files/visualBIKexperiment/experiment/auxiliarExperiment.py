@@ -100,11 +100,11 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		
 		#Variables del bucle:
 		self.init_value_T = 0.0
-		self.init_value_R = 0.26179939 #0.0
+		self.init_value_R = 0.0
 		self.end_value_T  = 50.00
-		self.end_value_R  =  0.26179939 #(15.0*math.pi)/180.0#0.0
+		self.end_value_R  = (15.0*math.pi)/180.0#0.0
 		self.step_value_T = 5
-		self.step_value_R = ((15.0*math.pi)/180.0)/10#self.end_value/10.0
+		self.step_value_R = self.end_value_R/10.0
 		self.i = 1 #change to 1
 
 		self.stdDev_T  = self.init_value_T
@@ -210,8 +210,12 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		#GUARDAMOS LOS DATOS EN OTRO FICHERO
 		os.system('mv /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(self.i).zfill(5)+'.txt')
 		
-		self.stdDev_R += self.step_value_R
 		self.stdDev_T += self.step_value_T
+		if self.stdDev_T>=self.end_value_T :
+			print "SIGUIENTE ITERACION "
+			self.stdDev_R += self.step_value_R
+			self.stdDev_T = self.init_value_T
+
 		self.i += 1
 				
 	#######################################################

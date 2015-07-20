@@ -45,15 +45,20 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 
 	if (floor != NULL)
 	{
-		QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
-		QVec upperLeft = innerModel->transform("world",QVec::vec3(center.x() - floor->width/2, center.y(), center.z() + floor->height/2), "floor");
-		QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2), "floor");
-		upperLeft.print("UL");
-		downRight.print("DR");
-		outerRegion.setLeft( upperLeft.x() );
-		outerRegion.setRight( downRight.x() );
-		outerRegion.setBottom( downRight.z() );
-		outerRegion.setTop( upperLeft.z() );
+	//	QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
+	//	QVec upperLeft = innerModel->transform("world",QVec::vec3(center.x() - floor->width/2, center.y(), center.z() + floor->height/2), "floor");
+	//	QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2), "floor");
+	//	upperLeft.print("UL");
+	//	downRight.print("DR");
+	//	outerRegion.setLeft( upperLeft.x() );
+	//	outerRegion.setRight( downRight.x() );
+	//	outerRegion.setBottom( downRight.z() );
+	//	outerRegion.setTop( upperLeft.z() );
+		
+		outerRegion.setLeft( 0 );
+		outerRegion.setRight( 6500  );
+		outerRegion.setBottom( 0 );
+		outerRegion.setTop( 4000 );
 		
 		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
 	}
