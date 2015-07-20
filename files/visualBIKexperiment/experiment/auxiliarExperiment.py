@@ -115,6 +115,7 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		if self.stdDev_R >= self.end_value:
 			self.testTimer.stop()
 			os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/data.txt")
+			os.system('killall -9 VisualBIK inversekinematics ursuscommonjointcomp apriltagscomp')
 			self.ui.testButton.setEnabled(True)
 			
 		self.ui.errorLabel.setText('Running experiment with error in translation: stdDev_R='+str(self.stdDev_R))
@@ -144,13 +145,13 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		#DORMIMOS 5 SEGUNDOS
 		time.sleep(10)
 		
-		###LEVANTAMOS EL INVERSEKINEMATICSGRAPH
-		#self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando GIK\n')
-		#print '############################# ejecutando GIK'
-		#os.system('killall -9 ikGraphGenerator')
-		#os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikgSim.conf 2> graphDATA.tx &')
-		##DORMIMOS 5 SEGUNDOS
-		#time.sleep(10)		
+		##LEVANTAMOS EL INVERSEKINEMATICSGRAPH
+		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando GIK\n')
+		print '############################# ejecutando GIK'
+		os.system('killall -9 ikGraphGenerator')
+		os.system('nohup /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikgSim.conf 2> graphDATA.tx &')
+		#DORMIMOS 5 SEGUNDOS
+		time.sleep(10)		
 		
 		##LEVANTAMOS EL VISUAL INVERSEKINEMATICS
 		self.ui.textEdit_2.append(str(self.i)+'--->  ejecutando VIK\n')
