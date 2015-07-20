@@ -194,7 +194,8 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 // 		qDebug() << __FUNCTION__ << "Smoothing";
 		smoothPath(currentPath);
 		currentPath = currentSmoothedPath;
-// 		qDebug() << __FUNCTION__ << "Final path size " << currentPath.size();
+//  		qDebug() << __FUNCTION__ << "Final path size " << currentPath.size();
+// 		constructGraph(currentPath);
 
 		return true;
 	}
@@ -898,6 +899,7 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
 
  	qDebug() << __FUNCTION__ << "Learning with shortened path of" << sList.size() << " points";
 	constructGraph( sList, 10, 2000, 400);
+	constructGraph(currentPath);
 	learnForAWhile();
 	return true;
 }
