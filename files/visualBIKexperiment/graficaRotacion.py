@@ -6,12 +6,21 @@
 
 from pylab import *
 
-figure()
+#figure()
 
 
-error_t = []
+error_R = []
 eee = []
 number = 0
+
+#init_value = 0.0
+#end_value  = (15.0*math.pi)/180.0#0.0
+#step_value = end_value/10.0
+init_value = 0.0
+end_value  = 50
+step_value = 5
+stdDev_R  = init_value
+
 try:
 	while True and number < 15:
                 number += 1
@@ -20,20 +29,21 @@ try:
 		for line in open(fname, 'r').readlines():
 			err = line.split(' ')
 			while '' in err: err.remove('')
-			errT = err[7].split(':')
-			print errT, err
-			if int(err[18]) == 0:
-                            this.append(float(errT[1]))
-                        else:
-                            print 'pasando de este'
-		error_t.append(this)
-		eee.append((number*5)-5)
+			errR = err[8].split(':')
+			print errR, err
+			#if int(err[18]) == 0:
+			this.append(float(errR[1]))
+			#else:
+				#print 'pasando de este'
+		error_R.append(this)
+		eee.append(stdDev_R)
+		stdDev_R += step_value
 except IOError, ioerr:
 	pass
 
 fig, ax1 = plt.subplots(figsize=(10,6))
-bp = plt.boxplot(error_t) #, notch=0, sym='+', vert=1, whis=1.5
-fig.canvas.set_window_title('A Boxplot Example')
+bp = plt.boxplot(error_R) #, notch=0, sym='+', vert=1, whis=1.5
+fig.canvas.set_window_title('Grafica de Rotacion')
 xtickNames = plt.setp(ax1, xticklabels=eee)
 plt.setp(xtickNames)
 

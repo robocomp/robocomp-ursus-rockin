@@ -30,43 +30,46 @@ void SpecificWorker::compute()
 // 		
 		QHash<QString, int32_t>  match1;
 		match1.insert("world",20);
-// 		//match1.insert("t_table0",5);
+		match1.insert("mugT",9);
 		match1.insert("initialRobotPose",1);
 // 				
 		include_im(match1);
 // 		
- 		qDebug()<<"\n\nnumberOfSymbols AFTER insert InnerModel"<<worldModel->numberOfSymbols();
-//  		AGMModelPrinter::printWorld(worldModel);
-// 		
+		///comprobacion agm puro es extraido correctamente
+//  		qDebug()<<"\n\nnumberOfSymbols AFTER insert InnerModel"<<worldModel->numberOfSymbols();
+// 		agmInner.setWorld(worldModel);
+// 		worldModel=agmInner.extractAGM();
+// 		qDebug()<<"numberOfSymbols extractAGM"<<worldModel->numberOfSymbols();
+// 		qDebug()<<"***********  agmInner.extractAGM() print *************";
+// 		AGMModelPrinter::printWorld(worldModel);
+// 		qDebug()<<"************************";
+		
 		QString nodeName="world";
-//  		qDebug()<<"\n\n****** extract innerModel from:"<<nodeName;
-		qDebug()<<"\n\n****** UPDATE INNERMODEL";
-		//(extractInnerModel(nodeName))->treePrint();
+ 		qDebug()<<"\n\n****** extract innerModel from:"<<nodeName;
+		//qDebug()<<"\n\n****** UPDATE INNERMODEL";
 		agmInner.setWorld(worldModel);	
-		qDebug()<<"\n\nnumberOfSymbols AFTER setWorld"<< agmInner.getWorld()->numberOfSymbols();
+		(agmInner.extractInnerModel(nodeName))->treePrint();
+// 		qDebug()<<"\n\nnumberOfSymbols AFTER setWorld"<< agmInner.getWorld()->numberOfSymbols();
 // 		printf("sending modification!\n");
 // 		AGMModel::SPtr newModel(new AGMModel(agmInner.getWorld()));		
 // 		//AGMModelPrinter::printWorld(newModel);
 		//sendModificationProposal(worldModel, newModel);
-		usleep(100);
+		
 		
 // 		(agmInner.extractInnerModel(nodeName))->treePrint();
 		
-		innerModel->updateTransformValues("floor",100.,200.,300.,.0,.0,.0);
-		innerModel->treePrint("a",true);
-		//agmInner.updateAgmWithInnerModel(worldModel,innerModel);
-		agmInner.updateAgmWithInnerModel(innerModel);
-		(agmInner.extractInnerModel(nodeName))->treePrint("d",true);
+// 		innerModel->updateTransformValues("floor",100.,200.,300.,.0,.0,.0);
+// 		innerModel->treePrint("a",true);
+// 		//agmInner.updateAgmWithInnerModel(worldModel,innerModel);
+// 		agmInner.updateAgmWithInnerModel(innerModel);
+// 		(agmInner.extractInnerModel(nodeName))->treePrint("d",true);
 		qDebug()<<"\n\n**********************";
 		
 // 		
 		printf("sending modification!\n");
-// // 		AGMModel::SPtr newModel(new AGMModel(worldModel))
-		AGMModel::SPtr newModel1(new AGMModel(agmInner.getWorld()));		
-// 		qDebug()<<"AGMModelPrinter::printWorld(newModel1)";
-// 		AGMModelPrinter::printWorld(newModel1);
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		qDebug()<<"-------------------------------------";
-		sendModificationProposal(worldModel, newModel1);
+		sendModificationProposal(worldModel, newModel);
 // 		int symbolID=20;
 // 		string linkType ="RT";
 // 		QList<int> visited;
@@ -322,7 +325,7 @@ void SpecificWorker::include_im(QHash<QString, int32_t>  match)
 		for (int j = 0; j < lNode.size(); ++j) 
 		{
 			InnerModelNode *nodeSong=innerModel->getNode(lNode.at(j));
-// 			qDebug()<<"InnerModel link"<<lSymbols.at(i)<<"--RT-->"<<lSymbols.at(j);	
+			qDebug()<<"InnerModel link"<<node->id <<"--RT-->"<<nodeSong->id;	
 			if ( node->children.contains(nodeSong) )
 			{
 				qDebug()<<"crear en AGM, link"<<lSymbols.at(i)<<"--RT-->"<<lSymbols.at(j);	
@@ -366,17 +369,9 @@ void SpecificWorker::innerToAGM(InnerModelNode* node, int &symbolID, QList<QStri
 			int existingID = findName ( (*i)->id ) ;
 			if ( existingID == -1 )
 			{	
-				int32_t id =worldModel->getNewId();
-				
 				qDebug()<<node->id<<"link"<<(*i)->id;
-				std::map<std::string, std::string> attrs;
-				attrs.insert ( std::pair<std::string,std::string>("name",(*i)->id.toStdString()) );
-				
-				AGMModelSymbol::SPtr newSym;
-				
-				//TODO innerModelNode cast to the type and translate the name.
-				// attribute "type" = mesh,plane,joint..				
-				newSym = worldModel->newSymbol(id,"transform",attrs);		
+				//symbol
+				AGMModelSymbol::SPtr newSym = ImNodeToSymbol((*i));				
 								
 				//edge 
 				std::map<std::string, std::string> linkAttrs;
@@ -387,7 +382,7 @@ void SpecificWorker::innerToAGM(InnerModelNode* node, int &symbolID, QList<QStri
 				linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str((*i)->getRxValue())));
 				linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str((*i)->getRyValue())));
 				linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str((*i)->getRzValue())));
-				
+				int32_t id = newSym->identifier;
 				worldModel->addEdgeByIdentifiers(p,id,"RT",linkAttrs);
 				innerToAGM((*i),id,lNode);
 			}
@@ -396,6 +391,232 @@ void SpecificWorker::innerToAGM(InnerModelNode* node, int &symbolID, QList<QStri
 		}
 	}	
 }
+
+AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
+{
+	
+				
+	
+	std::map<std::string, std::string> attrs;
+	attrs.insert ( std::pair<std::string,std::string>("name",node->id.toStdString()) );
+	
+	AGMModelSymbol::SPtr newSym;
+	
+	//TODO innerModelNode cast to the type and translate the name.
+	// attribute "type" = mesh,plane,joint..
+	string type;
+	if (dynamic_cast<InnerModelJoint*>(node) != NULL)
+	{
+		InnerModelJoint *joint = dynamic_cast<InnerModelJoint*>(node);
+		//QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, ;
+		//float ry_, float rz_, float min_, float max_, uint32_t port_, std::string axis_, float home_, 
+// 		attrs.insert ( std::pair<std::string,std::string>("lx",float2str(0.) ) );
+// 		attrs.insert ( std::pair<std::string,std::string>("ly",float2str(0.) ) );
+// 		attrs.insert ( std::pair<std::string,std::string>("lz",float2str(0.) ) );
+// 		
+// 		attrs.insert ( std::pair<std::string,std::string>("hx",float2str(joint->backhX) ) );
+// 		attrs.insert ( std::pair<std::string,std::string>("hy",float2str(joint->backhY) ) );
+// 		attrs.insert ( std::pair<std::string,std::string>("hz",float2str(joint->backhZ) ) );
+		
+		attrs.insert ( std::pair<std::string,std::string>("min",float2str(joint->min) ) );
+		attrs.insert ( std::pair<std::string,std::string>("max",float2str(joint->max) ) );
+		attrs.insert ( std::pair<std::string,std::string>("port",int2str(joint->port) ) );
+		attrs.insert ( std::pair<std::string,std::string>("axis",joint->axis) );
+		attrs.insert ( std::pair<std::string,std::string>("home",float2str(joint->home)) );
+		type= "joint";
+	}
+	else if (dynamic_cast<InnerModelPrismaticJoint*>(node) != NULL)
+	{
+		InnerModelPrismaticJoint *p = dynamic_cast<InnerModelPrismaticJoint*>(node);
+// 	float value, offset;
+// 	float min, max;
+// 	float home;
+// 	uint32_t port;
+// 	std::string axis;
+	
+		attrs.insert ( std::pair<std::string,std::string>("value",float2str(p->value) ) );
+		attrs.insert ( std::pair<std::string,std::string>("offset",float2str(p->offset) ) );
+		attrs.insert ( std::pair<std::string,std::string>("min",float2str(p->min) ) );
+		attrs.insert ( std::pair<std::string,std::string>("max",float2str(p->max) ) );
+		attrs.insert ( std::pair<std::string,std::string>("home",float2str(p->home)) );
+		attrs.insert ( std::pair<std::string,std::string>("port",int2str(p->port)) );
+		attrs.insert ( std::pair<std::string,std::string>("axis",p->axis) );
+		
+		type= "prismaticJoint";
+	}
+	
+	else if (dynamic_cast<InnerModelTouchSensor*>(node) != NULL)
+	{
+		InnerModelTouchSensor *touch = dynamic_cast<InnerModelTouchSensor*>(node);
+// 		float nx, ny, nz;
+		attrs.insert ( std::pair<std::string,std::string>("nx",float2str(touch->nx) ));
+		attrs.insert ( std::pair<std::string,std::string>("ny",float2str(touch->ny)) );
+		attrs.insert ( std::pair<std::string,std::string>("nz",float2str(touch->nz)) );
+		
+		//float min, max;// 	float value;
+		attrs.insert ( std::pair<std::string,std::string>("min",float2str(touch->min) ));
+		attrs.insert ( std::pair<std::string,std::string>("max",float2str(touch->max)) );
+		attrs.insert ( std::pair<std::string,std::string>("value",float2str(touch->value)) );
+	// 	uint32_t port;
+		attrs.insert ( std::pair<std::string,std::string>("port",int2str(touch->port)) );
+		// QString stype;
+		attrs.insert ( std::pair<std::string,std::string>("stype",touch->stype.toStdString()) );
+		type = "TouchSensor";
+	}
+	else if (dynamic_cast<InnerModelDifferentialRobot*>(node) != NULL)
+	{
+		InnerModelDifferentialRobot *diff = dynamic_cast<InnerModelDifferentialRobot*>(node);
+		//uint32_t port;
+		//float noise;
+		//bool collide;
+		attrs.insert ( std::pair<std::string,std::string>("port",int2str(diff->port)) );
+		attrs.insert ( std::pair<std::string,std::string>("noise",float2str(diff->noise)) );
+		
+		string v="false";
+		if (diff->collide)
+			v="true";
+		attrs.insert ( std::pair<std::string,std::string>("collide",v) );
+		
+		type = "differentialRobot";
+	}
+	else if (dynamic_cast<InnerModelOmniRobot*>(node) != NULL)
+	{
+		InnerModelOmniRobot *omni = dynamic_cast<InnerModelOmniRobot*>(node);
+		//uint32_t port;
+		//float noise;
+		//bool collide;
+		attrs.insert ( std::pair<std::string,std::string>("port",int2str(omni->port)) );
+		attrs.insert ( std::pair<std::string,std::string>("noise",float2str(omni->noise)) );
+		
+		string v="false";
+		if (omni->collide)
+			v="true";
+		attrs.insert ( std::pair<std::string,std::string>("collide",v) );
+				
+		type = "omniRobot";
+	}
+	else if (dynamic_cast<InnerModelPlane*>(node) != NULL)
+	{
+		//QString id, InnerModelNode *parent, QString texture, float width, float height, float depth, int repeat, 
+		//float nx, float ny, float nz, float px, float py, float pz, bool collidable)
+
+		InnerModelPlane* plane = dynamic_cast<InnerModelPlane*>(node);	
+		
+		attrs.insert ( std::pair<std::string,std::string>("width",float2str(plane->width) ));
+		attrs.insert ( std::pair<std::string,std::string>("height",float2str(plane->height)) );
+		attrs.insert ( std::pair<std::string,std::string>("depth",float2str(plane->depth)) );
+		
+		attrs.insert ( std::pair<std::string,std::string>("nx",float2str(plane->normal.x()) ));
+		attrs.insert ( std::pair<std::string,std::string>("ny",float2str(plane->normal.y()) ));
+		attrs.insert ( std::pair<std::string,std::string>("nz",float2str(plane->normal.z()) ));
+		
+		attrs.insert ( std::pair<std::string,std::string>("px",float2str(plane->point.x()) ));
+		attrs.insert ( std::pair<std::string,std::string>("py",float2str(plane->point.y()) ));
+		attrs.insert ( std::pair<std::string,std::string>("pz",float2str(plane->point.z()) ));
+		
+		string v="false";
+		if (plane->collidable)
+			v="true";
+		attrs.insert ( std::pair<std::string,std::string>("collidable",v) );
+		attrs.insert ( std::pair<std::string,std::string>("repeat",int2str(plane->repeat)) );
+		attrs.insert ( std::pair<std::string,std::string>("texture",plane->texture.toStdString()) );
+		type = "plane";
+		
+	}
+	else if (dynamic_cast<InnerModelRGBD*>(node) != NULL)
+	{
+		InnerModelRGBD* rgbd = dynamic_cast<InnerModelRGBD*>(node);		
+		
+		attrs.insert ( std::pair<std::string,std::string>("port",int2str(rgbd->port)) );
+		attrs.insert ( std::pair<std::string,std::string>("noise",float2str(rgbd->noise) ) );
+		attrs.insert ( std::pair<std::string,std::string>("focal",float2str(rgbd->focal) ) );
+		attrs.insert ( std::pair<std::string,std::string>("height",float2str(rgbd->height) ) );
+		attrs.insert ( std::pair<std::string,std::string>("width",float2str(rgbd->width) ) );
+		attrs.insert ( std::pair<std::string,std::string>("ifconfig",rgbd->ifconfig.toStdString()) );
+		type ="rgbd";
+	}
+	else if (dynamic_cast<InnerModelCamera*>(node) != NULL)
+	{
+		InnerModelCamera* cam = dynamic_cast<InnerModelCamera*>(node);		
+		
+		attrs.insert ( std::pair<std::string,std::string>("focal",float2str(cam->focal) ) );
+		attrs.insert ( std::pair<std::string,std::string>("height",float2str(cam->height) ) );
+		attrs.insert ( std::pair<std::string,std::string>("width",float2str(cam->width) ) );
+		
+		type = "camera";
+	}
+	else if (dynamic_cast<InnerModelIMU*>(node) != NULL)
+	{
+		InnerModelIMU* imu = dynamic_cast<InnerModelIMU*>(node);		
+		attrs.insert ( std::pair<std::string,std::string>("port",int2str(imu->port)) );
+		type = "imu";
+	}
+	else if (dynamic_cast<InnerModelLaser*>(node) != NULL)
+	{
+		InnerModelLaser* laser = dynamic_cast<InnerModelLaser*>(node);
+		//public:	uint32_t port;	uint32_t min, max;	float angle;	uint32_t measures;	QString ifconfig;
+		
+		attrs.insert ( std::pair<std::string,std::string>("port",int2str(laser->port)) );
+		attrs.insert ( std::pair<std::string,std::string>("min",int2str(laser->min)) );
+		attrs.insert ( std::pair<std::string,std::string>("max",int2str(laser->max)) );
+		attrs.insert ( std::pair<std::string,std::string>("measures",int2str(laser->measures)) );
+		attrs.insert ( std::pair<std::string,std::string>("angle",float2str(laser->angle)) );
+		attrs.insert ( std::pair<std::string,std::string>("ifconfig",laser->ifconfig.toStdString()) );
+		type = "laser";
+	}
+	else if (dynamic_cast<InnerModelMesh*>(node) != NULL)
+	{
+		InnerModelMesh* mesh = dynamic_cast<InnerModelMesh*>(node);
+		//InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scale, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
+
+	     //return newMesh(id,parent,path,scale,scale,scale,render,tx,ty,tz,rx,ry,rz, collidable);
+		attrs.insert ( std::pair<std::string,std::string>("path",mesh->meshPath.toStdString()) );
+		attrs.insert ( std::pair<std::string,std::string>("scalex",float2str(mesh->scalex)) );
+		attrs.insert ( std::pair<std::string,std::string>("scaley",float2str(mesh->scaley)) );
+		attrs.insert ( std::pair<std::string,std::string>("scalez",float2str(mesh->scalez)) );
+		string v="false";
+		if (mesh->collidable)
+			v="true";
+		attrs.insert ( std::pair<std::string,std::string>("collidable",v) );
+		
+		//enum RenderingModes { NormalRendering=0, WireframeRendering=1};
+		v="NormalRendering";
+		if (mesh->render==1)
+			v="WireframeRendering";
+		attrs.insert ( std::pair<std::string,std::string>("render",v) );
+		
+		type = "mesh";
+	}
+	else if (dynamic_cast<InnerModelPointCloud*>(node) != NULL)
+	{
+		//InnerModelPointCloud* pc = dynamic_cast<InnerModelPointCloud*>(node);		
+		//attrs.insert ( std::pair<std::string,std::string>("generic",node->id.toStdString()) );
+		type = "pointCloud";
+	}
+	else if (dynamic_cast<InnerModelTransform*>(node) != NULL)
+	{
+		InnerModelTransform *t = dynamic_cast<InnerModelTransform*>(node);
+		///InnerModelTransform *newTransform(QString id, QString engine, InnerModelNode *parent, float tx=0, float ty=0, float tz=0, float rx=0, float ry=0, float rz=0, 
+		//float mass=0);
+		type="transform";
+		attrs.insert ( std::pair<std::string,std::string>("engine",t->engine.toStdString()) );
+		attrs.insert ( std::pair<std::string,std::string>("mass",float2str(t->mass)) );
+	}
+	
+	else
+	{	
+		string err;			
+		err = "error: Type of node " + node->id.toStdString() + " is unknown.";
+		throw err;
+	}
+	
+	///new id for the symbol
+	int32_t id =worldModel->getNewId();	
+	return worldModel->newSymbol(id,type,attrs);
+
+}
+
+
 
 // COMMON METHODS
 
@@ -588,8 +809,8 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-		qDebug()<<"sendModificationProposal, printWorld";
-		AGMModelPrinter::printWorld(newModel);
+// 		qDebug()<<"sendModificationProposal, printWorld";
+// 		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"agmInnerCompAgent");
 	}
 	catch(...)
