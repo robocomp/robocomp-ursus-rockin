@@ -99,24 +99,13 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		os.system("rm /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt")
 		
 		#Variables del bucle:
-<<<<<<< HEAD
-		#self.init_value = 45.0 #0.0
-		#self.end_value  = 50.00#0.0
-		#self.step_value = 5
-		#self.i = 10 #change to 1
-		self.init_value = 0.26179939 #0.0
-		self.end_value  = 0.235619451 #(15.0*math.pi)/180.0#0.0
-		self.step_value = ((15.0*math.pi)/180.0)/10#self.end_value/10.0
-		self.i = 11 #change to 1
-=======
 		self.init_value_T = 0.0
-		self.init_value_R = 0.26179939 #0.0
+		self.init_value_R = 0.0
 		self.end_value_T  = 50.00
-		self.end_value_R  =  0.26179939 #(15.0*math.pi)/180.0#0.0
+		self.end_value_R  = (15.0*math.pi)/180.0#0.0
 		self.step_value_T = 5
-		self.step_value_R = ((15.0*math.pi)/180.0)/10#self.end_value/10.0
+		self.step_value_R = self.end_value_R/10.0
 		self.i = 1 #change to 1
->>>>>>> 35e59d547de5b8281b1c3c8df5fca78cb1ea3b9a
 
 		self.stdDev_T  = self.init_value_T
 		self.stdDev_R  = self.init_value_R
@@ -221,8 +210,12 @@ class Auxiliar(QtGui.QDialog,Ice.Application):
 		#GUARDAMOS LOS DATOS EN OTRO FICHERO
 		os.system('mv /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/data.txt /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/datosObtenidos_'+str(self.i).zfill(5)+'.txt')
 		
-		self.stdDev_R += self.step_value_R
 		self.stdDev_T += self.step_value_T
+		if self.stdDev_T>=self.end_value_T :
+			print "SIGUIENTE ITERACION "
+			self.stdDev_R += self.step_value_R
+			self.stdDev_T = self.init_value_T
+
 		self.i += 1
 				
 	#######################################################
