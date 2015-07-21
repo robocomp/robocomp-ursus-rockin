@@ -22,9 +22,10 @@ void SpecificWorker::compute()
 	///check remove_ImOriginal
 //  	qDebug()<<"\n\nnumberOfSymbols agmInner.remove_ImOriginal: "<< (agmInner.remove_ImOriginal("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/initialModelCOFFEE.xml",
 // 				"/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml") )->numberOfSymbols();
-// 	qFatal("fary");
+
 	if (worldModel->numberOfSymbols()>0)
 	{		
+		
 		qDebug()<<"\n\n\n\n************************";
 		qDebug()<<"numberOfSymbols BEFORE insert InnerModel"<<worldModel->numberOfSymbols();
 		qDebug()<<"************************";
@@ -34,7 +35,7 @@ void SpecificWorker::compute()
 // 		
 		///FIRST INNERMODEL
 		QHash<QString, int32_t>  match;
-		match.insert("room",2);		
+		match.insert("room",7);		
 		include_im(match,innerModel);
 		qDebug()<<"\n\n*********** FIRST INNERMODEL include ************* \n\n";
 		///SECOND INNERMODEL

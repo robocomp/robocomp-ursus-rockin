@@ -74,6 +74,7 @@ private:
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	bool haveTarget;
 	
 
 	RoboCompOmniRobot::TBaseState bState;

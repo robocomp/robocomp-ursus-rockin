@@ -30,6 +30,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
+	haveTarget = false;
 }
 
 /**
@@ -45,10 +46,13 @@ void SpecificWorker::compute( )
 	// ODOMETRY AND LOCATION-RELATED ISSUES
 	odometryAndLocationIssues();
 
-	// ACTION EXECUTION
+// 	innerModel->treePrint();
+	qDebug()<<"numberOfSymbols"<<worldModel->numberOfSymbols();
+
+		
 	//
 // 	printf("<ae\n");
-	actionExecution();
+// 	actionExecution();
 // 	printf("ae>\n");
 }
 
@@ -144,11 +148,13 @@ bool SpecificWorker::reloadConfigAgent()
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
 	mutex->lock();
+	
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
-		roomsPolygons = extractPolygonsFromModel(worldModel);
+	//if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
+		//roomsPolygons = extractPolygonsFromModel(worldModel);
+	
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room");
 
 	mutex->unlock();
 }
@@ -158,7 +164,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room");
 
 	mutex->unlock();
 }
@@ -167,7 +173,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
 
@@ -290,18 +296,18 @@ void SpecificWorker::actionExecution()
 	if (newAction)
 		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
 
-	try
-	{
-		planningState = trajectoryrobot2d_proxy->getState();
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
-	}
-	catch(...)
-	{
-		printf("something else %d\n", __LINE__);
-	}
+// 	try
+// 	{
+// 		planningState = trajectoryrobot2d_proxy->getState();
+// 	}
+// 	catch(const Ice::Exception &ex)
+// 	{
+// 		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
+// 	}
+// 	catch(...)
+// 	{
+// 		printf("something else %d\n", __LINE__);
+// 	}
 
 	if (action == "changeroom")
 	{
@@ -321,7 +327,8 @@ void SpecificWorker::actionExecution()
 	}
 	else
 	{
-		action_NoAction();
+		std::cout<< action;
+		//action_NoAction();
 	}
 }
 
@@ -595,97 +602,67 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 
 void SpecificWorker::action_SetObjectReach(bool newAction)
 {
-	printf("void SpecificWorker::action_SetObjectReach()\n");
-	static float lastX = std::numeric_limits<float>::quiet_NaN();
-	static float lastZ = std::numeric_limits<float>::quiet_NaN();
-	int32_t objectId = str2int(params["object"].value);
-	AGMModelSymbol::SPtr goalObject;
-	try
+	std::cout<<"action "<<action<<"\n";
+	// ACTION EXECUTION
+	if (action=="setobjectreach")
 	{
-		goalObject = worldModel->getSymbol(objectId);
-	}
-	catch(...)
-	{
-		printf("object %d not in our model\n", objectId);
-		return;
-	}
-	const float x = str2float(goalObject->getAttribute("tx"));
-	const float z = str2float(goalObject->getAttribute("tz"));
-	float alpha;
-	switch (objectId)
-	{
-		case 5:
-			alpha = -0;
-			break;
-		case 7:
-			alpha = -3.141592;
-			break;
-		case 9:
-			alpha = 0;
-			break;
-		default:
-			qFatal("navigation: can't get orientation goal for reaching object %d\n", objectId);
-			break;
-	}
-	printf("object (%f, %f, %f)\n", x, z, alpha);
-	const int32_t robotId = worldModel->getIdentifierByType("robot");
-	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-	const float rx = str2float(robot->getAttribute("tx"));
-	const float rz = str2float(robot->getAttribute("tz"));
-	const float ralpha = str2float(robot->getAttribute("alpha"));
-	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
-
-	// Avoid repeating the same goal and confuse the navigator
-	const float errX = abs(rx-x);
-	const float errZ = abs(rz-z);
-	float errAlpha = abs(ralpha-alpha);
-	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
-	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
-	errAlpha = abs(errAlpha);
-	if (errX<20 and errZ<20 and errAlpha<0.1)
-		return;
-
-	bool proceed = true;
-	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
-	{
-		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+		RoboCompTrajectoryRobot2D::TargetPose tp;
+		///x z del modelo , el grafo, el agmInner
+		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(9, 10, "RT");
+		tp.x = str2float(edge->getAttribute("tx") );
+		tp.z = str2float(edge->getAttribute("tz") ) ;
+		tp.y = 0.;
+		tp.rx=tp.ry=tp.rz=0.0;
+		tp.doRotation=false;
+		
+		try
 		{
-			proceed = false;
-			printf("do not proceed because the coordinates do not differ (%s)\n", planningState.state.c_str());
+			if (!haveTarget)
+			{
+				try
+				{
+					trajectoryrobot2d_proxy->go(tp);										
+					std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<" "<<tp.z<<")\n";
+					haveTarget=true;
+				}
+				catch(const Ice::Exception &ex)
+				{
+					std::cout << ex << std::endl;
+				}
+				
+			 }
+			
+			if (trajectoryrobot2d_proxy->getState().state=="IDLE" && haveTarget)
+			{
+				std::cout<<"\ttrajectoryrobot2d_proxy->getState() "<<trajectoryrobot2d_proxy->getState().state<<"\n";
+				//timer.start();
+				try
+				{
+					AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+					AGMModelEdge &edge  = newModel->getEdgeByIdentifiers(9, 10, "noReach");
+					
+					std::cout<<"edge->toString()"<<edge->toString(worldModel)<<"\n";
+					edge->setLabel("reach");
+					std::cout<<"edge->toString()"<<edge->toString(worldModel)<<"\n";
+					
+					sendModificationProposal(worldModel, newModel);
+					haveTarget=false;
+				}
+				catch (...)
+				{
+					std::cout<<"eeeee"<<"\n";
+				}
+				
+			}
+			
+			
 		}
-		else
+		catch(const Ice::Exception &ex)
 		{
-			proceed = true;
-			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+			std::cout << ex << std::endl;
 		}
-	}
-	else
-	{
-		proceed = true;
-		printf("proceed because it's not planning or executing\n");
-	}
-
-	static bool backp = true;
-	if (proceed)
-	{
-		lastX = x;
-		lastZ = z;
-		printf("proceed setobjectreach %d\n", objectId);
-		float xx = x;
-		float zz = z;
-// 		objectId==7?z+550:z-550
-		float aa = objectId==7?-3.141592:0;
-// 		qDebug() << xx << zz << aa;
-		go(xx, zz, aa, true, 80, 150, 50);
-		backp = true;
-	}
-	else if (backp)
-	{
-		printf("not proceeding %s\n", planningState.state.c_str());
-		backp = false;
-	}
-
-	printf("aaAdigejr\n");
+	}	
 }
 
 void SpecificWorker::action_GraspObject(bool newAction)
@@ -743,7 +720,7 @@ void SpecificWorker::odometryAndLocationIssues()
 	try
 	{
 		
-		int32_t robotId;
+		int32_t robotId, roomId;
 		//AGMModelPrinter::printWorld(worldModel);
 		robotId = worldModel->getIdentifierByType("robot");
 		if (robotId < 0)
@@ -751,32 +728,21 @@ void SpecificWorker::odometryAndLocationIssues()
 			printf("Waiting for the executive...\n");
 			return;
 		}
-		AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-		try
-		{
-			robot->setAttribute("tx", float2str(bState.x));
-			robot->setAttribute("tz", float2str(bState.z));
-			robot->setAttribute("alpha", float2str(bState.alpha));
-		}
-		catch (...)
-		{
-			printf("Can't update odometry in the model A!!!\n");
+		
+                //AGMModelPrinter::printWorld(worldModel);              
+		roomId= agmInner.findName(worldModel,"room");
+		if (roomId < 0)
+		{			
+			printf("roomId not found...\n");
 			return;
 		}
 		
-		
-		///link update
-		qDebug()<<bState.x<<bState.z<<bState.alpha;
-		
-                //AGMModelPrinter::printWorld(worldModel);                
-		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(20, 1, "RT");
-		
+		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(roomId, robotId, "RT");
 		try
 		{
-			edge->setAttribute("tx", float2str(bState.x));
-			edge->setAttribute("tz", float2str(bState.z));
-			edge->setAttribute("ry", float2str(bState.alpha));
-		}
+			edge->setAttribute("tx", float2str(bState.correctedX));
+			edge->setAttribute("tz", float2str(bState.correctedX));
+			edge->setAttribute("ry", float2str(bState.correctedAlpha));		}
 		catch (...)
 		{
 			printf("Can't update odometry in RT !!!\n");
@@ -784,20 +750,22 @@ void SpecificWorker::odometryAndLocationIssues()
 		}
 		
 		
-		
 // 		printf("a %d\n", __LINE__);
+		//to reduces the publication frequency
 		static float bStatex = 0;
 		static float bStatez = 0;
 		static float bStatealpha = 0;
-		if (fabs(bStatex - bState.x)>20 or fabs(bStatez - bState.z)>20 or fabs(bStatealpha - bState.alpha)>0.16)
-		{
-			AGMMisc::publishNodeUpdate(robot, agmagenttopic_proxy);
+		if (fabs(bStatex - bState.correctedX)>20 or fabs(bStatez - bState.correctedX)>20 or fabs(bStatealpha - bState.correctedAlpha)>0.1)
+		{			
 			//Publish update edge
-			AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy);
+			printf("Update odometry...\n");
 			
-			bStatex = bState.x;
-			bStatez = bState.z;
-			bStatealpha = bState.alpha;
+			bStatex = bState.correctedX;
+			bStatez = bState.correctedZ;
+			bStatealpha = bState.correctedAlpha;
+			qDebug()<<"bState corrected"<<bState.correctedX<<bState.correctedZ<<bState.correctedAlpha;
+			qDebug()<<"bState"<<bStatex<<bStatez<<bStatealpha;
+			AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy);
                 }
                 
 // 		printf("a %d\nv", __LINE__);
@@ -820,7 +788,7 @@ void SpecificWorker::odometryAndLocationIssues()
 
 	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
 	//
-	updateRobotsCognitiveLocation();
+	///updateRobotsCognitiveLocation();
 }
 
 
@@ -842,3 +810,94 @@ void SpecificWorker::action_NoAction(bool newAction)
 }
 
 
+// printf("void SpecificWorker::action_SetObjectReach()\n");
+// 	static float lastX = std::numeric_limits<float>::quiet_NaN();
+// 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
+// 	int32_t objectId = str2int(params["object"].value);
+// 	AGMModelSymbol::SPtr goalObject;
+// 	try
+// 	{
+// 		goalObject = worldModel->getSymbol(objectId);
+// 	}
+// 	catch(...)
+// 	{
+// 		printf("object %d not in our model\n", objectId);
+// 		return;
+// 	}
+// 	const float x = str2float(goalObject->getAttribute("tx"));
+// 	const float z = str2float(goalObject->getAttribute("tz"));
+// 	float alpha;
+// 	switch (objectId)
+// 	{
+// 		case 5:
+// 			alpha = -0;
+// 			break;
+// 		case 7:
+// 			alpha = -3.141592;
+// 			break;
+// 		case 9:
+// 			alpha = 0;
+// 			break;
+// 		default:
+// 			qFatal("navigation: can't get orientation goal for reaching object %d\n", objectId);
+// 			break;
+// 	}
+// 	printf("object (%f, %f, %f)\n", x, z, alpha);
+// 	const int32_t robotId = worldModel->getIdentifierByType("robot");
+// 	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
+// 	const float rx = str2float(robot->getAttribute("tx"));
+// 	const float rz = str2float(robot->getAttribute("tz"));
+// 	const float ralpha = str2float(robot->getAttribute("alpha"));
+// 	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
+// 
+// 	// Avoid repeating the same goal and confuse the navigator
+// 	const float errX = abs(rx-x);
+// 	const float errZ = abs(rz-z);
+// 	float errAlpha = abs(ralpha-alpha);
+// 	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
+// 	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
+// 	errAlpha = abs(errAlpha);
+// 	if (errX<20 and errZ<20 and errAlpha<0.1)
+// 		return;
+// 
+// 	bool proceed = true;
+// 	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
+// 	{
+// 		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
+// 		{
+// 			proceed = false;
+// 			printf("do not proceed because the coordinates do not differ (%s)\n", planningState.state.c_str());
+// 		}
+// 		else
+// 		{
+// 			proceed = true;
+// 			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
+// 		}
+// 	}
+// 	else
+// 	{
+// 		proceed = true;
+// 		printf("proceed because it's not planning or executing\n");
+// 	}
+// 
+// 	static bool backp = true;
+// 	if (proceed)
+// 	{
+// 		lastX = x;
+// 		lastZ = z;
+// 		printf("proceed setobjectreach %d\n", objectId);
+// 		float xx = x;
+// 		float zz = z;
+// // 		objectId==7?z+550:z-550
+// 		float aa = objectId==7?-3.141592:0;
+// // 		qDebug() << xx << zz << aa;
+// 		go(xx, zz, aa, true, 80, 150, 50);
+// 		backp = true;
+// 	}
+// 	else if (backp)
+// 	{
+// 		printf("not proceeding %s\n", planningState.state.c_str());
+// 		backp = false;
+// 	}
+// 
+// 	printf("aaAdigejr\n");
