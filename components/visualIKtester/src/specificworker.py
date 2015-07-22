@@ -47,12 +47,12 @@ class SpecificWorker(GenericWorker):
 		self.Period = 2000
 		self.timer.start(self.Period)
 		
-		self.ui.txbox.setValue(0)
+		self.ui.txbox.setValue(90)
 		self.ui.tybox.setValue(800)
 		self.ui.tzbox.setValue(400)
 		self.ui.rxbox.setValue(0)
-		self.ui.rybox.setValue(0)
-		self.ui.rzbox.setValue(3.1415)
+		self.ui.rybox.setValue(-0.8)
+		self.ui.rzbox.setValue(-3.1415)
 		
 		self.ui.homebutton.clicked.connect(self.goHome)
 		self.ui.homebutton_2.clicked.connect(self.goHome)
@@ -136,6 +136,13 @@ class SpecificWorker(GenericWorker):
 			weights.ry = 0
 			weights.rz = 0
 		try:
+			axis = RoboCompInverseKinematics.Axis() #vector de pesos
+			axis.x = 0
+			axis.y = 0
+			axis.z = 1
+			part = "HEAD"
+			self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
+			
 			part = "RIGHTARM"
 			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
 			print 'Mirando estado'

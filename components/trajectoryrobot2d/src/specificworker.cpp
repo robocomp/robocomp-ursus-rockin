@@ -100,7 +100,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
 
 	//Planning
-	plannerPRM = new PlannerPRM(innerModel, 100, 30);
+	plannerPRM = new PlannerPRM(innerModel, 150, 20);
 	planner = plannerPRM;
 #ifdef USE_QTGUI
 	planner->cleanGraph(innerViewer);
@@ -291,13 +291,14 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 			}
 			else
 			{
-				planner->learnPath( road.backList );
+// 				planner->learnPath( road.backList );
 				changeCommand(target,CurrentTarget::Command::STOP);
 #ifdef USE_QTGUI
 				planner->cleanGraph(innerViewer);
 				planner->drawGraph(innerViewer);
 #endif
 			}
+			planner->learnPath( road.backList );
 		}
 
 		// Get here when robot is stuck
@@ -480,21 +481,11 @@ void SpecificWorker::changeCommand(CurrentTarget& target, CurrentTarget::Command
  */
 bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 {
-    static QTime clockInner = QTime::currentTime();	//used only in this method
 	try
 	{
 		omnirobot_proxy->getBaseState(bState);
-		if(state.getState()=="IDLE" or clockInner.elapsed()>10000)
-		{
-		  inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
-		  innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
-		  clockInner.restart();
-		}
-		else
-		{
-		  inner->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-		  innerVisual->updateTransformValues("robot", bState.x, 0, bState.z, 0, bState.alpha, 0);
-		}
+		inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
 		try
 		{
 			laserData = laser_proxy->getLaserData();
@@ -598,7 +589,6 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-
 		printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
 		//PARAMETERS CHECK
 		if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
@@ -610,11 +600,7 @@ float SpecificWorker::go(const TargetPose& target)
 		else
 		{
 			tState.setState("EXECUTING");
-			//currentTarget.command = CurrentTarget::Command::CHANGETARGET;
-	// 		QTime reloj = QTime::currentTime();
-	// 		while(tState.getState() != "IDLE" or reloj.elapsed() < 3000){};
-	// 		if( reloj.elapsed() < 3000 )
-	// 		{
+
 				currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 				currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
 				changeCommand(currentTarget,CurrentTarget::Command::GOTO);
@@ -623,19 +609,11 @@ float SpecificWorker::go(const TargetPose& target)
 					currentTarget.setHasRotation(true);
 				drawTarget( QVec::vec3(target.x,target.y,target.z));
 				taskReloj.restart();
-
 				qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
-
-	// 		}
-	// 		else
-	// 		{
-	// 			qDebug() <<__FUNCTION__ << "Returning. Could not cancel current target";
-	// 			RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Returning. Could not cancel current target";
-	// 			throw ex;
-	// 		}
 		}
+		
+		//return road.getRobotDistanceToTarget();
 }
-
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 {
 	return tState.toMiddleware(this->bState, this->road);

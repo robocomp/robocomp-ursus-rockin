@@ -1,0 +1,28 @@
+<AGMModel>
+
+	<symbol id="1" type="robot" />
+
+	<symbol id="9" type="object" />
+	<symbol id="10" type="objectSt" />
+	<link  src="9"  dst="10"     label="hasStatus" />
+	<link  src="9"  dst="10"     label="table" />
+	<link  src="9"  dst="10"     label="noReach" />
+	<link  src="9"  dst="10"     label="reachable" />
+
+	<symbol id="7" type="object" />
+	<symbol id="8" type="objectSt" />
+	<link  src="7"  dst="8"  label="room" />
+	<link  src="1"  dst="7" label="in" />
+	<link  src="9"  dst="7" label="in" />	
+	<link  src="7"  dst="1"  label="RT"/>
+
+	<link  src="7"  dst="9"     label="RT">
+		<linkAttribute key="rx" value="0" />
+		<linkAttribute key="ry" value="0" />
+		<linkAttribute key="rz" value="0" />
+		<linkAttribute key="tx" value="3000" />
+		<linkAttribute key="ty" value="0" />
+		<linkAttribute key="tz" value="2800" />
+	</link>
+
+</AGMModel>

@@ -63,9 +63,8 @@ void PlannerOMPL::initialize(Sampler *sampler )
 	QRectF outerRegion = sampler->getOuterRegion();
 	xMin = outerRegion.left();      
 	xMax = outerRegion.right();
-	zMin = outerRegion.top();
-	zMax = outerRegion.bottom();
-	
+	zMin = outerRegion.bottom();
+	zMax = outerRegion.top();
 	//Create state space as R2
 	ob::RealVectorStateSpace *space = new ob::RealVectorStateSpace();
 	space->addDimension(xMin, xMax);
@@ -112,20 +111,20 @@ bool PlannerOMPL::setPath(const QVec& origin, const QVec &target)
 }
 
 bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTime)  //maxTime in seconds
-{
+{	
+
 	
 	simpleSetUp->clear();
-	
 	ob::ScopedState<> start(simpleSetUp->getStateSpace());
 	start[0] = origin.x();	start[1] = origin.z();
 	ob::ScopedState<> goal(simpleSetUp->getStateSpace());
 	goal[0] = target.x();	goal[1] = target.z();
 	simpleSetUp->setStartAndGoalStates(start, goal);
 	simpleSetUp->getProblemDefinition()->print(std::cout);
-	
 	//Call the planner
+	printf("starting RRT search with maxTime %d seconds\n",maxTime);
 	ob::PlannerStatus solved = simpleSetUp->solve(maxTime);
-
+	printf("FINISH SEARCH\n");
 	if (solved)
 	{
 		std::cout << __FILE__ << __FUNCTION__ << "RRT, found solution with " << simpleSetUp->getSolutionPath().getStateCount() << " waypoints" << std::endl;;

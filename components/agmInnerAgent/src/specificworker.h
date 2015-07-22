@@ -69,7 +69,7 @@ private:
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
-	InnerModel *innerModel;
+	InnerModel *innerModel,*innerModel1;
 	AgmInner agmInner;
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
@@ -77,9 +77,12 @@ private:
 	
 
 	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);		
-	void include_im(QHash< QString, ::int32_t > match);
+	//void include_im(QHash< QString, ::int32_t > match);
+	void include_im(QHash<QString, int32_t>  match, InnerModel *im);
+
 	
 	int findName(QString n);	
+	AGMModelSymbol::SPtr ImNodeToSymbol(InnerModelNode* node);
 // 	InnerModel* extractInnerModel(QString imNodeName);
 // 	void recorrer(InnerModel* imNew, int& symbolID);
 // 	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);

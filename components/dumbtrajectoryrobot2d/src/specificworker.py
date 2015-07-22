@@ -56,6 +56,8 @@ def saturate_minabs_BothSigns(value, minabs, top):
 class SpecificWorker(GenericWorker):
 	def __init__(self, proxy_map):
 		super(SpecificWorker, self).__init__(proxy_map)
+		self.collisions = 0
+		self.currentVel = [0,0,0]
 		self.hide()
 
 		self.state = NavState()
@@ -80,7 +82,7 @@ class SpecificWorker(GenericWorker):
 		self.stop()
 
 
-		self.Period = 100
+		self.Period = 50
 		self.timer.start(self.Period)
 		self.timer.timeout.connect(self.compute)
 
@@ -91,7 +93,10 @@ class SpecificWorker(GenericWorker):
 		return r
 
 	def updateStatePose(self):
-		self.state.x, self.state.z, self.state.ry = self.omnirobot_proxy.getBasePose()
+		s = self.omnirobot_proxy.getBaseState()
+		self.state.x = s.correctedX
+		self.state.z = s.correctedZ
+		self.state.ry = s.correctedAlpha
 		print 'POSE', self.state.x, self.state.z, self.state.ry
 
 	def setParams(self, params):
@@ -99,6 +104,9 @@ class SpecificWorker(GenericWorker):
 
 	def getError(self, current, target):
 		errAlpha = self.normalize_s_pi(self.normalize_s_pi(target.ry)-self.normalize_s_pi(current.ry))
+		print 'ta', target.ry
+		print 'ca', current.ry
+		print 'errAlpha', errAlpha
 		return target.x-current.x, target.z-current.z, errAlpha
 
 	@QtCore.Slot()
@@ -126,8 +134,24 @@ class SpecificWorker(GenericWorker):
 				if np.linalg.norm(command)<=self.threshold and abs(errAlpha) < 0.08:
 					print 'stop by threshold'
 					proceed = False
+					
+					
+				laserData = self.laser_proxy.getLaserData()
+				for l in laserData:
+					if l.dist<400:
+						self.collisions += 1
+						self.currentVel = [0.7*x for x in self.currentVel]
+						self.omnirobot_proxy.setSpeedBase(self.currentVel[0], self.currentVel[1], self.currentVel[2])
+						if self.collisions > 100:
+							print '<Now IDLE'
+							self.stop()
+							self.state.state = 'IDLE'
+							print 'Now IDLE>'
+						return
+				self.collisions = 0
+			
 				if proceed:
-					maxspeed = 300.
+					maxspeed = 200.
 					if np.linalg.norm(command)<0.1:
 						command = np.array([0,0])
 					else:
@@ -135,6 +159,7 @@ class SpecificWorker(GenericWorker):
 						if speed > maxspeed: speed = maxspeed
 						command = command / (np.linalg.norm(command)/speed)
 					commandAlpha = saturate_minabs_BothSigns(errAlpha, 0.05, 0.3)
+					self.currentVel = [command[0], command[1], commandAlpha]
 					self.omnirobot_proxy.setSpeedBase(command[0], command[1], commandAlpha)
 				else:
 					print '<Now IDLE'
@@ -154,7 +179,7 @@ class SpecificWorker(GenericWorker):
 	#
 	# go
 	def go(self, target):
-		print target.x, target.z
+		print target.x, target.z, target.ry
 		return self.goReferenced(target, 0, 0, 0)
 
 

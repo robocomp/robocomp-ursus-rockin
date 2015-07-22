@@ -58,6 +58,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	road.setBlocked(false);
 	for(auto i : laserData)
 	{
+		printf("laser dist %f || baseOffsets %f \n",i.dist,baseOffsets[j]);
 		if(i.dist < 10) i.dist = 30000;
 		if( i.dist < baseOffsets[j] + 50 )
 		{
@@ -147,7 +148,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//				* reduction is 1 if there are not obstacle.
 		//				* teta that applies when getting close to the target (1/roadGetCurvature)
 		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
- 		reduction=1; //TODO arreglar reduction del laser;
+ 		reduction=1; //TODO Desativado hasta que el laser no toque con el robot;
 		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
 								 * reduction
 								 * exponentialFunction(vrot, 0.8, 0.01)
@@ -169,6 +170,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			vrot = 0;
 			vside = 0;
 		}
+		
 		/////////////////////////////////////////////////
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 		////////////////////////////////////////////////
@@ -180,27 +182,24 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		/////////////////////////////////////////////////
 		///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
 		/////////////////////////////////////////////////
-// 		float vside = 0;
+		//TODO: PROBAR EN URSUS A VER COMO QUEDA..
+		
 // 		std::sort(laserData.begin(), laserData.end(), [](auto a, auto b){ return a.dist < b.dist;});
-// 		if(laserData.front().dist < 100)// and fabs(laserData.front().angle)>0.3)
+// 		if(laserData.front().dist > 300 && vside == 0)// and fabs(laserData.front().angle)>0.3)
 // 		{
-// 			if( laserData.front().angle > 0) vside  = -100;
-// 			else vside = 100;
+// 			if( laserData.front().angle > 0) vside  = -30;
+// 			else vside = 30;
 // 		}
-// 		else
-// 			vside = 0;
 		
 		/////////////////////////////////////////////////
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
    		//qDebug() << "------------------Controller Report ---------------;";
-    		//qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot;
+    		//qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot << " VSide: " << vside;
    		//qDebug() << "---------------------------------------------------;";
                 
-   		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);
-                    qDebug() << "iuuu";
-                }
+   		try { omnirobot_proxy->setSpeedBase(vside/2, vadvance/2, vrot/2);}
    		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 	}
 	else		//Too long delay. Stopping robot.
@@ -232,6 +231,7 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 	float distN, distNorm;
 	int k=0;
 	bool collision = false;
+	float minD = 999999999;
 	for(auto i : laserData)
 	{
 		//non-linear (exponential) transformation of the magnitude
@@ -241,12 +241,15 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 		//qDebug() << distNorm;
 		QVec p = innerModel->laserTo("laser", "laser" , distNorm, i.angle);  //Watch the laser to tobot offset to compute final corrections
 		res += (p * (T)(-1));
-		if( i.dist < 100.f)
+		if (i.dist<minD)
+			minD = i.dist;
+		if( i.dist < 400.f)
 		{
 			collision = true;
 			vadvance = 0;
 			vrot = 0;
 		}
+		printf("min distance = %f\n", minD);
 	}
 	return collision;
 }
