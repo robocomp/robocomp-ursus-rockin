@@ -31,6 +31,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
 	haveTarget = false;
+	
 }
 
 /**
@@ -48,11 +49,12 @@ void SpecificWorker::compute( )
 
 // 	innerModel->treePrint();
 	qDebug()<<"numberOfSymbols"<<worldModel->numberOfSymbols();
+// 	std::cout<<"action: "<<action<<"\n";
 
 		
 	//
 // 	printf("<ae\n");
-// 	actionExecution();
+	actionExecution();
 // 	printf("ae>\n");
 }
 
@@ -155,7 +157,6 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	
 	agmInner.setWorld(worldModel);
 	innerModel = agmInner.extractInnerModel("room");
-
 	mutex->unlock();
 }
 
@@ -165,7 +166,6 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	innerModel = agmInner.extractInnerModel("room");
-
 	mutex->unlock();
 }
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
@@ -327,7 +327,7 @@ void SpecificWorker::actionExecution()
 	}
 	else
 	{
-		std::cout<< action;
+		std::cout<<" "<< action;
 		//action_NoAction();
 	}
 }
@@ -608,7 +608,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	{
 		RoboCompTrajectoryRobot2D::TargetPose tp;
 		///x z del modelo , el grafo, el agmInner
-		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(9, 10, "RT");
+		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(7, 9, "RT");
 		tp.x = str2float(edge->getAttribute("tx") );
 		tp.z = str2float(edge->getAttribute("tz") ) ;
 		tp.y = 0.;
@@ -627,7 +627,8 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 				}
 				catch(const Ice::Exception &ex)
 				{
-					std::cout << ex << std::endl;
+					std::cout <<"trajectoryrobot2d_proxy->go "<< ex << std::endl;
+					throw ex;
 				}
 				
 			 }
@@ -741,7 +742,7 @@ void SpecificWorker::odometryAndLocationIssues()
 		try
 		{
 			edge->setAttribute("tx", float2str(bState.correctedX));
-			edge->setAttribute("tz", float2str(bState.correctedX));
+			edge->setAttribute("tz", float2str(bState.correctedZ));
 			edge->setAttribute("ry", float2str(bState.correctedAlpha));		}
 		catch (...)
 		{
@@ -750,11 +751,12 @@ void SpecificWorker::odometryAndLocationIssues()
 		}
 		
 		
-// 		printf("a %d\n", __LINE__);
+		printf("a %d\n", __LINE__);
 		//to reduces the publication frequency
 		static float bStatex = 0;
 		static float bStatez = 0;
 		static float bStatealpha = 0;
+		
 		if (fabs(bStatex - bState.correctedX)>20 or fabs(bStatez - bState.correctedX)>20 or fabs(bStatealpha - bState.correctedAlpha)>0.1)
 		{			
 			//Publish update edge
