@@ -182,15 +182,12 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		/////////////////////////////////////////////////
 		///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
 		/////////////////////////////////////////////////
-// 		float vside = 0;
 // 		std::sort(laserData.begin(), laserData.end(), [](auto a, auto b){ return a.dist < b.dist;});
-// 		if(laserData.front().dist < 100)// and fabs(laserData.front().angle)>0.3)
+// 		if(laserData.front().dist > 300 && vside == 0)// and fabs(laserData.front().angle)>0.3)
 // 		{
-// 			if( laserData.front().angle > 0) vside  = -100;
-// 			else vside = 100;
+// 			if( laserData.front().angle > 0) vside  = -30;
+// 			else vside = 30;
 // 		}
-// 		else
-// 			vside = 0;
 		
 		/////////////////////////////////////////////////
 		//////   EXECUTION

@@ -613,7 +613,7 @@ float SpecificWorker::go(const TargetPose& target)
 		}
 		
 		//return road.getRobotDistanceToTarget();
-
+}
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 {
 	return tState.toMiddleware(this->bState, this->road);
