@@ -100,6 +100,11 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 // 		params[name+".param_name"] = "xxx";
 // 	}
 	params["AgmInnerAgent.InnerModel"] = aux;
+	
+	//todo better if necessary
+	configGetString("AgmInnerAgent","InnerModel1", aux.value, "no file");
+	params["AgmInnerAgent.InnerModel1"] = aux;
+	
 }
 
 //comprueba que los parametros sean correctos y los transforma a la estructura del worker
