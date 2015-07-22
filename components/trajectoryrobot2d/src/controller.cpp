@@ -233,6 +233,7 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 	float distN, distNorm;
 	int k=0;
 	bool collision = false;
+	float minD = 999999999;
 	for(auto i : laserData)
 	{
 		//non-linear (exponential) transformation of the magnitude
@@ -242,12 +243,15 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 		//qDebug() << distNorm;
 		QVec p = innerModel->laserTo("laser", "laser" , distNorm, i.angle);  //Watch the laser to tobot offset to compute final corrections
 		res += (p * (T)(-1));
-		if( i.dist < 100.f)
+		if (i.dist<minD)
+			minD = i.dist;
+		if( i.dist < 400.f)
 		{
 			collision = true;
 			vadvance = 0;
 			vrot = 0;
 		}
+		printf("min distance = %f\n", minD);
 	}
 	return collision;
 }
