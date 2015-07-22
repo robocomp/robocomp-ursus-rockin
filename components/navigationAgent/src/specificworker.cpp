@@ -152,13 +152,13 @@ void SpecificWorker::odometryAndLocationIssues()
 		}
 		
 		
-		printf("a %d\n", __LINE__);
+		//printf("a %d\n", __LINE__);
 		//to reduces the publication frequency
 		static float bStatex = 0;
 		static float bStatez = 0;
 		static float bStatealpha = 0;
 		
-		if (fabs(bStatex - bState.correctedX)>20 or fabs(bStatez - bState.correctedX)>20 or fabs(bStatealpha - bState.correctedAlpha)>0.1)
+		if (fabs(bStatex - bState.correctedX)>20 or fabs(bStatez - bState.correctedZ)>20 or fabs(bStatealpha - bState.correctedAlpha)>0.2)
 		{			
 			//Publish update edge
 			printf("Update odometry...\n");
