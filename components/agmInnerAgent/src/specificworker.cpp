@@ -29,20 +29,34 @@ void SpecificWorker::compute()
 		qDebug()<<"\n\n\n\n************************";
 		qDebug()<<"numberOfSymbols BEFORE insert InnerModel"<<worldModel->numberOfSymbols();
 		qDebug()<<"************************";
-// 		qDebug()<<"\n\n******* Original innerModel *****************";		
-//  		innerModel->treePrint();
-// 		qDebug()<<"\n\n*********** include_im *************";
+		qDebug()<<"\n\n******* Original innerModel *****************";		
+ 		innerModel->treePrint();
+		qDebug()<<"\n\n*********** include_im *************";
 // 		
 		///FIRST INNERMODEL
 		QHash<QString, int32_t>  match;
-		match.insert("room",7);		
+		match.insert("room",7);
+		match.insert("robot",1);				
 		include_im(match,innerModel);
-		qDebug()<<"\n\n*********** FIRST INNERMODEL include ************* \n\n";
-		///SECOND INNERMODEL
-		QHash<QString, int32_t>  match1;
-		match1.insert("robot",1);		
-		include_im(match1,innerModel1);
+		agmInner.setWorld(worldModel);	
+		worldModel->save("agmInnerFirst.xml");
+		qDebug()<<"\n\n*********** FIRST INNERMODEL included ************* \n\n";
+		
+		qDebug()<<"\n\n******* Extract innerModel *****************";		
+		QString nodeName="room";
+		(agmInner.extractInnerModel(nodeName))->treePrint();
+		qDebug()<<"\n\n*********** include_im *************";
+// 		///SECOND INNERMODEL
+// 		QHash<QString, int32_t>  match1;
+// 		match1.insert("robot",1);		
+// 		include_im(match1,innerModel1);
+// 		qDebug()<<"\n\n*********** SECOND INNERMODEL included ************* \n\n";
 // 		
+// 		QString nodeName="room";
+//  		qDebug()<<"\n\n****** extract innerModel from:"<<nodeName;		
+// 		agmInner.setWorld(worldModel);	
+// 		(agmInner.extractInnerModel(nodeName))->treePrint();		
+// 		worldModel->save("agmInnerSecond.xml");
 		///comprobacion agm puro es extraido correctamente
 //  		qDebug()<<"\n\nnumberOfSymbols AFTER insert InnerModel"<<worldModel->numberOfSymbols();
 // 		agmInner.setWorld(worldModel);
@@ -92,19 +106,19 @@ void SpecificWorker::compute()
 
 
 /**
- * @brief Search the name of the innermodel node,(the name is the unique key for innerModel ), inside de AGM Model. The innermodel id is stored in the attribute "name" of each symbol. 
+ * @brief Search the imName of the innermodel node,(the name is the unique key for innerModel ), inside de AGM Model. The innermodel id is stored in the attribute "imName" of each symbol. 
  * It is found, return the id of the symbol, the unique key for AGMSymbols, otherwise returns -1.
  * 
- * @param n value of the attribute field name...
+ * @param n value of the attribute field imName...
  * @return symbol ID, -1 if it is not found
  */
 int SpecificWorker::findName(QString n)
 {
 	for (uint32_t i=0; i<worldModel->symbols.size(); ++i)
 	{	
-		if (worldModel->symbols[i]->attributes.find("name") != worldModel->symbols[i]->attributes.end() )
+		if (worldModel->symbols[i]->attributes.find("imName") != worldModel->symbols[i]->attributes.end() )
 		{
-			if (worldModel->symbols[i]->attributes["name"] == n.toStdString() )
+			if (worldModel->symbols[i]->attributes["imName"] == n.toStdString() )
 			{
 // 				qDebug()<<"findName: FOUND"<<n<<worldModel->symbols[i]->identifier;
 				return worldModel->symbols[i]->identifier;
@@ -228,18 +242,33 @@ void SpecificWorker::include_im(QHash<QString, int32_t>  match, InnerModel *im)
 			qFatal("abort, not node");
 		}
 	}
-	//comprobar que todos los symbolos existen en AGM y que tienen attribute name
+	//comprobar que todos los symbolos existen en AGM y que tienen attribute imName, imType y todo los de innermodel
 	QList<int32_t> lSymbols =match.values();
 	for (int i = 0; i < lSymbols.size(); ++i) 
 	{
 		try
 		{
 			AGMModelSymbol::SPtr symbol =worldModel->getSymbolByIdentifier(lSymbols.at(i));
-			if (symbol->symbolType!="transform")
+			
+			try
 			{
-				std::cout<<symbol->toString()<<"\n";
-				qDebug()<<"AGMSymbol must be the attribute name, ADDING...";
-				symbol->setAttribute("name",match.key(lSymbols.at(i)).toStdString());
+				symbol->getAttribute("imName");
+			}
+			catch (...)			
+			{
+				std::cout<<"AGMSymbol "<< symbol->toString()<<" ";
+				std::cout<<"must be the attribute imName, ADDING [imName , "<<match.key(lSymbols.at(i)).toStdString()<<" ]\n";
+				symbol->setAttribute("imName",match.key(lSymbols.at(i)).toStdString());
+			}			
+			try
+			{
+				symbol->getAttribute("imType");
+			}
+			catch (...)			
+			{
+				std::cout<<"AGMSymbol "<< symbol->toString()<<" ";
+				std::cout<<"must be the attribue imType, ADDING [imType , "<<match.key(lSymbols.at(i)).toStdString()<<" ]\n";
+				symbol->setAttribute("imType",match.key(lSymbols.at(i)).toStdString());
 			}
 		}
 		catch (AGMModelException e )	
@@ -249,6 +278,41 @@ void SpecificWorker::include_im(QHash<QString, int32_t>  match, InnerModel *im)
 			qFatal("Abort, not symbol");
 		}
 	}
+	
+	//comprobar que todos los symbolos de los enlaces RT de agm tienen attribute name
+	for (std::vector<AGMModelEdge>::iterator it = worldModel->edges.begin() ; it != worldModel->edges.end(); ++it)
+	{
+		//std::cout << ' ' << (*it)->toString(worldModel);
+		if ((*it)->getLabel()=="RT" )
+		{			
+			AGMModelSymbol::SPtr symbolA = worldModel->getSymbol((*it)->getSymbolPair().first);			
+			try
+			{
+				symbolA->getAttribute("imName");
+			}
+			catch (...)			
+			{
+				std::cout<<"AGMSymbol "<< symbolA->toString()<<" ";
+				std::cout<<"must be the attribute imName, ADDING [imName , "<<symbolA->toString()<<" ]\n";
+				symbolA->setAttribute("imName",symbolA->toString());
+				symbolA->setAttribute("imType","transform");
+			}	
+			AGMModelSymbol::SPtr symbolB = worldModel->getSymbol((*it)->getSymbolPair().second);
+			try
+			{
+				symbolB->getAttribute("imName");
+			}
+			catch (...)			
+			{
+				std::cout<<"AGMSymbol "<< symbolB->toString()<<" ";
+				std::cout<<"must be the attribute name, ADDING [imName , "<<symbolB->toString()<<" ]\n";
+				symbolB->setAttribute("imName",symbolB->toString());
+				symbolA->setAttribute("imType","transform");
+			}	
+		}
+		//std::cout << '\n';
+	}
+	
 // 	qDebug()<<"***** lNode"<< lNode;
 // 	qDebug()<<"***** lSymbols"<<lSymbols;
 	
@@ -262,16 +326,25 @@ void SpecificWorker::include_im(QHash<QString, int32_t>  match, InnerModel *im)
 			qDebug()<<"InnerModel link"<<node->id <<"--RT-->"<<nodeSong->id;	
 			if ( node->children.contains(nodeSong) )
 			{
-				qDebug()<<"crear en AGM, link"<<lSymbols.at(i)<<"--RT-->"<<lSymbols.at(j);	
+				//si no existe ya esta relacion
 				//edge 
-				std::map<std::string, std::string> linkAttrs;
-				linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str(0.0)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str(0.0)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str(0.0)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str(0.0)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str(0.0)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str(0.0)) );
-				worldModel->addEdgeByIdentifiers(lSymbols.at(i),lSymbols.at(j),"RT",linkAttrs);
+				try
+				{
+					AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(lSymbols.at(i), lSymbols.at(j), "RT");
+										
+				}
+				catch (...)
+				{
+					qDebug()<<"crear en AGM, link"<<lSymbols.at(i)<<"--RT-->"<<lSymbols.at(j);	
+					std::map<std::string, std::string> linkAttrs;
+					linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str(0.0)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str(0.0)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str(0.0)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str(0.0)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str(0.0)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str(0.0)) );
+					worldModel->addEdgeByIdentifiers(lSymbols.at(i),lSymbols.at(j),"RT",linkAttrs);
+				}
 			}
 		}
 	}
@@ -333,7 +406,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 				
 	
 	std::map<std::string, std::string> attrs;
-	attrs.insert ( std::pair<std::string,std::string>("name",node->id.toStdString()) );
+	attrs.insert ( std::pair<std::string,std::string>("imName",node->id.toStdString()) );
 	
 	AGMModelSymbol::SPtr newSym;
 	
@@ -359,6 +432,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("axis",joint->axis) );
 		attrs.insert ( std::pair<std::string,std::string>("home",float2str(joint->home)) );
 		type= "joint";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelPrismaticJoint*>(node) != NULL)
 	{
@@ -378,6 +452,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("axis",p->axis) );
 		
 		type= "prismaticJoint";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	
 	else if (dynamic_cast<InnerModelTouchSensor*>(node) != NULL)
@@ -396,7 +471,8 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("port",int2str(touch->port)) );
 		// QString stype;
 		attrs.insert ( std::pair<std::string,std::string>("stype",touch->stype.toStdString()) );
-		type = "TouchSensor";
+		type = "touchSensor";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelDifferentialRobot*>(node) != NULL)
 	{
@@ -413,6 +489,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("collide",v) );
 		
 		type = "differentialRobot";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelOmniRobot*>(node) != NULL)
 	{
@@ -429,6 +506,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("collide",v) );
 				
 		type = "omniRobot";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelPlane*>(node) != NULL)
 	{
@@ -456,6 +534,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("repeat",int2str(plane->repeat)) );
 		attrs.insert ( std::pair<std::string,std::string>("texture",plane->texture.toStdString()) );
 		type = "plane";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 		
 	}
 	else if (dynamic_cast<InnerModelRGBD*>(node) != NULL)
@@ -469,6 +548,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("width",float2str(rgbd->width) ) );
 		attrs.insert ( std::pair<std::string,std::string>("ifconfig",rgbd->ifconfig.toStdString()) );
 		type ="rgbd";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelCamera*>(node) != NULL)
 	{
@@ -479,12 +559,14 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("width",float2str(cam->width) ) );
 		
 		type = "camera";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelIMU*>(node) != NULL)
 	{
 		InnerModelIMU* imu = dynamic_cast<InnerModelIMU*>(node);		
 		attrs.insert ( std::pair<std::string,std::string>("port",int2str(imu->port)) );
 		type = "imu";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelLaser*>(node) != NULL)
 	{
@@ -498,6 +580,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("angle",float2str(laser->angle)) );
 		attrs.insert ( std::pair<std::string,std::string>("ifconfig",laser->ifconfig.toStdString()) );
 		type = "laser";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelMesh*>(node) != NULL)
 	{
@@ -521,12 +604,14 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		attrs.insert ( std::pair<std::string,std::string>("render",v) );
 		
 		type = "mesh";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelPointCloud*>(node) != NULL)
 	{
 		//InnerModelPointCloud* pc = dynamic_cast<InnerModelPointCloud*>(node);		
 		//attrs.insert ( std::pair<std::string,std::string>("generic",node->id.toStdString()) );
 		type = "pointCloud";
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	else if (dynamic_cast<InnerModelTransform*>(node) != NULL)
 	{
@@ -536,6 +621,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 		type="transform";
 		attrs.insert ( std::pair<std::string,std::string>("engine",t->engine.toStdString()) );
 		attrs.insert ( std::pair<std::string,std::string>("mass",float2str(t->mass)) );
+		attrs.insert ( std::pair<std::string,std::string>("imType",type ) );
 	}
 	
 	else
@@ -603,26 +689,26 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		qFatal("Error reading config params");
 	}
 	
-	try
-	{
-		RoboCompCommonBehavior::Parameter par = params.at("AgmInnerAgent.InnerModel1") ;
-		qDebug()<<"hello";
-		if( QFile(QString::fromStdString(par.value)).exists() == true)
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-			innerModel1 = new InnerModel(par.value);
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-		}
-		else
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-			qFatal("Exiting now.");
-		}
-	}
-	catch(std::exception e)
-	{
-		qFatal("Error reading config params");
-	}
+// 	try
+// 	{
+// 		RoboCompCommonBehavior::Parameter par = params.at("AgmInnerAgent.InnerModel1") ;
+// 		qDebug()<<"hello";
+// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+// 			innerModel1 = new InnerModel(par.value);
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+// 		}
+// 		else
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+// 			qFatal("Exiting now.");
+// 		}
+// 	}
+// 	catch(std::exception e)
+// 	{
+// 		qFatal("Error reading config params");
+// 	}
 
 	
 	timer.start(Period);
