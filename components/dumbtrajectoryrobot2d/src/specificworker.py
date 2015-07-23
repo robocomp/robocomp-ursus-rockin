@@ -125,6 +125,7 @@ class SpecificWorker(GenericWorker):
 				# Now we take into account the target reference
 				self.relErrX -= self.xRef
 				self.relErrZ -= self.zRef
+				self.relAng   = math.atan2(self.relErrZ, self.relErrX)
 				# Final relative coordinates of the target
 				print 'command', self.relErrX, self.relErrZ
 				
@@ -151,7 +152,7 @@ class SpecificWorker(GenericWorker):
 				self.collisions = 0
 			
 				if proceed:
-					maxspeed = 200.
+					maxspeed = 150.
 					if np.linalg.norm(command)<0.1:
 						command = np.array([0,0])
 					else:
@@ -159,6 +160,17 @@ class SpecificWorker(GenericWorker):
 						if speed > maxspeed: speed = maxspeed
 						command = command / (np.linalg.norm(command)/speed)
 					commandAlpha = saturate_minabs_BothSigns(errAlpha, 0.05, 0.3)
+					
+					#dist = math.sqrt(self.relErrX*self.relErrX + self.relErrZ*self.relErrZ)
+					#if dist > 400:
+						#print 'DIST > 200, relang:', self.relAng
+						#if self.relAng < 0:
+							#commandAlpha = 0.2
+						#else:
+							#commandAlpha = -0.2
+						#if abs(self.relAng) > 0.8:
+							#command[0] = command[1] = 0
+
 					self.currentVel = [command[0], command[1], commandAlpha]
 					self.omnirobot_proxy.setSpeedBase(command[0], command[1], commandAlpha)
 				else:
