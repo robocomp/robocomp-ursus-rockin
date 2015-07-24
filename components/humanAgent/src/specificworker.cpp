@@ -38,6 +38,12 @@ SpecificWorker::~SpecificWorker()
 	
 }
 
+void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &timestamp)
+{
+	std::cout<<"new algo" << people.size()<<" "<<timestamp<<"\n";
+	
+}
+
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 
@@ -71,6 +77,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
+	
+	
 // 	try
 // 	{
 // 		camera_proxy->getYImage(0,img, cState, bState);

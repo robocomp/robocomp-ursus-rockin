@@ -27,11 +27,12 @@
 #include <ui_mainUI.h>
 
 #include <CommonBehavior.h>
-#include <AGMAgent.h>
-#include <Planning.h>
-#include <AGMExecutive.h>
-#include <AGMCommonBehavior.h>
+#include <MSKBody.h>
 #include <AGMWorldModel.h>
+#include <AGMAgent.h>
+#include <AGMExecutive.h>
+#include <Planning.h>
+#include <AGMCommonBehavior.h>
 
 #include <agm.h>
 #include <agmInner/agmInner.h>
@@ -44,11 +45,12 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
 using namespace std;
 
-using namespace RoboCompAGMAgent;
-using namespace RoboCompPlanning;
-using namespace RoboCompAGMExecutive;
-using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompMSKBody;
 using namespace RoboCompAGMWorldModel;
+using namespace RoboCompAGMAgent;
+using namespace RoboCompAGMExecutive;
+using namespace RoboCompPlanning;
+using namespace RoboCompAGMCommonBehavior;
 
 
 struct BehaviorParameters 
@@ -94,6 +96,7 @@ public:
 	virtual void structuralChange(const RoboCompAGMWorldModel::Event &modification) = 0;
 	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification) = 0;
 	virtual void symbolUpdated(const RoboCompAGMWorldModel::Node &modification) = 0;
+	virtual void newMSKBodyEvent(const PersonList &people, const long &timestamp) = 0;
 
 
 protected:

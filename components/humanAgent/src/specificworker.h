@@ -54,6 +54,7 @@ public:
 	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	void newMSKBodyEvent(const PersonList &people, const long &timestamp);
 
 public slots:
 	void compute(); 	

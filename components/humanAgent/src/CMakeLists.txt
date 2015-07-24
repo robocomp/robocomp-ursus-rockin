@@ -28,6 +28,7 @@ SET ( SOURCES
   specificworker.cpp
   agmcommonbehaviorI.cpp
   agmexecutivetopicI.cpp
+  mskbodyeventI.cpp
 )
 
 # Headers set
@@ -40,10 +41,11 @@ SET ( HEADERS
   specificworker.h
   agmcommonbehaviorI.h
   agmexecutivetopicI.h
+  mskbodyeventI.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior AGMAgent AGMWorldModel AGMExecutive AGMWorldModel Planning AGMCommonBehavior AGMWorldModel )
+ROBOCOMP_WRAP_ICE( CommonBehavior AGMAgent AGMWorldModel AGMExecutive AGMWorldModel Planning AGMCommonBehavior AGMWorldModel MSKBody )
 SET (EXECUTABLE_OUTPUT_PATH ${RC_COMPONENT_DEVEL_PATH}/bin)
 
 # Qt4

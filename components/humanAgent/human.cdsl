@@ -3,6 +3,8 @@ import "/robocomp/interfaces/IDSLs/AGMExecutive.idsl";
 import "/robocomp/interfaces/IDSLs/AGMCommonBehavior.idsl";
 import "/robocomp/interfaces/IDSLs/AGMWorldModel.idsl";
 //Previous interfaces could be deleted
+import "/robocomp/interfaces/IDSLs/MSKBody.idsl";
+
 
 Component humanComp
 {
@@ -10,7 +12,7 @@ Component humanComp
 	{
 		implements AGMCommonBehavior;
 		publishes AGMAgentTopic;
-		subscribesTo AGMExecutiveTopic;
+		subscribesTo AGMExecutiveTopic, MSKBodyEvent;		
 	};
 	language Cpp;
 	gui Qt(QWidget);	
