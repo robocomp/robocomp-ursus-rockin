@@ -1,13 +1,20 @@
 
-SET(LIBS ${LIBS} -lagm)
 # Sources set
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
+  #temporary
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.cpp
 )
 
 # Headers set
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
+  #temporary
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.h
 )
+
+INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)
+
+ADD_DEFINITIONS( -std=c++11 )

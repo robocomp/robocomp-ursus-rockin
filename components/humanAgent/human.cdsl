@@ -2,6 +2,7 @@ import "/robocomp/interfaces/IDSLs/AGMAgent.idsl";
 import "/robocomp/interfaces/IDSLs/AGMExecutive.idsl";
 import "/robocomp/interfaces/IDSLs/AGMCommonBehavior.idsl";
 import "/robocomp/interfaces/IDSLs/AGMWorldModel.idsl";
+//Previous interfaces could be deleted
 
 Component humanComp
 {
@@ -12,5 +13,6 @@ Component humanComp
 		subscribesTo AGMExecutiveTopic;
 	};
 	language Cpp;
-	gui Qt(QWidget);
+	gui Qt(QWidget);	
+	options agmagent;
 };

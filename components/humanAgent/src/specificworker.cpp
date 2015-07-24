@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -16,19 +16,18 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-
- #include "specificworker.h"
+#include "specificworker.h"
 
 /**
 * \brief Default constructor
 */
-
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-	active = false;
 
+	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
+	innerModel = new InnerModel();
 }
 
 /**
@@ -36,50 +35,69 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 */
 SpecificWorker::~SpecificWorker()
 {
-
-}
-
-void SpecificWorker::compute( )
-{
+	
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 
-	try
-	{
-		RoboCompCommonBehavior::Parameter par = params.at("HumanAgent.InnerModel") ;
-		if( QFile(QString::fromStdString(par.value)).exists() == true)
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-			innerModel = new InnerModel(par.value);
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-		}
-		else
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-			qFatal("Exiting now.");
-		}
-	}
-	catch(std::exception e)
-	{
-		qFatal("Error reading config params");
-	}
 
+//       THE FOLLOWING IS JUST AN EXAMPLE for AGENTS
+// 	try
+// 	{
+// 		RoboCompCommonBehavior::Parameter par = params.at("NameAgent.InnerModel") ;
+// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+// 			innerModel = new InnerModel(par.value);
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+// 		}
+// 		else
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+// 			qFatal("Exiting now.");
+// 		}
+// 	}
+// 	catch(std::exception e)
+// 	{
+// 		qFatal("Error reading config params");
+// 	}
 
+	
 	timer.start(Period);
+
 	return true;
 }
 
-bool SpecificWorker::activateAgent(const ParameterMap& prs)
+void SpecificWorker::compute()
+{
+// 	try
+// 	{
+// 		camera_proxy->getYImage(0,img, cState, bState);
+// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
+// 		searchTags(image_gray);
+// 	}
+// 	catch(const Ice::Exception &e)
+// 	{
+// 		std::cout << "Error reading from Camera" << e << std::endl;
+// 	}
+}
+
+
+bool SpecificWorker::reloadConfigAgent()
+{
+	return true;
+}
+
+bool SpecificWorker::activateAgent(const ParameterMap &prs)
 {
 	bool activated = false;
 	if (setParametersAndPossibleActivation(prs, activated))
 	{
-			if (not activated)
-			{
-				return activate(p);
-			}
+		if (not activated)
+		{
+			return activate(p);
+		}
 	}
 	else
 	{
@@ -88,9 +106,30 @@ bool SpecificWorker::activateAgent(const ParameterMap& prs)
 	return true;
 }
 
+bool SpecificWorker::setAgentParameters(const ParameterMap &prs)
+{
+	bool activated = false;
+	return setParametersAndPossibleActivation(prs, activated);
+}
+
+ParameterMap SpecificWorker::getAgentParameters()
+{
+	return params;
+}
+
+void SpecificWorker::killAgent()
+{
+
+}
+
+int SpecificWorker::uptimeAgent()
+{
+	return 0;
+}
+
 bool SpecificWorker::deactivateAgent()
 {
-		return deactivate();
+	return deactivate();
 }
 
 StateStruct SpecificWorker::getAgentState()
@@ -108,48 +147,41 @@ StateStruct SpecificWorker::getAgentState()
 	return s;
 }
 
-ParameterMap SpecificWorker::getAgentParameters()
-{
-	return params;
-}
-
-bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
-{
-	bool activated = false;
-	return setParametersAndPossibleActivation(prs, activated);
-}
-
-void SpecificWorker::killAgent()
-{
-}
-
-Ice::Int SpecificWorker::uptimeAgent()
-{
-	return 0;
-}
-
-bool SpecificWorker::reloadConfigAgent()
-{
-	return true;
-}
-
-
-void SpecificWorker::modelModified(const RoboCompAGMWorldModel::Event& modification)
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modification)
 {
 	mutex->lock();
-	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+ 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+ 
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel();
 	mutex->unlock();
 }
 
-void SpecificWorker::modelUpdated(const RoboCompAGMWorldModel::Node& modification)
+void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
 {
 	mutex->lock();
-	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+ 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+ 
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel();
 	mutex->unlock();
 }
+
+void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modification)
+{
+	mutex->lock();
+ 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+ 
+	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel();
+	mutex->unlock();
+}
+
+
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
+	printf("<<< setParametersAndPossibleActivation\n");
 	// We didn't reactivate the component
 	reactivated = false;
 
@@ -164,8 +196,8 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 	{
 		action = params["action"].value;
 		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
-
-		if (action == "graspobject")
+		//TYPE YOUR ACTION NAME
+		if (action == "actionname")
 		{
 			active = true;
 		}
@@ -187,18 +219,23 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 		reactivated = true;
 	}
 
+	printf("setParametersAndPossibleActivation >>>\n");
+
 	return true;
 }
-
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
 	try
 	{
-		//AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "humanAgent");
+		AGMModelPrinter::printWorld(newModel);
+		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"humanCompAgent");
 	}
 	catch(...)
 	{
 		exit(1);
 	}
 }
+
+
+
+
