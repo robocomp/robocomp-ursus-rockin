@@ -93,7 +93,7 @@ private:
 	void action_NoAction(bool newAction = true);
 
 
-	void odometryAndLocationIssues();
+	bool odometryAndLocationIssues();
 
 };
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -16,8 +16,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef AGMCOMMONBEHAVIORI_H
-#define AGMCOMMONBEHAVIORI_H
+#ifndef AGMCOMMONBEHAVIOR_H
+#define AGMCOMMONBEHAVIOR_H
 
 // QT includes
 #include <QtCore/QObject>
@@ -37,15 +37,15 @@ Q_OBJECT
 public:
 	AGMCommonBehaviorI( GenericWorker *_worker, QObject *parent = 0 );
 	~AGMCommonBehaviorI();
-	bool activateAgent(const ParameterMap& prs, const Ice::Current& = Ice::Current());
-bool deactivateAgent(const Ice::Current& = Ice::Current());
-StateStruct getAgentState(const Ice::Current& = Ice::Current());
-ParameterMap getAgentParameters(const Ice::Current& = Ice::Current());
-bool setAgentParameters(const ParameterMap& prs, const Ice::Current& = Ice::Current());
-void  killAgent(const Ice::Current& = Ice::Current());
-Ice::Int uptimeAgent(const Ice::Current& = Ice::Current());
-bool reloadConfigAgent(const Ice::Current& = Ice::Current());
-
+	
+	bool reloadConfigAgent(const Ice::Current&);
+	bool activateAgent(const ParameterMap  &prs, const Ice::Current&);
+	bool setAgentParameters(const ParameterMap  &prs, const Ice::Current&);
+	ParameterMap getAgentParameters(const Ice::Current&);
+	void killAgent(const Ice::Current&);
+	int uptimeAgent(const Ice::Current&);
+	bool deactivateAgent(const Ice::Current&);
+	StateStruct getAgentState(const Ice::Current&);
 
 	QMutex *mutex;
 private:
