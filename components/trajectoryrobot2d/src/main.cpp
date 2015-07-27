@@ -110,14 +110,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void TrajectoryRobot2DComp::initialize()
+void ::TrajectoryRobot2DComp::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int TrajectoryRobot2DComp::run(int argc, char* argv[])
+int ::TrajectoryRobot2DComp::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
 			printf("Configuration prefix: <%s>\n", prefix.toStdString().c_str());
 		}
 	}
-	TrajectoryRobot2DComp app(prefix);
+	::TrajectoryRobot2DComp app(prefix);
 
 	return app.main(argc, argv, configFile.c_str());
 }

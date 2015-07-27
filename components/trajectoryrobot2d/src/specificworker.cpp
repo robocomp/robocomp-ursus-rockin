@@ -578,6 +578,7 @@ void SpecificWorker::printNumberOfElementsInIMV()
 float SpecificWorker::changeTarget(const TargetPose& target)
 {
 	qDebug() <<__FUNCTION__ << "DEPRECATED";
+	return 100;
 }
 
 /**
@@ -668,6 +669,8 @@ float SpecificWorker::goBackwards(const TargetPose& target)
 		taskReloj.restart();
 		qDebug() << __FUNCTION__ << "-------------------------------------------------------------------------GOBACKWARDS command received, with target" << currentTarget.getTranslation() << currentTarget.getRotation();
 	}
+	
+	return 0;
 }
 
 ///////////////////////////////////
@@ -915,7 +918,12 @@ float SpecificWorker::angmMPI(float angle)
 
 float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold)
 {
+	return 0;
 }
 
 
+void SpecificWorker::mapBasedTarget(const NavigationParameterMap &parameters)
+{
+	
+}
 

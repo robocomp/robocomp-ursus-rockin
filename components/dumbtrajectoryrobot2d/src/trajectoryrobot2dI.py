@@ -23,9 +23,10 @@ ROBOCOMP = ''
 try:
 	ROBOCOMP = os.environ['ROBOCOMP']
 except:
-	pass
+	print '$ROBOCOMP environment variable not set, using the default value /opt/robocomp'
+	ROBOCOMP = '/opt/robocomp'
 if len(ROBOCOMP)<1:
-	print ('ROBOCOMP environment variable not set! Exiting.')
+	print 'ROBOCOMP environment variable not set! Exiting.'
 	sys.exit()
 	
 
@@ -50,6 +51,8 @@ class TrajectoryRobot2DI(TrajectoryRobot2D):
 		return self.worker.changeTarget(target)
 	def go(self, target, c):
 		return self.worker.go(target)
+	def mapBasedTarget(self, parameters, c):
+		return self.worker.mapBasedTarget(parameters)
 
 
 
