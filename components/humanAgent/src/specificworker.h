@@ -72,6 +72,20 @@ private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 	void updatePeople();
+	void updatePeopleInner();
+	
+	map<string,QString> dictionaryNames;
+	map<string,RoboCompMSKBody::JointType> dictionaryEnum;
+	map<string,RTMat> mapJointRotations;
+	map<int, InnerModel*> innerModelMap;
+	
+	void updateInnerModel( TPerson &person, int idPerson );
+	void initDictionary();
+	void calculateJointRotations(TPerson &p);
+	
+	RTMat rtMatFromJointPosition(RTMat rS, RoboCompMSKBody::SkeletonPoint p1, RoboCompMSKBody::SkeletonPoint p2, RoboCompMSKBody::SkeletonPoint translation, int axis);
+	
+	bool rotarTorso(const QVec & hombroizq,const QVec & hombroder);
 	
 };
 

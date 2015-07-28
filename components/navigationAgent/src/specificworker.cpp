@@ -127,8 +127,8 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 			//el angulo final del robot gracias a innerModel!			
 			int robotID;
 			robotID = symbols["robot"]->identifier;//9;
-			QString  robotId =QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("name"));
-			QString  tableId =QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("name"));
+			QString  robotId =QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+			QString  tableId =QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
 			
 			innerModel->transform6D("room","robot").print("robot pose in room");
 			innerModel->transform6D("room","table").print("table pose in room");
