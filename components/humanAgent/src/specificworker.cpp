@@ -31,23 +31,23 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	newBodyEvent=false;
 	
 	//fake
-	for (int i=0; i<5;i++)
-	{
-		RoboCompMSKBody::TPerson t;
-		if (i%2==0)
-			t.state=RoboCompMSKBody::Tracking;	
-		else
-			t.state=RoboCompMSKBody::PositionOnly;	
-		
-		t.TrackingId=rand()% 32768;	
-		t.Position.X=0.;
-		t.Position.Y=(float)i+10.0;
-		t.Position.Z=0.;
-		std::pair<int,TPerson> p;
-		p.first=i;
-		p.second=t;
-		personList.insert(p);
-	}
+// 	for (int i=0; i<5;i++)
+// 	{
+// 		RoboCompMSKBody::TPerson t;
+// 		if (i%2==0)
+// 			t.state=RoboCompMSKBody::Tracking;	
+// 		else
+// 			t.state=RoboCompMSKBody::PositionOnly;	
+// 		
+// 		t.TrackingId=rand()% 32768;	
+// 		t.Position.X=0.;
+// 		t.Position.Y=(float)i+10.0;
+// 		t.Position.Z=0.;
+// 		std::pair<int,TPerson> p;
+// 		p.first=i;
+// 		p.second=t;
+// 		personList.insert(p);
+// 	}
 	
 }
 
@@ -62,14 +62,17 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &timestamp)
 {	
 	QMutexLocker m (mutex);
-	//std::cout<<"new newMSKBodyEvent " << people.size()<<" timestamp "<<timestamp<<"\n";
+	std::cout<<"\n\nnew newMSKBodyEvent, people.size() " << people.size()<<" timestamp "<<timestamp<<"\n\n";
 	this->personList = people;
-	this->timeStamp = timestamp;
-	newBodyEvent = true;	
+// 	if (timestamp!=timeStamp)
+	{
+		this->timeStamp = timestamp;
+		timerTimeStamp.setSingleShot(true);
+		timerTimeStamp.start(10000);
+	}
 	
-	//fake
-// 	srand(1000);
-	std::cout<<"srand(1000) "<<rand()<<"\n";
+	//newBodyEvent = true;	
+	
 	
 }
 
@@ -78,28 +81,36 @@ void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &times
 void SpecificWorker::compute()
 {
 	QMutexLocker m (mutex);		
+	qDebug()<<"timerTimeStamp.isActive() "<<timerTimeStamp.isActive();
 	qDebug()<<"worldModel->numberOfSymbols()"<<worldModel->numberOfSymbols();
+	std::cout<<"\tpersonList.size() "<<personList.size()<<" timeStamp "<<timeStamp<<"\n";
+	
 // 	srand(1000);
-	if (worldModel->numberOfSymbols()>0)
-	{
-		newBodyEvent =true;
-		static int stop =0;
-		std::cout<<"\n\tstop: "<<stop<<"\n";
-		if (stop==1)
-			personList.erase(0);			
-		if (stop==2)
-			personList.at(2).Position.Y=100;
-		if (stop>3)
-			qFatal("fary");
-		stop++;
-	}
-	if (newBodyEvent)
+// 	if (worldModel->numberOfSymbols()>0)
+// 	{
+// 		newBodyEvent =true;
+// 		static int stop =0;
+// 		std::cout<<"\n\tstop: "<<stop<<"\n";
+// 		if (stop==1)
+// 			personList.erase(0);			
+// 		if (stop==2)
+// 			personList.at(2).Position.Y=100;
+// 		if (stop>3)
+// 			qFatal("fary");
+// 		stop++;
+// 	}
+// 	if (newBodyEvent)
 	{
 		updatePeople();
-		newBodyEvent=false;		
+		//newBodyEvent=false;		
 	}
 	
-	
+	//clear personList after a while without received event
+	if (timerTimeStamp.isActive() ==false and personList.empty()==false  )		
+	{
+		std::cout<<"\t\t clear list \n\n";
+		personList.clear();
+	}
 		
 }
 
@@ -140,7 +151,7 @@ void SpecificWorker::updatePeople()
 			
 		}
 	}
-	qDebug()<<l;
+	qDebug()<<"lsymbols person:"<<l;
 	qDebug()<<"\n ********** \n";
 			
 	
@@ -177,9 +188,9 @@ void SpecificWorker::updatePeople()
 				//actualizo su arco
 				std::cout<<"Actualizo su arco\n";
 				AGMModelEdge &edge = worldModel->getEdgeByIdentifiers(robotID,personID,"RT");
-				edge->setAttribute("tx",float2str(personIt.second.Position.X));
-				edge->setAttribute("ty",float2str(personIt.second.Position.Y));
-				edge->setAttribute("tz",float2str(personIt.second.Position.Z));
+				edge->setAttribute("tx",float2str(personIt.second.Position.X*1000));
+				edge->setAttribute("ty",float2str(personIt.second.Position.Y*1000));
+				edge->setAttribute("tz",float2str(personIt.second.Position.Z*1000));
 				AGMMisc::publishEdgeUpdate(edge,agmagenttopic_proxy);
 				
 				
@@ -201,9 +212,9 @@ void SpecificWorker::updatePeople()
 			
 			//añado su arco
 			std::map<string,string>att;
-			att["tx"]=float2str(personIt.second.Position.X);
-			att["ty"]=float2str(personIt.second.Position.Y);
-			att["tz"]=float2str(personIt.second.Position.Z);
+			att["tx"]=float2str(personIt.second.Position.X*1000);
+			att["ty"]=float2str(personIt.second.Position.Y*1000);
+			att["tz"]=float2str(personIt.second.Position.Z*1000);
 			att["rx"]=att["ry"]=att["rz"]="0";
 			worldModel->addEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT",att);
 			
@@ -228,14 +239,7 @@ void SpecificWorker::updatePeople()
 		AGMModel::SPtr newModel(new AGMModel(worldModel));			
 		sendModificationProposal(worldModel, newModel);
 	}
-	
-	printf("show information about personList from winkinect\n");
-	
-	
 
-	
-	
-	
 }
 
 

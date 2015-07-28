@@ -67,6 +67,7 @@ private:
 	bool active, newBodyEvent;
 	PersonList personList;
 	long int timeStamp;
+	QTimer timerTimeStamp;
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
