@@ -145,6 +145,8 @@ private:
 	void calcularModuloFloat(QVec &angles, float mod);
 	float angmMPI(float angle);
 
+	void mapBasedTarget(const NavigationParameterMap  &parameters);
+
 #ifdef USE_QTGUI
 	OsgView *osgView;
 	InnerModelViewer *innerViewer;

@@ -76,6 +76,7 @@ public:
 	virtual float goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold) = 0;
 	virtual float changeTarget(const TargetPose &target) = 0;
 	virtual float go(const TargetPose &target) = 0;
+	virtual void mapBasedTarget(const NavigationParameterMap &parameters) = 0;
 
 
 protected:

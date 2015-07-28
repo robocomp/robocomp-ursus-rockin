@@ -59,6 +59,11 @@ float TrajectoryRobot2DI::go(const TargetPose  &target, const Ice::Current&)
 	return worker->go(target);
 }
 
+void TrajectoryRobot2DI::mapBasedTarget(const NavigationParameterMap  &parameters, const Ice::Current&)
+{
+	worker->mapBasedTarget(parameters);
+}
+
 
 
 
