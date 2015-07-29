@@ -21,7 +21,7 @@ from PySide import *
 try:
 	from ui_mainUI import *
 except:
-	print "Can't import UI file. Did you run 'make'?"
+	print "Can't import UI file. Did you run 'pyuic4 mainUI.ui -o ui_mainUI.py'?"
 	sys.exit(-1)
 
 
