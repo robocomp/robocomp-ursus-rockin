@@ -246,38 +246,17 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 	{
 		switch(ap.id)
 		{
-			case 0: // EXPLORED TABLE
+			case 30:
 				if (updateTable(ap, newModel))
 				{
 					publishModel = true;
 					printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 				}
 				break;
-			case 1: // NON-EXPLORED TABLE
-				if (updateTable(ap, newModel))
-				{
-					publishModel = true;
-					printf("TABLE NE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-				}
-				break;
-			case 12: // MUG
+			case 31:
 				if (updateMug(ap, newModel))
 				{
 					printf("MUG %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-					publishModel = true;
-				}
-				break;
-			case 13:
-				if (updateMilk(ap, newModel))
-				{
-					printf("MILK %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-					publishModel = true;
-				}
-					break;
-			case 14:
-				if (updateCoffee(ap, newModel))
-				{
-					printf("COFFEE %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 					publishModel = true;
 				}
 				break;
