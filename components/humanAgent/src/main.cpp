@@ -18,11 +18,11 @@
  */
 
 
-/** \mainpage RoboComp::TrajectoryRobot2DComp
+/** \mainpage RoboComp::humanComp
  *
  * \section intro_sec Introduction
  *
- * The TrajectoryRobot2DComp component...
+ * The humanComp component...
  *
  * \section interface_sec Interface
  *
@@ -34,7 +34,7 @@
  * ...
  *
  * \subsection install2_ssec Compile and install
- * cd TrajectoryRobot2DComp
+ * cd humanComp
  * <br>
  * cmake . && make
  * <br>
@@ -52,7 +52,7 @@
  *
  * \subsection execution_ssec Execution
  *
- * Just: "${PATH_TO_BINARY}/TrajectoryRobot2DComp --Ice.Config=${PATH_TO_CONFIG_FILE}"
+ * Just: "${PATH_TO_BINARY}/humanComp --Ice.Config=${PATH_TO_CONFIG_FILE}"
  *
  * \subsection running_ssec Once running
  *
@@ -78,11 +78,15 @@
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
 
-#include <trajectoryrobot2dI.h>
+#include <agmcommonbehaviorI.h>
+#include <agmexecutivetopicI.h>
+#include <mskbodyeventI.h>
 
-#include <OmniRobot.h>
-#include <TrajectoryRobot2D.h>
-#include <Laser.h>
+#include <AGMAgent.h>
+#include <AGMExecutive.h>
+#include <AGMCommonBehavior.h>
+#include <AGMWorldModel.h>
+#include <MSKBody.h>
 
 
 // User includes here
@@ -91,16 +95,18 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 
-using namespace RoboCompOmniRobot;
-using namespace RoboCompTrajectoryRobot2D;
-using namespace RoboCompLaser;
+using namespace RoboCompAGMAgent;
+using namespace RoboCompAGMExecutive;
+using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompAGMWorldModel;
+using namespace RoboCompMSKBody;
 
 
 
-class TrajectoryRobot2DComp : public RoboComp::Application
+class humanComp : public RoboComp::Application
 {
 public:
-	TrajectoryRobot2DComp (QString prfx) { prefix = prfx.toStdString(); }
+	humanComp (QString prfx) { prefix = prfx.toStdString(); }
 private:
 	void initialize();
 	std::string prefix;
@@ -110,14 +116,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void ::TrajectoryRobot2DComp::initialize()
+void ::humanComp::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int ::TrajectoryRobot2DComp::run(int argc, char* argv[])
+int ::humanComp::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -126,45 +132,34 @@ int ::TrajectoryRobot2DComp::run(int argc, char* argv[])
 #endif
 	int status=EXIT_SUCCESS;
 
-	LaserPrx laser_proxy;
-	OmniRobotPrx omnirobot_proxy;
+	AGMAgentTopicPrx agmagenttopic_proxy;
 
 	string proxy, tmp;
 	initialize();
 
+IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
-	try
+	IceStorm::TopicPrx agmagenttopic_topic;
+	while (!agmagenttopic_topic)
 	{
-		if (not GenericMonitor::configGetString(communicator(), prefix, "LaserProxy", proxy, ""))
+		try
 		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy LaserProxy\n";
+			agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic");
 		}
-		laser_proxy = LaserPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("LaserProxy initialized Ok!");
-	mprx["LaserProxy"] = (::IceProxy::Ice::Object*)(&laser_proxy);//Remote server proxy creation example
-
-
-	try
-	{
-		if (not GenericMonitor::configGetString(communicator(), prefix, "OmniRobotProxy", proxy, ""))
+		catch (const IceStorm::NoSuchTopic&)
 		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy OmniRobotProxy\n";
+			try
+			{
+				agmagenttopic_topic = topicManager->create("AGMAgentTopic");
+			}
+			catch (const IceStorm::TopicExists&){
+				// Another client created the topic.
+			}
 		}
-		omnirobot_proxy = OmniRobotPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
 	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("OmniRobotProxy initialized Ok!");
-	mprx["OmniRobotProxy"] = (::IceProxy::Ice::Object*)(&omnirobot_proxy);//Remote server proxy creation example
+	Ice::ObjectPrx agmagenttopic_pub = agmagenttopic_topic->getPublisher()->ice_oneway();
+	AGMAgentTopicPrx agmagenttopic = AGMAgentTopicPrx::uncheckedCast(agmagenttopic_pub);
+	mprx["AGMAgentTopicPub"] = (::IceProxy::Ice::Object*)(&agmagenttopic);
 
 
 
@@ -193,17 +188,73 @@ int ::TrajectoryRobot2DComp::run(int argc, char* argv[])
 
 
 		// Server adapter creation and publication
-		if (not GenericMonitor::configGetString(communicator(), prefix, "TrajectoryRobot2D.Endpoints", tmp, ""))
+		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMCommonBehavior.Endpoints", tmp, ""))
 		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy TrajectoryRobot2D";
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMCommonBehavior";
 		}
-		Ice::ObjectAdapterPtr adapterTrajectoryRobot2D = communicator()->createObjectAdapterWithEndpoints("TrajectoryRobot2D", tmp);
-		TrajectoryRobot2DI *trajectoryrobot2d = new TrajectoryRobot2DI(worker);
-		adapterTrajectoryRobot2D->add(trajectoryrobot2d, communicator()->stringToIdentity("trajectoryrobot2d"));
-		adapterTrajectoryRobot2D->activate();
+		Ice::ObjectAdapterPtr adapterAGMCommonBehavior = communicator()->createObjectAdapterWithEndpoints("AGMCommonBehavior", tmp);
+		AGMCommonBehaviorI *agmcommonbehavior = new AGMCommonBehaviorI(worker);
+		adapterAGMCommonBehavior->add(agmcommonbehavior, communicator()->stringToIdentity("agmcommonbehavior"));
+		adapterAGMCommonBehavior->activate();
 
 
 
+
+		// Server adapter creation and publication
+		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveTopicTopic.Endpoints", tmp, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveTopicProxy";
+		}
+		Ice::ObjectAdapterPtr AGMExecutiveTopic_adapter = communicator()->createObjectAdapterWithEndpoints("agmexecutivetopic", tmp);
+		AGMExecutiveTopicPtr agmexecutivetopicI_ = new AGMExecutiveTopicI(worker);
+		Ice::ObjectPrx agmexecutivetopic = AGMExecutiveTopic_adapter->addWithUUID(agmexecutivetopicI_)->ice_oneway();
+		IceStorm::TopicPrx agmexecutivetopic_topic;
+		if(!agmexecutivetopic_topic){
+		try {
+			agmexecutivetopic_topic = topicManager->create("AGMExecutiveTopic");
+		}
+		catch (const IceStorm::TopicExists&) {
+		//Another client created the topic
+		try{
+			agmexecutivetopic_topic = topicManager->retrieve("AGMExecutiveTopic");
+		}
+		catch(const IceStorm::NoSuchTopic&)
+		{
+			//Error. Topic does not exist
+			}
+		}
+		IceStorm::QoS qos;
+		agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic);
+		}
+		AGMExecutiveTopic_adapter->activate();
+
+		// Server adapter creation and publication
+		if (not GenericMonitor::configGetString(communicator(), prefix, "MSKBodyEventTopic.Endpoints", tmp, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy MSKBodyEventProxy";
+		}
+		Ice::ObjectAdapterPtr MSKBodyEvent_adapter = communicator()->createObjectAdapterWithEndpoints("mskbodyevent", tmp);
+		MSKBodyEventPtr mskbodyeventI_ = new MSKBodyEventI(worker);
+		Ice::ObjectPrx mskbodyevent = MSKBodyEvent_adapter->addWithUUID(mskbodyeventI_)->ice_oneway();
+		IceStorm::TopicPrx mskbodyevent_topic;
+		if(!mskbodyevent_topic){
+		try {
+			mskbodyevent_topic = topicManager->create("MSKBodyEvent");
+		}
+		catch (const IceStorm::TopicExists&) {
+		//Another client created the topic
+		try{
+			mskbodyevent_topic = topicManager->retrieve("MSKBodyEvent");
+		}
+		catch(const IceStorm::NoSuchTopic&)
+		{
+			//Error. Topic does not exist
+			}
+		}
+		IceStorm::QoS qos;
+		mskbodyevent_topic->subscribeAndGetPublisher(qos, mskbodyevent);
+		}
+		MSKBodyEvent_adapter->activate();
 
 		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;
@@ -268,7 +319,7 @@ int main(int argc, char* argv[])
 			printf("Configuration prefix: <%s>\n", prefix.toStdString().c_str());
 		}
 	}
-	::TrajectoryRobot2DComp app(prefix);
+	::humanComp app(prefix);
 
 	return app.main(argc, argv, configFile.c_str());
 }

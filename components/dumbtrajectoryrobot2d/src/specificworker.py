@@ -104,9 +104,6 @@ class SpecificWorker(GenericWorker):
 
 	def getError(self, current, target):
 		errAlpha = self.normalize_s_pi(self.normalize_s_pi(target.ry)-self.normalize_s_pi(current.ry))
-		print 'ta', target.ry
-		print 'ca', current.ry
-		print 'errAlpha', errAlpha
 		return target.x-current.x, target.z-current.z, errAlpha
 
 	@QtCore.Slot()
@@ -125,6 +122,9 @@ class SpecificWorker(GenericWorker):
 				# Now we take into account the target reference
 				self.relErrX -= self.xRef
 				self.relErrZ -= self.zRef
+				self.relAng   = math.atan2(self.relErrX, self.relErrZ)
+				#if not self.target.doRotation:
+					
 				# Final relative coordinates of the target
 				print 'command', self.relErrX, self.relErrZ
 				
@@ -135,23 +135,9 @@ class SpecificWorker(GenericWorker):
 					print 'stop by threshold'
 					proceed = False
 					
-					
-				laserData = self.laser_proxy.getLaserData()
-				for l in laserData:
-					if l.dist<400:
-						self.collisions += 1
-						self.currentVel = [0.7*x for x in self.currentVel]
-						self.omnirobot_proxy.setSpeedBase(self.currentVel[0], self.currentVel[1], self.currentVel[2])
-						if self.collisions > 100:
-							print '<Now IDLE'
-							self.stop()
-							self.state.state = 'IDLE'
-							print 'Now IDLE>'
-						return
-				self.collisions = 0
 			
 				if proceed:
-					maxspeed = 200.
+					maxspeed = 150.
 					if np.linalg.norm(command)<0.1:
 						command = np.array([0,0])
 					else:
@@ -159,8 +145,60 @@ class SpecificWorker(GenericWorker):
 						if speed > maxspeed: speed = maxspeed
 						command = command / (np.linalg.norm(command)/speed)
 					commandAlpha = saturate_minabs_BothSigns(errAlpha, 0.05, 0.3)
+					
+					print 'errAlpha', errAlpha
+					print 'relAng', self.relAng
+					dist = math.sqrt(self.relErrX*self.relErrX + self.relErrZ*self.relErrZ)
+					A = ''
+					B = ''
+					if dist > 1000:
+						A = 'L'
+						if abs(self.relAng) < 0.4:
+							# If the error is small, we can try to orient a little
+							# so we don't do anything here...
+							B = 'p'
+						elif abs(self.relAng) > 0.8: # If the error is too big, 
+							B = 'g'
+							if self.relAng < 0:
+								B += '>'
+								commandAlpha = -0.2
+							else:
+								B += '<'
+								commandAlpha = +0.2
+							if abs(self.relAng) > 1.5: # If the error is really too big, T=0
+								B += 'G'
+								command[0] = command[1] = 0
+						else:
+							B = 'm'
+							if errAlpha * self.relAng < 0: # if the signe differ
+								commandAlpha = 0
+								B += '!'
+							else:
+								B += '='
+					else:
+						A = 'C'
+						B = ''
+					print '==============', A, B
+
+
+					SEND = True
+					laserData = self.laser_proxy.getLaserData()
+					for l in laserData:
+						if l.dist<400:
+							self.collisions += 1
+							self.currentVel = [0.7*x for x in self.currentVel]
+							if SEND: self.omnirobot_proxy.setSpeedBase(self.currentVel[0], self.currentVel[1], self.currentVel[2])
+							if self.collisions > 100:
+								print '<Now IDLE'
+								self.stop()
+								self.state.state = 'IDLE'
+								print 'Now IDLE>'
+							return
+					self.collisions = 0
+
 					self.currentVel = [command[0], command[1], commandAlpha]
-					self.omnirobot_proxy.setSpeedBase(command[0], command[1], commandAlpha)
+					print self.currentVel
+					if SEND: self.omnirobot_proxy.setSpeedBase(command[0], command[1], commandAlpha)
 				else:
 					print '<Now IDLE'
 					self.stop()
@@ -179,7 +217,7 @@ class SpecificWorker(GenericWorker):
 	#
 	# go
 	def go(self, target):
-		print target.x, target.z, target.ry
+		print 'target::', target.x, target.z, target.ry
 		return self.goReferenced(target, 0, 0, 0)
 
 
@@ -224,6 +262,15 @@ class SpecificWorker(GenericWorker):
 		return self.goReferenced(target, 0, 0, 0)
 
 
+
+	#
+	# mapBasedTarget
+	#
+	def mapBasedTarget(self, parameters):
+		#
+		# YOUR CODE HERE
+		#
+		pass
 
 
 

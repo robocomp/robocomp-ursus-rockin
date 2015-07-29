@@ -16,36 +16,29 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef AGMCOMMONBEHAVIOR_H
-#define AGMCOMMONBEHAVIOR_H
+#ifndef MSKBODYEVENT_H
+#define MSKBODYEVENT_H
 
 // QT includes
 #include <QtCore/QObject>
 
 // Ice includes
 #include <Ice/Ice.h>
-#include <AGMCommonBehavior.h>
+#include <MSKBody.h>
 
 #include <config.h>
 #include "genericworker.h"
 
-using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompMSKBody;
 
-class AGMCommonBehaviorI : public QObject , public virtual RoboCompAGMCommonBehavior::AGMCommonBehavior
+class MSKBodyEventI : public QObject , public virtual RoboCompMSKBody::MSKBodyEvent
 {
 Q_OBJECT
 public:
-	AGMCommonBehaviorI( GenericWorker *_worker, QObject *parent = 0 );
-	~AGMCommonBehaviorI();
+	MSKBodyEventI( GenericWorker *_worker, QObject *parent = 0 );
+	~MSKBodyEventI();
 	
-	bool reloadConfigAgent(const Ice::Current&);
-	bool activateAgent(const ParameterMap  &prs, const Ice::Current&);
-	bool setAgentParameters(const ParameterMap  &prs, const Ice::Current&);
-	ParameterMap getAgentParameters(const Ice::Current&);
-	void killAgent(const Ice::Current&);
-	int uptimeAgent(const Ice::Current&);
-	bool deactivateAgent(const Ice::Current&);
-	StateStruct getAgentState(const Ice::Current&);
+	void newMSKBodyEvent(const PersonList  &people, const Ice::Long  timestamp, const Ice::Current&);
 
 	QMutex *mutex;
 private:

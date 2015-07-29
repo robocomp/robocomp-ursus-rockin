@@ -16,32 +16,22 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "agmexecutivetopicI.h"
+#include "mskbodyeventI.h"
 
-AGMExecutiveTopicI::AGMExecutiveTopicI(GenericWorker *_worker, QObject *parent) : QObject(parent)
+MSKBodyEventI::MSKBodyEventI(GenericWorker *_worker, QObject *parent) : QObject(parent)
 {
 	worker = _worker;
 	mutex = worker->mutex;       // Shared worker mutex
 }
 
 
-AGMExecutiveTopicI::~AGMExecutiveTopicI()
+MSKBodyEventI::~MSKBodyEventI()
 {
 }
 
-void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event  &modification, const Ice::Current&)
+void MSKBodyEventI::newMSKBodyEvent(const PersonList  &people, const Ice::Long  timestamp, const Ice::Current&)
 {
-	worker->structuralChange(modification);
-}
-
-void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&)
-{
-	worker->edgeUpdated(modification);
-}
-
-void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node  &modification, const Ice::Current&)
-{
-	worker->symbolUpdated(modification);
+	worker->newMSKBodyEvent(people, timestamp);
 }
 
 

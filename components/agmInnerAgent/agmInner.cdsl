@@ -15,7 +15,7 @@ Component agmInnerComp
 		publishes AGMAgentTopic;
 	};
 	language Cpp;
-	gui Qt(QWidget);
+	gui Qt(QWidget);	
 	options agmagent;
 };
 
