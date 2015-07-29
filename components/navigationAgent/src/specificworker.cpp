@@ -47,16 +47,19 @@ void SpecificWorker::compute( )
 	// ODOMETRY AND LOCATION-RELATED ISSUES	
 	if (odometryAndLocationIssues()==false)
 		return;
-// 	printf("todo ok...\n");
+	printf("todo ok...\n");
 // 	innerModel->treePrint();
 	
 	actionExecution();
 	
 // 	printf("ae>\n");
 }
+
+
 void SpecificWorker::actionExecution()
 {
 	QMutexLocker locker(mutex);
+	printf("<<actionExecution\n");
 
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
@@ -98,6 +101,9 @@ void SpecificWorker::actionExecution()
 		std::cout<<" "<< action;
 		//action_NoAction();
 	}
+	
+	
+	printf("actionExecution>>\n");
 }
 
 void SpecificWorker::action_SetObjectReach(bool newAction)
@@ -206,6 +212,10 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	catch(...)
 	{
 		printf("navigationAgent: Couldn't retrieve action's parameters\n");
+		std::cout << "We were looking for: robot room object status\n";
+		printf("<<WORLD\n");
+		AGMModelPrinter::printWorld(worldModel);
+		printf("WORLD>>\n");
 	}
 
 }
@@ -693,7 +703,9 @@ bool SpecificWorker::reloadConfigAgent()
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-	mutex->lock();
+	printf("pre <<structuralChange\n");
+	QMutexLocker l(mutex);
+	printf("<<structuralChange\n");
 	
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	//if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
@@ -701,24 +713,26 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	
 	agmInner.setWorld(worldModel);
 	innerModel = agmInner.extractInnerModel("room");
-	mutex->unlock();
+	printf("structuralChange>>\n");
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
-	mutex->lock();
+	QMutexLocker l(mutex);
+	printf("<<symbolUpdated\n");
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	innerModel = agmInner.extractInnerModel("room");
-	mutex->unlock();
+	printf("symbolUpdated>>\n");
 }
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	mutex->lock();
+	QMutexLocker l(mutex);
+	printf("<<edgeUpdated\n");
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	innerModel = agmInner.extractInnerModel("room");
-	mutex->unlock();
+	printf("edgeUpdated>>\n");
 }
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
@@ -922,3 +936,7 @@ void SpecificWorker::stop()
 // 	}
 // 
 // 	printf("aaAdigejr\n");
+
+
+
+
