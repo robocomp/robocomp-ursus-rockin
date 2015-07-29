@@ -47,12 +47,13 @@ class SpecificWorker(GenericWorker):
 		self.Period = 2000
 		self.timer.start(self.Period)
 		
-		self.ui.txbox.setValue(90)
-		self.ui.tybox.setValue(800)
+		self.ui.txbox.setValue(100)
+		self.ui.tybox.setValue(850)
 		self.ui.tzbox.setValue(400)
 		self.ui.rxbox.setValue(0)
-		self.ui.rybox.setValue(-0.8)
+		self.ui.rybox.setValue(-1.56)
 		self.ui.rzbox.setValue(-3.1415)
+		self.ui.weightbutton.setChecked(True)
 		
 		self.ui.homebutton.clicked.connect(self.goHome)
 		self.ui.homebutton_2.clicked.connect(self.goHome)
