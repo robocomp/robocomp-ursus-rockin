@@ -44,10 +44,11 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	printf("compute 1..\n");
 	// ODOMETRY AND LOCATION-RELATED ISSUES	
 	if (odometryAndLocationIssues()==false)
 		return;
-	printf("todo ok...\n");
+	printf("compute 2..\n");
 // 	innerModel->treePrint();
 	
 	actionExecution();
@@ -64,7 +65,7 @@ void SpecificWorker::actionExecution()
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
 
-	if (newAction)
+// 	if (newAction)
 		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
 
 // 	try
@@ -108,115 +109,133 @@ void SpecificWorker::actionExecution()
 
 void SpecificWorker::action_SetObjectReach(bool newAction)
 {
+	std::cout<<"action "<<action<<" 1\n";
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
 	{
-		std::cout<<"action "<<action<<"\n";
-		// ACTION EXECUTION
-		if (action=="setobjectreach")
+		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/);
+		for (auto dd : symbols)
 		{
-			std::map<std::string, AGMModelSymbol::SPtr> symbols = worldModel->getSymbolsMap(params,  "robot", "room", "object", "status");
-		
-			RoboCompTrajectoryRobot2D::TargetPose tp;
-			///x z del modelo de agm 7--RT-->9 ,  y el angulo final del robot es el relativo al angulo con la mesa
-			int roomID, objectID;
-			roomID =symbols["room"]->identifier;//7;
-			objectID =symbols["object"]->identifier;//9;//
-			
-			
-			AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(roomID,objectID, "RT");
-			tp.x = str2float(edge->getAttribute("tx") );
-			tp.z = str2float(edge->getAttribute("tz") ) ;
-			tp.y = 0.;
-			tp.rx=tp.rz=0.0;
-			tp.doRotation=true;
-			
-			//el angulo final del robot gracias a innerModel!			
-			int robotID;
-			robotID = symbols["robot"]->identifier;//9;
-			QString  robotId =QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
-			QString  tableId =QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
-			
-			innerModel->transform6D("room","robot").print("robot pose in room");
-			innerModel->transform6D("room","table").print("table pose in room");
-			innerModel->transform6D("robot","table").print("table pose from robot");
-			try
-			{
-				qDebug()<<"innerModel->transform("<<tableId<<robotId<<")";
-				//innerModel->transform(tableId,robotId).print("transform");
-// 				innerModel->transform6D(tableId,robotId).print("transform6D");
-				tp.ry =innerModel->transform6D(robotId,tableId).ry();
-			}
-			catch (...)
-			{
-				qDebug()<<"innerModel exception";
-			}
-			try
-			{
-// 				std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
-// 				qDebug()<<"\n***nos volvemos sin mover el robot***\n";
-// 				return;
-				if (!haveTarget)
-				{
-					try
-					{
-						trajectoryrobot2d_proxy->go(tp);										
-						std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
-						haveTarget=true;
-					}
-					catch(const Ice::Exception &ex)
-					{
-						std::cout <<"trajectoryrobot2d_proxy->go "<< ex << std::endl;
-						throw ex;
-					}
-					
-				}
-				string state;
-				try
-				{
-						state= trajectoryrobot2d_proxy->getState().state;						
-				}
-				catch(const Ice::Exception &ex)
-				{
-						std::cout <<"trajectoryrobot2d_proxy->getState().state "<< ex << std::endl;
-						throw ex;
-				}
-				
-				//state="IDLE";
-				std::cout<<state<<" haveTarget "<<haveTarget;
-				if (state=="IDLE" && haveTarget)
-				{
-					//std::cout<<"\ttrajectoryrobot2d_proxy->getState() "<<trajectoryrobot2d_proxy->getState().state<<"\n";
-					try
-					{
-						AGMModel::SPtr newModel(new AGMModel(worldModel));
-						//objectID has been obtained before
-						int statusID =symbols["status"]->identifier;
-						newModel->getEdgeByIdentifiers(objectID, statusID, "noReach").setLabel("reach");
-						sendModificationProposal(worldModel, newModel);
-						haveTarget=false;
-					}
-					catch (...)
-					{
-						std::cout<<"\neeeee"<< "\n";
-						std::cout<<"\tedge->toString() "<<edge->toString(worldModel)<<" not exist\n";
-					}
-				}
-			}
-			catch(const Ice::Exception &ex)
-			{
-				std::cout << ex << std::endl;
-			}
-		}	
-
+			printf("tenemos %s\n", dd.first.c_str());
+		}
 	}
 	catch(...)
 	{
 		printf("navigationAgent: Couldn't retrieve action's parameters\n");
-		std::cout << "We were looking for: robot room object status\n";
 		printf("<<WORLD\n");
 		AGMModelPrinter::printWorld(worldModel);
 		printf("WORLD>>\n");
+		if (worldModel->size() > 0)
+		{
+			exit(-1);
+		}
 	}
+		
+	std::cout<<"action "<<action<<" 2\n";
+	// ACTION EXECUTION
+	if (action=="setobjectreach")
+	{
+		int roomID, objectID, robotID;
+		try
+		{
+			roomID = symbols["room"]->identifier;//7;
+			objectID =symbols["object"]->identifier;//9;//
+			robotID = symbols["robot"]->identifier;//9;
+		}
+		catch(...)
+		{
+			printf("bla blakedoij ewr\n");
+			exit(2);
+		}
+
+
+		RoboCompTrajectoryRobot2D::TargetPose tp;
+		///x z del modelo de agm 7--RT-->9 ,  y el angulo final del robot es el relativo al angulo con la mesa
+		
+		printf("%s\n", __LINE__);
+		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(roomID,objectID, "RT");
+		tp.x = str2float(edge->getAttribute("tx") );
+		tp.z = str2float(edge->getAttribute("tz") ) ;
+		tp.y = 0.;
+		tp.rx=tp.rz=0.0;
+		tp.doRotation=true;
+		
+		//el angulo final del robot gracias a innerModel!
+		QString  robotId =QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+		QString  tableId =QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
+		
+		innerModel->transform6D("room","robot").print("robot pose in room");
+		innerModel->transform6D("room","table").print("table pose in room");
+		innerModel->transform6D("robot","table").print("table pose from robot");
+		try
+		{
+			qDebug()<<"innerModel->transform("<<tableId<<robotId<<")";
+			//innerModel->transform(tableId,robotId).print("transform");
+// 				innerModel->transform6D(tableId,robotId).print("transform6D");
+			tp.ry =innerModel->transform6D(robotId,tableId).ry();
+		}
+		catch (...)
+		{
+			qDebug()<<"innerModel exception";
+		}
+		try
+		{
+// 				std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
+// 				qDebug()<<"\n***nos volvemos sin mover el robot***\n";
+// 				return;
+			if (!haveTarget)
+			{
+				try
+				{
+					trajectoryrobot2d_proxy->go(tp);										
+					std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
+					haveTarget=true;
+				}
+				catch(const Ice::Exception &ex)
+				{
+					std::cout <<"trajectoryrobot2d_proxy->go "<< ex << std::endl;
+					throw ex;
+				}
+				
+			}
+			string state;
+			try
+			{
+					state= trajectoryrobot2d_proxy->getState().state;						
+			}
+			catch(const Ice::Exception &ex)
+			{
+					std::cout <<"trajectoryrobot2d_proxy->getState().state "<< ex << std::endl;
+					throw ex;
+			}
+			
+			//state="IDLE";
+			std::cout<<state<<" haveTarget "<<haveTarget;
+			if (state=="IDLE" && haveTarget)
+			{
+				//std::cout<<"\ttrajectoryrobot2d_proxy->getState() "<<trajectoryrobot2d_proxy->getState().state<<"\n";
+				try
+				{
+					AGMModel::SPtr newModel(new AGMModel(worldModel));
+					//objectID has been obtained before
+					int statusID =symbols["status"]->identifier;
+					newModel->getEdgeByIdentifiers(objectID, statusID, "noReach").setLabel("reach");
+					sendModificationProposal(worldModel, newModel);
+					haveTarget=false;
+				}
+				catch (...)
+				{
+					std::cout<<"\neeeee"<< "\n";
+					std::cout<<"\tedge->toString() "<<edge->toString(worldModel)<<" not exist\n";
+				}
+			}
+		}
+		catch(const Ice::Exception &ex)
+		{
+			std::cout << ex << std::endl;
+		}
+	}	
+
 
 }
 
@@ -641,17 +660,21 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 bool SpecificWorker::activateAgent(const ParameterMap& prs)
 {
 	bool activated = false;
+	printf("<<activateAgent\n");
 	if (setParametersAndPossibleActivation(prs, activated))
 	{
 			if (not activated)
 			{
+				printf("activateAgent 0 >>\n");
 				return activate(p);
 			}
 	}
 	else
 	{
+		printf("activateAgent 1 >>\n");
 		return false;
 	}
+	printf("activateAgent 2 >>\n");
 	return true;
 }
 
@@ -745,9 +768,11 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 	params.clear();
 	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
 	{
+		printf("param:%s   value:%s\n", it->first.c_str(), it->second.value.c_str());
 		params[it->first] = it->second;
 	}
-
+	printf("----\n");
+	
 	try
 	{
 		action = params["action"].value;
