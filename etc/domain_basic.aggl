@@ -48,6 +48,33 @@ changeRoom : active(1)
 	}
 }
 
+findTable : active(1)
+{
+	{
+		robot:robot(-325,0)
+		room:object(-325,110)
+		robot->room(in)
+	}
+	=>
+	{
+		container:object(-130,110)
+		room:object(-325,110)
+		contst:objectSt(95,110)
+		robot:robot(-325,0)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+		container->contst(hasStatus)
+		container->contst(table)
+		container->contst(explored)*
+		container->contst(noReach)
+		container->contst(reachable)
+		container->contst(position)
+		container->contst(see)
+	}
+}
+
+
 findObjectVisuallyInTable : active(1)
 {
 	{
@@ -65,10 +92,10 @@ findObjectVisuallyInTable : active(1)
 	=>
 	{
 		status:objectSt(95,0)
-		contst:objectSt(95,110)
+		object:object(-130,0)
 		container:object(-130,110)
 		room:object(-325,110)
-		object:object(-130,0)
+		contst:objectSt(95,110)
 		robot:robot(-325,0)
 		container->contst(explored)*
 		container->contst(table)
@@ -85,22 +112,13 @@ findObjectVisuallyInTable : active(1)
 		robot->room(in)
 		container->room(in)
 	}
-	effect
-	{
-		(forall
-			something:object
-			(when
-				(in container something)
-				(in object something)
-			)
-		)
-	}
 }
 
 findObjectTold : active(4)
 {
 	{
 		robot:robot(-325,0)
+		container:object(-130,110)
 	}
 	=>
 	{
@@ -386,11 +404,11 @@ setObjectNotReachable : passive(1)
 graspObject : active(1)
 {
 	{
-		room:object(-130,0)
-		object:object(130,0)
-		ost:objectSt(290,0)
-		robot:robot(0,-110)
 		table:object(0,110)
+		object:object(130,0)
+		room:object(-130,0)
+		robot:robot(0,-110)
+		ost:objectSt(290,0)
 		robot->object(know)
 		object->table(in)
 		robot->room(in)
@@ -399,11 +417,11 @@ graspObject : active(1)
 	}
 	=>
 	{
-		room:object(-130,0)
-		object:object(130,0)
-		ost:objectSt(290,0)
-		robot:robot(0,-110)
 		table:object(0,110)
+		object:object(130,0)
+		room:object(-130,0)
+		robot:robot(0,-110)
+		ost:objectSt(290,0)
 		robot->object(know)
 		object->robot(in)
 		robot->room(in)
@@ -534,8 +552,8 @@ tellHumanAboutMug : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
-		conth:object(-45,120)
 		robot:robot(-295,-135)
+		conth:object(-45,120)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
@@ -552,8 +570,8 @@ tellHumanAboutMug : active(1)
 	{
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
-		robot:robot(-295,-135)
 		conth:object(-45,175)
+		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
@@ -583,8 +601,8 @@ tellHumanAboutGlasses : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
-		conth:object(-45,120)
 		robot:robot(-295,-135)
+		conth:object(-45,120)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
@@ -601,8 +619,8 @@ tellHumanAboutGlasses : active(1)
 	{
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
-		robot:robot(-295,-135)
 		conth:object(-45,175)
+		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
@@ -632,8 +650,8 @@ tellHumanAboutMilk : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
-		conth:object(-45,120)
 		robot:robot(-295,-135)
+		conth:object(-45,120)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
@@ -650,8 +668,8 @@ tellHumanAboutMilk : active(1)
 	{
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
-		robot:robot(-295,-135)
 		conth:object(-45,175)
+		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
@@ -681,8 +699,8 @@ tellHumanAboutCoffeePot : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
-		conth:object(-45,120)
 		robot:robot(-295,-135)
+		conth:object(-45,120)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
@@ -699,8 +717,8 @@ tellHumanAboutCoffeePot : active(1)
 	{
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
-		robot:robot(-295,-135)
 		conth:object(-45,175)
+		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
@@ -730,8 +748,8 @@ tellHumanAboutTable : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
-		conth:object(-45,120)
 		robot:robot(-295,-135)
+		conth:object(-45,120)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
@@ -748,8 +766,8 @@ tellHumanAboutTable : active(1)
 	{
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
-		robot:robot(-295,-135)
 		conth:object(-45,175)
+		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
@@ -779,8 +797,8 @@ tellHumanAboutUnknownObject : active(1)
 {
 	{
 		statusr:objectSt(-490,-25)
-		robot:robot(-295,-135)
 		conth:object(-90,100)
+		robot:robot(-295,-135)
 		person:person(-90,-135)
 		objectr:object(-295,-25)
 		contr:object(-295,100)
@@ -796,8 +814,8 @@ tellHumanAboutUnknownObject : active(1)
 	{
 		statusr:objectSt(-490,-25)
 		objecth:object(-100,-25)
-		robot:robot(-295,-135)
 		conth:object(-100,100)
+		robot:robot(-295,-135)
 		person:person(-100,-135)
 		objectr:object(-295,-25)
 		contr:object(-300,100)

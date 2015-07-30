@@ -47,12 +47,13 @@ class SpecificWorker(GenericWorker):
 		self.Period = 2000
 		self.timer.start(self.Period)
 		
-		self.ui.txbox.setValue(90)
-		self.ui.tybox.setValue(800)
+		self.ui.txbox.setValue(100)
+		self.ui.tybox.setValue(850)
 		self.ui.tzbox.setValue(400)
 		self.ui.rxbox.setValue(0)
-		self.ui.rybox.setValue(-0.8)
+		self.ui.rybox.setValue(-1.56)
 		self.ui.rzbox.setValue(-3.1415)
+		self.ui.weightbutton.setChecked(True)
 		
 		self.ui.homebutton.clicked.connect(self.goHome)
 		self.ui.homebutton_2.clicked.connect(self.goHome)
@@ -83,7 +84,7 @@ class SpecificWorker(GenericWorker):
 		#	print "Error reading config params"
 		return True
 
-	@QtCore.Slot()
+	@QtCore.pyqtSlot()
 	def compute(self):
 		#print 'SpecificWorker.compute...'
 		#try:
@@ -93,7 +94,7 @@ class SpecificWorker(GenericWorker):
 		#	print e
 		return True
 	
-	@QtCore.Slot()
+	@QtCore.pyqtSlot()
 	def goHome(self):
 		print "GO HOME"
 		import RoboCompInverseKinematics
@@ -102,7 +103,7 @@ class SpecificWorker(GenericWorker):
 		except RoboCompInverseKinematics.IKException, e:
 			print "Exception in tester (GO HOME)): ", e
 			
-	@QtCore.Slot()
+	@QtCore.pyqtSlot()
 	def stop(self):
 		print "STOP"
 		import RoboCompInverseKinematics
@@ -111,7 +112,7 @@ class SpecificWorker(GenericWorker):
 		except RoboCompInverseKinematics.IKException, e:
 			print "Exception in tester (STOP): ", e
 	
-	@QtCore.Slot()
+	@QtCore.pyqtSlot()
 	def sendPose6D(self):
 		print "SEND POSE 6D"
 		import RoboCompInverseKinematics
@@ -164,7 +165,7 @@ class SpecificWorker(GenericWorker):
 		except RoboCompInverseKinematics.IKException, e:
 			print "Expection in tester (sendPose): ", e
 				
-	@QtCore.Slot()
+	@QtCore.pyqtSlot()
 	def sendPoseAlignAxis(self):
 		#  setTargetAlignaxis(const string &bodyPart, const Pose6D &target, const Axis &ax)
 		print "SEND POSE ALIGN AXIS"

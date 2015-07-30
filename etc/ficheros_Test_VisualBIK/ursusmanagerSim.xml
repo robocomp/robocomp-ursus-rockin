@@ -39,7 +39,8 @@
  <node alias="vik" endpoint="inversekinematics:tcp -h localhost -p 10242">
   <dependence alias="gik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost VIK /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/ ./bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/vikSim.conf" />
+ <!-- <upCommand command="rcremote localhost VIK /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/ ./bin/VisualBIK Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/vikSim.conf" />-->
+  <upCommand command="rcremote localhost VIK /home/robocomp/robocomp/components/robocomp-ursus/components/visualik/ ./bin/VisualBIK --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/vik.conf" />
   <downCommand command="killall -9 VisualBIK" />
   <configFile path="xxx" />
   <xpos value="79.1406595764" />
@@ -51,7 +52,7 @@
   <dependence alias="commonjoint" />
   <dependence alias="ik" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost GIK /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/ ./bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikgSim.conf" />
+  <upCommand command="rcremote localhost GIK /home/robocomp/robocomp/components/robocomp-ursus/components/ikGraphGenerator/ ./bin/ikGraphGenerator --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/ikg.conf" />
   <downCommand command="killall -9 ikGraphGenerator" />
   <configFile path="xxx" />
   <xpos value="99.1406595764" />
@@ -63,7 +64,7 @@
   <dependence alias="commonjoint" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost IK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ikSim.conf" />
+  <upCommand command="rcremote localhost IK /home/robocomp/robocomp/components/robocomp-ursus/components/inversekinematics/ ./bin/inversekinematics --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/inversekinematics.conf" />
   <downCommand command="killall -9 inversekinematics" />
   <configFile path="xxx" />
   <xpos value="79.1406595764" />
@@ -73,7 +74,7 @@
 
  <node alias="icestorm" endpoint="IceStorm/TopicManager:default -h localhost -p 9999">
   <color value="#4422FF" />
-  <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/" />
+  <workingDir path="/home/robocomp/robocomp/components/robocomp-ursus/etc/" />
   <upCommand command="rcremote localhost icestorm /home/robocomp/robocomp/components/robocomp-ursus/etc/ icebox --Ice.Config=icebox.conf" />
   <downCommand command="killall -9 icebox" />
   <configFile path="xxx" />
@@ -85,7 +86,7 @@
  <node alias="dynamixel" endpoint="jointmotor:tcp -h localhost -p 10068">
   <dependence alias="icestorm" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
+  <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus/etc/ rcis ursus.xml" />
   <downCommand command="killall -9 dynamixelComp" />
   <configFile path="xxx" />
   <xpos value="95.0371054916" />
@@ -96,7 +97,7 @@
  <node alias="faulhaber" endpoint="jointmotor:tcp -h localhost -p 10067">
   <dependence alias="icestorm" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ rcis simulation.xml" />
+  <upCommand command="rcremote localhost rcis /home/robocomp/robocomp/components/robocomp-ursus/etc/ rcis ursus.xml" />
   <downCommand command="killall -9 faulhaberComp" />
   <configFile path="xxx" />
   <xpos value="188.957741258" />
