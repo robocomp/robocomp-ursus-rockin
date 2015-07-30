@@ -21,12 +21,12 @@ from PySide import *
 try:
 	from ui_mainUI import *
 except:
-	print "Can't import UI file. Did you run 'make' or pyuic4 mainUI.ui -o ui_MainUI.py?"
+	print "Can't import UI file. Did you run 'make'?"
 	sys.exit(-1)
 
 
 class GenericWorker(QtGui.QWidget):
-	kill = QtCore.Signal()
+	kill = QtCore.pyqtSignal()
 
 
 	def __init__(self, mprx):
@@ -46,14 +46,14 @@ class GenericWorker(QtGui.QWidget):
 		self.timer = QtCore.QTimer(self)
 
 
-	@QtCore.Slot()
+	@QtCore.pyqtSlot()
 	def killYourSelf(self):
 		rDebug("Killing myself")
 		self.kill.emit()
 
 	# \brief Change compute period
 	# @param per Period in ms
-	@QtCore.Slot(int)
+	@QtCore.pyqtSlot(int)
 	def setPeriod(self, p):
 		print "Period changed", p
 		Period = p
