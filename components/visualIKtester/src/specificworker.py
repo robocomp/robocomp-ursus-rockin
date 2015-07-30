@@ -84,7 +84,8 @@ class SpecificWorker(GenericWorker):
 		#	print "Error reading config params"
 		return True
 
-	@QtCore.pyqtSlot()
+	#@QtCore.pyqtSlot()
+	@QtCore.Slot()
 	def compute(self):
 		#print 'SpecificWorker.compute...'
 		#try:
@@ -94,7 +95,8 @@ class SpecificWorker(GenericWorker):
 		#	print e
 		return True
 	
-	@QtCore.pyqtSlot()
+	#@QtCore.pyqtSlot()
+	@QtCore.Slot()
 	def goHome(self):
 		print "GO HOME"
 		import RoboCompInverseKinematics
@@ -103,7 +105,8 @@ class SpecificWorker(GenericWorker):
 		except RoboCompInverseKinematics.IKException, e:
 			print "Exception in tester (GO HOME)): ", e
 			
-	@QtCore.pyqtSlot()
+	#@QtCore.pyqtSlot()
+	@QtCore.Slot()
 	def stop(self):
 		print "STOP"
 		import RoboCompInverseKinematics
@@ -112,7 +115,8 @@ class SpecificWorker(GenericWorker):
 		except RoboCompInverseKinematics.IKException, e:
 			print "Exception in tester (STOP): ", e
 	
-	@QtCore.pyqtSlot()
+	#@QtCore.pyqtSlot()
+	@QtCore.Slot()
 	def sendPose6D(self):
 		print "SEND POSE 6D"
 		import RoboCompInverseKinematics
@@ -165,7 +169,8 @@ class SpecificWorker(GenericWorker):
 		except RoboCompInverseKinematics.IKException, e:
 			print "Expection in tester (sendPose): ", e
 				
-	@QtCore.pyqtSlot()
+	#@QtCore.pyqtSlot()
+	@QtCore.Slot()
 	def sendPoseAlignAxis(self):
 		#  setTargetAlignaxis(const string &bodyPart, const Pose6D &target, const Axis &ax)
 		print "SEND POSE ALIGN AXIS"

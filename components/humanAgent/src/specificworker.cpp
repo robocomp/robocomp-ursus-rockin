@@ -30,7 +30,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	innerModel = new InnerModel();
 	imHumanGeneric = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/person.xml");
 	newBodyEvent=false;
-	setPeriod(500);
+	setPeriod(100);
 	
 	//fake
 // 	for (int i=0; i<5;i++)
@@ -65,11 +65,11 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &timestamp)
 {	
 	QMutexLocker m (mutex);
-// 	std::cout<<"\n\nnew newMSKBodyEvent, people.size() " << people.size()<<" timestamp "<<timestamp<<"\n\n";
+	std::cout<<"\n\nnew newMSKBodyEvent, people.size() " << people.size()<<" timestamp "<<timestamp<<"\n\n";
 	this->personList = people;
 	this->timeStamp = timestamp;
 	timerTimeStamp.setSingleShot(true);
-	timerTimeStamp.start(10000);
+	timerTimeStamp.start(5000);
 	newBodyEvent = true;	
 }
 
@@ -166,8 +166,9 @@ void SpecificWorker::compute()
 // 	qDebug()<<"timerTimeStamp.isActive() "<<timerTimeStamp.isActive();
 	qDebug()<<"worldModel->numberOfSymbols()"<<worldModel->numberOfSymbols();
 	agmInner.setWorld(worldModel);
+	
 	std::cout<<"\tpersonList.size() "<<personList.size()<<" timeStamp "<<timeStamp<<"\n";
-	innerModelMap.size();
+	
 	if (newBodyEvent)
 	{
 		//Insertar simbolos para todo el torso		
@@ -180,8 +181,10 @@ void SpecificWorker::compute()
 	//clear personList after a while without to recive any event
 	if (timerTimeStamp.isActive() ==false and personList.empty()==false  )		
 	{
-		std::cout<<"\t\t clear list \n\n";
+		saveInnerModels();
+		std::cout<<"\t\t clear list \n\n";		
 		personList.clear();
+		qFatal("fary check");
 	}
 			//the navigation agent should do something like that
 		//hay que añadir la kinect del cuello al innerModel
@@ -216,6 +219,7 @@ void SpecificWorker::updatePeopleInnerFull()
 		return;
 	}
 	bool modification = false;
+	
 	
 	//extrae en una lista con los ID de los symbolos "person" que son hijos del symbolo robotID enlazados mediante "RT"
 	//Qlist<int32_t> l = listaSymbolos(int symbolID, string symbolType=person,string linkType=RT);
@@ -702,6 +706,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
  	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
  
 	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel("room");
 	
 	mutex->unlock();
 }
@@ -712,6 +717,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification
  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
  
 	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel("room");
 	
 	mutex->unlock();
 }
@@ -722,6 +728,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modificati
  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
  
 	agmInner.setWorld(worldModel);
+	innerModel = agmInner.extractInnerModel("room");
 	
 	mutex->unlock();
 }
@@ -904,7 +911,13 @@ void SpecificWorker::initDictionary()
 	jointList = person.joints;
 	///*********************** TODO transform ***************************
 	///kinect a la posición real de la base
-	//kinect=innerModel->getTransformationMatrix("kinect","robot")
+	
+	kinect=innerModel->getTransformationMatrix("robot","rgbdHumanPose");
+	
+	kinect.setTr(kinect.getTr().x()/1000.0, kinect.getTr().y()/1000.0,kinect.getTr().z()/1000.0);
+	//kinect.print("kinect");
+	
+	
 	/// apunta el torso (inclinación alante/atrás y lateral del torso)
 	mapJointRotations[ "Spine" ]=
 	rtMatFromJointPosition( kinect,
@@ -1119,8 +1132,12 @@ void SpecificWorker::saveInnerModels()
 	for( auto m : innerModelMap )			
 	{		
 		QString pre =QString::fromStdString(int2str(m.first));
-		qDebug()<<"Saving innermodel: "<<pre+"inner.xml";
+		qDebug()<<"Saving innermodels : "<<pre+"innerHuman.xml";
 		m.second->save(pre+"inner.xml");			
 	}	
+	innerModel=agmInner.extractInnerModel("room");
+	innerModel->save("extractInnerModelFromRoom.xml");
+	innerModel->getTransformationMatrix("robot","rgbdHumanPose").print("robot rgbdHumanPose") ;
+	innerModel->getTransformationMatrix("rgbdHumanPose","robot").print(" getTransformationMatrix( robot -> rgdHumanPose) ");
 }
 
