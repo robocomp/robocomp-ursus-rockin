@@ -36,18 +36,24 @@ void SpecificWorker::compute()
 		
 		///FIRST INNERMODEL
 		QHash<QString, int32_t>  match;
-		match.insert("room",7);
+// 		match.insert("room",7);
 		match.insert("robot",1);				
 		agmInner.include_im(match,innerModel);
 		agmInner.setWorld(worldModel);	
 		worldModel->save("agmInnerFirst.xml");
 		qDebug()<<"\n\n*********** FIRST INNERMODEL included ************* \n\n";
 		
+<<<<<<< HEAD
 
 		qDebug()<<"\n\n******* Extract innerModel *****************";		
 		QString nodeName="room";
 		(agmInner.extractInnerModel(nodeName))->save("extractInnerModel.xml");
 
+=======
+		qDebug()<<"\n\n******* Extract innerModel *****************";
+// 		QString nodeName="room";
+// 		(agmInner.extractInnerModel(nodeName))->treePrint();
+>>>>>>> 05a881cff02f17fcf4750104f3f14dae7b83c0ed
 		qDebug()<<"\n\n*********** include_im *************";
 // 		///SECOND INNERMODEL
 // 		QHash<QString, int32_t>  match1;
