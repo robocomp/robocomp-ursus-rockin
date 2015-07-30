@@ -22,7 +22,6 @@
 /**
 * \brief Default constructor
 */
-
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
@@ -47,6 +46,7 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	printf("--\n");
 	static std::string previousAction = "";
 	bool newAction = false;
 	if (previousAction != action)
@@ -166,7 +166,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel("world");
+	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
@@ -174,7 +174,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel("world");
+	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
 
@@ -251,6 +251,8 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 				{
 					publishModel = true;
 					printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+					//PASAR TAG AL ROOT Y ACTUALIZAR TRANSFORM EN EN INNER. PUBLICAR CAMBIO
+					
 				}
 				break;
 			case 31:
@@ -314,15 +316,17 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 {
 	bool existing = false;
 
+	AGMModelSymbol::SPtr symbol;
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
-		const AGMModelSymbol::SPtr &symbol = *symbol_it;
-		if (symbol->symbolType == "object") {
-			try {
+		symbol = *symbol_it;
+		if (symbol->symbolType == "object")
+		{
+			try
+			{
 				const int32_t tag = str2int(symbol->getAttribute("tag"));
-				if (t.id == tag) {
-// 					QVec v(6); v(0) = t.tx; v(1) = t.ty; v(2) = t.tz; v(3) = t.rx; v(4) = t.ry; v(5) = t.rz;
-// 					QVec worldRef = innerModel->transform("world", v, "rgbd");
+				if (t.id == tag)
+				{
 					existing = true;
 				}
 			}
@@ -330,8 +334,19 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 		}
 	}
 
-	if (not existing)
+	
+	if (existing)
 	{
+		QVec pose = QVec::vec6(t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
+		QString mugIMName    = QString::fromStdString(symbol->getAttribute("imName"));
+		QString parentIMName = innerModel->getNode(mugIMName)->parent->id;
+		QVec poseFromParent = innerModel->transform6D(parentIMName, pose, "rgbd");
+		poseFromParent.print("poseFromParent");
+		innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
+	}
+	else
+	{
+		qFatal("wuuut");
 		try
 		{
 			int32_t objectSymbolID;

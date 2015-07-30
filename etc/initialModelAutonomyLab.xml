@@ -3,10 +3,13 @@
 		<attribute key="imName" value="robot" />
 		<attribute key="imType" value="omniRobot" />
 	</symbol>
+
 	<symbol id="9" type="object" >
 		<attribute key="imName" value="table" />
 		<attribute key="imType" value="transform" />
+		<attribute key="tag" value="30" />
 	</symbol>
+
 	<link  src="1"  dst="9"      label="know" />
 	<symbol id="10" type="objectSt" />
 	<link  src="9"  dst="10"     label="hasStatus" />
@@ -41,6 +44,7 @@
 	<symbol id="11" type="object" >
 		<attribute key="imName" value="mug" />
 		<attribute key="imType" value="transform" />
+		<attribute key="tag" value="31" />
 	</symbol>
 	<link  src="1"  dst="11"      label="know" />
 	<symbol id="12" type="objectSt" />
