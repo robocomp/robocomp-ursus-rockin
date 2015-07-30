@@ -1,23 +1,12 @@
 # Proxies for required interfaces
-<<<<<<< HEAD
 #JointMotorProxy = jointmotor:tcp -h robonuc1.local -p 20000
 JointMotorProxy = jointmotor:tcp -h localhost -p 20000
-=======
-JointMotorProxy = jointmotor:tcp -h robonuc1.local -p 20000
-#JointMotorProxy = jointmotor:tcp -h localhost -p 20000
->>>>>>> d850fa33e54c0ed83f1729ec8e3e7acc06f34016
+
 InverseKinematicsProxy = inversekinematics:tcp -h localhost -p 10242
 
-
 # This property is used by the clients to connect to IceStorm.
-<<<<<<< HEAD
 #TopicManager.Proxy=IceStorm/TopicManager:default -p 9999 -h robonuc1.local
 TopicManager.Proxy=IceStorm/TopicManager:default -p 9999 -h localhost
-=======
-TopicManager.Proxy=IceStorm/TopicManager:default -p 9999 -h robonuc1.local
-#TopicManager.Proxy=IceStorm/TopicManager:default -p 9999 -h localhost
->>>>>>> d850fa33e54c0ed83f1729ec8e3e7acc06f34016
-
 
 Ice.Warn.Connections=0
 Ice.Trace.Network=0
