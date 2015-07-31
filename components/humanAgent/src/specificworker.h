@@ -68,6 +68,7 @@ private:
 	PersonList personList;
 	long int timeStamp;
 	QTimer timerTimeStamp;
+	int number;
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
@@ -90,7 +91,7 @@ private:
 	
 	void newInnerModel(InnerModel * imSrc, InnerModel *imDst, QString pre);
 	void insertNodeInnerModel(InnerModel* im, InnerModelNode* node, QString pre );
-	void saveInnerModels();
+	void saveInnerModels(QString number="");
 
 
 };
