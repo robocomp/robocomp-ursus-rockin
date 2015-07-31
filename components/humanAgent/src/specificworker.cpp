@@ -167,19 +167,11 @@ void SpecificWorker::compute()
 	agmInner.setWorld(worldModel);
 	
 // 	std::cout<<"\tpersonList.size() "<<personList.size()<<" timeStamp "<<timeStamp<<"\n";
-	static int aaa =0;
 	if (newBodyEvent)
 	{
 		//Insertar simbolos para todo el torso		
-		qDebug()<<"updatePeopleInnerFull() aaa "<< aaa;						
+
 		updatePeopleInnerFull();						
-		
-		if (aaa==10)
-		{
-			saveInnerModels();
-			qFatal("fary");
-		}
-		aaa++;
 		newBodyEvent=false;	
 		
 	}
@@ -189,26 +181,12 @@ void SpecificWorker::compute()
 	//clear personList after a while without to recive any event
 	if (timerTimeStamp.isActive() ==false and personList.empty()==false  )		
 	{		
-		std::cout<<"\t\t clear list \n\n";		
+		std::cout<<"\t\t clear list \n\n";
+		saveInnerModels();
 		personList.clear();
 		qFatal("fary check");
 	}
-			//the navigation agent should do something like that
-		//hay que añadir la kinect del cuello al innerModel
-		//agmInner.setWorld(worldModel);
-// 		innerModel= agmInner.extractInnerModel("room");
-// 		try
-// 		{
-// 			QVec v = innerModel->transform6D("room","person_11");
-// 			innerModel->transform6D("room","robot").print("robot pose in room");
-// 			innerModel->transform6D("room","table").print("table pose in room");
-// 			innerModel->transform6D("robot","table").print("table pose from robot");
-// 			
-// 		}
-// 		catch (InnerModelException e)
-// 		{
-// 			qDebug()<<"innerModel->transform6D( "<<e.what();
-// 		}
+
 		
 }
 
@@ -285,7 +263,7 @@ void SpecificWorker::updatePeopleInnerFull()
 // 			QString pre =QString::fromStdString(int2str(personID));
 			updateInnerModel(personIt.second,personID);
 			
-// 			agmInner.updateAgmWithInnerModel(innerModelMap.at(personID));
+			agmInner.updateAgmWithInnerModel(innerModelMap.at(personID));
 			//modification = true;
 			
 // 			if (personIt.second.state== RoboCompMSKBody::stateType::Tracking )
@@ -327,7 +305,7 @@ void SpecificWorker::updatePeopleInnerFull()
 			//lo inserto en la super estructura agmInner
 			QHash<QString, int32_t>  match;			
 			match.insert(pre+"XN_SKEL_TORSO",id);
-// 			agmInner.include_im(match,innerModelMap.at(id));
+			agmInner.include_im(match,innerModelMap.at(id));
 				
 // 			//añado su arco calculado para innerModel
 			std::map<string,string>att;
@@ -897,7 +875,6 @@ void SpecificWorker::initDictionary()
 				innerModelMap[ idPerson ]->updateTransformValues( QString::fromStdString(idNode),x,y,z,rx,ry,rz );
 			else
 				innerModelMap[ idPerson ]->updateRotationValues( QString::fromStdString(idNode),rx,ry,rz );						
-			
 		}
 		catch ( Ice::Exception e ) 
 		{
@@ -1148,8 +1125,8 @@ void SpecificWorker::saveInnerModels()
 		qDebug()<<"Saving innermodels : "<<pre+"innerHuman.xml";
 		m.second->save(pre+"innerHuman.xml");			
 	}	
-// 	innerModel=agmInner.extractInnerModel("room");
-// 	innerModel->save("extractInnerModelFromRoom.xml");
+	innerModel=agmInner.extractInnerModel("room");
+	innerModel->save("extractInnerModelFromRoom.xml");
 	
 }
 
