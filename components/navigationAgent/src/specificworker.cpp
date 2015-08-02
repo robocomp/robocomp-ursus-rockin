@@ -109,6 +109,7 @@ void SpecificWorker::actionExecution()
 
 void SpecificWorker::action_SetObjectReach(bool newAction)
 {
+	// Get symbols' map
 	std::cout<<"action "<<action<<" 1\n";
 	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
@@ -131,96 +132,107 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		}
 	}
 		
-	std::cout<<"action "<<action<<" 2\n";
-	// ACTION EXECUTION
-	if (action=="setobjectreach")
+	// Get target
+	int roomID, objectID, robotID;
+	try
 	{
-		int roomID, objectID, robotID, statusID;
-		try
+		if (symbols["room"].get() and symbols["object"].get() and symbols["robot"].get())
 		{
 			roomID = symbols["room"]->identifier;//7;
 			objectID =symbols["object"]->identifier;//9;//
 			robotID = symbols["robot"]->identifier;//9;
 			statusID = symbols["status"]->identifier;//9;
 		}
-		catch(...)
+		else
 		{
-			printf("bla blakedoij ewr\n");
-			exit(2);
+			printf("parameters not in the model yet\n");
+			return;
 		}
-
-		
-		//el angulo final del robot gracias a innerModel!
-		QString  roomIMID   = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
-		QString  objectIMID = QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
-		
-		QVec objectPose = innerModel->transform6D(roomIMID, objectIMID);
-		objectPose.print("object pose in room");
+	}
+	catch(...)
+	{
 
 		RoboCompTrajectoryRobot2D::TargetPose tp;
-		tp.x = objectPose.x();
-		tp.y = objectPose.y();
-		tp.z = objectPose.z();
-		tp.rx = 0;
-		tp.ry = objectPose.ry();
-		tp.rz = 0;
+		///x z del modelo de agm 7--RT-->9 ,  y el angulo final del robot es el relativo al angulo con la mesa
+		
+		printf("%s\n", __LINE__);
+		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(roomID,objectID, "RT");
+		tp.x = str2float(edge->getAttribute("tx") );
+		tp.z = str2float(edge->getAttribute("tz") ) ;
+		tp.y = 0.;
+		tp.rx=tp.rz=0.0;
+		tp.doRotation=true;
+		
+		//el angulo final del robot gracias a innerModel!
+		QString  robotId =QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+		QString  tableId =QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
+		
+		innerModel->transform6D("room","robot").print("robot pose in room");
+		innerModel->transform6D("room","table").print("table pose in room");
+		innerModel->transform6D("robot","table").print("table pose from robot");
 		tp.doRotation = true;
+	}
+	catch (...)
+	{
+		qDebug()<<"innerModel exception";
+	}
 
-		try
+	
+	printf("distance: %f\n", innerModel->transform6D(robotIMID, objectIMID).norm2());
+
+	
+	// Execute target
+	try
+	{
+		if (!haveTarget)
 		{
-			std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
-			qDebug()<<"\n***nos volvemos sin mover el robot***\n";
-			if (!haveTarget)
-			{
-				try
-				{
-					trajectoryrobot2d_proxy->go(tp);
-					std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
-					haveTarget = true;
-				}
-				catch(const Ice::Exception &ex)
-				{
-					std::cout <<"trajectoryrobot2d_proxy->go "<< ex << std::endl;
-					throw ex;
-				}
-				
-			}
-			string state;
 			try
 			{
-					state = trajectoryrobot2d_proxy->getState().state;
+				trajectoryrobot2d_proxy->go(tp);										
+				std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
+				haveTarget=true;
 			}
 			catch(const Ice::Exception &ex)
 			{
-					std::cout <<"trajectoryrobot2d_proxy->getState().state "<< ex << std::endl;
-					throw ex;
+				std::cout <<"trajectoryrobot2d_proxy->go "<< ex << std::endl;
+				throw ex;
 			}
-			
-			//state="IDLE";
-			std::cout<<state<<" haveTarget "<<haveTarget;
-			if (state=="IDLE" && haveTarget)
-			{
-				//std::cout<<"\ttrajectoryrobot2d_proxy->getState() "<<trajectoryrobot2d_proxy->getState().state<<"\n";
-				try
-				{
-					AGMModel::SPtr newModel(new AGMModel(worldModel));
-					newModel->getEdgeByIdentifiers(objectID, statusID, "noReach").setLabel("reach");
-					sendModificationProposal(worldModel, newModel);
-					haveTarget = false;
-				}
-				catch (...)
-				{
-					std::cout<<"\nCan't update noReach -> reach because the edge doesn't exist\n";
-				}
-			}
+		}
+		string state;
+		try
+		{
+				state= trajectoryrobot2d_proxy->getState().state;						
 		}
 		catch(const Ice::Exception &ex)
 		{
-			std::cout << ex << std::endl;
+				std::cout <<"trajectoryrobot2d_proxy->getState().state "<< ex << std::endl;
+				throw ex;
 		}
-	}	
-
-
+		
+		//state="IDLE";
+		std::cout<<state<<" haveTarget "<<haveTarget;
+		if (state=="IDLE" && haveTarget)
+		{
+			//std::cout<<"\ttrajectoryrobot2d_proxy->getState() "<<trajectoryrobot2d_proxy->getState().state<<"\n";
+			try
+			{
+				AGMModel::SPtr newModel(new AGMModel(worldModel));
+				//objectID has been obtained before
+				int statusID =symbols["status"]->identifier;
+				newModel->getEdgeByIdentifiers(objectID, statusID, "noReach").setLabel("reach");
+				sendModificationProposal(worldModel, newModel);
+				haveTarget=false;
+			}
+			catch (...)
+			{
+				std::cout<<"\neeeee"<< "\n";
+			}
+		}
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
 }
 
 

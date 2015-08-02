@@ -22,7 +22,6 @@
 /**
 * \brief Default constructor
 */
-
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
@@ -47,6 +46,7 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
+	printf("--\n");
 	static std::string previousAction = "";
 	bool newAction = false;
 	if (previousAction != action)
@@ -156,7 +156,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room");
 	innerModel->treePrint();
 	mutex->unlock();
 }
@@ -166,7 +166,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel("world");
+	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
@@ -174,7 +174,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel("world");
+	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
 
@@ -251,6 +251,8 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 				{
 					publishModel = true;
 					printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
+					//PASAR TAG AL ROOT Y ACTUALIZAR TRANSFORM EN EN INNER. PUBLICAR CAMBIO
+					
 				}
 				break;
 			case 31:
@@ -314,24 +316,66 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 {
 	bool existing = false;
 
+	AGMModelSymbol::SPtr symbol;
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
-		const AGMModelSymbol::SPtr &symbol = *symbol_it;
-		if (symbol->symbolType == "object") {
-			try {
+		symbol = *symbol_it;
+		if (symbol->symbolType == "object" and symbol->attributes.find("tag") != symbol->attributes.end())
+		{
+			try
+			{
 				const int32_t tag = str2int(symbol->getAttribute("tag"));
-				if (t.id == tag) {
-// 					QVec v(6); v(0) = t.tx; v(1) = t.ty; v(2) = t.tz; v(3) = t.rx; v(4) = t.ry; v(5) = t.rz;
-// 					QVec worldRef = innerModel->transform("world", v, "rgbd");
+				if (t.id == tag)
+				{
+					// Si el identificador del nodo coincide con el del tag entonces el simbolo existe.
+					// Salimos del bucle porque ya lo hemos encontrado.
 					existing = true;
+					break;
 				}
 			}
-			catch (...) { }
+			catch (...)
+			{
+				printf("NI puta idea de por que leches falla \n");
+			}
 		}
 	}
 
-	if (not existing)
+	printf("%s: %d\n", __FILE__, __LINE__);
+	
+	if (existing)
 	{
+		printf("Exists\n");
+		QVec pose = QVec::vec6(t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
+		pose.print("pose inicial");
+		QString mugIMName    = QString::fromStdString(symbol->getAttribute("imName"));
+		qDebug() << "MUG??: "<<mugIMName;
+		InnerModelNode *node = innerModel->getNode(mugIMName);
+		if (node)
+		{
+			printf("%s: %d\n", __FILE__, __LINE__);
+			InnerModelNode *parentNode = node->parent;
+			if (parentNode)
+			{
+				printf("%s: %d\n", __FILE__, __LINE__);
+				QString parentIMName = parentNode->id;
+				qDebug() << parentIMName;
+				QVec poseFromParent = innerModel->transform6D(parentIMName, pose, "rgbd");
+				poseFromParent.print("poseFromParent");
+				innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
+			}
+			else
+			{
+				qDebug() << "no hay nodo padre"; 
+			}
+		}
+		else
+		{
+			qDebug() << "no hay nodo en innemodel"; 
+		}
+	}
+	else
+	{
+		qFatal("wuuut");
 		try
 		{
 			int32_t objectSymbolID;

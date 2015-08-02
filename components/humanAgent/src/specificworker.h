@@ -63,16 +63,18 @@ private:
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
-	InnerModel *innerModel;
+	InnerModel *innerModel,*imHumanGeneric;
 	bool active, newBodyEvent;
 	PersonList personList;
 	long int timeStamp;
 	QTimer timerTimeStamp;
+	int number;
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 	void updatePeople();
 	void updatePeopleInner();
+	void updatePeopleInnerFull();
 	
 	map<string,QString> dictionaryNames;
 	map<string,RoboCompMSKBody::JointType> dictionaryEnum;
@@ -87,6 +89,11 @@ private:
 	
 	bool rotarTorso(const QVec & hombroizq,const QVec & hombroder);
 	
+	void newInnerModel(InnerModel * imSrc, InnerModel *imDst, QString pre);
+	void insertNodeInnerModel(InnerModel* im, InnerModelNode* node, QString pre );
+	void saveInnerModels(QString number="");
+
+
 };
 
 #endif

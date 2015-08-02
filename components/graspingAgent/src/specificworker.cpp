@@ -66,6 +66,7 @@ void SpecificWorker::compute( )
 
 void SpecificWorker::manageReachedObjects()
 {
+	return;
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 // 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
 	float THRESHOLD_object = 450;
@@ -76,7 +77,7 @@ void SpecificWorker::manageReachedObjects()
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	mutex->unlock();
 	
-// 	innerModel->transform("world", "arm_right_1").print("arm_right_1");
+// 	innerModel->transform("room", "arm_right_1").print("arm_right_1");
 
 	for (AGMModel::iterator symbol_itr=newModel->begin(); symbol_itr!=newModel->end(); symbol_itr++)
 	{
@@ -237,12 +238,12 @@ float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr 
 	if (isPolygon)
 	{
 		const std::string polygon = node->getAttribute("polygon");
-		const QVec head_in_floor = innerModel->transform("world", reference_name.c_str());
+		const QVec head_in_floor = innerModel->transform("room", reference_name.c_str());
 		return distanceToPolygon(head_in_floor, QVec::vec3(x, y, z), polygon);
 	}
 	else
 	{
-		return innerModel->transform(QString::fromStdString(reference_name), QVec::vec3(x,y,z), "world").norm2();
+		return innerModel->transform(QString::fromStdString(reference_name), QVec::vec3(x,y,z), "room").norm2();
 	}
 }
 
@@ -369,7 +370,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
 
@@ -378,7 +379,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
@@ -386,7 +387,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
 
@@ -483,7 +484,7 @@ void SpecificWorker::directGazeTowards(AGMModelSymbol::SPtr symbol)
 		const float y = str2float(symbol->getAttribute("ty"));
 		const float z = str2float(symbol->getAttribute("tz"));
 		QVec worldRef = QVec::vec3(x, y, z);
-		QVec robotRef = innerModel->transform("robot", worldRef, "world");
+		QVec robotRef = innerModel->transform("robot", worldRef, "room");
 		printf("saccadic3D\n");
 		printf("\n");
 		saccadic3D(robotRef, QVec::vec3(0,0,1));
@@ -556,7 +557,7 @@ void SpecificWorker::action_GraspObject(bool first)
 			printf("%s: %d\n", __FILE__, __LINE__);
 			symbol = symbols["object"];
 			printf("%s: %d\n", __FILE__, __LINE__);
-			sendRightArmToTargetFullPose(symbol, offset);
+			sendRightArmToTargetFullPose(symbol, QVec::vec3(150, -250, 0));
 			printf("%s: %d\n", __FILE__, __LINE__);
 		}
 		catch (...)
@@ -572,7 +573,7 @@ void SpecificWorker::action_GraspObject(bool first)
 		if (time.elapsed() > 4000) { state = 0; }
 		else
 		{
-			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"])+offset, "world").norm2();
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"])+offset, "room").norm2();
 			printf("state==1: %f\n", distance);
 			if (distance < 50)
 			{
@@ -584,16 +585,17 @@ void SpecificWorker::action_GraspObject(bool first)
 	{
 		//inversekinematics_proxy->setFingers(100);
 		usleep(100000);
-		sendRightArmToTargetFullPose(symbols["object"], offset.operator*(0.4));
+		sendRightArmToTargetFullPose(symbols["object"], QVec::vec3(0, -250, 0));
 		time = QTime::currentTime();
 		state = 3;
+		exit(1);
 	}
 	else if (state == 3) // wait
 	{
 		if (time.elapsed() > 4000) { state = 0; }
 		else
 		{
-			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"]) + offset.operator*(0.4), "world").norm2();
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"]) + offset.operator*(0.4), "room").norm2();
 			printf("state==3: %f\n", distance);
 			if (distance < 5)
 			{
@@ -612,7 +614,7 @@ void SpecificWorker::action_GraspObject(bool first)
 		if (time.elapsed() > 4000) { state = 0; }
 		else
 		{
-			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"]) + offset.operator*(0.4), "world").norm2();
+			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocation(symbols["object"]) + offset.operator*(0.4), "room").norm2();
 			printf("state==5: %f\n", distance);
 			if (distance < 5)
 			{
@@ -653,15 +655,38 @@ void SpecificWorker::action_GraspObject(bool first)
 
 QVec SpecificWorker::getObjectsLocation(AGMModelSymbol::SPtr &object)
 {
-printf("%s: %d (%d)\n", __FILE__, __LINE__, object->identifier);
-	const float x = str2float(object->getAttribute("tx"));
-printf("%s: %d\n", __FILE__, __LINE__);
-	const float y = str2float(object->getAttribute("ty"));
-printf("%s: %d\n", __FILE__, __LINE__);
-	const float z = str2float(object->getAttribute("tz"));
-printf("%s: %d\n", __FILE__, __LINE__);
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
+	try
+	{
+		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/);
+		for (auto dd : symbols)
+		{
+			printf("tenemos %s\n", dd.first.c_str());
+		}
+	}
+	catch(...)
+	{
+		printf("navigationAgent: Couldn't retrieve action's parameters\n");
+		printf("<<WORLD\n");
+		AGMModelPrinter::printWorld(worldModel);
+		printf("WORLD>>\n");
+		if (worldModel->size() > 0)
+		{
+			exit(-1);
+		}
+	}
 
-	return QVec::vec3(x, y, z);
+	// Get target
+	int roomID, objectID, robotID;
+	roomID = symbols["room"]->identifier;//7;
+	objectID =symbols["object"]->identifier;//9;//
+	robotID = symbols["robot"]->identifier;//9;
+	
+	QString  robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+	QString  roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
+	QString  objectIMID = QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
+
+	return innerModel->transform6D(roomIMID, objectIMID);
 }
 
 void SpecificWorker::sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec offset)
@@ -676,16 +701,16 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		printf("%s: %d\n", __FILE__, __LINE__);
 		targetPos.print("targetFullPose");
 		printf("%s: %d\n", __FILE__, __LINE__);
-		target.x = targetPos(0);
-		target.y = targetPos(1);
-		target.z = targetPos(2);
+		target.x = targetPos.x();
+		target.y = targetPos.y();
+		target.z = targetPos.z();
 		weights.x = 1;
 		weights.y = 1;
 		weights.z = 1;
 		printf("%s: %d\n", __FILE__, __LINE__);
-		target.rx = str2float(targetObject->getAttribute("rx"));
-		target.ry = str2float(targetObject->getAttribute("ry"));
-		target.rz = str2float(targetObject->getAttribute("rz"));
+		target.rx = targetPos.rx();
+		target.ry = targetPos.ry();
+		target.rz = targetPos.rz();
 		printf("%s: %d\n", __FILE__, __LINE__);
 		weights.rx = 1;
 		weights.ry = 1;
@@ -750,12 +775,13 @@ void SpecificWorker::sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetOb
 
 void SpecificWorker::action_SetObjectReach(bool first)
 {
+	
 	printf("void SpecificWorker::action_SetObjectReach()\n");
 
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
-	if (backAction != "setobjectreach" or innerModel->transform("world", "grabPositionHandR")(1)<1000)
+	if (backAction != "setobjectreach" or innerModel->transform("room", "grabPositionHandR")(1)<1000)
 	{
 			backAction = action;
 			printf("first time, set arm for manipulation\n");
@@ -782,9 +808,10 @@ void SpecificWorker::action_SetObjectReach(bool first)
 			mutex->lock();
 			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
 			mutex->unlock();
-			const float x = str2float(goalObject->getAttribute("tx"));
-			const float y = str2float(goalObject->getAttribute("ty"));
-			const float z = str2float(goalObject->getAttribute("tz"));
+			QVec pose = getObjectsLocation(goalObject);
+			const float x = pose.x();
+			const float y = pose.y();
+			const float z = pose.z();
 			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
 		}
 		catch (...)
@@ -814,7 +841,7 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 {
 // 	printf("saccadic3D\n");
 
-	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "world");
+	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "room");
 // 	rel.print("desde la camara");
 
 	float errYaw   = -atan2(rel(0), rel(2));
@@ -862,15 +889,13 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 
 void SpecificWorker::updateInnerModel()
 {
+	return;
 	mutex->lock();
 	try
 	{
 		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
-		const float x     = str2float(robot->getAttribute("tx"));
-		const float z     = str2float(robot->getAttribute("tz"));
-		const float alpha = str2float(robot->getAttribute("alpha"));
-		innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
-                printf("%f %f __ %f\n", x, z, alpha);
+// 		innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
+//                 printf("%f %f __ %f\n", x, z, alpha);
 		MotorStateMap mstateMap;
 		jointmotor_proxy->getAllMotorState(mstateMap);
 		for (auto &joint : mstateMap)

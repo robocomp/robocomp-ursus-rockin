@@ -29,22 +29,25 @@ void SpecificWorker::compute()
 		qDebug()<<"\n\n\n\n************************";
 		qDebug()<<"numberOfSymbols BEFORE insert InnerModel"<<worldModel->numberOfSymbols();
 		qDebug()<<"************************";
-		qDebug()<<"\n\n******* Original innerModel *****************";		
+		qDebug()<<"\n\n******* Original innerModel *****************";
  		innerModel->treePrint();
 		qDebug()<<"\n\n*********** include_im *************";
-// 		
+		agmInner.setWorld(worldModel);	
+		
 		///FIRST INNERMODEL
 		QHash<QString, int32_t>  match;
-		match.insert("room",7);
+// 		match.insert("room",7);
 		match.insert("robot",1);				
-		include_im(match,innerModel);
+		agmInner.include_im(match,innerModel);
 		agmInner.setWorld(worldModel);	
 		worldModel->save("agmInnerFirst.xml");
 		qDebug()<<"\n\n*********** FIRST INNERMODEL included ************* \n\n";
-		
+
 		qDebug()<<"\n\n******* Extract innerModel *****************";		
 		QString nodeName="room";
 		(agmInner.extractInnerModel(nodeName))->treePrint();
+		(agmInner.extractInnerModel(nodeName))->save("extractInnerModel.xml");
+
 		qDebug()<<"\n\n*********** include_im *************";
 // 		///SECOND INNERMODEL
 // 		QHash<QString, int32_t>  match1;
