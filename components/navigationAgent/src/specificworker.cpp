@@ -31,7 +31,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
 	haveTarget = false;
-	
+
 }
 
 /**
@@ -45,14 +45,14 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::compute( )
 {
 	printf("compute 1..\n");
-	// ODOMETRY AND LOCATION-RELATED ISSUES	
+	// ODOMETRY AND LOCATION-RELATED ISSUES
 	if (odometryAndLocationIssues()==false)
 		return;
 	printf("compute 2..\n");
 // 	innerModel->treePrint();
-	
+
 	actionExecution();
-	
+
 // 	printf("ae>\n");
 }
 
@@ -102,8 +102,8 @@ void SpecificWorker::actionExecution()
 		std::cout<<" "<< action;
 		//action_NoAction();
 	}
-	
-	
+
+
 	printf("actionExecution>>\n");
 }
 
@@ -131,7 +131,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 			exit(-1);
 		}
 	}
-		
+
 	// Get target
 	int roomID, objectID, robotID;
 	try
@@ -141,7 +141,6 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 			roomID = symbols["room"]->identifier;//7;
 			objectID =symbols["object"]->identifier;//9;//
 			robotID = symbols["robot"]->identifier;//9;
-			statusID = symbols["status"]->identifier;//9;
 		}
 		else
 		{
@@ -151,25 +150,23 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	}
 	catch(...)
 	{
+		printf("bla blakedoij ewr\n");
+		exit(2);
+	}
+	RoboCompTrajectoryRobot2D::TargetPose tp;
+	QString  robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+	QString  roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
+	QString  objectIMID = QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
+	try
+	{
+		QVec poseInRoom = innerModel->transform6D(roomIMID, objectIMID);
 
-		RoboCompTrajectoryRobot2D::TargetPose tp;
-		///x z del modelo de agm 7--RT-->9 ,  y el angulo final del robot es el relativo al angulo con la mesa
-		
-		printf("%s\n", __LINE__);
-		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(roomID,objectID, "RT");
-		tp.x = str2float(edge->getAttribute("tx") );
-		tp.z = str2float(edge->getAttribute("tz") ) ;
-		tp.y = 0.;
-		tp.rx=tp.rz=0.0;
-		tp.doRotation=true;
-		
-		//el angulo final del robot gracias a innerModel!
-		QString  robotId =QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
-		QString  tableId =QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
-		
-		innerModel->transform6D("room","robot").print("robot pose in room");
-		innerModel->transform6D("room","table").print("table pose in room");
-		innerModel->transform6D("robot","table").print("table pose from robot");
+		tp.x = poseInRoom.x();
+		tp.y = 0;
+		tp.z = poseInRoom.z();
+		tp.rx = 0;
+		tp.ry = 0;
+		tp.rz = 0;
 		tp.doRotation = true;
 	}
 	catch (...)
@@ -177,10 +174,10 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		qDebug()<<"innerModel exception";
 	}
 
-	
+
 	printf("distance: %f\n", innerModel->transform6D(robotIMID, objectIMID).norm2());
 
-	
+
 	// Execute target
 	try
 	{
@@ -188,7 +185,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		{
 			try
 			{
-				trajectoryrobot2d_proxy->go(tp);										
+				trajectoryrobot2d_proxy->go(tp);
 				std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
 				haveTarget=true;
 			}
@@ -201,14 +198,14 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		string state;
 		try
 		{
-				state= trajectoryrobot2d_proxy->getState().state;						
+				state= trajectoryrobot2d_proxy->getState().state;
 		}
 		catch(const Ice::Exception &ex)
 		{
 				std::cout <<"trajectoryrobot2d_proxy->getState().state "<< ex << std::endl;
 				throw ex;
 		}
-		
+
 		//state="IDLE";
 		std::cout<<state<<" haveTarget "<<haveTarget;
 		if (state=="IDLE" && haveTarget)
@@ -251,7 +248,7 @@ bool SpecificWorker::odometryAndLocationIssues()
 	}
 
 	int32_t robotId, roomId;
-	
+
 	robotId = worldModel->getIdentifierByType("robot");
 	if (robotId < 0)
 	{
@@ -261,30 +258,30 @@ bool SpecificWorker::odometryAndLocationIssues()
 
 	roomId=7;
 	if (roomId < 0)
-	{			
+	{
 		printf("roomId not found, Waiting for Insert innerModel...\n");
 		return false;
 	}
-	
+
 	try
 	{
 		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(roomId, robotId, "RT");
 		//printf("a %d\n", __LINE__);
-		
+
 		float bStatex =str2float(edge->getAttribute("tx"));
 		float bStatez = str2float(edge->getAttribute("tz"));
 		float bStatealpha = str2float(edge->getAttribute("ry"));
 		//to reduces the publication frequency
 		if (fabs(bStatex - bState.correctedX)>50 or fabs(bStatez - bState.correctedZ)>50 or fabs(bStatealpha - bState.correctedAlpha)>0.2)
-		{			
+		{
 			//Publish update edge
 			printf("\nUpdate odometry...\n");
 			qDebug()<<"bState local :"<<bStatex<<bStatez<<bStatealpha;
 			qDebug()<<"bState corrected"<<bState.correctedX<<bState.correctedZ<<bState.correctedAlpha;
-			
+
 			edge->setAttribute("tx", float2str(bState.correctedX));
 			edge->setAttribute("tz", float2str(bState.correctedZ));
-			edge->setAttribute("ry", float2str(bState.correctedAlpha));		
+			edge->setAttribute("ry", float2str(bState.correctedAlpha));
 			qDebug()<<"TODO: AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy)\n\n";
 			AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy);
 		}
@@ -725,11 +722,11 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	printf("pre <<structuralChange\n");
 	QMutexLocker l(mutex);
 	printf("<<structuralChange\n");
-	
+
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	//if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
 		//roomsPolygons = extractPolygonsFromModel(worldModel);
-	
+
 	agmInner.setWorld(worldModel);
 	innerModel = agmInner.extractInnerModel("room");
 	printf("structuralChange>>\n");
@@ -768,7 +765,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 		params[it->first] = it->second;
 	}
 	printf("----\n");
-	
+
 	try
 	{
 		action = params["action"].value;
@@ -905,7 +902,7 @@ void SpecificWorker::stop()
 // 	const float rz = str2float(robot->getAttribute("tz"));
 // 	const float ralpha = str2float(robot->getAttribute("alpha"));
 // 	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
-// 
+//
 // 	// Avoid repeating the same goal and confuse the navigator
 // 	const float errX = abs(rx-x);
 // 	const float errZ = abs(rz-z);
@@ -915,7 +912,7 @@ void SpecificWorker::stop()
 // 	errAlpha = abs(errAlpha);
 // 	if (errX<20 and errZ<20 and errAlpha<0.1)
 // 		return;
-// 
+//
 // 	bool proceed = true;
 // 	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
 // 	{
@@ -935,7 +932,7 @@ void SpecificWorker::stop()
 // 		proceed = true;
 // 		printf("proceed because it's not planning or executing\n");
 // 	}
-// 
+//
 // 	static bool backp = true;
 // 	if (proceed)
 // 	{
@@ -955,7 +952,7 @@ void SpecificWorker::stop()
 // 		printf("not proceeding %s\n", planningState.state.c_str());
 // 		backp = false;
 // 	}
-// 
+//
 // 	printf("aaAdigejr\n");
 
 
