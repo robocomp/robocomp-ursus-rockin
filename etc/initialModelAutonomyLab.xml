@@ -36,9 +36,9 @@
 		<linkAttribute key="rx" value="0" />
 		<linkAttribute key="ry" value="0" />
 		<linkAttribute key="rz" value="0" />
-		<linkAttribute key="tx" value="3000" />
+		<linkAttribute key="tx" value="3800" />
 		<linkAttribute key="ty" value="0" />
-		<linkAttribute key="tz" value="2800" />
+		<linkAttribute key="tz" value="3200" />
 	</link>
 
 	<symbol id="11" type="object" >
