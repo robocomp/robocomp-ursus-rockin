@@ -185,9 +185,9 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		{
 			try
 			{
-				trajectoryrobot2d_proxy->go(tp);
-				std::cout<<"trajectoryrobot2d_proxy->go( "<<tp.x<<","<<tp.z<<","<<tp.ry<<")\n";
-				haveTarget=true;
+				trajectoryrobot2d_proxy->goReferenced(tp, 175, 250, 100);
+				std::cout << "trajectoryrobot2d_proxy->go(" << tp.x << ", " << tp.z << ", " << tp.ry << ", " << 175 << ", " << 250 << " )\n";
+				haveTarget = true;
 			}
 			catch(const Ice::Exception &ex)
 			{
@@ -198,7 +198,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		string state;
 		try
 		{
-				state= trajectoryrobot2d_proxy->getState().state;
+				state = trajectoryrobot2d_proxy->getState().state;
 		}
 		catch(const Ice::Exception &ex)
 		{

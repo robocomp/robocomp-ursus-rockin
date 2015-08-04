@@ -84,7 +84,7 @@ private:
 	void updateInnerModel();
 
 
-	bool isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node);
+	bool isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t);
 	float distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr symbol);
 	float distanceToPolygon(QVec reference, QVec position, std::string polygon_str);
 

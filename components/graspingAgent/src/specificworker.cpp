@@ -49,9 +49,15 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::compute( )
 {
 // 	printf("compute %d\n\n", __LINE__);
-	// STUFF
 	updateInnerModel();
-// 	printf("compute %d\n\n", __LINE__);
+
+	if (not innerModel->getNode("grabPositionHandR"))
+	{
+		printf("waiting for AGM*\n");
+		return;
+	}
+
+	// 	printf("compute %d\n\n", __LINE__);
 	manageReachedObjects();
 
 // 	printf("compute %d\n\n", __LINE__);
@@ -64,40 +70,34 @@ void SpecificWorker::compute( )
 
 void SpecificWorker::manageReachedObjects()
 {
-	return;
-// 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
-// 	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
-	float THRESHOLD_object = 450;
+	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
+	printf("<<<<<<<<<<<<<<<< REACHED OBJECTS\n");
+	float THRESHOLD_object = 350;
 	float THRESHOLD_table = 800;
 	
 	bool changed = false;
 	mutex->lock();
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	mutex->unlock();
-	
-// 	innerModel->transform("room", "arm_right_1").print("arm_right_1");
 
 	for (AGMModel::iterator symbol_itr=newModel->begin(); symbol_itr!=newModel->end(); symbol_itr++)
 	{
 		AGMModelSymbol::SPtr node = *symbol_itr;
 		if (node->symboltype() == "object")
 		{
+			printf("node: %d\n", node->identifier);
 			// Avoid working with rooms
-			if (isRoom(newModel, node)) continue;
+			if (isObjectType(newModel, node, "room")) continue;
 
 			/// Compute distance and new state
 			float d2n = distanceToNode("arm_right_1", newModel, node);
 			printf("distance: %d(%s)=%f\n", node->identifier, node->symbolType.c_str(), d2n);
 			float THRESHOLD = THRESHOLD_object;
-			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
+			if (isObjectType(newModel, node, "table"))
 			{
-				AGMModelEdge &edge = *edge_itr;
-				if (edge->getLabel() == "table")
-				{
-					THRESHOLD = THRESHOLD_table;
-				}
+				THRESHOLD = THRESHOLD_table;
 			}
-				
+
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
 				AGMModelEdge &edge = *edge_itr;
@@ -122,93 +122,22 @@ void SpecificWorker::manageReachedObjects()
 	if (changed)
 	{
 		printf("PUBLISH!!!!\n");
-		AGMModelPrinter::printWorld(newModel);
-
 		mutex->lock();
 		sendModificationProposal(newModel, worldModel);
 		mutex->unlock();
 	}
 
 
-// 	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
-// 	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
-
-
-/*
-	float alpha;
-	switch (objectId)
-	{
-		case 7:
-			alpha = -3.141592;
-			break;
-		case 9:
-			alpha = 0;
-			break;
-		default:
-			qFatal("ee");
-			break;
-	}
-	// printf("object (%f, %f, %f)\n", x, z, alpha);
-
-	const int32_t robotId = worldModel->getIdentifierByType("robot");
-	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-	const float rx = str2float(robot->getAttribute("tx"));
-	const float rz = str2float(robot->getAttribute("tz"));
-	const float ralpha = str2float(robot->getAttribute("alpha"));
-
-	// Avoid repeating the same goal and confuse the navigator
-	const float errX = abs(rx-x);
-	const float errZ = abs(rz-z);
-	float errAlpha = abs(ralpha-alpha);
-	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
-	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
-	errAlpha = abs(errAlpha);
-
-	printf("%f %f %f\n", rx, rz, ralpha);
-	printf("%f %f %f\n",  x,  z,  alpha);
-	printf("%f %f %f\n", errX, errZ, errAlpha);
-	if (errX<300 and errZ<300 and errAlpha<0.4)
-	{
-		AGMModel::SPtr newModel(new AGMModel(worldModel));
-		std::map<std::string, AGMModelSymbol::SPtr> symbols;
-		try
-		{
-			symbols = newModel->getSymbolsMap(params, "object", "status");
-		}
-		catch(...)
-		{
-			printf("graspingAgent: Couldn't retrieve action's parameters\n");
-			return;
-		}
-
-		if (newModel->renameEdge(symbols["object"], symbols["status"], "noReach", "reach"))
-		{
-			try
-			{
-				sendModificationProposal(newModel, worldModel);
-				printf("sent reach\n");
-			}
-			catch(const Ice::Exception& ex)
-			{
-				printf("graspingAgent: Couldn't publish new model\n");
-				cout << "Exception: " << ex << endl;
-				return ;
-			}
-		}
-		else
-		{
-			printf("already reaching??\n");
-		}
-	}
-*/
+	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
+	printf(">>>>>>>>>>>>>>>> REACHED OBJECTS\n");
 }
 
-bool SpecificWorker::isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node)
+bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t)
 {
 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model); edge_itr++)
 	{
 		AGMModelEdge edge = *edge_itr;
-		if (edge->getLabel() == "room")
+		if (edge->getLabel() == t)
 		{
 			return true;
 		}
@@ -220,29 +149,24 @@ bool SpecificWorker::isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 
 float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 {
-	printf("distance node %d\n", node->identifier);
-	bool isPolygon = false;
-	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
-	{
-		if ((*edge_itr)->getLabel() == "table") isPolygon = true;
-	}
+	// check if it's a polygon
+// 	bool isPolygon = false;
+// 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
+// 	{
+// 		if ((*edge_itr)->getLabel() == "table")
+// 			isPolygon = true;
+// 	}
 
-	printf("isPolygon: %d\n", isPolygon);
-
-	const float x = str2float(node->getAttribute("tx"));
-	const float y = str2float(node->getAttribute("ty"));
-	const float z = str2float(node->getAttribute("tz"));
-
-	if (isPolygon)
-	{
-		const std::string polygon = node->getAttribute("polygon");
-		const QVec head_in_floor = innerModel->transform("room", reference_name.c_str());
-		return distanceToPolygon(head_in_floor, QVec::vec3(x, y, z), polygon);
-	}
-	else
-	{
-		return innerModel->transform(QString::fromStdString(reference_name), QVec::vec3(x,y,z), "room").norm2();
-	}
+// 	if (isPolygon)
+// 	{
+// 		const std::string polygon = node->getAttribute("polygon");
+// 		const QVec head_in_floor = innerModel->transform("room", reference_name.c_str());
+// 		return distanceToPolygon(head_in_floor, QVec::vec3(x, y, z), polygon);
+// 	}
+// 	else
+// 	{
+		return innerModel->transformS(reference_name, node->getAttribute("imName")).norm2();
+// 	}
 }
 
 float SpecificWorker::distanceToPolygon(QVec reference, QVec position, std::string polygon_str)
@@ -253,7 +177,7 @@ float SpecificWorker::distanceToPolygon(QVec reference, QVec position, std::stri
 // 	printf("p %s\n", polygon_str.c_str());
 	std::vector<std::string> strs;
 	boost::split(strs, polygon_str, boost::is_any_of(";"));
-// 	printf("æ %f  %f\n", position(0);
+// 	printf("d %f  %f\n", position(0);
 	for (auto coords : strs)
 	{
 // 		printf("pp %s\n", coords.c_str());
@@ -800,28 +724,28 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	}
 	if (objectId > 0)
 	{
-		// In the meantime we just move the head downwards:
-		inversekinematics_proxy->setJoint("head_pitch_joint", 0.8, 0.5);
-		inversekinematics_proxy->setJoint("head_yaw_joint",   0.0, 0.5);
-// 		try
-// 		{
-// 			mutex->lock();
-// 			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-// 			mutex->unlock();
-// 			QVec pose = getObjectsLocation(goalObject);
-// 			const float x = pose.x();
+		try
+		{
+			mutex->lock();
+			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+			mutex->unlock();
+			QVec pose = innerModel->transformS("robot", goalObject->getAttribute("imName"));
+			const float x = pose.x();
 // 			const float y = pose.y();
-// 			const float z = pose.z();
-// 			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
-// 		}
-// 		catch (...)
-// 		{
-// 			printf("%s %d\n", __FILE__, __LINE__);
-// 		}
+			const float z = pose.z();
+			// In the meantime we just move the head downwards:
+			inversekinematics_proxy->setJoint("head_pitch_joint", 0.9, 0.5);
+			inversekinematics_proxy->setJoint("head_yaw_joint",   atan2(x, z), 0.5);
+// // // // // // // // 			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+		}
+		catch (...)
+		{
+			printf("%s %d\n", __FILE__, __LINE__);
+		}
 	}
 	else
 	{
-		printf ("don't have the object to reach in my model %d\n", objectId);
+		printf("don't have the object to reach in my model %d\n", objectId);
 	}
 
 	printf("--------------------\n");
