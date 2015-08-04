@@ -29,7 +29,6 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-
 	active = false;
 
 	worldModel = AGMModel::SPtr(new AGMModel());
@@ -37,8 +36,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	innerModel = new InnerModel();
 
 // 	inversekinematics_proxy->goHome("RIGHTARM");
-// 	setRightArmUp_Reflex();
-
+	setRightArmUp_Reflex();
 }
 
 /**
@@ -775,17 +773,16 @@ void SpecificWorker::sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetOb
 
 void SpecificWorker::action_SetObjectReach(bool first)
 {
-	
 	printf("void SpecificWorker::action_SetObjectReach()\n");
 
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
-	if (backAction != "setobjectreach" or innerModel->transform("room", "grabPositionHandR")(1)<1000)
+	if (backAction != "setobjectreach" or innerModel->transform("room", "grabPositionHandR")(1)<1500)
 	{
-			backAction = action;
-			printf("first time, set arm for manipulation\n");
-			setRightArmUp_Reflex();
+		backAction = action;
+		printf("first time, set arm for manipulation\n");
+		setRightArmUp_Reflex();
 	}
 
 
@@ -803,21 +800,24 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	}
 	if (objectId > 0)
 	{
-		try
-		{
-			mutex->lock();
-			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-			mutex->unlock();
-			QVec pose = getObjectsLocation(goalObject);
-			const float x = pose.x();
-			const float y = pose.y();
-			const float z = pose.z();
-			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
-		}
-		catch (...)
-		{
-			printf("%s %d\n", __FILE__, __LINE__);
-		}
+		// In the meantime we just move the head downwards:
+		inversekinematics_proxy->setJoint("head_pitch_joint", 0.8, 0.5);
+		inversekinematics_proxy->setJoint("head_yaw_joint",   0.0, 0.5);
+// 		try
+// 		{
+// 			mutex->lock();
+// 			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
+// 			mutex->unlock();
+// 			QVec pose = getObjectsLocation(goalObject);
+// 			const float x = pose.x();
+// 			const float y = pose.y();
+// 			const float z = pose.z();
+// 			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+// 		}
+// 		catch (...)
+// 		{
+// 			printf("%s %d\n", __FILE__, __LINE__);
+// 		}
 	}
 	else
 	{
@@ -913,25 +913,14 @@ void SpecificWorker::updateInnerModel()
 
 void SpecificWorker::setRightArmUp_Reflex()
 {
-	inversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
-	inversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
-	inversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
-	inversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
-	inversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
-	inversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder1", -3, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder2", -0.2, 0.3);
+	inversekinematics_proxy->setJoint("rightShoulder3", 0.5, 0.3);
+	inversekinematics_proxy->setJoint("rightElbow", 0.1, 0.5);
+	inversekinematics_proxy->setJoint("rightForeArm", 0.1, 0.3);
+	inversekinematics_proxy->setJoint("rightWrist1", 0.0, 0.3);
 	inversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
 }
 
-
-void SpecificWorker::setRightArm_GRASP_0_Reflex()
-{
-	inversekinematics_proxy->setJoint("rightShoulder1", -1.6, 0.3);
-	inversekinematics_proxy->setJoint("rightShoulder2", -0.6, 0.3);
-	inversekinematics_proxy->setJoint("rightShoulder3", 0.25, 0.3);
-	inversekinematics_proxy->setJoint("rightElbow", 1.9, 0.5);
-	inversekinematics_proxy->setJoint("rightForeArm", 0.39, 0.3);
-	inversekinematics_proxy->setJoint("rightWrist1", 0.4, 0.3);
-	inversekinematics_proxy->setJoint("rightWrist2", 0.0, 0.3);
-}
 
 

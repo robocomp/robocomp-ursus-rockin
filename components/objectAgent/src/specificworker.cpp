@@ -39,10 +39,6 @@ SpecificWorker::~SpecificWorker()
 
 }
 
-//transform world->rgbd(6)
-///[ 0.000000 1340.000000 19.999367 0.000000 0.000000 0.000000 ]
-//innerModel de fichero transform world->rgbd(6)
-//[ 0.000000 1340.000000 19.999992 0.000000 0.000000 0.000000
 
 void SpecificWorker::compute( )
 {
@@ -63,26 +59,6 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-// 	try
-// 	{
-// 		RoboCompCommonBehavior::Parameter par = params.at("ObjectAgent.InnerModel") ;
-// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-// 			innerModel = new InnerModel(par.value);
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-// 		}
-// 		else
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-// 			qFatal("Exiting now.");
-// 		}
-// 	}
-// 	catch(std::exception e)
-// 	{
-// 		qFatal("Error reading config params");
-// 	}
-
 	timer.start(Period);
 	return true;
 }
@@ -169,6 +145,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
+
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	mutex->lock();

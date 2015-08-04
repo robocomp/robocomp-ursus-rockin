@@ -222,17 +222,17 @@ cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/agmInnerA
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling object agent"
+	echo "error compiling agminner agent"
 	exit
 fi
 
-# hriAgent
-echo "make hri agent"
-cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/hriAgent/
+# human
+echo "make human agent"
+cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/humanAgent/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling object agent"
+	echo "error compiling human agent"
 	exit
 fi
 

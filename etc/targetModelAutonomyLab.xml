@@ -1,0 +1,11 @@
+<AGMModel>
+	<symbol id="11" type="object" />
+	<symbol id="12" type="objectSt" />
+	<link  src="11"  dst="12"     label="hasStatus" />
+	<link  src="11"  dst="12"     label="mug" />
+	<link  src="11"  dst="12"     label="classified" />
+	<link  src="11"  dst="12"     label="reach" />
+	<link  src="11"  dst="12"     label="reachable" />
+	<link  src="11"  dst="12"     label="notSee" />
+	<link  src="11"  dst="12"     label="position" />
+</AGMModel>

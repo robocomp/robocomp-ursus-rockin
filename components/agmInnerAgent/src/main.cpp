@@ -85,7 +85,6 @@
 #include <AGMExecutive.h>
 #include <AGMCommonBehavior.h>
 #include <AGMWorldModel.h>
-#include <InnerModelManager.h>
 
 
 // User includes here
@@ -98,7 +97,6 @@ using namespace RoboCompAGMAgent;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMWorldModel;
-using namespace RoboCompInnerModelManager;
 
 
 
@@ -115,14 +113,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void agmInnerComp::initialize()
+void ::agmInnerComp::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int agmInnerComp::run(int argc, char* argv[])
+int ::agmInnerComp::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -132,27 +130,9 @@ int agmInnerComp::run(int argc, char* argv[])
 	int status=EXIT_SUCCESS;
 
 	AGMAgentTopicPrx agmagenttopic_proxy;
-	InnerModelManagerPrx innermodelmanager_proxy;
 
 	string proxy, tmp;
 	initialize();
-
-
-	try
-	{
-		if (not GenericMonitor::configGetString(communicator(), prefix, "InnerModelManagerProxy", proxy, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy InnerModelManagerProxy\n";
-		}
-		innermodelmanager_proxy = InnerModelManagerPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("InnerModelManagerProxy initialized Ok!");
-	mprx["InnerModelManagerProxy"] = (::IceProxy::Ice::Object*)(&innermodelmanager_proxy);//Remote server proxy creation example
 
 IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
@@ -218,7 +198,7 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 
 
 		// Server adapter creation and publication
-		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveTopicTopic", tmp, ""))
+		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveTopicTopic.Endpoints", tmp, ""))
 		{
 			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveTopicProxy";
 		}
@@ -308,7 +288,7 @@ int main(int argc, char* argv[])
 			printf("Configuration prefix: <%s>\n", prefix.toStdString().c_str());
 		}
 	}
-	agmInnerComp app(prefix);
+	::agmInnerComp app(prefix);
 
 	return app.main(argc, argv, configFile.c_str());
 }

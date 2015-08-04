@@ -27,14 +27,14 @@
 #include <ui_mainUI.h>
 
 #include <CommonBehavior.h>
-#include <AGMWorldModel.h>
 #include <AGMAgent.h>
-#include <InnerModelManager.h>
-#include <AGMExecutive.h>
 #include <Planning.h>
+#include <AGMExecutive.h>
 #include <AGMCommonBehavior.h>
+#include <AGMWorldModel.h>
 
 #include <agm.h>
+#include <agmInner/agmInner.h>
 
 
 #define CHECK_PERIOD 5000
@@ -44,12 +44,11 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
 using namespace std;
 
-using namespace RoboCompAGMWorldModel;
 using namespace RoboCompAGMAgent;
-using namespace RoboCompInnerModelManager;
-using namespace RoboCompAGMExecutive;
 using namespace RoboCompPlanning;
+using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompAGMWorldModel;
 
 
 struct BehaviorParameters 
@@ -83,7 +82,6 @@ public:
 	
 
 	AGMAgentTopicPrx agmagenttopic_proxy;
-	InnerModelManagerPrx innermodelmanager_proxy;
 
 	virtual bool reloadConfigAgent() = 0;
 	virtual bool activateAgent(const ParameterMap &prs) = 0;
@@ -105,6 +103,7 @@ protected:
 	AGMModel::SPtr worldModel;
 	BehaviorParameters p;
 	ParameterMap params;
+	AgmInner agmInner;
 	int iter;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	RoboCompPlanning::Action createAction(std::string s);
