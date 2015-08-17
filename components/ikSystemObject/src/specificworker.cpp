@@ -84,6 +84,38 @@ void SpecificWorker::compute()
 }
 
 
+
+State methodXXX( const State &state)
+{
+ static bool firstTime = true;
+
+ // Do here whatever is needed the firstTime
+ // typically, call VIK to start moving a robot part
+ if(firstTime)
+ {
+ // bik_proxy->setTarget();
+ firstTime = false;
+ return state;
+ }
+ // Do here whatever is needed to check the end of the task 
+ else
+ {
+ // state = bin_proxy->getState();
+ // if(state == FIN)
+ // {
+ firstTime = true;
+ // return newState
+ // }
+ else
+ return state;
+ }
+}
+
+
+
+
+
+
 bool SpecificWorker::reloadConfigAgent()
 {
 	return true;
