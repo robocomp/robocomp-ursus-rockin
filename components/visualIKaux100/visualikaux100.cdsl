@@ -1,0 +1,14 @@
+import "/robocomp/interfaces/IDSLs/InverseKinematics.idsl";
+import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
+
+Component visualikaux100
+{
+	Communications
+	{
+		requires InverseKinematics;
+		subscribesTo AprilTags;
+	};
+	language Cpp;
+	gui Qt(QWidget);
+};
+
