@@ -93,7 +93,7 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
 	
 	for (auto tag : tags)
 	{
-		if (tag.id == 11)
+		if (tag.id == 31)
 		{
 			QMutexLocker ml(mutex);
 			QVec newTag = QVec::vec3(tag.tx, tag.ty, tag.tz);
