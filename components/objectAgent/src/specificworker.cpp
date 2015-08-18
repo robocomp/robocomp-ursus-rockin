@@ -39,10 +39,6 @@ SpecificWorker::~SpecificWorker()
 
 }
 
-//transform world->rgbd(6)
-///[ 0.000000 1340.000000 19.999367 0.000000 0.000000 0.000000 ]
-//innerModel de fichero transform world->rgbd(6)
-//[ 0.000000 1340.000000 19.999992 0.000000 0.000000 0.000000
 
 void SpecificWorker::compute( )
 {
@@ -63,26 +59,6 @@ void SpecificWorker::compute( )
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-// 	try
-// 	{
-// 		RoboCompCommonBehavior::Parameter par = params.at("ObjectAgent.InnerModel") ;
-// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-// 			innerModel = new InnerModel(par.value);
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-// 		}
-// 		else
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-// 			qFatal("Exiting now.");
-// 		}
-// 	}
-// 	catch(std::exception e)
-// 	{
-// 		qFatal("Error reading config params");
-// 	}
-
 	timer.start(Period);
 	return true;
 }
@@ -156,7 +132,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room");
 	innerModel->treePrint();
 	mutex->unlock();
 }
@@ -169,6 +145,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
+
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	mutex->lock();
@@ -320,29 +297,58 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
 		symbol = *symbol_it;
-		if (symbol->symbolType == "object")
+		if (symbol->symbolType == "object" and symbol->attributes.find("tag") != symbol->attributes.end())
 		{
 			try
 			{
 				const int32_t tag = str2int(symbol->getAttribute("tag"));
 				if (t.id == tag)
 				{
+					// Si el identificador del nodo coincide con el del tag entonces el simbolo existe.
+					// Salimos del bucle porque ya lo hemos encontrado.
 					existing = true;
+					break;
 				}
 			}
-			catch (...) { }
+			catch (...)
+			{
+				printf("NI puta idea de por que leches falla \n");
+			}
 		}
 	}
 
+	printf("%s: %d\n", __FILE__, __LINE__);
 	
 	if (existing)
 	{
+		printf("Exists\n");
 		QVec pose = QVec::vec6(t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
+		pose.print("pose inicial");
 		QString mugIMName    = QString::fromStdString(symbol->getAttribute("imName"));
-		QString parentIMName = innerModel->getNode(mugIMName)->parent->id;
-		QVec poseFromParent = innerModel->transform6D(parentIMName, pose, "rgbd");
-		poseFromParent.print("poseFromParent");
-		innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
+		qDebug() << "MUG??: "<<mugIMName;
+		InnerModelNode *node = innerModel->getNode(mugIMName);
+		if (node)
+		{
+			printf("%s: %d\n", __FILE__, __LINE__);
+			InnerModelNode *parentNode = node->parent;
+			if (parentNode)
+			{
+				printf("%s: %d\n", __FILE__, __LINE__);
+				QString parentIMName = parentNode->id;
+				qDebug() << parentIMName;
+				QVec poseFromParent = innerModel->transform6D(parentIMName, pose, "rgbd");
+				poseFromParent.print("poseFromParent");
+				innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
+			}
+			else
+			{
+				qDebug() << "no hay nodo padre"; 
+			}
+		}
+		else
+		{
+			qDebug() << "no hay nodo en innemodel"; 
+		}
 	}
 	else
 	{

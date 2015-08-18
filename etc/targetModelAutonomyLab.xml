@@ -1,0 +1,11 @@
+<AGMModel>
+	<symbol id="1" type="robot" />
+	<symbol id="11" type="object" />
+	<symbol id="12" type="objectSt" />
+
+	<link  src="1"  dst="11"      label="know" />
+	<link  src="11"  dst="12"     label="mug" />
+	<link  src="11"  dst="1"     label="in" />
+
+
+</AGMModel>

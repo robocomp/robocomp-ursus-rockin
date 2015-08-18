@@ -184,7 +184,7 @@ class SpecificWorker(GenericWorker):
 					SEND = True
 					laserData = self.laser_proxy.getLaserData()
 					for l in laserData:
-						if l.dist<400:
+						if l.dist<200:
 							self.collisions += 1
 							self.currentVel = [0.7*x for x in self.currentVel]
 							if SEND: self.omnirobot_proxy.setSpeedBase(self.currentVel[0], self.currentVel[1], self.currentVel[2])
