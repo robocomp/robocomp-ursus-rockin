@@ -1,9 +1,7 @@
-CommonBehavior.Endpoints=tcp -p 10243
-
+CommonBehavior.Endpoints=tcp -p 14547
 
 # Endpoints for subscriptions
-AprilTagsTopic.Endpoints=tcp -p 12938
-
+AprilTagsTopic.Endpoints=tcp -p 12438
 
 # Proxies for required interfaces
 InverseKinematicsProxy =inversekinematics:tcp -h localhost -p 10242
@@ -12,7 +10,7 @@ InnerModel=/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml
 
 
 This property is used by the clients to connect to IceStorm.
-TopicManager.Proxy=IceStorm/TopicManager:default -p 9999
+TopicManager.Proxy=IceStorm/TopicManager:default -p 9999 -h robonuc1.local
 
 Ice.Warn.Connections=0
 Ice.Trace.Network=0
