@@ -41,7 +41,7 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx);	
+	SpecificWorker(MapPrx& mprx);
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	bool activateAgent(const ParameterMap& prs);
@@ -58,16 +58,16 @@ public:
 
 
 public slots:
-	void compute(); 	
+	void compute();
 
 private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
 
 
-	QVec getObjectsLocation(AGMModelSymbol::SPtr &object);
-	void sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
-	void sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
+	QVec getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object);
+	QVec fromRobotToRoom(std::map<std::string, AGMModelSymbol::SPtr> &symbols, const QVec vector);
+	int sendRightArmToPose(QVec p);
 
 	void manageReachedObjects();
 
@@ -86,7 +86,7 @@ private:
 
 	bool isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t);
 	float distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr symbol);
-	float distanceToPolygon(QVec reference, QVec position, std::string polygon_str);
+// 	float distanceToPolygon(QVec reference, QVec position, std::string polygon_str);
 
 	void setRightArmUp_Reflex();
 
