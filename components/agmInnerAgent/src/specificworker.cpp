@@ -36,11 +36,12 @@ void SpecificWorker::compute()
 		
 		///FIRST INNERMODEL
 		QHash<QString, int32_t>  match;
-// 		match.insert("room",7);
+		/// ADDED to insert room from autonomyLabModel.xml
+		match.insert("room",7);
 		match.insert("robot",1);				
 		agmInner.include_im(match,innerModel);
-		agmInner.setWorld(worldModel);	
-		worldModel->save("agmInnerFirst.xml");
+		
+		worldModel->save("agmInnerAutonomyLabModel.xml");
 		qDebug()<<"\n\n*********** FIRST INNERMODEL included ************* \n\n";
 
 		qDebug()<<"\n\n******* Extract innerModel *****************";		
