@@ -29,6 +29,7 @@ QObject()
 
 {
 	inversekinematics_proxy = (*(InverseKinematicsPrx*)mprx["InverseKinematicsProxy"]);
+	jointmotor_proxy = (*(JointMotorPrx*)mprx["JointMotorProxy"]);
 
 
 	mutex = new QMutex(QMutex::Recursive);

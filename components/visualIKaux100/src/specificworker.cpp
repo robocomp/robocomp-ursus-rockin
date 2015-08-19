@@ -64,6 +64,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
+	updateInnerModel();
 	//TODO HACER MAQUINA DE ESTADO QUE BUSQUE TAZA Y LA COJA
 	QMutexLocker ml(mutex);
 	if(sendPoseFlag == true)
@@ -71,6 +72,7 @@ void SpecificWorker::compute()
 		//PREPARAMOS EL TARGET Y LO ENVIAMOS AL VISUALIK
 		//1) PASAMOS EL TAG AL SISTEMA DE REFERENCIA DEL MUNDO
 		QVec tagPose = QVec::vec3(currentTag.tx, currentTag.ty, currentTag.tz);
+		tagPose.print("dddddddd");
 		QVec tagInRoot = innerModel->transform("root", tagPose, "rgbd");
 		//2) ENVIAMOS EL TARGET AL VIK
 		Pose6D target;
@@ -86,40 +88,58 @@ void SpecificWorker::compute()
 		weights.x = 1; weights.y = 1; weights.z = 1;
 		weights.rx = 0.1; weights.ry = 0.1; weights.rz = 0.1;
 		
+		qDebug()<<"----->"<< target.x <<" "<< target.y <<" "<<target.z;
+		//qFatal("FIN");
 		inversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights);
+		sendPoseFlag = false;
 	}
 }
 
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {
 	static bool first = true;
-	qDebug()<<"111";
-
-	int umbral = 10;
+	int umbral = 50;
 	
 	for (auto tag : tags)
 	{
-		qDebug()<<tags.size() << tag.id;
 		if (tag.id == 31)
 		{
-			qDebug()<<"222";
 			QMutexLocker ml(mutex);
 			QVec newTag = QVec::vec3(tag.tx, tag.ty, tag.tz);
 			QVec oldTag = QVec::vec3(currentTag.tx, currentTag.ty, currentTag.tz);
-			
+			newTag.print("nos llega esto");
 			const float dist = (newTag-oldTag).norm2();
-			printf("d: %f\n", dist);
 			if (dist > umbral or first)
 			{
 				if (first) first = false;
-				qDebug()<<"333";
 				currentTag = tag;
 				sendPoseFlag = true;
+				inversekinematics_proxy->stop("RIGHTARM");
 			}
 		}	
 	}
 }
 
+
+void SpecificWorker::updateInnerModel()
+{
+	qDebug() << "-------- update";
+	try
+	{
+		RoboCompJointMotor::MotorStateMap mMap;
+		jointmotor_proxy->getAllMotorState(mMap);
+
+		for (auto j : mMap)
+		{
+			innerModel->updateJointValue(QString::fromStdString(j.first), j.second.pos);
+		//	qDebug() << QString::fromStdString(j.first) << j.second.pos;
+		}
+	}
+	catch (const Ice::Exception &ex)
+	{
+		std::cout<<"--> Excepción en actualizar InnerModel"<<std::endl;
+	}
+}
 
 
 

@@ -4,7 +4,8 @@ CommonBehavior.Endpoints=tcp -p 14547
 AprilTagsTopic.Endpoints=tcp -p 12438
 
 # Proxies for required interfaces
-InverseKinematicsProxy =inversekinematics:tcp -h localhost -p 10242
+InverseKinematicsProxy =inversekinematics:tcp -h robonuc1.local -p 10242
+JointMotorProxy = jointmotor:tcp -h robonuc1.local -p 20000
 
 InnerModel=/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml
 

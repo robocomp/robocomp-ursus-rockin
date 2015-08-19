@@ -54,6 +54,8 @@ private:
 	RoboCompAprilTags::tag currentTag;
 	
 	//Pose6D                 currentPose;
+	
+	void  updateInnerModel();
 };
 
 #endif
