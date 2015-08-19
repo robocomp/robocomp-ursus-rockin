@@ -103,6 +103,49 @@ void SpecificWorker::compute()
 //		bool loop=false;
 // 		agmInner.checkLoop(symbolID,visited,"RT",loop);
 		//qDebug()<<"CheckLoop from"<<symbolID<<"linkType"<<QString::fromStdString(linkType)<<"There is loop ?"<<loop<<visited;
+		
+		
+		///para comprobar la funcion del edge en el mision
+// 		sleep(1);
+// 		float cX,cY,cRY;
+// 		for (int j=0; j<100;j++)
+// 		{
+// 			cX=cY=50;
+// 			cRY=0.01;
+// 			if (j%2==1)
+// 			{
+// 				cX=-cX;cY=-cY;cRY=-cRY;
+// 			}
+// 			for (int i=0; i<60;i++)
+// 			{
+// 				try
+// 				{
+// 					AGMModelEdge edge = worldModel->getEdgeByIdentifiers(7,1,"RT");
+// 					float tx,tz,ry;
+// 					tx=str2float( edge->getAttribute("tx") );
+// 					tz=str2float( edge->getAttribute("tz") );
+// 					ry=str2float( edge->getAttribute("ry") );
+// 					
+// 					tx=tx+cX;
+// 					tz=tz+cY;
+// 					ry=ry+cRY;
+// 					
+// 					edge->setAttribute("tx",float2str(tx));
+// 					edge->setAttribute("tz",float2str(tz));
+// 					edge->setAttribute("ry",float2str(ry));
+// 					
+// 					qDebug()<<"move"<<tx<<tz<<ry;
+// 					
+// 					AGMMisc::publishEdgeUpdate(edge,agmagenttopic_proxy);			
+// 					usleep(10000);
+// 				}
+// 				catch (...)
+// 				{
+// 					qDebug()<<"edge EXCEPTION couldn't find attribute";
+// 				}
+// 			}
+// 		}
+		
 		qFatal("fary");
 	}
 	
