@@ -8,13 +8,15 @@
 	</transform>
 
 	<transform id="pared0" tx="1075.0" tz="0.0" ty="1500" >
-		<plane id="muro0" nx="-0.0" nz="2150.0" size="2150.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
+		<plane id="muro0" nx="-0.0" nz="2150.0" size="2150.0,3000" texture="#ff8030" />
+<!-- 		<plane id="muro0" nx="-0.0" nz="2150.0" size="2150.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" /> -->
 	</transform>
 	<transform id="pared1" tx="3380.0" tz="0.0" ty="250" >
 		<plane id="muro1" nx="-0.0" nz="2460.0" size="2460.0,500"  texture="#aa6040" />
 	</transform>
 	<transform id="pared2" tx="5410.0" tz="0.0" ty="1500" >
-		<plane id="muro2" nx="-0.0" nz="1600.0" size="1600.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
+		<plane id="muro2" nx="-0.0" nz="1600.0" size="1600.0,3000" texture="#ff8030" />
+<!--<plane id="muro2" nx="-0.0" nz="1600.0" size="1600.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />-->
 	</transform>
 	<transform id="pared3" tx="6210.0" tz="495.0" ty="1500" >
 		<plane id="muro3" nx="-990.0" nz="0.0" size="990.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
