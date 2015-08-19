@@ -8,40 +8,48 @@
 	</transform>
 
 	<transform id="pared0" tx="1075.0" tz="0.0" ty="1500" >
+<<<<<<< HEAD
 		<plane id="muro0" nx="-0.0" nz="2150.0" size="2150.0,3000" texture="#ff8030" />
+=======
+		<plane id="muro0" nx="-0.0" nz="2150.0" size="2150.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
+>>>>>>> ce708c06ef7e2a82593a99382e8b1f612666cdef
 	</transform>
 	<transform id="pared1" tx="3380.0" tz="0.0" ty="250" >
 		<plane id="muro1" nx="-0.0" nz="2460.0" size="2460.0,500"  texture="#aa6040" />
 	</transform>
 	<transform id="pared2" tx="5410.0" tz="0.0" ty="1500" >
+<<<<<<< HEAD
 		<plane id="muro2" nx="-0.0" nz="1600.0" size="1600.0,3000" texture="#ff8030" />
+=======
+		<plane id="muro2" nx="-0.0" nz="1600.0" size="1600.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
+>>>>>>> ce708c06ef7e2a82593a99382e8b1f612666cdef
 	</transform>
 	<transform id="pared3" tx="6210.0" tz="495.0" ty="1500" >
-		<plane id="muro3" nx="-990.0" nz="0.0" size="990.0,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro3" nx="-990.0" nz="0.0" size="990.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 	<transform id="pared4" tx="6605.0" tz="990.0" ty="1500" >
-		<plane id="muro4" nx="-0.0" nz="790.0" size="790.0,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro4" nx="-0.0" nz="790.0" size="790.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 	<transform id="pared5" tx="7000.0" tz="2465.0" ty="1500" >
-		<plane id="muro5" nx="-2950.0" nz="0.0" size="2950.0,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro5" nx="-2950.0" nz="0.0" size="2950.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 	<transform id="pared6" tx="6600.0" tz="3940.0" ty="1500" >
-		<plane id="muro6" nx="-0.0" nz="-800.0" size="800.0,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro6" nx="-0.0" nz="-800.0" size="800.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 	<transform id="pared7" tx="6200.0" tz="3865.0" ty="1500" >
-		<plane id="muro7" nx="150.0" nz="0.0" size="150.0,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro7" nx="150.0" nz="0.0" size="150.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 	<transform id="pared8" tx="5935.0" tz="3790.0" ty="1500" >
-		<plane id="muro8" nx="-0.0" nz="-530.0" size="530.0,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro8" nx="-0.0" nz="-530.0" size="530.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 	<transform id="pared9" tx="5670.0" tz="3910.0" ty="1500" >
-		<plane id="muro9" nx="-240.0" nz="0.0" size="240.0,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro9" nx="-240.0" nz="0.0" size="240.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 	<transform id="pared10" tx="2835.0" tz="4055.0" ty="1500" >
-		<plane id="muro10" nx="-50.0" nz="-5670.0" size="5670.22045427,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro10" nx="-50.0" nz="-5670.0" size="5670.22045427,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 	<transform id="pared11" tx="0.0" tz="2040.0" ty="1500" >
-		<plane id="muro11" nx="4080.0" nz="0.0" size="4080.0,3000"  texture="wall-texture-white.jpg" />
+		<plane id="muro11" nx="4080.0" nz="0.0" size="4080.0,3000"  texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/wall-texture-white.jpg" />
 	</transform>
 
 	

@@ -79,8 +79,8 @@ void SpecificWorker::compute()
 		target.z = tagInRoot.z()-150;
 		// fijamos las rotaciones:
 		target.rx = 0;
-		target.ry = -1.56;
-		target.rz = -3.1416;
+		target.ry = -1.5707963267948966;
+		target.rz = 0;
 		
 		WeightVector weights;
 		weights.x = 1; weights.y = 1; weights.z = 1;
