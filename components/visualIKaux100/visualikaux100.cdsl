@@ -1,11 +1,13 @@
 import "/robocomp/interfaces/IDSLs/InverseKinematics.idsl";
 import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
+import "/robocomp/interfaces/IDSLs/JointMotor.idsl";
+
 
 Component visualikaux100
 {
 	Communications
 	{
-		requires InverseKinematics;
+		requires InverseKinematics, JointMotor;
 		subscribesTo AprilTags;
 	};
 	language Cpp;

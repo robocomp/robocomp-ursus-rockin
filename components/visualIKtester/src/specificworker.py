@@ -119,6 +119,8 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sendPose6D(self):
 		print "SEND POSE 6D"
+		self.inversekinematics_proxy.stop("RIGHTARM");
+		
 		import RoboCompInverseKinematics
 		pose6D = RoboCompInverseKinematics.Pose6D() #target al que se movera
 		pose6D.x  = float(self.ui.txbox.value())
@@ -150,12 +152,12 @@ class SpecificWorker(GenericWorker):
 			
 			part = "RIGHTARM"
 			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
-			print 'Mirando estado'
-			state = RoboCompInverseKinematics.TargetState()
-			state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-			while state.finish!=True:
-				state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-			print 'Moviemdo motores!!'
+			#print 'Mirando estado'
+			#state = RoboCompInverseKinematics.TargetState()
+			#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+			#while state.finish!=True:
+				#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
+			#print 'Moviemdo motores!!'
 #			for motor in state.motors:
 #				print motor
 #				goal = MotorGoalPosition()

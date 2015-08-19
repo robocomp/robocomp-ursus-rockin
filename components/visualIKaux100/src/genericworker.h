@@ -28,6 +28,7 @@
 
 #include <CommonBehavior.h>
 #include <InverseKinematics.h>
+#include <JointMotor.h>
 #include <AprilTags.h>
 
 
@@ -40,6 +41,7 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 using namespace std;
 
 using namespace RoboCompInverseKinematics;
+using namespace RoboCompJointMotor;
 using namespace RoboCompAprilTags;
 
 
@@ -64,6 +66,7 @@ public:
 	
 
 	InverseKinematicsPrx inversekinematics_proxy;
+	JointMotorPrx jointmotor_proxy;
 
 	virtual void newAprilTag(const tagsList &tags) = 0;
 
