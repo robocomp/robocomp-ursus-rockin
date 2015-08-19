@@ -26,6 +26,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	QMutexLocker ml(mutex);
 	sendPoseFlag = false;
 	INITIALIZED  = false;
+	currentTag.tx = 0;
+	currentTag.ty = 0;
+	currentTag.tz = 0;
 }
 
 /**
@@ -72,12 +75,12 @@ void SpecificWorker::compute()
 		//2) ENVIAMOS EL TARGET AL VIK
 		Pose6D target;
 		target.x = tagInRoot.x();
-		target.y = tagInRoot.y()+100;
-		target.z = tagInRoot.z();
+		target.y = tagInRoot.y();
+		target.z = tagInRoot.z()-150;
 		// fijamos las rotaciones:
 		target.rx = 0;
-		target.ry = -1.56;
-		target.rz = -3.1416;
+		target.ry = -1.5707963267948966;
+		target.rz = 0;
 		
 		WeightVector weights;
 		weights.x = 1; weights.y = 1; weights.z = 1;
@@ -89,17 +92,30 @@ void SpecificWorker::compute()
 
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {
+	static bool first = true;
+	qDebug()<<"111";
+
 	int umbral = 10;
 	
 	for (auto tag : tags)
 	{
-		if (tag.id == 11)
+		qDebug()<<tags.size() << tag.id;
+		if (tag.id == 31)
 		{
+			qDebug()<<"222";
 			QMutexLocker ml(mutex);
 			QVec newTag = QVec::vec3(tag.tx, tag.ty, tag.tz);
 			QVec oldTag = QVec::vec3(currentTag.tx, currentTag.ty, currentTag.tz);
-			if((newTag-oldTag).norm2() > umbral)
+			
+			const float dist = (newTag-oldTag).norm2();
+			printf("d: %f\n", dist);
+			if (dist > umbral or first)
+			{
+				if (first) first = false;
+				qDebug()<<"333";
 				currentTag = tag;
+				sendPoseFlag = true;
+			}
 		}	
 	}
 }

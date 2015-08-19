@@ -46,7 +46,7 @@ void SpecificWorker::compute( )
 {
 	printf("compute 1..\n");
 	// ODOMETRY AND LOCATION-RELATED ISSUES
-	if (odometryAndLocationIssues()==false)
+	if (odometryAndLocationIssues() == false)
 		return;
 	printf("compute 2..\n");
 // 	innerModel->treePrint();
@@ -65,8 +65,10 @@ void SpecificWorker::actionExecution()
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
 
-// 	if (newAction)
+	if (newAction)
+	{
 		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
+	}
 
 // 	try
 // 	{
@@ -104,6 +106,11 @@ void SpecificWorker::actionExecution()
 	}
 
 
+	if (newAction)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}
 	printf("actionExecution>>\n");
 }
 
@@ -131,6 +138,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 			exit(-1);
 		}
 	}
+	std::cout<<"action "<<action<<" 12\n";
 
 	// Get target
 	int roomID, objectID, robotID;
@@ -153,13 +161,35 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		printf("bla blakedoij ewr\n");
 		exit(2);
 	}
+	
+	std::cout<<"action "<<action<<" 13\n";
+
 	RoboCompTrajectoryRobot2D::TargetPose tp;
-	QString  robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
-	QString  roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
-	QString  objectIMID = QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
+	QString robotIMID;
+	QString roomIMID;
+	QString objectIMID;
 	try
 	{
+		robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+		roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
+		objectIMID = QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
+	}
+	catch(...)
+	{
+		printf("bfrfeyeyrteyrtytryrtyrtedoij ewr\n");
+		exit(2);
+	}
+	
+	std::cout<<"action "<<action<<" 14\n";
+		
+	try
+	{
+	std::cout<<"action "<<action<<" 145\n";
+		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(objectIMID)))
+			return;
+	std::cout<<"action "<<action<<" 146\n";
 		QVec poseInRoom = innerModel->transform6D(roomIMID, objectIMID);
+	std::cout<<"action "<<action<<" 147\n";
 
 		tp.x = poseInRoom.x();
 		tp.y = 0;
@@ -168,6 +198,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		tp.ry = 0;
 		tp.rz = 0;
 		tp.doRotation = true;
+		std::cout<<"action "<<action<<" 147\n";
 	}
 	catch (...)
 	{
@@ -213,11 +244,10 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 			//std::cout<<"\ttrajectoryrobot2d_proxy->getState() "<<trajectoryrobot2d_proxy->getState().state<<"\n";
 			try
 			{
-				AGMModel::SPtr newModel(new AGMModel(worldModel));
-				//objectID has been obtained before
-				int statusID =symbols["status"]->identifier;
-				newModel->getEdgeByIdentifiers(objectID, statusID, "noReach").setLabel("reach");
-				sendModificationProposal(worldModel, newModel);
+// 				AGMModel::SPtr newModel(new AGMModel(worldModel));
+// 				int statusID =symbols["status"]->identifier;
+// 				newModel->getEdgeByIdentifiers(objectID, statusID, "noReach").setLabel("reach");
+// 				sendModificationProposal(worldModel, newModel);
 				haveTarget=false;
 			}
 			catch (...)
@@ -572,6 +602,10 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 
 void SpecificWorker::action_GraspObject(bool newAction)
 {
+	sleep(2);
+	printf("Not doing anything\n");
+	return;
+	
 	printf("SpecificWorker::action_GraspObject\n");
 	int32_t objectId;
 	AGMModelSymbol::SPtr goalObject;
@@ -814,7 +848,6 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 
 void SpecificWorker::go(float x, float z, float alpha, bool rot, float xRef, float zRef, float threshold)
 {
-// 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.x = x;
 	tp.z = z;
@@ -861,99 +894,6 @@ void SpecificWorker::stop()
 		printf("something else %d\n", __LINE__);
 	}
 }
-
-
-// printf("void SpecificWorker::action_SetObjectReach()\n");
-// 	static float lastX = std::numeric_limits<float>::quiet_NaN();
-// 	static float lastZ = std::numeric_limits<float>::quiet_NaN();
-// 	int32_t objectId = str2int(params["object"].value);
-// 	AGMModelSymbol::SPtr goalObject;
-// 	try
-// 	{
-// 		goalObject = worldModel->getSymbol(objectId);
-// 	}
-// 	catch(...)
-// 	{
-// 		printf("object %d not in our model\n", objectId);
-// 		return;
-// 	}
-// 	const float x = str2float(goalObject->getAttribute("tx"));
-// 	const float z = str2float(goalObject->getAttribute("tz"));
-// 	float alpha;
-// 	switch (objectId)
-// 	{
-// 		case 5:
-// 			alpha = -0;
-// 			break;
-// 		case 7:
-// 			alpha = -3.141592;
-// 			break;
-// 		case 9:
-// 			alpha = 0;
-// 			break;
-// 		default:
-// 			qFatal("navigation: can't get orientation goal for reaching object %d\n", objectId);
-// 			break;
-// 	}
-// 	printf("object (%f, %f, %f)\n", x, z, alpha);
-// 	const int32_t robotId = worldModel->getIdentifierByType("robot");
-// 	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-// 	const float rx = str2float(robot->getAttribute("tx"));
-// 	const float rz = str2float(robot->getAttribute("tz"));
-// 	const float ralpha = str2float(robot->getAttribute("alpha"));
-// 	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
-//
-// 	// Avoid repeating the same goal and confuse the navigator
-// 	const float errX = abs(rx-x);
-// 	const float errZ = abs(rz-z);
-// 	float errAlpha = abs(ralpha-alpha);
-// 	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
-// 	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
-// 	errAlpha = abs(errAlpha);
-// 	if (errX<20 and errZ<20 and errAlpha<0.1)
-// 		return;
-//
-// 	bool proceed = true;
-// 	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
-// 	{
-// 		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
-// 		{
-// 			proceed = false;
-// 			printf("do not proceed because the coordinates do not differ (%s)\n", planningState.state.c_str());
-// 		}
-// 		else
-// 		{
-// 			proceed = true;
-// 			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
-// 		}
-// 	}
-// 	else
-// 	{
-// 		proceed = true;
-// 		printf("proceed because it's not planning or executing\n");
-// 	}
-//
-// 	static bool backp = true;
-// 	if (proceed)
-// 	{
-// 		lastX = x;
-// 		lastZ = z;
-// 		printf("proceed setobjectreach %d\n", objectId);
-// 		float xx = x;
-// 		float zz = z;
-// // 		objectId==7?z+550:z-550
-// 		float aa = objectId==7?-3.141592:0;
-// // 		qDebug() << xx << zz << aa;
-// 		go(xx, zz, aa, true, 80, 150, 50);
-// 		backp = true;
-// 	}
-// 	else if (backp)
-// 	{
-// 		printf("not proceeding %s\n", planningState.state.c_str());
-// 		backp = false;
-// 	}
-//
-// 	printf("aaAdigejr\n");
 
 
 
