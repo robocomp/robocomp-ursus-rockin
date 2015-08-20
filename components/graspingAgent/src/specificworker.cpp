@@ -296,7 +296,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room");
+	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
 }
 
@@ -306,7 +306,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room");
+	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
 }
 
@@ -316,7 +316,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room");
+	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
 }
 
