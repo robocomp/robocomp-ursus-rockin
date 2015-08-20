@@ -321,7 +321,7 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 				for(AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 				{
 					symbolTableParent = *symbol_it;
-					if (symbolTableParent->symbolType == "object" and symbolTableParent->attributes["imName"]==parentIMName)
+					if (symbolTableParent->symbolType == "object" and symbolTableParent->attributes["imName"]==parentIMName.toStdString())
 					{
 						parentFound = true;
 						break;
@@ -332,7 +332,7 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 				{
 					try
 					{
-						AGMModelEdge edgeRT  = newModel->getEdgeByIdentifiers( symbolTableParent->identifier, symbolTable->identifier, "RT");
+						AGMModelEdge &edgeRT  = newModel->getEdgeByIdentifiers( symbolTableParent->identifier, symbolTable->identifier, "RT");
 						edgeRT->setAttribute("tx", float2str(poseFromParent.x()));
 						edgeRT->setAttribute("ty", float2str(poseFromParent.y()));
 						edgeRT->setAttribute("tz", float2str(poseFromParent.z()));
@@ -364,8 +364,8 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 	{
 		qFatal("TODO: Create table symbol");
 	}
-	return (existing);
-// 	return (not existing);
+
+	return (not existing);
 }
 
 /**
@@ -404,7 +404,6 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 	{
 		qDebug()<<"MUG Exists";
 		QVec positionTagMug = QVec::vec3(t.tx, t.ty, t.tz);
-		poseTagMug.print("pose mug inicial");
 		QString mugIMName    = QString::fromStdString(symbolMug->getAttribute("imName"));
 		qDebug() << "MUG??: "<<mugIMName<<"----> "<<symbolMug->identifier;
 		InnerModelNode *nodeMug = innerModel->getNode(mugIMName);
@@ -417,17 +416,20 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 				printf("%s: %d\n", __FILE__, __LINE__);
 				QString parentIMName = parentMugNode->id;
 				qDebug() <<"PADRE MUG: "<< parentIMName;
-				QVec positionFromParent = innerModel->transform(parentIMName, poseTagMug, "rgbd");
+				QVec positionFromParent = innerModel->transform(parentIMName, positionTagMug, "rgbd");
 				
-				QMat rotationOffset = Rot3D(-M_PI_2, 0, 0);
+				QMat rotationOffset = Rot3D(M_PI_2, 0, 0);
 				QMat rotationTag = Rot3D(t.rx, t.ry, t.rz);
-				QMat rotationRGBD2Parent = innerModel->getRotationMatrix("rgbd", parentIMName);
-				QVec rotation = (rotationOffset * rotationTag * rotationRGBD2Parent).extractAnglesR_min();
-				rotation.print("ffff");
+				QMat rotationRGBD2Parent = innerModel->getRotationMatrixTo("rgbd", parentIMName);
+				QVec rotation;
+				rotation = (rotationOffset * rotationTag * rotationRGBD2Parent).extractAnglesR_min();
+				rotation.print("sin");
+				rotation = (rotationOffset * rotationTag * rotationRGBD2Parent).invert().extractAnglesR_min();
+				rotation.print("con");
 				
-				QVec poseFromParent = QVec::zero(6);
+				QVec poseFromParent = QVec::zeros(6);
 				poseFromParent.inject(positionFromParent, 0);
-				poseFromParent.inject(rotationFromParent, 3);
+				poseFromParent.inject(rotation, 3);
 				poseFromParent.print("poseFromParent");
 				innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
 				
@@ -437,7 +439,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 				for(AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 				{
 					symbolMugParent = *symbol_it;
-					if (symbolMugParent->symbolType == "object" and symbolMugParent->attributes["imName"]==parentIMName)
+					if (symbolMugParent->symbolType == "object" and symbolMugParent->attributes["imName"]==parentIMName.toStdString())
 					{
 						parentFound = true;
 						break;
@@ -448,7 +450,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 				{
 					try
 					{
-						AGMModelEdge edgeRT  = newModel->getEdgeByIdentifiers(symbolMugParent->identifier, symbolMug->identifier, "RT");
+						AGMModelEdge &edgeRT  = newModel->getEdgeByIdentifiers(symbolMugParent->identifier, symbolMug->identifier, "RT");
 						edgeRT->setAttribute("tx", float2str(poseFromParent.x()));
 						edgeRT->setAttribute("ty", float2str(poseFromParent.y()));
 						edgeRT->setAttribute("tz", float2str(poseFromParent.z()));
@@ -459,9 +461,10 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 						qDebug()<<"UPDATE NOW!";
 	//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
 						AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
+// 						qFatal
 
 					}
-					catch(...){ qDebug()<<"Impossible to update the RT edge"; }
+					catch(...){ qFatal("Impossible to update the RT edge"); }
 				}
 			}
 			else
@@ -511,9 +514,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 // 		}
 	}
 
-	const bool forcePublishModel = not existing;
-// 	printf("force publish by mug %d (%d)\n", forcePublishModel, t.id);
-	return forcePublishModel;
+	return not existing;
 }
 
 

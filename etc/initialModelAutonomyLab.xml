@@ -42,7 +42,7 @@
 	</link>
 
 	<symbol id="11" type="object" >
-		<attribute key="imName" value="mug" />
+		<attribute key="imName" value="mugRP" />
 		<attribute key="imType" value="transform" />
 		<attribute key="tag" value="31" />
 	</symbol>
