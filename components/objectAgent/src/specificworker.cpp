@@ -215,6 +215,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 }
 
 
+// Get new apriltags!
 void SpecificWorker::newAprilTag(const tagsList &list)
 {
 	if (worldModel->numberOfSymbols() == 0) return;
@@ -231,7 +232,7 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 				{
 					publishModel = true;
 					printf("TABLE E %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
-					//PASAR TAG AL ROOT Y ACTUALIZAR TRANSFORM EN EN INNER. PUBLICAR CAMBIO
+// 					if (updateTable(ap,SPtr)) printf("error in newAprilTag, updateTable");
 					
 				}
 				break;
@@ -241,7 +242,7 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 					printf("MUG %d  (%f, %f, %f)    (%f, %f, %f)\n", ap.id, ap.tx, ap.ty, ap.tz, ap.rx, ap.ry, ap.rz);
 					publishModel = true;
 				}
-				break;
+				break;				
 		}
 	}
 
@@ -251,30 +252,32 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 	}
 }
 
+/**
+ * \brief Metodo UPDATE TABLE: 
+ * 1) Tomamos ID de la tabla en AGM y en INNER
+ * 2) Calulamospadre.
+ * 3) Calculamos enlace anterior E
+ * 4) UPDATE AGM
+ */ 
 bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
-	return false;
 	bool existing = false;
 
+	AGMModelSymbol::SPtr symbolTable;
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
-		const AGMModelSymbol::SPtr &symbol = *symbol_it;
-		if (symbol->symbolType == "object")
+		symbolTable = *symbol_it;
+		if (symbolTable->symbolType == "object" and symbolTable->attributes.find("tag") != symbolTable->attributes.end())
 		{
 			try
 			{
-				const int32_t tag = str2int(symbol->getAttribute("tag"));
+				const int32_t tag = str2int(symbolTable->getAttribute("tag")); //Identificador numerico del tag
 				if (t.id == tag)
 				{
-// 					QVec v(6);
-// 					v(0) = t.tx;
-// 					v(1) = t.ty;
-// 					v(2) = t.tz;
-// 					v(3) = t.rx;
-// 					v(4) = t.ry;
-// 					v(5) = t.rz;
-// 					QVec worldRef = innerModel->transform("world", v, "rgbd");
+					// Si el identificador del nodo coincide con el del tag entonces el simbolo existe.
+					// Salimos del bucle porque ya lo hemos encontrado.
 					existing = true;
+					break;
 				}
 			}
 			catch (...)
@@ -283,28 +286,107 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 			}
 		}
 	}
-
-	if (not existing)
+	
+	if (existing)
 	{
+		// ALERT: METER AQUI LA MOVIDA
+		printf("TABLE Exists\n");
+// 		symbol
+		QVec poseTagTable      = QVec::vec6(t.tx, t.ty, t.tz, t.rx, t.ry, t.rz); //sistema RGBD
+		qDebug()<<"POSE TABLA VISTA POR ROBOT: "<<poseTagTable;
+		QString tableIMName    = QString::fromStdString(symbolTable->getAttribute("imName"));
+		qDebug() << "Table??: "<<tableIMName<<"--->"<< symbolTable->findName(tableIMName);
+		
+		InnerModelNode *nodeTable   = innerModel->getNode(tableIMName);
+		if (nodeTable)
+		{
+			printf("HAY NODO %s: %d\n", __FILE__, __LINE__);
+			InnerModelNode *parentNode = nodeTable->parent;
+			if (parentNode)
+			{
+				printf("%s: %d\n", __FILE__, __LINE__);
+				QString parentIMName = parentNode->id;
+				qDebug() << "Nombre del padre: "<< parentIMName;
+				QVec poseFromParent = innerModel->transform6D(parentIMName, pose, "rgbd");
+				poseFromParent.print("poseFromParent");
+				innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
+				
+				//BUSCAR EL ENLACE RT
+				AGMModelSymbol::SPtr symbolTableParent;
+				for(AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
+				{
+					symbolTableParent = *symbol_it;
+					if (symbolTableParent->symbolType == "object" and symbolTableParent->attributes.find(parentIMName) != symbolTableParent->attributes.end())
+						break;
+				}
+				
+				try
+				{
+					AGMModelEdge edgeRT  = newModel->getEdgeByIdentifiers( symbolTableParent->findName(parentIMName), symbolTable->findName(mugIMName), "RT");
+					edgeRT->setAttribute("tx", float2str(poseFromParent.x()));
+					edgeRT->setAttribute("ty", float2str(poseFromParent.y()));
+					edgeRT->setAttribute("tz", float2str(poseFromParent.z()));
+					edgeRT->setAttribute("rx", float2str(poseFromParent.rx()));
+					edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
+					edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
+					
+					qDebug()<<"UPDATE NOW!";
+//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
+					AGMMisc::edgePublishUpdate(edgeRT, agmagenttopic_proxy);
+
+				}
+				catch(...){ qDebug()<<"Impossible to update the RT edge"; }
+				
+				
+			}
+			else
+			{
+				qDebug() << "no hay nodo padre"; 
+			}
+		}
+		else
+		{
+			qDebug() << "no hay nodo en innemodel"; 
+		}
+
+
+// 		QVec v(6);
+// 		v(0) = t.tx;
+// 		v(1) = t.ty;
+// 		v(2) = t.tz;
+// 		v(3) = t.rx;
+// 		v(4) = t.ry;
+// 		v(5) = t.rz;
+// 		QVec worldRef = innerModel->transform("world", v, "rgbd");
 
 	}
-
-	return (not existing);
+	else {
+		printf("Apriltag in other object ???");
+	}
+	return (existing);
+// 	return (not existing);
 }
 
+/**
+ * \brief UPDATE MUG 
+ * 1) Tomamos ID de la tabla en AGM y en INNER
+ * 2) Calulamospadre.
+ * 3) Calculamos enlace anterior E
+ * 4) UPDATE AGM
+ */ 
 bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
 	bool existing = false;
-
-	AGMModelSymbol::SPtr symbol;
+	AGMModelSymbol::SPtr symbolMug;
+	
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 	{
-		symbol = *symbol_it;
-		if (symbol->symbolType == "object" and symbol->attributes.find("tag") != symbol->attributes.end())
+		symbolMug = *symbol_it;
+		if (symbolMug->symbolType == "object" and symbolMug->attributes.find("tag") != symbolMug->attributes.end())
 		{
 			try
 			{
-				const int32_t tag = str2int(symbol->getAttribute("tag"));
+				const int32_t tag = str2int(symbolMug->getAttribute("tag"));
 				if (t.id == tag)
 				{
 					// Si el identificador del nodo coincide con el del tag entonces el simbolo existe.
@@ -320,28 +402,52 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 		}
 	}
 
-	printf("%s: %d\n", __FILE__, __LINE__);
-	
 	if (existing)
 	{
-		printf("Exists\n");
-		QVec pose = QVec::vec6(t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
-		pose.print("pose inicial");
-		QString mugIMName    = QString::fromStdString(symbol->getAttribute("imName"));
-		qDebug() << "MUG??: "<<mugIMName;
-		InnerModelNode *node = innerModel->getNode(mugIMName);
-		if (node)
+		printf("MUG Exists\n");
+		QVec poseTagMug = QVec::vec6(t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
+		poseTagMug.print("pose inicial");
+		QString mugIMName    = QString::fromStdString(symbolMug->getAttribute("imName"));
+		qDebug() << "MUG??: "<<mugIMName<<"----> "<<symbolMug->findName(mugIMName);
+		InnerModelNode *nodeMug = innerModel->getNode(mugIMName);
+		if (nodeMug)
 		{
 			printf("%s: %d\n", __FILE__, __LINE__);
-			InnerModelNode *parentNode = node->parent;
-			if (parentNode)
+			InnerModelNode *parentMugNode = nodeMug->parent; //mesa
+			if (parentMugNode)
 			{
 				printf("%s: %d\n", __FILE__, __LINE__);
-				QString parentIMName = parentNode->id;
-				qDebug() << parentIMName;
-				QVec poseFromParent = innerModel->transform6D(parentIMName, pose, "rgbd");
+				QString parentIMName = parentMugNode->id;
+				qDebug() <<"PADRE MUG: "<< parentIMName;
+				QVec poseFromParent = innerModel->transform6D(parentIMName, poseTagMug, "rgbd");
 				poseFromParent.print("poseFromParent");
 				innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
+				
+				//BUSCAR EL ENLACE RT
+				AGMModelSymbol::SPtr symbolMugParent;
+				for(AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
+				{
+					symbolMugParent = *symbol_it;
+					if (symbolMugParent->symbolType == "object" and symbolMugParent->attributes.find(parentIMName) != symbolMugParent->attributes.end())
+						break;
+				}
+				
+				try
+				{
+					AGMModelEdge edgeRT  = newModel->getEdgeByIdentifiers( symbolMugParent->findName(parentIMName), symbolMug->findName(mugIMName), "RT");
+					edgeRT->setAttribute("tx", float2str(poseFromParent.x()));
+					edgeRT->setAttribute("ty", float2str(poseFromParent.y()));
+					edgeRT->setAttribute("tz", float2str(poseFromParent.z()));
+					edgeRT->setAttribute("rx", float2str(poseFromParent.rx()));
+					edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
+					edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
+					
+					qDebug()<<"UPDATE NOW!";
+//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
+					AGMMisc::edgePublishUpdate(edgeRT, agmagenttopic_proxy);
+
+				}
+				catch(...){ qDebug()<<"Impossible to update the RT edge"; }
 			}
 			else
 			{

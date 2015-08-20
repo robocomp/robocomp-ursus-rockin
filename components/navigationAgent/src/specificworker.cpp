@@ -286,6 +286,7 @@ bool SpecificWorker::odometryAndLocationIssues()
 		return false;
 	}
 
+	//TODO ESTO ES UNA ÑAPA!!!!! CURRARSELO MAS HOMBREEE!
 	roomId=7; // worldModel->getIdentifierByType("room");
 	if (roomId < 0)
 	{
