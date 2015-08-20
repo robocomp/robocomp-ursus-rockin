@@ -63,7 +63,7 @@ private:
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
-	InnerModel *innerModel,*imHumanGeneric;
+	InnerModel *innerModelVacio,*imHumanGeneric;
 	bool active, newBodyEvent;
 	PersonList personList;
 	long int timeStamp;
@@ -73,7 +73,7 @@ private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 	void updatePeople();
-	void updatePeopleInner();
+	//void updatePeopleInner();
 	void updatePeopleInnerFull();
 	
 	map<string,QString> dictionaryNames;

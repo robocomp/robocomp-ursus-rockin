@@ -295,6 +295,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	mutex->lock();
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
@@ -304,14 +305,17 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
+
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room");
 	mutex->unlock();
 }
@@ -515,8 +519,6 @@ void SpecificWorker::action_GraspObject(bool first)
 		{
 			lastTargetId = sendRightArmToPose(objectsLocationInRobot);
 			objectsLocationInRobot.print("m");
-			qFatal("fary");
-// 			lastTargetId = sendRightArmToPose(handTargetPoseInRoom);
 			time = QTime::currentTime();
 			state = 1;
 		}

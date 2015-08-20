@@ -286,7 +286,8 @@ bool SpecificWorker::odometryAndLocationIssues()
 		return false;
 	}
 
-	roomId=7;
+	//TODO ESTO ES UNA ÑAPA!!!!! CURRARSELO MAS HOMBREEE!
+	roomId=7; // worldModel->getIdentifierByType("room");
 	if (roomId < 0)
 	{
 		printf("roomId not found, Waiting for Insert innerModel...\n");
@@ -762,6 +763,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 		//roomsPolygons = extractPolygonsFromModel(worldModel);
 
 	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room");
 	printf("structuralChange>>\n");
 }
@@ -772,6 +774,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	printf("<<symbolUpdated\n");
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room");
 	printf("symbolUpdated>>\n");
 }
@@ -781,6 +784,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	printf("<<edgeUpdated\n");
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room");
 	printf("edgeUpdated>>\n");
 }

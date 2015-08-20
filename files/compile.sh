@@ -119,7 +119,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling IK"
-	exit
+#	exit
 fi
 
 
@@ -131,7 +131,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling gik"
-	exit
+#	exit
 fi
 
 
@@ -183,7 +183,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling trajectory"
-	exit
+#	exit
 fi
 
 # navigationAgent
@@ -193,6 +193,16 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling navigation agent"
+	exit
+fi
+
+# proprioceptionAgent
+echo "make proprioceptionAgent agent"
+cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/proprioceptionAgent/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+	echo "error compiling proprioception agent"
 	exit
 fi
 

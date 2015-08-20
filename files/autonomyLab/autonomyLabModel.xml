@@ -1,5 +1,5 @@
 <innermodel>
-
+<transform id="room">
 	<include path="/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml"/>
 
 	<axes id="ax" length="200" width="30"/>
@@ -87,7 +87,6 @@
 		<plane id="mugTag" ny="1" py="110" size="70,-70,5.0" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/31.png" />
 		<plane id="mugTagb" ny="1" py="110" size="80,-80,3.5" texture="#ffffff" />
 	</transform>
-
-	
+</transform>
 </innermodel>
 
