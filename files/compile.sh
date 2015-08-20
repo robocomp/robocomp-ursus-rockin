@@ -25,7 +25,7 @@ git pull
 
 sleep 5
 
-N=2
+N=4
 
 ###
 ### RoboComp
