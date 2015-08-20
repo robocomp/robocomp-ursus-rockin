@@ -44,7 +44,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	try
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("InnerModel") ;
-		if( QFile(QString::fromStdString(par.value)).exists() == true)
+		if (QFile(QString::fromStdString(par.value)).exists() == true)
 		{
 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
 			innerModel = new InnerModel(par.value);
@@ -65,7 +65,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 void SpecificWorker::compute()
 {
 	updateInnerModel();
-	//TODO HACER MAQUINA DE ESTADO QUE BUSQUE TAZA Y LA COJA
+	// TODO HACER MAQUINA DE ESTADO QUE BUSQUE TAZA Y LA COJA
 	QMutexLocker ml(mutex);
 	if(sendPoseFlag == true)
 	{
