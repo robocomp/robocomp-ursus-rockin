@@ -137,7 +137,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room");
+	innerModel = agmInner.extractInnerModel("room", true);
 	innerModel->treePrint();
 
 	printf("structuralChange>>\n");
@@ -149,7 +149,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room");
+	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
 }
 
@@ -159,7 +159,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room");
+	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
 }
 
@@ -422,9 +422,9 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 				QMat rotationTag = Rot3D(t.rx, t.ry, t.rz);
 				QMat rotationRGBD2Parent = innerModel->getRotationMatrixTo("rgbd", parentIMName);
 				QVec rotation;
-				rotation = (rotationOffset * rotationTag * rotationRGBD2Parent).extractAnglesR_min();
+				rotation = (rotationTag * rotationRGBD2Parent).extractAnglesR_min();
 				rotation.print("sin");
-				rotation = (rotationOffset * rotationTag * rotationRGBD2Parent).invert().extractAnglesR_min();
+				rotation = (rotationTag * rotationRGBD2Parent).invert().extractAnglesR_min();
 				rotation.print("con");
 				
 				QVec poseFromParent = QVec::zeros(6);
