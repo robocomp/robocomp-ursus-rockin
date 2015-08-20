@@ -309,35 +309,44 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 				printf("%s: %d\n", __FILE__, __LINE__);
 				QString parentIMName = parentNode->id;
 				qDebug() << "Nombre del padre: "<< parentIMName;
+				
+// WARNING TODO ERROR GAUUUUUUUUUUUUUUUUUUUUUUUU				poseFromParent = GIRO EN X
+				
 				QVec poseFromParent = innerModel->transform6D(parentIMName, poseTagTable, "rgbd");
 				poseFromParent.print("poseFromParent");
-				innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
 				
 				//BUSCAR EL ENLACE RT
+				bool parentFound = false;
 				AGMModelSymbol::SPtr symbolTableParent;
 				for(AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 				{
 					symbolTableParent = *symbol_it;
-					if (symbolTableParent->symbolType == "object" and symbolTableParent->attributes.find(parentIMName.toStdString()) != symbolTableParent->attributes.end())
+					if (symbolTableParent->symbolType == "object" and symbolTableParent->attributes["imName"]==parentIMName)
+					{
+						parentFound = true;
 						break;
+					}
 				}
 				
-				try
+				if (parentFound)
 				{
-					AGMModelEdge edgeRT  = newModel->getEdgeByIdentifiers( symbolTableParent->identifier, symbolTable->identifier, "RT");
-					edgeRT->setAttribute("tx", float2str(poseFromParent.x()));
-					edgeRT->setAttribute("ty", float2str(poseFromParent.y()));
-					edgeRT->setAttribute("tz", float2str(poseFromParent.z()));
-					edgeRT->setAttribute("rx", float2str(poseFromParent.rx()));
-					edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
-					edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
-					
-					qDebug()<<"UPDATE NOW!";
-//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
-					AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
+					try
+					{
+						AGMModelEdge edgeRT  = newModel->getEdgeByIdentifiers( symbolTableParent->identifier, symbolTable->identifier, "RT");
+						edgeRT->setAttribute("tx", float2str(poseFromParent.x()));
+						edgeRT->setAttribute("ty", float2str(poseFromParent.y()));
+						edgeRT->setAttribute("tz", float2str(poseFromParent.z()));
+						edgeRT->setAttribute("rx", float2str(poseFromParent.rx()));
+						edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
+						edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
+						
+						qDebug()<<"UPDATE NOW!";
+	//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
+						AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
 
+					}
+					catch(...){ qDebug()<<"Impossible to update the RT edge"; }
 				}
-				catch(...){ qDebug()<<"Impossible to update the RT edge"; }
 				
 				
 			}
@@ -348,12 +357,12 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 		}
 		else
 		{
-			qDebug() << "no hay nodo en innemodel"; 
+			qFatal("Couldn't find the table in innermodel"); 
 		}
 	}
 	else 
 	{
-		printf("Apriltag in other object ???");
+		qFatal("TODO: Create table symbol");
 	}
 	return (existing);
 // 	return (not existing);
@@ -394,7 +403,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 	if (existing)
 	{
 		qDebug()<<"MUG Exists";
-		QVec poseTagMug = QVec::vec6(t.tx, t.ty, t.tz, t.rx, t.ry, t.rz);
+		QVec positionTagMug = QVec::vec3(t.tx, t.ty, t.tz);
 		poseTagMug.print("pose mug inicial");
 		QString mugIMName    = QString::fromStdString(symbolMug->getAttribute("imName"));
 		qDebug() << "MUG??: "<<mugIMName<<"----> "<<symbolMug->identifier;
@@ -408,35 +417,52 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 				printf("%s: %d\n", __FILE__, __LINE__);
 				QString parentIMName = parentMugNode->id;
 				qDebug() <<"PADRE MUG: "<< parentIMName;
-				QVec poseFromParent = innerModel->transform6D(parentIMName, poseTagMug, "rgbd");
+				QVec positionFromParent = innerModel->transform(parentIMName, poseTagMug, "rgbd");
+				
+				QMat rotationOffset = Rot3D(-M_PI_2, 0, 0);
+				QMat rotationTag = Rot3D(t.rx, t.ry, t.rz);
+				QMat rotationRGBD2Parent = innerModel->getRotationMatrix("rgbd", parentIMName);
+				QVec rotation = (rotationOffset * rotationTag * rotationRGBD2Parent).extractAnglesR_min();
+				rotation.print("ffff");
+				
+				QVec poseFromParent = QVec::zero(6);
+				poseFromParent.inject(positionFromParent, 0);
+				poseFromParent.inject(rotationFromParent, 3);
 				poseFromParent.print("poseFromParent");
 				innerModel->transform6D("room", poseFromParent, parentIMName).print("poseFromRoom");
 				
 				//BUSCAR EL ENLACE RT
+				bool parentFound = false;
 				AGMModelSymbol::SPtr symbolMugParent;
 				for(AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 				{
 					symbolMugParent = *symbol_it;
-					if (symbolMugParent->symbolType == "object" and symbolMugParent->attributes.find(parentIMName.toStdString()) != symbolMugParent->attributes.end())
+					if (symbolMugParent->symbolType == "object" and symbolMugParent->attributes["imName"]==parentIMName)
+					{
+						parentFound = true;
 						break;
+					}
 				}
 				
-				try
+				if (parentFound)
 				{
-					AGMModelEdge edgeRT  = newModel->getEdgeByIdentifiers(symbolMugParent->identifier, symbolMug->identifier, "RT");
-					edgeRT->setAttribute("tx", float2str(poseFromParent.x()));
-					edgeRT->setAttribute("ty", float2str(poseFromParent.y()));
-					edgeRT->setAttribute("tz", float2str(poseFromParent.z()));
-					edgeRT->setAttribute("rx", float2str(poseFromParent.rx()));
-					edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
-					edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
-					
-					qDebug()<<"UPDATE NOW!";
-//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
-					AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
+					try
+					{
+						AGMModelEdge edgeRT  = newModel->getEdgeByIdentifiers(symbolMugParent->identifier, symbolMug->identifier, "RT");
+						edgeRT->setAttribute("tx", float2str(poseFromParent.x()));
+						edgeRT->setAttribute("ty", float2str(poseFromParent.y()));
+						edgeRT->setAttribute("tz", float2str(poseFromParent.z()));
+						edgeRT->setAttribute("rx", float2str(poseFromParent.rx()));
+						edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
+						edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
+						
+						qDebug()<<"UPDATE NOW!";
+	//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
+						AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
 
+					}
+					catch(...){ qDebug()<<"Impossible to update the RT edge"; }
 				}
-				catch(...){ qDebug()<<"Impossible to update the RT edge"; }
 			}
 			else
 			{
