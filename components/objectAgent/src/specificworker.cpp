@@ -427,9 +427,9 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 				QMat rotationTag         = Rot3D(t.rx, t.ry, t.rz); //rotacion propia de la marca
 				QMat rotationRGBD2Parent = innerModel->getRotationMatrixTo("rgbd", parentIMName); //matriz rotacion del nodo padre a la rgbd
 				QVec rotation;
-				rotation = (rotationTag * rotationRGBD2Parent).extractAnglesR_min();
+				rotation = (rotationTag * rotationOffset).extractAnglesR_min();
 				rotation.print("sin");
-				rotation = (rotationTag * rotationRGBD2Parent).invert().extractAnglesR_min(); 
+				rotation = (rotationTag * rotationOffset).invert().extractAnglesR_min(); 
 				rotation.print("con"); //la buena se saca de la matriz inversa. ORDEN: rgbd2Parent * tag
 				// COMPONEMOS LA POSE ENTERA:
 				QVec poseFromParent = QVec::zeros(6);
