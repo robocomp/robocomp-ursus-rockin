@@ -34,44 +34,41 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx);
-	~SpecificWorker();
-	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	bool activateAgent(const ParameterMap& prs);
-	bool deactivateAgent();
-	StateStruct getAgentState();
+	     SpecificWorker(MapPrx& mprx);
+		~SpecificWorker();
+	bool setParams     (RoboCompCommonBehavior::ParameterList params);
+	
+	bool         activateAgent     (const ParameterMap& prs);
+	bool         deactivateAgent   ();
+	StateStruct  getAgentState     ();
 	ParameterMap getAgentParameters();
-	bool setAgentParameters(const ParameterMap& prs);
-	void  killAgent();
-	Ice::Int uptimeAgent();
-	bool reloadConfigAgent();
+	bool         setAgentParameters(const ParameterMap& prs);
+	void         killAgent         ();
+	Ice::Int     uptimeAgent       ();
+	bool         reloadConfigAgent ();
+	
 	void  structuralChange(const RoboCompAGMWorldModel::Event& modification);
-	void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
-	void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
+	void  symbolUpdated   (const RoboCompAGMWorldModel::Node& modification);
+	void  edgeUpdated     (const RoboCompAGMWorldModel::Edge& modification);
 
 
 public slots:
  	void compute();
 
 private:
-	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	bool active;
-	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-
-
-
-	void action_FindObjectVisuallyInTable(bool newAction);
-
-
-
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	void sendModificationProposal          (AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+	
+	void action_FindObjectVisuallyInTable  (bool newAction);
 
 	void getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t &objectStSymbolID);
 
 	void newAprilTag(const tagsList &list);
 
-	bool updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
-	bool updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
-	bool updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
+	bool updateTable (const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
+	bool updateMug   (const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
+	bool updateMilk  (const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
 	bool updateCoffee(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel);
 
 
