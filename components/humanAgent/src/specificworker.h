@@ -72,7 +72,7 @@ private:
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-	void updatePeople();
+// 	void updatePeople();
 	//void updatePeopleInner();
 	void updatePeopleInnerFull();
 	
