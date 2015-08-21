@@ -485,7 +485,8 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 	}
 	else
 	{
-		qFatal("NO EXISTE EL SYMBOL");
+		qFatal("||   SYMBOL NODE DOESN'T EXIST INTO AGM   ||");
+		//Si el simbolo no existe, lo creamos... TODO
 // 		try
 // 		{
 // 			int32_t objectSymbolID;
