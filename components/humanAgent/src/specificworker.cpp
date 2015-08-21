@@ -885,7 +885,7 @@ void SpecificWorker::initDictionary()
 	try
 	{
 		InnerModel *innerModelTmp = new InnerModel();		
-		innerModelTmp = agmInner.extractInnerModel("room");
+		innerModelTmp = agmInner.extractInnerModel("room", true);
 		kinect=innerModelTmp->getTransformationMatrix("rgbdHumanPose","room");
 		kinect.setTr(kinect.getTr().x()/1000.0, kinect.getTr().y()/1000.0,kinect.getTr().z()/1000.0);			
 	}
@@ -1115,7 +1115,7 @@ void SpecificWorker::saveInnerModels(QString number)
 		qDebug()<<"Saving innermodels : "<<pre+"innerHuman.xml";
 		m.second->save(number+"_"+pre+"innerHuman.xml");			
 	}		
-	agmInner.extractInnerModel("room")->save(number+"_extractInnerModelFromRoom.xml");
+	agmInner.extractInnerModel("room", true)->save(number+"_extractInnerModelFromRoom.xml");
 	
 }
 

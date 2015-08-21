@@ -79,9 +79,9 @@ void SpecificWorker::compute()
 printf("---------------------------------------------------------------------\n");
 		for (auto j : mMap)
 		{
-			printf("Updating: %s\n", j.first.c_str());
-			if (abs(backMap[j.first].pos - mMap[j.first].pos) > 0.5*M_PIl/180.) /* send modification if the angle has changed more than one degree */
+// 			if (abs(backMap[j.first].pos - mMap[j.first].pos) > 0.5*M_PIl/180.) /* send modification if the angle has changed more than one degree */
 			{
+				printf("Updating: %s (%d)\n", j.first.c_str(), worldModel->size());
 				bool found = false;
 				for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
 				{
@@ -108,11 +108,16 @@ printf("---------------------------------------------------------------------\n"
 							e.setAttribute("r"+symbol->getAttribute("axis"), float2str(j.second.pos));
 							try
 							{
+								printf("  axis    %s\n", symbol->getAttribute("axis").c_str());
+								printf("  edge rx %s\n", e.getAttribute("rx").c_str());
+								printf("  edge rz %s\n", e.getAttribute("rz").c_str());
+								printf("  edge ry %s\n", e.getAttribute("ry").c_str());
 								AGMMisc::publishEdgeUpdate(e, agmagenttopic_proxy);
+								printf(" done!\n");
 							}
 							catch(...)
 							{
-								printf("can't update node\n");
+								printf(" can't update node\n");
 							}
 							break;
 						}
@@ -208,7 +213,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
  
 	agmInner.setWorld(worldModel);
 	delete innerModel;
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
 }
 
@@ -220,7 +225,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification
  
 	agmInner.setWorld(worldModel);
 	delete innerModel;
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
 }
 
@@ -232,7 +237,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modificati
  
 	agmInner.setWorld(worldModel);
 	delete innerModel;
-	innerModel = agmInner.extractInnerModel();
+	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
 }
 
