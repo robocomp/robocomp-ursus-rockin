@@ -82,10 +82,10 @@
 		<plane id="mesaTagb" ny="1" py="11" size="80,-80,3.5" texture="#ffffff" />
 	</transform>
 
-	<transform id="mugRP" tx="3800" tz="2700" ty="800">
-		<mesh id="mugR" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/mug_blue.3ds" scale="120,120,120" rx="1.5707" rz="-1.5707" collide="1" tx="-10" ty="60" />
-		<plane id="mugTag" ny="1" py="110" size="70,-70,5.0" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/31.png" />
-		<plane id="mugTagb" ny="1" py="110" size="80,-80,3.5" texture="#ffffff" />
+	<transform id="mugRP" tx="3800" tz="2700" ty="910">
+		<mesh id="mugR" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/mug_blue.3ds" scale="120,120,120" rx="1.5707" rz="-1.5707" collide="1" tx="-10" ty="-50" />
+		<plane id="mugTag" ny="1" py="0" size="70,-70,5.0" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/31.png" />
+		<plane id="mugTagb" ny="1" py="0" size="80,-80,3.5" texture="#ffffff" />
 	</transform>
 </transform>
 </innermodel>
