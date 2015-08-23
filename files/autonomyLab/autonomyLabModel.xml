@@ -83,7 +83,12 @@
 	</transform>
 
 	<transform id="mugRP" tx="3800" tz="2700" ty="910">
-		<mesh id="mugR" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/mug_blue.3ds" scale="120,120,120" rx="1.5707" rz="-1.5707" collide="1" tx="-10" ty="-50" />
+		<transform id="mugRPr" tx="-10" ty="-50">
+			<mesh id="mugR" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/mug_blue.3ds" scale="120,120,120" rx="1.5707" rz="-1.5707" collide="1" />
+		</transform>
+		<transform id="mugRPr2" tx="-10" ty="1000">
+			<mesh id="mugR2" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/mug_blue.3ds" scale="50,50,50" rx="1.5707" rz="-1.5707" collide="1" />
+		</transform>
 		<plane id="mugTag" ny="1" py="0" size="70,-70,5.0" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/31.png" />
 		<plane id="mugTagb" ny="1" py="0" size="80,-80,3.5" texture="#ffffff" />
 	</transform>

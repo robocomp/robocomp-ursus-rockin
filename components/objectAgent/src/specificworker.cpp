@@ -230,10 +230,6 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 {
 	if (worldModel->numberOfSymbols() == 0)
 		return;
-	static QTime lastTT = QTime::currentTime();
-	if (lastTT.elapsed() < 5000)
-		return;
-	lastTT = QTime::currentTime();
 
 
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
@@ -241,7 +237,6 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 	bool publishModel = false;
 	for (auto ap : list)
 	{
-		if (ap.id != 31) continue;
 		switch(ap.id)
 		{
 			case 30:
@@ -304,7 +299,6 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 	if (existing)
 	{
 		QVec positionTag    = QVec::vec6(t.tx, t.ty, t.tz); // tag position from parent
-// 		QMat rotationOffset = Rot3D(0, 0, 0); // apriltags' rotation offset
 		QMat rotationOffset = Rot3D(M_PI_2, 0, 0); // apriltags' rotation offset
 		QMat rotationTag    = Rot3D(t.rx, t.ry, t.rz); // apriltags' rotation as seen
 // 		QVec resultingEuler = (rotationTag*rotationOffset.invert()).extractAnglesR_min();
