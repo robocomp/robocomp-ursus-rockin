@@ -215,7 +215,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-// 		AGMModelPrinter::printWorld(newModel);		
+// 		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, "objectAgent");
 	}
 	catch(...)
@@ -256,7 +256,7 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 		}
 	}
 
-	if (publishModel)
+// 	if (publishModel)
 	{
 		sendModificationProposal(worldModel, newModel);
 	}
@@ -299,7 +299,7 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 	if (existing)
 	{
 		QVec positionTag    = QVec::vec6(t.tx, t.ty, t.tz); // tag position from parent
-		QMat rotationOffset = Rot3D(M_PI_2, 0, 0); // apriltags' rotation offset
+		QMat rotationOffset = Rot3D(-M_PI_2, 0, 0); // apriltags' rotation offset
 		QMat rotationTag    = Rot3D(t.rx, t.ry, t.rz); // apriltags' rotation as seen
 // 		QVec resultingEuler = (rotationTag*rotationOffset.invert()).extractAnglesR_min();
 // 		QVec poseTag        = QVec::vec6(t.tx, t.ty, t.tz, resultingEuler.rx(), resultingEuler.ry(), resultingEuler.rz()); // tag pose from parent, takin into account mugs' offsets
@@ -320,6 +320,7 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 				QMat rotationTag         = Rot3D(t.rx, t.ry, t.rz); //rotacion propia de la marca
 				QMat rotationRGBD2Parent = innerModel->getRotationMatrixTo(parentIMName, "rgbd"); //matriz rotacion del nodo padre a la rgbd
 				QVec rotation;
+				rotation.print("rotation");
 				rotation = (rotationRGBD2Parent * rotationTag * rotationOffset).invert().extractAnglesR_min(); 
 				// COMPONEMOS LA POSE ENTERA:
 				QVec poseFromParent = QVec::zeros(6);
@@ -417,8 +418,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 	if (existing)
 	{
 		QVec positionTag    = QVec::vec6(t.tx, t.ty, t.tz); // tag position from parent
-// 		QMat rotationOffset = Rot3D(0, 0, 0); // apriltags' rotation offset
-		QMat rotationOffset = Rot3D(M_PI_2, 0, 0); // apriltags' rotation offset
+		QMat rotationOffset = Rot3D(-M_PI_2, 0, 0); // apriltags' rotation offset
 		QMat rotationTag    = Rot3D(t.rx, t.ry, t.rz); // apriltags' rotation as seen
 // 		QVec resultingEuler = (rotationTag*rotationOffset.invert()).extractAnglesR_min();
 // 		QVec poseTag        = QVec::vec6(t.tx, t.ty, t.tz, resultingEuler.rx(), resultingEuler.ry(), resultingEuler.rz()); // tag pose from parent, takin into account mugs' offsets
@@ -439,6 +439,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 				QMat rotationTag         = Rot3D(t.rx, t.ry, t.rz); //rotacion propia de la marca
 				QMat rotationRGBD2Parent = innerModel->getRotationMatrixTo(parentIMName, "rgbd"); //matriz rotacion del nodo padre a la rgbd
 				QVec rotation;
+				rotation.print("rotation");
 				rotation = (rotationRGBD2Parent * rotationTag * rotationOffset).invert().extractAnglesR_min(); 
 				// COMPONEMOS LA POSE ENTERA:
 				QVec poseFromParent = QVec::zeros(6);

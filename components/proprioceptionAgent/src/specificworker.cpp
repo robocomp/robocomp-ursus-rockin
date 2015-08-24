@@ -47,6 +47,9 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	return true;
 }
 
+
+#define AGMINNER_UPDATE_EDGE 0
+
 void SpecificWorker::compute()
 {
 	if (worldModel->size() == 0)
@@ -71,6 +74,7 @@ void SpecificWorker::compute()
 	}
 
 	
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	QMutexLocker locker(mutex);
 	try
 	{
@@ -81,9 +85,9 @@ printf("---------------------------------------------------------------------\n"
 		{
 // 			if (abs(backMap[j.first].pos - mMap[j.first].pos) > 0.5*M_PIl/180.) /* send modification if the angle has changed more than one degree */
 			{
-				printf("Updating: %s (%d)\n", j.first.c_str(), worldModel->size());
+				printf("Updating: %s (%d)\n", j.first.c_str(), newModel->size());
 				bool found = false;
-				for (AGMModel::iterator symbol_it=worldModel->begin(); symbol_it!=worldModel->end(); symbol_it++)
+				for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
 				{
 					const AGMModelSymbol::SPtr &symbol = *symbol_it;
 					std::string imName;
@@ -96,10 +100,10 @@ printf("---------------------------------------------------------------------\n"
 						{
 							printf("found!\n");
 							found = true;
-							auto parent = worldModel->getParentByLink(symbol->identifier, "RT");
+							auto parent = newModel->getParentByLink(symbol->identifier, "RT");
 // printf("%d (%d -> %d)\n", __LINE__, parent->identifier, symbol->identifier);
-							AGMModelEdge &e = worldModel->getEdgeByIdentifiers(parent->identifier, symbol->identifier, "RT");
-// printf("edge %s\n",  e.toString(worldModel).c_str());
+							AGMModelEdge &e = newModel->getEdgeByIdentifiers(parent->identifier, symbol->identifier, "RT");
+// printf("edge %s\n",  e.toString(newModel).c_str());
 // printf("edge rx %s\n", e.getAttribute("rx").c_str());
 							e.setAttribute("rx", "0");
 							e.setAttribute("ry", "0");
@@ -112,7 +116,9 @@ printf("---------------------------------------------------------------------\n"
 								printf("  edge rx %s\n", e.getAttribute("rx").c_str());
 								printf("  edge rz %s\n", e.getAttribute("rz").c_str());
 								printf("  edge ry %s\n", e.getAttribute("ry").c_str());
+// #if AGMINNER_UPDATE_EDGE==1
 								AGMMisc::publishEdgeUpdate(e, agmagenttopic_proxy);
+// #endif
 								printf(" done!\n");
 							}
 							catch(...)
@@ -133,8 +139,9 @@ printf("---------------------------------------------------------------------\n"
 			}
 		}
 		
-		AGMMisc::publishModification(worldModel, agmagenttopic_proxy, worldModel, "proprioception");
-
+#if AGMINNER_UPDATE_EDGE==0
+	sendModificationProposal(worldModel, newModel);
+#endif
 	}
 	catch (const Ice::Exception &ex)
 	{
