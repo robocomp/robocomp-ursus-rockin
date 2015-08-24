@@ -56,11 +56,13 @@ void SpecificWorker::compute( )
 // 	printf("ae>\n");
 }
 
-
+/**
+ * \brief ESTE ES EL VERDADERO COMPUTE
+ */ 
 void SpecificWorker::actionExecution()
 {
 	QMutexLocker locker(mutex);
-	printf("<<actionExecution\n");
+	qDebug()<<"ACTION: "<<QString::fromStdString(action);
 
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
@@ -93,8 +95,8 @@ void SpecificWorker::actionExecution()
 	}
 	else if (action == "setobjectreach")
 	{
-		return; //TODO QUITAR DESPUES!!!!!!!!!!
-		//action_SetObjectReach(newAction);
+// 		return; //TODO QUITAR DESPUES!!!!!!!!!!
+		action_SetObjectReach(newAction);
 	}
 	else if (action == "graspobject")
 	{
@@ -115,6 +117,9 @@ void SpecificWorker::actionExecution()
 	printf("actionExecution>>\n");
 }
 
+/**
+ * \brief elmeollo dl asunto
+ */ 
 void SpecificWorker::action_SetObjectReach(bool newAction)
 {
 	// Get symbols' map
@@ -122,10 +127,11 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
 	{
-		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/);
-		for (auto dd : symbols)
+		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/); //ALL THE SYMBOLS GIVEN IN THE RULE
+		printf("Simbolos que tenemos: \n");
+		for (auto symbol : symbols)
 		{
-			printf("tenemos %s\n", dd.first.c_str());
+			printf("             %s\n", symbol.first.c_str());
 		}
 	}
 	catch(...)
@@ -134,10 +140,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		printf("<<WORLD\n");
 		AGMModelPrinter::printWorld(worldModel);
 		printf("WORLD>>\n");
-		if (worldModel->size() > 0)
-		{
-			exit(-1);
-		}
+		if (worldModel->size() > 0) {	exit(-1);  }
 	}
 	std::cout<<"action "<<action<<" 12\n";
 
@@ -147,9 +150,9 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	{
 		if (symbols["room"].get() and symbols["object"].get() and symbols["robot"].get())
 		{
-			roomID = symbols["room"]->identifier;//7;
-			objectID =symbols["object"]->identifier;//9;//
-			robotID = symbols["robot"]->identifier;//9;
+			roomID = symbols["room"]->identifier;   //7 ROOM
+			objectID =symbols["object"]->identifier;//9 TABLE
+			robotID = symbols["robot"]->identifier; //1 ROBOT
 		}
 		else
 		{
@@ -159,13 +162,13 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	}
 	catch(...)
 	{
-		printf("bla blakedoij ewr\n");
+		printf("ERROR: SYMBOL DOESN'T EXIST \n");
 		exit(2);
 	}
 	
 	std::cout<<"action "<<action<<" 13\n";
 
-	RoboCompTrajectoryRobot2D::TargetPose tp;
+	// GET THE INNERMODEL NAMES OF TH SYMBOLS
 	QString robotIMID;
 	QString roomIMID;
 	QString objectIMID;
@@ -177,38 +180,37 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	}
 	catch(...)
 	{
-		printf("bfrfeyeyrteyrtytryrtyrtedoij ewr\n");
+		printf("ERROR IN GET THE INNERMODEL NAMES\n");
 		exit(2);
 	}
 	
 	std::cout<<"action "<<action<<" 14\n";
-		
+
+	// GET THE TARGET POSE: 
+	//RoboCompTrajectoryRobot2D::TargetPose tp;
+	
 	try
 	{
-	std::cout<<"action "<<action<<" 145\n";
-		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(objectIMID)))
-			return;
-	std::cout<<"action "<<action<<" 146\n";
-		QVec poseInRoom = innerModel->transform6D(roomIMID, objectIMID);
-	std::cout<<"action "<<action<<" 147\n";
+		std::cout<<"action "<<action<<" 145\n";
+		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(objectIMID)))    return;
+		std::cout<<"action "<<action<<" 146\n";
+		QVec poseInRoom = innerModel->transform6D(roomIMID, objectIMID); // FROM OBJECT TO ROOM
+		qDebug()<<" TARGET POSE: "<< poseInRoom;
 
-		tp.x = poseInRoom.x();
-		tp.y = 0;
-		tp.z = poseInRoom.z();
-		tp.rx = 0;
-		tp.ry = 0;
-		tp.rz = 0;
-		tp.doRotation = true;
+		currentTarget.first = objectID;
+		currentTarget.second.x = poseInRoom.x();
+		currentTarget.second.y = 0;
+		currentTarget.second.z = poseInRoom.z();
+		currentTarget.second.rx = 0;
+		currentTarget.second.ry = 0;
+		currentTarget.second.rz = 0;
+		currentTarget.second.doRotation = true;
 		std::cout<<"action "<<action<<" 147\n";
 	}
-	catch (...)
-	{
+	catch (...) 
+	{ 
 		qDebug()<<"innerModel exception";
 	}
-
-
-	printf("distance: %f\n", innerModel->transform6D(robotIMID, objectIMID).norm2());
-
 
 	// Execute target
 	try
@@ -217,8 +219,8 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		{
 			try
 			{
-				trajectoryrobot2d_proxy->goReferenced(tp, 175, 250, 100);
-				std::cout << "trajectoryrobot2d_proxy->go(" << tp.x << ", " << tp.z << ", " << tp.ry << ", " << 175 << ", " << 250 << " )\n";
+				trajectoryrobot2d_proxy->goReferenced(currentTarget.second, 175, 250, 100);
+				std::cout << "trajectoryrobot2d_proxy->go(" << currentTarget.second.x << ", " << currentTarget.second.z << ", " << currentTarget.second.ry << ", " << 175 << ", " << 250 << " )\n";
 				haveTarget = true;
 			}
 			catch(const Ice::Exception &ex)
@@ -789,11 +791,34 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	AGMModelEdge dst;
 	AGMModelConverter::fromIceToInternal(modification,dst);
 	agmInner.updateImNodeFromEdge(dst, innerModel);
-	if(action == "setobjectreach")
+	
+	//NOTE: MIRAR BIEN
+	// Compare the current target old with the new updateç
+	// TODO: check edge node
+	if(modification.a == currentTarget.first || modification.b == currentTarget.second)
 	{
-		haveTarget=false;
-		action_SetObjectReach(true);
+		try
+		{
+			QString objectIMID = QString::fromStdString(worldModel->getSymbol(currentTarget.first)->getAttribute("imName"));
+			QVec targetOld = QVec::vec3(currentTarget.second.x, currentTarget.second.y, currentTarget.second.z);
+			QVec targetNew = innerModel->transform("room", objectIMID);
+			//NOTE: Threshold is for correct only if the distance has clearly changed.
+			if((targetNew-targetOld).norm2()<=100)
+			{
+				if(action == "setobjectreach")
+				{
+					haveTarget=false;
+					action_SetObjectReach(true);
+				}
+			}
+		}
+		catch(...)
+		{
+			printf("ERROR IN GET THE INNERMODEL NAME\n");
+			exit(2);
+		}
 	}
+	
 // 		if (innerModel) delete innerModel;
 // 		innerModel = agmInner.extractInnerModel("room", true);
 // 	innermodel->save("afterInner.xml");

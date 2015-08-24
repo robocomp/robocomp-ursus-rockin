@@ -76,6 +76,8 @@ private:
 	InnerModel *innerModel;
 	bool haveTarget;
 	
+	QPair<int32_t, RoboCompTrajectoryRobot2D::TargetPose> currentTarget;
+	
 
 	RoboCompOmniRobot::TBaseState bState;
 	RoboCompTrajectoryRobot2D::NavState planningState;
