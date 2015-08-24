@@ -27,7 +27,7 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
-
+	innerModelMutex = new QMutex(QMutex::Recursive);
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel(); 
@@ -52,7 +52,14 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 void SpecificWorker::compute( )
 {
 	static std::string previousAction = "";
-
+	try {
+		QMutexLocker lockIM(innerModelMutex);
+		innerModel->transform6D("robot","rgbd").print("tr6D compute");
+	}
+	catch (...)
+	{
+		qDebug()<<"hollaaa";
+	}
 	bool newAction = (previousAction != action);
 	if (newAction)
 		printf("New action: %s\n", action.c_str());
@@ -142,8 +149,12 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
-	if (innerModel != NULL) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
+
+	{
+		QMutexLocker lockIM(innerModelMutex);
+		if (innerModel != NULL) delete innerModel;
+		innerModel = agmInner.extractInnerModel("room", true);
+	}
 
 	printf("structuralChange>>\n");
 }
@@ -153,9 +164,13 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
 	mutex->unlock();
+
+	{
+		QMutexLocker lockIM(innerModelMutex);
+		if (innerModel) delete innerModel;
+		innerModel = agmInner.extractInnerModel("room", true);
+	}
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
@@ -163,9 +178,18 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	mutex->lock();
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
+// 	innermodel->save("beforeInner.xml");
 	mutex->unlock();
+
+	{
+		QMutexLocker lockIM(innerModelMutex);
+		AGMModelEdge dst;
+		AGMModelConverter::fromIceToInternal(modification,dst);
+		agmInner.updateImNodeFromEdge(dst, innerModel);
+// 		if (innerModel) delete innerModel;
+// 		innerModel = agmInner.extractInnerModel("room", true);
+	}
+// 	innermodel->save("afterInner.xml");
 }
 
 
@@ -256,7 +280,7 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 		}
 	}
 
-// 	if (publishModel)
+	if (publishModel)
 	{
 		sendModificationProposal(worldModel, newModel);
 	}
@@ -305,7 +329,7 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 // 		QVec poseTag        = QVec::vec6(t.tx, t.ty, t.tz, resultingEuler.rx(), resultingEuler.ry(), resultingEuler.rz()); // tag pose from parent, takin into account mugs' offsets
 
 		QString symbolIMName       = QString::fromStdString(symbol->getAttribute("imName"));
-		qDebug() << "Table IM name " << symbolIMName << "    agm identifer: " << symbol->identifier;
+// 		qDebug() << "Table IM name " << symbolIMName << "    agm identifer: " << symbol->identifier;
 		InnerModelNode *nodeSymbolIM = innerModel->getNode(symbolIMName);
 
 		if (nodeSymbolIM)
@@ -314,19 +338,19 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 			if (parentNodeIM)
 			{
 				QString parentIMName    = parentNodeIM->id;
-				qDebug() << "Table's parent: " << parentIMName;
+// 				qDebug() << "Table's parent: " << parentIMName;
 				QVec positionFromParent  = innerModel->transform(parentIMName, positionTag, "rgbd");
 // 				QVec poseFromParent  = innerModel->transform(parentIMName, poseTag, "rgbd");
 				QMat rotationTag         = Rot3D(t.rx, t.ry, t.rz); //rotacion propia de la marca
 				QMat rotationRGBD2Parent = innerModel->getRotationMatrixTo(parentIMName, "rgbd"); //matriz rotacion del nodo padre a la rgbd
 				QVec rotation;
-				rotation.print("rotation");
+// 				rotation.print("rotation");
 				rotation = (rotationRGBD2Parent * rotationTag * rotationOffset).invert().extractAnglesR_min(); 
 				// COMPONEMOS LA POSE ENTERA:
 				QVec poseFromParent = QVec::zeros(6);
 				poseFromParent.inject(positionFromParent, 0);
 				poseFromParent.inject(rotation, 3);
-				poseFromParent.print("pose from parent");
+// 				poseFromParent.print("pose from parent");
 				
 				//BUSCAR EL ENLACE RT: NECESITAMOS EL SIMBOLO PADRE EN AGM
 				bool parentFound = false;
@@ -336,7 +360,7 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 					symbolParent = *symbol_it;
 					if (symbolParent->symbolType == "object" and symbolParent->attributes["imName"]==parentIMName.toStdString())
 					{
-						qDebug() << "parent in AGM: " << QString::fromStdString(symbolParent->attributes["imName"]);
+// 						qDebug() << "parent in AGM: " << QString::fromStdString(symbolParent->attributes["imName"]);
 						parentFound = true;
 						break;
 					}
@@ -424,7 +448,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 // 		QVec poseTag        = QVec::vec6(t.tx, t.ty, t.tz, resultingEuler.rx(), resultingEuler.ry(), resultingEuler.rz()); // tag pose from parent, takin into account mugs' offsets
 
 		QString symbolIMName       = QString::fromStdString(symbol->getAttribute("imName"));
-		qDebug() << "Mug IM name " << symbolIMName << "    agm identifer: " << symbol->identifier;
+// 		qDebug() << "Mug IM name " << symbolIMName << "    agm identifer: " << symbol->identifier;
 		InnerModelNode *nodeSymbolIM = innerModel->getNode(symbolIMName);
 
 		if (nodeSymbolIM)
@@ -433,19 +457,19 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 			if (parentNodeIM)
 			{
 				QString parentIMName    = parentNodeIM->id;
-				qDebug() << "Mug's parent: " << parentIMName;
+// 				qDebug() << "Mug's parent: " << parentIMName;
 				QVec positionFromParent  = innerModel->transform(parentIMName, positionTag, "rgbd");
 // 				QVec poseFromParent  = innerModel->transform(parentIMName, poseTag, "rgbd");
 				QMat rotationTag         = Rot3D(t.rx, t.ry, t.rz); //rotacion propia de la marca
 				QMat rotationRGBD2Parent = innerModel->getRotationMatrixTo(parentIMName, "rgbd"); //matriz rotacion del nodo padre a la rgbd
 				QVec rotation;
-				rotation.print("rotation");
+// 				rotation.print("rotation");
 				rotation = (rotationRGBD2Parent * rotationTag * rotationOffset).invert().extractAnglesR_min(); 
 				// COMPONEMOS LA POSE ENTERA:
 				QVec poseFromParent = QVec::zeros(6);
 				poseFromParent.inject(positionFromParent, 0);
 				poseFromParent.inject(rotation, 3);
-				poseFromParent.print("pose from parent");
+// 				poseFromParent.print("pose from parent");
 				
 				//BUSCAR EL ENLACE RT: NECESITAMOS EL SIMBOLO PADRE EN AGM
 				bool parentFound = false;
@@ -455,7 +479,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 					symbolParent = *symbol_it;
 					if (symbolParent->symbolType == "object" and symbolParent->attributes["imName"]==parentIMName.toStdString())
 					{
-						qDebug() << "parent in AGM: " << QString::fromStdString(symbolParent->attributes["imName"]);
+// 						qDebug() << "parent in AGM: " << QString::fromStdString(symbolParent->attributes["imName"]);
 						parentFound = true;
 						break;
 					}
@@ -473,7 +497,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 						edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
 						edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
 						
-						qDebug() << "Updating edge!";
+// 						qDebug() << "Updating edge!";
 	//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
 						AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
 					}

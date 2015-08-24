@@ -116,9 +116,7 @@ printf("---------------------------------------------------------------------\n"
 								printf("  edge rx %s\n", e.getAttribute("rx").c_str());
 								printf("  edge rz %s\n", e.getAttribute("rz").c_str());
 								printf("  edge ry %s\n", e.getAttribute("ry").c_str());
-// #if AGMINNER_UPDATE_EDGE==1
 								AGMMisc::publishEdgeUpdate(e, agmagenttopic_proxy);
-// #endif
 								printf(" done!\n");
 							}
 							catch(...)
@@ -139,9 +137,9 @@ printf("---------------------------------------------------------------------\n"
 			}
 		}
 		
-#if AGMINNER_UPDATE_EDGE==0
-	sendModificationProposal(worldModel, newModel);
-#endif
+// #if AGMINNER_UPDATE_EDGE==0
+// 	sendModificationProposal(worldModel, newModel);
+// #endif
 	}
 	catch (const Ice::Exception &ex)
 	{
@@ -301,7 +299,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"navigationCompAgent");
+		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"propioception");
 	}
 	catch(...)
 	{
