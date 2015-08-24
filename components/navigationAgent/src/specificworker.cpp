@@ -777,15 +777,25 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	innerModel = agmInner.extractInnerModel("room", true);
 	printf("symbolUpdated>>\n");
 }
+/**
+ * \brief ACTUALIZACION DEL ENLACE EN INNERMODEL
+ */ 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	QMutexLocker l(mutex);
-	printf("<<edgeUpdated\n");
+	QMutexLocker lockIM(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
-	printf("edgeUpdated>>\n");
+	AGMModelEdge dst;
+	AGMModelConverter::fromIceToInternal(modification,dst);
+	agmInner.updateImNodeFromEdge(dst, innerModel);
+	if(action == "setobjectreach")
+	{
+		haveTarget=false;
+		action_SetObjectReach(true);
+	}
+// 		if (innerModel) delete innerModel;
+// 		innerModel = agmInner.extractInnerModel("room", true);
+// 	innermodel->save("afterInner.xml");
 }
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
