@@ -31,6 +31,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
 
+	mutexAGM = new QMutex(QMutex::Recursive);
+	mutexIM = new QMutex(QMutex::Recursive);
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
@@ -49,18 +51,19 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::compute( )
 {
 // 	printf("compute %d\n\n", __LINE__);
-	updateInnerModel();
-
-	if (not innerModel->getNode("grabPositionHandR"))
+	QMutexLocker imLocker(mutexIM);
 	{
-		printf("waiting for AGM*\n");
-		return;
+		if (not innerModel->getNode("grabPositionHandR"))
+		{
+			printf("waiting for AGM*\n");
+			return;
+		}
 	}
-
-	// 	printf("compute %d\n\n", __LINE__);
+	printf("manageReachedObjects %d\n\n", __LINE__);
 	manageReachedObjects();
+	printf("manageReachedObjects %d\n\n", __LINE__);
+	
 
-// 	printf("compute %d\n\n", __LINE__);
 	// ACTION EXECUTION
 	actionExecution();
 // 	printf("compute %d\n\n", __LINE__);
@@ -74,9 +77,11 @@ void SpecificWorker::manageReachedObjects()
 	float THRESHOLD_table = 800;
 	
 	bool changed = false;
-	mutex->lock();
+	
+	QMutexLocker agmLocker(mutexAGM);
+	QMutexLocker imLocker(mutexIM);
+	
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
-	mutex->unlock();
 
 	for (AGMModel::iterator symbol_itr=newModel->begin(); symbol_itr!=newModel->end(); symbol_itr++)
 	{
@@ -87,13 +92,23 @@ void SpecificWorker::manageReachedObjects()
 			if (isObjectType(newModel, node, "room")) continue;
 
 			/// Compute distance and new state
-			float d2n = distanceToNode("arm_right_1", newModel, node);
+			float d2n;
+			try
+			{
+				d2n = distanceToNode("arm_right_1", newModel, node);
+			}
+			catch(...)
+			{
+				printf("Ref: arm_right_1: %p\n", (void *)innerModel->getNode("arm_right_1"));
+				printf("Obj: %s: %p\n", node->getAttribute("imName").c_str(), (void *)innerModel->getNode(node->getAttribute("imName").c_str()));
+			}
 			
 			QVec arm = innerModel->transform("room", "arm_right_1");
 			arm(1) = 0;
 			QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
 			obj(1) = 0;
 
+			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (arm-obj).norm2());
 
 			float THRESHOLD = THRESHOLD_object;
 			if (isObjectType(newModel, node, "table"))
@@ -125,14 +140,14 @@ void SpecificWorker::manageReachedObjects()
 	if (changed)
 	{
 		printf("PUBLISH!!!!\n");
-		mutex->lock();
 		sendModificationProposal(newModel, worldModel);
-		mutex->unlock();
 	}
 }
 
 bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t)
 {
+	QMutexLocker agmLocker(mutexAGM);
+
 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model); edge_itr++)
 	{
 		AGMModelEdge edge = *edge_itr;
@@ -148,6 +163,10 @@ bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr nod
 
 float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 {
+// 	QMutexLocker agmLocker(mutexAGM);
+	QMutexLocker imLocker(mutexIM);
+	
+	
 	// check if it's a polygon
 // 	bool isPolygon = false;
 // 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
@@ -229,18 +248,24 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 bool SpecificWorker::activateAgent(const ParameterMap& prs)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	bool activated = false;
+printf("%s: %d\n", __FILE__, __LINE__);
 	if (setParametersAndPossibleActivation(prs, activated))
 	{
+printf("%s: %d\n", __FILE__, __LINE__);
 			if (not activated)
 			{
+printf("%s: %d\n", __FILE__, __LINE__);
 				return activate(p);
 			}
 	}
 	else
 	{
+printf("%s: %d\n", __FILE__, __LINE__);
 		return false;
 	}
+printf("%s: %d\n", __FILE__, __LINE__);
 	return true;
 }
 
@@ -272,6 +297,7 @@ ParameterMap SpecificWorker::getAgentParameters()
 bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
 {
 	bool activated = false;
+printf("%s: %d\n", __FILE__, __LINE__);
 	return setParametersAndPossibleActivation(prs, activated);
 }
 
@@ -292,7 +318,9 @@ bool SpecificWorker::reloadConfigAgent()
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-	mutex->lock();
+	QMutexLocker agmLocker(mutexAGM);
+	QMutexLocker imLocker(mutexIM);
+
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
@@ -312,29 +340,37 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	mutex->lock();
+	QMutexLocker agmLocker(mutexAGM);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
-	mutex->unlock();
+	{
+		AGMModelEdge dst;
+		AGMModelConverter::fromIceToInternal(modification,dst);
+		QMutexLocker imLocker(mutexIM);
+		agmInner.updateImNodeFromEdge(dst, innerModel);
+	}
 }
 
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	// We didn't reactivate the component
 	reactivated = false;
 
 	// Update parameters
+printf("%s: %d\n", __FILE__, __LINE__);
 	params.clear();
+printf("%s: %d\n", __FILE__, __LINE__);
 	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
 	{
 		params[it->first] = it->second;
 	}
 
+printf("%s: %d\n", __FILE__, __LINE__);
 	try
 	{
+printf("%s: %d\n", __FILE__, __LINE__);
 		backAction = action;
 		action = params["action"].value;
 		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
@@ -350,6 +386,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 	}
 	catch (...)
 	{
+printf("%s: %d\n", __FILE__, __LINE__);
 		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
 		return false;
 	}
@@ -360,6 +397,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 		active = true;
 		reactivated = true;
 	}
+printf("%s: %d\n", __FILE__, __LINE__);
 
 	return true;
 }
@@ -790,29 +828,6 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 }
 
 
-
-void SpecificWorker::updateInnerModel()
-{
-	return;
-	mutex->lock();
-	try
-	{
-		AGMModelSymbol::SPtr robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
-// 		innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
-//                 printf("%f %f __ %f\n", x, z, alpha);
-		MotorStateMap mstateMap;
-		jointmotor_proxy->getAllMotorState(mstateMap);
-		for (auto &joint : mstateMap)
-		{
-			innerModel->updateJointValue(QString::fromStdString(joint.first), joint.second.pos);
-		}
-
-	}
-	catch(...)
-	{
-	}
-	mutex->unlock();
-}
 
 
 void SpecificWorker::setRightArmUp_Reflex()

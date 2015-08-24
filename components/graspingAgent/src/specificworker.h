@@ -81,7 +81,6 @@ private:
 	void directGazeTowards(AGMModelSymbol::SPtr symbol);
 	void saccadic3D(QVec point, QVec axis);
 	void saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz);
-	void updateInnerModel();
 
 
 	bool isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t);
@@ -91,6 +90,9 @@ private:
 	void setRightArmUp_Reflex();
 
 private:
+	
+	QMutex *mutexAGM, *mutexIM;
+	
 	std::string action, backAction;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
