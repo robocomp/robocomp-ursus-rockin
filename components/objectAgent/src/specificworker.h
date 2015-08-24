@@ -73,6 +73,7 @@ private:
 
 
 private:
+	QMutex* innerModelMutex;
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;

@@ -324,7 +324,6 @@ bool SpecificWorker::odometryAndLocationIssues()
 		return false;
 	}
 
-// 		printf("a %d\nv", __LINE__);
 	return true;
 }
 
