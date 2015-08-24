@@ -56,7 +56,8 @@ void SpecificWorker::compute( )
 	bool newAction = (previousAction != action);
 	if (newAction)
 		printf("New action: %s\n", action.c_str());
-
+	else
+		qDebug()<<"No action";
 	if (action == "findobjectvisuallyintable")
 	{
 		action_FindObjectVisuallyInTable(newAction);
@@ -245,6 +246,7 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 					publishModel = true;
 					printf("New table was detected!\n");
 				}
+				qDebug()<<ap.id<<"POSE: "<<innerModel->transform("room", QVec::vec3(ap.tx, ap.ty, ap.tz), "rgbd");
 				break;
 			case 31:
 				if (updateMug(ap, newModel))
@@ -252,10 +254,10 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 					publishModel = true;
 					printf("New mug was detected!\n");
 				}
+				qDebug()<<ap.id<<"POSE: "<<innerModel->transform("room", QVec::vec3(ap.tx, ap.ty, ap.tz), "rgbd");
 				break;				
 		}
 	}
-
 // 	if (publishModel)
 	{
 		sendModificationProposal(worldModel, newModel);
