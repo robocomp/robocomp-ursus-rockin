@@ -50,18 +50,20 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 //#########################################################################
 void SpecificWorker::compute( )
 {
+	static bool first = true;
+	if (first)
+	{
+		first = false;
+		printf("compute!\n");
+	}
 	static std::string previousAction = "";
 
 	bool newAction = (previousAction != action);
 	if (newAction)
 		printf("New action: %s\n", action.c_str());
-//	else
-//		qDebug()<<"No action";
 	if (action == "findobjectvisuallyintable")
 	{
-		printf("%s: %d\n", __FILE__, __LINE__);
 		action_FindObjectVisuallyInTable(newAction);
-		printf("%s: %d\n", __FILE__, __LINE__);
 	}
 
 	previousAction = action;
@@ -136,7 +138,6 @@ bool SpecificWorker::reloadConfigAgent()
 //#########################################################################
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-	printf("pre <<structuralChange\n");
 	printf("<<structuralChange\n");
 
 	QMutexLocker l(mutex);
@@ -171,7 +172,6 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	// We didn't reactivate the component
 	reactivated = false;
 
@@ -202,7 +202,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		return false;
 	}
 
-printf("%s: %d\n", __FILE__, __LINE__);
 	// Check if we should reactivate the component
 	if (active)
 	{
@@ -210,13 +209,11 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		reactivated = true;
 	}
 
-printf("%s: %d\n", __FILE__, __LINE__);
 	return true;
 }
 
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	try
 	{
 // 		AGMModelPrinter::printWorld(newModel);
@@ -232,7 +229,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 // Get new apriltags!
 void SpecificWorker::newAprilTag(const tagsList &list)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	if (worldModel->numberOfSymbols() == 0)
 		return;
 
@@ -242,7 +238,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 	bool publishModel = false;
 	for (auto ap : list)
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		switch(ap.id)
 		{
 			case 30:
@@ -362,8 +357,7 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 						edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
 						edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
 						
-						qDebug() << "Updating edge!";
-	//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
+						agmInner.setWorld(newModel);
 						AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
 					}
 					catch(...){ qFatal("Impossible to update the RT edge"); }
@@ -544,7 +538,6 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 
 bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	bool existing = false;
 
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
@@ -605,14 +598,11 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 bool SpecificWorker::updateCoffee(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
-
 	return false;
 }
 
 void SpecificWorker::getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t &objectStSymbolID)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	objectSymbolID = -1;
 	objectStSymbolID = -1;
 
@@ -635,7 +625,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	static QTime lastTime;
 
 	if (newAction)
@@ -647,13 +636,10 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		auto symbols = newModel->getSymbolsMap(params, "container");
 		auto node = symbols["container"];
 
-printf("%s: %d\n", __FILE__, __LINE__);
 		for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 		{
-printf("%s: %d\n", __FILE__, __LINE__);
 			if ((*edge_itr)->getLabel() == "noExplored")
 			{
-printf("%s: %d\n", __FILE__, __LINE__);
 				(*edge_itr)->setLabel("explored");
 				sendModificationProposal(worldModel, newModel);
 				return;
@@ -661,7 +647,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		}
 
 	}
-printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 
