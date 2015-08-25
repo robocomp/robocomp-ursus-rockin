@@ -27,8 +27,6 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
-	innerModelMutex = new QMutex(QMutex::Recursive);
-	agmMutex = new QMutex(QMutex::Recursive);
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel(); 
@@ -141,43 +139,33 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	printf("pre <<structuralChange\n");
 	printf("<<structuralChange\n");
 
-	{
-		QMutexLocker l(agmMutex);
-		AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-		agmInner.setWorld(worldModel);
-		{
-			QMutexLocker lockIM(innerModelMutex);
-			if (innerModel != NULL) delete innerModel;
-			innerModel = agmInner.extractInnerModel("room", true);
-		}
-	}
+	QMutexLocker l(mutex);
+	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+	agmInner.setWorld(worldModel);
+	if (innerModel != NULL) delete innerModel;
+	innerModel = agmInner.extractInnerModel("room", true);
+
 	printf("structuralChange>>\n");
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
-	QMutexLocker l(agmMutex);
+	QMutexLocker l(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 
-	{
-		QMutexLocker lockIM(innerModelMutex);
-		if (innerModel) delete innerModel;
-		innerModel = agmInner.extractInnerModel("room", true);
-	}
+	if (innerModel) delete innerModel;
+	innerModel = agmInner.extractInnerModel("room", true);
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	QMutexLocker l(agmMutex);
+	QMutexLocker l(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	{
-		QMutexLocker lockIM(innerModelMutex);
-		AGMModelEdge dst;
-		AGMModelConverter::fromIceToInternal(modification,dst);
-		agmInner.updateImNodeFromEdge(dst, innerModel);
-	}
+	AGMModelEdge dst;
+	AGMModelConverter::fromIceToInternal(modification,dst);
+	agmInner.updateImNodeFromEdge(dst, innerModel);
 }
 
 
