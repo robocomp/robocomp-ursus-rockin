@@ -95,7 +95,6 @@ void SpecificWorker::actionExecution()
 	}
 	else if (action == "setobjectreach")
 	{
-// 		return; //TODO QUITAR DESPUES!!!!!!!!!!
 		action_SetObjectReach(newAction);
 	}
 	else if (action == "graspobject")
@@ -197,14 +196,14 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		QVec poseInRoom = innerModel->transform6D(roomIMID, objectIMID); // FROM OBJECT TO ROOM
 		qDebug()<<" TARGET POSE: "<< poseInRoom;
 
-		currentTarget.first = objectID;
-		currentTarget.second.x = poseInRoom.x();
-		currentTarget.second.y = 0;
-		currentTarget.second.z = poseInRoom.z();
-		currentTarget.second.rx = 0;
-		currentTarget.second.ry = 0;
-		currentTarget.second.rz = 0;
-		currentTarget.second.doRotation = true;
+// 		currentTarget.first = objectID;
+		currentTarget.x = poseInRoom.x();
+		currentTarget.y = 0;
+		currentTarget.z = poseInRoom.z();
+		currentTarget.rx = 0;
+		currentTarget.ry = 0;
+		currentTarget.rz = 0;
+		currentTarget.doRotation = true;
 		std::cout<<"action "<<action<<" 147\n";
 	}
 	catch (...) 
@@ -219,8 +218,9 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		{
 			try
 			{
-				trajectoryrobot2d_proxy->goReferenced(currentTarget.second, 175, 250, 100);
-				std::cout << "trajectoryrobot2d_proxy->go(" << currentTarget.second.x << ", " << currentTarget.second.z << ", " << currentTarget.second.ry << ", " << 175 << ", " << 250 << " )\n";
+				
+				trajectoryrobot2d_proxy->goReferenced(currentTarget, 175, 250, 100);
+				std::cout << "trajectoryrobot2d_proxy->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << 175 << ", " << 250 << " )\n";
 				haveTarget = true;
 			}
 			catch(const Ice::Exception &ex)
@@ -791,37 +791,6 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	AGMModelEdge dst;
 	AGMModelConverter::fromIceToInternal(modification,dst);
 	agmInner.updateImNodeFromEdge(dst, innerModel);
-	
-	//NOTE: MIRAR BIEN
-	// Compare the current target old with the new updateç
-	// TODO: check edge node
-	if(modification.a == currentTarget.first || modification.b == currentTarget.second)
-	{
-		try
-		{
-			QString objectIMID = QString::fromStdString(worldModel->getSymbol(currentTarget.first)->getAttribute("imName"));
-			QVec targetOld = QVec::vec3(currentTarget.second.x, currentTarget.second.y, currentTarget.second.z);
-			QVec targetNew = innerModel->transform("room", objectIMID);
-			//NOTE: Threshold is for correct only if the distance has clearly changed.
-			if((targetNew-targetOld).norm2()<=100)
-			{
-				if(action == "setobjectreach")
-				{
-					haveTarget=false;
-					action_SetObjectReach(true);
-				}
-			}
-		}
-		catch(...)
-		{
-			printf("ERROR IN GET THE INNERMODEL NAME\n");
-			exit(2);
-		}
-	}
-	
-// 		if (innerModel) delete innerModel;
-// 		innerModel = agmInner.extractInnerModel("room", true);
-// 	innermodel->save("afterInner.xml");
 }
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)

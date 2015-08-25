@@ -31,8 +31,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
 
-	mutexAGM = new QMutex(QMutex::Recursive);
-	mutexIM = new QMutex(QMutex::Recursive);
+	mutex_AGM_IM = new QMutexDebug(QMutex::Recursive, QString("AGM & IM"));
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
@@ -50,8 +49,9 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-// 	printf("compute %d\n\n", __LINE__);
-	QMutexLocker imLocker(mutexIM);
+printf("%s: %d\n", __FILE__, __LINE__);
+	printf("compute %d\n\n", __LINE__);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	{
 		if (not innerModel->getNode("grabPositionHandR"))
 		{
@@ -73,13 +73,13 @@ void SpecificWorker::compute( )
 
 void SpecificWorker::manageReachedObjects()
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	float THRESHOLD_object = 400;
 	float THRESHOLD_table = 800;
 	
 	bool changed = false;
 	
-	QMutexLocker agmLocker(mutexAGM);
-	QMutexLocker imLocker(mutexIM);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 
@@ -108,13 +108,13 @@ void SpecificWorker::manageReachedObjects()
 			QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
 			obj(1) = 0;
 
-			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (arm-obj).norm2());
-
 			float THRESHOLD = THRESHOLD_object;
 			if (isObjectType(newModel, node, "table"))
 			{
 				THRESHOLD = THRESHOLD_table;
 			}
+			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (arm-obj).norm2(), THRESHOLD);
+
 
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
@@ -146,7 +146,8 @@ void SpecificWorker::manageReachedObjects()
 
 bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t)
 {
-	QMutexLocker agmLocker(mutexAGM);
+printf("%s: %d\n", __FILE__, __LINE__);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 
 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model); edge_itr++)
 	{
@@ -163,9 +164,8 @@ bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr nod
 
 float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 {
-// 	QMutexLocker agmLocker(mutexAGM);
-	QMutexLocker imLocker(mutexIM);
-	
+printf("%s: %d\n", __FILE__, __LINE__);
+
 	
 	// check if it's a polygon
 // 	bool isPolygon = false;
@@ -222,6 +222,7 @@ float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr 
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 // 	try
 // 	{
 // 		RoboCompCommonBehavior::Parameter par = params.at("GraspingAgent.InnerModel") ;
@@ -271,11 +272,13 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 bool SpecificWorker::deactivateAgent()
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 		return deactivate();
 }
 
 StateStruct SpecificWorker::getAgentState()
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	StateStruct s;
 	if (isActive())
 	{
@@ -291,11 +294,13 @@ StateStruct SpecificWorker::getAgentState()
 
 ParameterMap SpecificWorker::getAgentParameters()
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	return params;
 }
 
 bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	bool activated = false;
 printf("%s: %d\n", __FILE__, __LINE__);
 	return setParametersAndPossibleActivation(prs, activated);
@@ -303,52 +308,52 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 void SpecificWorker::killAgent()
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 Ice::Int SpecificWorker::uptimeAgent()
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	return 0;
 }
 
 bool SpecificWorker::reloadConfigAgent()
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	return true;
 }
 
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-	QMutexLocker agmLocker(mutexAGM);
-	QMutexLocker imLocker(mutexIM);
+printf("%s: %d\n", __FILE__, __LINE__);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room", true);
-	mutex->unlock();
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
-	mutex->lock();
+printf("%s: %d\n", __FILE__, __LINE__);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room", true);
-	mutex->unlock();
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	QMutexLocker agmLocker(mutexAGM);
+printf("%s: %d\n", __FILE__, __LINE__);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	{
-		AGMModelEdge dst;
-		AGMModelConverter::fromIceToInternal(modification,dst);
-		QMutexLocker imLocker(mutexIM);
-		agmInner.updateImNodeFromEdge(dst, innerModel);
-	}
+	AGMModelEdge dst;
+	AGMModelConverter::fromIceToInternal(modification,dst);
+	agmInner.updateImNodeFromEdge(dst, innerModel);
 }
 
 
@@ -416,6 +421,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel
 
 void SpecificWorker::actionExecution()
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
 
@@ -445,6 +451,7 @@ void SpecificWorker::actionExecution()
 
 void SpecificWorker::directGazeTowards(AGMModelSymbol::SPtr symbol)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	
 	try
 	{
@@ -471,9 +478,8 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 	try
 	{
 		int32_t tableId = str2int(params["container"].value);
-		mutex->lock();
+		QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 		directGazeTowards(worldModel->getSymbol(tableId));
-		mutex->unlock();
 	}
 	catch(...)
 	{
@@ -486,11 +492,11 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 
 void SpecificWorker::action_GraspObject(bool first)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	static int32_t state = 0;
 	static QTime time;
-	mutex->lock();
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
-	mutex->unlock();
 
 	static int lastTargetId = 0;
 	
@@ -626,9 +632,10 @@ void SpecificWorker::action_GraspObject(bool first)
 // // 			qFatal("got it!!!! :-D");
 // 			newModel->removeEdge(symbols["object"], symbols["table"], "in");
 // 			newModel->addEdge(   symbols["object"], symbols["robot"], "in");
-// 			mutex->lock();
-// 			sendModificationProposal(newModel, worldModel);
-// 			mutex->unlock();
+// 			{
+// 				QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+// 				sendModificationProposal(newModel, worldModel);
+// 			}
 // 			time = QTime::currentTime();
 // 			state = 7;
 // 		}
@@ -650,6 +657,7 @@ void SpecificWorker::action_GraspObject(bool first)
 
 QVec SpecificWorker::getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	// Get target
 	int robotID, objectID;
 	robotID = symbols["robot"]->identifier;
@@ -663,6 +671,7 @@ QVec SpecificWorker::getObjectsLocationInRobot(std::map<std::string, AGMModelSym
 
 QVec SpecificWorker::fromRobotToRoom(std::map<std::string, AGMModelSymbol::SPtr> &symbols, const QVec vector)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	// Get target
 	int roomID, robotID;
 	roomID = symbols["room"]->identifier;
@@ -684,6 +693,7 @@ QVec SpecificWorker::fromRobotToRoom(std::map<std::string, AGMModelSymbol::SPtr>
 
 int SpecificWorker::sendRightArmToPose(QVec targetPose)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	Pose6D target;
 	WeightVector weights;
 	try
@@ -711,6 +721,7 @@ int SpecificWorker::sendRightArmToPose(QVec targetPose)
 
 void SpecificWorker::action_SetObjectReach(bool first)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	printf("void SpecificWorker::action_SetObjectReach()\n");
 
 	///
@@ -741,9 +752,8 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	{
 		try
 		{
-			mutex->lock();
+			QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-			mutex->unlock();
 			QVec pose = innerModel->transformS("robot", goalObject->getAttribute("imName"));
 			const float x = pose.x();
 // 			const float y = pose.y();
@@ -776,11 +786,13 @@ void SpecificWorker::action_SetObjectReach(bool first)
 
 void SpecificWorker::saccadic3D(QVec point, QVec axis)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	saccadic3D(point(0), point(1), point(2), axis(0), axis(1), axis(2));
 }
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 // 	printf("saccadic3D\n");
 
 	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "room");

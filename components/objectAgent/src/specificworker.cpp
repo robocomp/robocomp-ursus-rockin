@@ -28,6 +28,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
 	innerModelMutex = new QMutex(QMutex::Recursive);
+	agmMutex = new QMutex(QMutex::Recursive);
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel(); 
@@ -60,11 +61,12 @@ void SpecificWorker::compute( )
 //		qDebug()<<"No action";
 	if (action == "findobjectvisuallyintable")
 	{
+		printf("%s: %d\n", __FILE__, __LINE__);
 		action_FindObjectVisuallyInTable(newAction);
+		printf("%s: %d\n", __FILE__, __LINE__);
 	}
 
 	previousAction = action;
-
 }
 //#########################################################################
 //#########################################################################
@@ -136,29 +138,27 @@ bool SpecificWorker::reloadConfigAgent()
 //#########################################################################
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-	
 	printf("pre <<structuralChange\n");
-	QMutexLocker l(mutex);
 	printf("<<structuralChange\n");
 
-	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	agmInner.setWorld(worldModel);
-
 	{
-		QMutexLocker lockIM(innerModelMutex);
-		if (innerModel != NULL) delete innerModel;
-		innerModel = agmInner.extractInnerModel("room", true);
+		QMutexLocker l(agmMutex);
+		AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+		agmInner.setWorld(worldModel);
+		{
+			QMutexLocker lockIM(innerModelMutex);
+			if (innerModel != NULL) delete innerModel;
+			innerModel = agmInner.extractInnerModel("room", true);
+		}
 	}
-
 	printf("structuralChange>>\n");
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
-	mutex->lock();
+	QMutexLocker l(agmMutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	mutex->unlock();
 
 	{
 		QMutexLocker lockIM(innerModelMutex);
@@ -169,26 +169,21 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	mutex->lock();
+	QMutexLocker l(agmMutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-// 	innermodel->save("beforeInner.xml");
-	mutex->unlock();
-
 	{
 		QMutexLocker lockIM(innerModelMutex);
 		AGMModelEdge dst;
 		AGMModelConverter::fromIceToInternal(modification,dst);
 		agmInner.updateImNodeFromEdge(dst, innerModel);
-// 		if (innerModel) delete innerModel;
-// 		innerModel = agmInner.extractInnerModel("room", true);
 	}
-// 	innermodel->save("afterInner.xml");
 }
 
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	// We didn't reactivate the component
 	reactivated = false;
 
@@ -219,6 +214,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 		return false;
 	}
 
+printf("%s: %d\n", __FILE__, __LINE__);
 	// Check if we should reactivate the component
 	if (active)
 	{
@@ -226,11 +222,13 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 		reactivated = true;
 	}
 
+printf("%s: %d\n", __FILE__, __LINE__);
 	return true;
 }
 
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	try
 	{
 // 		AGMModelPrinter::printWorld(newModel);
@@ -246,6 +244,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 // Get new apriltags!
 void SpecificWorker::newAprilTag(const tagsList &list)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	if (worldModel->numberOfSymbols() == 0)
 		return;
 
@@ -255,6 +254,7 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 	bool publishModel = false;
 	for (auto ap : list)
 	{
+printf("%s: %d\n", __FILE__, __LINE__);
 		switch(ap.id)
 		{
 			case 30:
@@ -556,6 +556,7 @@ bool SpecificWorker::updateMug(const RoboCompAprilTags::tag &t, AGMModel::SPtr &
 
 bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	bool existing = false;
 
 	for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
@@ -616,12 +617,14 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 
 bool SpecificWorker::updateCoffee(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 
 	return false;
 }
 
 void SpecificWorker::getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t &objectStSymbolID)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	objectSymbolID = -1;
 	objectStSymbolID = -1;
 
@@ -644,6 +647,7 @@ void SpecificWorker::getIDsFor(std::string obj, int32_t &objectSymbolID, int32_t
 
 void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 {
+printf("%s: %d\n", __FILE__, __LINE__);
 	static QTime lastTime;
 
 	if (newAction)
@@ -655,10 +659,13 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 		auto symbols = newModel->getSymbolsMap(params, "container");
 		auto node = symbols["container"];
 
+printf("%s: %d\n", __FILE__, __LINE__);
 		for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 		{
+printf("%s: %d\n", __FILE__, __LINE__);
 			if ((*edge_itr)->getLabel() == "noExplored")
 			{
+printf("%s: %d\n", __FILE__, __LINE__);
 				(*edge_itr)->setLabel("explored");
 				sendModificationProposal(worldModel, newModel);
 				return;
@@ -666,6 +673,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 		}
 
 	}
+printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 
