@@ -122,16 +122,10 @@ void SpecificWorker::actionExecution()
 void SpecificWorker::action_SetObjectReach(bool newAction)
 {
 	// Get symbols' map
-	std::cout<<"action "<<action<<" 1\n";
 	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
 	{
 		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/); //ALL THE SYMBOLS GIVEN IN THE RULE
-		printf("Simbolos que tenemos: \n");
-		for (auto symbol : symbols)
-		{
-			printf("             %s\n", symbol.first.c_str());
-		}
 	}
 	catch(...)
 	{
@@ -141,7 +135,6 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		printf("WORLD>>\n");
 		if (worldModel->size() > 0) {	exit(-1);  }
 	}
-	std::cout<<"action "<<action<<" 12\n";
 
 	// Get target
 	int roomID, objectID, robotID;
@@ -165,7 +158,6 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		exit(2);
 	}
 	
-	std::cout<<"action "<<action<<" 13\n";
 
 	// GET THE INNERMODEL NAMES OF TH SYMBOLS
 	QString robotIMID;
@@ -183,16 +175,13 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		exit(2);
 	}
 	
-	std::cout<<"action "<<action<<" 14\n";
 
 	// GET THE TARGET POSE: 
 	//RoboCompTrajectoryRobot2D::TargetPose tp;
 	
 	try
 	{
-		std::cout<<"action "<<action<<" 145\n";
 		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(objectIMID)))    return;
-		std::cout<<"action "<<action<<" 146\n";
 		QVec poseInRoom = innerModel->transform6D(roomIMID, objectIMID); // FROM OBJECT TO ROOM
 		qDebug()<<" TARGET POSE: "<< poseInRoom;
 
@@ -204,7 +193,6 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		currentTarget.ry = 0;
 		currentTarget.rz = 0;
 		currentTarget.doRotation = true;
-		std::cout<<"action "<<action<<" 147\n";
 	}
 	catch (...) 
 	{ 
@@ -218,14 +206,14 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		{
 			try
 			{
-				
-				trajectoryrobot2d_proxy->goReferenced(currentTarget, 175, 250, 100);
-				std::cout << "trajectoryrobot2d_proxy->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << 175 << ", " << 250 << " )\n";
+				float xRef=200, zRef=350, th=50;
+				trajectoryrobot2d_proxy->goReferenced(currentTarget, x, z, th);
+				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << xRef << ", " << zRef << " )\n";
 				haveTarget = true;
 			}
 			catch(const Ice::Exception &ex)
 			{
-				std::cout <<"trajectoryrobot2d_proxy->go "<< ex << std::endl;
+				std::cout <<"trajectoryrobot2d->go "<< ex << std::endl;
 				throw ex;
 			}
 		}
@@ -236,7 +224,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		}
 		catch(const Ice::Exception &ex)
 		{
-				std::cout <<"trajectoryrobot2d_proxy->getState().state "<< ex << std::endl;
+				std::cout <<"trajectoryrobot2d->getState().state "<< ex << std::endl;
 				throw ex;
 		}
 

@@ -225,13 +225,15 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
 {
-	mutex->lock();
- 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
- 
+	QMutexLocker l(mutex);
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
-	mutex->unlock();
+	{
+		QMutexLocker lockIM(innerModelMutex);
+		AGMModelEdge dst;
+		AGMModelConverter::fromIceToInternal(modification,dst);
+		agmInner.updateImNodeFromEdge(dst, innerModel);
+	}
 }
 
 
