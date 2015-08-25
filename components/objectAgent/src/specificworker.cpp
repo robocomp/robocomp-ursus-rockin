@@ -358,6 +358,9 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 						edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
 						
 						agmInner.setWorld(newModel);
+// 						agmInner.updateAgmWithInnerModelAndPublish(innerModel, agmagenttopic_proxy);
+						agmInner.setWorld(newModel);
+						agmInner.updateImNodeFromEdge(edgeRT, innerModel);
 						AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
 					}
 					catch(...){ qFatal("Impossible to update the RT edge"); }

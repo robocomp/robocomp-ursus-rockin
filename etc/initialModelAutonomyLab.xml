@@ -37,7 +37,7 @@
 		<linkAttribute key="ry" value="0" />
 		<linkAttribute key="rz" value="0" />
 		<linkAttribute key="tx" value="3800" />
-		<linkAttribute key="ty" value="200" />
+		<linkAttribute key="ty" value="910" />
 		<linkAttribute key="tz" value="3200" />
 	</link>
 
@@ -64,8 +64,8 @@
 		<linkAttribute key="ry" value="0" />
 		<linkAttribute key="rz" value="0" />
 		<linkAttribute key="tx" value="0" />
-		<linkAttribute key="ty" value="0" />
-		<linkAttribute key="tz" value="0" />
+		<linkAttribute key="ty" value="110" />
+		<linkAttribute key="tz" value="-500" />
 	</link>
 
 </AGMModel>
