@@ -117,14 +117,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void navigationComp::initialize()
+void ::navigationComp::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int navigationComp::run(int argc, char* argv[])
+int ::navigationComp::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -200,15 +200,21 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 
 
 
-	GenericWorker *worker = new SpecificWorker(mprx);
+	SpecificWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
-	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
+	SpecificMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor, SIGNAL(kill()), &a, SLOT(quit()));
 	QObject::connect(worker, SIGNAL(kill()), &a, SLOT(quit()));
 	monitor->start();
 
 	if ( !monitor->isRunning() )
 		return status;
+	
+	while (!monitor->ready)
+	{
+		usleep(10000);
+	}
+	
 	try
 	{
 		// Server adapter creation and publication
@@ -328,7 +334,7 @@ int main(int argc, char* argv[])
 			printf("Configuration prefix: <%s>\n", prefix.toStdString().c_str());
 		}
 	}
-	navigationComp app(prefix);
+	::navigationComp app(prefix);
 
 	return app.main(argc, argv, configFile.c_str());
 }

@@ -27,7 +27,6 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
-	innerModelMutex = new QMutex(QMutex::Recursive);
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel(); 
@@ -51,20 +50,23 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 //#########################################################################
 void SpecificWorker::compute( )
 {
+	static bool first = true;
+	if (first)
+	{
+		first = false;
+		printf("compute!\n");
+	}
 	static std::string previousAction = "";
 
 	bool newAction = (previousAction != action);
 	if (newAction)
 		printf("New action: %s\n", action.c_str());
-//	else
-//		qDebug()<<"No action";
 	if (action == "findobjectvisuallyintable")
 	{
 		action_FindObjectVisuallyInTable(newAction);
 	}
 
 	previousAction = action;
-
 }
 //#########################################################################
 //#########################################################################
@@ -136,54 +138,35 @@ bool SpecificWorker::reloadConfigAgent()
 //#########################################################################
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-	
-	printf("pre <<structuralChange\n");
-	QMutexLocker l(mutex);
 	printf("<<structuralChange\n");
 
+	QMutexLocker l(mutex);
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
-
-	{
-		QMutexLocker lockIM(innerModelMutex);
-		if (innerModel != NULL) delete innerModel;
-		innerModel = agmInner.extractInnerModel("room", true);
-	}
+	if (innerModel != NULL) delete innerModel;
+	innerModel = agmInner.extractInnerModel("room", true);
 
 	printf("structuralChange>>\n");
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
-	mutex->lock();
+	QMutexLocker l(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	mutex->unlock();
 
-	{
-		QMutexLocker lockIM(innerModelMutex);
-		if (innerModel) delete innerModel;
-		innerModel = agmInner.extractInnerModel("room", true);
-	}
+	if (innerModel) delete innerModel;
+	innerModel = agmInner.extractInnerModel("room", true);
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	mutex->lock();
+	QMutexLocker l(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-// 	innermodel->save("beforeInner.xml");
-	mutex->unlock();
-
-	{
-		QMutexLocker lockIM(innerModelMutex);
-		AGMModelEdge dst;
-		AGMModelConverter::fromIceToInternal(modification,dst);
-		agmInner.updateImNodeFromEdge(dst, innerModel);
-// 		if (innerModel) delete innerModel;
-// 		innerModel = agmInner.extractInnerModel("room", true);
-	}
-// 	innermodel->save("afterInner.xml");
+	AGMModelEdge dst;
+	AGMModelConverter::fromIceToInternal(modification,dst);
+	agmInner.updateImNodeFromEdge(dst, innerModel);
 }
 
 
@@ -374,8 +357,10 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 						edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
 						edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
 						
-						qDebug() << "Updating edge!";
-	//					updateAgmWithInnerModelAndPublish(innerModel, AGMAgentTopicPrx &agmagenttopic_proxy);
+						agmInner.setWorld(newModel);
+// 						agmInner.updateAgmWithInnerModelAndPublish(innerModel, agmagenttopic_proxy);
+						agmInner.setWorld(newModel);
+						agmInner.updateImNodeFromEdge(edgeRT, innerModel);
 						AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
 					}
 					catch(...){ qFatal("Impossible to update the RT edge"); }
@@ -616,7 +601,6 @@ bool SpecificWorker::updateMilk(const RoboCompAprilTags::tag &t, AGMModel::SPtr 
 
 bool SpecificWorker::updateCoffee(const RoboCompAprilTags::tag &t, AGMModel::SPtr &newModel)
 {
-
 	return false;
 }
 

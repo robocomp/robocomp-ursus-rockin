@@ -31,8 +31,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
 
-	mutexAGM = new QMutex(QMutex::Recursive);
-	mutexIM = new QMutex(QMutex::Recursive);
+	mutex_AGM_IM = new QMutexDebug(QMutex::Recursive, QString("AGM & IM"));
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
@@ -50,8 +49,7 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-// 	printf("compute %d\n\n", __LINE__);
-	QMutexLocker imLocker(mutexIM);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	{
 		if (not innerModel->getNode("grabPositionHandR"))
 		{
@@ -59,27 +57,22 @@ void SpecificWorker::compute( )
 			return;
 		}
 	}
-	printf("manageReachedObjects %d\n\n", __LINE__);
 	manageReachedObjects();
-	printf("manageReachedObjects %d\n\n", __LINE__);
-	
 
 	// ACTION EXECUTION
 	actionExecution();
 // 	printf("compute %d\n\n", __LINE__);
-
 }
 
 
 void SpecificWorker::manageReachedObjects()
 {
-	float THRESHOLD_object = 400;
-	float THRESHOLD_table = 800;
+	float THRESHOLD_object = 100;
+	float THRESHOLD_table = 400;
 	
 	bool changed = false;
 	
-	QMutexLocker agmLocker(mutexAGM);
-	QMutexLocker imLocker(mutexIM);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 
@@ -95,26 +88,30 @@ void SpecificWorker::manageReachedObjects()
 			float d2n;
 			try
 			{
-				d2n = distanceToNode("arm_right_1", newModel, node);
+				d2n = distanceToNode("right_shoulder_pose", newModel, node);
 			}
 			catch(...)
 			{
-				printf("Ref: arm_right_1: %p\n", (void *)innerModel->getNode("arm_right_1"));
+				printf("Ref: right_shoulder_pose: %p\n", (void *)innerModel->getNode("right_shoulder_pose"));
 				printf("Obj: %s: %p\n", node->getAttribute("imName").c_str(), (void *)innerModel->getNode(node->getAttribute("imName").c_str()));
 			}
 			
-			QVec arm = innerModel->transform("room", "arm_right_1");
-			arm(1) = 0;
+			QVec graspPosition = innerModel->transform("room", QVec::vec3(0, 0, 0), "right_shoulder_pose");
+			graspPosition(1) = 0;
 			QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
 			obj(1) = 0;
-
-			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (arm-obj).norm2());
+			graspPosition.print("  graspPosition");
+			obj.print("  obj");
 
 			float THRESHOLD = THRESHOLD_object;
 			if (isObjectType(newModel, node, "table"))
 			{
 				THRESHOLD = THRESHOLD_table;
 			}
+			
+			
+			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (graspPosition-obj).norm2(), THRESHOLD);
+
 
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
@@ -146,7 +143,7 @@ void SpecificWorker::manageReachedObjects()
 
 bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t)
 {
-	QMutexLocker agmLocker(mutexAGM);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 
 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model); edge_itr++)
 	{
@@ -163,10 +160,6 @@ bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr nod
 
 float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 {
-// 	QMutexLocker agmLocker(mutexAGM);
-	QMutexLocker imLocker(mutexIM);
-	
-	
 	// check if it's a polygon
 // 	bool isPolygon = false;
 // 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
@@ -248,30 +241,24 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 bool SpecificWorker::activateAgent(const ParameterMap& prs)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	bool activated = false;
-printf("%s: %d\n", __FILE__, __LINE__);
 	if (setParametersAndPossibleActivation(prs, activated))
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
-			if (not activated)
-			{
-printf("%s: %d\n", __FILE__, __LINE__);
-				return activate(p);
-			}
+		if (not activated)
+		{
+			return activate(p);
+		}
 	}
 	else
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		return false;
 	}
-printf("%s: %d\n", __FILE__, __LINE__);
 	return true;
 }
 
 bool SpecificWorker::deactivateAgent()
 {
-		return deactivate();
+	return deactivate();
 }
 
 StateStruct SpecificWorker::getAgentState()
@@ -297,7 +284,6 @@ ParameterMap SpecificWorker::getAgentParameters()
 bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
 {
 	bool activated = false;
-printf("%s: %d\n", __FILE__, __LINE__);
 	return setParametersAndPossibleActivation(prs, activated);
 }
 
@@ -318,59 +304,48 @@ bool SpecificWorker::reloadConfigAgent()
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-	QMutexLocker agmLocker(mutexAGM);
-	QMutexLocker imLocker(mutexIM);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room", true);
-	mutex->unlock();
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
-	mutex->lock();
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
 	innerModel = agmInner.extractInnerModel("room", true);
-	mutex->unlock();
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	QMutexLocker agmLocker(mutexAGM);
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
-	{
-		AGMModelEdge dst;
-		AGMModelConverter::fromIceToInternal(modification,dst);
-		QMutexLocker imLocker(mutexIM);
-		agmInner.updateImNodeFromEdge(dst, innerModel);
-	}
+	AGMModelEdge dst;
+	AGMModelConverter::fromIceToInternal(modification,dst);
+	agmInner.updateImNodeFromEdge(dst, innerModel);
 }
 
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	// We didn't reactivate the component
 	reactivated = false;
 
 	// Update parameters
-printf("%s: %d\n", __FILE__, __LINE__);
 	params.clear();
-printf("%s: %d\n", __FILE__, __LINE__);
 	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
 	{
 		params[it->first] = it->second;
 	}
 
-printf("%s: %d\n", __FILE__, __LINE__);
 	try
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		backAction = action;
 		action = params["action"].value;
 		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
@@ -386,7 +361,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 	}
 	catch (...)
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
 		return false;
 	}
@@ -397,7 +371,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		active = true;
 		reactivated = true;
 	}
-printf("%s: %d\n", __FILE__, __LINE__);
 
 	return true;
 }
@@ -419,6 +392,10 @@ void SpecificWorker::actionExecution()
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
 
+	qDebug()<<"---------------------------------";
+	cout<<action<<endl;
+	qDebug()<<"---------------------------------";
+	
 	if (newAction)
 		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
 
@@ -445,7 +422,6 @@ void SpecificWorker::actionExecution()
 
 void SpecificWorker::directGazeTowards(AGMModelSymbol::SPtr symbol)
 {
-	
 	try
 	{
 		const float x = str2float(symbol->getAttribute("tx"));
@@ -471,9 +447,8 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 	try
 	{
 		int32_t tableId = str2int(params["container"].value);
-		mutex->lock();
+		QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 		directGazeTowards(worldModel->getSymbol(tableId));
-		mutex->unlock();
 	}
 	catch(...)
 	{
@@ -488,10 +463,10 @@ void SpecificWorker::action_GraspObject(bool first)
 {
 	static int32_t state = 0;
 	static QTime time;
-	mutex->lock();
+	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
-	mutex->unlock();
-
+	QVec objectsLocationInRobot;
+	TargetState ikState;
 	static int lastTargetId = 0;
 	
 	if (first) state = 0;
@@ -505,149 +480,162 @@ void SpecificWorker::action_GraspObject(bool first)
 	catch(...)
 	{
 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
-	}
+	}	
 
-
-	if (state == 0) // 1º approach hand
+//////////////////////////////////////////////
+// 	STATE MACHINE							//
+// 	1.- approach the hand and open fingers	//
+// 	2.- align in x axe						//
+// 	3.- grasp position						//
+// 	4.- close fingers						//
+//////////////////////////////////////////////
+	switch (state)
 	{
-		printf("%s: %d\n", __FILE__, __LINE__);
-		try
-		{
-			inversekinematics_proxy->setFingers(80);
-		}
-		catch(...)
-		{
-			qFatal("%s: %d\n", __FILE__, __LINE__);
-		}
-
-		printf("%s: %d\n", __FILE__, __LINE__);
-		usleep(100000);
-		QVec objectsLocationInRobot;
-
-		try
-		{
-			objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbols["object"]);
-		}
-		catch (...)
-		{
-			printf("%s: %d\n", __FILE__, __LINE__);
-		}
-
-		objectsLocationInRobot += QVec::vec6(100, 100, 0,  0,0,0);
-		objectsLocationInRobot(3) = 0;
-		objectsLocationInRobot(4) = -1.5707;
-		objectsLocationInRobot(5) = -3.1415926535;
-		objectsLocationInRobot.print("d1");
-
-		printf("%s: %d\n", __FILE__, __LINE__);
-
-// 		QVec handTargetPoseInRoom;
-// 		try
-// 		{
-// 			handTargetPoseInRoom = fromRobotToRoom(symbols, objectsLocationInRobot);
-// 			handTargetPoseInRoom.print("d2");
-// 		}
-// 		catch (...)
-// 		{
-// 			printf("%s: %d\n", __FILE__, __LINE__);
-// 		}
-// 		printf("%s: %d\n", __FILE__, __LINE__);
-
-		try
-		{
-			lastTargetId = sendRightArmToPose(objectsLocationInRobot);
-			objectsLocationInRobot.print("m");
-			time = QTime::currentTime();
-			state = 1;
-		}
-		catch (...)
-		{
-			printf("%s: %d\n", __FILE__, __LINE__);
-		}
-		printf("%s: %d\n", __FILE__, __LINE__);
+		case 0: // APPROACH AND OPEN FINGERS
+			// open fingers
+			try
+			{
+				inversekinematics_proxy->setFingers(80); //OPEN FINGERS
+			}
+			catch(...)	{	qFatal("%s: %d\n", __FILE__, __LINE__);	}
+			usleep(100000);
+			// approach the hand
+			try
+			{
+				objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbols["object"]); //POSE OBJECT IN ROBOT SYSTEM
+			}
+			catch (...)	{	printf("%s: %d\n", __FILE__, __LINE__);	}
+			// add offset and put rotation
+			objectsLocationInRobot += QVec::vec6(100, 100, 0,  0,0,0);
+			objectsLocationInRobot(3) = 0;
+			objectsLocationInRobot(4) = -1.5707;
+			objectsLocationInRobot(5) = 0;
+			try
+			{
+				lastTargetId = sendRightArmToPose(objectsLocationInRobot);
+				qDebug()<<"------> 0 step execution";
+				time = QTime::currentTime();
+				state++; // next state
+				
+			}
+			catch (...)	{ printf("%s: %d\n", __FILE__, __LINE__); }
+			break;
+		////////////////////////////////////////////////////////////////////////////////////////////
+		case 1: // WAITING FOR THE FIRST VIK EXECUTION
+			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
+			if (ikState.finish)
+			{
+				if (ikState.errorT < 40 and ikState.errorR < 0.5)
+				{
+					state++; // next state
+					qDebug()<<"------> 1 step execution";
+				}
+			}
+			break;
+		////////////////////////////////////////////////////////////////////////////////////////////
+		case 2: // ALIGN TO OBJECT IN X AXE
+			try
+			{
+				objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbols["object"]); //POSE OBJECT IN ROBOT SYSTEM
+			}
+			catch (...)	{	printf("%s: %d\n", __FILE__, __LINE__);	}
+			// add offset and put rotation
+			objectsLocationInRobot += QVec::vec6(100, -50, 0,  0,0,0);
+			objectsLocationInRobot(3) = 0;
+			objectsLocationInRobot(4) = -1.5707;
+			objectsLocationInRobot(5) = 0;
+			try
+			{
+				lastTargetId = sendRightArmToPose(objectsLocationInRobot);
+				qDebug()<<"------> 2 step execution";
+				time = QTime::currentTime();
+				state++; // next state
+			}
+			catch (...)	{ printf("%s: %d\n", __FILE__, __LINE__); }
+			break;
+		////////////////////////////////////////////////////////////////////////////////////////////
+		case 3: // WAITING FOR THE SECOND VIK EXECUTION
+			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
+			if (ikState.finish)
+			{
+				if (ikState.errorT < 40 and ikState.errorR < 0.5)
+				{
+					state++; // next state
+					qDebug()<<"------> 3 step execution";
+				}
+			}
+			break;
+		////////////////////////////////////////////////////////////////////////////////////////////
+		case 4: // GRASP POSITION
+			try
+			{
+				objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbols["object"]); //POSE OBJECT IN ROBOT SYSTEM
+			}
+			catch (...)	{	printf("%s: %d\n", __FILE__, __LINE__);	}
+			// add offset and put rotation
+			objectsLocationInRobot += QVec::vec6(80, -50, 0,  0,0,0);
+			objectsLocationInRobot(3) = 0;
+			objectsLocationInRobot(4) = -1.5707;
+			objectsLocationInRobot(5) = 0;
+			try
+			{
+				lastTargetId = sendRightArmToPose(objectsLocationInRobot);
+				qDebug()<<"------> 4 step execution";
+				time = QTime::currentTime();
+				state++; // next state
+			}
+			catch (...)	{ printf("%s: %d\n", __FILE__, __LINE__); }
+			break;
+		////////////////////////////////////////////////////////////////////////////////////////////
+		case 5: // WAITING FOR THE THIRD VIK EXECUTION
+			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
+			if (ikState.finish)
+			{
+				if (ikState.errorT < 40 and ikState.errorR < 0.5)
+				{
+					state++; // next state
+					qDebug()<<"------> 5 step execution";
+				}
+			}
+			break;
+		////////////////////////////////////////////////////////////////////////////////////////////
+		case 6:
+			try
+			{
+				inversekinematics_proxy->setFingers(50);
+				usleep(500000);
+// 				qFatal("got it!!!! :-D");
+				newModel->removeEdge(symbols["object"], symbols["table"], "in");
+				newModel->addEdge(   symbols["object"], symbols["robot"], "in");
+				{
+					QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+					sendModificationProposal(newModel, worldModel);
+				}
+				time = QTime::currentTime();
+				
+				state++;
+			}
+			catch(...)
+			{
+				printf("graspingAgent: Couldn't publish new model\n");
+			}
+			break;
+		////////////////////////////////////////////////////////////////////////////////////////////
+		default:
+			if (time.elapsed() > 4000)
+			{
+				state = 0;
+			}
+			break;
 	}
-	else if (state == 1) // wait
-	{
-		TargetState ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
-
-		if (ikState.finish)
-		{
-			if (ikState.errorT < 40 and ikState.errorR < 0.5)
-				state = 2;
-		}
-	}
-	else if (state == 2) // 2º get the hand into the object
-	{
-		printf("yipieeeeeeeeee\n");
-// 		usleep(100000);
-// 		sendRightArmToPose(symbols["object"], QVec::vec3(0, -250, 0));
-// 		time = QTime::currentTime();
-		state = 3;
-		exit(1);
-	}
-	else if (state == 3) // wait
-	{
-// 		if (time.elapsed() > 4000) { state = 0; }
-// 		else
-// 		{
-// 			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocationInRobot(symbols["object"]) + offset.operator*(0.4), "room").norm2();
-// 			printf("state==3: %f\n", distance);
-// 			if (distance < 5)
-// 			{
-// 				state = 4;
-// 			}
-// 		}
-	}
-	else if (state == 4) // 3º get the hand into the object
-	{
-// 		//inversekinematics_proxy->setFingers(50);
-// 		time = QTime::currentTime();
-// 		state = 5;
-	}
-	else if (state == 5) // wait
-	{
-// 		if (time.elapsed() > 4000) { state = 0; }
-// 		else
-// 		{
-// 			auto distance = innerModel->transform("grabPositionHandR", getObjectsLocationInRobot(symbols["object"]) + offset.operator*(0.4), "room").norm2();
-// 			printf("state==5: %f\n", distance);
-// 			if (distance < 5)
-// 			{
-// 				state = 6;
-// 			}
-// 		}
-	}
-	else if (state == 6)
-	{
-// 		try
-// 		{
-// 			inversekinematics_proxy->setFingers(50);
-// 			usleep(500000);
-// // 			qFatal("got it!!!! :-D");
-// 			newModel->removeEdge(symbols["object"], symbols["table"], "in");
-// 			newModel->addEdge(   symbols["object"], symbols["robot"], "in");
-// 			mutex->lock();
-// 			sendModificationProposal(newModel, worldModel);
-// 			mutex->unlock();
-// 			time = QTime::currentTime();
-// 			state = 7;
-// 		}
-// 		catch(...)
-// 		{
-// 			printf("graspingAgent: Couldn't publish new model\n");
-// 		}
-	}
-	else
-	{
-		if (time.elapsed() > 4000)
-		{
-			state = 0;
-		}
-	}
-
 }
 
-
+/**
+ * \brief This method calculates the pose of the symbol OBJECT into the robot reference system.
+ * @param symbols the symbols of AGM model
+ * @param object the goal object
+ * @return POSE 6D
+ */ 
 QVec SpecificWorker::getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object)
 {
 	// Get target
@@ -741,9 +729,8 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	{
 		try
 		{
-			mutex->lock();
+			QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-			mutex->unlock();
 			QVec pose = innerModel->transformS("robot", goalObject->getAttribute("imName"));
 			const float x = pose.x();
 // 			const float y = pose.y();
@@ -781,14 +768,11 @@ void SpecificWorker::saccadic3D(QVec point, QVec axis)
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
-// 	printf("saccadic3D\n");
-
 	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "room");
 // 	rel.print("desde la camara");
 
 	float errYaw   = -atan2(rel(0), rel(2));
 	float errPitch = +atan2(rel(1), rel(2));
-// 	printf("%f  %f\n", errYaw, errPitch);
 
 	RoboCompJointMotor::MotorGoalPosition goal;
 
