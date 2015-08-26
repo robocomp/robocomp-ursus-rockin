@@ -22,6 +22,61 @@ void SpecificWorker::compute()
 	///check remove_ImOriginal
 //  	qDebug()<<"\n\nnumberOfSymbols agmInner.remove_ImOriginal: "<< (agmInner.remove_ImOriginal("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/initialModelCOFFEE.xml",
 // 				"/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml") )->numberOfSymbols();
+	
+	////************************* test innerModelViewer **************************************************
+	////************************* test innerModelViewer **************************************************	
+	////************************* test innerModelViewer **************************************************
+	///test innermodel
+// 	std::cout << "START: Press enter to continue...\n";
+// 	std::cin.get(); 
+// // 	innerViewer->update();
+// 	osgView->autoResize();		
+// 	osgView->frame();	
+// 	static int i=0;
+// 	qDebug()<<"i"<<i;	
+// 	innerModel = new InnerModel ( "/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml");	
+// 	innerModel1 = new InnerModel ( "/home/luiky/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/autonomyLabModel.xml");	
+// 	while (i<100 )
+// 	{	
+// 		qDebug()<<"i"<<i;		
+// 		qDebug()<<"----------- 1111 delete innerViewer ----------" ;	
+// 		osgView->getRootGroup()->removeChild(innerViewer);		
+// 		qDebug()<<"----------- 2222 delete innerViewer ----------" ;				
+// 		std::cout << "new innerViewer \n";
+// 		if (i%2==0)
+// 		{
+// 			
+// 			innerModel = new InnerModel ( "/home/luiky/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/autonomyLabModel.xml");	
+// // 			innerModel = new InnerModel ( "/home/luiky/robocomp/components/robocomp-ursus-rockin/etc/person.xml");	
+// 			innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
+// 			
+// 		}
+// 		else
+// 		{
+// 			
+// 			innerModel1 = new InnerModel ( "/home/luiky/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/autonomyLabModel.xml");	
+// // 			innerModel1 = new InnerModel ( "/home/luiky/robocomp/components/robocomp-ursus-rockin/etc/person.xml");	
+// 			
+// 			innerViewer = new InnerModelViewer(innerModel1, "root", osgView->getRootGroup(), true);
+// 		}
+// 		innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);					
+// 		i++;
+// 		//usleep(200);
+// 	}
+// 	qDebug()<<"i"<<i;
+// // 	delete innerModel;
+// // 	std::cout << "END: Press enter to continue...\n";
+// // 	std::cin.get(); 
+// // 	exit(1);
+// // 	innerViewer->update();
+// // 	osgView->autoResize();		
+// // 	osgView->frame();
+// 	qFatal("fary");
+	
+	////************************* test innerModelViewer **************************************************
+	////************************* test innerModelViewer **************************************************
+	////************************* test innerModelViewer **************************************************
+	
 
 	if (worldModel->numberOfSymbols()>0)
 	{		
@@ -108,7 +163,7 @@ void SpecificWorker::compute()
 		///para comprobar la funcion del edge en el mision
 // 		sleep(1);
 // 		float cX,cY,cRY;
-// 		for (int j=0; j<100;j++)
+// 		for (int j=0; j<10;j++)
 // 		{
 // 			cX=cY=50;
 // 			cRY=0.01;
@@ -697,8 +752,21 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
-	worldModel->name = "worldModel";
-	//agmInner = new AgmInner();
+	worldModel->name = "worldModel";	
+	
+	innerModelVacio = new InnerModel();	
+	osgView = new OsgView( this );
+	show();
+//  	printf("%s: %d\n", __FILE__, __LINE__);
+	innerViewer = new InnerModelViewer(innerModelVacio, "root", osgView->getRootGroup(), true);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
+	manipulator = new osgGA::TrackballManipulator;
+	osgView->setCameraManipulator(manipulator, true);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
+	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
+	
+	
 	setPeriod(1000);
 }
 

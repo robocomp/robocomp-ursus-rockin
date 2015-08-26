@@ -34,6 +34,7 @@
 
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
+#include <innermodel/innermodelviewer.h>
 
 #include <agm.h>
 #include <qt4/QtCore/QHash>
@@ -70,6 +71,11 @@ private:
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel,*innerModel1;
+	osgGA::TrackballManipulator *manipulator;
+	OsgView *osgView;
+	InnerModel *innerModelVacio;
+	InnerModelViewer *innerViewer; 
+	
 	AgmInner agmInner;
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
