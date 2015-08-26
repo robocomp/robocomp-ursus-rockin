@@ -206,7 +206,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		{
 			try
 			{
-				float xRef=200, zRef=350, th=50;
+				float xRef=200, zRef=300, th=50;
 				trajectoryrobot2d_proxy->goReferenced(currentTarget, xRef, zRef, th);
 				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << xRef << ", " << zRef << " )\n";
 				haveTarget = true;

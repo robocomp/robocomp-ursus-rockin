@@ -49,7 +49,6 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	printf("compute %d\n\n", __LINE__);
 	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	{
@@ -73,9 +72,8 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 void SpecificWorker::manageReachedObjects()
 {
-printf("%s: %d\n", __FILE__, __LINE__);
-	float THRESHOLD_object = 400;
-	float THRESHOLD_table = 800;
+	float THRESHOLD_object = 100;
+	float THRESHOLD_table = 400;
 	
 	bool changed = false;
 	
@@ -95,25 +93,29 @@ printf("%s: %d\n", __FILE__, __LINE__);
 			float d2n;
 			try
 			{
-				d2n = distanceToNode("arm_right_1", newModel, node);
+				d2n = distanceToNode("right_shoulder_pose", newModel, node);
 			}
 			catch(...)
 			{
-				printf("Ref: arm_right_1: %p\n", (void *)innerModel->getNode("arm_right_1"));
+				printf("Ref: right_shoulder_pose: %p\n", (void *)innerModel->getNode("right_shoulder_pose"));
 				printf("Obj: %s: %p\n", node->getAttribute("imName").c_str(), (void *)innerModel->getNode(node->getAttribute("imName").c_str()));
 			}
 			
-			QVec arm = innerModel->transform("room", "arm_right_1");
-			arm(1) = 0;
+			QVec graspPosition = innerModel->transform("room", QVec::vec3(0, 0, 0), "right_shoulder_pose");
+			graspPosition(1) = 0;
 			QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
 			obj(1) = 0;
+			graspPosition.print("  graspPosition");
+			obj.print("  obj");
 
 			float THRESHOLD = THRESHOLD_object;
 			if (isObjectType(newModel, node, "table"))
 			{
 				THRESHOLD = THRESHOLD_table;
 			}
-			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (arm-obj).norm2(), THRESHOLD);
+			
+			
+			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (graspPosition-obj).norm2(), THRESHOLD);
 
 
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
@@ -146,7 +148,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 
 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model); edge_itr++)
@@ -164,9 +165,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
-
-	
 	// check if it's a polygon
 // 	bool isPolygon = false;
 // 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
@@ -222,7 +220,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 // 	try
 // 	{
 // 		RoboCompCommonBehavior::Parameter par = params.at("GraspingAgent.InnerModel") ;
@@ -249,36 +246,28 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 bool SpecificWorker::activateAgent(const ParameterMap& prs)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	bool activated = false;
-printf("%s: %d\n", __FILE__, __LINE__);
 	if (setParametersAndPossibleActivation(prs, activated))
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
-			if (not activated)
-			{
-printf("%s: %d\n", __FILE__, __LINE__);
-				return activate(p);
-			}
+		if (not activated)
+		{
+			return activate(p);
+		}
 	}
 	else
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		return false;
 	}
-printf("%s: %d\n", __FILE__, __LINE__);
 	return true;
 }
 
 bool SpecificWorker::deactivateAgent()
 {
-printf("%s: %d\n", __FILE__, __LINE__);
-		return deactivate();
+	return deactivate();
 }
 
 StateStruct SpecificWorker::getAgentState()
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	StateStruct s;
 	if (isActive())
 	{
@@ -294,39 +283,32 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 ParameterMap SpecificWorker::getAgentParameters()
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	return params;
 }
 
 bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	bool activated = false;
-printf("%s: %d\n", __FILE__, __LINE__);
 	return setParametersAndPossibleActivation(prs, activated);
 }
 
 void SpecificWorker::killAgent()
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 Ice::Int SpecificWorker::uptimeAgent()
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	return 0;
 }
 
 bool SpecificWorker::reloadConfigAgent()
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	return true;
 }
 
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
@@ -337,7 +319,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
@@ -347,7 +328,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
@@ -359,23 +339,18 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	// We didn't reactivate the component
 	reactivated = false;
 
 	// Update parameters
-printf("%s: %d\n", __FILE__, __LINE__);
 	params.clear();
-printf("%s: %d\n", __FILE__, __LINE__);
 	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
 	{
 		params[it->first] = it->second;
 	}
 
-printf("%s: %d\n", __FILE__, __LINE__);
 	try
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		backAction = action;
 		action = params["action"].value;
 		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
@@ -391,7 +366,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 	}
 	catch (...)
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
 		return false;
 	}
@@ -402,7 +376,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		active = true;
 		reactivated = true;
 	}
-printf("%s: %d\n", __FILE__, __LINE__);
 
 	return true;
 }
@@ -421,7 +394,6 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel
 
 void SpecificWorker::actionExecution()
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
 
@@ -451,8 +423,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 void SpecificWorker::directGazeTowards(AGMModelSymbol::SPtr symbol)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
-	
 	try
 	{
 		const float x = str2float(symbol->getAttribute("tx"));
@@ -492,7 +462,6 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 
 void SpecificWorker::action_GraspObject(bool first)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	static int32_t state = 0;
 	static QTime time;
 	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
@@ -516,7 +485,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 	if (state == 0) // 1º approach hand
 	{
-		printf("%s: %d\n", __FILE__, __LINE__);
 		try
 		{
 			inversekinematics_proxy->setFingers(80);
@@ -525,8 +493,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		{
 			qFatal("%s: %d\n", __FILE__, __LINE__);
 		}
-
-		printf("%s: %d\n", __FILE__, __LINE__);
 		usleep(100000);
 		QVec objectsLocationInRobot;
 
@@ -539,13 +505,12 @@ printf("%s: %d\n", __FILE__, __LINE__);
 			printf("%s: %d\n", __FILE__, __LINE__);
 		}
 
-		objectsLocationInRobot += QVec::vec6(100, 100, 0,  0,0,0);
+		objectsLocationInRobot += QVec::vec6(100, 0, 0,  0,0,0);
 		objectsLocationInRobot(3) = 0;
 		objectsLocationInRobot(4) = -1.5707;
-		objectsLocationInRobot(5) = -3.1415926535;
+		objectsLocationInRobot(5) = 0;
 		objectsLocationInRobot.print("d1");
 
-		printf("%s: %d\n", __FILE__, __LINE__);
 
 // 		QVec handTargetPoseInRoom;
 // 		try
@@ -570,7 +535,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		{
 			printf("%s: %d\n", __FILE__, __LINE__);
 		}
-		printf("%s: %d\n", __FILE__, __LINE__);
 	}
 	else if (state == 1) // wait
 	{
@@ -657,7 +621,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 QVec SpecificWorker::getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	// Get target
 	int robotID, objectID;
 	robotID = symbols["robot"]->identifier;
@@ -671,7 +634,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 QVec SpecificWorker::fromRobotToRoom(std::map<std::string, AGMModelSymbol::SPtr> &symbols, const QVec vector)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	// Get target
 	int roomID, robotID;
 	roomID = symbols["room"]->identifier;
@@ -693,7 +655,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 int SpecificWorker::sendRightArmToPose(QVec targetPose)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	Pose6D target;
 	WeightVector weights;
 	try
@@ -721,7 +682,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 void SpecificWorker::action_SetObjectReach(bool first)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	printf("void SpecificWorker::action_SetObjectReach()\n");
 
 	///
@@ -786,21 +746,16 @@ printf("%s: %d\n", __FILE__, __LINE__);
 
 void SpecificWorker::saccadic3D(QVec point, QVec axis)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
 	saccadic3D(point(0), point(1), point(2), axis(0), axis(1), axis(2));
 }
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
-printf("%s: %d\n", __FILE__, __LINE__);
-// 	printf("saccadic3D\n");
-
 	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "room");
 // 	rel.print("desde la camara");
 
 	float errYaw   = -atan2(rel(0), rel(2));
 	float errPitch = +atan2(rel(1), rel(2));
-// 	printf("%f  %f\n", errYaw, errPitch);
 
 	RoboCompJointMotor::MotorGoalPosition goal;
 

@@ -63,10 +63,10 @@ public:
 	QMutexLockerDebug(QMutexDebug *mutex, QString callerID)
 	{
 		this->mutex = mutex;
-		printf("Mutex %s is being accessed by %s\n", mutex->getMutexName().toStdString().c_str(), callerID.toStdString().c_str());
+// 		printf("Mutex %s is being accessed by %s\n", mutex->getMutexName().toStdString().c_str(), callerID.toStdString().c_str());
 		locker = new QMutexLocker(mutex);
 		mutex->setCallerID(callerID);
-		printf("Mutex %s was blocked by %s\n", mutex->getMutexName().toStdString().c_str(), callerID.toStdString().c_str());
+// 		printf("Mutex %s was blocked by %s\n", mutex->getMutexName().toStdString().c_str(), callerID.toStdString().c_str());
 	}
 	~QMutexLockerDebug()
 	{
