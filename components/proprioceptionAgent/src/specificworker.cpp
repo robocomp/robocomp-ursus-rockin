@@ -52,6 +52,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
+	QMutexLocker l(mutex);
 	if (worldModel->size() == 0)
 	{
 		printf("Waiting for AGM*\n");
@@ -73,9 +74,8 @@ void SpecificWorker::compute()
 		}
 	}
 
-	
+	static bool firstSend = true;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
-	QMutexLocker locker(mutex);
 	try
 	{
 		RoboCompJointMotor::MotorStateMap mMap;
@@ -83,8 +83,9 @@ void SpecificWorker::compute()
 printf("---------------------------------------------------------------------\n");
 		for (auto j : mMap)
 		{
-// 			if (abs(backMap[j.first].pos - mMap[j.first].pos) > 0.5*M_PIl/180.) /* send modification if the angle has changed more than one degree */
+ 			if (firstSend or abs(backMap[j.first].pos - mMap[j.first].pos) > 0.5*M_PIl/180.) /* send modification if the angle has changed more than one degree */
 			{
+				firstSend = false;
 				printf("Updating: %s (%d)\n", j.first.c_str(), newModel->size());
 				bool found = false;
 				for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
@@ -117,6 +118,7 @@ printf("---------------------------------------------------------------------\n"
 								printf("  edge rz %s\n", e.getAttribute("rz").c_str());
 								printf("  edge ry %s\n", e.getAttribute("ry").c_str());
 								AGMMisc::publishEdgeUpdate(e, agmagenttopic_proxy);
+								usleep(1000);
 								printf(" done!\n");
 							}
 							catch(...)
@@ -215,7 +217,6 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
 {
 	mutex->lock();
  	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
- 
 	agmInner.setWorld(worldModel);
 	delete innerModel;
 	innerModel = agmInner.extractInnerModel("room", true);
@@ -238,7 +239,6 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modificati
 {
 	mutex->lock();
  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
- 
 	agmInner.setWorld(worldModel);
 	delete innerModel;
 	innerModel = agmInner.extractInnerModel("room", true);
@@ -295,6 +295,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
+	QMutexLocker l(mutex);
 	try
 	{
 		AGMModelPrinter::printWorld(newModel);

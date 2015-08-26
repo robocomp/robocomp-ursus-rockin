@@ -31,7 +31,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	active = false;
 
-	mutex_AGM_IM = new QMutexDebug(QMutex::Recursive, QString("AGM & IM"));
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
@@ -49,7 +48,7 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+	QMutexLocker locker(mutex);
 	{
 		if (not innerModel->getNode("grabPositionHandR"))
 		{
@@ -57,11 +56,10 @@ void SpecificWorker::compute( )
 			return;
 		}
 	}
-	manageReachedObjects();
+//	manageReachedObjects();
 
 	// ACTION EXECUTION
 	actionExecution();
-// 	printf("compute %d\n\n", __LINE__);
 }
 
 
@@ -72,7 +70,7 @@ void SpecificWorker::manageReachedObjects()
 	
 	bool changed = false;
 	
-	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+	QMutexLocker locker(mutex);
 	
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 
@@ -143,7 +141,7 @@ void SpecificWorker::manageReachedObjects()
 
 bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t)
 {
-	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+	QMutexLocker locker(mutex);
 
 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model); edge_itr++)
 	{
@@ -160,6 +158,8 @@ bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr nod
 
 float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 {
+	QMutexLocker locker(mutex);
+	
 	// check if it's a polygon
 // 	bool isPolygon = false;
 // 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
@@ -215,6 +215,7 @@ float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr 
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
+	QMutexLocker locker(mutex);
 // 	try
 // 	{
 // 		RoboCompCommonBehavior::Parameter par = params.at("GraspingAgent.InnerModel") ;
@@ -241,6 +242,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 bool SpecificWorker::activateAgent(const ParameterMap& prs)
 {
+	QMutexLocker locker(mutex);
 	bool activated = false;
 	if (setParametersAndPossibleActivation(prs, activated))
 	{
@@ -258,11 +260,13 @@ bool SpecificWorker::activateAgent(const ParameterMap& prs)
 
 bool SpecificWorker::deactivateAgent()
 {
+	QMutexLocker locker(mutex);
 	return deactivate();
 }
 
 StateStruct SpecificWorker::getAgentState()
 {
+	QMutexLocker locker(mutex);
 	StateStruct s;
 	if (isActive())
 	{
@@ -283,6 +287,7 @@ ParameterMap SpecificWorker::getAgentParameters()
 
 bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
 {
+	QMutexLocker locker(mutex);
 	bool activated = false;
 	return setParametersAndPossibleActivation(prs, activated);
 }
@@ -304,7 +309,7 @@ bool SpecificWorker::reloadConfigAgent()
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
-	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+	QMutexLocker locker(mutex);
 
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
@@ -314,7 +319,8 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
 {
-	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+	QMutexLocker locker(mutex);
+
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
@@ -323,17 +329,30 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
-	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+	QMutexLocker locker(mutex);
+	
+	printf("---- %d %s %d\n" , modification.a, modification.edgeType.c_str(), modification.b);
+
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	
+	//worldModel->save("g.xml");
+	try {
+		agmInner.updateImNodeFromEdge(modification, innerModel);
+	}
+	catch (...)
+	{
+		qDebug()<<"\n";
+	}
+	
 	agmInner.setWorld(worldModel);
-	AGMModelEdge dst;
-	AGMModelConverter::fromIceToInternal(modification,dst);
-	agmInner.updateImNodeFromEdge(dst, innerModel);
+	
 }
 
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
+	QMutexLocker locker(mutex);
+
 	// We didn't reactivate the component
 	reactivated = false;
 
@@ -377,6 +396,8 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel)
 {
+	QMutexLocker locker(mutex);
+
 	try
 	{
 		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, "graspingAgent");
@@ -389,6 +410,8 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel
 
 void SpecificWorker::actionExecution()
 {
+	QMutexLocker locker(mutex);
+
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
 
@@ -422,6 +445,7 @@ void SpecificWorker::actionExecution()
 
 void SpecificWorker::directGazeTowards(AGMModelSymbol::SPtr symbol)
 {
+	QMutexLocker locker(mutex);
 	try
 	{
 		const float x = str2float(symbol->getAttribute("tx"));
@@ -447,7 +471,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 	try
 	{
 		int32_t tableId = str2int(params["container"].value);
-		QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+		QMutexLocker locker(mutex);
 		directGazeTowards(worldModel->getSymbol(tableId));
 	}
 	catch(...)
@@ -463,7 +487,8 @@ void SpecificWorker::action_GraspObject(bool first)
 {
 	static int32_t state = 0;
 	static QTime time;
-	QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+
+	QMutexLocker locker(mutex);
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	QVec objectsLocationInRobot;
 	TargetState ikState;
@@ -529,6 +554,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				{
 					state++; // next state
 					qDebug()<<"------> 1 step execution";
+					qFatal("FARY!!!");
 				}
 			}
 			break;
@@ -608,7 +634,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				newModel->removeEdge(symbols["object"], symbols["table"], "in");
 				newModel->addEdge(   symbols["object"], symbols["robot"], "in");
 				{
-					QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
+					QMutexLocker locker(mutex);
 					sendModificationProposal(newModel, worldModel);
 				}
 				time = QTime::currentTime();
@@ -638,6 +664,8 @@ void SpecificWorker::action_GraspObject(bool first)
  */ 
 QVec SpecificWorker::getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object)
 {
+	QMutexLocker locker(mutex);
+
 	// Get target
 	int robotID, objectID;
 	robotID = symbols["robot"]->identifier;
@@ -651,6 +679,8 @@ QVec SpecificWorker::getObjectsLocationInRobot(std::map<std::string, AGMModelSym
 
 QVec SpecificWorker::fromRobotToRoom(std::map<std::string, AGMModelSymbol::SPtr> &symbols, const QVec vector)
 {
+	QMutexLocker locker(mutex);
+
 	// Get target
 	int roomID, robotID;
 	roomID = symbols["room"]->identifier;
@@ -699,6 +729,7 @@ int SpecificWorker::sendRightArmToPose(QVec targetPose)
 
 void SpecificWorker::action_SetObjectReach(bool first)
 {
+	QMutexLocker locker(mutex);
 	printf("void SpecificWorker::action_SetObjectReach()\n");
 
 	///
@@ -729,23 +760,25 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	{
 		try
 		{
-			QMutexLockerDebug locker(mutex_AGM_IM, __FUNCTION__);
 			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
 			QVec pose = innerModel->transformS("robot", goalObject->getAttribute("imName"));
+			pose.print("pose relativa");
 			const float x = pose.x();
 // 			const float y = pose.y();
 			const float z = pose.z();
 			// In the meantime we just move the head downwards:
 			inversekinematics_proxy->setJoint("head_pitch_joint", 0.9, 0.5);
 			float angle = atan2(x, z);
-			if (angle > +0.3) angle = +0.3;
-			if (angle < -0.3) angle = -0.3;
+			if (angle > +0.5) angle = +0.5;
+			if (angle < -0.5) angle = -0.5;
+			printf("Mandamos angulo %f\n", angle);
 			inversekinematics_proxy->setJoint("head_yaw_joint", angle, 0.5);
-// // // // // // // // 			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
+// // // // // // // 			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));
 		}
 		catch (...)
 		{
 			printf("%s %d\n", __FILE__, __LINE__);
+			qFatal("d");
 		}
 	}
 	else

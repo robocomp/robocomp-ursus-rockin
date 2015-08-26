@@ -37,7 +37,7 @@
 
 #include <agm.h>
 
-
+/*
 class QMutexDebug : public QMutex
 {
 public:
@@ -79,6 +79,7 @@ private:
 	QMutexLocker *locker;
 };
 
+*/
 
 
 class SpecificWorker : public GenericWorker
@@ -134,8 +135,6 @@ private:
 	void setRightArmUp_Reflex();
 
 private:
-	
-	QMutexDebug *mutex_AGM_IM;
 	
 	std::string action, backAction;
 	ParameterMap params;

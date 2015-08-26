@@ -61,6 +61,8 @@ void SpecificWorker::compute( )
  */ 
 void SpecificWorker::actionExecution()
 {
+	return;
+	
 	QMutexLocker locker(mutex);
 	qDebug()<<"ACTION: "<<QString::fromStdString(action);
 
@@ -293,13 +295,14 @@ bool SpecificWorker::odometryAndLocationIssues()
 		float bStatex =str2float(edge->getAttribute("tx"));
 		float bStatez = str2float(edge->getAttribute("tz"));
 		float bStatealpha = str2float(edge->getAttribute("ry"));
+		
 		//to reduces the publication frequency
-		if (fabs(bStatex - bState.correctedX)>50 or fabs(bStatez - bState.correctedZ)>50 or fabs(bStatealpha - bState.correctedAlpha)>0.2)
+		if (fabs(bStatex - bState.correctedX)>5 or fabs(bStatez - bState.correctedZ)>5 or fabs(bStatealpha - bState.correctedAlpha)>0.02)
 		{
 			//Publish update edge
 			printf("\nUpdate odometry...\n");
-			qDebug()<<"bState local :"<<bStatex<<bStatez<<bStatealpha;
-			qDebug()<<"bState corrected"<<bState.correctedX<<bState.correctedZ<<bState.correctedAlpha;
+			qDebug()<<"bState local --> "<<bStatex<<bStatez<<bStatealpha;
+			qDebug()<<"bState corrected --> "<<bState.correctedX<<bState.correctedZ<<bState.correctedAlpha;
 
 			edge->setAttribute("tx", float2str(bState.correctedX));
 			edge->setAttribute("tz", float2str(bState.correctedZ));
