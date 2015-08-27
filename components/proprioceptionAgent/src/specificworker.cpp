@@ -42,8 +42,8 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-	timer.start(Period);
-
+	//timer.start(Period);
+	timer.start(100);
 	return true;
 }
 
@@ -83,9 +83,8 @@ void SpecificWorker::compute()
 printf("---------------------------------------------------------------------\n");
 		for (auto j : mMap)
 		{
- 			if (firstSend or abs(backMap[j.first].pos - mMap[j.first].pos) > 0.5*M_PIl/180.) /* send modification if the angle has changed more than one degree */
+ 			//if (firstSend or abs(backMap[j.first].pos - mMap[j.first].pos) > 0.5*M_PIl/180.) /* send modification if the angle has changed more than one degree */
 			{
-				firstSend = false;
 				printf("Updating: %s (%d)\n", j.first.c_str(), newModel->size());
 				bool found = false;
 				for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
@@ -138,15 +137,12 @@ printf("---------------------------------------------------------------------\n"
 					printf("   couln't find joint: %s\n", j.first.c_str());
 			}
 		}
-		
-// #if AGMINNER_UPDATE_EDGE==0
-// 	sendModificationProposal(worldModel, newModel);
-// #endif
 	}
 	catch (const Ice::Exception &ex)
 	{
 		std::cout<<"--> Excepción en actualizar InnerModel"<<std::endl;
 	}
+	firstSend = false;
 }
 
 
