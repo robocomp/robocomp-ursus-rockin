@@ -4,13 +4,13 @@
 		<attribute key="imType" value="omniRobot" />
 	</symbol>
 
+<!--
 	<symbol id="9" type="object" >
 		<attribute key="imName" value="table" />
 		<attribute key="imType" value="transform" />
 		<attribute key="tag" value="30" />
 	</symbol>
 
-	<link  src="1"  dst="9"      label="know" />
 	<symbol id="10" type="objectSt" />
 	<link  src="9"  dst="10"     label="hasStatus" />
 	<link  src="9"  dst="10"     label="table" />
@@ -19,6 +19,8 @@
 	<link  src="9"  dst="10"     label="reachable" />
 	<link  src="9"  dst="10"     label="notSee" />
 	<link  src="9"  dst="10"     label="position" />
+	<link  src="1"  dst="9"      label="know" />
+	-->
 
 	<symbol id="7" type="object" >
 		<attribute key="imName" value="room" />
@@ -57,7 +59,7 @@
 	<link  src="11"  dst="12"     label="position" />
 
 	<link  src="11"  dst="7"     label="in" />
-	<link  src="11"  dst="9"     label="in" />
+<!-- 	<link  src="11"  dst="9"     label="in" /> -->
 
 	<link  src="9"  dst="11"     label="RT">
 		<linkAttribute key="rx" value="0" />
