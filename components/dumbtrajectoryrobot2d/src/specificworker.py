@@ -130,14 +130,16 @@ class SpecificWorker(GenericWorker):
 				
 				proceed = True
 				command = np.array([self.relErrX, self.relErrZ])
-				#print 'norm', np.linalg.norm(command), 'threshold', self.threshold
-				if np.linalg.norm(command)<=self.threshold and abs(errAlpha) < 0.08:
+				if np.linalg.norm(command)<=400:
+					command = np.array([0.25*self.relErrX, 0.25*self.relErrZ])
+				
+				elif np.linalg.norm(command)<=self.threshold and abs(errAlpha) < 0.08:
 					print 'stop by threshold'
 					proceed = False
 					
 			
 				if proceed:
-					maxspeed = 150.
+					maxspeed = 100.
 					if np.linalg.norm(command)<0.1:
 						command = np.array([0,0])
 					else:
