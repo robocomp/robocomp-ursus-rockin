@@ -25,6 +25,7 @@
 
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
+	Period = 20;
 	active = false;
 
 	worldModel = AGMModel::SPtr(new AGMModel());
@@ -44,11 +45,9 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::compute( )
 {
-	printf("compute 1..\n");
 	// ODOMETRY AND LOCATION-RELATED ISSUES
 	if (odometryAndLocationIssues() == false)
 		return;
-	printf("compute 2..\n");
 // 	innerModel->treePrint();
 
 	actionExecution();
@@ -61,7 +60,7 @@ void SpecificWorker::compute( )
  */ 
 void SpecificWorker::actionExecution()
 {
-	return;
+// 	return;
 	
 	QMutexLocker locker(mutex);
 	qDebug()<<"ACTION: "<<QString::fromStdString(action);
@@ -204,18 +203,19 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	// Execute target
 	try
 	{
-		if (!haveTarget)
+// 		if (!haveTarget)
 		{
 			try
 			{
-				float xRef=200, zRef=300, th=50;
-				trajectoryrobot2d_proxy->goReferenced(currentTarget, xRef, zRef, th);
-				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << xRef << ", " << zRef << " )\n";
+				QVec graspRef = innerModel->transform("robot", "right_shoulder_grasp_pose");
+				float th=50;
+				trajectoryrobot2d_proxy->goReferenced(currentTarget, graspRef.x(), graspRef.z(), th);
+				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << graspRef.x() << ", " << graspRef.z() << " )\n";
 				haveTarget = true;
 			}
 			catch(const Ice::Exception &ex)
 			{
-				std::cout <<"trajectoryrobot2d->go "<< ex << std::endl;
+				std::cout <<"ERROR trajectoryrobot2d->go "<< ex << std::endl;
 				throw ex;
 			}
 		}
@@ -674,7 +674,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 // 		qFatal("Error reading config params");
 // 	}
 
-	timer.start(Period);
+	timer.start(20);
 	return true;
 }
 

@@ -238,23 +238,27 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 	bool publishModel = false;
 	for (auto ap : list)
 	{
-		switch(ap.id)
+		auto ap2 = ap;
+// 		ap2.tx = ap.tx*0.85;
+// 		ap2.ty = ap.ty*0.85;
+// 		ap2.tz = ap.tz*0.85;
+		switch(ap2.id)
 		{
 			case 30:
-				if (updateTable(ap, newModel))
+				if (updateTable(ap2, newModel))
 				{
 					publishModel = true;
 					printf("New table was detected!\n");
 				}
-				qDebug()<<ap.id<<"POSE: "<<innerModel->transform("room", QVec::vec3(ap.tx, ap.ty, ap.tz), "rgbd");
+				qDebug()<<ap2.id<<"POSE: "<<innerModel->transform("room", QVec::vec3(ap2.tx, ap2.ty, ap2.tz), "rgbd");
 				break;
 			case 31:
-				if (updateMug(ap, newModel))
+				if (updateMug(ap2, newModel))
 				{
 					publishModel = true;
 					printf("New mug was detected!\n");
 				}
-				qDebug()<<ap.id<<"POSE: "<<innerModel->transform("room", QVec::vec3(ap.tx, ap.ty, ap.tz), "rgbd");
+				qDebug()<<ap2.id<<"POSE: "<<innerModel->transform("room", QVec::vec3(ap2.tx, ap2.ty, ap2.tz), "rgbd");
 				break;				
 		}
 	}

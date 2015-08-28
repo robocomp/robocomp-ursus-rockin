@@ -56,7 +56,7 @@ void SpecificWorker::compute( )
 			return;
 		}
 	}
-//	manageReachedObjects();
+	manageReachedObjects();
 
 	// ACTION EXECUTION
 	actionExecution();
@@ -86,15 +86,15 @@ void SpecificWorker::manageReachedObjects()
 			float d2n;
 			try
 			{
-				d2n = distanceToNode("right_shoulder_pose", newModel, node);
+				d2n = distanceToNode("right_shoulder_grasp_pose", newModel, node);
 			}
 			catch(...)
 			{
-				printf("Ref: right_shoulder_pose: %p\n", (void *)innerModel->getNode("right_shoulder_pose"));
+				printf("Ref: right_shoulder_grasp_pose: %p\n", (void *)innerModel->getNode("right_shoulder_grasp_pose"));
 				printf("Obj: %s: %p\n", node->getAttribute("imName").c_str(), (void *)innerModel->getNode(node->getAttribute("imName").c_str()));
 			}
 			
-			QVec graspPosition = innerModel->transform("room", QVec::vec3(0, 0, 0), "right_shoulder_pose");
+			QVec graspPosition = innerModel->transform("room", QVec::vec3(0, 0, 0), "right_shoulder_grasp_pose");
 			graspPosition(1) = 0;
 			QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
 			obj(1) = 0;
@@ -331,7 +331,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 {
 	QMutexLocker locker(mutex);
 	
-	printf("---- %d %s %d\n" , modification.a, modification.edgeType.c_str(), modification.b);
+// // 	printf("---- %d %s %d\n" , modification.a, modification.edgeType.c_str(), modification.b);
 
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	
@@ -508,11 +508,11 @@ void SpecificWorker::action_GraspObject(bool first)
 	}	
 
 //////////////////////////////////////////////
-// 	STATE MACHINE							//
-// 	1.- approach the hand and open fingers	//
-// 	2.- align in x axe						//
-// 	3.- grasp position						//
-// 	4.- close fingers						//
+// <TAB>STATE MACHINE<TAB><TAB><TAB><TAB><TAB><TAB><TAB>//
+// <TAB>1.- approach the hand and open fingers<TAB>//
+// <TAB>2.- align in x axe<TAB><TAB><TAB><TAB><TAB><TAB>//
+// <TAB>3.- grasp position<TAB><TAB><TAB><TAB><TAB><TAB>//
+// <TAB>4.- close fingers<TAB><TAB><TAB><TAB><TAB><TAB>//
 //////////////////////////////////////////////
 	switch (state)
 	{
@@ -521,17 +521,20 @@ void SpecificWorker::action_GraspObject(bool first)
 			try
 			{
 				inversekinematics_proxy->setFingers(80); //OPEN FINGERS
+				inversekinematics_proxy->setJoint("head_pitch_joint", 1.2, 0.5);
 			}
-			catch(...)	{	qFatal("%s: %d\n", __FILE__, __LINE__);	}
+			catch(...) { qFatal("%s: %d\n", __FILE__, __LINE__); }
 			usleep(100000);
 			// approach the hand
 			try
 			{
 				objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbols["object"]); //POSE OBJECT IN ROBOT SYSTEM
+				objectsLocationInRobot.print("objectsLocationInRobot");
+				innerModel->transformS("robot", QVec::vec3(0,0,0), symbols["object"]->getAttribute("imName")).print("directo");
 			}
-			catch (...)	{	printf("%s: %d\n", __FILE__, __LINE__);	}
+			catch (...) { printf("%s: %d\n", __FILE__, __LINE__); }
 			// add offset and put rotation
-			objectsLocationInRobot += QVec::vec6(100, 100, 0,  0,0,0);
+			objectsLocationInRobot += QVec::vec6(150, 0, 0,  0,0,0);
 			objectsLocationInRobot(3) = 0;
 			objectsLocationInRobot(4) = -1.5707;
 			objectsLocationInRobot(5) = 0;
@@ -554,7 +557,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				{
 					state++; // next state
 					qDebug()<<"------> 1 step execution";
-					qFatal("FARY!!!");
+					qFatal("!!!");
 				}
 			}
 			break;
@@ -761,16 +764,35 @@ void SpecificWorker::action_SetObjectReach(bool first)
 		try
 		{
 			AGMModelSymbol::SPtr goalObject = worldModel->getSymbol(objectId);
-			QVec pose = innerModel->transformS("robot", goalObject->getAttribute("imName"));
-			pose.print("pose relativa");
-			const float x = pose.x();
-// 			const float y = pose.y();
-			const float z = pose.z();
-			// In the meantime we just move the head downwards:
-			inversekinematics_proxy->setJoint("head_pitch_joint", 0.9, 0.5);
-			float angle = atan2(x, z);
+			// Get object's relative position from the robot's perspective
+			QVec poseRRobot = innerModel->transformS("robot", goalObject->getAttribute("imName"));
+			float angleRRobot = atan2(poseRRobot.x(), poseRRobot.z());
+			printf("angulo relativa robot %f\n", angleRRobot);
+			// Get object's relative position from the yaw's perspective
+			QVec poseRYaw = innerModel->transformS("head_yaw_pose", goalObject->getAttribute("imName"));
+			poseRYaw.print("relativo al yaw");
+			float angleRYaw = atan2(poseRYaw.x(), poseRYaw.z());
+			printf("angulo relativa a la camara %f\n", angleRYaw);
+			// Compute current head's yaw
+			float currentYaw = angleRRobot - angleRYaw;
+			printf("current yaw: %f\n", currentYaw);
+			float angle = 0.5*angleRRobot + 0.5*currentYaw;
+			printf("%f -> ", angle);
+			if (fabs(angle-currentYaw) > 1.*M_PI/180.)
+			{
+				printf(" ** ");
+				if (angle>currentYaw)
+					angle = currentYaw + 1.*M_PI/180.;
+				else
+					angle = currentYaw - 1.*M_PI/180.;
+			}
+			printf(" -> %f\n", angle);
+			
 			if (angle > +0.5) angle = +0.5;
 			if (angle < -0.5) angle = -0.5;
+
+			// In the meantime we just move the head downwards:
+			inversekinematics_proxy->setJoint("head_pitch_joint", 0.9, 0.5);
 			printf("Mandamos angulo %f\n", angle);
 			inversekinematics_proxy->setJoint("head_yaw_joint", angle, 0.5);
 // // // // // // // 			saccadic3D(QVec::vec3(x,y,z), QVec::vec3(0,0,1));

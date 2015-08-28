@@ -25,7 +25,7 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-
+	Period = 10;
 	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
@@ -43,7 +43,7 @@ SpecificWorker::~SpecificWorker()
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	//timer.start(Period);
-	timer.start(100);
+	timer.start(10);
 	return true;
 }
 
@@ -59,32 +59,37 @@ void SpecificWorker::compute()
 		return;
 	}
 
-	static RoboCompJointMotor::MotorStateMap backMap;
 	static bool first = true;
+	static std::map<std::string, QTime> backTimes;
+	static RoboCompJointMotor::MotorStateMap backMotors;
+	
 	if (first)
 	{
 		try
 		{
-			jointmotor_proxy->getAllMotorState(backMap);
-			first = false;
+			jointmotor_proxy->getAllMotorState(backMotors);
+			for (auto j : backMotors)
+			{
+				backTimes[j.first] = QTime::currentTime().addSecs(-1000000);
+			}
 		}
 		catch (const Ice::Exception &ex)
 		{
-			std::cout<<"--> Excepción en actualizar InnerModel"<<std::endl;
+			std::cout << __FILE__ << ":" << __LINE__ << " --> Can't update InnerModel" << std::endl;
 		}
 	}
 
-	static bool firstSend = true;
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	try
 	{
 		RoboCompJointMotor::MotorStateMap mMap;
 		jointmotor_proxy->getAllMotorState(mMap);
-printf("---------------------------------------------------------------------\n");
 		for (auto j : mMap)
 		{
- 			//if (firstSend or abs(backMap[j.first].pos - mMap[j.first].pos) > 0.5*M_PIl/180.) /* send modification if the angle has changed more than one degree */
+ 			if (backTimes[j.first].elapsed()>500 or abs(backMotors[j.first].pos-mMap[j.first].pos) > 0.25*M_PIl/180.) /* send if it changed more than half degree */
 			{
+				backTimes[j.first] = QTime::currentTime();
+				backMotors[j.first] = j.second;
 				printf("Updating: %s (%d)\n", j.first.c_str(), newModel->size());
 				bool found = false;
 				for (AGMModel::iterator symbol_it=newModel->begin(); symbol_it!=newModel->end(); symbol_it++)
@@ -112,13 +117,13 @@ printf("---------------------------------------------------------------------\n"
 							e.setAttribute("r"+symbol->getAttribute("axis"), float2str(j.second.pos));
 							try
 							{
-								printf("  axis    %s\n", symbol->getAttribute("axis").c_str());
-								printf("  edge rx %s\n", e.getAttribute("rx").c_str());
-								printf("  edge rz %s\n", e.getAttribute("rz").c_str());
-								printf("  edge ry %s\n", e.getAttribute("ry").c_str());
+// 								printf("  axis    %s\n", symbol->getAttribute("axis").c_str());
+// 								printf("  edge rx %s\n", e.getAttribute("rx").c_str());
+// 								printf("  edge rz %s\n", e.getAttribute("rz").c_str());
+// 								printf("  edge ry %s\n", e.getAttribute("ry").c_str());
 								AGMMisc::publishEdgeUpdate(e, agmagenttopic_proxy);
-								usleep(1000);
-								printf(" done!\n");
+								usleep(500);
+// 								printf(" done!\n");
 							}
 							catch(...)
 							{
@@ -137,12 +142,17 @@ printf("---------------------------------------------------------------------\n"
 					printf("   couln't find joint: %s\n", j.first.c_str());
 			}
 		}
+		
+		
+		if (first)
+		{
+			first = false;
+		}
 	}
 	catch (const Ice::Exception &ex)
 	{
 		std::cout<<"--> Excepción en actualizar InnerModel"<<std::endl;
 	}
-	firstSend = false;
 }
 
 
