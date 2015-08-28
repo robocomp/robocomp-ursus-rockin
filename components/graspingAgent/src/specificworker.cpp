@@ -33,9 +33,25 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
-	innerModel = new InnerModel();
+	innerModel = new InnerModel();	
+#ifdef USE_QTGUI	
+	osgView = new OsgView( this );
+	show();
+//  	printf("%s: %d\n", __FILE__, __LINE__);
+	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
+	manipulator = new osgGA::TrackballManipulator;
+	osgView->setCameraManipulator(manipulator, true);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
+	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
+#endif
+	
+	
 
 	setRightArmUp_Reflex();
+	
+	
+	
 }
 
 /**
@@ -44,6 +60,17 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 SpecificWorker::~SpecificWorker()
 {
 	
+}
+void SpecificWorker::updateViewer()
+{
+	 printf("%s: %d\n", __FILE__, __LINE__);
+	if (!innerModel) return;
+	
+	innerViewer->update();
+	osgView->autoResize();		
+	osgView->frame();	
+
+
 }
 
 void SpecificWorker::compute( )
@@ -60,6 +87,9 @@ void SpecificWorker::compute( )
 
 	// ACTION EXECUTION
 	actionExecution();
+#ifdef USE_QTGUI
+	updateViewer();
+#endif	
 }
 
 
@@ -306,6 +336,18 @@ bool SpecificWorker::reloadConfigAgent()
 	return true;
 }
 
+void SpecificWorker::changeInner ()
+{	
+	if (innerViewer)
+	{
+		//borra innermodel dentro de InnerModelViewer
+		osgView->getRootGroup()->removeChild(innerViewer);				
+	}
+	innerModel = agmInner.extractInnerModel("room", false);
+	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
+	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
+	
+}
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
 {
@@ -313,8 +355,13 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
+	
+#ifdef USE_QTGUI
+	changeInner( );
+#else
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
+	innerModel = agmInner.extractInnerModel("room", true);	
+#endif	
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
@@ -323,8 +370,13 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	agmInner.setWorld(worldModel);
+#ifdef USE_QTGUI
+	changeInner( );
+#else
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
+	innerModel = agmInner.extractInnerModel("room", true);	
+#endif	
+	
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)

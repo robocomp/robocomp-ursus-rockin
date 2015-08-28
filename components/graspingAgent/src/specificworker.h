@@ -34,6 +34,7 @@
 
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
+#include <innermodel/innermodelviewer.h>
 
 #include <agm.h>
 
@@ -134,12 +135,21 @@ private:
 
 	void setRightArmUp_Reflex();
 
+	void updateViewer();
+	void changeInner ();
+
+
+
 private:
 	
 	std::string action, backAction;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	osgGA::TrackballManipulator *manipulator;
+	OsgView *osgView;	
+	InnerModelViewer *innerViewer; 
+	
 	bool active;
 	
 };
