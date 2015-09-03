@@ -31,13 +31,24 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModelVacio = new InnerModel();
-	imHumanGeneric = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/person.xml");
+	innerModelsLocals = new InnerModel();
+	imHumanGeneric = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/person.xml");	
 	newBodyEvent=false;
 	number=0;
-	setPeriod(100);
+	
+#ifdef USE_QTGUI
+	osgView = new OsgView(  this );
+	innerViewer = new InnerModelViewer(innerModelsLocals, "root", osgView->getRootGroup(), true);
+	manipulator = new osgGA::TrackballManipulator;
+	osgView->setCameraManipulator(manipulator, true);
+	innerViewer->setMainCamera(manipulator, InnerModelViewer::FRONT_POV);
+	show();
+#endif	
+	
 
 	innerModelMap.clear();
 	initDictionary();
+
 }
 
 /**
@@ -55,7 +66,7 @@ void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &times
 	this->timeStamp = timestamp;
 	///esto es pq cuando hay 0 personas no me envia nada
 	timerTimeStamp.setSingleShot(true);
-	timerTimeStamp.start(50);
+	timerTimeStamp.start(1000);
 	newBodyEvent = true;	
 }
 
@@ -79,6 +90,7 @@ void SpecificWorker::newInnerModel(InnerModel * imSrc, InnerModel *imDst, QStrin
 }
 void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, QString pre)
 {
+// 	qDebug()<<"pre:"<<pre;
 // 	qDebug()<<node->id;
 // 	qDebug()<<"\t parent"<<node->parent->id;
 	
@@ -102,7 +114,7 @@ void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, 
 				
 		if(  dynamic_cast<InnerModelJoint *>( tf )  != NULL )
 		{
-			qDebug()<<"insert Joint";
+// 			qDebug()<<"insert Joint"<<node->id;
 			InnerModelJoint * joint=dynamic_cast<InnerModelJoint *>( tf );
 			
 			InnerModelJoint * newJoint = im->newJoint (pre+joint->id,dynamic_cast<InnerModelTransform *>( parent),								   
@@ -113,7 +125,7 @@ void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, 
 		}
 		else
 		{
-			qDebug()<<"insert transform";
+// 			qDebug()<<"insert transform"<<node->id;
 			InnerModelTransform * newTf = im->newTransform(pre+tf->id,tf->engine,parent,tf->getTr().x(),tf->getTr().y(),tf->getTr().z(),
 								       tf->getRxValue(),tf->getRyValue(),tf->getRzValue(),tf->mass);
 			parent->addChild(newTf);	
@@ -121,15 +133,22 @@ void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, 
 	}
 	else if(  dynamic_cast<InnerModelMesh *>( node )  != NULL )
 	{
-		qDebug()<<"insert Mesh";
+// 		qDebug()<<"insert Mesh"<<node->id;
 		InnerModelMesh * m=dynamic_cast<InnerModelMesh *>( node );
+		try
+		{
+			InnerModelMesh * newMesh = im->newMesh(pre+m->id,parent, m->meshPath,m->scalex,m->scaley,m->scalez,m->render,m->tx,m->ty,m->tz,m->rx,m->ry,m->rz,m->collidable);
+			parent->addChild(newMesh);		
+		}
+		catch (QString e )
+		{
+			qDebug()<<"error mesh"<<e;
+		}
 		
-		InnerModelMesh * newMesh = im->newMesh(pre+m->id,parent, m->meshPath,m->scalex,m->scaley,m->scalez,m->render,m->tx,m->ty,m->tz,m->rx,m->ry,m->rz,m->collidable);
-		parent->addChild(newMesh);		
 	}
 	else if(  dynamic_cast<InnerModelPlane *>( node )  != NULL )
 	{
-		qDebug()<<"insert Plane";
+// 		qDebug()<<"insert Plane"<<node->id;
 		InnerModelPlane * p=dynamic_cast<InnerModelPlane *>( node );
 		
 		InnerModelPlane * newPlane = im->newPlane(pre+p->id,parent,p->texture,
@@ -148,12 +167,27 @@ void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, 
 
 void SpecificWorker::compute()
 {
-	QMutexLocker m (mutex);		
-	qDebug()<<"newBodyEvent"<<newBodyEvent;	
+	QMutexLocker m (mutex);	
+	
+/********************* TEST CODE***********************************************	
+	if (innerModelMap.empty())
+	{
+		printf("Created: %d\n", __LINE__);
+		innerModelMap[0] =new InnerModel();
+		newInnerModel(imHumanGeneric, innerModelMap.at(0),"0");
+		innerModelMap[1] =new InnerModel();
+		newInnerModel(imHumanGeneric, innerModelMap.at(0),"1");
+	}	
+	updateViewerLocalInnerModels();
+*******************************************************************/	
+	
+updateViewerLocalInnerModels();		
+	
+// 	qDebug()<<"newBodyEvent"<<newBodyEvent;	
 	if (newBodyEvent)
 	{
 		//Insertar simbolos para todo el torso		
-		updatePeopleInnerFull();						
+		///updatePeopleInnerFull();						
 		newBodyEvent=false;	
 	}
 	
@@ -161,15 +195,24 @@ void SpecificWorker::compute()
 	if (timerTimeStamp.isActive() == false and newBodyEvent==false)		
 	{		
 		std::cout<<"\t clear list \n";		
-		personList.clear();
-		updatePeopleInnerFull();
+		personList.clear();		
+// 		updatePeopleInnerFull();
 		if (!innerModelMap.empty())
 		{
 			saveInnerModels("666666");
+			innerModelsLocals->save("innerModelsLocals.xml");
 			qDebug()<<"innerModelMap.size()"<<innerModelMap.size();			
 			qFatal("fary innerModelMap not empty");
 		}
+		
 	}
+
+#ifdef USE_QTGUI	
+	innerViewer->update();
+	osgView->autoResize();						
+	osgView->frame();			
+#endif	
+	
 }
 
 
@@ -177,8 +220,6 @@ void SpecificWorker::compute()
 //Y COLGARLOS DEL MUNDO
 void SpecificWorker::updatePeopleInnerFull()
 {
-	
-	
 	int32_t robotID = worldModel->getIdentifierByType("robot");
 	if (robotID < 0)
 	{
@@ -255,16 +296,9 @@ void SpecificWorker::updatePeopleInnerFull()
 			
 			//ACTUALIZO EL INNERMODEL DEL HUMANO en mi vector de InnerModel locales
 			updateInnerModel(personIt.second,personID);
-			static int frame = 1000;
 			
 			//TODO chequear esta funcion
-			//agmInner.updateAgmWithInnerModel(innerModelMap.at(personID));
-			saveInnerModels(QString::number(frame));
-// 			agmInner.updateAgmWithInnerModelAndPublish(innerModelMap.at(personID),agmagenttopic_proxy);
-			if (frame >=1002)
-				qFatal("fary updateAgmWithInnerModel");
-			frame++;
-		
+			//agmInner.updateAgmWithInnerModel(innerModelMap.at(personID));					
 		}
 		// añado la nueva en cualquier estado ??		
 		else 
@@ -275,18 +309,21 @@ void SpecificWorker::updatePeopleInnerFull()
 			newSymbolPerson->setAttribute("State",int2str(personIt.second.state));
 			
 			//creo desde un innerModelGenerico un specifico para esa persona
+			
 			int id = newSymbolPerson->identifier;		
 			QString pre =QString::fromStdString(int2str(id));
 			innerModelMap[id] =new InnerModel();
+			
 			newInnerModel(imHumanGeneric, innerModelMap.at(id),pre);
+			
 			updateInnerModel(personIt.second,id);
-					
+			
 			//lo inserto en la super estructura agmInner
-			QHash<QString, int32_t>  match;			
+			QHash<QString, int32_t>  match;		
+						
 			match.insert(pre+"XN_SKEL_TORSO",id);
-			qDebug()<<"\nbefore innerModelMap.at(personID)"<<innerModelMap.at(personID)->getIDKeys()<<"\n";
-			agmInner.include_im(match,innerModelMap.at(id));
-			qDebug()<<"\nafterinnerModelMap.at(personID)"<<innerModelMap.at(personID)->getIDKeys()<<"\n";
+			
+			//agmInner.include_im(match,innerModelMap.at(id));
 // // 			//añado su arco calculado para innerModel, de la matzi kinect a la persona
 			std::map<string,string>att;
 			att["tx"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
@@ -309,19 +346,24 @@ void SpecificWorker::updatePeopleInnerFull()
 	for (int i=0; i< l.size(); i++)
 	{
 		std::cout<<" remove Symbol "<<worldModel->getSymbol(l.at(i))->toString()<<"\n";	
-		worldModel->save("AGM_BeforeRemovePerson.xml");
-		innerModelMap.at(l.at(i))->save("innerPersonToRemove.xml");
-		qDebug()<<"\n innerModelMap.at(l.at(i))->getIDKeys()\n"<<innerModelMap.at(l.at(i))->getIDKeys()<<"\n";
-		agmInner.remove_Im(innerModelMap.at(l.at(i)));		
-		delete innerModelMap.at(l.at(i)); 
-		innerModelMap.erase(l.at(i));
+// 		worldModel->save("AGM_BeforeRemovePerson.xml");
+// 		innerModelMap.at(l.at(i))->save("innerPersonToRemove.xml");
+// 		qDebug()<<"\n innerModelMap.at(l.at(i))->getIDKeys()\n"<<innerModelMap.at(l.at(i))->getIDKeys()<<"\n";
+		//agmInner.remove_Im(innerModelMap.at(l.at(i)));	
+		try{
+			innerModelMap.at(l.at(i)); 
+			innerModelMap.erase(l.at(i));
+		}
+		catch (...)
+		{
+			qDebug()<<"execption"<<l.at(i)<<innerModelMap.size();
+		}
 		
-		qDebug()<<"innerModelMap.size()"<<innerModelMap.size();
-		worldModel->save("AGM_AfterRemovePerson.xml");
+		
+// 		qDebug()<<"innerModelMap.size()"<<innerModelMap.size();
+// 		worldModel->save("AGM_AfterRemovePerson.xml");
 		worldModel->removeSymbol(l.at(i));
-		worldModel->save("AGM_AfterRemoveSymbol_Person.xml");
-		
-		qFatal("fary remove");
+// 		worldModel->save("AGM_AfterRemoveSymbol_Person.xml");
 		modification=true;		
 	}
 
@@ -330,9 +372,9 @@ void SpecificWorker::updatePeopleInnerFull()
 		qDebug()<<"-------------------------------------";
 		AGMModel::SPtr newModel(new AGMModel(worldModel));	
 		//agmInner.setWorld(worldModel);
-		sendModificationProposal(worldModel, newModel);					
-		saveInnerModels(QString::number(number));
-		number++;
+		//sendModificationProposal(worldModel, newModel);					
+// 		saveInnerModels(QString::number(number));
+// 		number++;
 	}
 
 }
@@ -859,9 +901,15 @@ void SpecificWorker::initDictionary()
 				continue;
 			string idNode = int2str(idPerson) + dictionaryNamesIt.second.toStdString();			
 			if (idJoint=="Spine")
+			{
 				innerModelMap[ idPerson ]->updateTransformValues( QString::fromStdString(idNode),x,y,z,rx,ry,rz );
+				innerModelsLocals->updateTransformValues(QString::fromStdString(idNode),x,y,z,rx,ry,rz);
+			}
 			else
+			{
 				innerModelMap[ idPerson ]->updateRotationValues( QString::fromStdString(idNode),rx,ry,rz );						
+				innerModelsLocals->updateRotationValues( QString::fromStdString(idNode),rx,ry,rz );
+			}
 		}
 		catch ( Ice::Exception e ) 
 		{
@@ -1118,6 +1166,135 @@ void SpecificWorker::saveInnerModels(QString number)
 	agmInner.extractInnerModel("room", true)->save(number+"_extractInnerModelFromRoom.xml");
 	
 }
+
+void SpecificWorker::updateViewer()
+{	
+// 	for( auto m : innerModelMap )			
+// 	{	
+// 		std::map<int,IMV>::iterator it;			
+// 		it = InnerModelViewerMap.find(m.first);
+// 		//si está actualizo
+// 		if (it != InnerModelViewerMap.end())
+// 		{						
+// 			InnerModelViewerMap.at(m.first).innerViewer->update();
+// 			InnerModelViewerMap.at(m.first).osgView->autoResize();						
+// 			InnerModelViewerMap.at(m.first).osgView->frame();
+// 			InnerModelViewerMap.at(m.first).widget->update();
+// 			printf("Updated: %d\n", __LINE__);
+// 			
+// 		}
+// 		//sino inserto
+// 		else 
+// 		{			
+// 			printf("No Exist: %d\n", __LINE__);
+// 			IMV myIMV;			
+// 			InnerModelViewerMap.insert ( std::pair<int,IMV>(m.first,myIMV) );
+// // 			myIMV.widget = new QWidget();
+// // 			myIMV.widget->show();
+// // 			myIMV.widget->resize(1024,768);
+// // 			myIMV.widget->setWindowTitle("innerModel:"+QString::number(m.first));
+// // 			myIMV.osgView = new OsgView(myIMV.widget);
+// // 			myIMV.innerViewer = new InnerModelViewer(innerModelMap.at(m.first), "root", myIMV.osgView->getRootGroup(), true);
+// // 			
+// // 			myIMV.manipulator = new osgGA::TrackballManipulator;
+// // 			printf("No Exist: %d\n", __LINE__);
+// // 			myIMV.osgView->setCameraManipulator(myIMV.manipulator, true);
+// // 			printf("No Exist: %d\n", __LINE__);
+// // 			myIMV.innerViewer->setMainCamera(myIMV.manipulator, InnerModelViewer::TOP_POV);
+// 			
+// 			InnerModelViewerMap.at(m.first).widget = new QWidget();
+// 			InnerModelViewerMap.at(m.first).widget->show();
+// 			InnerModelViewerMap.at(m.first).widget->resize(1024,768);
+// 			InnerModelViewerMap.at(m.first).widget->setWindowTitle("innerModel:"+QString::number(m.first));
+// 			InnerModelViewerMap.at(m.first).osgView = new OsgView(InnerModelViewerMap.at(m.first).widget);
+// 			InnerModelViewerMap.at(m.first).innerViewer = new InnerModelViewer(innerModelMap.at(m.first), "root", 
+// 											   InnerModelViewerMap.at(m.first).osgView->getRootGroup(), true);
+// 			
+// 			InnerModelViewerMap.at(m.first).manipulator = new osgGA::TrackballManipulator;
+// 			printf("No Exist: %d\n", __LINE__);
+// 			InnerModelViewerMap.at(m.first).osgView->setCameraManipulator(InnerModelViewerMap.at(m.first).manipulator, true);
+// 			printf("No Exist: %d\n", __LINE__);
+// 			InnerModelViewerMap.at(m.first).innerViewer->setMainCamera(InnerModelViewerMap.at(m.first).manipulator, InnerModelViewer::TOP_POV);			
+// 			
+// 		}
+// 	}		
+}
+
+void SpecificWorker::updateViewerLocalInnerModels()
+{	
+	qDebug()<<"-- init --";
+	//borro si alguno en el map no esta en list		
+	std::map<int,InnerModel*>::iterator it;
+	std::map<int,TPerson>::iterator itPersonList;
+	bool creatViewer=false;
+	
+	for( auto mapIt : innerModelMap )
+	{
+		itPersonList = personList.find(mapIt.first);
+		//alguno en el mapa no está en la lista, tengo que borrar el viewer y crearlo;
+		if (itPersonList == personList.end())
+		{
+			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<<"mappIt.first"<<mapIt.first;
+			innerModelMap.erase (mapIt.first);			
+			creatViewer = true;			
+		}
+	}
+	
+	//actgualizar y añadir	
+	for( auto personIt : personList )
+	{
+		int id = personIt.first;					
+		//lo busco 
+		it = innerModelMap.find(id);
+		//lo encuentro lo actualizo
+		if (it != innerModelMap.end())
+		{
+			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<<"id"<<id;
+			updateInnerModel(personIt.second,id);			
+		}
+		//no lo encuentrr lo añado y tngo que crear el viewer
+		else
+		{
+			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<<"id"<<id;
+			innerModelMap[id] =new InnerModel();
+			QString pre =QString::fromStdString(int2str(id));
+			newInnerModel(imHumanGeneric, innerModelMap.at(id),pre);		
+			updateInnerModel(personIt.second,id);
+			creatViewer = true;			
+		}	
+		
+	}
+
+	if (creatViewer )
+	{
+#ifdef USE_QTGUI
+		osgView->getRootGroup()->removeChild(innerViewer);
+		innerModelsLocals = new InnerModel();
+#else
+		delete innerModelsLocals;
+		innerModelsLocals = new InnerModel();
+#endif
+		//añado al viewer innerModelMap.at(id)
+		for( auto mapIt : innerModelMap )
+		{
+			QList<InnerModelNode *>	l;
+			l.clear();
+			mapIt.second->getSubTree(mapIt.second->getNode("root"),&l);		
+			QList<InnerModelNode*>::iterator it;
+			for (it=l.begin();it!=l.end();it++)
+			{
+				insertNodeInnerModel(innerModelsLocals,(*it));
+			}
+		}
+#ifdef USE_QTGUI
+		innerViewer = new InnerModelViewer(innerModelsLocals, "root", osgView->getRootGroup(), true);	
+		innerViewer->setMainCamera(manipulator, InnerModelViewer::FRONT_POV);
+#endif
+	}
+// 	qDebug()<<"creatViewer"<<creatViewer<<"-- end --";
+}
+
+
 
 ///****** code for check innermodel memory
 // 	std::ofstream myfile;

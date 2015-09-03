@@ -34,6 +34,11 @@
 
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
+#include <innermodel/innermodelviewer.h>
+#include <osgviewer/osgview.h>
+
+#include <QWidget>
+
 
 class SpecificWorker : public GenericWorker
 {
@@ -63,12 +68,18 @@ private:
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
-	InnerModel *innerModelVacio,*imHumanGeneric;
+	InnerModel *innerModelVacio,*imHumanGeneric, *innerModelsLocals;
 	bool active, newBodyEvent;
 	PersonList personList;
 	long int timeStamp;
 	QTimer timerTimeStamp;
 	int number;
+	
+	osgGA::TrackballManipulator *manipulator;
+	OsgView *osgView;	
+	InnerModelViewer *innerViewer; 
+	
+	
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
@@ -79,7 +90,7 @@ private:
 	map<string,QString> dictionaryNames;
 	map<string,RoboCompMSKBody::JointType> dictionaryEnum;
 	map<string,RTMat> mapJointRotations;
-	map<int, InnerModel*> innerModelMap;
+	map<int, InnerModel*> innerModelMap;	
 	
 	void updateInnerModel( TPerson &person, int idPerson );
 	void initDictionary();
@@ -90,9 +101,11 @@ private:
 	bool rotarTorso(const QVec & hombroizq,const QVec & hombroder);
 	
 	void newInnerModel(InnerModel * imSrc, InnerModel *imDst, QString pre);
-	void insertNodeInnerModel(InnerModel* im, InnerModelNode* node, QString pre );
+	void insertNodeInnerModel(InnerModel* im, InnerModelNode* node, QString pre="" );
 	void saveInnerModels(QString number="");
 
+	void updateViewer();
+	void updateViewerLocalInnerModels();
 
 };
 
