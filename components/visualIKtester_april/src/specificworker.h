@@ -1,6 +1,5 @@
-
 /*
- *    Copyright (C) 2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -17,29 +16,43 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SPECIFICMONITOR_H
-#define SPECIFICMONITOR_H
-
-#include "genericmonitor.h"
 
 /**
        \brief
        @author authorname
 */
-class SpecificMonitor : public GenericMonitor
+
+
+#ifndef SPECIFICWORKER_H
+#define SPECIFICWORKER_H
+
+#include <genericworker.h>
+#include <innermodel/innermodel.h>
+
+class SpecificWorker : public GenericWorker
 {
-  Q_OBJECT
-  
-  public:
-	SpecificMonitor(GenericWorker *_worker, Ice::CommunicatorPtr _communicator);
-	~SpecificMonitor();
+Q_OBJECT
+public:
+	SpecificWorker(MapPrx& mprx);	
+	~SpecificWorker();
+	bool setParams(RoboCompCommonBehavior::ParameterList params);
+
+	void newAprilTag(const tagsList &tags);
+
+public slots:
+	void compute(); 	
+
+private:
 	
-	void readConfig(RoboCompCommonBehavior::ParameterList &params );
-	void run();
-	void initialize();
-    
-	bool sendParamsToWorker(RoboCompCommonBehavior::ParameterList params);
-	bool checkParams(RoboCompCommonBehavior::ParameterList l);
+	void updateInnerModel();
+	
+	bool                    INITIALIZED;
+	bool                    sendPoseFlag;
+	InnerModel             *innerModel;         // EL MODELO INTERNO DEL ROBOT	
+	RoboCompAprilTags::tag  currentTag;
+	InnerModelTransform    *nodeMarca, *nodeMarca2;
+	
 };
 
-#endif // GENERICMONITOR_H
+#endif
+

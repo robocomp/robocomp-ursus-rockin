@@ -18,11 +18,11 @@
  */
 
 
-/** \mainpage RoboComp::visualikaux100
+/** \mainpage RoboComp::visualiktester_april
  *
  * \section intro_sec Introduction
  *
- * The visualikaux100 component...
+ * The visualiktester_april component...
  *
  * \section interface_sec Interface
  *
@@ -34,7 +34,7 @@
  * ...
  *
  * \subsection install2_ssec Compile and install
- * cd visualikaux100
+ * cd visualiktester_april
  * <br>
  * cmake . && make
  * <br>
@@ -52,7 +52,7 @@
  *
  * \subsection execution_ssec Execution
  *
- * Just: "${PATH_TO_BINARY}/visualikaux100 --Ice.Config=${PATH_TO_CONFIG_FILE}"
+ * Just: "${PATH_TO_BINARY}/visualiktester_april --Ice.Config=${PATH_TO_CONFIG_FILE}"
  *
  * \subsection running_ssec Once running
  *
@@ -97,10 +97,10 @@ using namespace RoboCompJointMotor;
 
 
 
-class visualikaux100 : public RoboComp::Application
+class visualiktester_april : public RoboComp::Application
 {
 public:
-	visualikaux100 (QString prfx) { prefix = prfx.toStdString(); }
+	visualiktester_april (QString prfx) { prefix = prfx.toStdString(); }
 private:
 	void initialize();
 	std::string prefix;
@@ -110,14 +110,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void ::visualikaux100::initialize()
+void ::visualiktester_april::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int ::visualikaux100::run(int argc, char* argv[])
+int ::visualiktester_april::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -169,15 +169,21 @@ int ::visualikaux100::run(int argc, char* argv[])
 IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
 
-	GenericWorker *worker = new SpecificWorker(mprx);
+	SpecificWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
-	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
+	SpecificMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor, SIGNAL(kill()), &a, SLOT(quit()));
 	QObject::connect(worker, SIGNAL(kill()), &a, SLOT(quit()));
 	monitor->start();
 
 	if ( !monitor->isRunning() )
 		return status;
+	
+	while (!monitor->ready)
+	{
+		usleep(10000);
+	}
+	
 	try
 	{
 		// Server adapter creation and publication
@@ -286,7 +292,7 @@ int main(int argc, char* argv[])
 			printf("Configuration prefix: <%s>\n", prefix.toStdString().c_str());
 		}
 	}
-	::visualikaux100 app(prefix);
+	::visualiktester_april app(prefix);
 
 	return app.main(argc, argv, configFile.c_str());
 }
