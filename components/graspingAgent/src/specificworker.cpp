@@ -95,7 +95,7 @@ void SpecificWorker::compute( )
 
 void SpecificWorker::manageReachedObjects()
 {
-	float THRESHOLD_object = 100;
+	float THRESHOLD_object = 150;
 	float THRESHOLD_table = 400;
 	
 	bool changed = false;
@@ -596,7 +596,6 @@ void SpecificWorker::action_GraspObject(bool first)
 				qDebug()<<"------> 0 step execution";
 				time = QTime::currentTime();
 				state++; // next state
-				
 			}
 			catch (...)	{ printf("%s: %d\n", __FILE__, __LINE__); }
 			break;
@@ -609,7 +608,6 @@ void SpecificWorker::action_GraspObject(bool first)
 				{
 					state++; // next state
 					qDebug()<<"------> 1 step execution";
-					qFatal("!!!");
 				}
 			}
 			break;
@@ -790,6 +788,7 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
+	printf("altura mano %f\n", innerModel->transform("room", "grabPositionHandR")(1));
 	if (first or innerModel->transform("room", "grabPositionHandR")(1)<1500)
 	{
 		backAction = action;
@@ -830,18 +829,18 @@ void SpecificWorker::action_SetObjectReach(bool first)
 			printf("current yaw: %f\n", currentYaw);
 			float angle = 0.5*angleRRobot + 0.5*currentYaw;
 			printf("%f -> ", angle);
-			if (fabs(angle-currentYaw) > 1.*M_PI/180.)
+			if (fabs(angle-currentYaw) > 10.*M_PI/180.)
 			{
 				printf(" ** ");
 				if (angle>currentYaw)
-					angle = currentYaw + 1.*M_PI/180.;
+					angle = currentYaw + 10.*M_PI/180.;
 				else
-					angle = currentYaw - 1.*M_PI/180.;
+					angle = currentYaw - 10.*M_PI/180.;
 			}
 			printf(" -> %f\n", angle);
 			
-			if (angle > +0.5) angle = +0.5;
-			if (angle < -0.5) angle = -0.5;
+			if (angle > +1.) angle = +1.;
+			if (angle < -1.) angle = -1.;
 
 			// In the meantime we just move the head downwards:
 			inversekinematics_proxy->setJoint("head_pitch_joint", 0.9, 0.5);
