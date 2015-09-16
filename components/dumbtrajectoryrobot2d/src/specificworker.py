@@ -78,8 +78,7 @@ class SpecificWorker(GenericWorker):
 		target.rx = 0
 		target.ry = self.state.ry
 		target.rz = 0
-		self.goReferenced(target, 0, 0, 0)
-		self.stop()
+		self.state.state = 'IDLE'
 
 
 		self.Period = 50
