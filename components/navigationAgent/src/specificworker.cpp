@@ -104,8 +104,7 @@ void SpecificWorker::actionExecution()
 	}
 	else
 	{
-		std::cout<<" "<< action;
-		//action_NoAction();
+		action_NoAction(newAction);
 	}
 
 
@@ -279,7 +278,7 @@ bool SpecificWorker::odometryAndLocationIssues()
 		return false;
 	}
 
-	//TODO ESTO ES UNA ÑAPA!!!!! CURRARSELO MAS HOMBREEE!
+	//TODO fix this
 	roomId=7; // worldModel->getIdentifierByType("room");
 	if (roomId < 0)
 	{
@@ -307,7 +306,7 @@ bool SpecificWorker::odometryAndLocationIssues()
 			edge->setAttribute("tx", float2str(bState.correctedX));
 			edge->setAttribute("tz", float2str(bState.correctedZ));
 			edge->setAttribute("ry", float2str(bState.correctedAlpha));
-			qDebug()<<"TODO: AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy)\n\n";
+// 			qDebug()<<"TODO: AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy)\n\n";
 			AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy);
 		}
 	}
@@ -520,7 +519,7 @@ void SpecificWorker::action_ChangeRoom(bool newAction)
 
 void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 {
-	stop();
+// 	stop();
 
 
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
@@ -605,6 +604,7 @@ void SpecificWorker::action_GraspObject(bool newAction)
 	AGMModelSymbol::SPtr goalObject;
 	AGMModelSymbol::SPtr robot;
 
+	printf("dddd\n");
 	stop();
 
 	try
@@ -637,17 +637,9 @@ void SpecificWorker::action_GraspObject(bool newAction)
 
 void SpecificWorker::action_NoAction(bool newAction)
 {
-	static QTime time;
-	static bool first = true;
-	if (first)
+	if (newAction)
 	{
-		first = false;
-		time = QTime::currentTime();
-		trajectoryrobot2d_proxy->stop();
-	}
-	else if (time.elapsed()>3000)
-	{
-		time = QTime::currentTime();
+		printf("deded,eko\n");
 		stop();
 	}
 }

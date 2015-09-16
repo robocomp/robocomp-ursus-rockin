@@ -791,6 +791,7 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	printf("altura mano %f\n", innerModel->transform("room", "grabPositionHandR")(1));
 	if (first or innerModel->transform("room", "grabPositionHandR")(1)<1500)
 	{
+		inversekinematics_proxy->setJoint("head_yaw_joint", 0, 0.5);
 		backAction = action;
 		if (first) printf("first time, set arm for manipulation\n");
 		else  printf("arm is down, set arm for manipulation\n");
@@ -839,8 +840,8 @@ void SpecificWorker::action_SetObjectReach(bool first)
 			}
 			printf(" -> %f\n", angle);
 			
-			if (angle > +1.) angle = +1.;
-			if (angle < -1.) angle = -1.;
+			if (angle > +.4) angle = +.4;
+			if (angle < -.4) angle = -.4;
 
 			// In the meantime we just move the head downwards:
 			inversekinematics_proxy->setJoint("head_pitch_joint", 0.9, 0.5);

@@ -26,7 +26,6 @@ except:
 
 
 class GenericWorker(QtGui.QWidget):
-	#kill = QtCore.pyqtSignal()
 	kill = QtCore.Signal()
 
 
@@ -47,7 +46,6 @@ class GenericWorker(QtGui.QWidget):
 		self.timer = QtCore.QTimer(self)
 
 
-	#@QtCore.pyqtSlot()
 	@QtCore.Slot()
 	def killYourSelf(self):
 		rDebug("Killing myself")
@@ -55,7 +53,6 @@ class GenericWorker(QtGui.QWidget):
 
 	# \brief Change compute period
 	# @param per Period in ms
-	#@QtCore.pyqtSlot(int)
 	@QtCore.Slot(int)
 	def setPeriod(self, p):
 		print "Period changed", p
