@@ -586,7 +586,7 @@ void SpecificWorker::action_GraspObject(bool first)
 			}
 			catch (...) { printf("%s: %d\n", __FILE__, __LINE__); }
 			// add offset and put rotation
-			objectsLocationInRobot += QVec::vec6(150, 0, 0,  0,0,0);
+			objectsLocationInRobot += QVec::vec6(150, 150, 0,  0,0,0);
 			objectsLocationInRobot(3) = 0;
 			objectsLocationInRobot(4) = -1.5707;
 			objectsLocationInRobot(5) = 0;
@@ -598,6 +598,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				state++; // next state
 			}
 			catch (...)	{ printf("%s: %d\n", __FILE__, __LINE__); }
+			qFatal("done!\n");
 			break;
 		////////////////////////////////////////////////////////////////////////////////////////////
 		case 1: // WAITING FOR THE FIRST VIK EXECUTION
