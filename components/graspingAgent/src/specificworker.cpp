@@ -46,7 +46,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
 #endif
 	
-	
+	show();
 
 	setRightArmUp_Reflex();
 	
