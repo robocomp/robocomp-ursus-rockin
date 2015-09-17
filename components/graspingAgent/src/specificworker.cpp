@@ -33,9 +33,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
-	innerModel = new InnerModel();	
+	innerModel = new InnerModel();
 #ifdef USE_QTGUI	
-	osgView = new OsgView( this );
+	osgView = new OsgView(widget);
 	show();
 //  	printf("%s: %d\n", __FILE__, __LINE__);
 	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
@@ -586,7 +586,7 @@ void SpecificWorker::action_GraspObject(bool first)
 			}
 			catch (...) { printf("%s: %d\n", __FILE__, __LINE__); }
 			// add offset and put rotation
-			objectsLocationInRobot += QVec::vec6(150, 150, 0,  0,0,0);
+			objectsLocationInRobot += QVec::vec6(150, 100, 0,  0,0,0);
 			objectsLocationInRobot(3) = 0;
 			objectsLocationInRobot(4) = -1.5707;
 			objectsLocationInRobot(5) = 0;
@@ -935,3 +935,12 @@ void SpecificWorker::setRightArmUp_Reflex()
 
 
 
+void SpecificWorker::on_state1_clicked()
+{
+	action = "graspobject";
+	action_GraspObject(true);
+	
+	params["object"].value = "11";
+	params["room"  ].value = "7";
+	params["robot" ].value = "1";
+}

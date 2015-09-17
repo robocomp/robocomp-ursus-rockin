@@ -42,7 +42,7 @@
 
 		<!-- Base		 -->
 		<transform id="initialRobotPose" tx="0" tz="0" ty="0" >
-			<include path="/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml" />
+			<include path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/makeMeCoffee/ursus.xml" />
 		</transform>
 
 	</transform>
