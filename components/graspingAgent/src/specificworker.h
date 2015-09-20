@@ -109,8 +109,9 @@ private:
 	int sendRightArmToPose(QVec p);
 
 	void manageReachedObjects();
+	void leaveObjectSimulation();
 
-
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 
 	void actionExecution();
 	void action_FindObjectVisuallyInTable(bool first=false);
@@ -144,7 +145,8 @@ private:
 	InnerModelViewer *innerViewer; 
 	
 	bool active;
-	
+
+	int32_t sendHandToSymbol(AGMModelSymbol::SPtr symbol, QVec offset, std::map<std::string, AGMModelSymbol::SPtr> symbols);
 	
 	
 public slots:

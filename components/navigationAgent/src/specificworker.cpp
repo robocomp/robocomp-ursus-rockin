@@ -595,53 +595,17 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 
 void SpecificWorker::action_GraspObject(bool newAction)
 {
-	sleep(2);
-	printf("Not doing anything\n");
-	return;
-	
-	printf("SpecificWorker::action_GraspObject\n");
-	int32_t objectId;
-	AGMModelSymbol::SPtr goalObject;
-	AGMModelSymbol::SPtr robot;
-
-	printf("dddd\n");
-	stop();
-
-	try
-	{
-		objectId = str2int(params["object"].value);
-		goalObject = worldModel->getSymbol(objectId);
-		robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
-	}
-	catch (...)
-	{
-		printf("do we have the model yet\n?");
-		return;
-	}
-
-	const float x = str2float(goalObject->getAttribute("tx"));
-	const float z = str2float(goalObject->getAttribute("tz"));
-	float alpha = (objectId==7 or objectId==100)?-3.141592:0;
-
-	QVec::vec3( x, z, alpha).print("object");
-
-	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.x = x;
-	tp.z = z;
-	tp.y = 0;
-	tp.rx = 0;
-	tp.ry = alpha;
-	tp.rz = 0;
-	trajectoryrobot2d_proxy->goReferenced(tp, 80, 350, 50);
+	std::string state = trajectoryrobot2d_proxy->getState().state;
+	printf("action_GraspObject: %s\n", state.c_str());
+	if (state != "IDLE")
+		trajectoryrobot2d_proxy->stop();
 }
 
 void SpecificWorker::action_NoAction(bool newAction)
 {
-	if (newAction)
-	{
-		printf("deded,eko\n");
+	std::string state = trajectoryrobot2d_proxy->getState().state;
+	if (state != "IDLE")
 		stop();
-	}
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)

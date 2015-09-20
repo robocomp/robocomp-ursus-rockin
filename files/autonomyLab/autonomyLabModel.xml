@@ -1,6 +1,6 @@
 <innermodel>
 <transform id="room">
-	<include path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/ursus.xml"/>
+	<include path="/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml"/>
 
 	<axes id="ax" length="200" width="30"/>
 	<transform id="floor" tx="3500" tz="2000">

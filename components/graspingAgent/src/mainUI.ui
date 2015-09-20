@@ -78,9 +78,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="buttonLeave">
        <property name="text">
-        <string>force state 7</string>
+        <string>LEAVE</string>
        </property>
       </widget>
      </item>

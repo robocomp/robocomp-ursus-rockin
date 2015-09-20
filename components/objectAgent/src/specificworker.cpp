@@ -248,9 +248,6 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 	for (auto ap : list)
 	{
 		auto ap2 = ap;
-// 		ap2.tx = ap.tx*0.85;
-// 		ap2.ty = ap.ty*0.85;
-// 		ap2.tz = ap.tz*0.85;
 		switch(ap2.id)
 		{
 			case 30:
