@@ -21,7 +21,7 @@
 		</transform>
 
 		<transform id="example_pose" tx="200" ty="1050" tz="400">
-			<axes id="dewetrtqwfqweteuj53" />
+<!--			<axes id="dewetrtqwfqweteuj53" /> -->
 		</transform>
 
 

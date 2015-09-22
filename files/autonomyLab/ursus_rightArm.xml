@@ -4,12 +4,12 @@
 		<!--Gira en Z -->
 		<mesh id="arm_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo1.ive" rz="0" tz="-55" ty="-30" scale="1000" collide="1" />
 		<joint id="rightShoulder1" port="20000" axis="z" min="-3.14" max="0.54" home="-0.1">
-			<transform id="err1" rz="0.3">
+			<transform id="err1" rz="0.1">
 				<mesh id="shoulder_right_1_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo2.ive" rz="0" tz="0" scale="1000" collide="1" />
 				<transform id="arm_right_2" tz="41" rx="1.5707963267948966">
 					<!-- 									Gira en X -->
 					<joint id="rightShoulder2" port="20000"  axis="x" min="-3.14" max="0.34" home="-0.1" >
-						<transform id="err2" rz="0.2">
+						<transform id="err2" rz="0.12">
 							<mesh id="shoulder_right_2_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo3.ive" rx="0" scale="1000" collide="1" />
 							<transform id="arm_right_3" tz="234" rz="-1.5707963267948966" >
 								<!-- 											Gira en Z -->
@@ -18,12 +18,12 @@
 									<transform id="arm_right_4" ty="-28"  tz="20"    > <!--Codo-->
 										<!-- 													Gira en X -->
 										<joint id="rightElbow" port="20000" axis="x"  min="0.01" max="2.6" home="0.15" >
-											<transform id="err4" rz="0.25">
+											<transform id="err4" rz="0.1">
 												<mesh id="elbow_right_mesh" file="/home/robocomp/robocomp/files/osgModels/robexarm/brazo5.ive" rz="3.14159265359" ty="0" scale="1000"  collide="1"  />
 												<transform id="arm_right_5" ty="28" tz="166"    > <!--Giro1 muñeca-->
 													<!-- 															Gira en Z-->
 													<joint id="rightForeArm" port="20000" axis="z" min="-1.8" max="1.8" home="0.1">
-														<transform id="err5" rz="0.4">
+														<transform id="err5" rz="0.12">
 															<mesh id="wrist_right_mesh" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="2"  collide="1"  />
 
 
