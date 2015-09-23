@@ -68,7 +68,7 @@ private:
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
-	InnerModel *innerModelVacio,*imHumanGeneric, *innerModelsLocals;
+	InnerModel *innerModelVacio,*imHumanGeneric, *innerModelsLocals,*innerModelAGM;
 	bool active, newBodyEvent;
 	PersonList personList;
 	long int timeStamp;
@@ -83,10 +83,8 @@ private:
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-// 	void updatePeople();
-	//void updatePeopleInner();
 	void updatePeopleInnerFull();
-	
+	void updatePeopleInnerFullB();
 	map<string,QString> dictionaryNames;
 	map<string,RoboCompMSKBody::JointType> dictionaryEnum;
 	map<string,RTMat> mapJointRotations;
