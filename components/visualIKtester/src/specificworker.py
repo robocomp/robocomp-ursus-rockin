@@ -51,7 +51,7 @@ class SpecificWorker(GenericWorker):
 		self.ui.tybox.setValue(950)
 		self.ui.tzbox.setValue(400)
 		self.ui.rxbox.setValue(0)
-		self.ui.rybox.setValue(-1.57)
+		self.ui.rybox.setValue(-0.78)
 		self.ui.rzbox.setValue(0)
 		self.ui.weightbutton.setChecked(True)
 		

@@ -78,8 +78,7 @@ class SpecificWorker(GenericWorker):
 		target.rx = 0
 		target.ry = self.state.ry
 		target.rz = 0
-		self.goReferenced(target, 0, 0, 0)
-		self.stop()
+		self.state.state = 'IDLE'
 
 
 		self.Period = 50
@@ -190,8 +189,8 @@ class SpecificWorker(GenericWorker):
 							self.collisions += 1
 							self.currentVel = [0.7*x for x in self.currentVel]
 							if SEND: self.omnirobot_proxy.setSpeedBase(self.currentVel[0], self.currentVel[1], self.currentVel[2])
-							if self.collisions > 100:
-								print '<Now IDLE'
+							if self.collisions > 50:
+								print '<Now IDLE  BY COLLISIONS!!!!'
 								self.stop()
 								self.state.state = 'IDLE'
 								print 'Now IDLE>'
@@ -227,6 +226,7 @@ class SpecificWorker(GenericWorker):
 	#
 	def goReferenced(self, target, xRef, zRef, threshold):
 		l = QtCore.QMutexLocker(self.mutex)
+		print 'goreferenced'
 		self.state.state = "EXECUTING"
 		self.target = target
 		self.xRef = float(xRef)
@@ -255,6 +255,8 @@ class SpecificWorker(GenericWorker):
 	# stop
 	def stop(self):
 		l = QtCore.QMutexLocker(self.mutex)
+		self.state.state = "IDLE"
+		print 'set STOP'
 		self.omnirobot_proxy.setSpeedBase(0,0,0)
 
 

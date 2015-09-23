@@ -32,6 +32,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	innerModel = new InnerModel(); 
 }
 
+
+
 /**
 * \brief Default destructor
 */
@@ -45,9 +47,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	timer.start(Period);
 	return true;
 }
-//#########################################################################
-//#########################################################################
-//#########################################################################
+
+
 void SpecificWorker::compute( )
 {
 	static bool first = true;
@@ -68,9 +69,9 @@ void SpecificWorker::compute( )
 
 	previousAction = action;
 }
-//#########################################################################
-//#########################################################################
-//#########################################################################
+
+
+
 bool SpecificWorker::activateAgent(const ParameterMap& prs)
 {
 	bool activated = false;
@@ -88,11 +89,15 @@ bool SpecificWorker::activateAgent(const ParameterMap& prs)
 	return true;
 }
 
+
+
 bool SpecificWorker::deactivateAgent()
 {
 		return deactivate();
 		
 }
+
+
 
 StateStruct SpecificWorker::getAgentState()
 {
@@ -109,10 +114,14 @@ StateStruct SpecificWorker::getAgentState()
 	return s;
 }
 
+
+
 ParameterMap SpecificWorker::getAgentParameters()
 {
 	return params;
 }
+
+
 
 bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
 {
@@ -239,9 +248,6 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 	for (auto ap : list)
 	{
 		auto ap2 = ap;
-// 		ap2.tx = ap.tx*0.85;
-// 		ap2.ty = ap.ty*0.85;
-// 		ap2.tz = ap.tz*0.85;
 		switch(ap2.id)
 		{
 			case 30:
