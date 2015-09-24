@@ -584,7 +584,7 @@ void SpecificWorker::action_GraspObject(bool first)
 			if (ikState.finish)
 			{
 				printf("ik finished! te:%f re:%f\n", ikState.errorT, ikState.errorR);
-				if (ikState.errorT < 40 and ikState.errorR < 0.5)
+// 				if (ikState.errorT < 40 and ikState.errorR < 0.5)
 				{
 					printf("next state!\n");
 					if (offset.norm2() >= QVec::vec3(60, 0 -60).norm2())
@@ -685,11 +685,14 @@ int32_t SpecificWorker::sendHandToSymbol(AGMModelSymbol::SPtr symbol, QVec offse
 		innerModel->transformS("robot", QVec::vec3(0,0,0), symbol->getAttribute("imName")).print("directo");
 	}
 	catch (...) { printf("%s: %d\n", __FILE__, __LINE__); }
+	
+	objectsLocationInRobot.print("objectsLocationInRobot");
 	// add offset and put rotation
 	for (int i=0; i<3; i++) objectsLocationInRobot(i)  += offset(i);
 	objectsLocationInRobot(3) = 0;
 	objectsLocationInRobot(4) = -0.7853981633974;
 	objectsLocationInRobot(5) = 0;
+	objectsLocationInRobot.print("objectsLocationInRobot + offset");
 	try
 	{
 		lastTargetId = sendRightArmToPose(objectsLocationInRobot);

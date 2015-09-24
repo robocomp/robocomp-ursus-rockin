@@ -265,7 +265,7 @@ void SpecificWorker::newAprilTag(const tagsList &list)
 					printf("New mug was detected!\n");
 				}
 				qDebug()<<ap2.id<<"POSE: "<<innerModel->transform("room", QVec::vec3(ap2.tx, ap2.ty, ap2.tz), "rgbd");
-				break;				
+				break;
 		}
 	}
 
