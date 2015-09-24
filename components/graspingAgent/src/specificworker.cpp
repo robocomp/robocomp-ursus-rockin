@@ -555,6 +555,7 @@ void SpecificWorker::action_GraspObject(bool first)
 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
 	}
 
+	static QVec offset;
 	switch (state)
 	{
 		//
@@ -569,9 +570,13 @@ void SpecificWorker::action_GraspObject(bool first)
 				inversekinematics_proxy->setJoint("head_pitch_joint", 1., 0.5);
 			}
 			catch(...) { qFatal("%s: %d\n", __FILE__, __LINE__); }
-			lastTargetId = sendHandToSymbol(symbols["object"],                                             QVec::vec6(120, 120, -140,  0,0,0), symbols);
-			state++;
+			offset = QVec::vec6(120, 120, -120);
+			lastTargetId = sendHandToSymbol(symbols["object"],  offset, symbols);
+			state=1;
 			break;
+		//
+		// Wait for last movement (it can be the first one or a intermediate one)
+		//
 		case 1:
 			printf("%d\n", __LINE__);
 			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
@@ -581,7 +586,10 @@ void SpecificWorker::action_GraspObject(bool first)
 				if (ikState.errorT < 40 and ikState.errorR < 0.5)
 				{
 					printf("next state!\n");
-					state++;
+					if (offset.norm2() >= QVec::vec3(60, 0 -60).norm2())
+						state = 2;
+					else
+						state = 3;
 				}
 			}
 			else
@@ -594,40 +602,28 @@ void SpecificWorker::action_GraspObject(bool first)
 		//
 		case 2:
 			printf("%d\n", __LINE__);
-			lastTargetId = sendHandToSymbol(symbols["object"],                                             QVec::vec6(120, 0, -120,  0,0,0), symbols);
-			state++;
+			if (offset(1) > 0)
+			{
+				offset(1) -= 10;
+			}
+			else
+			{
+				offset(0) -= 10;
+				offset(2) += 10;
+			}
+			lastTargetId = sendHandToSymbol(symbols["object"], offset, 0,0,0), symbols);
+			state = 1; // Go back to wait state
 			break;
 		case 3:
-			printf("%d\n", __LINE__);
-			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
-			if (ikState.finish/* and ikState.errorT < 40 and ikState.errorR < 0.5*/) state++;
-			break;
-		//
-		// APPROACH 3
-		//
-		case 4:
-			printf("%d\n", __LINE__);
-			lastTargetId = sendHandToSymbol(symbols["object"],                                             QVec::vec6(50, 0, -60,  0,0,0), symbols);
-			state++;
-			break;
-		case 5:
-			printf("%d\n", __LINE__);
-			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
-			if (ikState.finish/* and ikState.errorT < 40 and ikState.errorR < 0.5*/) state++;
-			break;
-		//
-		// CLOSE FINGERS
-		//
-		case 6:
 			try
 			{
-				inversekinematics_proxy->setJoint("rightFinger1", -0.8, 0.5);
-				inversekinematics_proxy->setJoint("rightFinger2", +0.8, 0.5);
+				inversekinematics_proxy->setJoint("rightFinger1", -0.8, 1.);
+				inversekinematics_proxy->setJoint("rightFinger2", +0.8, 1.);
 			}
 			catch(...) { qFatal("%s: %d\n", __FILE__, __LINE__); }
-			state++;
+			state = 4;
 			break;
-		case 7:
+		case 4:
 			try
 			{
  				newModel->removeEdge(symbols["object"], symbols["table"], "in");
@@ -643,7 +639,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				printf("graspingAgent: Couldn't publish new model\n");
 				qFatal("wfuieey78 ");
 			}
-			state++;
+			state = 9999;
 			break;
 		////////////////////////////////////////////////////////////////////////////////////////////
 		default:
@@ -689,7 +685,7 @@ int32_t SpecificWorker::sendHandToSymbol(AGMModelSymbol::SPtr symbol, QVec offse
 	}
 	catch (...) { printf("%s: %d\n", __FILE__, __LINE__); }
 	// add offset and put rotation
-	objectsLocationInRobot += offset;
+	for (int i=0; i<3; i++) objectsLocationInRobot(i)  += offset(i);
 	objectsLocationInRobot(3) = 0;
 	objectsLocationInRobot(4) = -0.7853981633974;
 	objectsLocationInRobot(5) = 0;
