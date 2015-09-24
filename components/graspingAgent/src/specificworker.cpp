@@ -555,7 +555,8 @@ void SpecificWorker::action_GraspObject(bool first)
 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
 	}
 
-	static QVec offset;
+	static QVec offset = QVec::vec3(0,0,0);
+	offset.print("offset");
 	switch (state)
 	{
 		//
@@ -570,7 +571,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				inversekinematics_proxy->setJoint("head_pitch_joint", 1., 0.5);
 			}
 			catch(...) { qFatal("%s: %d\n", __FILE__, __LINE__); }
-			offset = QVec::vec6(120, 120, -120);
+			offset = QVec::vec3(120, 120, -120);
 			lastTargetId = sendHandToSymbol(symbols["object"],  offset, symbols);
 			state=1;
 			break;
@@ -611,7 +612,7 @@ void SpecificWorker::action_GraspObject(bool first)
 				offset(0) -= 10;
 				offset(2) += 10;
 			}
-			lastTargetId = sendHandToSymbol(symbols["object"], offset, 0,0,0), symbols);
+			lastTargetId = sendHandToSymbol(symbols["object"], offset, symbols);
 			state = 1; // Go back to wait state
 			break;
 		case 3:
