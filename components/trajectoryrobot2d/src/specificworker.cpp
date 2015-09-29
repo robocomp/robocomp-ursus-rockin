@@ -100,7 +100,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
 
 	//Planning
-	plannerPRM = new PlannerPRM(innerModel, 150, 20);
+	plannerPRM = new PlannerPRM(innerModel, 100, 10);
 	planner = plannerPRM;
 #ifdef USE_QTGUI
 	planner->cleanGraph(innerViewer);

@@ -58,7 +58,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	road.setBlocked(false);
 	for(auto i : laserData)
 	{
-		printf("laser dist %f || baseOffsets %f \n",i.dist,baseOffsets[j]);
+		//printf("laser dist %f || baseOffsets %f \n",i.dist,baseOffsets[j]);
 		if(i.dist < 10) i.dist = 30000;
 		if( i.dist < baseOffsets[j] + 50 )
 		{
@@ -129,7 +129,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		// Factor to be used in speed control when approaching the end of the road
 		float reduction=1;
 		int w=0;
-		float constant=1000;		//Empieza a reducir cuando encuentra obstaculos a una distancia menor a "constant"
+		float constant=1000;		//Empieza a reducir cuando encuentra obstaculos a una distancia menor a "constant" (usado para pasar por puertas)
 		for(auto i : laserData)
 		{
 			constant = baseOffsets[w] + constant;
