@@ -170,6 +170,10 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			vrot = 0;
 			vside = 0;
 		}
+		//TODO: use omni
+		vside = vrot*MAX_ADV_SPEED;
+		
+		
 		
 		/////////////////////////////////////////////////
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
@@ -195,11 +199,11 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-   		//qDebug() << "------------------Controller Report ---------------;";
-    		//qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot << " VSide: " << vside;
-   		//qDebug() << "---------------------------------------------------;";
+//    		qDebug() << "------------------Controller Report ---------------;";
+//     		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot << " VSide: " << vside;
+//    		qDebug() << "---------------------------------------------------;";
                 
-   		try { omnirobot_proxy->setSpeedBase(vside/2, vadvance/2, vrot/2);}
+   		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
    		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 	}
 	else		//Too long delay. Stopping robot.

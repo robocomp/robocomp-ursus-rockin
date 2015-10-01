@@ -4,6 +4,7 @@
 	<transform id="world">
 		<transform id="floor">
 			<plane id="floor_plane" ny="1" size="10000,10000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+		<!--	
 			<transform id="pared_0" tz="800">
 				<plane id="pared0" nz="1" size="5000,1000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
 			</transform>
@@ -19,6 +20,7 @@
 			<transform id="pared_4" tx="-2000" tz="3000">
 				<plane id="pared4" nz="1" size="4000,1000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
 			</transform>
+		-->
 		</transform>
 	</transform>		
 </innerModel>
