@@ -1,14 +1,14 @@
 ```
 ```
 #
-``` visualikaux100
+``` visualiktester_april
 ```
 Intro to component here
 
 
 ## Configuration parameters
 As any other component,
-``` *visualikaux100* ```
+``` *visualiktester_april* ```
 needs a configuration file to start. In
 
     etc/config
@@ -23,7 +23,7 @@ To avoid changing the *config* file in the repository, we can copy it to the com
 
     cd
 
-``` <visualikaux100 's path> ```
+``` <visualiktester_april 's path> ```
 
     cp etc/config config
     
@@ -31,6 +31,6 @@ After editing the new config file we can run the component:
 
     bin/
 
-```visualikaux100 ```
+```visualiktester_april ```
 
     --Ice.Config=config

@@ -22,7 +22,7 @@
 */
 SpecificMonitor::SpecificMonitor(GenericWorker *_worker,Ice::CommunicatorPtr _communicator):GenericMonitor(_worker, _communicator)
 {
-
+		ready = false;
 }
 /**
 * \brief Default destructor
@@ -35,6 +35,7 @@ SpecificMonitor::~SpecificMonitor()
 void SpecificMonitor::run()
 {
 	initialize();
+	ready = true;
 	forever
 	{
 		//rDebug("specific monitor run");
@@ -84,7 +85,7 @@ bool SpecificMonitor::sendParamsToWorker(RoboCompCommonBehavior::ParameterList p
 ///We need to supply a list of accepted values to each call
 void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 {
-	RoboCompCommonBehavior::Parameter aux;
+ 	RoboCompCommonBehavior::Parameter aux;
 	aux.editable = true;
 	
 	configGetString("", "InnerModel", aux.value,"");
