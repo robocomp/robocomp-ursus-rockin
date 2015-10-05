@@ -37,6 +37,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 {
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
 	/*static*/ long epoch = 100;
+	static float lastVadvance = 0.f;
+	const float umbral = 30.f;	//salto maximo de velocidad
+	static int contador  = 0;
 
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
@@ -173,7 +176,17 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//TODO: use omni
 		vside = vrot*MAX_ADV_SPEED;
 		
-		
+		//stopping speed jump
+		if(fabs(vadvance - lastVadvance) > umbral)
+		{
+			contador++;
+			qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
+			if(vadvance > lastVadvance)
+				vadvance = vadvance - ((vadvance - lastVadvance)/2);
+			else vadvance = lastVadvance - ((lastVadvance - vadvance)/2);
+		}
+		lastVadvance=vadvance;
+		qDebug()<<"corregida "<<vadvance;
 		
 		/////////////////////////////////////////////////
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
@@ -199,9 +212,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-//    		qDebug() << "------------------Controller Report ---------------;";
-//     		qDebug() << "	VAdv: " << vadvance << " VRot: " << vrot << " VSide: " << vside;
-//    		qDebug() << "---------------------------------------------------;";
+		qDebug() << "------------------Controller Report ---------------;";
+		qDebug() <<"correcciones:"<<contador <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
+		qDebug() << "---------------------------------------------------;";
                 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
    		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
