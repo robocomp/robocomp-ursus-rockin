@@ -33,9 +33,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
-	innerModel = new InnerModel();	
+	innerModel = new InnerModel();
 #ifdef USE_QTGUI	
-	osgView = new OsgView( this );
+	osgView = new OsgView(widget);
 	show();
 //  	printf("%s: %d\n", __FILE__, __LINE__);
 	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
@@ -46,10 +46,11 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
 #endif
 	
-	
+	show();
 
 	setRightArmUp_Reflex();
 	
+	connect(buttonLeave, SIGNAL(clicked()), this, SLOT(leaveObjectSimulation()));
 	
 	
 }
@@ -63,14 +64,11 @@ SpecificWorker::~SpecificWorker()
 }
 void SpecificWorker::updateViewer()
 {
-	 printf("%s: %d\n", __FILE__, __LINE__);
 	if (!innerModel) return;
 	
 	innerViewer->update();
 	osgView->autoResize();		
 	osgView->frame();	
-
-
 }
 
 void SpecificWorker::compute( )
@@ -95,7 +93,7 @@ void SpecificWorker::compute( )
 
 void SpecificWorker::manageReachedObjects()
 {
-	float THRESHOLD_object = 100;
+	float THRESHOLD_object = 150;
 	float THRESHOLD_table = 400;
 	
 	bool changed = false;
@@ -128,8 +126,8 @@ void SpecificWorker::manageReachedObjects()
 			graspPosition(1) = 0;
 			QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
 			obj(1) = 0;
-			graspPosition.print("  graspPosition");
-			obj.print("  obj");
+// 			graspPosition.print("  no");
+// 			obj.print("  obj");
 
 			float THRESHOLD = THRESHOLD_object;
 			if (isObjectType(newModel, node, "table"))
@@ -138,7 +136,7 @@ void SpecificWorker::manageReachedObjects()
 			}
 			
 			
-			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (graspPosition-obj).norm2(), THRESHOLD);
+// 			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (graspPosition-obj).norm2(), THRESHOLD);
 
 
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
@@ -542,174 +540,175 @@ void SpecificWorker::action_GraspObject(bool first)
 
 	QMutexLocker locker(mutex);
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
-	QVec objectsLocationInRobot;
 	TargetState ikState;
 	static int lastTargetId = 0;
 	
 	if (first) state = 0;
 	printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
 
-	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
 	{
-		symbols = newModel->getSymbolsMap(params, "object", "room", "robot");
+		symbols = newModel->getSymbolsMap(params, "object", "room", "robot", "table");
 	}
 	catch(...)
 	{
 		printf("graspingAgent: Couldn't retrieve action's parameters\n");
-	}	
+	}
 
-//////////////////////////////////////////////
-// <TAB>STATE MACHINE<TAB><TAB><TAB><TAB><TAB><TAB><TAB>//
-// <TAB>1.- approach the hand and open fingers<TAB>//
-// <TAB>2.- align in x axe<TAB><TAB><TAB><TAB><TAB><TAB>//
-// <TAB>3.- grasp position<TAB><TAB><TAB><TAB><TAB><TAB>//
-// <TAB>4.- close fingers<TAB><TAB><TAB><TAB><TAB><TAB>//
-//////////////////////////////////////////////
+	static QVec offset = QVec::vec3(0,0,0);
+	offset.print("offset");
 	switch (state)
 	{
-		case 0: // APPROACH AND OPEN FINGERS
-			// open fingers
+		//
+		// APPROACH 1 AND OPEN FINGERS
+		//
+		case 0:
+			printf("%d\n", __LINE__);
 			try
 			{
-				inversekinematics_proxy->setFingers(80); //OPEN FINGERS
-				inversekinematics_proxy->setJoint("head_pitch_joint", 1.2, 0.5);
+				inversekinematics_proxy->setJoint("rightFinger1", -0., 0.5);
+				inversekinematics_proxy->setJoint("rightFinger2", +0., 0.5);
+				inversekinematics_proxy->setJoint("head_pitch_joint", 1., 0.5);
 			}
 			catch(...) { qFatal("%s: %d\n", __FILE__, __LINE__); }
-			usleep(100000);
-			// approach the hand
-			try
-			{
-				objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbols["object"]); //POSE OBJECT IN ROBOT SYSTEM
-				objectsLocationInRobot.print("objectsLocationInRobot");
-				innerModel->transformS("robot", QVec::vec3(0,0,0), symbols["object"]->getAttribute("imName")).print("directo");
-			}
-			catch (...) { printf("%s: %d\n", __FILE__, __LINE__); }
-			// add offset and put rotation
-			objectsLocationInRobot += QVec::vec6(150, 0, 0,  0,0,0);
-			objectsLocationInRobot(3) = 0;
-			objectsLocationInRobot(4) = -1.5707;
-			objectsLocationInRobot(5) = 0;
-			try
-			{
-				lastTargetId = sendRightArmToPose(objectsLocationInRobot);
-				qDebug()<<"------> 0 step execution";
-				time = QTime::currentTime();
-				state++; // next state
-				
-			}
-			catch (...)	{ printf("%s: %d\n", __FILE__, __LINE__); }
+			offset = QVec::vec3(120, 120, -120);
+			lastTargetId = sendHandToSymbol(symbols["object"],  offset, symbols);
+			state=1;
 			break;
-		////////////////////////////////////////////////////////////////////////////////////////////
-		case 1: // WAITING FOR THE FIRST VIK EXECUTION
+		//
+		// Wait for last movement (it can be the first one or a intermediate one)
+		//
+		case 1:
+			printf("%d\n", __LINE__);
 			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
 			if (ikState.finish)
 			{
-				if (ikState.errorT < 40 and ikState.errorR < 0.5)
+				printf("ik finished! te:%f re:%f\n", ikState.errorT, ikState.errorR);
+// 				if (ikState.errorT < 40 and ikState.errorR < 0.5)
 				{
-					state++; // next state
-					qDebug()<<"------> 1 step execution";
-					qFatal("!!!");
+					printf("next state!\n");
+					if (offset.norm2() >= QVec::vec3(60, 0 -60).norm2())
+						state = 2;
+					else
+						state = 3;
 				}
 			}
-			break;
-		////////////////////////////////////////////////////////////////////////////////////////////
-		case 2: // ALIGN TO OBJECT IN X AXE
-			try
+			else
 			{
-				objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbols["object"]); //POSE OBJECT IN ROBOT SYSTEM
-			}
-			catch (...)	{	printf("%s: %d\n", __FILE__, __LINE__);	}
-			// add offset and put rotation
-			objectsLocationInRobot += QVec::vec6(100, -50, 0,  0,0,0);
-			objectsLocationInRobot(3) = 0;
-			objectsLocationInRobot(4) = -1.5707;
-			objectsLocationInRobot(5) = 0;
-			try
-			{
-				lastTargetId = sendRightArmToPose(objectsLocationInRobot);
-				qDebug()<<"------> 2 step execution";
-				time = QTime::currentTime();
-				state++; // next state
-			}
-			catch (...)	{ printf("%s: %d\n", __FILE__, __LINE__); }
-			break;
-		////////////////////////////////////////////////////////////////////////////////////////////
-		case 3: // WAITING FOR THE SECOND VIK EXECUTION
-			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
-			if (ikState.finish)
-			{
-				if (ikState.errorT < 40 and ikState.errorR < 0.5)
-				{
-					state++; // next state
-					qDebug()<<"------> 3 step execution";
-				}
+				printf("not finished yet\n");
 			}
 			break;
-		////////////////////////////////////////////////////////////////////////////////////////////
-		case 4: // GRASP POSITION
-			try
+		//
+		// APPROACH 2
+		//
+		case 2:
+			printf("%d\n", __LINE__);
+			if (offset(1) > 0)
 			{
-				objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbols["object"]); //POSE OBJECT IN ROBOT SYSTEM
+				offset(1) -= 10;
 			}
-			catch (...)	{	printf("%s: %d\n", __FILE__, __LINE__);	}
-			// add offset and put rotation
-			objectsLocationInRobot += QVec::vec6(80, -50, 0,  0,0,0);
-			objectsLocationInRobot(3) = 0;
-			objectsLocationInRobot(4) = -1.5707;
-			objectsLocationInRobot(5) = 0;
-			try
+			else
 			{
-				lastTargetId = sendRightArmToPose(objectsLocationInRobot);
-				qDebug()<<"------> 4 step execution";
-				time = QTime::currentTime();
-				state++; // next state
+				offset(0) -= 10;
+				offset(2) += 10;
 			}
-			catch (...)	{ printf("%s: %d\n", __FILE__, __LINE__); }
+			lastTargetId = sendHandToSymbol(symbols["object"], offset, symbols);
+			state = 1; // Go back to wait state
 			break;
-		////////////////////////////////////////////////////////////////////////////////////////////
-		case 5: // WAITING FOR THE THIRD VIK EXECUTION
-			ikState = inversekinematics_proxy->getTargetState("RIGHTARM", lastTargetId);
-			if (ikState.finish)
-			{
-				if (ikState.errorT < 40 and ikState.errorR < 0.5)
-				{
-					state++; // next state
-					qDebug()<<"------> 5 step execution";
-				}
-			}
-			break;
-		////////////////////////////////////////////////////////////////////////////////////////////
-		case 6:
+		case 3:
 			try
 			{
-				inversekinematics_proxy->setFingers(50);
-				usleep(500000);
-// 				qFatal("got it!!!! :-D");
-				newModel->removeEdge(symbols["object"], symbols["table"], "in");
+				inversekinematics_proxy->setJoint("rightFinger1", -0.8, 1.);
+				inversekinematics_proxy->setJoint("rightFinger2", +0.8, 1.);
+			}
+			catch(...) { qFatal("%s: %d\n", __FILE__, __LINE__); }
+			state = 4;
+			break;
+		case 4:
+			try
+			{
+ 				newModel->removeEdge(symbols["object"], symbols["table"], "in");
 				newModel->addEdge(   symbols["object"], symbols["robot"], "in");
 				{
 					QMutexLocker locker(mutex);
 					sendModificationProposal(newModel, worldModel);
 				}
-				time = QTime::currentTime();
-				
 				state++;
 			}
 			catch(...)
 			{
 				printf("graspingAgent: Couldn't publish new model\n");
+				qFatal("wfuieey78 ");
 			}
+			state = 9999;
 			break;
 		////////////////////////////////////////////////////////////////////////////////////////////
 		default:
-			if (time.elapsed() > 4000)
-			{
-				state = 0;
-			}
 			break;
 	}
+	
+	usleep(500000);
 }
+
+void SpecificWorker::leaveObjectSimulation()
+{
+	QMutexLocker locker(mutex);
+
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	try
+	{
+		newModel->addEdge(   symbols["object"], symbols["table"], "in");
+		newModel->removeEdge(symbols["object"], symbols["robot"], "in");
+		{
+			QMutexLocker locker(mutex);
+			sendModificationProposal(newModel, worldModel);
+		}
+	}
+	catch(...)
+	{
+		printf("graspingAgent: Couldn't publish new model\n");
+		qFatal("2264w7ertytynvc8");
+	}
+	
+}
+
+
+int32_t SpecificWorker::sendHandToSymbol(AGMModelSymbol::SPtr symbol, QVec offset, std::map<std::string, AGMModelSymbol::SPtr> symbols)
+{
+	int32_t lastTargetId;
+	QVec objectsLocationInRobot;
+	// approach the hand
+	try
+	{
+		objectsLocationInRobot = getObjectsLocationInRobot(symbols, symbol); //POSE OBJECT IN ROBOT SYSTEM
+		objectsLocationInRobot.print("objectsLocationInRobot");
+		innerModel->transformS("robot", QVec::vec3(0,0,0), symbol->getAttribute("imName")).print("directo");
+	}
+	catch (...) { printf("%s: %d\n", __FILE__, __LINE__); }
+	
+	objectsLocationInRobot.print("objectsLocationInRobot");
+	// add offset and put rotation
+	for (int i=0; i<3; i++) objectsLocationInRobot(i)  += offset(i);
+	objectsLocationInRobot(3) = 0;
+	objectsLocationInRobot(4) = -0.7853981633974;
+	objectsLocationInRobot(5) = 0;
+	objectsLocationInRobot.print("objectsLocationInRobot + offset");
+	try
+	{
+		lastTargetId = sendRightArmToPose(objectsLocationInRobot);
+		objectsLocationInRobot.print("sent");
+		qDebug()<<"------> 0 step execution";
+	}
+	catch (...)
+	{
+		lastTargetId = -1;
+		printf("%s: %d\n", __FILE__, __LINE__);
+		qFatal("dewer");
+	}
+	return lastTargetId;
+}
+
+
 
 /**
  * \brief This method calculates the pose of the symbol OBJECT into the robot reference system.
@@ -790,8 +789,10 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
+	printf("altura mano %f\n", innerModel->transform("room", "grabPositionHandR")(1));
 	if (first or innerModel->transform("room", "grabPositionHandR")(1)<1500)
 	{
+		inversekinematics_proxy->setJoint("head_yaw_joint", 0, 0.5);
 		backAction = action;
 		if (first) printf("first time, set arm for manipulation\n");
 		else  printf("arm is down, set arm for manipulation\n");
@@ -830,18 +831,18 @@ void SpecificWorker::action_SetObjectReach(bool first)
 			printf("current yaw: %f\n", currentYaw);
 			float angle = 0.5*angleRRobot + 0.5*currentYaw;
 			printf("%f -> ", angle);
-			if (fabs(angle-currentYaw) > 1.*M_PI/180.)
+			if (fabs(angle-currentYaw) > 10.*M_PI/180.)
 			{
 				printf(" ** ");
 				if (angle>currentYaw)
-					angle = currentYaw + 1.*M_PI/180.;
+					angle = currentYaw + 10.*M_PI/180.;
 				else
-					angle = currentYaw - 1.*M_PI/180.;
+					angle = currentYaw - 10.*M_PI/180.;
 			}
 			printf(" -> %f\n", angle);
 			
-			if (angle > +0.5) angle = +0.5;
-			if (angle < -0.5) angle = -0.5;
+			if (angle > +.4) angle = +.4;
+			if (angle < -.4) angle = -.4;
 
 			// In the meantime we just move the head downwards:
 			inversekinematics_proxy->setJoint("head_pitch_joint", 0.9, 0.5);
@@ -934,3 +935,12 @@ void SpecificWorker::setRightArmUp_Reflex()
 
 
 
+void SpecificWorker::on_state1_clicked()
+{
+	action = "graspobject";
+	action_GraspObject(true);
+	
+	params["object"].value = "11";
+	params["room"  ].value = "7";
+	params["robot" ].value = "1";
+}

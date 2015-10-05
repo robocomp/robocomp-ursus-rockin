@@ -22,13 +22,6 @@
        @author authorname
 */
 
-
-
-// THIS IS AN AGENT
-
-
-
-
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
@@ -95,12 +88,12 @@ public:
 	StateStruct getAgentState();
 	ParameterMap getAgentParameters();
 	bool setAgentParameters(const ParameterMap& prs);
-	void  killAgent();
+	void killAgent();
 	Ice::Int uptimeAgent();
 	bool reloadConfigAgent();
-	void  structuralChange(const RoboCompAGMWorldModel::Event& modification);
-	void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
-	void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
+	void structuralChange(const RoboCompAGMWorldModel::Event& modification);
+	void symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
+	void edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
 
 
 public slots:
@@ -116,8 +109,9 @@ private:
 	int sendRightArmToPose(QVec p);
 
 	void manageReachedObjects();
+	void leaveObjectSimulation();
 
-
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 
 	void actionExecution();
 	void action_FindObjectVisuallyInTable(bool first=false);
@@ -151,7 +145,12 @@ private:
 	InnerModelViewer *innerViewer; 
 	
 	bool active;
+
+	int32_t sendHandToSymbol(AGMModelSymbol::SPtr symbol, QVec offset, std::map<std::string, AGMModelSymbol::SPtr> symbols);
 	
+	
+public slots:
+	void on_state1_clicked();
 };
 
 #endif
