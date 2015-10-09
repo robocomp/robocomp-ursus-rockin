@@ -31,51 +31,6 @@
 
 #include <agm.h>
 
-/*
-class QMutexDebug : public QMutex
-{
-public:
-	QMutexDebug(QMutex::RecursionMode recursionMode, QString name) : QMutex(recursionMode)
-	{
-		myname = name;
-		caller = "<none yet>";
-	}
-	void setCallerID(QString callerID)
-	{
-		caller = callerID;
-	}
-	QString getCallerID() { return caller; }
-	QString getMutexName() { return myname; }
-private:
-	QString caller;
-	QString myname;
-};
-
-class QMutexLockerDebug
-{
-public:
-	QMutexLockerDebug(QMutexDebug *mutex, QString callerID)
-	{
-		this->mutex = mutex;
-// 		printf("Mutex %s is being accessed by %s\n", mutex->getMutexName().toStdString().c_str(), callerID.toStdString().c_str());
-		locker = new QMutexLocker(mutex);
-		mutex->setCallerID(callerID);
-// 		printf("Mutex %s was blocked by %s\n", mutex->getMutexName().toStdString().c_str(), callerID.toStdString().c_str());
-	}
-	~QMutexLockerDebug()
-	{
-		mutex->setCallerID(QString("was released by ")+mutex->getCallerID());
-		delete locker;
-	}
-private:
-	QMutexDebug *mutex;
-	QString caller;
-	QMutexLocker *locker;
-};
-
-*/
-
-
 class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
@@ -98,8 +53,12 @@ public:
 
 public slots:
 	void compute();
+	
+	void startManualMode();
 
 private:
+	bool manualMode;
+
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
 

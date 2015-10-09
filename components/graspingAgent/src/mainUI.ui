@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>918</width>
-    <height>663</height>
+    <width>435</width>
+    <height>339</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,9 +24,6 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="0">
-        <widget class="QSpinBox" name="xspin"/>
-       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
@@ -48,34 +45,82 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QDoubleSpinBox" name="xspin">
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="minimum">
+          <double>0.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>300.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>100.000000000000000</double>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="1">
-        <widget class="QSpinBox" name="yspin"/>
+        <widget class="QDoubleSpinBox" name="yspin">
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="minimum">
+          <double>700.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>1200.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>850.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item row="1" column="2">
-        <widget class="QSpinBox" name="zspin"/>
+        <widget class="QDoubleSpinBox" name="zspin">
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="minimum">
+          <double>150.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>400.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>250.000000000000000</double>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
      <item>
-      <widget class="QPushButton" name="state1">
+      <widget class="QPushButton" name="manualButton">
        <property name="text">
-        <string>force state1</string>
+        <string>SET MANUAL MODE</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="state3">
+      <widget class="QCheckBox" name="manualModeSet">
        <property name="text">
-        <string>force state 3</string>
+        <string>manual mode</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="text">
-        <string>force state 5</string>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
-      </widget>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="buttonLeave">

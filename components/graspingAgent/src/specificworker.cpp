@@ -46,11 +46,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
 #endif
 	
+	manualMode = false;
 	show();
 
 	setRightArmUp_Reflex();
 	
-	connect(buttonLeave, SIGNAL(clicked()), this, SLOT(leaveObjectSimulation()));
+	connect(manualButton, SIGNAL(clicked()), this, SLOT(startManualMode()));
+	connect(buttonLeave,  SIGNAL(clicked()), this, SLOT(leaveObjectSimulation()));
 	
 	
 }
@@ -75,7 +77,7 @@ void SpecificWorker::compute( )
 {
 	QMutexLocker locker(mutex);
 	{
-		if (not innerModel->getNode("grabPositionHandR"))
+		if (not innerModel->getNode("grabPositionHandR") and not manualMode)
 		{
 			printf("waiting for AGM*\n");
 			return;
@@ -83,8 +85,16 @@ void SpecificWorker::compute( )
 	}
 	manageReachedObjects();
 
-	// ACTION EXECUTION
-	actionExecution();
+	
+	if (manualMode)
+	{
+		action_GraspObject();
+	}
+	else
+	{
+		// ACTION EXECUTION
+		actionExecution();
+	}
 #ifdef USE_QTGUI
 	updateViewer();
 #endif	
@@ -532,6 +542,12 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool first)
 }
 
 
+void SpecificWorker::startManualMode()
+{
+	manualMode = true;
+	action_GraspObject(true);
+}
+
 
 void SpecificWorker::action_GraspObject(bool first)
 {
@@ -546,13 +562,27 @@ void SpecificWorker::action_GraspObject(bool first)
 	if (first) state = 0;
 	printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
 
-	try
+	
+	QVec pose = QVec::vec6();
+	if (not manualMode)
 	{
-		symbols = newModel->getSymbolsMap(params, "object", "room", "robot", "table");
+		try
+		{
+			symbols = newModel->getSymbolsMap(params, "object", "room", "robot", "table");
+		}
+		catch(...)
+		{
+			printf("graspingAgent: Couldn't retrieve action's parameters\n");
+		}
 	}
-	catch(...)
+	else
 	{
-		printf("graspingAgent: Couldn't retrieve action's parameters\n");
+		pose(0) = xspin->value();
+		pose(1) = yspin->value();
+		pose(2) = zspin->value();
+		pose(3) = 0;
+		pose(4) = -0.7853981633974;
+		pose(5) = 0;
 	}
 
 	static QVec offset = QVec::vec3(0,0,0);
@@ -572,7 +602,15 @@ void SpecificWorker::action_GraspObject(bool first)
 			}
 			catch(...) { qFatal("%s: %d\n", __FILE__, __LINE__); }
 			offset = QVec::vec3(120, 120, -120);
-			lastTargetId = sendHandToSymbol(symbols["object"],  offset, symbols);
+			if (manualMode)
+			{
+				for (int cc=0; cc<3; cc++) pose(cc) += offset(cc);
+				lastTargetId = sendRightArmToPose(pose);
+			}
+			else
+			{
+				lastTargetId = sendHandToSymbol(symbols["object"],  offset, symbols);
+			}
 			state=1;
 			break;
 		//
@@ -605,14 +643,22 @@ void SpecificWorker::action_GraspObject(bool first)
 			printf("%d\n", __LINE__);
 			if (offset(1) > 0)
 			{
-				offset(1) -= 10;
+				offset(1) -= 25;
 			}
 			else
 			{
-				offset(0) -= 10;
-				offset(2) += 10;
+				offset(0) -= 20;
+				offset(2) += 20;
 			}
-			lastTargetId = sendHandToSymbol(symbols["object"], offset, symbols);
+			if (manualMode)
+			{
+				for (int cc=0; cc<3; cc++) pose(cc) += offset(cc);
+				lastTargetId = sendRightArmToPose(pose);
+			}
+			else
+			{
+				lastTargetId = sendHandToSymbol(symbols["object"], offset, symbols);
+			}
 			state = 1; // Go back to wait state
 			break;
 		case 3:
@@ -627,11 +673,14 @@ void SpecificWorker::action_GraspObject(bool first)
 		case 4:
 			try
 			{
- 				newModel->removeEdge(symbols["object"], symbols["table"], "in");
-				newModel->addEdge(   symbols["object"], symbols["robot"], "in");
+				if (not manualMode)
 				{
-					QMutexLocker locker(mutex);
-					sendModificationProposal(newModel, worldModel);
+					newModel->removeEdge(symbols["object"], symbols["table"], "in");
+					newModel->addEdge(   symbols["object"], symbols["robot"], "in");
+					{
+						QMutexLocker locker(mutex);
+						sendModificationProposal(newModel, worldModel);
+					}
 				}
 				state++;
 			}
