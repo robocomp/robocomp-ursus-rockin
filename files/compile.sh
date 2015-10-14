@@ -235,16 +235,6 @@ if [ $? -ne 0 ]; then
 fi
 
 
-# mission comp
-echo "make mission comp"
-cd /home/robocomp/robocomp/components/robocomp-ursus/components/missionAgent/
-cmake .
-make -j$N
-if [ $? -ne 0 ]; then
-        echo "error compiling mission comp"
-        exit
-fi
-
 # human
 echo "make human agent"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin/components/humanAgent/
