@@ -38,8 +38,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
 	/*static*/ long epoch = 100;
 	static float lastVadvance = 0.f;
-	const float umbral = 30.f;	//salto maximo de velocidad
-	static int contador  = 0;
+	const float umbral = 25.f;	//salto maximo de velocidad
+	static float lastVrot = 0.f;
+	const float umbralrot = 0.1f;	//salto maximo de rotación
 
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
@@ -158,10 +159,31 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 								 * teta;
                                                                                                                                 //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
 								 //* sunk;
+
+
+		if(fabs(vrot - lastVrot) > umbralrot)
+		{
+			qDebug()<<"lastrot "<<lastVrot << "\n vrot "<< vrot;
+			if(vrot > lastVrot)
+				vrot = lastVrot + umbralrot;
+			else vrot = lastVrot - umbralrot;
+		}
+		lastVrot=vrot;
+
 		//Pre-limiting filter to avoid displacements in very closed turns
 		if( fabs(vrot) > 0.8)
 			vadvance = 0;
 		
+		//stopping speed jump
+		if(fabs(vadvance - lastVadvance) > umbral)
+		{
+			qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
+			if(vadvance > lastVadvance)
+				vadvance = lastVadvance + umbral;
+			else vadvance = lastVadvance - umbral;
+		}
+		lastVadvance=vadvance;
+
  		// Limiting filter
  		if( vadvance > MAX_ADV_SPEED )
  			vadvance = MAX_ADV_SPEED;
@@ -174,19 +196,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			vside = 0;
 		}
 
-		vside = vrot*MAX_ADV_SPEED;
-		
-		//stopping speed jump
-		if(fabs(vadvance - lastVadvance) > umbral)
-		{
-			contador++;
-			qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
-			if(vadvance > lastVadvance)
-				vadvance = vadvance - ((vadvance - lastVadvance)/2);
-			else vadvance = lastVadvance - ((lastVadvance - vadvance)/2);
-		}
-		lastVadvance=vadvance;
-		qDebug()<<"corregida "<<vadvance;
+		//vside = vrot*MAX_ADV_SPEED;
 		
 		/////////////////////////////////////////////////
 		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
@@ -213,7 +223,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		////////////////////////////////////////////////
 
 		qDebug() << "------------------Controller Report ---------------;";
-		qDebug() <<"correcciones:"<<contador <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
+		qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
 		qDebug() << "---------------------------------------------------;";
                 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
