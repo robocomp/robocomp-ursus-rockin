@@ -48,7 +48,6 @@ changeRoom : active(1)
 	}
 }
 
-
 findObjectVisuallyInTable : active(1)
 {
 	{
@@ -66,10 +65,10 @@ findObjectVisuallyInTable : active(1)
 	=>
 	{
 		status:objectSt(95,0)
-		object:object(-130,0)
+		contst:objectSt(95,110)
 		container:object(-130,110)
 		room:object(-325,110)
-		contst:objectSt(95,110)
+		object:object(-130,0)
 		robot:robot(-325,0)
 		container->contst(explored)*
 		container->contst(table)
@@ -87,7 +86,6 @@ findObjectVisuallyInTable : active(1)
 		container->room(in)
 	}
 }
-
 
 findGranny : active(1)
 {
@@ -122,7 +120,7 @@ findGranny : active(1)
 	effect
 	{
 		(forall
-			aRoom:object
+			aRoom:room
 			aRoomSt:roomSt
 			(and
 				(not (explored aRoom aRoomSt))
@@ -131,7 +129,6 @@ findGranny : active(1)
 		)
 	}
 }
-
 
 recognizeObjGlasses : active(1)
 {
@@ -159,19 +156,18 @@ recognizeObjGlasses : active(1)
 	}
 }
 
-
 setRoomExplored : passive(1)
 {
 	{
 		status:roomSt(250,0)
-		object:object(0,0)
-		object->status(noExplored)
+		room:object(0,0)
+		room->status(noExplored)
 	}
 	=>
 	{
 		status:roomSt(250,0)
-		object:object(0,0)
-		object->status(explored)
+		room:object(0,0)
+		room->status(explored)
 	}
 }
 
@@ -179,14 +175,14 @@ setRoomNotExplored : passive(1)
 {
 	{
 		status:roomSt(250,0)
-		object:object(0,0)
-		object->status(explored)
+		room:object(0,0)
+		room->status(explored)
 	}
 	=>
 	{
 		status:roomSt(250,0)
-		object:object(0,0)
-		object->status(noExplored)
+		room:object(0,0)
+		room->status(noExplored)
 	}
 }
 
@@ -273,9 +269,9 @@ graspObject : active(1)
 	{
 		table:object(0,110)
 		object:object(130,0)
+		ost:objectSt(290,0)
 		room:object(-130,0)
 		robot:robot(0,-110)
-		ost:objectSt(290,0)
 		robot->object(know)
 		object->table(in)
 		robot->room(in)
@@ -286,9 +282,9 @@ graspObject : active(1)
 	{
 		table:object(0,110)
 		object:object(130,0)
+		ost:objectSt(290,0)
 		room:object(-130,0)
 		robot:robot(0,-110)
-		ost:objectSt(290,0)
 		robot->object(know)
 		object->robot(in)
 		robot->room(in)
@@ -415,4 +411,19 @@ setObjectNotPosition : passive(1)
 	}
 }
 
+setRoomHumanFree : active(1)
+{
+	{
+		room:object(60,-40)
+		rs:roomSt(250,-40)
+		room->rs(room)
+	}
+	=>
+	{
+		room:object(20,-40)
+		rs:roomSt(250,-40)
+		room->rs(room)
+		room->rs(humanFree)
+	}
+}
 
