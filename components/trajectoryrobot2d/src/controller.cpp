@@ -173,7 +173,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 			vrot = 0;
 			vside = 0;
 		}
-		//TODO: use omni
+
 		vside = vrot*MAX_ADV_SPEED;
 		
 		//stopping speed jump
