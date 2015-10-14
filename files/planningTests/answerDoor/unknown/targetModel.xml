@@ -1,0 +1,5 @@
+<AGMModel>
+	<symbol id="5" type="object" />
+	<symbol id="6" type="roomSt" />
+	<link src="5" dst="6" label="humanFree" />
+</AGMModel>
