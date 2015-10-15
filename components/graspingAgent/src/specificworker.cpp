@@ -625,7 +625,7 @@ void SpecificWorker::action_GraspObject(bool first)
 // 				if (ikState.errorT < 40 and ikState.errorR < 0.5)
 				{
 					printf("next state!\n");
-					if (offset.norm2() >= QVec::vec3(60, 0 -60).norm2())
+					if (offset.norm2() >= QVec::vec3(70, 0 -70).norm2())
 						state = 2;
 					else
 						state = 3;
@@ -643,12 +643,15 @@ void SpecificWorker::action_GraspObject(bool first)
 			printf("%d\n", __LINE__);
 			if (offset(1) > 0)
 			{
-				offset(1) -= 25;
+				if (offset(1) > 61)
+					offset(1) -= 60;
+				else
+					offset(1) = -10;
 			}
 			else
 			{
-				offset(0) -= 20;
-				offset(2) += 20;
+				offset(0) -= 30;
+				offset(2) += 30;
 			}
 			if (manualMode)
 			{
@@ -664,8 +667,8 @@ void SpecificWorker::action_GraspObject(bool first)
 		case 3:
 			try
 			{
-				inversekinematics_proxy->setJoint("rightFinger1", -0.8, 1.);
-				inversekinematics_proxy->setJoint("rightFinger2", +0.8, 1.);
+				inversekinematics_proxy->setJoint("rightFinger1", -0.9, 1.5);
+				inversekinematics_proxy->setJoint("rightFinger2", +0.9, 1.5);
 			}
 			catch(...) { qFatal("%s: %d\n", __FILE__, __LINE__); }
 			state = 4;
@@ -673,6 +676,7 @@ void SpecificWorker::action_GraspObject(bool first)
 		case 4:
 			try
 			{
+				usleep(500000);
 				if (not manualMode)
 				{
 					newModel->removeEdge(symbols["object"], symbols["table"], "in");
@@ -681,6 +685,16 @@ void SpecificWorker::action_GraspObject(bool first)
 						QMutexLocker locker(mutex);
 						sendModificationProposal(newModel, worldModel);
 					}
+				}
+				offset(1)+=80;
+				if (manualMode)
+				{
+					for (int cc=0; cc<3; cc++) pose(cc) += offset(cc);
+					lastTargetId = sendRightArmToPose(pose);
+				}
+				else
+				{
+					lastTargetId = sendHandToSymbol(symbols["object"], offset, symbols);
 				}
 				state++;
 			}
