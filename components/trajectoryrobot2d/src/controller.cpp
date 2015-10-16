@@ -40,7 +40,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	static float lastVadvance = 0.f;
 	const float umbral = 25.f;	//salto maximo de velocidad
 	static float lastVrot = 0.f;
-	const float umbralrot = 0.1f;	//salto maximo de rotación
+	const float umbralrot = 0.08f;	//salto maximo de rotación
 
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
@@ -111,8 +111,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 
 		// VRot is computed as the sum of three terms: angle with tangent to road + atan(perp. distance to road) + road curvature
 		// as descirbed in Thrun's paper on DARPA challenge
-
-		vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/350.) + 0.8 * road.getRoadCurvatureAtClosestPoint() ;
+		vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/800.) + 0.8 * road.getRoadCurvatureAtClosestPoint() ;  //350->800.
 	// Limiting filter
  		if( vrot > MAX_ROT_SPEED )
  			vrot = MAX_ROT_SPEED;
