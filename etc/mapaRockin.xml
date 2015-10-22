@@ -1,0 +1,49 @@
+<!-- this world represents our lab -->
+<innerModel>
+	<transform id="world">
+		<transform id="floor">
+			<plane id="back" ny="1" size="6000,9000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+			<transform id="paredD" tx="-500" tz="4500" ty="500" >
+				<plane id="muroD" nz="1" size="5000,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+			<transform id="paredB" tx="3000" tz="2750" ty="500" >
+				<plane id="muroB" nx="1" size="3500,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+			<transform id="paredE" tx="0" tz="2750" ty="500" >
+				<plane id="muroE" nx="1" size="3500,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+			<transform id="paredC" tx="2000" tz="3250" ty="500" >
+				<plane id="muroC" nx="1" size="2500,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+			<transform id="paredF" tx="-1900" tz="1000" ty="500" >
+				<plane id="muroF" nz="1" size="2200,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+			<transform id="puertaC" tx="-400" tz="1000" ty="500" >
+				<plane id="doorC" nz="1" size="800,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+			</transform>
+			<transform id="puertaB" tx="400" tz="2000" ty="500" >
+				<plane id="doorB" nz="1" size="800,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+			</transform>
+			<transform id="paredG" tx="1400" tz="2000" ty="500" >
+				<plane id="muroG" nz="1" size="1200,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+			<transform id="puertaA" tx="2500" tz="2000" ty="500" >
+				<plane id="doorA" nz="1" size="1000,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+			</transform>
+			<transform id="paredA" tx="1675" tz="1000" ty="750" >
+				<plane id="muroA" nz="1" size="1750,1500"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+			<transform id="paredH" tx="-1750" tz="-3000" ty="500" >
+				<plane id="muroH" nz="1" size="2500,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+			<transform id="puertaD" tx="-500" tz="-3400" ty="500" >
+				<plane id="doorD" nx="1" size="800,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+			</transform>
+			<transform id="paredI" tx="-500" tz="-4150" ty="500" >
+				<plane id="muroI" nx="1" size="700,1000"  texture="/home/robocomp/robocomp/files/osgModels/textures/Metal.jpg" />
+			</transform>
+		</transform>
+	</transform>		
+</innerModel>
+
+
