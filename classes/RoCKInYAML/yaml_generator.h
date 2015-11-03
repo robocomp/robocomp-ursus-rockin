@@ -60,6 +60,51 @@ public:
 		return true;
 	}
 	
+	bool logPose(float x, float y, float z, float ox, float oy, float oz, float ow)
+	{
+		std::string header = getHeaderFor("pose");
+
+		logFileMutex.lock();
+		logFile << header;
+		logFile << "  message:\n";
+		logFile << "   position:\n";
+		logFile << "    x: " << x << "\n";
+		logFile << "    y: " << y << "\n";
+		logFile << "    z: " << z << "\n";
+		logFile << "   orientation:\n";
+		logFile << "    x: " << ox << "\n";
+		logFile << "    y: " << oy << "\n";
+		logFile << "    z: " << oz << "\n";
+		logFile << "    w: " << ow << "\n";
+		logFileMutex.unlock();
+		
+		return true;
+	}
+	
+	bool logAudio(uint8_t *data, uint32_t length)
+	{
+		std::vector<uint8_t> tmp;
+		tmp.resize(length);
+		memcpy(&tmp[0], data, length);
+
+		return logAudio(tmp);
+	}
+	bool logAudio(std::vector<uint8_t> data)
+	{
+		std::string header = getHeaderFor("audio");
+
+		std::string odata;
+		base64_encode(data, odata);
+
+		logFileMutex.lock();
+		logFile << header;
+		logFile << "  message:\n";
+		logFile << "   data: " << odata << "\n";
+		logFileMutex.unlock();
+		
+		return true;
+	}
+	
 	
 	bool logRGB(uint8_t *data, int32_t width, int32_t height, string frame_id="", int32_t seq=-1)
 	{
@@ -94,7 +139,18 @@ public:
 		return true;
 	}
 	
-	
+	bool logCommand(std::string data)
+	{
+		std::string header = getHeaderFor("command");
+
+		logFileMutex.lock();
+		logFile << header;
+		logFile << "  message:\n";
+		logFile << "   data: '" << data << "'\n";
+		logFileMutex.unlock();
+		
+		return true;
+	}
 	
 private:
 	
