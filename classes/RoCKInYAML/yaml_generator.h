@@ -56,6 +56,8 @@ public:
 		logFile << "   z: " << float(z)/1000. << "\n";
 		logFile << "   theta: " << float(alpha) << "\n";
 		logFileMutex.unlock();
+		
+		return true;
 	}
 	
 	
@@ -64,19 +66,32 @@ public:
 		time_t sec;
 		suseconds_t usec;
 		std::string header = getHeaderFor("image", &sec, &usec);
+		
+		std::string odata;
+		std::vector<uint8_t> tmp;
+		tmp.resize(width*height*3);
+		memcpy(&tmp[0], data, width*height*3);
+		base64_encode(tmp, odata);
+
 
 		logFileMutex.lock();
 		logFile << header;
 		logFile << "  message:\n";
 		logFile << "   header:\n";
-		logFile << "     seq: " << std::to_string(seq);
+		logFile << "     seq: " << std::to_string(seq) << "\n";
 		logFile << "     stamp:\n";
-		logFile << "       secs: " << std::to_string(sec);
-		logFile << "       nsecs: " << std::to_string(usec);
-		logFile << "   x: " << float(x)/1000. << "\n";
-		logFile << "   z: " << float(z)/1000. << "\n";
-		logFile << "   theta: " << float(alpha) << "\n";
+		logFile << "       secs: " << std::to_string(sec) << "\n";
+		logFile << "       nsecs: " << std::to_string(usec) << "\n";
+		logFile << "     frame_id: '" << frame_id << "'\n";
+		logFile << "   width: " << width << "\n";
+		logFile << "   height: " << height << "\n";
+		logFile << "   encoding: rbg8\n";
+		logFile << "   is_bigendian: 0\n";
+		logFile << "   step: " << std::to_string(width*3) << "\n";
+		logFile << "   data: " << odata << "\n";
 		logFileMutex.unlock();
+
+		return true;
 	}
 	
 	
