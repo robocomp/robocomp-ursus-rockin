@@ -34,7 +34,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	innerModelAGM = new InnerModel();
 	imHumanGeneric = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/person.xml");
 	newBodyEvent = false;
-	number = 0;
 
 #ifdef USE_QTGUI
 	osgView = new OsgView(this);
@@ -169,7 +168,7 @@ void SpecificWorker::compute()
 //
 // 		newBodyEvent=false;
 // 	}
-	updateViewerLocalInnerModels();
+// 	updateViewerLocalInnerModels();
 	//QString pre =QString::fromStdString(int2str(TrackingId))
 	std::map<string,string>att;
 
@@ -178,13 +177,27 @@ void SpecificWorker::compute()
 		int id = personIt.second.TrackingId;
 		QString pre = QString::fromStdString(int2str(id));
 		qDebug()<< "person id"<<id;
-			att["tx"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());
-			att["ty"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
-			att["tz"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
-			att["rx"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
-			att["ry"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
-			att["rz"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
+printf("L %d\n", __LINE__);
+		try
+		{
+			InnerModel *im = innerModelMap.at(id);
+	printf("L %d\n", __LINE__);
+			InnerModelTransform *transform = im->getTransform(pre+"XN_SKEL_TORSO");
+	printf("L %d\n", __LINE__);
+			att["tx"]=float2str(transform->getTr().x());
+	printf("L %d\n", __LINE__);
+			att["ty"]=float2str(transform->getTr().y());
+	printf("L %d\n", __LINE__);
+			att["tz"]=float2str(transform->getTr().z());
+			att["rx"]=float2str(transform->getRxValue());
+			att["ry"]=float2str(transform->getRyValue());
+			att["rz"]=float2str(transform->getRzValue());
 			std::cout << "( " << att["tx"] << " " << att["ty"] << " "<<att["tz"] << " "<<att["rx"] << " "<<att["ry"] << " "<<att["rz"] << "\n";
+		}
+		catch(...)
+		{
+			printf("no %d in innermodelmap\n", id);
+		}
 	}
 
 
@@ -240,20 +253,22 @@ void SpecificWorker::updatePeopleInnerFull()
 
 	// Create a list of the identifiers of the 'person' symbols which are chilren of the room symbol by an 'RT' edge
 	QList<int32_t> l;
-	printf("List:");
+// 	worldModel->save("caca.xml");
+	printf("List: (");
 	for (AGMModelSymbol::iterator edge_itr=room->edgesBegin(worldModel); edge_itr!=room->edgesEnd(worldModel); edge_itr++)
 	{
 		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==roomID)
 		{
 			const int second = (*edge_itr)->getSymbolPair().second;
-			if ( worldModel->getSymbolByIdentifier(second)->symbolType=="person")
+			if (worldModel->getSymbolByIdentifier(second)->symbolType=="person")
 			{
-				printf("%d ", second);
+				printf(" _%d_(%d %d %s) ", second, (*edge_itr)->getSymbolPair().first, (*edge_itr)->getSymbolPair().second, (*edge_itr)->getLabel().c_str());
 				l.append(second);
 			}
 		}
 	}
-	qDebug()<< "\n ********** \n";
+
+	printf(")\n");
 
 
 
@@ -298,44 +313,33 @@ void SpecificWorker::updatePeopleInnerFull()
 			AGMModelSymbol::SPtr newSymbolPerson = worldModel->newSymbol("person");
 			std::cout<< " añado un nuevo symbolo persona "<<newSymbolPerson->toString()<< "\n";
 			newSymbolPerson->setAttribute("TrackingId",int2str(personIt.second.TrackingId));
-printf("%d\n", __LINE__);
 			newSymbolPerson->setAttribute("State",int2str(personIt.second.state));
-printf("%d\n", __LINE__);
 
 			//creo desde un innerModelGenerico un specifico para esa persona
 
-printf("%d\n", __LINE__);
 			int id = newSymbolPerson->identifier;
-printf("%d\n", __LINE__);
 			QString pre =QString::fromStdString(int2str(id));
 			innerModelMap[id] =new InnerModel();
 
-printf("%d\n", __LINE__);
 			innerModelCopyWithPrefix(imHumanGeneric, innerModelMap.at(id),pre);
-printf("%d\n", __LINE__);
-
 			updateInnerModel(personIt.second,id);
-printf("%d\n", __LINE__);
 
 			//lo inserto en la super estructura agmInner
 			QHash<QString, int32_t>  match;
 
-printf("%d\n", __LINE__);
 			match.insert(pre+"XN_SKEL_TORSO",id);
-printf("%d\n", __LINE__);
 
 			//agmInner.include_im(match,innerModelMap.at(id));
 // // 			//añado su arco calculado para innerModel, de la matzi kinect a la persona
 			std::map<string,string>att;
-printf("%d\n", __LINE__);
-			att["tx"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());
-			att["ty"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
-			att["tz"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
+			att["tx"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());
+			att["ty"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
+			att["tz"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
  			att["rx"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
  			att["ry"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
  			att["rz"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
-printf("%d\n", __LINE__);
 			worldModel->addEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT",att);
+			worldModel->addEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"in",att);
 //
 // 			///printing
 // 			AGMModelEdge &edge = worldModel->getEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT");
@@ -381,9 +385,9 @@ printf("%d\n", __LINE__);
 		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		agmInner.setWorld(worldModel);
 		sendModificationProposal(worldModel, newModel);
-// 		saveInnerModels(QString::number(number));
-// 		number++;
+		newModel->save("caca.xml");
 	}
+printf("%d\n", __LINE__);
 
 }
 
@@ -454,6 +458,7 @@ StateStruct SpecificWorker::getAgentState()
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modification)
 {
+	printf("sttructural change\n");
 	QMutexLocker ml(mutex);
  	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
@@ -547,11 +552,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	timer.start(Period);
 	printf("dddddddddddddddddddddd\n");
-	printf("dddddddddddddddddddddd\n");
-	printf("dddddddddddddddddddddd\n");
-
-	connect(&timer, SIGNAL(timeout()), this, SLOT(compute()));
-	printf("dddddddddddddddddddddd\n");
+// 	connect(&timer, SIGNAL(timeout()), this, SLOT(compute()));
 	printf("dddddddddddddddddddddd\n");
 	return true;
 }
@@ -598,36 +599,38 @@ void SpecificWorker::initDictionary()
 
 
 ////************** INNERMODEL ******************++
- void SpecificWorker::updateInnerModel( TPerson &person, int idPerson )
+void SpecificWorker::updateInnerModel(TPerson &person, int idPerson)
 {
-	float x,y,z,rx,ry,rz;
-	string idJoint;
-
 	calculateJointRotations(person);
 
-	for( auto dictionaryNamesIt : dictionaryNames )
+	for (auto dictionaryNamesIt : dictionaryNames)
 	{
 		try
 		{
-			idJoint = dictionaryNamesIt.first;
-			x=y=z=rx=ry=rz=0.0;
+printf("%d\n", __LINE__);
+			string idJoint = dictionaryNamesIt.first;
+			float x = 1000.*mapJointRotations[ idJoint ].getTr().x();
+			float y = 1000.*mapJointRotations[ idJoint ].getTr().y();
+			float z = 1000.*mapJointRotations[ idJoint ].getTr().z();
+			float rx = mapJointRotations[ idJoint ].getRxValue();
+			float ry = mapJointRotations[ idJoint ].getRyValue();
+			float rz = mapJointRotations[ idJoint ].getRzValue();
 
+printf("%d\n", __LINE__);
+			//qDebug() << QString::fromStdString(idJoint) << pose.x << pose.y << pose.z << "( " << pose.rx << pose.ry << pose.rz << " )";
+printf("%d\n", __LINE__);
 
-			x = 1000.*mapJointRotations[ idJoint ].getTr().x();
-			y = 1000.*mapJointRotations[ idJoint ].getTr().y();
-			z = 1000.*mapJointRotations[ idJoint ].getTr().z();
-
-			rx = mapJointRotations[ idJoint ].getRxValue();
-			ry = mapJointRotations[ idJoint ].getRyValue();
-			rz = mapJointRotations[ idJoint ].getRzValue();
-
-			//qDebug()<<QString::fromStdString( idJoint)<<pose.x<<pose.y<<pose.z<< "( "<<pose.rx<<pose.ry<<pose.rz<< " )";
-			//nan check
 			if ( (x!=x) or (y!=y) or (z!=z) or (rx!=rx) or (ry!=ry) or (rz!=rz) )
+			{
+				printf("Person %d has nan values\n", idPerson);
 				continue;
+			}
+
+printf("%d\n", __LINE__);
 			string idNode = int2str(idPerson) + dictionaryNamesIt.second.toStdString();
 			if (idJoint=="Spine")
 			{
+				printf("%d\n", __LINE__);
 				innerModelMap[ idPerson ]->updateTransformValues( QString::fromStdString(idNode),x,y,z,rx,ry,rz );
 				try
 				{
@@ -637,9 +640,11 @@ void SpecificWorker::initDictionary()
 				{
 					qDebug()<< "Exception, probably innerModelLocals, has not been created yet";
 				}
+printf("%d\n", __LINE__);
 			}
 			else
 			{
+				printf("%d\n", __LINE__);
 				innerModelMap[ idPerson ]->updateRotationValues( QString::fromStdString(idNode),rx,ry,rz );
 				try
 				{
@@ -651,9 +656,10 @@ void SpecificWorker::initDictionary()
 				}
 			}
 		}
-		catch ( Ice::Exception e )
+		catch (Ice::Exception e)
 		{
-			qDebug( )<< "error updateInnerModel"<<e.what( );
+			qDebug() << "error updateInnerModel" << e.what();
+			qFatal("d");
 		}
 	}
 }
@@ -663,13 +669,12 @@ void SpecificWorker::initDictionary()
  * @param person Person who rotation matrix is calculated
  * @return void
  */
- void SpecificWorker::calculateJointRotations( TPerson &person )
+void SpecificWorker::calculateJointRotations( TPerson &person )
 {
 	RTMat kinect;
 	RoboCompMSKBody::JointList jointList;
-
 	jointList = person.joints;
-	///*********************** TODO transform ***************************
+
 	try
 	{
 		/*InnerModel *innerModelTmp = new InnerModel();
@@ -681,125 +686,40 @@ void SpecificWorker::initDictionary()
 	{
 		qDebug()<< "not found kinect using identity RTMat kinect";
 	}
-	//kinect.print("kinect");
-
 
 	/// apunta el torso (inclinación alante/atrás y lateral del torso)
-	mapJointRotations[ "Spine" ]=
-	rtMatFromJointPosition( kinect,
-			      jointList[ dictionaryEnum[ "Spine" ] ].Position,
-			      jointList[ dictionaryEnum[ "Head" ] ].Position,
-			      jointList[ dictionaryEnum[ "Spine" ] ].Position, 2 );
-
+	mapJointRotations["Spine"] = rtMatFromJointPosition(kinect, jointList[dictionaryEnum["Spine"]].Position, jointList[dictionaryEnum["Head"]].Position, jointList[dictionaryEnum["Spine"]].Position, 2);
 	/// alineación de hombros (rotación en Z del torso), previa al cálculo de la transformacion final de los hombros.
-	RTMat LEFT_SHOULDER_PRE_Z=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
-			      jointList[ dictionaryEnum[ "ShoulderLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "ShoulderLeft" ] ].Position, 2 );
-	RTMat RIGHT_SHOULDER_PRE_Z=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
-			      jointList[ dictionaryEnum[ "ShoulderRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "ShoulderRight" ] ].Position, 2 );
-
-	rotarTorso ( RIGHT_SHOULDER_PRE_Z.getTr( ), LEFT_SHOULDER_PRE_Z.getTr( ) );
-
+	RTMat LEFT_SHOULDER_PRE_Z  = rtMatFromJointPosition(mapJointRotations["Spine"], jointList[dictionaryEnum["ShoulderLeft"]].Position,  jointList[dictionaryEnum["ElbowLeft"]].Position,  jointList[dictionaryEnum["ShoulderLeft"]].Position, 2);
+	RTMat RIGHT_SHOULDER_PRE_Z = rtMatFromJointPosition(mapJointRotations["Spine"], jointList[dictionaryEnum["ShoulderRight"]].Position, jointList[dictionaryEnum["ElbowRight"]].Position, jointList[dictionaryEnum["ShoulderRight"]].Position, 2);
+	rotarTorso(RIGHT_SHOULDER_PRE_Z.getTr(), LEFT_SHOULDER_PRE_Z.getTr());
 
 	///Cintura
-// 	mapJointRotations[ "HipCenter" ]=
-// 	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
-// 			      jointList[ dictionaryEnum[ "HipCenter" ] ].Position,
-// 			      jointList[ dictionaryEnum[ "Spine" ] ].Position,
-// 			      jointList[ dictionaryEnum[ "HipCenter" ] ].Position, 2 );
+	//mapJointRotations["HipCenter"]= rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["HipCenter"]].Position, jointList[dictionaryEnum["Spine"]].Position, jointList[dictionaryEnum["HipCenter"]].Position, 2);
+	mapJointRotations["HipLeft"]  = rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["HipLeft"]].Position, jointList[dictionaryEnum["KneeLeft"]].Position, jointList[dictionaryEnum["HipLeft"]].Position, 2);
+	mapJointRotations["HipRight"] = rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["HipRight"]].Position, jointList[dictionaryEnum["KneeRight"]].Position, jointList[dictionaryEnum["HipRight"]].Position, 2);
+	mapJointRotations["KneeLeft"] = rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["HipLeft"], jointList[dictionaryEnum["KneeLeft"]].Position, jointList[dictionaryEnum["FootLeft"]].Position, jointList[dictionaryEnum["KneeLeft"]].Position, 2);
+	mapJointRotations["KneeRight"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["HipRight"], jointList[dictionaryEnum["KneeRight"]].Position, jointList[dictionaryEnum["FootRight"]].Position, jointList[dictionaryEnum["KneeRight"]].Position, 2);
 
-	mapJointRotations[ "HipLeft" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
-			      jointList[ dictionaryEnum[ "HipLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "KneeLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "HipLeft" ] ].Position, 2);
-
-	mapJointRotations[ "HipRight" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
-			      jointList[ dictionaryEnum[ "HipRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "KneeRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "HipRight" ] ].Position, 2);
-
-	///Knee
-	mapJointRotations[ "KneeLeft" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "HipLeft" ],
-			      jointList[ dictionaryEnum[ "KneeLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "FootLeft" ] ].Position,
-      			      jointList[ dictionaryEnum[ "KneeLeft" ] ].Position, 2);
-
-	mapJointRotations[ "KneeRight" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "HipRight" ],
-			      jointList[ dictionaryEnum[ "KneeRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "FootRight" ] ].Position,
-      			      jointList[ dictionaryEnum[ "KneeRight" ] ].Position, 2);
-
-
-//     ///cabeza
-// 	mapJointRotations[ "Head" ]=
-// 	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
-// 				jointList[ dictionaryEnum[ "Head" ] ].Position,
-// 				joints[ "JOINT_HEAD" ],
-// 				joints[ "JOINT_NECK" ], 2);
-
+	///cabeza
+	//mapJointRotations["Head"]= rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["Head"]].Position, joints["JOINT_HEAD"], joints["JOINT_NECK"], 2);
 
 	///brazo izquierdo
-	mapJointRotations[ "ShoulderLeft" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
-			      jointList[ dictionaryEnum[ "ShoulderLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "ShoulderLeft" ] ].Position, 2);
-
-	mapJointRotations[ "ElbowLeft" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "ShoulderLeft" ],
-			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "HandLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position, 2);
-
+	mapJointRotations["ShoulderLeft"]= rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["ShoulderLeft"]].Position, jointList[dictionaryEnum["ElbowLeft"]].Position, jointList[dictionaryEnum["ShoulderLeft"]].Position, 2);
+	mapJointRotations["ElbowLeft"]=rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["ShoulderLeft"], jointList[dictionaryEnum["ElbowLeft"]].Position, jointList[dictionaryEnum["HandLeft"]].Position, jointList[dictionaryEnum["ElbowLeft"]].Position, 2);
 
 	///brazo derecho
 	///codo al hombro (p2 inicio p1 final)
-	mapJointRotations[ "ShoulderRight" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
-			      jointList[ dictionaryEnum[ "ShoulderRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "ShoulderRight" ] ].Position, 2);
-
-	mapJointRotations[ "ElbowRight" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "ShoulderRight" ],
-			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "HandRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position, 2);
+	mapJointRotations["ShoulderRight"]= rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["ShoulderRight"]].Position, jointList[dictionaryEnum["ElbowRight"]].Position, jointList[dictionaryEnum["ShoulderRight"]].Position, 2);
+	mapJointRotations["ElbowRight"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["ShoulderRight"], jointList[dictionaryEnum["ElbowRight"]].Position, jointList[dictionaryEnum["HandRight"]].Position, jointList[dictionaryEnum["ElbowRight"]].Position, 2);
 
 	///Manos derecha e izquierda
-	mapJointRotations[ "HandRight" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "ShoulderRight" ]*mapJointRotations[ "ElbowRight" ],
-			      jointList[ dictionaryEnum[ "HandRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "HandRight" ] ].Position, 2);
+	mapJointRotations["HandRight"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["ShoulderRight"]*mapJointRotations["ElbowRight"], jointList[dictionaryEnum["HandRight"]].Position, jointList[dictionaryEnum["ElbowRight"]].Position, jointList[dictionaryEnum["HandRight"]].Position, 2);
+	mapJointRotations["HandLeft"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["ShoulderLeft"]*mapJointRotations["ElbowLeft"], jointList[dictionaryEnum["HandLeft"]].Position, jointList[dictionaryEnum["ElbowLeft"]].Position, jointList[dictionaryEnum["HandLeft"]].Position, 2);
 
-	mapJointRotations[ "HandLeft" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "ShoulderLeft" ]*mapJointRotations[ "ElbowLeft" ],
-			      jointList[ dictionaryEnum[ "HandLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "HandLeft" ] ].Position, 2);
-
-	///Manos derecha e izquierda
-	mapJointRotations[ "FootRight" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "HipRight" ]*mapJointRotations[ "KneeRight" ],
-			      jointList[ dictionaryEnum[ "FootRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "KneeRight" ] ].Position,
-			      jointList[ dictionaryEnum[ "FootRight" ] ].Position, 2);
-
-     	mapJointRotations[ "FootLeft" ]=
-	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "HipLeft" ]*mapJointRotations[ "KneeLeft" ],
-			      jointList[ dictionaryEnum[ "FootLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "KneeLeft" ] ].Position,
-			      jointList[ dictionaryEnum[ "FootLeft" ] ].Position, 2);
+	/// Pies derecha e izquierda
+	mapJointRotations["FootRight"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["HipRight"]*mapJointRotations["KneeRight"],      jointList[dictionaryEnum["FootRight"]].Position, jointList[dictionaryEnum["KneeRight"]].Position, jointList[dictionaryEnum["FootRight"]].Position, 2);
+	mapJointRotations["FootLeft"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["HipLeft"]*mapJointRotations["KneeLeft"], jointList[dictionaryEnum["FootLeft"]].Position, jointList[dictionaryEnum["KneeLeft"]].Position, jointList[dictionaryEnum["FootLeft"]].Position, 2);
 }
 
  /**
@@ -812,7 +732,7 @@ void SpecificWorker::initDictionary()
   * @param axis Always axis Z (2)
   * @return RMat::RTMat This is the Rotation Matrix
   */
- RTMat SpecificWorker::rtMatFromJointPosition( RTMat rS, RoboCompMSKBody::SkeletonPoint p1, RoboCompMSKBody::SkeletonPoint p2, RoboCompMSKBody::SkeletonPoint translation, int axis )
+RTMat SpecificWorker::rtMatFromJointPosition( RTMat rS, RoboCompMSKBody::SkeletonPoint p1, RoboCompMSKBody::SkeletonPoint p2, RoboCompMSKBody::SkeletonPoint translation, int axis )
 {
 	bool XClockWise=true, YClockWise=true, ZClockWise=true;
 	float alpha, beta, gamma;
@@ -962,7 +882,6 @@ void SpecificWorker::updateViewer()
 
 void SpecificWorker::updateViewerLocalInnerModels()
 {
-	return;
 	//borro si alguno en el map no esta en list
 	std::map<int,InnerModel*>::iterator it;
 	std::map<int,TPerson>::iterator itPersonList;
@@ -1005,6 +924,7 @@ void SpecificWorker::updateViewerLocalInnerModels()
 
 	}
 
+	/*
 	if (creatViewer)
 	{
 #ifdef USE_QTGUI
@@ -1032,5 +952,6 @@ void SpecificWorker::updateViewerLocalInnerModels()
 		innerViewer->setMainCamera(manipulator, InnerModelViewer::FRONT_POV);
 #endif
 	}
+	*/
 }
 
