@@ -50,10 +50,10 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 		QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2), "floor");
 		upperLeft.print("UL");
 		downRight.print("DR");
-		outerRegion.setLeft( upperLeft.x() );
-		outerRegion.setRight( downRight.x() );
-		outerRegion.setBottom( downRight.z() );
-		outerRegion.setTop( upperLeft.z() );
+		outerRegion.setLeft( upperLeft.x() + floor->point.x() );
+		outerRegion.setRight( downRight.x() + floor->point.x() );
+		outerRegion.setBottom( downRight.z() + floor->point.z() );
+		outerRegion.setTop( upperLeft.z() + floor->point.z() );
 		
 // 		outerRegion.setLeft( 0 );
 // 		outerRegion.setRight( 6500  );
