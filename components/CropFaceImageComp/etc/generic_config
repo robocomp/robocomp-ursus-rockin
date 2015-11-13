@@ -1,0 +1,15 @@
+#
+# This property is used to configure the endpoints of the subscriber adapter.
+#
+CropFaceImageComp.Endpoints=tcp -p 11252
+CommonBehavior.Endpoints=tcp -p 12252
+MSKFaceEventTopic.Endpoints=tcp -p 12250
+
+# Remote servers proxies example
+#RemoteProxy = remote:tcp -h remotehost -p 10001
+
+
+#
+# This property is used by the clients to connect to IceStorm.
+#
+TopicManager.Proxy=IceStorm/TopicManager:default -h 10.0.30.11 -p 9999
