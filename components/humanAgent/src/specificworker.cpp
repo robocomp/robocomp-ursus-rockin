@@ -26,30 +26,27 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-
 	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModelVacio = new InnerModel();
 	innerModelsLocals = new InnerModel();
 	innerModelAGM = new InnerModel();
-	imHumanGeneric = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/person.xml");	
-	newBodyEvent=false;
+	imHumanGeneric = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/person.xml");
+	newBodyEvent = false;
 	number=0;
 	
 #ifdef USE_QTGUI
-	osgView = new OsgView(  this );
+	osgView = new OsgView(this);
 	innerViewer = new InnerModelViewer(innerModelsLocals, "root", osgView->getRootGroup(), true);
 	manipulator = new osgGA::TrackballManipulator;
 	osgView->setCameraManipulator(manipulator, true);
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::FRONT_POV);
 	show();
-#endif	
-	
+#endif
 
 	innerModelMap.clear();
 	initDictionary();
-
 }
 
 /**
@@ -57,13 +54,11 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 */
 SpecificWorker::~SpecificWorker()
 {
-	
 }
 
 void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &timestamp)
-{	
-	
-	QMutexLocker m (mutex);	
+{
+	QMutexLocker m (mutex);
 	this->personList = people;
 	this->timeStamp = timestamp;
 	///esto es pq cuando hay 0 personas no me envia nada
@@ -78,9 +73,9 @@ void SpecificWorker::newInnerModel(InnerModel * imSrc, InnerModel *imDst, QStrin
 	//recorrer innermodel generico añadiendo el sufijo del nuevo symbolo e insertandolo en el map
 	
 	QList<InnerModelNode *>	l;
-	
+
 	imSrc->getSubTree(imSrc->getNode("root"),&l);
-	
+
 	QList<InnerModelNode*>::iterator it;
 	for (it=l.begin();it!=l.end();it++)
 	{
@@ -146,7 +141,7 @@ void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, 
 		{
 			qDebug()<<"error mesh"<<e;
 		}
-		
+
 	}
 	else if(  dynamic_cast<InnerModelPlane *>( node )  != NULL )
 	{
@@ -803,6 +798,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 
 	return true;
 }
+
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
 	QMutexLocker m (mutex);	
@@ -854,6 +850,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	return true;
 }
+
+
 void SpecificWorker::initDictionary()
 {
 	QMutexLocker m (mutex);	
@@ -875,8 +873,7 @@ void SpecificWorker::initDictionary()
 	dictionaryNames[ "HandLeft" ] = "XN_SKEL_LEFT_HAND";
 // 	dictionaryNames[ "WallPose" ] = "WALL_POSE";
 // 	dictionaryNames[ "Wall" ] = "XN_SUCCESS_WALL";
-	
-	
+
 	dictionaryEnum[ "Spine" ] = Spine;
 	dictionaryEnum[ "Head" ] = Head;
 	dictionaryEnum[ "ShoulderLeft" ] = ShoulderLeft;
