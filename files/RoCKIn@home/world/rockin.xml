@@ -84,7 +84,7 @@
 		</transform>
 		
 		<transform id="dinin_table_t" tx="6400" tz="-7700" ry="1.57">
-			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="20,20,25"  />
+<!-- 			<mesh id="dinin_table" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/tablerigid.3ds" rx="1.57" rz="1.57" scale="20,20,25"  /> -->
 		</transform>
 		
 		
