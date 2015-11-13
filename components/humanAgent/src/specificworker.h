@@ -98,7 +98,7 @@ private:
 	
 	bool rotarTorso(const QVec & hombroizq,const QVec & hombroder);
 	
-	void innerModelCopyWithPrefix(InnerModel *imSrc, InnerModel *imDst, QString pre);
+	void newInnerModel(InnerModel * imSrc, InnerModel *imDst, QString pre);
 	void insertNodeInnerModel(InnerModel* im, InnerModelNode* node, QString pre="" );
 	void saveInnerModels(QString number="");
 

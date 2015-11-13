@@ -34,7 +34,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	innerModelAGM = new InnerModel();
 	imHumanGeneric = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/person.xml");
 	newBodyEvent = false;
-
+	number=0;
+	
 #ifdef USE_QTGUI
 	osgView = new OsgView(this);
 	innerViewer = new InnerModelViewer(innerModelsLocals, "root", osgView->getRootGroup(), true);
@@ -53,7 +54,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 */
 SpecificWorker::~SpecificWorker()
 {
-
 }
 
 void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &timestamp)
@@ -61,172 +61,156 @@ void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &times
 	QMutexLocker m (mutex);
 	this->personList = people;
 	this->timeStamp = timestamp;
-	newBodyEvent = true;
-
-	printf("event\n");
-	// We force at least a trigger per second in case the component doesn't detect any person in a second
+	///esto es pq cuando hay 0 personas no me envia nada
 	timerTimeStamp.setSingleShot(true);
 	timerTimeStamp.start(1000);
+	newBodyEvent = true;	
 }
 
-// Create a copy of an InnerModel instance modifying the node's names prepending 'pre'
-void SpecificWorker::innerModelCopyWithPrefix(InnerModel * imSrc, InnerModel *imDst, QString pre)
+//Dado  un innerModel creo otro, añadiendo el prefijo a cada id del nodo
+void SpecificWorker::newInnerModel(InnerModel * imSrc, InnerModel *imDst, QString pre)
 {
+	//recorrer innermodel generico añadiendo el sufijo del nuevo symbolo e insertandolo en el map
+	
 	QList<InnerModelNode *>	l;
-	imSrc->getSubTree(imSrc->getNode("root"), &l);
+
+	imSrc->getSubTree(imSrc->getNode("root"),&l);
 
 	QList<InnerModelNode*>::iterator it;
-	for (it=l.begin(); it!=l.end(); it++)
+	for (it=l.begin();it!=l.end();it++)
 	{
-		insertNodeInnerModel(imDst, (*it), pre);
+		insertNodeInnerModel(imDst,(*it),pre);
 	}
+	//copia perfecta con su prefijo
+	//imDst->save("imDst.xml");
+
 }
-
-
-void SpecificWorker::insertNodeInnerModel(InnerModel *im, InnerModelNode *node, QString pre)
+void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, QString pre)
 {
-	InnerModelNode *parent = NULL;
-	if (node->parent->id == "root")
-	{
-		parent = im->getRoot();
+// 	qDebug()<<"pre:"<<pre;
+// 	qDebug()<<node->id;
+// 	qDebug()<<"\t parent"<<node->parent->id;
+	
+	
+	InnerModelNode * parent = NULL;
+	if (node->parent->id=="root")
+	{			
+		parent = im->getRoot();							
 	}
 	else
 	{
 		parent = im->getNode(pre+node->parent->id);
 	}
-	if (parent == NULL)
+	if (parent==NULL)
 		qFatal("parent null stop");
 
-	if (dynamic_cast<InnerModelTransform *>(node) != NULL)
+	if(  dynamic_cast<InnerModelTransform *>( node )  != NULL )
 	{
-		InnerModelTransform *tf=dynamic_cast<InnerModelTransform *>(node);
-		if (dynamic_cast<InnerModelJoint *>(tf) != NULL)
+		
+		InnerModelTransform * tf=dynamic_cast<InnerModelTransform *>( node );
+				
+		if(  dynamic_cast<InnerModelJoint *>( tf )  != NULL )
 		{
+// 			qDebug()<<"insert Joint"<<node->id;
 			InnerModelJoint * joint=dynamic_cast<InnerModelJoint *>( tf );
-
-			InnerModelJoint * newJoint = im->newJoint (pre+joint->id,dynamic_cast<InnerModelTransform *>( parent),
+			
+			InnerModelJoint * newJoint = im->newJoint (pre+joint->id,dynamic_cast<InnerModelTransform *>( parent),								   
 								joint->backlX,joint->backlY,joint->backlZ,joint->backhX,joint->backhY,joint->backhZ,
 								joint->getTr().x(),joint->getTr().y(),joint->getTr().z(),joint->getRxValue(),joint->getRyValue(),joint->getRzValue(),
 								joint->min, joint->max,joint->port,joint->axis,joint->home);
-			parent->addChild(newJoint);
+			parent->addChild(newJoint);		
 		}
 		else
 		{
-// 			qDebug()<< "insert transform"<<node->id;
+// 			qDebug()<<"insert transform"<<node->id;
 			InnerModelTransform * newTf = im->newTransform(pre+tf->id,tf->engine,parent,tf->getTr().x(),tf->getTr().y(),tf->getTr().z(),
 								       tf->getRxValue(),tf->getRyValue(),tf->getRzValue(),tf->mass);
-			parent->addChild(newTf);
+			parent->addChild(newTf);	
 		}
 	}
-	else if(dynamic_cast<InnerModelMesh *>(node)  != NULL)
+	else if(  dynamic_cast<InnerModelMesh *>( node )  != NULL )
 	{
-		InnerModelMesh *m=dynamic_cast<InnerModelMesh *>(node);
+// 		qDebug()<<"insert Mesh"<<node->id;
+		InnerModelMesh * m=dynamic_cast<InnerModelMesh *>( node );
 		try
 		{
-			InnerModelMesh *newMesh = im->newMesh(pre+m->id,parent, m->meshPath,m->scalex,m->scaley,m->scalez,m->render,m->tx,m->ty,m->tz,m->rx,m->ry,m->rz,m->collidable);
-			parent->addChild(newMesh);
+			InnerModelMesh * newMesh = im->newMesh(pre+m->id,parent, m->meshPath,m->scalex,m->scaley,m->scalez,m->render,m->tx,m->ty,m->tz,m->rx,m->ry,m->rz,m->collidable);
+			parent->addChild(newMesh);		
 		}
-		catch (QString e)
+		catch (QString e )
 		{
-			qDebug()<< "error mesh"<<e;
+			qDebug()<<"error mesh"<<e;
 		}
 
 	}
-	else if(dynamic_cast<InnerModelPlane *>( node )  != NULL )
+	else if(  dynamic_cast<InnerModelPlane *>( node )  != NULL )
 	{
-		InnerModelPlane *p=dynamic_cast<InnerModelPlane *>( node );
-		InnerModelPlane *newPlane = im->newPlane(pre+p->id,parent,p->texture, p->width, p->height, p->depth, p->repeat,
-		  p->normal(0),p->normal(1),p->normal(2), p->point(0),p->point(1),p->point(2), p->collidable);
-		parent->addChild(newPlane);
+// 		qDebug()<<"insert Plane"<<node->id;
+		InnerModelPlane * p=dynamic_cast<InnerModelPlane *>( node );
+		
+		InnerModelPlane * newPlane = im->newPlane(pre+p->id,parent,p->texture,
+							p->width,p->height,p->depth,p->repeat,
+							p->normal(0),p->normal(1),p->normal(2),
+							p->point(0),p->point(1),p->point(2),
+							p->collidable);
+		parent->addChild(newPlane);		
 	}
 	else
 	{
-		qDebug()<< "type not implemented, node-id: "<<node->id<< "\n";
+		qDebug()<<"type not implemented, node-id: "<<node->id<<"\n";
 	}
+	
 }
 
 void SpecificWorker::compute()
 {
-	printf("compute\n");
-	QMutexLocker m (mutex);
 
-/********************* TEST CODE***********************************************
+  QMutexLocker m (mutex);	
+	
+/********************* TEST CODE***********************************************	
 	if (innerModelMap.empty())
 	{
 		printf("Created: %d\n", __LINE__);
 		innerModelMap[0] =new InnerModel();
-		innerModelCopyWithPrefix(imHumanGeneric, innerModelMap.at(0),"0");
+		newInnerModel(imHumanGeneric, innerModelMap.at(0),"0");
 		innerModelMap[1] =new InnerModel();
-		innerModelCopyWithPrefix(imHumanGeneric, innerModelMap.at(0),"1");
-	}
+		newInnerModel(imHumanGeneric, innerModelMap.at(0),"1");
+	}	
 	updateViewerLocalInnerModels();
-*******************************************************************/
-// 	qDebug()<< "newBodyEvent"<<newBodyEvent;
+*******************************************************************/	
+// 	qDebug()<<"newBodyEvent"<<newBodyEvent;	
 // 	if (newBodyEvent)
 // 	{
-// 		//Insertar simbolos para todo el torso
-//
-// 		newBodyEvent=false;
+// 		//Insertar simbolos para todo el torso		
+// 								
+// 		newBodyEvent=false;	
 // 	}
-// 	updateViewerLocalInnerModels();
-	//QString pre =QString::fromStdString(int2str(TrackingId))
-	std::map<string,string>att;
-
-	for (auto personIt : personList)
-	{
-		int id = personIt.second.TrackingId;
-		QString pre = QString::fromStdString(int2str(id));
-		qDebug()<< "person id"<<id;
-printf("L %d\n", __LINE__);
-		try
-		{
-			InnerModel *im = innerModelMap.at(id);
-	printf("L %d\n", __LINE__);
-			InnerModelTransform *transform = im->getTransform(pre+"XN_SKEL_TORSO");
-	printf("L %d\n", __LINE__);
-			att["tx"]=float2str(transform->getTr().x());
-	printf("L %d\n", __LINE__);
-			att["ty"]=float2str(transform->getTr().y());
-	printf("L %d\n", __LINE__);
-			att["tz"]=float2str(transform->getTr().z());
-			att["rx"]=float2str(transform->getRxValue());
-			att["ry"]=float2str(transform->getRyValue());
-			att["rz"]=float2str(transform->getRzValue());
-			std::cout << "( " << att["tx"] << " " << att["ty"] << " "<<att["tz"] << " "<<att["rx"] << " "<<att["ry"] << " "<<att["rz"] << "\n";
-		}
-		catch(...)
-		{
-			printf("no %d in innermodelmap\n", id);
-		}
-	}
-
-
-		updatePeopleInnerFull();
-// 	QString pre = QString::fromStdString(int2str(TrackingId));
-// 	qDebug()<< "\t person ";
-
-// 	innerModelMap->getTransform(pre+"XN_SKEL_TORSO").getTr();
+	updatePeopleInnerFullB(); 
+	updateViewerLocalInnerModels();		
+	
+	
 	//clear personList after a while without to recive any event
-	if (timerTimeStamp.isActive() == false and !personList.empty())
-	{
-		std::cout<< "\t clear list \n";
-		personList.clear();
+	if (timerTimeStamp.isActive() == false and !personList.empty())		
+	{		
+		std::cout<<"\t clear list \n";
+		personList.clear();		
+
 // 		/*updatePeopleInnerFull();
 // 		if (!innerModelMap.empty())
 // 		{
 // 			saveInnerModels("666666");
 // 			innerModelsLocals->save("innerModelsLocals.xml");
-// 			qDebug()<< "innerModelMap.size()"<<innerModelMap.size();
+// 			qDebug()<<"innerModelMap.size()"<<innerModelMap.size();			
 // 			qFatal("fary innerModelMap not empty");
 // 		}
 	}
 
-#ifdef USE_QTGUI
+#ifdef USE_QTGUI	
 	innerViewer->update();
-	osgView->autoResize();
-	osgView->frame();
-#endif
-
+	osgView->autoResize();						
+	osgView->frame();			
+#endif	
+	
 }
 
 
@@ -234,182 +218,447 @@ printf("L %d\n", __LINE__);
 //Y COLGARLOS DEL MUNDO
 void SpecificWorker::updatePeopleInnerFull()
 {
-	// Get robot identifier. Exit if not found
+// 	int32_t robotID = worldModel->getIdentifierByType("robot");
+// 	if (robotID < 0)
+// 	{
+// 		printf("Robot symbol not found, Waiting for the executive...\n");
+// 		return;
+// 	}
+// 	bool modification = false;
+// 	
+// 	
+// 	///CAUTION CHAPUZA PA PROBAR A COLGAR DLE MUNDO 
+// 	 robotID = agmInner.findName("room");
+// 	if (robotID < 0)
+// 	{
+// 		printf("ROOOM symbol not found, \n");
+// 		qFatal("abort");
+// 		return;
+// 	}
+// 	
+// 	
+// 	//extrae en una lista con los ID de los symbolos "person" que son hijos del symbolo robotID enlazados mediante "RT"
+// 	//Qlist<int32_t> l = listaSymbolos(int symbolID, string symbolType=person,string linkType=RT);
+// 	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(robotID);
+// 	QList<int32_t> l;
+// 	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
+// 	{
+// 		//std::cout<<(*edge_itr).toString(worldModel)<<"\n";
+// 		//comprobamos el id del simbolo para evitar los arcos que le llegan y seguir solo los que salen del nodo
+// 		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==robotID )
+// 		{
+// 			int second = (*edge_itr)->getSymbolPair().second;
+// 			const AGMModelSymbol::SPtr &symbolSecond=  worldModel->getSymbolByIdentifier(second);
+// 			if(symbolSecond->symbolType=="person")
+// 			{
+// 				//std::cout<<" es una persona "<<symbolSecond->toString()<<"\n";
+// 				l.append(second);
+// 			}
+// 		}
+// 	}
+// // 	qDebug()<<"lsymbols person:"<<l;
+// // 	qDebug()<<"\n ********** \n";
+// 			
+// 	//calculo para cada strucutra personIT de TPerson mskBody.ice, su correspondientes RT en robocomp
+// 	//<int,TPerson> personIt; jajajaja
+// 	for( auto personIt : personList )
+// 	{
+// 		bool found = false;
+// 		int personID = -1;
+// 		//lista de ID de symbolos
+// 		for (int i=0; i< l.size(); i++)
+// 		{
+// 			//buscar persona 
+// 			if ( str2int ( (worldModel->getSymbol(l.at(i))->getAttribute("TrackingId")) ) ==personIt.second.TrackingId ) 				
+// 			{			
+// 				personID=l.at(i);
+// 				found = true;
+// 				l.removeOne(personID);
+// 				std::cout<<"id symbol person with TrackingId: "<<personID<<"\n";
+// 				break;				
+// 			}			
+// 		}
+// 		
+// 		//si encuentro el id en el worldModel la actualizo con el valor de la lista, el estado no me dice nada
+// 		//lo suyo sería usar el innerModel update...
+// 		if (found)
+// 		{
+// 			//actualizos su estado	
+// 			std::cout<<"\n\tSimbolo encontrado: Actualizando el symbolo person: "<<personID<<"\n";
+// 			AGMModelSymbol::SPtr  s =worldModel->getSymbol(personID);				
+// 			if ( s->getAttribute("State")!=int2str(personIt.second.state) )
+// 			{
+// 				s->setAttribute("State",int2str(personIt.second.state));
+// 				//AGMMisc::publishNodeUpdate(s,agmagenttopic_proxy);
+// 			}
+// 			
+// 			//ACTUALIZO EL INNERMODEL DEL HUMANO en mi vector de InnerModel locales
+// 			updateInnerModel(personIt.second,personID);
+// 			
+// 			//TODO chequear esta funcion
+// 			//agmInner.updateAgmWithInnerModel(innerModelMap.at(personID));					
+// 		}
+// 		// añado la nueva en cualquier estado ??		
+// 		else 
+// 		{
+// 			AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");			
+// 			std::cout<<" añado un nuevo symbolo persona "<<newSymbolPerson->toString()<<"\n";
+// 			newSymbolPerson->setAttribute("TrackingId",int2str(personIt.second.TrackingId));
+// 			newSymbolPerson->setAttribute("State",int2str(personIt.second.state));
+// 			
+// 			//creo desde un innerModelGenerico un specifico para esa persona
+// 			
+// 			int id = newSymbolPerson->identifier;		
+// 			QString pre =QString::fromStdString(int2str(id));
+// 			innerModelMap[id] =new InnerModel();
+// 			
+// 			newInnerModel(imHumanGeneric, innerModelMap.at(id),pre);
+// 			
+// 			updateInnerModel(personIt.second,id);
+// 			
+// 			//lo inserto en la super estructura agmInner
+// 			QHash<QString, int32_t>  match;		
+// 						
+// 			match.insert(pre+"XN_SKEL_TORSO",id);
+// 			
+// 			//agmInner.include_im(match,innerModelMap.at(id));
+// // // 			//añado su arco calculado para innerModel, de la matzi kinect a la persona
+// 			std::map<string,string>att;
+// 			att["tx"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
+// 			att["ty"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
+// 			att["tz"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
+//  			att["rx"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
+//  			att["ry"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
+//  			att["rz"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
+// 			worldModel->addEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT",att);
+// // 			
+// // 			///printing
+// // 			AGMModelEdge &edge = worldModel->getEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT");
+// // 			std::cout<<"\tRT [ "<<edge->getAttribute("tx")<<" , "<<edge->getAttribute("ty")<<" , "<<edge->getAttribute("tz");
+// // 			std::cout<<" , "<<edge->getAttribute("rx")<<" , "<<edge->getAttribute("ry")<<" , "<<edge->getAttribute("rz")<<" ]\n";
+// 
+// 			modification = true;		
+// 		}
+// 	}
+// 	//removeSymbol persons si queda alguno en la lista de symbolos
+// 	for (int i=0; i< l.size(); i++)
+// 	{
+// 		std::cout<<" remove Symbol "<<worldModel->getSymbol(l.at(i))->toString()<<"\n";	
+// // 		worldModel->save("AGM_BeforeRemovePerson.xml");
+// // 		innerModelMap.at(l.at(i))->save("innerPersonToRemove.xml");
+// // 		qDebug()<<"\n innerModelMap.at(l.at(i))->getIDKeys()\n"<<innerModelMap.at(l.at(i))->getIDKeys()<<"\n";
+// 		//agmInner.remove_Im(innerModelMap.at(l.at(i)));	
+// 		try{
+// 			innerModelMap.at(l.at(i)); 
+// 			innerModelMap.erase(l.at(i));
+// 		}
+// 		catch (...)
+// 		{
+// 			qDebug()<<"execption"<<l.at(i)<<innerModelMap.size();
+// 		}
+// 		
+// 		
+// // 		qDebug()<<"innerModelMap.size()"<<innerModelMap.size();
+// // 		worldModel->save("AGM_AfterRemovePerson.xml");
+// 		worldModel->removeSymbol(l.at(i));
+// // 		worldModel->save("AGM_AfterRemoveSymbol_Person.xml");
+// 		modification=true;		
+// 	}
+// 
+// 	if (modification)
+// 	{
+// 		qDebug()<<"-------------------------------------";
+// 		AGMModel::SPtr newModel(new AGMModel(worldModel));	
+// 		//agmInner.setWorld(worldModel);
+// 		//sendModificationProposal(worldModel, newModel);					
+// // 		saveInnerModels(QString::number(number));
+// // 		number++;
+// 	}
+
+}
+
+
+
+void SpecificWorker::updatePeopleInnerFullB()
+{
 	int32_t robotID = worldModel->getIdentifierByType("robot");
 	if (robotID < 0)
 	{
-		printf("robot symbol not found, Waiting for the executive...\n");
+		printf("Robot symbol not found, Waiting for the executive...\n");
 		return;
 	}
-
-	// Get room identifier and symbol. Exit if not found. TODO We should check in which room is the robot located, not assuming there's just one room
-	int roomID = agmInner.findName("room");
+	bool modification = false;
+	
+	///CAUTION CHAPUZA PA PROBAR A COLGAR DLE MUNDO 
+	int32_t roomID = agmInner.findName("room");
 	if (roomID < 0)
 	{
-		printf("ROOM symbol not found\n");
+		printf("ROOOM symbol not found, \n");
+		qFatal("abort");
 		return;
 	}
-	const AGMModelSymbol::SPtr &room = worldModel->getSymbol(roomID);
-
-	// Create a list of the identifiers of the 'person' symbols which are chilren of the room symbol by an 'RT' edge
-	QList<int32_t> l;
-	printf("List: (");
-	for (AGMModelSymbol::iterator edge_itr=room->edgesBegin(worldModel); edge_itr!=room->edgesEnd(worldModel); edge_itr++)
+	
+	//extrae en una lista con los ID de los symbolos "person" que son hijos del symbolo room enlazados mediante "RT"
+	//Qlist<int32_t> l = listaSymbolos(int symbolID, string symbolType=person,string linkType=RT);
+	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(roomID);
+	QList<int32_t> lSymbolsPersons;
+	
+	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
 	{
-		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==roomID)
+		//std::cout<<(*edge_itr).toString(worldModel)<<"\n";
+		//comprobamos el id del simbolo para evitar los arcos que le llegan y seguir solo los que salen del nodo
+		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==roomID )
 		{
-			const int second = (*edge_itr)->getSymbolPair().second;
-			if (worldModel->getSymbolByIdentifier(second)->symbolType=="person")
+			int second = (*edge_itr)->getSymbolPair().second;
+			const AGMModelSymbol::SPtr &symbolSecond=  worldModel->getSymbolByIdentifier(second);
+			if(symbolSecond->symbolType=="person")
 			{
-				printf(" _%d_(%d %d %s) ", second, (*edge_itr)->getSymbolPair().first, (*edge_itr)->getSymbolPair().second, (*edge_itr)->getLabel().c_str());
-				l.append(second);
+				try
+				{
+					string trackingId = symbolSecond->getAttribute("TrackingId");
+					lSymbolsPersons.append(str2int(trackingId));
+					
+				}
+				catch(...)
+				{
+					std::cout<<__FUNCTION__<<" es una persona Sin TrackinID"<<symbolSecond->toString()<<"\n";
+				}
 			}
 		}
 	}
-	printf(")\n");
-
-	if (l.size() > 10)
-	{
-		qFatal("too many people... theres probably something wrong\n");
-	}
-
-
-	// Handle each of the persons detected by MSKBody
-	bool modification = false;
-	for (auto personIt : personList)
-	{
-		// Try to find the person in the known persons which are already in the graph
-		int personID = -1;
-		for (int i=0; i<l.size(); i++)
+	
+	qDebug()<<"lsymbols person:"<<lSymbolsPersons;
+	//Contienen el id de las personas. un entero.
+	QList<int32_t> lInsertions;
+	QList<int32_t> lUpdates;
+	for( auto mapIt : innerModelMap )
+	{		
+		if (lSymbolsPersons.contains(mapIt.first))
 		{
-			int iid = l.at(i);
-			if (str2int((worldModel->getSymbol(iid)->getAttribute("TrackingId"))) == personIt.second.TrackingId )
-			{
-				personID = iid;
-				l.removeOne(personID);
-				std::cout << "id symbol person with TrackingId: " << personID << "\n";
-				break;
-			}
+			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<<"mappIt.first"<<mapIt.first;						
+			lUpdates.append(mapIt.first);
+			lSymbolsPersons.removeOne(mapIt.first);
 		}
-
-		//si encuentro el id en el worldModel la actualizo con el valor de la lista, el estado no me dice nada
-		//lo suyo sería usar el innerModel update...
-		if (personID > -1)
+		else
 		{
-			//actualizos su estado
-			std::cout<< "\n\tSimbolo encontrado: Actualizando el symbolo person: "<<personID<< "\n";
-// 			qFatal("d3");
-			AGMModelSymbol::SPtr  s = worldModel->getSymbol(personID);
-			if ( s->getAttribute("State")!=int2str(personIt.second.state) )
-			{
-				s->setAttribute("State",int2str(personIt.second.state));
-				//AGMMisc::publishNodeUpdate(s,agmagenttopic_proxy);
-			}
-
-			//ACTUALIZO EL INNERMODEL DEL HUMANO en mi vector de InnerModel locales
-			updateInnerModel(personIt.second, personID);
-
-			//TODO chequear esta funcion
-			//agmInner.updateAgmWithInnerModel(innerModelMap.at(personID));
-		}
-		else  // Create a new 'person' symbol in the graph representation
-		{
-			AGMModelSymbol::SPtr newSymbolPerson = worldModel->newSymbol("person");
-			newSymbolPerson->setAttribute("TrackingId",int2str(personIt.second.TrackingId));
-			newSymbolPerson->setAttribute("State",int2str(personIt.second.state));
-			std::cout<< " añado un nuevo symbolo persona "<<newSymbolPerson->toString()<< "\n";
-			const int personId = newSymbolPerson->identifier;
-			QString pre = QString::fromStdString(int2str(personId));
-			innerModelMap[personId] = new InnerModel();
-			//creo desde un innerModelGenerico un specifico para esa persona
-			innerModelCopyWithPrefix(imHumanGeneric, innerModelMap.at(personId), pre);
-			updateInnerModel(personIt.second, personId);
-			//lo inserto en la super estructura agmInner
-			QHash<QString, int32_t>  match;
-			match.insert(pre+"XN_SKEL_TORSO", personId);
-			//agmInner.include_im(match,innerModelMap.at(id));
-printf("%d\n", __LINE__);
-
-			//añado su arco calculado para innerModel, de la matzi kinect a la persona
-			std::map<string,string>att;
-
-			att["tx"]=float2str(innerModelMap.at(personId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());
-			att["ty"]=float2str(innerModelMap.at(personId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
-			att["tz"]=float2str(innerModelMap.at(personId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
- 			att["rx"]=float2str(innerModelMap.at(personId)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
- 			att["ry"]=float2str(innerModelMap.at(personId)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
- 			att["rz"]=float2str(innerModelMap.at(personId)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
- 			att["imType"]="transform";
-printf("%d\n", __LINE__);
-			worldModel->addEdgeByIdentifiers(roomID, newSymbolPerson->identifier, "RT", att);
-			worldModel->addEdgeByIdentifiers(newSymbolPerson->identifier, roomID, "in");
-
-printf("%d\n", __LINE__);
-
-			AGMModelSymbol::SPtr newMeshSymbol = worldModel->newSymbol("mesh");
-printf("%d\n", __LINE__);
-			int meshId = newMeshSymbol->identifier;
-			att.clear();
-printf("%d\n", __LINE__);
-			att["tx"] = att["ty"] = att["tz"] = att["rx"] = att["ry"] = att["rz"] = "0";
- 			att["imType"]="mesh";
- 			att["path"]="/home/robocomp/robocomp/files/osgModels/humanColor/pecho.osg";
-			att["scalex"]="10";
-			att["scaley"]="10";
-			att["scalez"]="10";
-			att["collidable"]="false";
-printf("%d\n", __LINE__);
-			worldModel->addEdgeByIdentifiers(newSymbolPerson->identifier, newMeshSymbol->identifier, "RT", att);
-printf("%d\n", __LINE__);
-
-
-
-
-// 			///printing
-// 			AGMModelEdge &edge = worldModel->getEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT");
-// 			std::cout<< "\tRT [ "<<edge->getAttribute("tx")<< " , "<<edge->getAttribute("ty")<< " , "<<edge->getAttribute("tz");
-// 			std::cout<< " , "<<edge->getAttribute("rx")<< " , "<<edge->getAttribute("ry")<< " , "<<edge->getAttribute("rz")<< " ]\n";
-
-			modification = true;
+			lInsertions.append(mapIt.first);
+			
 		}
 	}
-
-
-
-
-	//removeSymbol persons si queda alguno en la lista de symbolos
-	for (int i=0; i< l.size(); i++)
+	//remove
+	qDebug()<<"lsymbols person to remove:"<<lSymbolsPersons;
+	for (int i=0; i<lSymbolsPersons.size(); i++)
+	{	
+	  
+		int symbolID = agmInner.findName(QString::fromStdString(int2str(lSymbolsPersons.at(i)))+"XN_SKEL_TORSO");
+		qDebug()<<__FUNCTION__<<__LINE__<<innerModelMap.size()<<"lSymbolsPersons.at(i)"<<lSymbolsPersons.at(i)<<"symbol"<<symbolID;
+		//CAUTION el vector innermodelMap no contiene nada en esa posición
+		//agmInner.remove_Im(innerModelMap.at(lSymbolsPersons.at(i)));
+		QList <int> listaDescendientes;
+		bool loop=false;	
+		agmInner.checkLoop(symbolID,listaDescendientes,"RT",loop );
+// 		
+// 		qDebug()<<"lislistaDescendientes"<<listaDescendientes;
+		for (int j=0; j<listaDescendientes.size();j++)
+		    worldModel->removeSymbol(j);
+		modification = true;
+		
+	}
+	//add, 
+	qDebug()<<"lInsertions"<<lInsertions;
+	for (int i=0; i<lInsertions.size(); i++)
 	{
-		std::cout<< " remove Symbol "<<worldModel->getSymbol(l.at(i))->toString()<< "\n";
-// 		worldModel->save("AGM_BeforeRemovePerson.xml");
-// 		innerModelMap.at(l.at(i))->save("innerPersonToRemove.xml");
-// 		qDebug()<< "\n innerModelMap.at(l.at(i))->getIDKeys()\n"<<innerModelMap.at(l.at(i))->getIDKeys()<< "\n";
-		//agmInner.remove_Im(innerModelMap.at(l.at(i)));
-		try{
-			innerModelMap.at(l.at(i));
-			innerModelMap.erase(l.at(i));
+		AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");					
+		int personID = newSymbolPerson->identifier;
+		
+		int TrackingId = lInsertions.at(i);
+		newSymbolPerson->setAttribute("TrackingId",int2str(TrackingId));
+		std::cout<<" añado un nuevo symbolo persona "<<newSymbolPerson->toString()<<" TrackingID "<<TrackingId<<"\n";
+		
+		//state está en personList
+		int state = personList.at(TrackingId).state;
+		newSymbolPerson->setAttribute("State",int2str(state));
+		
+		
+		//añado su arco calculado para innerModel, de la matzi kinect a la persona
+		QString pre =QString::number(TrackingId);
+		std::map<string,string>att;
+		try
+		{
+			att["tx"]=float2str( innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
+			att["ty"]=float2str( innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
+			att["tz"]=float2str( innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
+			att["rx"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
+			att["ry"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
+			att["rz"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
+			worldModel->addEdgeByIdentifiers(roomID,personID,"RT",att);
+			worldModel->addEdgeByIdentifiers(personID,roomID,"in");
 		}
 		catch (...)
 		{
-			qDebug()<< "execption"<<l.at(i)<<innerModelMap.size();
+			qDebug()<<"si no existe el torso q qFatal"<<__FUNCTION__<<__LINE__;
+			qFatal("abort fary");
 		}
-
-
-// 		qDebug()<< "innerModelMap.size()"<<innerModelMap.size();
-// 		worldModel->save("AGM_AfterRemovePerson.xml");
-		worldModel->removeSymbol(l.at(i));
-// 		worldModel->save("AGM_AfterRemoveSymbol_Person.xml");
-		modification=true;
+		//el prefijo es el ID del tracking, pero cuelga/inicia en la persona. Debo crear el arco entre room--RT-->person
+		QHash<QString, int32_t>  match;
+		
+		match.insert(pre+"XN_SKEL_TORSO",personID);
+		agmInner.include_im(match, innerModelMap.at(lInsertions.at(i)));
+		modification =true;
 	}
-
+	qDebug()<<"lUpdates:"<<lUpdates;
+// 	//update, si no hay nada que borrar ni insertar. puedo usar el que contiene todos
+	for (int i=0; i<lUpdates.size(); i++)
+	{
+		//agmInner.updateAgmWithInnerModel(innerModelsLocals);
+		//agmInner.updateAgmWithInnerModel(innerModelMap.at(lUpdates.at(i)));
+		agmInner.updateAgmWithInnerModelAndPublish(innerModelMap.at(lUpdates.at(i)),agmagenttopic_proxy);
+	}
+	qDebug()<<"\n ********** \n";
 	if (modification)
 	{
-		qDebug()<< "-------------------------------------";
-		AGMModel::SPtr newModel(new AGMModel(worldModel));
-		agmInner.setWorld(worldModel);
-		sendModificationProposal(worldModel, newModel);
-		newModel->save("caca.xml");
+		qDebug()<<"----------- MODIFICATION -----------------------";
+ 		AGMModel::SPtr newModel(new AGMModel(worldModel));	
+ 		sendModificationProposal(worldModel, newModel);					
+		saveInnerModels(QString::number(number));
+		number++;
+		//if (number>1)
+			//qFatal("fary");
 	}
+
+// 	if (!remove and insert)
+// 	{
+// 		AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");			
+// 		std::cout<<" añado un nuevo symbolo persona "<<newSymbolPerson->toString()<<"\n";
+// 		newSymbolPerson->setAttribute("TrackingId",int2str(personIt.second.TrackingId));
+// 		newSymbolPerson->setAttribute("State",int2str(personIt.second.state));
+// 		int id = newSymbolPerson->identifier;		
+// 		QString pre =QString::fromStdString(int2str(id));
+// 		//lo inserto en la super estructura agmInner
+// 			QHash<QString, int32_t>  match;		
+// 						
+// 			match.insert(pre+"XN_SKEL_TORSO",id);
+// 			
+// 			//agmInner.include_im(match,innerModelMap.at(id));
+// // // 			//añado su arco calculado para innerModel, de la matzi kinect a la persona
+// 			std::map<string,string>att;
+// 			att["tx"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
+// 			att["ty"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
+// 			att["tz"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
+//  			att["rx"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
+//  			att["ry"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
+//  			att["rz"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
+// 			worldModel->addEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT",att);
+// // 			
+// 	}
+	
+	//calculo para cada strucutra personIT de TPerson mskBody.ice, su correspondientes RT en robocomp
+	//<int,TPerson> personIt; jajajaja
+// 	for( auto personIt : personList )
+// 	{
+// 		bool found = false;
+// 		int personID = -1;
+// 		//lista de ID de symbolos
+// 		for (int i=0; i< l.size(); i++)
+// 		{
+// 			//buscar persona 
+// 			if ( str2int ( (worldModel->getSymbol(l.at(i))->getAttribute("TrackingId")) ) ==personIt.second.TrackingId ) 				
+// 			{			
+// 				personID=l.at(i);
+// 				found = true;
+// 				l.removeOne(personID);
+// 				std::cout<<"id symbol person with TrackingId: "<<personID<<"\n";
+// 				break;				
+// 			}			
+// 		}
+// 		
+// 		//si encuentro el id en el worldModel la actualizo con el valor de la lista, el estado no me dice nada
+// 		//lo suyo sería usar el innerModel update...
+// 		if (found)
+// 		{
+// 			//actualizos su estado	
+// 			std::cout<<"\n\tSimbolo encontrado: Actualizando el symbolo person: "<<personID<<"\n";
+// 			AGMModelSymbol::SPtr  s =worldModel->getSymbol(personID);				
+// 			if ( s->getAttribute("State")!=int2str(personIt.second.state) )
+// 			{
+// 				s->setAttribute("State",int2str(personIt.second.state));
+// 				//AGMMisc::publishNodeUpdate(s,agmagenttopic_proxy);
+// 			}
+// 			
+// 			//ACTUALIZO EL INNERMODEL DEL HUMANO en mi vector de InnerModel locales
+// 			updateInnerModel(personIt.second,personID);
+// 			
+// 			//TODO chequear esta funcion
+// 			//agmInner.updateAgmWithInnerModel(innerModelMap.at(personID));					
+// 		}
+// 		// añado la nueva en cualquier estado ??		
+// 		else 
+// 		{
+// 			AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");			
+// 			std::cout<<" añado un nuevo symbolo persona "<<newSymbolPerson->toString()<<"\n";
+// 			newSymbolPerson->setAttribute("TrackingId",int2str(personIt.second.TrackingId));
+// 			newSymbolPerson->setAttribute("State",int2str(personIt.second.state));
+// 			
+// 			//creo desde un innerModelGenerico un specifico para esa persona
+// 			
+// 			int id = newSymbolPerson->identifier;		
+// 			QString pre =QString::fromStdString(int2str(id));
+// 			innerModelMap[id] =new InnerModel();
+// 			
+// 			newInnerModel(imHumanGeneric, innerModelMap.at(id),pre);
+// 			
+// 			updateInnerModel(personIt.second,id);
+// 			
+// 			//lo inserto en la super estructura agmInner
+// 			QHash<QString, int32_t>  match;		
+// 						
+// 			match.insert(pre+"XN_SKEL_TORSO",id);
+// 			
+// 			//agmInner.include_im(match,innerModelMap.at(id));
+// // // 			//añado su arco calculado para innerModel, de la matzi kinect a la persona
+// 			std::map<string,string>att;
+// 			att["tx"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
+// 			att["ty"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
+// 			att["tz"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
+//  			att["rx"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
+//  			att["ry"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
+//  			att["rz"]=float2str(innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
+// 			worldModel->addEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT",att);
+// // 			
+// // 			///printing
+// // 			AGMModelEdge &edge = worldModel->getEdgeByIdentifiers(robotID,newSymbolPerson->identifier,"RT");
+// // 			std::cout<<"\tRT [ "<<edge->getAttribute("tx")<<" , "<<edge->getAttribute("ty")<<" , "<<edge->getAttribute("tz");
+// // 			std::cout<<" , "<<edge->getAttribute("rx")<<" , "<<edge->getAttribute("ry")<<" , "<<edge->getAttribute("rz")<<" ]\n";
+// 
+// 			modification = true;		
+// 		}
+// 	}
+// 	//removeSymbol persons si queda alguno en la lista de symbolos
+// 	for (int i=0; i< l.size(); i++)
+// 	{
+// 		std::cout<<" remove Symbol "<<worldModel->getSymbol(l.at(i))->toString()<<"\n";	
+// // 		worldModel->save("AGM_BeforeRemovePerson.xml");
+// // 		innerModelMap.at(l.at(i))->save("innerPersonToRemove.xml");
+// // 		qDebug()<<"\n innerModelMap.at(l.at(i))->getIDKeys()\n"<<innerModelMap.at(l.at(i))->getIDKeys()<<"\n";
+// 		//agmInner.remove_Im(innerModelMap.at(l.at(i)));	
+// 		try{
+// 			innerModelMap.at(l.at(i)); 
+// 			innerModelMap.erase(l.at(i));
+// 		}
+// 		catch (...)
+// 		{
+// 			qDebug()<<"execption"<<l.at(i)<<innerModelMap.size();
+// 		}
+// 		
+// 		
+// // 		qDebug()<<"innerModelMap.size()"<<innerModelMap.size();
+// // 		worldModel->save("AGM_AfterRemovePerson.xml");
+// 		worldModel->removeSymbol(l.at(i));
+// // 		worldModel->save("AGM_AfterRemoveSymbol_Person.xml");
+// 		modification=true;		
+// 	}
+// 
+
 
 }
 
@@ -480,33 +729,27 @@ StateStruct SpecificWorker::getAgentState()
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modification)
 {
-	printf("sttructural change\n");
-	QMutexLocker ml(mutex);
+	QMutexLocker m (mutex);	
  	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 	agmInner.setWorld(worldModel);
-	if (innerModelAGM)
-	{
-// 		delete innerModelAGM;
-	}
+	if (innerModelAGM) 
+		delete innerModelAGM;
 	innerModelAGM = agmInner.extractInnerModel("room",true);
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
 {
-	mutex->lock();
+	QMutexLocker m (mutex);	
 //  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 // 	agmInner.updateImNodeFromEdge(modification,innerViewer->innerModel);
 // 	agmInner.setWorld(worldModel);
-
-	mutex->unlock();
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modification)
 {
-	mutex->lock();
-//  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	QMutexLocker m (mutex);	
+//  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);	
 // 	agmInner.setWorld(worldModel);
-	mutex->unlock();
 }
 
 
@@ -556,32 +799,62 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 	return true;
 }
 
-
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
+	QMutexLocker m (mutex);	
 	try
 	{
 		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"humanCompAgent");
 	}
-	catch(...)
+	catch(Ice::Exception e)
 	{
+		std::cout<<"que pasa amigo" << e.what()<<"\n";
 		exit(1);
 	}
+	catch(...)
+	{
+		qDebug()<<"que pasa amigo";
+		exit(1);
+	}
+  
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
+
+
+//       THE FOLLOWING IS JUST AN EXAMPLE for AGENTS
+// 	try
+// 	{
+// 		RoboCompCommonBehavior::Parameter par = params.at("NameAgent.InnerModel") ;
+// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+// 			innerModel = new InnerModel(par.value);
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+// 		}
+// 		else
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+// 			qFatal("Exiting now.");
+// 		}
+// 	}
+// 	catch(std::exception e)
+// 	{
+// 		qFatal("Error reading config params");
+// 	}
+
+	
 	timer.start(Period);
-	printf("dddddddddddddddddddddd\n");
-// 	connect(&timer, SIGNAL(timeout()), this, SLOT(compute()));
-	printf("dddddddddddddddddddddd\n");
+
 	return true;
 }
 
 
 void SpecificWorker::initDictionary()
 {
+	QMutexLocker m (mutex);	
 	/*Cargamos el mapa de  nombres*/
 	dictionaryNames[ "Spine" ] = "XN_SKEL_TORSO";
 	dictionaryNames[ "Head" ] = "XN_SKEL_NECK";
@@ -600,7 +873,6 @@ void SpecificWorker::initDictionary()
 	dictionaryNames[ "HandLeft" ] = "XN_SKEL_LEFT_HAND";
 // 	dictionaryNames[ "WallPose" ] = "WALL_POSE";
 // 	dictionaryNames[ "Wall" ] = "XN_SUCCESS_WALL";
-
 
 	dictionaryEnum[ "Spine" ] = Spine;
 	dictionaryEnum[ "Head" ] = Head;
@@ -621,126 +893,214 @@ void SpecificWorker::initDictionary()
 
 
 ////************** INNERMODEL ******************++
-void SpecificWorker::updateInnerModel(TPerson &person, int idPerson)
+ void SpecificWorker::updateInnerModel( TPerson &person, int idPerson )
 {
-	calculateJointRotations(person);
+	QMutexLocker m (mutex);	
+	float x,y,z,rx,ry,rz;
+	string idJoint;
 
-	for (auto dictionaryNamesIt : dictionaryNames)
+	calculateJointRotations(person);
+	
+	for( auto dictionaryNamesIt : dictionaryNames )
 	{
 		try
 		{
-			string idJoint = dictionaryNamesIt.first;
-			float x = 1000.*mapJointRotations[ idJoint ].getTr().x();
-			float y = 1000.*mapJointRotations[ idJoint ].getTr().y();
-			float z = 1000.*mapJointRotations[ idJoint ].getTr().z();
-			float rx = mapJointRotations[ idJoint ].getRxValue();
-			float ry = mapJointRotations[ idJoint ].getRyValue();
-			float rz = mapJointRotations[ idJoint ].getRzValue();
-
-			//qDebug() << QString::fromStdString(idJoint) << pose.x << pose.y << pose.z << "( " << pose.rx << pose.ry << pose.rz << " )";
-
+			idJoint = dictionaryNamesIt.first;
+			x=y=z=rx=ry=rz=0.0;
+			
+		
+			x = 1000*mapJointRotations[ idJoint ].getTr().x();
+			y = 1000*mapJointRotations[ idJoint ].getTr().y();
+			z = 1000*mapJointRotations[ idJoint ].getTr().z();		
+			
+			rx = mapJointRotations[ idJoint ].getRxValue();
+			ry = mapJointRotations[ idJoint ].getRyValue();
+			rz = mapJointRotations[ idJoint ].getRzValue();
+				
+			//qDebug()<<QString::fromStdString( idJoint)<<pose.x<<pose.y<<pose.z<<"( "<<pose.rx<<pose.ry<<pose.rz<<" )";
+			//nan check			
 			if ( (x!=x) or (y!=y) or (z!=z) or (rx!=rx) or (ry!=ry) or (rz!=rz) )
-			{
-				printf("Person %d has nan values\n", idPerson);
 				continue;
-			}
-
-			string idNode = int2str(idPerson) + dictionaryNamesIt.second.toStdString();
+			string idNode = int2str(idPerson) + dictionaryNamesIt.second.toStdString();			
 			if (idJoint=="Spine")
 			{
-								innerModelMap[ idPerson ]->updateTransformValues( QString::fromStdString(idNode),x,y,z,rx,ry,rz );
+				innerModelMap[ idPerson ]->updateTransformValues( QString::fromStdString(idNode),x,y,z,rx,ry,rz );
 				try
 				{
 					innerModelsLocals->updateTransformValues(QString::fromStdString(idNode),x,y,z,rx,ry,rz);
 				}
 				catch (...)
 				{
-					qDebug()<< "Exception, probably innerModelLocals, has not been created yet";
+					qDebug()<<"Exception, probably innerModelLocals, has not been created yet";
 				}
 			}
 			else
 			{
-								innerModelMap[ idPerson ]->updateRotationValues( QString::fromStdString(idNode),rx,ry,rz );
+				innerModelMap[ idPerson ]->updateRotationValues( QString::fromStdString(idNode),rx,ry,rz );						
 				try
 				{
 					innerModelsLocals->updateRotationValues( QString::fromStdString(idNode),rx,ry,rz );
 				}
 				catch (...)
 				{
-					qDebug()<< "Exception, probably innerModelLocals, has not been created yet";
+					qDebug()<<"Exception, probably innerModelLocals, has not been created yet";
 				}
 			}
 		}
-		catch (Ice::Exception e)
+		catch ( Ice::Exception e ) 
 		{
-			qDebug() << "error updateInnerModel" << e.what();
-			qFatal("d");
+			qDebug( )<<"error updateInnerModel"<<e.what( );
 		}
 	}
 }
  /**
  * @brief Given a person, this method calculates the Rotation Matrix of all the Joints. person is in metres
- *
+ * 
  * @param person Person who rotation matrix is calculated
  * @return void
  */
-void SpecificWorker::calculateJointRotations( TPerson &person )
+ void SpecificWorker::calculateJointRotations( TPerson &person )
 {
 	RTMat kinect;
 	RoboCompMSKBody::JointList jointList;
+	
 	jointList = person.joints;
-
+	///*********************** TODO transform ***************************	
 	try
 	{
-		/*InnerModel *innerModelTmp = new InnerModel();
-		innerModelTmp = agmInner.extractInnerModel("room", true);*/
-		printf("innermodelagm %p\n", innerModelAGM);
+		/*InnerModel *innerModelTmp = new InnerModel();		
+		innerModelTmp = agmInner.extractInnerModel("room", true);*/		
 		kinect=innerModelAGM->getTransformationMatrix("rgbdHumanPose","room");
-		kinect.setTr(kinect.getTr().x()/1000.0, kinect.getTr().y()/1000.0,kinect.getTr().z()/1000.0);
+		kinect.setTr(kinect.getTr().x()/1000.0, kinect.getTr().y()/1000.0,kinect.getTr().z()/1000.0);			
 	}
 	catch (...)
 	{
-		qDebug()<< "not found kinect using identity RTMat kinect";
+		qDebug()<<"not found kinect using identity RTMat kinect";
 	}
-
+	//kinect.print("kinect");
+	
+	
 	/// apunta el torso (inclinación alante/atrás y lateral del torso)
-	mapJointRotations["Spine"] = rtMatFromJointPosition(kinect, jointList[dictionaryEnum["Spine"]].Position, jointList[dictionaryEnum["Head"]].Position, jointList[dictionaryEnum["Spine"]].Position, 2);
-	/// alineación de hombros (rotación en Z del torso), previa al cálculo de la transformacion final de los hombros.
-	RTMat LEFT_SHOULDER_PRE_Z  = rtMatFromJointPosition(mapJointRotations["Spine"], jointList[dictionaryEnum["ShoulderLeft"]].Position,  jointList[dictionaryEnum["ElbowLeft"]].Position,  jointList[dictionaryEnum["ShoulderLeft"]].Position, 2);
-	RTMat RIGHT_SHOULDER_PRE_Z = rtMatFromJointPosition(mapJointRotations["Spine"], jointList[dictionaryEnum["ShoulderRight"]].Position, jointList[dictionaryEnum["ElbowRight"]].Position, jointList[dictionaryEnum["ShoulderRight"]].Position, 2);
-	rotarTorso(RIGHT_SHOULDER_PRE_Z.getTr(), LEFT_SHOULDER_PRE_Z.getTr());
+	mapJointRotations[ "Spine" ]=
+	rtMatFromJointPosition( kinect,
+			      jointList[ dictionaryEnum[ "Spine" ] ].Position,
+			      jointList[ dictionaryEnum[ "Head" ] ].Position, 
+			      jointList[ dictionaryEnum[ "Spine" ] ].Position, 2 );			
+
+	/// alineación de hombros (rotación en Z del torso), previa al cálculo de la transformacion final de los hombros. 
+	RTMat LEFT_SHOULDER_PRE_Z=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
+			      jointList[ dictionaryEnum[ "ShoulderLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position, 
+			      jointList[ dictionaryEnum[ "ShoulderLeft" ] ].Position, 2 );
+	RTMat RIGHT_SHOULDER_PRE_Z=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
+			      jointList[ dictionaryEnum[ "ShoulderRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position, 
+			      jointList[ dictionaryEnum[ "ShoulderRight" ] ].Position, 2 );
+	
+	rotarTorso ( RIGHT_SHOULDER_PRE_Z.getTr( ), LEFT_SHOULDER_PRE_Z.getTr( ) );
+	
 
 	///Cintura
-	//mapJointRotations["HipCenter"]= rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["HipCenter"]].Position, jointList[dictionaryEnum["Spine"]].Position, jointList[dictionaryEnum["HipCenter"]].Position, 2);
-	mapJointRotations["HipLeft"]  = rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["HipLeft"]].Position, jointList[dictionaryEnum["KneeLeft"]].Position, jointList[dictionaryEnum["HipLeft"]].Position, 2);
-	mapJointRotations["HipRight"] = rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["HipRight"]].Position, jointList[dictionaryEnum["KneeRight"]].Position, jointList[dictionaryEnum["HipRight"]].Position, 2);
-	mapJointRotations["KneeLeft"] = rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["HipLeft"], jointList[dictionaryEnum["KneeLeft"]].Position, jointList[dictionaryEnum["FootLeft"]].Position, jointList[dictionaryEnum["KneeLeft"]].Position, 2);
-	mapJointRotations["KneeRight"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["HipRight"], jointList[dictionaryEnum["KneeRight"]].Position, jointList[dictionaryEnum["FootRight"]].Position, jointList[dictionaryEnum["KneeRight"]].Position, 2);
+// 	mapJointRotations[ "HipCenter" ]= 
+// 	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
+// 			      jointList[ dictionaryEnum[ "HipCenter" ] ].Position,
+// 			      jointList[ dictionaryEnum[ "Spine" ] ].Position,
+// 			      jointList[ dictionaryEnum[ "HipCenter" ] ].Position, 2 );
 
-	///cabeza
-	//mapJointRotations["Head"]= rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["Head"]].Position, joints["JOINT_HEAD"], joints["JOINT_NECK"], 2);
+	mapJointRotations[ "HipLeft" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
+			      jointList[ dictionaryEnum[ "HipLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "KneeLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "HipLeft" ] ].Position, 2);
+	
+	mapJointRotations[ "HipRight" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
+			      jointList[ dictionaryEnum[ "HipRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "KneeRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "HipRight" ] ].Position, 2);
+	
+	///Knee			
+	mapJointRotations[ "KneeLeft" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "HipLeft" ],
+			      jointList[ dictionaryEnum[ "KneeLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "FootLeft" ] ].Position,
+      			      jointList[ dictionaryEnum[ "KneeLeft" ] ].Position, 2);
+				
+	mapJointRotations[ "KneeRight" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "HipRight" ],
+			      jointList[ dictionaryEnum[ "KneeRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "FootRight" ] ].Position,
+      			      jointList[ dictionaryEnum[ "KneeRight" ] ].Position, 2);
+
+
+//     ///cabeza
+// 	mapJointRotations[ "Head" ]=
+// 	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
+// 				jointList[ dictionaryEnum[ "Head" ] ].Position,
+// 				joints[ "JOINT_HEAD" ],
+// 				joints[ "JOINT_NECK" ], 2);
+
 
 	///brazo izquierdo
-	mapJointRotations["ShoulderLeft"]= rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["ShoulderLeft"]].Position, jointList[dictionaryEnum["ElbowLeft"]].Position, jointList[dictionaryEnum["ShoulderLeft"]].Position, 2);
-	mapJointRotations["ElbowLeft"]=rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["ShoulderLeft"], jointList[dictionaryEnum["ElbowLeft"]].Position, jointList[dictionaryEnum["HandLeft"]].Position, jointList[dictionaryEnum["ElbowLeft"]].Position, 2);
+	mapJointRotations[ "ShoulderLeft" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
+			      jointList[ dictionaryEnum[ "ShoulderLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "ShoulderLeft" ] ].Position, 2);		
+			    
+	mapJointRotations[ "ElbowLeft" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "ShoulderLeft" ],
+			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "HandLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position, 2);		
+
 
 	///brazo derecho
 	///codo al hombro (p2 inicio p1 final)
-	mapJointRotations["ShoulderRight"]= rtMatFromJointPosition( mapJointRotations["Spine"], jointList[dictionaryEnum["ShoulderRight"]].Position, jointList[dictionaryEnum["ElbowRight"]].Position, jointList[dictionaryEnum["ShoulderRight"]].Position, 2);
-	mapJointRotations["ElbowRight"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["ShoulderRight"], jointList[dictionaryEnum["ElbowRight"]].Position, jointList[dictionaryEnum["HandRight"]].Position, jointList[dictionaryEnum["ElbowRight"]].Position, 2);
+	mapJointRotations[ "ShoulderRight" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ],
+			      jointList[ dictionaryEnum[ "ShoulderRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "ShoulderRight" ] ].Position, 2);		
+			    
+	mapJointRotations[ "ElbowRight" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "ShoulderRight" ],
+			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "HandRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position, 2);		
+ 
+	///Manos derecha e izquierda
+	mapJointRotations[ "HandRight" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "ShoulderRight" ]*mapJointRotations[ "ElbowRight" ],
+			      jointList[ dictionaryEnum[ "HandRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "ElbowRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "HandRight" ] ].Position, 2);
+	
+	mapJointRotations[ "HandLeft" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "ShoulderLeft" ]*mapJointRotations[ "ElbowLeft" ],
+			      jointList[ dictionaryEnum[ "HandLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "ElbowLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "HandLeft" ] ].Position, 2);
 
 	///Manos derecha e izquierda
-	mapJointRotations["HandRight"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["ShoulderRight"]*mapJointRotations["ElbowRight"], jointList[dictionaryEnum["HandRight"]].Position, jointList[dictionaryEnum["ElbowRight"]].Position, jointList[dictionaryEnum["HandRight"]].Position, 2);
-	mapJointRotations["HandLeft"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["ShoulderLeft"]*mapJointRotations["ElbowLeft"], jointList[dictionaryEnum["HandLeft"]].Position, jointList[dictionaryEnum["ElbowLeft"]].Position, jointList[dictionaryEnum["HandLeft"]].Position, 2);
-
-	/// Pies derecha e izquierda
-	mapJointRotations["FootRight"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["HipRight"]*mapJointRotations["KneeRight"],      jointList[dictionaryEnum["FootRight"]].Position, jointList[dictionaryEnum["KneeRight"]].Position, jointList[dictionaryEnum["FootRight"]].Position, 2);
-	mapJointRotations["FootLeft"]= rtMatFromJointPosition( mapJointRotations["Spine"]*mapJointRotations["HipLeft"]*mapJointRotations["KneeLeft"], jointList[dictionaryEnum["FootLeft"]].Position, jointList[dictionaryEnum["KneeLeft"]].Position, jointList[dictionaryEnum["FootLeft"]].Position, 2);
+	mapJointRotations[ "FootRight" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "HipRight" ]*mapJointRotations[ "KneeRight" ],
+			      jointList[ dictionaryEnum[ "FootRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "KneeRight" ] ].Position,
+			      jointList[ dictionaryEnum[ "FootRight" ] ].Position, 2);
+	
+     	mapJointRotations[ "FootLeft" ]=
+	rtMatFromJointPosition( mapJointRotations[ "Spine" ]*mapJointRotations[ "HipLeft" ]*mapJointRotations[ "KneeLeft" ],
+			      jointList[ dictionaryEnum[ "FootLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "KneeLeft" ] ].Position,
+			      jointList[ dictionaryEnum[ "FootLeft" ] ].Position, 2);
 }
-
+ 
  /**
   * @brief This method calculates the rotation of a Joint given some points.
-  *
+  * 
   * @param rS Indicates the rotations of the above joints. (Example: To calculate the rotation of the ElbowLeft we must know the rotation of the ShoulderLeft).
   * @param p1 Starting point of the Joint (Example: ElbowLeft)
   * @param p2 Ending point of the Joint (Example: WristLeft)
@@ -748,122 +1108,122 @@ void SpecificWorker::calculateJointRotations( TPerson &person )
   * @param axis Always axis Z (2)
   * @return RMat::RTMat This is the Rotation Matrix
   */
-RTMat SpecificWorker::rtMatFromJointPosition( RTMat rS, RoboCompMSKBody::SkeletonPoint p1, RoboCompMSKBody::SkeletonPoint p2, RoboCompMSKBody::SkeletonPoint translation, int axis )
+ RTMat SpecificWorker::rtMatFromJointPosition( RTMat rS, RoboCompMSKBody::SkeletonPoint p1, RoboCompMSKBody::SkeletonPoint p2, RoboCompMSKBody::SkeletonPoint translation, int axis )
 {
-	bool XClockWise=true, YClockWise=true, ZClockWise=true;
+   	bool XClockWise=true, YClockWise=true, ZClockWise=true;
 	float alpha, beta, gamma;
-
+	
 	RTMat rt(XClockWise,YClockWise, ZClockWise);
 	QVec p1h = QVec::vec4(p1.X, p1.Y, p1.Z, 1);
 	QVec p2h = QVec::vec4(p2.X, p2.Y, p2.Z,1);
 	QVec translationH = QVec::vec4(translation.X, translation.Y, translation.Z,1);
-
+	
 	QMat aux =rS;
 	aux = aux.invert();
 	QVec translationT = aux *translationH;
 	QVec p1t = aux * p1h;
 	QVec p2t = aux * p2h;
 	QVec v = p2t - p1t;
-
+	
 	v= v.normalize();
-
-	///por filas
-	switch(axis)
-	{
+	
+	  ///por filas
+	switch(axis){
 	case 0:
 		alpha = 0;
-
+		
 		if(YClockWise) beta = atan2(-v.z(),v.x());
 		else beta = atan2(v.z(),v.x());
-
+		
 		if(ZClockWise) gamma = asin(-v.y());
 		else gamma = asin(v.y());
-
+		
 		break;
 	case 1:
 		if(XClockWise) alpha = atan2(v.z(),v.y());
 		else alpha = atan2(-v.z(),v.y());
-
+		
 		beta = 0;
-
+		
 		if(ZClockWise) gamma = asin(v.x());
 		else gamma = asin(-v.x());
-
+		
 		break;
 	case 2:
 		if(XClockWise) alpha =  atan2(-v.y(),v.z());
 		else alpha =  atan2(v.y(),v.z());
-
+		
 		if(YClockWise) beta = asin(v.x());
 		else beta = asin(-v.x());
-
+		
 		gamma = 0;
-
+		
 		break;
 	}
-
+	
 	rt.setRT(alpha,beta,gamma,translationT);
-
+	
 	return rt;
 }
-
-
+ 
+ 
  /**
   * @brief This method allows to rotate the torso from the position and rotation of the shoulders
-  *
+  * 
   * @param hombroizq Rotation Matrix from LeftShoulder
   * @param hombroder Rotation Matrix from RightShoulder
   * @return true if all the operations went correctly
   */
-bool SpecificWorker::rotarTorso( const QVec & hombroizq, const QVec & hombroder )
+ bool SpecificWorker::rotarTorso( const QVec & hombroizq, const QVec & hombroder )
 {
 	QVec eje= hombroizq - hombroder;	//Calculamos el eje que va de un hombro a otro
-
+	
 	eje.normalize ();
 
 	if( eje.x( ) == 0 ) return false;
 
 	float angulo = atan2( eje.y( ),eje.x( ) );	//Calculamos el giro necesario para alinear los hombros con el eje
-
+	
 	mapJointRotations[ "Spine" ].setRZ( angulo ); // Aplicamos dicho giro al eje Z del torso
-
+	
 	return true;
 }
 
 void SpecificWorker::saveInnerModels(QString number)
-{
+{	
 	worldModel->save(number.toStdString()+"_agmWorldModelLocal.xml");
-	agmInner.getWorld()->save(number.toStdString()+"_agmWorldModel_agmInner.xml");
-	for (auto m : innerModelMap)
-	{
+	agmInner.getWorld()->save(number.toStdString()+"_agmWorldModel_agmInner.xml");	
+	for( auto m : innerModelMap )			
+	{		
 		QString pre =QString::fromStdString(int2str(m.first));
-		qDebug()<< "Saving innermodels : "<<pre+"innerHuman.xml";
-		m.second->save(number+"_"+pre+"innerHuman.xml");
-	}
+		qDebug()<<"Saving innermodels : "<<pre+"innerHuman.xml";
+		m.second->save(number+"_"+pre+"innerHuman.xml");			
+	}		
 	agmInner.extractInnerModel("room", true)->save(number+"_extractInnerModelFromRoom.xml");
+	
 }
 
 void SpecificWorker::updateViewer()
-{
-// 	for( auto m : innerModelMap )
-// 	{
-// 		std::map<int,IMV>::iterator it;
+{	
+// 	for( auto m : innerModelMap )			
+// 	{	
+// 		std::map<int,IMV>::iterator it;			
 // 		it = InnerModelViewerMap.find(m.first);
 // 		//si está actualizo
 // 		if (it != InnerModelViewerMap.end())
-// 		{
+// 		{						
 // 			InnerModelViewerMap.at(m.first).innerViewer->update();
-// 			InnerModelViewerMap.at(m.first).osgView->autoResize();
+// 			InnerModelViewerMap.at(m.first).osgView->autoResize();						
 // 			InnerModelViewerMap.at(m.first).osgView->frame();
 // 			InnerModelViewerMap.at(m.first).widget->update();
 // 			printf("Updated: %d\n", __LINE__);
-//
+// 			
 // 		}
 // 		//sino inserto
-// 		else
-// 		{
+// 		else 
+// 		{			
 // 			printf("No Exist: %d\n", __LINE__);
-// 			IMV myIMV;
+// 			IMV myIMV;			
 // 			InnerModelViewerMap.insert ( std::pair<int,IMV>(m.first,myIMV) );
 // // 			myIMV.widget = new QWidget();
 // // 			myIMV.widget->show();
@@ -871,77 +1231,78 @@ void SpecificWorker::updateViewer()
 // // 			myIMV.widget->setWindowTitle("innerModel:"+QString::number(m.first));
 // // 			myIMV.osgView = new OsgView(myIMV.widget);
 // // 			myIMV.innerViewer = new InnerModelViewer(innerModelMap.at(m.first), "root", myIMV.osgView->getRootGroup(), true);
-// //
+// // 			
 // // 			myIMV.manipulator = new osgGA::TrackballManipulator;
 // // 			printf("No Exist: %d\n", __LINE__);
 // // 			myIMV.osgView->setCameraManipulator(myIMV.manipulator, true);
 // // 			printf("No Exist: %d\n", __LINE__);
 // // 			myIMV.innerViewer->setMainCamera(myIMV.manipulator, InnerModelViewer::TOP_POV);
-//
+// 			
 // 			InnerModelViewerMap.at(m.first).widget = new QWidget();
 // 			InnerModelViewerMap.at(m.first).widget->show();
 // 			InnerModelViewerMap.at(m.first).widget->resize(1024,768);
 // 			InnerModelViewerMap.at(m.first).widget->setWindowTitle("innerModel:"+QString::number(m.first));
 // 			InnerModelViewerMap.at(m.first).osgView = new OsgView(InnerModelViewerMap.at(m.first).widget);
-// 			InnerModelViewerMap.at(m.first).innerViewer = new InnerModelViewer(innerModelMap.at(m.first), "root",
+// 			InnerModelViewerMap.at(m.first).innerViewer = new InnerModelViewer(innerModelMap.at(m.first), "root", 
 // 											   InnerModelViewerMap.at(m.first).osgView->getRootGroup(), true);
-//
+// 			
 // 			InnerModelViewerMap.at(m.first).manipulator = new osgGA::TrackballManipulator;
 // 			printf("No Exist: %d\n", __LINE__);
 // 			InnerModelViewerMap.at(m.first).osgView->setCameraManipulator(InnerModelViewerMap.at(m.first).manipulator, true);
 // 			printf("No Exist: %d\n", __LINE__);
-// 			InnerModelViewerMap.at(m.first).innerViewer->setMainCamera(InnerModelViewerMap.at(m.first).manipulator, InnerModelViewer::TOP_POV);
-//
+// 			InnerModelViewerMap.at(m.first).innerViewer->setMainCamera(InnerModelViewerMap.at(m.first).manipulator, InnerModelViewer::TOP_POV);			
+// 			
 // 		}
-// 	}
+// 	}		
 }
 
 void SpecificWorker::updateViewerLocalInnerModels()
-{
-	//borro si alguno en el map no esta en list
+{	
+	QMutexLocker m (mutex);	
+	qDebug()<<"-- init --";
+	//borro si alguno en el map no esta en list		
 	std::map<int,InnerModel*>::iterator it;
 	std::map<int,TPerson>::iterator itPersonList;
 	bool creatViewer=false;
-
+	
 	for( auto mapIt : innerModelMap )
 	{
 		itPersonList = personList.find(mapIt.first);
 		//alguno en el mapa no está en la lista, tengo que borrar el viewer y crearlo;
 		if (itPersonList == personList.end())
 		{
-			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<< "mappIt.first"<<mapIt.first;
-			innerModelMap.erase (mapIt.first);
-			creatViewer = true;
+			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<<"mappIt.first"<<mapIt.first;
+			innerModelMap.erase (mapIt.first);			
+			creatViewer = true;			
 		}
 	}
-
-	//actgualizar y añadir
+	
+	//actgualizar y añadir	
 	for( auto personIt : personList )
 	{
-		int id = personIt.first;
-		//lo busco
+		int id = personIt.first;					
+		//lo busco 
 		it = innerModelMap.find(id);
 		//lo encuentro lo actualizo
 		if (it != innerModelMap.end())
 		{
-			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<< "id"<<id;
-			updateInnerModel(personIt.second,id);
+			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<<"id"<<id;
+			updateInnerModel(personIt.second,id);			
 		}
 		//no lo encuentrr lo añado y tngo que crear el viewer
 		else
 		{
-			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<< "id"<<id;
+			qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<<"id"<<id;
 			innerModelMap[id] =new InnerModel();
 			QString pre =QString::fromStdString(int2str(id));
-			innerModelCopyWithPrefix(imHumanGeneric, innerModelMap.at(id),pre);
+			newInnerModel(imHumanGeneric, innerModelMap.at(id),pre);		
 			updateInnerModel(personIt.second,id);
-			creatViewer = true;
-		}
-
+			creatViewer = true;			
+		}	
+		
 	}
 
-	/*
-	if (creatViewer)
+	if (creatViewer )
 	{
 #ifdef USE_QTGUI
 		qDebug()<<__FUNCTION__<<__LINE__;
@@ -956,7 +1317,7 @@ void SpecificWorker::updateViewerLocalInnerModels()
 		{
 			QList<InnerModelNode *>	l;
 			l.clear();
-			mapIt.second->getSubTree(mapIt.second->getNode("root"),&l);
+			mapIt.second->getSubTree(mapIt.second->getNode("root"),&l);		
 			QList<InnerModelNode*>::iterator it;
 			for (it=l.begin();it!=l.end();it++)
 			{
@@ -964,10 +1325,39 @@ void SpecificWorker::updateViewerLocalInnerModels()
 			}
 		}
 #ifdef USE_QTGUI
-		innerViewer = new InnerModelViewer(innerModelsLocals, "root", osgView->getRootGroup(), true);
+		innerViewer = new InnerModelViewer(innerModelsLocals, "root", osgView->getRootGroup(), true);	
 		innerViewer->setMainCamera(manipulator, InnerModelViewer::FRONT_POV);
 #endif
 	}
-	*/
+	qDebug()<<"creatViewer"<<creatViewer<<"-- end --";
 }
+
+
+
+///****** code for check innermodel memory
+// 	std::ofstream myfile;
+// 	myfile.open ("innerTestMesh.xml");
+// 	myfile <<  "<innerModel>\n\n";
+// 	for (int i=0;i<500;i++)
+// 	{
+// 		myfile <<"<transform id=\""<<QString::number(i).toStdString()<<"transform\">";	
+// 		myfile <<"\n\t<mesh id=\"XN_SKEL_TORSO_mesh"<<QString::number(i).toStdString()
+// 			<<"\" file=\"/home/robocomp/robocomp/files/osgModels/humanColor/pecho.osg\" scale=\"10\" rx=\"1.57\" />\n";		
+// 		myfile <<"</transform>\n";
+// 	}
+// 	myfile <<  "\n</innerModel>";
+// 	myfile.close();
+// 	qFatal("fary");
+	
+// 	qDebug()<<"worldModel->numberOfSymbols()"<<worldModel->numberOfSymbols()<<"newBodyEvent"<<newBodyEvent;	
+// 	InnerModel *innerModelTmp = new InnerModel("/home/luiky/robocomp/components/robocomp-ursus-rockin/components/humanAgent/etc/innerTestMesh.xml");
+// 	InnerModel *innerModelTmp = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/autonomyLabModel.xml");
+// 		usleep(10000);		
+// 		qDebug()<<"11";
+// 		delete innerModelTmp;
+// 		qDebug()<<"22";
+// 		usleep(20000);
+// 		return;
+// 	
+// 	return;
 
