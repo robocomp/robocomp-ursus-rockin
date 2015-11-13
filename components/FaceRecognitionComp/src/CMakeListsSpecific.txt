@@ -1,0 +1,17 @@
+
+#INCLUDE_DIRECTORIES( /usr/local/include/opencv /usr/include/opencv )
+#SET( SPECIFIC_LIBS -L/usr/local/lib -L/usr/lib -lopencv_core -lopencv_highgui -lopencv_contrib )
+
+INCLUDE ($ENV{ROBOCOMP}/cmake/modules/opencv2.cmake )
+
+# Sources set
+SET ( SOURCES
+  specificworker.cpp
+  specificmonitor.cpp
+)
+
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+)
