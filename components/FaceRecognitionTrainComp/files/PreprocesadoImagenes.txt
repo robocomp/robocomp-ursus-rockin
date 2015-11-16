@@ -1,0 +1,8 @@
+Pasos a seguir para preparar las imágenes de entrada al clasificador:
+
+-Crear un directorio para cada sujeto con sus imágenes.
+-Crear un fichero csv (csv.ext) con create_csv.py.
+-Detectar la cara y los ojos en las imágenes (FaceEyeDetection). Se genera el fichero ojos.txt
+-Normalizar las imágenes con crop_face.py.
+
+-Comprobar en cada directorio correspondiente a cada sujeto que las imágenes están bien. Eliminar las que no estén bien.
