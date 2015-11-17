@@ -79,6 +79,7 @@
 #include "commonbehaviorI.h"
 
 #include <agmcommonbehaviorI.h>
+#include <aI.h>
 #include <agmexecutivetopicI.h>
 
 #include <AGMAgent.h>
@@ -134,7 +135,7 @@ int ::agmInnerComp::run(int argc, char* argv[])
 	string proxy, tmp;
 	initialize();
 
-IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
+	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
 	IceStorm::TopicPrx agmagenttopic_topic;
 	while (!agmagenttopic_topic)
@@ -160,15 +161,21 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 
 
 
-	GenericWorker *worker = new SpecificWorker(mprx);
+	SpecificWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
-	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
+	SpecificMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor, SIGNAL(kill()), &a, SLOT(quit()));
 	QObject::connect(worker, SIGNAL(kill()), &a, SLOT(quit()));
 	monitor->start();
 
 	if ( !monitor->isRunning() )
 		return status;
+	
+	while (!monitor->ready)
+	{
+		usleep(10000);
+	}
+	
 	try
 	{
 		// Server adapter creation and publication
@@ -193,6 +200,8 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 		AGMCommonBehaviorI *agmcommonbehavior = new AGMCommonBehaviorI(worker);
 		adapterAGMCommonBehavior->add(agmcommonbehavior, communicator()->stringToIdentity("agmcommonbehavior"));
 		adapterAGMCommonBehavior->activate();
+		cout << "[" << PROGRAM_NAME << "]: AGMCommonBehavior adapter created in port " << tmp << endl;
+
 
 
 
@@ -224,6 +233,34 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 		agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic);
 		}
 		AGMExecutiveTopic_adapter->activate();
+
+		// Server adapter creation and publication
+		if (not GenericMonitor::configGetString(communicator(), prefix, "ATopic.Endpoints", tmp, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AProxy";
+		}
+		Ice::ObjectAdapterPtr A_adapter = communicator()->createObjectAdapterWithEndpoints("a", tmp);
+		APtr aI_ = new AI(worker);
+		Ice::ObjectPrx a = A_adapter->addWithUUID(aI_)->ice_oneway();
+		IceStorm::TopicPrx a_topic;
+		if(!a_topic){
+		try {
+			a_topic = topicManager->create("A");
+		}
+		catch (const IceStorm::TopicExists&) {
+		//Another client created the topic
+		try{
+			a_topic = topicManager->retrieve("A");
+		}
+		catch(const IceStorm::NoSuchTopic&)
+		{
+			//Error. Topic does not exist
+			}
+		}
+		IceStorm::QoS qos;
+		a_topic->subscribeAndGetPublisher(qos, a);
+		}
+		A_adapter->activate();
 
 		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;
