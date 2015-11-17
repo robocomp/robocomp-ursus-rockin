@@ -727,6 +727,14 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	innerModel = agmInner.extractInnerModel("room", true);
 	printf("symbolUpdated>>\n");
 }
+
+
+void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
+{
+
+}
+
+
 /**
  * \brief ACTUALIZACION DEL ENLACE EN INNERMODEL
  */ 
