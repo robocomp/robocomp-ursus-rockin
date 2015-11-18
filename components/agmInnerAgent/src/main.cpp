@@ -79,7 +79,6 @@
 #include "commonbehaviorI.h"
 
 #include <agmcommonbehaviorI.h>
-#include <aI.h>
 #include <agmexecutivetopicI.h>
 
 #include <AGMAgent.h>
@@ -233,34 +232,6 @@ int ::agmInnerComp::run(int argc, char* argv[])
 		agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic);
 		}
 		AGMExecutiveTopic_adapter->activate();
-
-		// Server adapter creation and publication
-		if (not GenericMonitor::configGetString(communicator(), prefix, "ATopic.Endpoints", tmp, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AProxy";
-		}
-		Ice::ObjectAdapterPtr A_adapter = communicator()->createObjectAdapterWithEndpoints("a", tmp);
-		APtr aI_ = new AI(worker);
-		Ice::ObjectPrx a = A_adapter->addWithUUID(aI_)->ice_oneway();
-		IceStorm::TopicPrx a_topic;
-		if(!a_topic){
-		try {
-			a_topic = topicManager->create("A");
-		}
-		catch (const IceStorm::TopicExists&) {
-		//Another client created the topic
-		try{
-			a_topic = topicManager->retrieve("A");
-		}
-		catch(const IceStorm::NoSuchTopic&)
-		{
-			//Error. Topic does not exist
-			}
-		}
-		IceStorm::QoS qos;
-		a_topic->subscribeAndGetPublisher(qos, a);
-		}
-		A_adapter->activate();
 
 		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;

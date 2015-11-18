@@ -154,7 +154,7 @@ int ::proprioceptionAgent::run(int argc, char* argv[])
 	rInfo("JointMotorProxy initialized Ok!");
 	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);//Remote server proxy creation example
 
-IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
+	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
 	IceStorm::TopicPrx agmagenttopic_topic;
 	while (!agmagenttopic_topic)
@@ -219,6 +219,8 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 		AGMCommonBehaviorI *agmcommonbehavior = new AGMCommonBehaviorI(worker);
 		adapterAGMCommonBehavior->add(agmcommonbehavior, communicator()->stringToIdentity("agmcommonbehavior"));
 		adapterAGMCommonBehavior->activate();
+		cout << "[" << PROGRAM_NAME << "]: AGMCommonBehavior adapter created in port " << tmp << endl;
+
 
 
 

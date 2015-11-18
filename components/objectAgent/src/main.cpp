@@ -157,7 +157,7 @@ int ::objectComp::run(int argc, char* argv[])
 	rInfo("JointMotorProxy initialized Ok!");
 	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);//Remote server proxy creation example
 
-IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
+	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
 	IceStorm::TopicPrx agmagenttopic_topic;
 	while (!agmagenttopic_topic)
@@ -222,37 +222,11 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 		AGMCommonBehaviorI *agmcommonbehavior = new AGMCommonBehaviorI(worker);
 		adapterAGMCommonBehavior->add(agmcommonbehavior, communicator()->stringToIdentity("agmcommonbehavior"));
 		adapterAGMCommonBehavior->activate();
+		cout << "[" << PROGRAM_NAME << "]: AGMCommonBehavior adapter created in port " << tmp << endl;
 
 
 
 
-		// Server adapter creation and publication
-		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveTopicTopic.Endpoints", tmp, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveTopicProxy";
-		}
-		Ice::ObjectAdapterPtr AGMExecutiveTopic_adapter = communicator()->createObjectAdapterWithEndpoints("agmexecutivetopic", tmp);
-		AGMExecutiveTopicPtr agmexecutivetopicI_ = new AGMExecutiveTopicI(worker);
-		Ice::ObjectPrx agmexecutivetopic = AGMExecutiveTopic_adapter->addWithUUID(agmexecutivetopicI_)->ice_oneway();
-		IceStorm::TopicPrx agmexecutivetopic_topic;
-		if(!agmexecutivetopic_topic){
-		try {
-			agmexecutivetopic_topic = topicManager->create("AGMExecutiveTopic");
-		}
-		catch (const IceStorm::TopicExists&) {
-		//Another client created the topic
-		try{
-			agmexecutivetopic_topic = topicManager->retrieve("AGMExecutiveTopic");
-		}
-		catch(const IceStorm::NoSuchTopic&)
-		{
-			//Error. Topic does not exist
-			}
-		}
-		IceStorm::QoS qos;
-		agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic);
-		}
-		AGMExecutiveTopic_adapter->activate();
 
 		// Server adapter creation and publication
 		if (not GenericMonitor::configGetString(communicator(), prefix, "AprilTagsTopic.Endpoints", tmp, ""))
@@ -281,6 +255,34 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 		apriltags_topic->subscribeAndGetPublisher(qos, apriltags);
 		}
 		AprilTags_adapter->activate();
+
+		// Server adapter creation and publication
+		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveTopicTopic.Endpoints", tmp, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveTopicProxy";
+		}
+		Ice::ObjectAdapterPtr AGMExecutiveTopic_adapter = communicator()->createObjectAdapterWithEndpoints("agmexecutivetopic", tmp);
+		AGMExecutiveTopicPtr agmexecutivetopicI_ = new AGMExecutiveTopicI(worker);
+		Ice::ObjectPrx agmexecutivetopic = AGMExecutiveTopic_adapter->addWithUUID(agmexecutivetopicI_)->ice_oneway();
+		IceStorm::TopicPrx agmexecutivetopic_topic;
+		if(!agmexecutivetopic_topic){
+		try {
+			agmexecutivetopic_topic = topicManager->create("AGMExecutiveTopic");
+		}
+		catch (const IceStorm::TopicExists&) {
+		//Another client created the topic
+		try{
+			agmexecutivetopic_topic = topicManager->retrieve("AGMExecutiveTopic");
+		}
+		catch(const IceStorm::NoSuchTopic&)
+		{
+			//Error. Topic does not exist
+			}
+		}
+		IceStorm::QoS qos;
+		agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic);
+		}
+		AGMExecutiveTopic_adapter->activate();
 
 		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;

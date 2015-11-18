@@ -53,6 +53,8 @@ public:
 	StateStruct getAgentState();
 	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
+
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 
 public slots:

@@ -70,6 +70,7 @@ public:
 	StateStruct getAgentState();
 	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 	void newMSKBodyEvent(const PersonList &people, const long &timestamp);
 

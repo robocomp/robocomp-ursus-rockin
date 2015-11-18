@@ -27,7 +27,6 @@ SET ( SOURCES
   genericworker.cpp
   specificworker.cpp
   agmcommonbehaviorI.cpp
-  aI.cpp
   agmexecutivetopicI.cpp
 )
 
@@ -40,7 +39,6 @@ SET ( HEADERS
   genericworker.h
   specificworker.h
   agmcommonbehaviorI.h
-  aI.h
   agmexecutivetopicI.h
 )
 

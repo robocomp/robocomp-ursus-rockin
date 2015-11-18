@@ -734,8 +734,19 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
 	//AGMModel::SPtr worldClean = agmInner.extractAGM();
 	//worldClean->save("worldClean.xml");
 	//AGMModelPrinter::printWorld(worldClean);
-	
-	
+}
+
+void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
+{
+	QMutexLocker lockIM(mutex);
+	agmInner.setWorld(worldModel);
+	for (auto modification : modifications)
+	{
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+		AGMModelEdge dst;
+		AGMModelConverter::fromIceToInternal(modification,dst);
+		agmInner.updateImNodeFromEdge(dst, innerModelAGM);
+	}
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)

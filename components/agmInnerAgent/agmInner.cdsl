@@ -7,9 +7,6 @@ Component agmInnerComp
 {
 	Communications
 	{
-		implements AGMCommonBehavior;
-		subscribesTo AGMExecutiveTopic;
-		publishes AGMAgentTopic;
 	};
 	language Cpp;
 	gui Qt(QWidget);	

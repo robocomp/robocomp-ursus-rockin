@@ -1,7 +1,5 @@
 /*
- *    Copyright (C) 
-<@@<2015>@@>
- by YOUR NAME HERE
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -77,11 +75,44 @@ public:
 	
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
-<TABHERE>bool activate(const BehaviorParameters& parameters);
-<TABHERE>bool deactivate();
-<TABHERE>bool isActive() { return active; }
-<TABHERE>RoboCompAGMWorldModel::BehaviorResultType status();
+	bool activate(const BehaviorParameters& parameters);
+	bool deactivate();
+	bool isActive() { return active; }
+	RoboCompAGMWorldModel::BehaviorResultType status();
 	
 
-<TABHERE>AGMAgentTopicPrx agmagenttopic_proxy;
+	AGMAgentTopicPrx agmagenttopic_proxy;
 
+	virtual bool reloadConfigAgent() = 0;
+	virtual bool activateAgent(const ParameterMap &prs) = 0;
+	virtual bool setAgentParameters(const ParameterMap &prs) = 0;
+	virtual ParameterMap getAgentParameters() = 0;
+	virtual void killAgent() = 0;
+	virtual int uptimeAgent() = 0;
+	virtual bool deactivateAgent() = 0;
+	virtual StateStruct getAgentState() = 0;
+	virtual void structuralChange(const RoboCompAGMWorldModel::Event &modification) = 0;
+	virtual void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications) = 0;
+	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification) = 0;
+	virtual void symbolUpdated(const RoboCompAGMWorldModel::Node &modification) = 0;
+
+
+protected:
+	QTimer timer;
+	int Period;
+	bool active;
+	AGMModel::SPtr worldModel;
+	BehaviorParameters p;
+	ParameterMap params;
+	AgmInner agmInner;
+	int iter;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	RoboCompPlanning::Action createAction(std::string s);
+
+public slots:
+	virtual void compute() = 0;
+signals:
+	void kill();
+};
+
+#endif
