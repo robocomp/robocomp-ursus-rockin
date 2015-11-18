@@ -68,4 +68,10 @@
 		<linkAttribute key="tz" value="-500" />
 	</link>
 
+	
+	<!--<symbol id="1001" type="unknownPerson" />
+	<symbol id="1002" type="extranger" />
+	<symbol id="1003" type="deliMan" />
+	<symbol id="1004" type="medicineDoctor" />
+	<symbol id="1005" type="postman" />-->
 </AGMModel>

@@ -39,7 +39,19 @@
 
 #include <QWidget>
 
-
+typedef struct RgbColor
+{
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+} RgbColor;
+typedef struct HsvColor
+{
+	unsigned char h;
+	unsigned char s;
+	unsigned char v;
+} HsvColor;
+	
 class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
@@ -80,7 +92,6 @@ private:
 	InnerModelViewer *innerViewer; 
 	
 	
-	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 	void updatePeopleInnerFull();
@@ -105,6 +116,9 @@ private:
 	void updateViewer();
 	void updateViewerLocalInnerModels();
 
+
+	HsvColor rgb2hsv(RgbColor colorRGB);
+	string getColorName(HsvColor hsv);
 };
 
 #endif

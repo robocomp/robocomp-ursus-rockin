@@ -117,7 +117,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling IK"
-	exit
+#	exit
 fi
 
 
