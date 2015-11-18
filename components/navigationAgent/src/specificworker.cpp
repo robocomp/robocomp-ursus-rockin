@@ -727,6 +727,22 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	innerModel = agmInner.extractInnerModel("room", true);
 	printf("symbolUpdated>>\n");
 }
+
+
+void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
+{
+	QMutexLocker lockIM(mutex);
+	agmInner.setWorld(worldModel);
+	for (auto modification : modifications)
+	{
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+		AGMModelEdge dst;
+		AGMModelConverter::fromIceToInternal(modification,dst);
+		agmInner.updateImNodeFromEdge(dst, innerModel);
+	}
+}
+
+
 /**
  * \brief ACTUALIZACION DEL ENLACE EN INNERMODEL
  */ 

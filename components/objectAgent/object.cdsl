@@ -6,9 +6,7 @@ Component objectComp
 	Communications
 	{
 		requires JointMotor;
-		implements AGMCommonBehavior;
-		publishes AGMAgentTopic;
-		subscribesTo AGMExecutiveTopic, AprilTags;
+		subscribesTo AprilTags;
 	};
 	language Cpp;
 	gui Qt(QWidget);

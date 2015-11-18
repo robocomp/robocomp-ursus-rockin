@@ -43,6 +43,9 @@ SET ( HEADERS
   agmexecutivetopicI.h
   mskbodyeventI.h
 )
+
+
+
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 ROBOCOMP_WRAP_ICE( CommonBehavior AGMAgent AGMWorldModel AGMExecutive AGMWorldModel Planning AGMCommonBehavior AGMWorldModel MSKBody )

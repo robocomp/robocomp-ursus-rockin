@@ -92,6 +92,7 @@ public:
 	virtual bool deactivateAgent() = 0;
 	virtual StateStruct getAgentState() = 0;
 	virtual void structuralChange(const RoboCompAGMWorldModel::Event &modification) = 0;
+	virtual void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications) = 0;
 	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification) = 0;
 	virtual void symbolUpdated(const RoboCompAGMWorldModel::Node &modification) = 0;
 

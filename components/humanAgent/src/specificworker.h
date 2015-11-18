@@ -39,7 +39,19 @@
 
 #include <QWidget>
 
-
+typedef struct RgbColor
+{
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+} RgbColor;
+typedef struct HsvColor
+{
+	unsigned char h;
+	unsigned char s;
+	unsigned char v;
+} HsvColor;
+	
 class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
@@ -58,6 +70,7 @@ public:
 	StateStruct getAgentState();
 	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 	void newMSKBodyEvent(const PersonList &people, const long &timestamp);
 
@@ -78,7 +91,6 @@ private:
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;	
 	InnerModelViewer *innerViewer; 
-	
 	
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
@@ -105,6 +117,9 @@ private:
 	void updateViewer();
 	void updateViewerLocalInnerModels();
 
+
+	HsvColor rgb2hsv(RgbColor colorRGB);
+	string getColorName(HsvColor hsv);
 };
 
 #endif

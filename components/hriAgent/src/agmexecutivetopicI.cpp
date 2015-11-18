@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -22,29 +22,35 @@ AGMExecutiveTopicI::AGMExecutiveTopicI(GenericWorker *_worker, QObject *parent) 
 {
 	worker = _worker;
 	mutex = worker->mutex;       // Shared worker mutex
-	// Component initialization...
 }
 
 
 AGMExecutiveTopicI::~AGMExecutiveTopicI()
 {
-	// Free component resources here
 }
 
-// Component functions, implementation
-void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event &modification, const Ice::Current&)
+void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event  &modification, const Ice::Current&)
 {
 	worker->structuralChange(modification);
 }
 
-void AGMExecutiveTopicI::symbolUpdated(   const RoboCompAGMWorldModel::Node &node,  const Ice::Current&)
+void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&)
 {
-	worker->symbolUpdated(node);
+	worker->edgesUpdated(modifications);
 }
 
-void AGMExecutiveTopicI::edgeUpdated(     const RoboCompAGMWorldModel::Edge &edge,  const Ice::Current&)
+void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&)
 {
-	worker->edgeUpdated(edge);
+	worker->edgeUpdated(modification);
 }
+
+void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node  &modification, const Ice::Current&)
+{
+	worker->symbolUpdated(modification);
+}
+
+
+
+
 
 
