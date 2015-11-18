@@ -29,9 +29,14 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 {	
 	// 	innerModel = new InnerModel(*innerModel_);
 	innerModel = innerModel_;
+	//Number of points in graph
+	graphNumPoints = nPoints;
+	graphNeighPoints = neigh;
+	//file name
+	fileName = "grafo.dot";
 	
 	//Get outerRegion extension from floor definition
-	QRectF outerRegion;
+	
 	InnerModelPlane *floor = NULL;
 	try
 	{
@@ -65,7 +70,7 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	else
 		qFatal("Aborting. Cannot determine the size of the world. Please define a floor_plane");
 	
-	QList<QRectF> innerRegions;
+	
 	//QRectF outerRegion(-1920,3500,  4000,-7000);
 	//QRectF outerRegion(-2500,-2500,  5000, 5000);
 	
@@ -74,7 +79,7 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	// QRectF outerRegion(0, 0, 10000, -10000);
 
 	sampler.initialize(innerModel, outerRegion, innerRegions);
-
+	  
 	if( QFile("grafo.dot").exists())
 	{
 		qDebug() << __FUNCTION__ << "Graph file exits. Loading";
@@ -86,7 +91,7 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 		//createGraph(nPoints, neigh, 2500.f);  //MAX distance apart for two points to be considered.
 		QList<QVec> pointList = sampler.sampleFreeSpaceR2(nPoints);
 		constructGraph(pointList, neigh, 2500.f, 400);
-		std::ofstream fout("grafo.dot");
+		std::ofstream fout(fileName);
 		writeGraphToStream(fout);
 	}
 	graphDirtyBit = true;
@@ -1011,10 +1016,34 @@ bool PlannerPRM::drawGraph(InnerModelViewer *innerViewer)
 
 void PlannerPRM::cleanGraph(InnerModelViewer *innerViewer)
 {
-	if (innerViewer->innerModel->getNode("graph"))
-		InnerModelDraw::removeNode(innerViewer, "graph");
+  if (innerViewer->innerModel->getNode("graph"))
+	 InnerModelDraw::removeNode(innerViewer, "graph");
 }
 
+void PlannerPRM::removeGraph(InnerModelViewer* innerViewer)
+{
+  cleanGraph(innerViewer);
+  graph.clear();
+  data.resize(0,0);
+  qDebug() << __FUNCTION__	<< "graph size" << boost::num_vertices(graph);
+
+  
+}
+
+/**
+ * @brief Creates a grpah if it does not exist
+ * 
+ * @return void
+ */
+void PlannerPRM::createGraph()
+{
+	sampler.initialize(innerModel, outerRegion, innerRegions);
+	QList<QVec> pointList = sampler.sampleFreeSpaceR2(graphNumPoints);
+	qDebug() << __FUNCTION__ << "constructing new graph";
+	constructGraph(pointList,graphNeighPoints, 2500.f, 400);
+	std::ofstream fout(fileName);
+	writeGraphToStream(fout);
+}
 // std::tuple<std::vector<Vertex>, QMap<u_int32_t, VertexIndex> > PlannerPRM::connectedComponents()
 // {
 // 	qDebug() << __FUNCTION__;

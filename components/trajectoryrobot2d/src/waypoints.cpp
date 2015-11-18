@@ -483,8 +483,8 @@ bool WayPoints::update()
 
 	//Check for arrival to target  TOO SIMPLE
 // 	if(	( ((int)getCurrentPointIndex()+1 == (int)size())  and  ( (int)getCurrentPointIndex()+1< 80) )
-	if((((int)getCurrentPointIndex()+1 == (int)size())  and  ( getRobotDistanceToTarget()< 80) )
-		or ( (getRobotDistanceToTarget() < 1000) and ( getRobotDistanceVariationToTarget() > 0) ) )
+	if(((((int)getCurrentPointIndex()+1 == (int)size())  or  ( getRobotDistanceToTarget()< 100) ))
+		or ( (getRobotDistanceToTarget() < 300) and ( getRobotDistanceVariationToTarget() > 0) ) )
 	{
 	
 		setFinished(true);		
