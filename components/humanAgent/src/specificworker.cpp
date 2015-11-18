@@ -384,6 +384,7 @@ void SpecificWorker::updatePeopleInnerFull()
 
 void SpecificWorker::updatePeopleInnerFullB()
 {
+	QMutexLocker m (mutex);	
 	int32_t robotID = worldModel->getIdentifierByType("robot");
 	if (robotID < 0)
 	{
@@ -490,9 +491,11 @@ void SpecificWorker::updatePeopleInnerFullB()
 			newSymbolPerson->setAttribute("Blue",int2str(personList.at(TrackingId).spineJointColor.B));
 			
 		}
-		catch (...)
+
+		catch (const std::out_of_range& oor)
 		{
-			qDebug()<<"at exception";
+			qDebug()<<"PersonList at exception";
+			std::cerr << "Out of Range error: " << oor.what() << '\n';
 			continue;
 		}
 		
@@ -502,15 +505,24 @@ void SpecificWorker::updatePeopleInnerFullB()
 		std::map<string,string>att;
 		try
 		{
-			att["tx"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
-			att["ty"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
-			att["tz"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
-			att["rx"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
-			att["ry"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
-			att["rz"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
-			worldModel->addEdgeByIdentifiers(roomID,personID,"RT",att);
-			worldModel->addEdgeByIdentifiers(personID,roomID,"in");
-			worldModel->addEdgeByIdentifiers(personID,typeSymbolPerson->identifier,"personIs");
+			try
+			{
+				att["tx"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
+				att["ty"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
+				att["tz"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
+				att["rx"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
+				att["ry"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
+				att["rz"]=float2str(innerModelMap.at(TrackingId)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
+				worldModel->addEdgeByIdentifiers(roomID,personID,"RT",att);
+				worldModel->addEdgeByIdentifiers(personID,roomID,"in");
+				worldModel->addEdgeByIdentifiers(personID,typeSymbolPerson->identifier,"personIs");
+			}
+			catch (const std::out_of_range& oor)
+			{	
+				qDebug()<<"at exception InnerModelMap";
+				std::cerr << "Out of Range error: " << oor.what() << '\n';			
+				continue;
+			}
 			
 		}
 		catch (...)
@@ -522,14 +534,24 @@ void SpecificWorker::updatePeopleInnerFullB()
 		QHash<QString, int32_t>  match;
 		
 		match.insert(pre+"XN_SKEL_TORSO",personID);
-		agmInner.include_im(match, innerModelMap.at(lInsertions.at(i)));
+		agmInner.include_im(match, innerModelMap.at(TrackingId));
 		modification =true;
 	}
 	qDebug()<<"lUpdates:"<<lUpdates;
 // 	//update, si no hay nada que borrar ni insertar. puedo usar el que contiene todos
 	for (int i=0; i<lUpdates.size(); i++)
 	{
-		agmInner.updateAgmWithInnerModelAndPublish(innerModelMap.at(lUpdates.at(i)),agmagenttopic_proxy);
+		try
+		{
+			InnerModel* imTmp =innerModelMap.at(lUpdates.at(i));
+			agmInner.updateAgmWithInnerModelAndPublish(imTmp,agmagenttopic_proxy);
+		}
+		catch (const std::out_of_range& oor)
+		{	
+			qDebug()<<"at exception InnerModelMap"<<__FUNCTION__<<__LINE__;
+			std::cerr << "Out of Range error: " << oor.what() << '\n';			
+			continue;
+		}
 		
 		int TrackingId = lUpdates.at(i);
 		int symbolID = agmInner.findName(QString::fromStdString(int2str(TrackingId))+"XN_SKEL_TORSO");
@@ -558,8 +580,9 @@ void SpecificWorker::updatePeopleInnerFullB()
 		std::cout<<"---------------------------"<<std::endl;
 		
 		string colorName = getColorName(colorHSV);
+		colorName="Blue";
 		cout << colorName << endl;
-// 		symbolPerson->setAttribute("Color",colorName);
+		symbolPerson->setAttribute("Color",colorName);
 		
 		//state
 		int state = personList.at(TrackingId).state;
@@ -582,13 +605,22 @@ void SpecificWorker::updatePeopleInnerFullB()
 		if (idTypeSymbolPerson != -1)
 		{
 			AGMModelSymbol::SPtr typeSymbolPerson = worldModel->getSymbol(idTypeSymbolPerson);
-			if (str2int ( symbolPerson->getAttribute("Blue") ) < 75 && typeSymbolPerson->getAttribute("extranger")!="extranger" )
+			
+			//AQUI hacer operaciones en base al filtro colorName						
+		
+			if (colorName == "Blue" && typeSymbolPerson->typeString() !="extranger")
 			{
 				qDebug()<<"publish typeSymbolPerson->setType( extranger )"<< "idTypeSymbolPerson" <<idTypeSymbolPerson;	
-				typeSymbolPerson->setType("extranger");			
+				typeSymbolPerson->setType("extranger");							
 				AGMMisc::publishNodeUpdate(typeSymbolPerson,agmagenttopic_proxy);
 				usleep(500);
-			}
+			}	
+// 			else
+// 			{
+// 				typeSymbolPerson->setType("unknownPerson");
+// 				AGMMisc::publishNodeUpdate(typeSymbolPerson,agmagenttopic_proxy);
+// 				usleep(500);
+// 			}
 			
 		}
 		AGMMisc::publishNodeUpdate(symbolPerson,agmagenttopic_proxy);
