@@ -343,7 +343,10 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa, Curre
 		  //differentialrobot_proxy->setSpeedBase(0, vrot);
 		  omnirobot_proxy->setSpeedBase(0, 0, vrot);
 // 		  omnirobot2_proxy->setSpeedBase(0, 0, vrot);
-		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+		} catch (const Ice::Exception &ex)
+		{
+			 std::cout << ex.what() << std::endl;
+		}
 	}
 	return true;
 }
@@ -390,7 +393,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		try
 		{
 		  omnirobot_proxy->setSpeedBase(0, 0, 0);
-		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+		} catch (const Ice::Exception &ex) { std::cout << ex << std::endl; }
 		//myRoad.requiresReplanning = true;
 
 		currentT.setWithoutPlan(false);
@@ -405,7 +408,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		  //differentialrobot_proxy->setSpeedBase(vadv, 0);
 		  omnirobot_proxy->setSpeedBase(0, vadv, 0);
 // 		  omnirobot2_proxy->setSpeedBase(0, vadv, 0);
-		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+		} catch (const Ice::Exception &ex) { std::cout << ex << std::endl; }
 	}
 
 	return true;

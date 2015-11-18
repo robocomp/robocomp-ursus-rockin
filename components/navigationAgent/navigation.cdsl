@@ -6,9 +6,6 @@ Component navigationComp
 	Communications
 	{
 		requires TrajectoryRobot2D, OmniRobot;
-		implements AGMCommonBehavior;
-		publishes AGMAgentTopic;
-		subscribesTo AGMExecutiveTopic;
 	};
 	language Cpp;
 	gui Qt(QWidget);

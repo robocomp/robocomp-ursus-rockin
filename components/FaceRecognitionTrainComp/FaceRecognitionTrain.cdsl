@@ -1,0 +1,6 @@
+Component FaceRecognitionTrainComp{
+	Communications{
+
+	};
+	language Cpp;
+};
