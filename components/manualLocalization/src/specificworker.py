@@ -47,31 +47,27 @@ class SpecificWorker(GenericWorker):
 		self.timer.timeout.connect(self.compute)
 		self.Period = 200000
 		self.timer.start(self.Period)
-		self.button.clicked.connect(self.clicked)
+		self.ui.button.clicked.connect(self.clicked)
 
 	def setParams(self, params):
-		#try:
-		#	par = params["InnerModelPath"]
-		#	innermodel_path=par.value
-		#	innermodel = InnerModel(innermodel_path)
-		#except:
-		#	traceback.print_exc()
-		#	print "Error reading config params"
 		return True
 
 	@QtCore.Slot()
 	def compute(self):
-		print 'SpecificWorker.compute...'
-		#try:
-		#	self.differentialrobot_proxy.setSpeedBase(100, 0)
-		#except Ice.Exception, e:
-		#	traceback.print_exc()
-		#	print e
 		return True
 
 	@QtCore.Slot()
 	def clicked(self):
 		print 'SpecificWorker.clicked...'
+		try:
+			xv = float(self.ui.xw.value())
+			zv = float(self.ui.zw.value())
+			av = float(self.ui.aw.value())
+			print xv, zv, av
+			self.aprilbasedlocalization.newAprilBasedPose(xv, zv, av)
+		except Ice.Exception, e:
+			traceback.print_exc()
+			print e
 
 
 

@@ -1,5 +1,4 @@
 # Proxies for published topics
-AprilBasedLocalizationProxy = aprilbasedlocalization:tcp -h localhost -p 0
 
 
 # This property is used by the clients to connect to IceStorm.
