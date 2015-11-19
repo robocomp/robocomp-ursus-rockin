@@ -1,0 +1,12 @@
+import "/robocomp/interfaces/IDSLs/TrajectoryRobot2D.idsl";
+import "/robocomp/interfaces/IDSLs/OmniRobot.idsl";
+
+Component moveRobotRockin
+{
+        Communications
+        {
+                requires TrajectoryRobot2D, OmniRobot;
+        };
+        language Cpp;
+        gui Qt(QWidget);
+};
