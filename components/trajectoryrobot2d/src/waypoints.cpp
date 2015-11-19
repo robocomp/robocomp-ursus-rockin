@@ -445,7 +445,6 @@ void WayPoints::setETA()
  *
  * @return void
  */
-
 bool WayPoints::update()
 {
 
@@ -455,6 +454,11 @@ bool WayPoints::update()
 	QLine2D nose =  QLine2D(  QVec::vec2(robot3DPos.x(),robot3DPos.z()), QVec::vec2(noseInRobot.x(), noseInRobot.z()));
 
 	//Compute closest existing trajectory point to robot
+		if(getRobotDistanceToTarget() < 1000)
+	{
+		robot3DPos = innerModel->transform("world", "virtualRobot");
+		qDebug()<<__FUNCTION__<<"swaping to virtualRobot";
+	}
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 
 	//Compute roadTangent at closestPoint;
@@ -481,24 +485,17 @@ bool WayPoints::update()
 
 	//Update estimated time of arrival
 	setETA();
-	//PARA EL GO-REFERENCE
-	////////
-	QVec virtualPos = innerModel->transform("world", "virtualRobot");
-	WayPoints::iterator closestPointVirtual = computeClosestPointToRobot(virtualPos);
-	float virtualDistToTarget = computeDistanceToTarget(closestPointVirtual, virtualPos);
-	////////
+
 	//Check for arrival to target  TOO SIMPLE
 // 	if(	( ((int)getCurrentPointIndex()+1 == (int)size())  and  ( (int)getCurrentPointIndex()+1< 80) )
-	
-	if(((((int)getCurrentPointIndex()+1 == (int)size())  or  ( getRobotDistanceToTarget()< threshold) ))
-		or ( (virtualDistToTarget < threshold) and ( getRobotDistanceVariationToTarget() > 0) ) )
+	if(((((int)getCurrentPointIndex()+1 == (int)size())  or  ( getRobotDistanceToTarget()< 100) ))
+		or ( (getRobotDistanceToTarget() < 300) and ( getRobotDistanceVariationToTarget() > 0) ) )
 	{
 	
 		setFinished(true);		
 //		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
 // 		getIndexOfClosestPointToRobot()->pos.print("closest point");
 	}
-	
 
 	//compute curvature of trajectory at closest point to robot
   	setRoadCurvatureAtClosestPoint( computeRoadCurvature(closestPoint, 3) );
