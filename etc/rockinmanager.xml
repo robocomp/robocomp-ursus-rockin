@@ -201,7 +201,7 @@
  <node alias="js" endpoint="joystick:tcp -h 10.0.30.11 -p 10002">
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote 10.0.30.11 jstck /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/ ./bin/joystickOmniComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/joystick.conf" />
+  <upCommand command="rcremote 10.0.30.11 jstck /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/ ./bin/joystickOmniComp --Ice.Config=etc/config" />
   <downCommand command="ssh robolab@10.0.30.11 killall -9 joystickOmniComp" />
   <configFile path="/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.conf" />
   <xpos value="-132.661335571" />
@@ -339,7 +339,7 @@
   <dependence alias="laser" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote 10.0.30.11 cgr /home/robocomp/robocomp/components/robocomp-robolab/experimental/CGR ./bin/CGRc --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/CGR.conf" />
+  <upCommand command="rcremote 10.0.30.11 cgr /home/robocomp/robocomp/components/robocomp-robolab/experimental/CGR ./bin/CGRc --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/CGR.conf" />
   <downCommand command="ssh robolab@10.0.30.11 killall -9 CGRc" />
   <configFile path="/home/robocomp/robocomp/components/robocomp-ursus/etc/CGR.conf" />
   <xpos value="-31.8438423902" />

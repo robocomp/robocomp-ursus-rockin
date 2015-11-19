@@ -477,6 +477,11 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa, Curre
 	else
 	{
 		float vrot = -0.7 * error;  //Proportional controller
+		
+		if(fabs(vrot)>0.3)    //ñapa para limitar la rotacion
+                    if(vrot>0) vrot=0.3;
+                    else vrot=-0.3;
+                    
 		try
 		{
 		  //differentialrobot_proxy->setSpeedBase(0, vrot);
@@ -736,7 +741,7 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-	goReferenced(target,0,200,100);
+	goReferenced(target,0,0,200);
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -1053,7 +1058,7 @@ float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, c
 	else
 	{
 	    innerModel->updateTransformValues("virtualRobot",xRef,0,zRef,0,0,0,"robot");
-		InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,50,50));
+		InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,1000,50));
 		tState.setState("EXECUTING");
 		road.setThreshold(threshold);
 		currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );

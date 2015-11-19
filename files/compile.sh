@@ -280,11 +280,11 @@ fi
 
 # primesense
 echo "make primesense"
-cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/primeSenseComp/
+cd /home/robocomp/robocomp/components/robocomp-robolab/components/openni2RGBD/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
-	echo "error compiling primeSenseComp"
+	echo "error compiling openni2RGBD"
 #	exit
 fi
 
