@@ -66,17 +66,17 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		if(i.dist < 10) i.dist = 30000;
 		if( i.dist < baseOffsets[j] + 50 )
 		{
-			if(i.angle>-1.57 && i.angle<1.57){
+			if(i.angle>-1.20 && i.angle<1.20){
 			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
 			stopTheRobot(omnirobot_proxy);
-			road.setBlocked(true);
-			qDebug()<<"marcha atras";
+			road.setBlocked(true);		//AQUI SE BLOQUEA PARA REPLANIFICAR
+			qDebug()<<"DETECTADO OBSTACULO, REPLANIFICANDO";
  			break;
 			}
 		}
 		else
 		{
-			if (i.dist < baseOffsets[j] + 150) 
+			if (i.dist < baseOffsets[j] + 200) 
 			{
 				if (i.angle > 0)
 				{
@@ -170,8 +170,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		lastVrot=vrot;
 
 		//Pre-limiting filter to avoid displacements in very closed turns
-		if( fabs(vrot) > 0.8)
+		if( fabs(vrot) == 0.3)
 			vadvance = 0;
+			vside = 0;
 		
 		//stopping speed jump
 		if(fabs(vadvance - lastVadvance) > umbral)
@@ -187,13 +188,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
  		if( vadvance > MAX_ADV_SPEED )
  			vadvance = MAX_ADV_SPEED;
 		
-		//Do backward
-		if(road.isBlocked())
-		{
-			vadvance=-80;
-			vrot = 0;
-			vside = 0;
-		}
+
 
 		//vside = vrot*MAX_ADV_SPEED;
 		

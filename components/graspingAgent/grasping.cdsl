@@ -6,9 +6,6 @@ Component graspingComp
 	Communications
 	{
 		requires JointMotor, InverseKinematics; 
-		implements AGMCommonBehavior;
-		publishes AGMAgentTopic;
-		subscribesTo AGMExecutiveTopic;
 	};
 	language Cpp;
 	gui Qt(QWidget);

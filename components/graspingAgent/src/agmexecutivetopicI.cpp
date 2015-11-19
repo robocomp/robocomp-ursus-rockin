@@ -34,6 +34,11 @@ void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event  &m
 	worker->structuralChange(modification);
 }
 
+void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&)
+{
+	worker->edgesUpdated(modifications);
+}
+
 void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&)
 {
 	worker->edgeUpdated(modification);

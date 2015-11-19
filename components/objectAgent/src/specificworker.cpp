@@ -179,6 +179,19 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 }
 
 
+void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
+{
+	QMutexLocker lockIM(mutex);
+	agmInner.setWorld(worldModel);
+	for (auto modification : modifications)
+	{
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+		AGMModelEdge dst;
+		AGMModelConverter::fromIceToInternal(modification,dst);
+		agmInner.updateImNodeFromEdge(dst, innerModel);
+	}
+}
+
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
 {
 	// We didn't reactivate the component

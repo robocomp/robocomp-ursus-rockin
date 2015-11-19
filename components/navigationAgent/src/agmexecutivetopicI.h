@@ -39,6 +39,7 @@ public:
 	~AGMExecutiveTopicI();
 	
 	void structuralChange(const RoboCompAGMWorldModel::Event  &modification, const Ice::Current&);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node  &modification, const Ice::Current&);
 

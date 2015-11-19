@@ -902,6 +902,16 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
  	mutex->unlock();
 }
 
+
+void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
+{
+	QMutexLocker lockIM(mutex);
+	for (auto modification : modifications)
+	{
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	}
+}
+
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
 {
 	mutex->lock();

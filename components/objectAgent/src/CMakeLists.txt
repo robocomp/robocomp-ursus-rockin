@@ -43,6 +43,9 @@ SET ( HEADERS
   agmexecutivetopicI.h
   apriltagsI.h
 )
+
+
+
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 ROBOCOMP_WRAP_ICE( CommonBehavior AGMAgent AGMWorldModel AGMExecutive AGMWorldModel Planning AGMCommonBehavior AGMWorldModel AprilTags JointMotor )

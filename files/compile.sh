@@ -23,7 +23,7 @@ echo "update robocomp-ursus-rockin"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin
 git pull
 
-N=7
+N=4
 
 ###
 ### RoboComp
@@ -103,7 +103,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling faulhaber"
-	exit
+#	exit
 fi
 
 
@@ -117,7 +117,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling IK"
-	exit
+#	exit
 fi
 
 
@@ -129,7 +129,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling gik"
-	exit
+#	exit
 fi
 
 

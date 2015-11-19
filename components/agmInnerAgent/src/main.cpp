@@ -134,7 +134,7 @@ int ::agmInnerComp::run(int argc, char* argv[])
 	string proxy, tmp;
 	initialize();
 
-IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
+	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
 	IceStorm::TopicPrx agmagenttopic_topic;
 	while (!agmagenttopic_topic)
@@ -160,15 +160,21 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 
 
 
-	GenericWorker *worker = new SpecificWorker(mprx);
+	SpecificWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
-	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
+	SpecificMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor, SIGNAL(kill()), &a, SLOT(quit()));
 	QObject::connect(worker, SIGNAL(kill()), &a, SLOT(quit()));
 	monitor->start();
 
 	if ( !monitor->isRunning() )
 		return status;
+	
+	while (!monitor->ready)
+	{
+		usleep(10000);
+	}
+	
 	try
 	{
 		// Server adapter creation and publication
@@ -193,6 +199,8 @@ IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(
 		AGMCommonBehaviorI *agmcommonbehavior = new AGMCommonBehaviorI(worker);
 		adapterAGMCommonBehavior->add(agmcommonbehavior, communicator()->stringToIdentity("agmcommonbehavior"));
 		adapterAGMCommonBehavior->activate();
+		cout << "[" << PROGRAM_NAME << "]: AGMCommonBehavior adapter created in port " << tmp << endl;
+
 
 
 

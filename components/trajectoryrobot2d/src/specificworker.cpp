@@ -59,6 +59,51 @@ SpecificWorker::~SpecificWorker()
  * @param params ...
  * @return bool
  */
+
+bool SpecificWorker::removeNode(const QString &item)
+{
+	if (item=="root")
+	{
+		qDebug() << "Can't remove root elements" << item;
+		return false;
+	}
+
+	InnerModelNode *node = innerModel->getNode(item);
+	if (node == NULL)
+	{
+		qDebug() << "Can't remove not existing elements" << item;
+		return false;
+	}
+
+	QStringList l;
+	innerModel->getSubTree(node, &l);
+	innerModel->removeSubTree(node, &l);
+
+	return true;
+}
+
+/**
+ * @brief Adds a plane to InnerModel
+ * 
+ * @param item ...
+ * @param parentS ...
+ * @param path ...
+ * @param scale ...
+ * @param t ...
+ * @param r ...
+ * @return void
+ */
+void SpecificWorker::addPlane(QString item, QString parentS, QString path, QVec scale, QVec t, QVec r)
+{
+	InnerModelTransform *parent = dynamic_cast<InnerModelTransform*>(innerModel->getNode(parentS));
+	if (innerModel->getNode(item) != NULL)
+		removeNode(item);
+	InnerModelMesh *mesh = innerModel->newMesh (item, parent, path, scale(0), scale(1), scale(2), 0, t(0), t(1), t(2), r(0), r(1), r(2));
+	mesh->setScale(scale(0), scale(1), scale(2));
+	parent->addChild(mesh);
+}
+
+
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	//qDebug() << QString::fromStdString(params["PointsFile"].value);
@@ -70,7 +115,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		{
 			innerModel = new InnerModel(par.value);
 #ifdef USE_QTGUI
-			innerVisual = new InnerModel(par.value);
+			innerVisual = new InnerModel(par.value);	//USED TO REPRESENT innerModel in innerViewer
 			innerViewer = new InnerModelViewer(innerVisual, "root", osgView->getRootGroup(), true);
 			show();
 #endif
@@ -93,8 +138,17 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	try { laserData = laser_proxy->getLaserData(); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with laser proxy");}
 
-	innerModel->updateTranslationValues("robot", bState.correctedX, 0, bState.correctedZ);   //"robot" should be an external parameter
+	innerModel->updateTranslationValues("robot", bState.correctedX, 0, bState.correctedZ);	//"robot" should be an external parameter
 	innerModel->updateRotationValues("robot", 0, bState.correctedAlpha, 0);
+	innerModel->newTransform("virtualRobot","static",innerModel->getNode("robot"));
+	
+// 	QString obstacleParent = "floor";
+// 	QString obstacleName = "ostias";
+// 	QVec T = QVec::vec3(800, 400, 800);
+// 	QVec R = QVec::vec3(0,0,1);
+// 	QVec sizeObstacle = QVec::vec3(800, 800, 800);
+// 	InnerModelDraw::addPlane_ignoreExisting(innerViewer, obstacleName, obstacleParent, T, R, "#555555", sizeObstacle);
+// 	addPlane(obstacleName, obstacleParent, "/home/robocomp/robocomp/files/osgModels/basics/cube.3ds", sizeObstacle, T, R);
 
 	//	setRobotInitialPose(800, -1500, M_PI);
 	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
@@ -122,7 +176,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
  	//Localizer stuff
  	localizer = new Localizer(innerModel);
-
+	
 	timer.start(20);
 	return true;
 };
@@ -137,7 +191,6 @@ void SpecificWorker::compute( )
 {
 	static QTime reloj = QTime::currentTime();
 	static int cont = 0;
-
 	// Check for connection failure
 	if ( updateInnerModel(innerModel, tState) == false )
 	{
@@ -145,7 +198,8 @@ void SpecificWorker::compute( )
 		stopCommand(currentTarget, road, tState);
 		tState.setState("DISCONNECTED");
 	}
-
+	
+	CurrentTarget local;
 	switch( currentTarget.command )
 	{
 		case CurrentTarget::Command::STOP:
@@ -164,7 +218,12 @@ void SpecificWorker::compute( )
 			setHeadingCommand(innerModel, currentTarget.getRotation().y(), currentTarget, tState, road);
 			break;
 		case CurrentTarget::Command::GOBACKWARDS:
-			goBackwardsCommand(innerModel, currentTargetAnt, currentTarget, tState, road);
+			//goBackwardsCommand(innerModel, currentTargetAnt, currentTarget, tState, road);
+			 goBackwardsCommand(innerModel, currentTargetBack, currentTarget, tState, road);
+			
+			break;
+		case CurrentTarget::Command::INSERTOBSTACLE:
+			insertObstacle();
 			break;
 		case CurrentTarget::Command::IDLE:
 			break;
@@ -182,8 +241,60 @@ void SpecificWorker::compute( )
 	}
 	cont++;
 
-#ifdef USE_QTGUI
-	
+#ifdef USE_QTGUI// 	//CHECK PARAMETERS
+// 	QVec target = current.getTranslation();
+// 	if( target.size() < 3 or std::isnan(target.x()) or std::isnan(target.y()) or std::isnan(target.z()))
+// 	{
+// 		qDebug() << __FUNCTION__ << "Returning. Invalid target";
+// 		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Returning. Invalid target";
+// 		throw ex;
+// 		return false;
+// 	}
+// 	printf("doing backwards\n");
+// 	float MAX_ADV_SPEED = 600.f;
+// 	const float MAX_POSITIONING_ERROR  = 50;  //mm
+// 	state.setState("EXECUTING");
+// 	QVec rPose = innerModel->transform("world","robot");
+// 	float error = (rPose-target).norm2();
+// 	//float error = target.norm2();
+// 	// 	qDebug() << __FUNCTION__ << "Error: " << error;
+// 
+// 	if( error < MAX_POSITIONING_ERROR )		//TASK IS FINISHED
+// 	{
+// //		current.setHasRotation(false);
+// //		myRoad.setFinished(true);
+// 		drawGreenBoxOnTarget( current.getTranslation() );
+// // 		current.print();
+// // 		current.reset();
+// // 		myRoad.reset();
+// // 		myRoad.endRoad();
+// 		state.setElapsedTime(taskReloj.elapsed());
+// 		//state.setState("IDLE");
+// 		try
+// 		{
+// 		  omnirobot_proxy->setSpeedBase(0, 0, 0);
+// 		} catch (const Ice::Exception &ex) { std::cout << ex << std::endl; }
+// 		//myRoad.requiresReplanning = true;
+// 
+// 		currentT.setWithoutPlan(false);
+// 		///////
+// 		//agregar plane		AQUI HAY QUE AGREGAR EL PLANO Y DAR LA ORDEN DE REPLANIFICAR!!
+// 		
+// 		changeCommand(currentT,CurrentTarget::Command::INSERTOBSTACLE);
+// 	}
+// 	else
+// 	{
+// 		float vadv = -0.5 * error;  //Proportional controller
+// 		if( vadv < -MAX_ADV_SPEED ) vadv = -MAX_ADV_SPEED;
+// 		try
+// 		{
+// 		  //differentialrobot_proxy->setSpeedBase(vadv, 0);
+// 		  omnirobot_proxy->setSpeedBase(0, vadv, 0);
+// // 		  omnirobot2_proxy->setSpeedBase(0, vadv, 0);
+// 		} catch (const Ice::Exception &ex) { std::cout << ex << std::endl; }
+// 	}
+// 
+
 	if (innerViewer)
 	{
 		QMutexLocker ml(&mutex_inner);
@@ -196,6 +307,27 @@ void SpecificWorker::compute( )
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+bool SpecificWorker::insertObstacle()
+{
+	QString obstacleParent = "floor";
+	QString obstacleName = "blockWall";
+	QVec T = QVec::vec3(800, 400, 800);
+	QVec R = QVec::vec3(0,0,1);
+	QVec final = innerModel->transform("world",QVec::vec3(0,0,300),"laser");
+	QVec sizeObstacle = QVec::vec3(500, 800, 100);
+	
+	InnerModelDraw::addPlane_ignoreExisting(innerViewer, obstacleName, obstacleParent, final, R, "#555555", sizeObstacle);
+	addPlane(obstacleName, obstacleParent, "/home/robocomp/robocomp/files/osgModels/basics/cube.3ds", sizeObstacle, final, R);
+	innerViewer->update();
+	try{ controller->stopTheRobot(omnirobot_proxy); } catch(const Ice::Exception &ex){std::cout << ex.what() << std::endl;};
+	//replaning
+	planner->removeGraph(innerViewer);
+	qDebug() << __FUNCTION__ << "creating graph";
+	planner->createGraph();
+	currentTarget.setWithoutPlan(true);
+	changeCommand(currentTarget,CurrentTarget::Command::GOTO);
+	return true;
+}
 
 
 /**
@@ -280,6 +412,13 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 		//myRoad.printRobotState(innerModel, target);
 		//move the robot according to the current force field
 		controller->update(innerModel, lData, omnirobot_proxy, myRoad);
+		
+		if(myRoad.isBlocked() == true)
+		{
+		  currentTargetBack.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-250),"robot"));
+		  changeCommand(target,CurrentTarget::Command::GOBACKWARDS);
+		  return true;
+		}
 
 		if (myRoad.isFinished() == true)
 		{
@@ -348,7 +487,10 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa, Curre
 		  //differentialrobot_proxy->setSpeedBase(0, vrot);
 		  omnirobot_proxy->setSpeedBase(0, 0, vrot);
 // 		  omnirobot2_proxy->setSpeedBase(0, 0, vrot);
-		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+		} catch (const Ice::Exception &ex)
+		{
+			 std::cout << ex.what() << std::endl;
+		}
 	}
 	return true;
 }
@@ -371,13 +513,13 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		throw ex;
 		return false;
 	}
-
-
 	float MAX_ADV_SPEED = 600.f;
-	const float MAX_POSITIONING_ERROR  = 50;  //mm
+	const float MAX_POSITIONING_ERROR  = 40;  //mm
 	state.setState("EXECUTING");
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
+	qDebug() << __FUNCTION__ << "doing backwards" << error;
+	
 	//float error = target.norm2();
 	// 	qDebug() << __FUNCTION__ << "Error: " << error;
 
@@ -395,11 +537,14 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		try
 		{
 		  omnirobot_proxy->setSpeedBase(0, 0, 0);
-		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+		} catch (const Ice::Exception &ex) { std::cout << ex << std::endl; }
 		//myRoad.requiresReplanning = true;
 
-		currentT.setWithoutPlan(false);
-		changeCommand(currentT,CurrentTarget::Command::GOTO);
+		currentT.setWithoutPlan(true);
+		///////
+		//agregar plane		AQUI HAY QUE AGREGAR EL PLANO Y DAR LA ORDEN DE REPLANIFICAR!!
+		
+		changeCommand(currentT,CurrentTarget::Command::INSERTOBSTACLE);
 	}
 	else
 	{
@@ -410,8 +555,9 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		  //differentialrobot_proxy->setSpeedBase(vadv, 0);
 		  omnirobot_proxy->setSpeedBase(0, vadv, 0);
 // 		  omnirobot2_proxy->setSpeedBase(0, vadv, 0);
-		} catch (const Ice::Exception &ex) { std::cout << ex << std::cout; }
+		} catch (const Ice::Exception &ex) { std::cout << ex << std::endl; }
 	}
+
 
 	return true;
 }
@@ -428,7 +574,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
  */
 bool SpecificWorker::targetHasAPlan(InnerModel *inner, CurrentTarget &target, TrajectoryState &state, WayPoints &myRoad)
 {
-	if( target.isWithoutPlan() == false )
+	if(  target.isWithoutPlan() == false )
 		return true;
 
 	QTime reloj = QTime::currentTime();
@@ -595,31 +741,9 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-		printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
-		//PARAMETERS CHECK
-		if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
-		{
-			qDebug() <<__FUNCTION__ << "Returning. Input parameter -target- is not valid";
-			RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Doing nothing. Invalid Target with nan in it";
-			throw ex;
-		}
-		else
-		{
-			tState.setState("EXECUTING");
-
-				currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
-				currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
-				changeCommand(currentTarget,CurrentTarget::Command::GOTO);
-				currentTarget.setWithoutPlan(true);
-				if( target.doRotation == true)
-					currentTarget.setHasRotation(true);
-				drawTarget( QVec::vec3(target.x,target.y,target.z));
-				taskReloj.restart();
-				qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
-		}
-		
-		//return road.getRobotDistanceToTarget();
+	goReferenced(target,0,0,200);
 }
+
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
 {
 	return tState.toMiddleware(this->bState, this->road);
@@ -923,7 +1047,32 @@ float SpecificWorker::angmMPI(float angle)
 
 float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold)
 {
-	return 0;
+	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
+	//PARAMETERS CHECK
+	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
+	{
+		qDebug() <<__FUNCTION__ << "Returning. Input parameter -target- is not valid";
+		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Doing nothing. Invalid Target with nan in it";
+		throw ex;
+	}
+	else
+	{
+	    innerModel->updateTransformValues("virtualRobot",xRef,0,zRef,0,0,0,"robot");
+		InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,1000,50));
+		tState.setState("EXECUTING");
+		road.setThreshold(threshold);
+		currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
+		currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+		changeCommand(currentTarget,CurrentTarget::Command::GOTO);
+		currentTarget.setWithoutPlan(true);
+		if( target.doRotation == true)
+			currentTarget.setHasRotation(true);
+		drawTarget( QVec::vec3(target.x,target.y,target.z));
+		taskReloj.restart();
+		qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
+	}
+	
+	//return road.getRobotDistanceToTarget();
 }
 
 
@@ -931,4 +1080,5 @@ void SpecificWorker::mapBasedTarget(const NavigationParameterMap &parameters)
 {
 	
 }
+
 
