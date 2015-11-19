@@ -23,7 +23,7 @@ echo "update robocomp-ursus-rockin"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin
 git pull
 
-N=7
+N=3
 
 ###
 ### RoboComp
