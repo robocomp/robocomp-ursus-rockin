@@ -736,7 +736,7 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-	goReferenced(target,400,400,100);
+	goReferenced(target,0,0,200);
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
