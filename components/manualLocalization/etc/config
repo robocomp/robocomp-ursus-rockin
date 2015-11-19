@@ -1,4 +1,5 @@
-# Proxies for published topics
+# Endpoints for implemented interfaces
+CommonBehavior.Endpoints=tcp -p 4310
 
 
 # This property is used by the clients to connect to IceStorm.

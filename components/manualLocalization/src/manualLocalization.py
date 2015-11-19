@@ -20,7 +20,7 @@
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# \mainpage RoboComp::AprilBasedLocalization
+# \mainpage RoboComp::manualLocalization
 #
 # \section intro_sec Introduction
 #
@@ -48,7 +48,7 @@
 #
 # \subsection execution_ssec Execution
 #
-# Just: "${PATH_TO_BINARY}/AprilBasedLocalization --Ice.Config=${PATH_TO_CONFIG_FILE}"
+# Just: "${PATH_TO_BINARY}/manualLocalization --Ice.Config=${PATH_TO_CONFIG_FILE}"
 #
 # \subsection running_ssec Once running
 #
@@ -79,10 +79,10 @@ if len(ROBOCOMP)<1:
 preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
 Ice.loadSlice(preStr+"CommonBehavior.ice")
 import RoboCompCommonBehavior
-Ice.loadSlice(preStr+"AprilTags.ice")
-import RoboCompAprilTags
 Ice.loadSlice(preStr+"AprilBasedLocalization.ice")
 import RoboCompAprilBasedLocalization
+Ice.loadSlice(preStr+"CommonBehavior.ice")
+import RoboCompCommonBehavior
 
 
 class CommonBehaviorI(RoboCompCommonBehavior.CommonBehavior):
@@ -154,6 +154,11 @@ if __name__ == '__main__':
 
 	if status == 0:
 		worker = SpecificWorker(mprx)
+
+
+		adapter = ic.createObjectAdapter('CommonBehavior')
+		adapter.add(CommonBehaviorI(worker, ic), ic.stringToIdentity('commonbehavior'))
+		adapter.activate()
 
 
 #		adapter.add(CommonBehaviorI(<LOWER>I, ic), ic.stringToIdentity('commonbehavior'))
