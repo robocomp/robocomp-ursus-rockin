@@ -76,7 +76,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		}
 		else
 		{
-			if (i.dist < baseOffsets[j] + 120) 
+			if (i.dist < baseOffsets[j] + 150) 
 			{
 				if (i.angle > 0)
 				{

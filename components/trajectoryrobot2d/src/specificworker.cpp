@@ -338,6 +338,11 @@ bool SpecificWorker::setHeadingCommand(InnerModel* innerModel, float alfa, Curre
 	else
 	{
 		float vrot = -0.7 * error;  //Proportional controller
+		
+		if(fabs(vrot)>0.3)    //ñapa para limitar la rotacion
+                    if(vrot>0) vrot=0.3;
+                    else vrot=-0.3;
+                    
 		try
 		{
 		  //differentialrobot_proxy->setSpeedBase(0, vrot);

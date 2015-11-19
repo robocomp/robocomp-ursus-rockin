@@ -73,6 +73,7 @@ QList<QVec> Sampler::sampleFreeSpaceR2(uint nPoints)
 				validState = checkRobotValidStateAtTarget(res);
 			}
 		}
+		res = innerModel->transform("floor_plane", res, "root");
 		list.append(res);
 		validState = false;
 	}
