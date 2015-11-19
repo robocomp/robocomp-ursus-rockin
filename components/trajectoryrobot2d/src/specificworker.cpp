@@ -140,7 +140,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	innerModel->updateTranslationValues("robot", bState.correctedX, 0, bState.correctedZ);	//"robot" should be an external parameter
 	innerModel->updateRotationValues("robot", 0, bState.correctedAlpha, 0);
-	
+	innerModel->newTransform("virtualRobot","static",innerModel->getNode("robot"));
 	
 // 	QString obstacleParent = "floor";
 // 	QString obstacleName = "ostias";
@@ -313,7 +313,7 @@ bool SpecificWorker::insertObstacle()
 	QString obstacleName = "blockWall";
 	QVec T = QVec::vec3(800, 400, 800);
 	QVec R = QVec::vec3(0,0,1);
-	QVec final = innerModel->transform("world",QVec::vec3(0,0,200),"laser");
+	QVec final = innerModel->transform("world",QVec::vec3(0,0,300),"laser");
 	QVec sizeObstacle = QVec::vec3(500, 800, 100);
 	
 	InnerModelDraw::addPlane_ignoreExisting(innerViewer, obstacleName, obstacleParent, final, R, "#555555", sizeObstacle);
@@ -415,7 +415,7 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 		
 		if(myRoad.isBlocked() == true)
 		{
-		  currentTargetBack.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-200),"robot"));
+		  currentTargetBack.setTranslation(innerModel->transform("world",QVec::vec3(0,0,-250),"robot"));
 		  changeCommand(target,CurrentTarget::Command::GOBACKWARDS);
 		  return true;
 		}
@@ -509,7 +509,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		return false;
 	}
 	float MAX_ADV_SPEED = 600.f;
-	const float MAX_POSITIONING_ERROR  = 50;  //mm
+	const float MAX_POSITIONING_ERROR  = 40;  //mm
 	state.setState("EXECUTING");
 	QVec rPose = innerModel->transform("world","robot");
 	float error = (rPose-target).norm2();
@@ -736,30 +736,7 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
-	//PARAMETERS CHECK
-	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
-	{
-		qDebug() <<__FUNCTION__ << "Returning. Input parameter -target- is not valid";
-		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Doing nothing. Invalid Target with nan in it";
-		throw ex;
-	}
-	else
-	{
-		tState.setState("EXECUTING");
-
-		currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
-		currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
-		changeCommand(currentTarget,CurrentTarget::Command::GOTO);
-		currentTarget.setWithoutPlan(true);
-		if( target.doRotation == true)
-			currentTarget.setHasRotation(true);
-		drawTarget( QVec::vec3(target.x,target.y,target.z));
-		taskReloj.restart();
-		qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
-	}
-	
-	//return road.getRobotDistanceToTarget();
+	goReferenced(target,0,200,100);
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -1065,7 +1042,32 @@ float SpecificWorker::angmMPI(float angle)
 
 float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold)
 {
-	return 0;
+	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
+	//PARAMETERS CHECK
+	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
+	{
+		qDebug() <<__FUNCTION__ << "Returning. Input parameter -target- is not valid";
+		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Doing nothing. Invalid Target with nan in it";
+		throw ex;
+	}
+	else
+	{
+	    innerModel->updateTransformValues("virtualRobot",xRef,0,zRef,0,0,0,"robot");
+		InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,50,50));
+		tState.setState("EXECUTING");
+		road.setThreshold(threshold);
+		currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
+		currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+		changeCommand(currentTarget,CurrentTarget::Command::GOTO);
+		currentTarget.setWithoutPlan(true);
+		if( target.doRotation == true)
+			currentTarget.setHasRotation(true);
+		drawTarget( QVec::vec3(target.x,target.y,target.z));
+		taskReloj.restart();
+		qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
+	}
+	
+	//return road.getRobotDistanceToTarget();
 }
 
 

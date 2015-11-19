@@ -172,6 +172,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//Pre-limiting filter to avoid displacements in very closed turns
 		if( fabs(vrot) == 0.3)
 			vadvance = 0;
+			vside = 0;
 		
 		//stopping speed jump
 		if(fabs(vadvance - lastVadvance) > umbral)
