@@ -339,7 +339,7 @@
   <dependence alias="laser" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
-  <upCommand command="rcremote robonuc1.local cgr /home/robocomp/robocomp/components/robocomp-robolab/experimental/CGR ./bin/CGRc --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus/etc/CGR.conf" />
+  <upCommand command="rcremote robonuc1.local cgr /home/robocomp/robocomp/components/robocomp-robolab/experimental/CGR ./bin/CGRc --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/CGR.conf" />
   <downCommand command="ssh robolab@robonuc1.local killall -9 CGRc" />
   <configFile path="/home/robocomp/robocomp/components/robocomp-ursus/etc/CGR.conf" />
   <xpos value="-31.8438423902" />
