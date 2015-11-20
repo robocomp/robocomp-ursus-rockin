@@ -35,7 +35,11 @@
 #include <innermodel/innermodel.h>
 
 #include <ros/ros.h>
+#include <geometry_msgs/Pose2D.h>
 #include <std_msgs/String.h>
+#include <std_msgs/UInt32.h>
+#include <std_srvs/Empty.h>
+#include <roah_rsbb_comm_ros/BenchmarkState.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -43,22 +47,30 @@ Q_OBJECT
 public:
     
 	ros::Subscriber subROS;
-	ros::Publisher  pubROS;
+        ros::Subscriber subROS2;
+	ros::Publisher  messages_saved_pub_;
+        
+        RoboCompTrajectoryRobot2D::TargetPose target_obtained;
+        
+        geometry_msgs::Pose2D goal_msg;
 
 	ros::NodeHandle nh;
-	std_msgs::StringPtr str;
+        std_msgs::String str;
+        
+        QMutex mutex_pos;
 
 	SpecificWorker(MapPrx& mprx);	
 	~SpecificWorker();
+        void prepare();
+        void execute();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
-
-	void chatterCallback(const std_msgs::String::ConstPtr& msg);
+        void goto_target( RoboCompTrajectoryRobot2D::TargetPose target);
+        void benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg);
+	void goalCallback(const ::geometry_msgs::Pose2D msg);
 
 public slots:
 	void compute();
 
-private:
-	std::list<TargetPose> targetList;
 };
 
 #endif

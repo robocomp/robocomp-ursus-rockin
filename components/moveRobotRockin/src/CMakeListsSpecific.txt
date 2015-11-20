@@ -18,7 +18,5 @@ find_package(catkin REQUIRED)
 include_directories(  ${catkin_INCLUDE_DIRS} )
 SET ( LIBS ${LIBS} ${catkin_LIBRARIES} -L/opt/ros/jade/lib -lroscpp -lrosconsole -lroscpp_serialization) # -lrosbag
 
-INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)
-
 ADD_DEFINITIONS( -std=c++11 )
 
