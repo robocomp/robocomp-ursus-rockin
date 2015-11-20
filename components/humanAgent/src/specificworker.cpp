@@ -575,13 +575,13 @@ void SpecificWorker::updatePeopleInnerFullB()
 		HsvColor colorHSV = rgb2hsv(colorRGB);
 		
                 
-                cv::Mat hsv_image;
-                cv::cvtColor(bgr_image, hsv_image, cv::COLOR_BGR2HSV);
-                // Threshold the HSV image, keep only the red pixels
-                cv::Mat lower_red_hue_range;
-                cv::Mat upper_red_hue_range;
-                cv::inRange(hsv_image, cv::Scalar(0, 100, 100), cv::Scalar(10, 255, 255), lower_red_hue_range);
-                cv::inRange(hsv_image, cv::Scalar(160, 100, 100), cv::Scalar(179, 255, 255), upper_red_hue_range);
+// 		cv::Mat hsv_image;
+// 		cv::cvtColor(bgr_image, hsv_image, cv::COLOR_BGR2HSV);
+// 		// Threshold the HSV image, keep only the red pixels
+// 		cv::Mat lower_red_hue_range;
+// 		cv::Mat upper_red_hue_range;
+// 		cv::inRange(hsv_image, cv::Scalar(0, 100, 100), cv::Scalar(10, 255, 255), lower_red_hue_range);
+// 		cv::inRange(hsv_image, cv::Scalar(160, 100, 100), cv::Scalar(179, 255, 255), upper_red_hue_range);
                 
                 
                 
