@@ -123,6 +123,8 @@ int ::moveRobotRockin::run(int argc, char* argv[])
 #endif
 	int status=EXIT_SUCCESS;
 
+        ros::init(argc,argv,"moverobot");
+
 	OmniRobotPrx omnirobot_proxy;
 	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
 
