@@ -1,0 +1,12 @@
+import "/robocomp/interfaces/IDSLs/Camera.idsl";
+
+Component doorbell
+{
+	Communications
+	{
+	};
+	language Cpp;
+	gui Qt(QWidget);
+	options agmagent;
+};
+
