@@ -1,0 +1,281 @@
+spacePattern=3
+lineThickness=2
+fontName=Arial
+name=domain_rockin_specific
+vertexDiameter=40
+shortPattern=1
+nodeThickness=2
+fontSize=12
+longPattern=3
+===
+recognizeHumanAsDeliMan : active(1)
+{
+	{
+		person:person(-15,-75)
+		robot:robot(-190,-75)
+		personType:unknownPerson(200,-75)
+		robot->person(know)
+		person->personType(personIs)
+	}
+	=>
+	{
+		person:person(-15,-75)
+		package:object(-15,70)
+		packageSt:objectSt(190,70)
+		robot:robot(-190,-75)
+		personType:deliMan(200,-75)
+		robot->person(know)
+		robot->package(know)
+		package->packageSt(hasStatus)
+		package->person(in)
+		robot->person(know)
+		person->personType(personIs)
+	}
+}
+
+recognizeHumanAsPostman : active(1)
+{
+	{
+		person:person(-15,-75)
+		robot:robot(-190,-75)
+		personType:unknownPerson(200,-75)
+		robot->person(know)
+		person->personType(personIs)
+	}
+	=>
+	{
+		person:person(-15,-75)
+		package:object(-15,70)
+		packageSt:objectSt(190,70)
+		robot:robot(-190,-75)
+		personType:postman(200,-75)
+		robot->person(know)
+		robot->package(know)
+		package->packageSt(hasStatus)
+		package->person(in)
+		robot->person(know)
+		person->personType(personIs)
+	}
+}
+
+recognizeHumanAsDrKimble : active(1)
+{
+	{
+		person:person(-15,-75)
+		robot:robot(-190,-75)
+		personType:unknownPerson(200,-75)
+		robot->person(know)
+		person->personType(personIs)
+	}
+	=>
+	{
+		person:person(-15,-75)
+		package:object(-15,70)
+		packageSt:objectSt(190,70)
+		robot:robot(-190,-75)
+		personType:medicineDoctor(200,-75)
+		robot->person(know)
+		robot->package(know)
+		robot->person(know)
+		person->personType(personIs)
+	}
+}
+
+recognizeHumanAsExtranger : active(1)
+{
+	{
+		person:person(-15,-75)
+		robot:robot(-190,-75)
+		personType:unknownPerson(200,-75)
+		robot->person(know)
+		person->personType(personIs)
+	}
+	=>
+	{
+		person:person(-15,-75)
+		robot:robot(-190,-75)
+		personType:extranger(200,-75)
+		robot->person(know)
+		person->personType(personIs)
+	}
+}
+
+kickOutExtranger : active(1)
+{
+	{
+		personType:extranger(200,-75)
+		person:person(-15,-75)
+		robot:robot(-190,-75)
+		rooms:objectSt(200,50)
+		room:object(-15,50)
+		robot->person(know)
+		person->personType(personIs)
+		person->room(in)
+		room->rooms(room)
+		room->rooms(outside)
+	}
+	=>
+	{
+		robot:robot(-190,-75)
+		room:object(-15,50)
+		personType:extranger(200,-75)
+		rooms:objectSt(200,50)
+		room->rooms(room)
+		room->rooms(outside)
+	}
+}
+
+kickOutDeliMan : active(1)
+{
+	{
+		personType:deliMan(200,-75)
+		person:person(-15,-75)
+		robot:robot(-190,-75)
+		rooms:objectSt(200,50)
+		room:object(-15,50)
+		robot->person(know)
+		person->personType(personIs)
+		person->room(in)
+		room->rooms(room)
+		room->rooms(outside)
+	}
+	=>
+	{
+		robot:robot(-190,-75)
+		room:object(-15,50)
+		personType:deliMan(200,-75)
+		rooms:objectSt(200,50)
+		room->rooms(room)
+		room->rooms(outside)
+	}
+	precondition
+	{
+		(forall
+			o:object
+			(not (in o person))
+		)
+	}
+}
+
+kickOutPostman : active(1)
+{
+	{
+		personType:postman(200,-75)
+		person:person(-15,-75)
+		robot:robot(-190,-75)
+		rooms:objectSt(200,50)
+		room:object(-15,50)
+		robot->person(know)
+		person->personType(personIs)
+		person->room(in)
+		room->rooms(room)
+		room->rooms(outside)
+	}
+	=>
+	{
+		robot:robot(-190,-75)
+		room:object(-15,50)
+		personType:postman(200,-75)
+		rooms:objectSt(200,50)
+		room->rooms(room)
+		room->rooms(outside)
+	}
+	precondition
+	{
+		(forall
+			o:object
+			(not (in o person))
+		)
+	}
+}
+
+makeHumanMoveToPublicRoom : active(1)
+{
+	{
+		r1:object(-15,-235)
+		r2:object(160,-235)
+		robot:robot(-190,-75)
+		person:person(-15,-75)
+		r2s:objectSt(335,-235)
+		r1s:objectSt(-190,-235)
+		robot->person(know)
+		person->r1(in)
+		r1->r1s(room)
+		r2->r2s(room)
+		r2->r2s(public)
+		r1->r2(connected)
+	}
+	=>
+	{
+		r1:object(-15,-235)
+		r2:object(160,-235)
+		robot:robot(-190,-75)
+		person:person(-15,-75)
+		r2s:objectSt(335,-235)
+		r1s:objectSt(-190,-235)
+		robot->person(know)
+		person->r2(in)
+		r1->r1s(room)
+		r2->r2s(room)
+		r2->r2s(public)
+		r1->r2(connected)
+	}
+	precondition
+	{
+		(and
+			(forall
+				personType:extranger
+				(not (personIs person personType))
+			)
+			(or
+				(in robot r1)
+				(in robot r2)
+			)
+		)
+	}
+}
+
+makeHumanMoveToPrivateRoom : active(1)
+{
+	{
+		r1:object(-15,-235)
+		r2:object(160,-235)
+		robot:robot(-190,-75)
+		personType:medicineDoctor(200,-75)
+		person:person(-15,-75)
+		r2s:objectSt(335,-235)
+		r1s:objectSt(-190,-235)
+		robot->person(know)
+		person->r1(in)
+		person->personType(personIs)
+		r1->r1s(room)
+		r2->r2s(room)
+		r2->r2s(private)
+		r1->r2(connected)
+	}
+	=>
+	{
+		r1:object(-15,-235)
+		r2:object(160,-235)
+		robot:robot(-190,-75)
+		personType:medicineDoctor(200,-75)
+		person:person(-15,-75)
+		r2s:objectSt(335,-235)
+		r1s:objectSt(-190,-235)
+		robot->person(know)
+		person->r2(in)
+		person->personType(personIs)
+		r1->r1s(room)
+		r2->r2s(room)
+		r2->r2s(private)
+		r1->r2(connected)
+	}
+	precondition
+	{
+		(or
+			(in robot r1)
+			(in robot r2)
+		)
+	}
+}
+

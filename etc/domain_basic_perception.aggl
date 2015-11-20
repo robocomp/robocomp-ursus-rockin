@@ -1,0 +1,78 @@
+spacePattern=3
+lineThickness=2
+fontName=Arial
+name=domain_basic_perception
+vertexDiameter=40
+shortPattern=1
+nodeThickness=2
+fontSize=12
+longPattern=3
+===
+
+setObjectSee : active(1)
+{
+	{
+		status:objectSt(250,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(noSee)
+	}
+	=>
+	{
+		status:objectSt(250,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(see)
+	}
+}
+
+setObjectNotSee : passive(1)
+{
+	{
+		status:objectSt(250,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(see)
+	}
+	=>
+	{
+		status:objectSt(250,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(noSee)
+	}
+}
+
+setObjectPosition : active(1)
+{
+	{
+		status:objectSt(250,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(noPosition)
+	}
+	=>
+	{
+		status:objectSt(250,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(position)
+	}
+}
+
+setObjectNotPosition : passive(1)
+{
+	{
+		status:objectSt(250,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(position)
+	}
+	=>
+	{
+		status:objectSt(250,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(noPosition)
+	}
+}

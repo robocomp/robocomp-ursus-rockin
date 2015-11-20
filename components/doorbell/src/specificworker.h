@@ -24,9 +24,6 @@
 
 
 
-// THIS IS AN AGENT
-
-
 
 
 #ifndef SPECIFICWORKER_H
@@ -57,7 +54,8 @@ public:
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 
 public slots:
-	void compute(); 	
+	void compute();
+	void doorbellRang();
 
 private:
 	std::string action;
@@ -67,7 +65,9 @@ private:
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-	
+
+
+
 };
 
 #endif

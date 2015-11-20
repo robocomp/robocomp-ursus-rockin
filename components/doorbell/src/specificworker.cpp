@@ -23,11 +23,12 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-
 	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
+
+	connect(pushButton, SIGNAL(clicked()), this, SLOT(doorbellRang()));
 }
 
 /**
@@ -40,30 +41,6 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-
-
-//       THE FOLLOWING IS JUST AN EXAMPLE for AGENTS
-// 	try
-// 	{
-// 		RoboCompCommonBehavior::Parameter par = params.at("NameAgent.InnerModel") ;
-// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-// 			innerModel = new InnerModel(par.value);
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-// 		}
-// 		else
-// 		{
-// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-// 			qFatal("Exiting now.");
-// 		}
-// 	}
-// 	catch(std::exception e)
-// 	{
-// 		qFatal("Error reading config params");
-// 	}
-
-	
 	timer.start(Period);
 
 	return true;
@@ -71,16 +48,49 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
+	printf("\n --- compute ---\n");
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+	AGMModelSymbol::SPtr outside;
+	try
+	{
+		outside = newModel->getSymbol(17);
+	}
+	catch(...)
+	{
+		printf("Can't find node 17. Waiting for executive?\n");
+		return;
+	}
+
+	printf("got 17\n");
+	for (AGMModelSymbol::iterator edge_itr=outside->edgesBegin(newModel); edge_itr!=outside->edgesEnd(newModel); edge_itr++)
+	{
+		if ((*edge_itr)->getLabel() == "in")
+		{
+			printf("got in\n");
+			int second = (*edge_itr)->getSymbolPair().first;
+			const AGMModelSymbol::SPtr &symbolPerson = newModel->getSymbolByIdentifier(second);
+			if (symbolPerson->symbolType == "person")
+			{
+				printf("got person\n");
+				for (AGMModelSymbol::iterator edge_itr2=symbolPerson->edgesBegin(newModel); edge_itr2!=symbolPerson->edgesEnd(newModel); edge_itr2++)
+				{
+					if ((*edge_itr2)->getLabel() == "personIs")
+					{
+						printf("got person type edge\n");
+						int third = (*edge_itr2)->getSymbolPair().second;
+						const AGMModelSymbol::SPtr &symbolPersonType = newModel->getSymbolByIdentifier(third);
+						if (symbolPersonType->symbolType == "unknownPerson")
+						{
+							printf("got unknown!!!\n");
+							symbolPersonType->symbolType = "medicineDoctor";
+							sendModificationProposal(worldModel, newModel);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 
@@ -231,6 +241,8 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 
 	return true;
 }
+
+
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
 	try
@@ -244,6 +256,22 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	}
 }
 
+
+void SpecificWorker::doorbellRang()
+{
+	printf("Trying to include a human in the model, given that the door bell rang...\n");
+
+	AGMModelSymbol::SPtr newSymbolPerson =  worldModel->newSymbol("person");
+	AGMModelSymbol::SPtr typeSymbolPerson = worldModel->newSymbol("unknownPerson");
+
+	worldModel->addEdgeByIdentifiers(1, newSymbolPerson->identifier, "know");
+	worldModel->addEdgeByIdentifiers(newSymbolPerson->identifier, 17, "in");
+	worldModel->addEdgeByIdentifiers(newSymbolPerson->identifier, typeSymbolPerson->identifier,"personIs");
+
+	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	sendModificationProposal(worldModel, newModel);
+
+}
 
 
 
