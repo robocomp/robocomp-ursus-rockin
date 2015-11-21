@@ -114,7 +114,7 @@
   <color value="#3333FF" />
  </node>
 
- <node alias="js" endpoint="joystick:tcp -h 100.0.30.88 -p 10002">
+ <node alias="js" endpoint="joystick:tcp -h 100.0.30.88 -p 15002">
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />
   <upCommand command="rcremote 100.0.30.88 jstck /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/ ./bin/joystickOmniComp --Ice.Config=etc/config" />
