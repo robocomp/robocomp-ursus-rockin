@@ -26,13 +26,12 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
     //published
     messages_saved_pub_ = nh.advertise<std_msgs::UInt32> ("/roah_rsbb/messages_saved", 1, true);
     // --> If you look this. write in the terminal  ------>> rostopic echo /testPublication
-    
+
     // subcribe
-    
+
     subROS = nh.subscribe("/roah_rsbb/goal", 1000, &SpecificWorker::goalCallback, this);
     subROS2 = nh.subscribe ("/roah_rsbb/benchmark/state", 1, &SpecificWorker::benchmark_state_callback, this);
 
-    
 }
 
 void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg)
@@ -48,7 +47,7 @@ void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState
           break;
         case roah_rsbb_comm_ros::BenchmarkState::EXECUTE:
            this->execute();
-        break;       
+        break;
     }
 }
 
@@ -83,29 +82,29 @@ void SpecificWorker::execute()
 {
     //first set the log
     //log set
-    
+
     //send the log
     std_msgs::UInt32 messages_saved_msg;
     messages_saved_msg.data = 1;
     messages_saved_pub_.publish (messages_saved_msg);
-    
+
     //ir like a champion a target
     goto_target( target_obtained );
-    
+
     //fin
     if (ros::service::waitForService ("/roah_rsbb/end_execute", 100)) 
     {
         std_srvs::Empty s;
-        if (! ros::service::call ("/roah_rsbb/end_execute", s)) 
+    	if (! ros::service::call ("/roah_rsbb/end_execute", s)) 
         {
           ROS_ERROR ("Error calling service /roah_rsbb/end_execute");
         }
     }
-    else 
+    else
     {
         ROS_ERROR ("Could not find service /roah_rsbb/end_execute");
     }
-    
+
 }
 
 
@@ -137,7 +136,7 @@ void SpecificWorker::goto_target( RoboCompTrajectoryRobot2D::TargetPose target)
                     sleep(5000);
             }
     }
-    
+
     if (!errorGo)
     {
             bool stateOk = false;
@@ -165,7 +164,7 @@ void SpecificWorker::goto_target( RoboCompTrajectoryRobot2D::TargetPose target)
                                     }
                             }
                     }
-                    
+
                     if (!errorState)
                     {
                             if (state == "IDLE")
@@ -178,7 +177,7 @@ void SpecificWorker::goto_target( RoboCompTrajectoryRobot2D::TargetPose target)
                             std::cout <<"ERROR in get state!!!"<< std::endl;
                             break;
                     }
-            }			
+            }
     }
 }
 
@@ -199,7 +198,7 @@ void SpecificWorker::compute()
 //     float64 x;
 //     float64 y;
 //     float64 theta;
-//     
+//
 //     bool goOk = false;
 //     bool errorGo = false;
 //     int cont = 0;
@@ -226,14 +225,14 @@ void SpecificWorker::compute()
 //                     this->sleep(5000)
 //             }
 //     }
-//     
+//
 //     if (!errorGo)
 //     {
 //             bool stateOk = false;
 //             bool errorState = false;
 //             int cont = 0;
 //             string state;
-// 
+//
 //             while (true) // wait to idle state
 //             {
 //                     while (!stateOk)
@@ -254,7 +253,7 @@ void SpecificWorker::compute()
 //                                     }
 //                             }
 //                     }
-//                     
+//
 //                     if (!errorState)
 //                     {
 //                             if (state == "IDLE")
@@ -267,7 +266,7 @@ void SpecificWorker::compute()
 //                             std::cout <<"ERROR in get state!!!"<< std::endl;
 //                             break;
 //                     }
-//             }			
+//             }
 //     }
 
 }
@@ -278,17 +277,17 @@ void SpecificWorker::goalCallback(const ::geometry_msgs::Pose2D msg)
         cout<<msg.x<<endl;
         cout<<msg.y<<endl;
         cout<<msg.theta<<endl;
-        
-        target_obtained.z = msg.x;
-		  target_obtained.y = 0;
-        target_obtained.x = - msg.y;
-		  target_obtained.rx = 0;
-		  target_obtained.ry = - msg.theta;
+
+	target_obtained.z = msg.x;
+	target_obtained.y = 0;
+	target_obtained.x = - msg.y;
+	target_obtained.rx = 0;
+	target_obtained.ry = - msg.theta;
         target_obtained.rz = 0;
-        
+
 // 	ROS_INFO("I heard: [%s]", msg->data.c_str());
 // 	///////////// Aqui tiene que venir las n poses
-// 	
+//
 // 	// asignar la lista de target de ROS a la de robocomp
 // 	// 	target.x = pose2D.x;
 // 	// 	target.z = pose2D.y;
@@ -296,5 +295,4 @@ void SpecificWorker::goalCallback(const ::geometry_msgs::Pose2D msg)
 // 	// 	target.ry = pose2D.teta;
 // 	// añadir la modificacion de nueva lista
 // 	targetList = poses2D;
-	
 }

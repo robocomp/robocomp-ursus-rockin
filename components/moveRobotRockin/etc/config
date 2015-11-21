@@ -1,8 +1,11 @@
-CommonBehavior.Endpoints=tcp -p 1
+CommonBehavior.Endpoints=tcp -p 12323
 
 
-# This property is used by the clients to connect to IceStorm.
-TopicManager.Proxy=IceStorm/TopicManager:default -p 9999
+# Proxies for required interfaces
+OmniRobotProxy = omnirobot:tcp -h 100.0.30.11 -p 12238
+TrajectoryRobot2DProxy = trajectoryrobot2d:tcp -h 100.0.30.11 -p 12204 
+
+
 
 Ice.Warn.Connections=0
 Ice.Trace.Network=0
