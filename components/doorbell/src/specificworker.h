@@ -67,7 +67,7 @@ private:
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 
 
-
+	string getPersonType();
 };
 
 #endif

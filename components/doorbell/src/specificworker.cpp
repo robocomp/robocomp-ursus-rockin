@@ -83,7 +83,30 @@ void SpecificWorker::compute()
 						if (symbolPersonType->symbolType == "unknownPerson")
 						{
 							printf("got unknown!!!\n");
-							symbolPersonType->symbolType = "medicineDoctor";
+							
+							
+							string symbolPersonType_str = getPersonType();
+
+
+							symbolPersonType->symbolType = symbolPersonType_str;
+							
+							if (symbolPersonType_str == "postman" or symbolPersonType_str == "deliMan")
+							{
+								AGMModelSymbol::SPtr packageObj = worldModel->newSymbol("object");
+								AGMModelSymbol::SPtr packageSts = worldModel->newSymbol("unknownPerson");
+								
+								worldModel->addEdgeByIdentifiers(1, packageObj->identifier, "know");
+								worldModel->addEdgeByIdentifiers(packageObj->identifier, symbolPerson->identifier, "in");
+								worldModel->addEdgeByIdentifiers(packageObj->identifier, packageSts->identifier, "hasStatus");
+							}
+							else if (symbolPersonType_str == "extranger")
+							{
+							}
+							else if (symbolPersonType_str == "medicineDoctor")
+							{
+							}
+
+	
 							sendModificationProposal(worldModel, newModel);
 						}
 					}
@@ -262,8 +285,10 @@ void SpecificWorker::doorbellRang()
 	printf("Trying to include a human in the model, given that the door bell rang...\n");
 
 	AGMModelSymbol::SPtr newSymbolPerson =  worldModel->newSymbol("person");
+	
+	
 	AGMModelSymbol::SPtr typeSymbolPerson = worldModel->newSymbol("unknownPerson");
-
+	
 	worldModel->addEdgeByIdentifiers(1, newSymbolPerson->identifier, "know");
 	worldModel->addEdgeByIdentifiers(newSymbolPerson->identifier, 17, "in");
 	worldModel->addEdgeByIdentifiers(newSymbolPerson->identifier, typeSymbolPerson->identifier,"personIs");
@@ -273,5 +298,14 @@ void SpecificWorker::doorbellRang()
 
 }
 
+
+
+string SpecificWorker::getPersonType()
+{
+// 	string symbolPersonType_str = "postman";
+// 	string symbolPersonType_str = "deliMan";
+// 	string symbolPersonType_str = "extranger";
+	string symbolPersonType_str = "medicineDoctor";
+}
 
 
