@@ -64,53 +64,43 @@ void SpecificWorker::prepare()
     }
 }
 
+
 void SpecificWorker::execute()
 {
     //first set the log
     //log set
-
-    //send the log
+		
+		qDebug() << __FUNCTION__;
+		
+		//send the log
     std_msgs::UInt32 messages_saved_msg;
     messages_saved_msg.data = 1;
     messages_saved_pub_.publish (messages_saved_msg);
-
+		
     //ir like a champion a target
+		//DENTRANCE
+		
+		target_obtained.z =  -3.2*1000.;
+		target_obtained.x =  -4.7*1000;
+		target_obtained.ry = 0.0;
+		
+		/////////////
 		goto_target(target_obtained);
 		
+		qDebug() << __FUNCTION__ << "target called";
 }
 
 void SpecificWorker::goto_target( RoboCompTrajectoryRobot2D::TargetPose target)
 {
   	try
 		{
-// 			cout <<"aaaaaaaaaaaaaaaaaaaa"<<endl;
 			std::string st = trajectoryrobot2d_proxy->getState().state;
-// 			cout <<"bbbbbbbbbbbbb"<<endl;
 			cout << st;
-// 			cout <<"cccccccccccc"<<endl;
 			if( st == "IDLE")
-			{
-			
-			//dorm
-			 //target.z =  4*1000.;
-			 //target.x =  -3.5*1000.;
-			 //target.ry = 0.0;
-	
-			 //DENTRANCE
-		   target.z =  -3.2*1000.;
-			 target.x =  -4.7*1000;
-			 target.ry = 0.0;
-	
-			  //comedor
-		   target.z =  -1.7*1000.;
-			 target.x =  2.5*1000;
-			 target.ry = 0.0;
-	
-			 
+			{		 
 				trajectoryrobot2d_proxy->go(target);
 				qDebug() << "Target sent to Trajectory" << target.x<<target.z<<target.ry;
 				state = State::GOING;
-				veces++;
 			}
     }
     catch(const Ice::Exception &ex)
@@ -139,6 +129,7 @@ void SpecificWorker::compute()
 						state = State::FINISH;
 					else
 					{
+						veces++;
 						RoboCompTrajectoryRobot2D::NavState statePos;
 						::geometry_msgs::Pose2D poseROS;
 						
@@ -162,6 +153,31 @@ void SpecificWorker::compute()
 						{
 							ROS_ERROR ("Could not find service /roah_rsbb/end_execute");
 						}
+						///////////////////////////77
+						switch(veces)
+						{
+							
+							case 1:
+							//comedor
+							target_obtained.z =  -1.7*1000.;
+							target_obtained.x =  2.5*1000;
+							target_obtained.ry = 0.0;
+							break;
+							case 2:
+							//puerta
+							target_obtained.z =  1.8*1000.;
+							target_obtained.x =  3.2*1000;
+							target_obtained.ry = 0.0;
+							break;
+							case 3:
+							//dorm
+							target_obtained.z =  1.8*1000.;
+							target_obtained.x =  -3.8*1000;
+							target_obtained.ry = 0.0;
+							break;
+						}
+						goto_target(target_obtained);
+						//////////////////////////7
 					}
 				}
 			}
@@ -194,10 +210,6 @@ void SpecificWorker::goalCallback(const ::geometry_msgs::Pose2D msg)
    target_obtained.ry = -msg.theta;
 	 target_obtained.y = target_obtained.rx = target_obtained.rz = 0.0;
 	 
-// 	 cout<<"target_obtained RCOP( "<<target_obtained.z
-// 														     <<target_obtained.x
-// 														     <<target_obtained.ry
-// 														     <<" )"<<endl;
 }
 
 void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg)
