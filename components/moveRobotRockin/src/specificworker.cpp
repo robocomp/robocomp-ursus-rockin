@@ -37,11 +37,12 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg)
 {
+    cout<<"benchmark_state_callback"<<endl;
     switch (msg->benchmark_state) 
     {
         case roah_rsbb_comm_ros::BenchmarkState::STOP:
           //pararse
-          trajectoryrobot2d_proxy->stop();
+          //trajectoryrobot2d_proxy->stop();
           break;
         case roah_rsbb_comm_ros::BenchmarkState::PREPARE:
            this->prepare();
@@ -65,6 +66,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::prepare()
 {
+    cout<<"prepare"<<endl;
     if (ros::service::waitForService ("/roah_rsbb/end_prepare", 100)) 
     {
         std_srvs::Empty s;
@@ -90,7 +92,8 @@ void SpecificWorker::execute()
     messages_saved_pub_.publish (messages_saved_msg);
     
     //ir like a champion a target
-    goto_target( target_obtained );
+//    goto_target( target_obtained );
+    cout<<target_obtained.x<<" "<<target_obtained.y<<endl;
     
     //fin
     if (ros::service::waitForService ("/roah_rsbb/end_execute", 100)) 
@@ -153,7 +156,7 @@ void SpecificWorker::goto_target( RoboCompTrajectoryRobot2D::TargetPose target)
                             {
                                     state = trajectoryrobot2d_proxy->getState().state;
                                     stateOk = true;
-                            }
+                           }
                             catch(const Ice::Exception &ex)
                             {
                                     std::cout <<"ERROR trajectoryrobot2d->getState "<< ex << std::endl;
@@ -269,6 +272,8 @@ void SpecificWorker::compute()
 //                     }
 //             }			
 //     }
+
+	ros::spinOnce();
 
 }
 
