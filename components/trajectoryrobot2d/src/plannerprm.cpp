@@ -47,7 +47,7 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 		printf("We need a plane named 'floor_plane'\n");
 		throw err;
 	}
-
+	//OUTERREGION (REGION WITH GRAPH) -- INNERREGION (REGION WHITOUT GRAPH)
 	if (floor != NULL)
 	{
 		QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
@@ -73,9 +73,9 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	
 	//QRectF outerRegion(-1920,3500,  4000,-7000);
 	//QRectF outerRegion(-2500,-2500,  5000, 5000);
-	
 	// for Rocking apartment
-	// innerRegions << QRectF(-5000, 5000, 3000, -10000) <<	QRectF(-5000, -5000, 10000, 3000) << QRectF(5000,5000, -3000,-10000) << QRectF(-5000, 5000, 5000, -2000) << QRectF(-5000, 5000, 3700, -5000);
+	innerRegions << QRectF(-5000,6000, 1000, -12000) << QRectF(-2700, 6000, 3500, -2900)
+				 << QRectF(-5000,-6000, 5000, 2900) << QRectF(-5000, -4500, 10000, -1800) << QRectF(3000, 1800, 2000, -7800);
 	// QRectF outerRegion(0, 0, 10000, -10000);
 
 	sampler.initialize(innerModel, outerRegion, innerRegions);
