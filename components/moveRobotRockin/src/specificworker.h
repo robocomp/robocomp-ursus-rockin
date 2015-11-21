@@ -46,15 +46,15 @@ class SpecificWorker : public GenericWorker
 Q_OBJECT
 public:
     
-        ros::Subscriber subROS;
-        ros::Subscriber subROS2;
-	ros::Publisher  messages_saved_pub_;
-        
+      ros::Subscriber subROS;
+      ros::Subscriber subROS2;
+	    ros::Publisher  messages_saved_pub_;
+		    
         RoboCompTrajectoryRobot2D::TargetPose target_obtained;
         
         geometry_msgs::Pose2D goal_msg;
 
-	ros::NodeHandle nh;
+				ros::NodeHandle nh;
         std_msgs::String str;
         
         QMutex mutex_pos;
@@ -74,6 +74,8 @@ public:
 public slots:
 	void compute();
 
+      private:
+      void nextTarget();
 };
 
 #endif
