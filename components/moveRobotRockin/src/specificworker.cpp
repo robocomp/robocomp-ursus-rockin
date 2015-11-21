@@ -35,22 +35,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
     
 }
 
-void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg)
-{
-    switch (msg->benchmark_state) 
-    {
-        case roah_rsbb_comm_ros::BenchmarkState::STOP:
-          //pararse
-          trajectoryrobot2d_proxy->stop();
-          break;
-        case roah_rsbb_comm_ros::BenchmarkState::PREPARE:
-           this->prepare();
-          break;
-        case roah_rsbb_comm_ros::BenchmarkState::EXECUTE:
-           this->execute();
-        break;       
-    }
-}
+
 
 /**
 * \brief Default destructor
@@ -65,6 +50,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::prepare()
 {
+    cout<<"prepare"<<endl;
     if (ros::service::waitForService ("/roah_rsbb/end_prepare", 100)) 
     {
         std_srvs::Empty s;
@@ -90,8 +76,9 @@ void SpecificWorker::execute()
     messages_saved_pub_.publish (messages_saved_msg);
     
     //ir like a champion a target
-    goto_target( target_obtained );
-    
+		
+		goto_target(target_obtained);
+		
     //fin
     if (ros::service::waitForService ("/roah_rsbb/end_execute", 100)) 
     {
@@ -105,196 +92,114 @@ void SpecificWorker::execute()
     {
         ROS_ERROR ("Could not find service /roah_rsbb/end_execute");
     }
-    
 }
-
 
 void SpecificWorker::goto_target( RoboCompTrajectoryRobot2D::TargetPose target)
 {
-    bool goOk = false;
-    bool errorGo = false;
-    int cont = 0;
-    while (!goOk && !errorGo)
-    {
-            try
-            {
-                    trajectoryrobot2d_proxy->go(target);
-                    printf("Go to ( %f , %f , %f )",target.x,target.y,target.z);
-                    goOk = true;
-            }
-            catch(const Ice::Exception &ex)
-            {
-                    std::cout <<"ERROR trajectoryrobot2d->go "<< ex << std::endl;
-                    sleep(5000);
-                    cont++;
-                    if (cont == 4)
-                    {
-                            errorGo = true;
-                    }
-            }
-            if (!errorGo)
-            {
-                    sleep(5000);
-            }
+  	try
+		{
+			std::string st = trajectoryrobot2d_proxy->getState().state;
+			if( st == "IDLE")
+			{
+				trajectoryrobot2d_proxy->go(target);
+				qDebug() << "Target sent to Trajectory" <<  target.x<<target.z<<target.ry;
+				state = State::GOING;
+				veces++;
+			}
     }
-    
-    if (!errorGo)
+    catch(const Ice::Exception &ex)
     {
-            bool stateOk = false;
-            bool errorState = false;
-            int cont = 0;
-            string state;
-
-            while (true) // wait to idle state
-            {
-                    while (!stateOk)
-                    {
-                            try
-                            {
-                                    state = trajectoryrobot2d_proxy->getState().state;
-                                    stateOk = true;
-                            }
-                            catch(const Ice::Exception &ex)
-                            {
-                                    std::cout <<"ERROR trajectoryrobot2d->getState "<< ex << std::endl;
-                                    sleep(5000);
-                                    cont++;
-                                    if (cont == 4)
-                                    {
-                                            errorState = true;
-                                    }
-                            }
-                    }
-                    
-                    if (!errorState)
-                    {
-                            if (state == "IDLE")
-                            {
-                                    break;
-                            }
-                    }
-                    else
-                    {
-                            std::cout <<"ERROR in get state!!!"<< std::endl;
-                            break;
-                    }
-            }			
-    }
+       std::cout <<"ERROR trajectoryrobot2d->go "<< ex << std::endl;
+		}
 }
 
 
 void SpecificWorker::compute()
 {
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
+	
+	switch(state)
+	{
+		case State::INIT:
+			break;
+		case State::IDLE:
+			break;
+		case State::GOING:
+			qDebug() << "en camino al éxito";
+			try
+			{
+				std::string st = trajectoryrobot2d_proxy->getState().state;
+				if( st == "IDLE")
+				{
+					qDebug() << "He acabado una";
+					//speech_proxy->say("I have reached waypoint" + itoa(veces));
+					if(veces == 3 )
+						state = State::FINISH;
+					else
+					{
+						RoboCompTrajectoryRobot2D::NavState statePos;
+						::geometry_msgs::Pose2D poseROS;
+						
+						statePos = trajectoryrobot2d_proxy->getState();
+						poseROS.x = statePos.z / 1000.;
+						poseROS.y = - (statePos.x / 1000.);
+						poseROS.theta = - (statePos.ang);
+						
+						qDebug() <<"Llegué a ( "<<statePos.z<<statePos.x<<statePos.ang<<" )";
+					}
+				}
+			}
+			catch(const Ice::Exception &e)
+			{
+				std::cout << "Error reading from Trajectory" << e << std::endl;
+			}
+			break;
+		case State::FINISH:
+				qDebug() << "He terminado con éxito";
+				//speech_proxy->say("I have finished my assignment");
+			break;
+	}
+	
 
-//     float64 x;
-//     float64 y;
-//     float64 theta;
-//     
-//     bool goOk = false;
-//     bool errorGo = false;
-//     int cont = 0;
-//     while (!goOk && !errorGo)
-//     {
-//             try
-//             {
-//                     trajectoryrobot2d_proxy->go(target);
-//                     printf("Go to ( %f , %f , %f )",target.x,target.y,target.z);
-//                     goOk = true;
-//             }
-//             catch(const Ice::Exception &ex)
-//             {
-//                     std::cout <<"ERROR trajectoryrobot2d->go "<< ex << std::endl;
-//                     this->sleep(5000)
-//                     cont++;
-//                     if (cont == 4)
-//                     {
-//                             errorGo = true;
-//                     }
-//             }
-//             if (!errorGo)
-//             {
-//                     this->sleep(5000)
-//             }
-//     }
-//     
-//     if (!errorGo)
-//     {
-//             bool stateOk = false;
-//             bool errorState = false;
-//             int cont = 0;
-//             string state;
-// 
-//             while (true) // wait to idle state
-//             {
-//                     while (!stateOk)
-//                     {
-//                             try
-//                             {
-//                                     state = trajectoryrobot2d_proxy->getState().state;
-//                                     stateOk = true;
-//                             }
-//                             catch(const Ice::Exception &ex)
-//                             {
-//                                     std::cout <<"ERROR trajectoryrobot2d->getState "<< ex << std::endl;
-//                                     this->sleep(5000)
-//                                     cont++;
-//                                     if (cont == 4)
-//                                     {
-//                                             errorState = true;
-//                                     }
-//                             }
-//                     }
-//                     
-//                     if (!errorState)
-//                     {
-//                             if (state == "IDLE")
-//                             {
-//                                     break;
-//                             }
-//                     }
-//                     else
-//                     {
-//                             std::cout <<"ERROR in get state!!!"<< std::endl;
-//                             break;
-//                     }
-//             }			
-//     }
+
+	ros::spinOnce();
 
 }
 
+///ROS Callbacks
 
 void SpecificWorker::goalCallback(const ::geometry_msgs::Pose2D msg)
 {
-        cout<<msg.x<<endl;
-        cout<<msg.y<<endl;
-        cout<<msg.theta<<endl;
-        
-        target_obtained.z = msg.x;
-		  target_obtained.y = 0;
-        target_obtained.x = - msg.y;
-		  target_obtained.rx = 0;
-		  target_obtained.ry = - msg.theta;
-        target_obtained.rz = 0;
-        
-// 	ROS_INFO("I heard: [%s]", msg->data.c_str());
-// 	///////////// Aqui tiene que venir las n poses
-// 	
-// 	// asignar la lista de target de ROS a la de robocomp
-// 	// 	target.x = pose2D.x;
-// 	// 	target.z = pose2D.y;
-// 	// 	target.y = 0; // no cambiar! siempre 0
-// 	// 	target.ry = pose2D.teta;
-// 	// añadir la modificacion de nueva lista
-// 	targetList = poses2D;
-	
+	 qDebug() << __FUNCTION__;
+   cout<<"target_obtained ROS( "<<msg.x
+																<<msg.y
+																<<msg.theta
+																<<" )"<<endl;
+																
+   target_obtained.z = msg.x*1000;
+   target_obtained.x = -msg.y*1000;
+   target_obtained.ry = -msg.theta;
+	 target_obtained.y = target_obtained.rx = target_obtained.rz = 0.0;
+	 
+// 	 cout<<"target_obtained RCOP( "<<target_obtained.z
+// 														     <<target_obtained.x
+// 														     <<target_obtained.ry
+// 														     <<" )"<<endl;
+}
+
+void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg)
+{
+    cout<<"benchmark_state_callback"<<endl;
+    switch (msg->benchmark_state) 
+    {
+        case roah_rsbb_comm_ros::BenchmarkState::STOP:
+          //pararse
+          //trajectoryrobot2d_proxy->stop();
+          break;
+        case roah_rsbb_comm_ros::BenchmarkState::PREPARE:
+           this->prepare();
+          break;
+        case roah_rsbb_comm_ros::BenchmarkState::EXECUTE:
+           this->execute();
+        break;       
+    }
 }
