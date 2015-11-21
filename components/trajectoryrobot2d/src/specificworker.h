@@ -150,6 +150,8 @@ private:
 	float angmMPI(float angle);
 
 	void mapBasedTarget(const NavigationParameterMap  &parameters);
+	
+	void publicarROS();
 
 #ifdef USE_QTGUI
 	OsgView *osgView;

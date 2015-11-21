@@ -154,7 +154,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
 
 	//Planning
-	plannerPRM = new PlannerPRM(innerModel, 100, 10);
+	plannerPRM = new PlannerPRM(innerModel, 600, 50);
 	planner = plannerPRM;
 #ifdef USE_QTGUI
 	planner->cleanGraph(innerViewer);
@@ -544,7 +544,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		///////
 		//agregar plane		AQUI HAY QUE AGREGAR EL PLANO Y DAR LA ORDEN DE REPLANIFICAR!!
 		
-		changeCommand(currentT,CurrentTarget::Command::INSERTOBSTACLE);
+		//changeCommand(currentT,CurrentTarget::Command::INSERTOBSTACLE);
 	}
 	else
 	{
@@ -1080,5 +1080,15 @@ void SpecificWorker::mapBasedTarget(const NavigationParameterMap &parameters)
 {
 	
 }
-
+void SpecificWorker::publicarROS()
+{ 
+	// time stamp = calcular;
+	static uint32_t seq = 0;
+	string frame_id="/map";
+	for (auto p : road)
+	{
+		;
+	}
+	seq++;
+}
 

@@ -95,7 +95,7 @@ void SpecificWorker::execute()
     if (ros::service::waitForService ("/roah_rsbb/end_execute", 100)) 
     {
         std_srvs::Empty s;
-        if (! ros::service::call ("/roah_rsbb/end_execute", s))
+    	if (! ros::service::call ("/roah_rsbb/end_execute", s)) 
         {
           ROS_ERROR ("Error calling service /roah_rsbb/end_execute");
         }
@@ -278,9 +278,12 @@ void SpecificWorker::goalCallback(const ::geometry_msgs::Pose2D msg)
         cout<<msg.y<<endl;
         cout<<msg.theta<<endl;
 
-        target_obtained.x = msg.x;
-        target_obtained.y = msg.y;
-        target_obtained.ry = msg.theta;
+	target_obtained.z = msg.x;
+	target_obtained.y = 0;
+	target_obtained.x = - msg.y;
+	target_obtained.rx = 0;
+	target_obtained.ry = - msg.theta;
+        target_obtained.rz = 0;
 
 // 	ROS_INFO("I heard: [%s]", msg->data.c_str());
 // 	///////////// Aqui tiene que venir las n poses

@@ -1,0 +1,15 @@
+spacePattern=3
+lineThickness=2
+fontName=Arial
+name=domain_rockin
+vertexDiameter=40
+shortPattern=1
+nodeThickness=2
+fontSize=12
+longPattern=3
+===
+include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_basic_perception.aggl)
+include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_manipulation.aggl)
+include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_hri.aggl)
+include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_navigation.aggl)
+include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_rockin_specific.aggl)
