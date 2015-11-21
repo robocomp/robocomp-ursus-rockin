@@ -75,7 +75,7 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	//QRectF outerRegion(-2500,-2500,  5000, 5000);
 	// for Rocking apartment                         y = x       x = -y
 	innerRegions << QRectF(-6000,-5000, 12000, 1000) << QRectF(-6000, -2700, 2900, 3500)
-				 << QRectF(6000, 0, -2900 , -5000) << QRectF(4500, 5000, 1800, -10000)<< QRectF(-1800, 3000, 7800, 2000) << QRectF(-200, -200, 1800, -5000);
+				 << QRectF(6000, 0, -2900 , -5000) << QRectF(4500, 5000, 1800, -10000)<< QRectF(-1800, 3000, 7800, 2000);// << QRectF(-200, -200, 1800, -5000);
 
 	sampler.initialize(innerModel, outerRegion, innerRegions);
 	  
