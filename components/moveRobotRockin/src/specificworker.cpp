@@ -36,6 +36,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg)
 {
+    cout<<"benchmark_state_callback"<<endl;
     switch (msg->benchmark_state) 
     {
         case roah_rsbb_comm_ros::BenchmarkState::STOP:
@@ -186,7 +187,7 @@ void SpecificWorker::compute()
 {
 // 	try
 // 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
+//		camera_proxy->getYImage(0,img, cState, bState);
 // 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
 // 		searchTags(image_gray);
 // 	}
@@ -268,7 +269,7 @@ void SpecificWorker::compute()
 //                     }
 //             }
 //     }
-
+	ros::spinOnce();
 }
 
 
@@ -278,9 +279,9 @@ void SpecificWorker::goalCallback(const ::geometry_msgs::Pose2D msg)
         cout<<msg.y<<endl;
         cout<<msg.theta<<endl;
 
-	target_obtained.z = msg.x;
+	target_obtained.z = 1000. * msg.x;
 	target_obtained.y = 0;
-	target_obtained.x = - msg.y;
+	target_obtained.x = - 1000. * msg.y;
 	target_obtained.rx = 0;
 	target_obtained.ry = - msg.theta;
         target_obtained.rz = 0;
