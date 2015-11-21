@@ -24,18 +24,17 @@
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
     //published
-    messages_saved_pub_ = nh.advertise<std_msgs::UInt32> ("/roah_rsbb/messages_saved", 1, true);
+    messages_saved_pub_ = nh.advertise<std_msgs::UInt32>
+    ("/roah_rsbb/messages_saved", 1, true);
+	  
     // --> If you look this. write in the terminal  ------>> rostopic echo /testPublication
-    
+
     // subcribe
-    
+
     subROS = nh.subscribe("/roah_rsbb/goal", 1000, &SpecificWorker::goalCallback, this);
     subROS2 = nh.subscribe ("/roah_rsbb/benchmark/state", 1, &SpecificWorker::benchmark_state_callback, this);
 
-    
 }
-
-
 
 /**
 * \brief Default destructor
@@ -69,40 +68,47 @@ void SpecificWorker::execute()
 {
     //first set the log
     //log set
-    
+
     //send the log
     std_msgs::UInt32 messages_saved_msg;
     messages_saved_msg.data = 1;
     messages_saved_pub_.publish (messages_saved_msg);
-    
+
     //ir like a champion a target
-		
 		goto_target(target_obtained);
 		
-    //fin
-    if (ros::service::waitForService ("/roah_rsbb/end_execute", 100)) 
-    {
-        std_srvs::Empty s;
-        if (! ros::service::call ("/roah_rsbb/end_execute", s)) 
-        {
-          ROS_ERROR ("Error calling service /roah_rsbb/end_execute");
-        }
-    }
-    else 
-    {
-        ROS_ERROR ("Could not find service /roah_rsbb/end_execute");
-    }
 }
 
 void SpecificWorker::goto_target( RoboCompTrajectoryRobot2D::TargetPose target)
 {
   	try
 		{
+// 			cout <<"aaaaaaaaaaaaaaaaaaaa"<<endl;
 			std::string st = trajectoryrobot2d_proxy->getState().state;
+// 			cout <<"bbbbbbbbbbbbb"<<endl;
+			cout << st;
+// 			cout <<"cccccccccccc"<<endl;
 			if( st == "IDLE")
 			{
+			
+			//dorm
+			 //target.z =  4*1000.;
+			 //target.x =  -3.5*1000.;
+			 //target.ry = 0.0;
+	
+			 //DENTRANCE
+		   target.z =  -3.2*1000.;
+			 target.x =  -4.7*1000;
+			 target.ry = 0.0;
+	
+			  //comedor
+		   target.z =  -1.7*1000.;
+			 target.x =  2.5*1000;
+			 target.ry = 0.0;
+	
+			 
 				trajectoryrobot2d_proxy->go(target);
-				qDebug() << "Target sent to Trajectory" <<  target.x<<target.z<<target.ry;
+				qDebug() << "Target sent to Trajectory" << target.x<<target.z<<target.ry;
 				state = State::GOING;
 				veces++;
 			}
@@ -116,15 +122,12 @@ void SpecificWorker::goto_target( RoboCompTrajectoryRobot2D::TargetPose target)
 
 void SpecificWorker::compute()
 {
-	
 	switch(state)
 	{
 		case State::INIT:
 			break;
-		case State::IDLE:
-			break;
 		case State::GOING:
-			qDebug() << "en camino al éxito";
+			//qDebug() << "en camino al éxito";
 			try
 			{
 				std::string st = trajectoryrobot2d_proxy->getState().state;
@@ -145,6 +148,20 @@ void SpecificWorker::compute()
 						poseROS.theta = - (statePos.ang);
 						
 						qDebug() <<"Llegué a ( "<<statePos.z<<statePos.x<<statePos.ang<<" )";
+						
+						 //signal to ROS after target is reached
+						if (ros::service::waitForService ("/roah_rsbb/end_execute", 100)) 
+						{
+							std_srvs::Empty s;
+							if (! ros::service::call ("/roah_rsbb/end_execute", s)) 
+							{
+								ROS_ERROR ("Error calling service /roah_rsbb/end_execute");
+							}
+						}
+						else
+						{
+							ROS_ERROR ("Could not find service /roah_rsbb/end_execute");
+						}
 					}
 				}
 			}
@@ -158,11 +175,8 @@ void SpecificWorker::compute()
 				//speech_proxy->say("I have finished my assignment");
 			break;
 	}
-	
-
 
 	ros::spinOnce();
-
 }
 
 ///ROS Callbacks
@@ -174,7 +188,7 @@ void SpecificWorker::goalCallback(const ::geometry_msgs::Pose2D msg)
 																<<msg.y
 																<<msg.theta
 																<<" )"<<endl;
-																
+ 
    target_obtained.z = msg.x*1000;
    target_obtained.x = -msg.y*1000;
    target_obtained.ry = -msg.theta;
@@ -193,7 +207,7 @@ void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState
     {
         case roah_rsbb_comm_ros::BenchmarkState::STOP:
           //pararse
-          //trajectoryrobot2d_proxy->stop();
+          trajectoryrobot2d_proxy->stop();
           break;
         case roah_rsbb_comm_ros::BenchmarkState::PREPARE:
            this->prepare();
