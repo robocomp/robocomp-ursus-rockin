@@ -76,7 +76,6 @@
  </node>
 
  <node alias="trajectory" endpoint="trajectoryrobot2d:tcp -h 100.0.30.11 -p 12204">
-  <dependence alias="laserRGBD" />
   <dependence alias="localization" />
   <dependence alias="base" />
   <workingDir path="/home/robocomp/" />

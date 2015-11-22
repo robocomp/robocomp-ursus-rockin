@@ -545,6 +545,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		//agregar plane		AQUI HAY QUE AGREGAR EL PLANO Y DAR LA ORDEN DE REPLANIFICAR!!
 		
 		//changeCommand(currentT,CurrentTarget::Command::INSERTOBSTACLE);
+		changeCommand(currentT,CurrentTarget::Command::GOTO);
 	}
 	else
 	{
