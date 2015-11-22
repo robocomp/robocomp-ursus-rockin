@@ -154,7 +154,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
 
 	//Planning
-	plannerPRM = new PlannerPRM(innerModel, 100, 10);
+	plannerPRM = new PlannerPRM(innerModel, 100, 20);
 	planner = plannerPRM;
 #ifdef USE_QTGUI
 	planner->cleanGraph(innerViewer);
@@ -544,7 +544,8 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		///////
 		//agregar plane		AQUI HAY QUE AGREGAR EL PLANO Y DAR LA ORDEN DE REPLANIFICAR!!
 		
-		changeCommand(currentT,CurrentTarget::Command::INSERTOBSTACLE);
+		//changeCommand(currentT,CurrentTarget::Command::INSERTOBSTACLE);
+		changeCommand(currentT,CurrentTarget::Command::GOTO);
 	}
 	else
 	{
@@ -741,7 +742,7 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-	goReferenced(target,0,0,200);
+	goReferenced(target,0,0,100);
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -1048,6 +1049,7 @@ float SpecificWorker::angmMPI(float angle)
 float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold)
 {
 	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
+
 	//PARAMETERS CHECK
 	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
 	{
@@ -1080,5 +1082,15 @@ void SpecificWorker::mapBasedTarget(const NavigationParameterMap &parameters)
 {
 	
 }
-
+void SpecificWorker::publicarROS()
+{ 
+	// time stamp = calcular;
+	static uint32_t seq = 0;
+	string frame_id="/map";
+	for (auto p : road)
+	{
+		;
+	}
+	seq++;
+}
 

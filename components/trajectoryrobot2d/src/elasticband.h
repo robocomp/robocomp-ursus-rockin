@@ -28,7 +28,7 @@
 #include <assert.h>
 #include "currenttarget.h"
 
-#define FORCE_DISTANCE_LIMIT 500  //mm
+#define FORCE_DISTANCE_LIMIT 600  //mm
 #define ROBOT_STEP 50
 #define DELTA_H 50
 #define ROAD_STEP_SEPARATION 400
