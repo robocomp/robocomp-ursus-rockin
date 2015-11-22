@@ -1080,7 +1080,7 @@ float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, c
 		qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
 	}
 	
-	return road.getRobotDistanceToTarget();
+	return (currentTarget.getTranslation() - innerModel->transform("world",QVec::vec3(0,0,0),"base")).norm2();
 }
 
 
