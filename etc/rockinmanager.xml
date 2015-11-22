@@ -241,4 +241,15 @@
   <color value="#33FF33" />
  </node>
 
+  <node alias="speechComp" endpoint="commonbehavior:tcp -h 100.0.30.11 -p 10696">
+<!--   <dependence alias="trajectoryrobot2d" /> -->
+  <workingDir path="/home/robocomp/" />
+  <upCommand command="rcremote 100.0.30.11 speechComp /home/robocomp/robocomp/components/robocomp-robolab/components/speechComp/ python src/speechComp.py --Ice.Config=etc/config" />
+  <downCommand command="ssh robolab@100.0.30.11 pkill -9 -f speechComp.py" />
+  <configFile path="/home/robocomp/robocomp/components/robocomp-ursus/etc/config" />
+  <xpos value="132.304217709" />
+  <ypos value="-67.1091236569" />
+  <radius value="10.0" />
+  <color value="#FF3333" />
+ </node>
 </rcmanager>
