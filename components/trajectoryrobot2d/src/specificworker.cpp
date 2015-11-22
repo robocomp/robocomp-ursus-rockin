@@ -742,7 +742,7 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-	goReferenced(target,0,0,200);
+	goReferenced(target,0,0,100);
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -1049,6 +1049,7 @@ float SpecificWorker::angmMPI(float angle)
 float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold)
 {
 	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
+
 	//PARAMETERS CHECK
 	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
 	{
