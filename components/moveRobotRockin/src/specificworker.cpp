@@ -33,7 +33,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
     subROS = nh.subscribe("/roah_rsbb/goal", 1000, &SpecificWorker::goalCallback, this);
     subROS2 = nh.subscribe ("/roah_rsbb/benchmark/state", 1, &SpecificWorker::benchmark_state_callback, this);
-
+   execute();
 }
 
 /**
@@ -80,9 +80,9 @@ void SpecificWorker::execute()
     //ir like a champion a target
 		//DENTRANCE
 		
-// 		target_obtained.z =  -3.2*1000.;
-// 		target_obtained.x =  -4.7*1000;
-// 		target_obtained.ry = 0.0;
+ 		target_obtained.z =  -1.7*1000.;
+ 		target_obtained.x =  2.5*1000;
+ 		target_obtained.ry = 0.0;
 		
 		/////////////
 		goto_target(target_obtained);
@@ -154,7 +154,7 @@ void SpecificWorker::compute()
 							ROS_ERROR ("Could not find service /roah_rsbb/end_execute");
 						}
 						///////////////////////////77
-		/*				switch(veces)
+						switch(veces)
 						{
 							
 							case 1:
@@ -177,7 +177,7 @@ void SpecificWorker::compute()
 							break;
 						}
 						goto_target(target_obtained);
-		*/	
+			
 		
 		//////////////////////////7
 					}
