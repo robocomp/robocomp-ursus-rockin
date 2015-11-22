@@ -131,6 +131,8 @@ int ::doorbell::run(int argc, char* argv[])
 #endif
 	int status=EXIT_SUCCESS;
 
+         ros::init(argc,argv,"doorbell");
+        
 	AGMAgentTopicPrx agmagenttopic_proxy;
 
 	string proxy, tmp;

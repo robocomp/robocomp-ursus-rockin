@@ -23,12 +23,14 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
+        doorbells = 0;
 	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
+        
+        ben_state_sub = nh.subscribe ("/roah_rsbb/benchmark/state", 1, &SpecificWorker::benchmark_state_callback, this);
 
-	connect(pushButton, SIGNAL(clicked()), this, SLOT(doorbellRang()));
 }
 
 /**
@@ -37,6 +39,75 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 SpecificWorker::~SpecificWorker()
 {
 	
+}
+
+void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg)
+{
+    cout<<"benchmark_state_callback"<<endl;
+    switch (msg->benchmark_state) 
+    {
+        case roah_rsbb_comm_ros::BenchmarkState::STOP:
+          //pararse
+          //trajectoryrobot2d_proxy->stop();
+          break;
+        case roah_rsbb_comm_ros::BenchmarkState::PREPARE:
+           this->prepare();
+          break;
+        case roah_rsbb_comm_ros::BenchmarkState::EXECUTE:
+           this->execute();
+        break;       
+    }
+}
+
+void SpecificWorker::prepare()
+{
+    cout<<"prepare"<<endl;
+    if (ros::service::waitForService ("/roah_rsbb/end_prepare", 100)) 
+    {
+        std_srvs::Empty s;
+        if (! ros::service::call ("/roah_rsbb/end_prepare", s)) 
+        {
+          ROS_ERROR ("Error calling service /roah_rsbb/end_prepare");
+        }
+    }
+    else 
+    {
+        ROS_ERROR ("Could not find service /roah_rsbb/end_prepare");
+    }
+    
+}
+
+
+void SpecificWorker::execute()
+{
+    //first set the log
+    //log set
+		
+		qDebug() << __FUNCTION__;
+		
+		//send the log
+    std_msgs::UInt32 messages_saved_msg;
+    messages_saved_msg.data = 1;
+    messages_saved_pub_.publish (messages_saved_msg);
+    
+    doorbell_sub = nh.subscribe ("/roah_rsbb/devices/bell", 1, &SpecificWorker::doorbellCallBack, this);
+}
+
+void SpecificWorker::end_execute()
+{
+        //fin
+    if (ros::service::waitForService ("/roah_rsbb/end_execute", 100)) 
+    {
+        std_srvs::Empty s;
+        if (! ros::service::call ("/roah_rsbb/end_execute", s)) 
+        {
+          ROS_ERROR ("Error calling service /roah_rsbb/end_execute");
+        }
+    }
+    else 
+    {
+        ROS_ERROR ("Could not find service /roah_rsbb/end_execute");
+    }
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -114,6 +185,7 @@ void SpecificWorker::compute()
 			}
 		}
 	}
+	ros::spinOnce();
 }
 
 
@@ -279,6 +351,11 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	}
 }
 
+void SpecificWorker::doorbellCallBack(std_msgs::Empty)
+{
+    doorbellRang();
+    doorbells++;
+}
 
 void SpecificWorker::doorbellRang()
 {
@@ -299,6 +376,12 @@ void SpecificWorker::doorbellRang()
 }
 
 
+void SpecificWorker::removeCurrentPerson()
+{
+    
+        if (doorbells > 4)
+            end_execute();    
+}
 
 string SpecificWorker::getPersonType()
 {

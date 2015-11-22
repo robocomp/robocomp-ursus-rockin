@@ -46,10 +46,11 @@ class SpecificWorker : public GenericWorker
 Q_OBJECT
 public:
     
-      ros::Subscriber subROS;
-      ros::Subscriber subROS2;
-	    ros::Publisher  messages_saved_pub_;
-		    
+        int doorbells;
+        ros::Subscriber subROS;
+        ros::Subscriber subROS2;
+	ros::Publisher  messages_saved_pub_;
+        
         RoboCompTrajectoryRobot2D::TargetPose target_obtained;
         
         geometry_msgs::Pose2D goal_msg;

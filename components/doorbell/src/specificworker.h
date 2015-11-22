@@ -31,9 +31,24 @@
 
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
+#include <ros/ros.h>
+#include <geometry_msgs/Pose2D.h>
+#include <std_msgs/String.h>
+#include <std_msgs/UInt32.h>
+#include <std_msgs/Empty.h>
+#include <std_srvs/Empty.h>
+#include <roah_rsbb_comm_ros/BenchmarkState.h>
 
 class SpecificWorker : public GenericWorker
 {
+        
+        int doorbells;
+        ros::Subscriber ben_state_sub;
+        ros::Subscriber doorbell_sub;
+	ros::Publisher  messages_saved_pub_;
+        
+        ros::NodeHandle nh;
+        
 Q_OBJECT
 public:
 	SpecificWorker(MapPrx& mprx);	
@@ -52,10 +67,17 @@ public:
 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
-
+        void prepare();
+        void execute();
+        void end_execute();
+        void benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg);
+        void doorbellCallBack(std_msgs::Empty);
+	
+        void removeCurrentPerson();
+        
 public slots:
 	void compute();
-	void doorbellRang();
+        void doorbellRang();
 
 private:
 	std::string action;
