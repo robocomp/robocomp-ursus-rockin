@@ -46,6 +46,7 @@ class SpecificWorker : public GenericWorker
 Q_OBJECT
 public:
     
+        int doorbells;
         ros::Subscriber subROS;
         ros::Subscriber subROS2;
 	ros::Publisher  messages_saved_pub_;
@@ -54,7 +55,7 @@ public:
         
         geometry_msgs::Pose2D goal_msg;
 
-	ros::NodeHandle nh;
+				ros::NodeHandle nh;
         std_msgs::String str;
         
         QMutex mutex_pos;
@@ -67,10 +68,15 @@ public:
         void goto_target( RoboCompTrajectoryRobot2D::TargetPose target);
         void benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg);
 	void goalCallback(const ::geometry_msgs::Pose2D msg);
-
+	enum State {INIT, GOING, FINISH};
+	State state = State::INIT;
+	uint veces = 0;
+	
 public slots:
 	void compute();
 
+      private:
+      void nextTarget();
 };
 
 #endif

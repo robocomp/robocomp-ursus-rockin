@@ -1,0 +1,105 @@
+spacePattern=3
+lineThickness=2
+fontName=Arial
+name=domain_active_perception
+vertexDiameter=40
+shortPattern=1
+nodeThickness=2
+fontSize=12
+longPattern=3
+===
+
+findObjectVisuallyInTable : active(1)
+{
+	{
+		contst:objectSt(95,110)
+		container:object(-130,110)
+		robot:robot(-325,0)
+		room:object(-325,110)
+		container->contst(explored)*
+		container->contst(table)
+		container->contst(reach)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+	}
+	=>
+	{
+		status:objectSt(95,0)
+		object:object(-130,0)
+		container:object(-130,110)
+		room:object(-325,110)
+		contst:objectSt(95,110)
+		robot:robot(-325,0)
+		container->contst(explored)*
+		container->contst(table)
+		container->contst(reach)
+		robot->object(know)
+		object->status(see)
+		object->status(unclassified)
+		object->status(noReach)
+		object->status(position)
+		object->status(reachable)
+		object->status(hasStatus)
+		object->container(in)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+	}
+}
+
+recognizeObjGlasses : active(1)
+{
+	{
+		status:objectSt(65,-75)
+		object:object(-130,-75)
+		robot:robot(-290,-75)
+		robot->object(know)
+		object->status(hasStatus)
+		object->status(see)
+		object->status(position)
+		object->status(unclassified)
+	}
+	=>
+	{
+		status:objectSt(60,-75)
+		object:object(-130,-75)
+		robot:robot(-290,-75)
+		robot->object(know)
+		object->status(hasStatus)
+		object->status(see)
+		object->status(position)
+		object->status(classified)
+		object->status(glasses)
+	}
+}
+
+setRoomExplored : passive(1)
+{
+	{
+		status:roomSt(250,0)
+		room:object(0,0)
+		room->status(noExplored)
+	}
+	=>
+	{
+		status:roomSt(250,0)
+		room:object(0,0)
+		room->status(explored)
+	}
+}
+
+setRoomNotExplored : passive(1)
+{
+	{
+		status:roomSt(250,0)
+		room:object(0,0)
+		room->status(explored)
+	}
+	=>
+	{
+		status:roomSt(250,0)
+		room:object(0,0)
+		room->status(noExplored)
+	}
+}

@@ -1,0 +1,60 @@
+<AGMModel>
+
+
+	<symbol id="1" type="robot" >
+		<attribute key="imName" value="robot" />
+		<attribute key="imType" value="omniRobot" />
+	</symbol>
+
+
+	<symbol id="7" type="object" >
+		<attribute key="imName" value="room" />
+		<attribute key="imType" value="transform" />
+	</symbol>
+	<link  src="1"  dst="7"      label="know" />
+	<symbol id="8" type="objectSt" />
+	<link  src="7"  dst="8"  label="room" />
+	<link  src="7"  dst="8"  label="public" />
+	<link  src="7"  dst="8"  label="classified" />
+	<link  src="1"  dst="7"  label="in" />
+	<link  src="7"  dst="1"  label="RT"/>
+
+
+
+	
+
+	<symbol id="17" type="object" >
+		<attribute key="imName" value="outside" />
+		<attribute key="imType" value="transform" />
+	</symbol>
+	<link  src="1"  dst="17"      label="know" />
+	<symbol id="18" type="objectSt" />
+	<link  src="17"  dst="18"  label="room" />
+	<link  src="17"  dst="18"  label="public" />
+	<link  src="17"  dst="18"  label="outside" />
+	<link  src="17"  dst="18"  label="classified" />
+
+
+
+	
+	
+	<symbol id="37" type="object" >
+		<attribute key="imName" value="bedroom" />
+		<attribute key="imType" value="transform" />
+	</symbol>
+	<link  src="1"  dst="37"      label="know" />
+	<symbol id="38" type="objectSt" />
+	<link  src="37"  dst="38"  label="room" />
+	<link  src="37"  dst="38"  label="private" />
+	<link  src="37"  dst="38"  label="classified" />
+
+
+
+	
+	<link src="7" dst="17" label="connected" />
+	<link src="17" dst="7" label="connected" />
+	<link src="7" dst="37" label="connected" />
+	<link src="37" dst="7" label="connected" />
+	
+</AGMModel>
+

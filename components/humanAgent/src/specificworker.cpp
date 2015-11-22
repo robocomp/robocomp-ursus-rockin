@@ -106,7 +106,7 @@ void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, 
 	if (parent==NULL)
 		qFatal("parent null stop");
 
-	if(  dynamic_cast<InnerModelTransform *>( node )  != NULL )
+	if (dynamic_cast<InnerModelTransform *>( node )  != NULL )
 	{
 		
 		InnerModelTransform * tf=dynamic_cast<InnerModelTransform *>( node );
@@ -384,7 +384,7 @@ void SpecificWorker::updatePeopleInnerFull()
 
 void SpecificWorker::updatePeopleInnerFullB()
 {
-	QMutexLocker m (mutex);	
+	QMutexLocker m (mutex);
 	int32_t robotID = worldModel->getIdentifierByType("robot");
 	if (robotID < 0)
 	{
@@ -392,7 +392,7 @@ void SpecificWorker::updatePeopleInnerFullB()
 		return;
 	}
 	bool modification = false;
-	
+
 	///CAUTION CHAPUZA PA PROBAR A COLGAR DLE MUNDO 
 	int32_t roomID = agmInner.findName("room");
 	if (roomID < 0)
@@ -473,7 +473,7 @@ void SpecificWorker::updatePeopleInnerFullB()
 	qDebug()<<"lInsertions"<<lInsertions;
 	for (int i=0; i<lInsertions.size(); i++)
 	{
-		AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");					
+		AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");
 		AGMModelSymbol::SPtr typeSymbolPerson =worldModel->newSymbol("unknownPerson");
 		int personID = newSymbolPerson->identifier;
 		
@@ -485,7 +485,7 @@ void SpecificWorker::updatePeopleInnerFullB()
 		try
 		{
 			int state = personList.at(TrackingId).state;
-			newSymbolPerson->setAttribute("State",int2str(state));						
+			newSymbolPerson->setAttribute("State",int2str(state));
 			newSymbolPerson->setAttribute("Red",int2str(personList.at(TrackingId).spineJointColor.R));
 			newSymbolPerson->setAttribute("Green",int2str(personList.at(TrackingId).spineJointColor.G));
 			newSymbolPerson->setAttribute("Blue",int2str(personList.at(TrackingId).spineJointColor.B));
@@ -574,6 +574,20 @@ void SpecificWorker::updatePeopleInnerFullB()
 		colorRGB.b = personList.at(TrackingId).spineJointColor.B;
 		HsvColor colorHSV = rgb2hsv(colorRGB);
 		
+                
+// 		cv::Mat hsv_image;
+// 		cv::cvtColor(bgr_image, hsv_image, cv::COLOR_BGR2HSV);
+// 		// Threshold the HSV image, keep only the red pixels
+// 		cv::Mat lower_red_hue_range;
+// 		cv::Mat upper_red_hue_range;
+// 		cv::inRange(hsv_image, cv::Scalar(0, 100, 100), cv::Scalar(10, 255, 255), lower_red_hue_range);
+// 		cv::inRange(hsv_image, cv::Scalar(160, 100, 100), cv::Scalar(179, 255, 255), upper_red_hue_range);
+                
+                
+                
+                
+                
+                
 		std::cout<<"---------------------------"<<std::endl;
 		std::cout<<"rgb("<<int2str(personList.at(TrackingId).spineJointColor.R)<<","<<int2str(personList.at(TrackingId).spineJointColor.G)<<","<<int2str(personList.at(TrackingId).spineJointColor.B)<<")"<<std::endl;
 		std::cout<<"hsv("<<int2str(colorHSV.h)<<","<<int2str(colorHSV.s)<<","<<int2str(colorHSV.v)<<")"<<std::endl;
