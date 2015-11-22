@@ -147,7 +147,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 
 		if(fabs(vrot - lastVrot) > umbralrot)
 		{
-			qDebug()<<"lastrot "<<lastVrot << "\n vrot "<< vrot;
+			//qDebug()<<"lastrot "<<lastVrot << "\n vrot "<< vrot;
 			if(vrot > lastVrot)
 				vrot = lastVrot + umbralrot;
 			else vrot = lastVrot - umbralrot;
@@ -162,7 +162,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//stopping speed jump
 		if(fabs(vadvance - lastVadvance) > umbral)
 		{
-			qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
+			//qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
 			if(vadvance > lastVadvance)
 				vadvance = lastVadvance + umbral;
 			else vadvance = lastVadvance - umbral;
@@ -285,9 +285,7 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 				break;
 		}
 		baseOffsets.push_back(k);
-		qDebug()<<k;
 	}
-	qDebug()<<"----------------------------";
 	return baseOffsets;
 }
 

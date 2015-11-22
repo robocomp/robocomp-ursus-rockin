@@ -1048,8 +1048,13 @@ float SpecificWorker::angmMPI(float angle)
 
 float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold)
 {
-	printf("<go target (%f %f) (%f)", target.x, target.z, target.ry);
-
+	QVec current = currentTarget.getTranslation();
+	QVec currentRot = currentTarget.getRotation();
+	if(fabs(target.x - current.x()) < 10 and fabs(target.z - current.z()) < 10 and (target.ry - currentRot.y()) < 0.05)
+	{
+		printf("same target \n");
+		return road.getRobotDistanceToTarget();
+	}
 	//PARAMETERS CHECK
 	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
 	{
@@ -1065,6 +1070,7 @@ float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, c
 		road.setThreshold(threshold);
 		currentTarget.setTranslation( QVec::vec3(target.x, target.y, target.z) );
 		currentTarget.setRotation( QVec::vec3(target.rx, target.ry, target.rz) );
+		qDebug() << currentTarget.getRotation() << "------ currentTarget ROtataion";
 		changeCommand(currentTarget,CurrentTarget::Command::GOTO);
 		currentTarget.setWithoutPlan(true);
 		if( target.doRotation == true)
@@ -1074,7 +1080,7 @@ float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, c
 		qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
 	}
 	
-	//return road.getRobotDistanceToTarget();
+	return road.getRobotDistanceToTarget();
 }
 
 
