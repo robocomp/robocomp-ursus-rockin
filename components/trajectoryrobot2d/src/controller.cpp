@@ -66,7 +66,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		if(i.dist < 10) i.dist = 30000;
 		if( i.dist < baseOffsets[j] + 50 )
 		{
-			if(i.angle>-1.20 && i.angle<1.20){
+			if(i.angle>-1.30 && i.angle<1.30){
 			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
 			stopTheRobot(omnirobot_proxy);
 			road.setBlocked(true);		//AQUI SE BLOQUEA PARA REPLANIFICAR
@@ -76,15 +76,15 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		}
 		else
 		{
-			if (i.dist < baseOffsets[j] + 250) 
+			if (i.dist < baseOffsets[j] + 150) 
 			{
 				if (i.angle > 0)
 				{
-					vside  = -50;
+					vside  = -80;
 				}
 				else
 				{
-					vside = 50;
+					vside = 80;
 				}
 			}
 		}
@@ -201,9 +201,9 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//////   EXECUTION
 		////////////////////////////////////////////////
 
-		qDebug() << "------------------Controller Report ---------------;";
-		qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
-		qDebug() << "---------------------------------------------------;";
+// 		qDebug() << "------------------Controller Report ---------------;";
+// 		qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
+// 		qDebug() << "---------------------------------------------------;";
                 
    		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
    		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
@@ -280,12 +280,14 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 		for(k = 10; k < 4000; k++)
 		{
 			p = innerModel->laserTo("robot","laser",k,i.angle);
-			if( p.x()*p.x() + p.z()*p.z() - 2*200*200 >= 0) 
+			if( sqrt(p.x()*p.x() + p.z()*p.z()) - 250 >= 0) 
 			//if( base.contains( QPointF( p.x(), p.z() ) ) == false )
 				break;
 		}
 		baseOffsets.push_back(k);
+		qDebug()<<k;
 	}
+	qDebug()<<"----------------------------";
 	return baseOffsets;
 }
 

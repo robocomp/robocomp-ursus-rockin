@@ -457,7 +457,6 @@ bool WayPoints::update()
 		if(getRobotDistanceToTarget() < 1000)
 	{
 		robot3DPos = innerModel->transform("world", "virtualRobot");
-		qDebug()<<__FUNCTION__<<"swaping to virtualRobot";
 	}
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 
