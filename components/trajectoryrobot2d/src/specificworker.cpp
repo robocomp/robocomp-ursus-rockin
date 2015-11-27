@@ -742,7 +742,7 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-	goReferenced(target,0,0,100);
+        return goReferenced(target,0,0,100);
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -1053,7 +1053,8 @@ float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, c
 	if(fabs(target.x - current.x()) < 10 and fabs(target.z - current.z()) < 10 and (target.ry - currentRot.y()) < 0.05)
 	{
 		printf("same target \n");
-		return road.getRobotDistanceToTarget();
+                return (current - innerModel->transform("world",QVec::vec3(0,0,0),"robot")).norm2();
+		//return road.getRobotDistanceToTarget();
 	}
 	//PARAMETERS CHECK
 	if( isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) )
@@ -1079,8 +1080,8 @@ float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, c
 		taskReloj.restart();
 		qDebug() << __FUNCTION__ << "---------- GO command received with target at Tr:" << currentTarget.getTranslation() << "Angle:" << currentTarget.getRotation().alfa();
 	}
-	
-	return (currentTarget.getTranslation() - innerModel->transform("world",QVec::vec3(0,0,0),"base")).norm2();
+	qDebug()<<"distanciaaaaaaaaaaaaaaaaaaaa"<<(currentTarget.getTranslation() - innerModel->transform("world",QVec::vec3(0,0,0),"robot")).norm2();
+	return (currentTarget.getTranslation() - innerModel->transform("world",QVec::vec3(0,0,0),"robot")).norm2();
 }
 
 
