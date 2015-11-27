@@ -28,9 +28,19 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
-        
-        ben_state_sub = nh.subscribe ("/roah_rsbb/benchmark/state", 1, &SpecificWorker::benchmark_state_callback, this);
 
+
+	messages_saved_pub_ = nh.advertise<std_msgs::UInt32>("/roah_rsbb/messages_saved", 1, true);
+
+        ben_state_sub = nh.subscribe ("/roah_rsbb/benchmark/state", 1, &SpecificWorker::benchmark_state_callback, this);
+	bell_sub = nh.subscribe ("/roah_rsbb/devices/bell", 1, &SpecificWorker::bell_callback, this);
+}
+
+void SpecificWorker::bell_callback(std_msgs::Empty::ConstPtr const&)
+{
+	qDebug() << "bell_callback";
+	doorbellRang();
+	doorbells++;
 }
 
 /**
@@ -43,7 +53,7 @@ SpecificWorker::~SpecificWorker()
 
 void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg)
 {
-    cout<<"benchmark_state_callback"<<endl;
+    qDebug() << "benchmark_state_callback";
     switch (msg->benchmark_state) 
     {
         case roah_rsbb_comm_ros::BenchmarkState::STOP:
@@ -55,7 +65,7 @@ void SpecificWorker::benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState
           break;
         case roah_rsbb_comm_ros::BenchmarkState::EXECUTE:
            this->execute();
-        break;       
+        break;
     }
 }
 
@@ -80,6 +90,7 @@ void SpecificWorker::prepare()
 
 void SpecificWorker::execute()
 {
+    cout << "execute" << endl;
     //first set the log
     //log set
 		
@@ -89,12 +100,15 @@ void SpecificWorker::execute()
     std_msgs::UInt32 messages_saved_msg;
     messages_saved_msg.data = 1;
     messages_saved_pub_.publish (messages_saved_msg);
+
+
     
-    doorbell_sub = nh.subscribe ("/roah_rsbb/devices/bell", 1, &SpecificWorker::doorbellCallBack, this);
+//    doorbell_sub = nh.subscribe ("/roah_rsbb/devices/bell", 1, &SpecificWorker::doorbellCallBack, this);
 }
 
 void SpecificWorker::end_execute()
 {
+    cout << "end execute"<<endl;
         //fin
     if (ros::service::waitForService ("/roah_rsbb/end_execute", 100)) 
     {
@@ -119,73 +133,115 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-	printf("\n --- compute ---\n");
-	AGMModel::SPtr newModel(new AGMModel(worldModel));
+	static string lastAction = "";
 
-	AGMModelSymbol::SPtr outside;
+	if (action != lastAction)
+	{
+		printf("action changed to %s!\n", action.c_str());
+		lastAction = action;
+	}
+
+
+	ros::spinOnce();
+
+	QMutexLocker l(mutex);
+
+	AGMModel::SPtr worldModel(new AGMModel(worldModel));
+
+	AGMModelSymbol::SPtr outside, robot;
 	try
 	{
-		outside = newModel->getSymbol(17);
+		outside = worldModel->getSymbol(17);
 	}
 	catch(...)
 	{
-		printf("Can't find node 17. Waiting for executive?\n");
+		printf("esperando modelo habit\n");
+		return;
+	}
+	try
+	{
+		robot   = worldModel->getSymbol(1);
+	}
+	catch(...)
+	{
+		printf("esperando modelo robot\n");
 		return;
 	}
 
-	printf("got 17\n");
-	for (AGMModelSymbol::iterator edge_itr=outside->edgesBegin(newModel); edge_itr!=outside->edgesEnd(newModel); edge_itr++)
+
+
+
+	if (action == "changeroom")
 	{
-		if ((*edge_itr)->getLabel() == "in")
+		AGMModelSymbol::SPtr goalRoom = worldModel->getSymbol(str2int(params["r2"].value));
+		auto roomId = goalRoom->identifier;
+
+		QVec target;
+		if (roomId == 7) //Mesa
 		{
-			printf("got in\n");
-			int second = (*edge_itr)->getSymbolPair().first;
-			const AGMModelSymbol::SPtr &symbolPerson = newModel->getSymbolByIdentifier(second);
-			if (symbolPerson->symbolType == "person")
-			{
-				printf("got person\n");
-				for (AGMModelSymbol::iterator edge_itr2=symbolPerson->edgesBegin(newModel); edge_itr2!=symbolPerson->edgesEnd(newModel); edge_itr2++)
-				{
-					if ((*edge_itr2)->getLabel() == "personIs")
-					{
-						printf("got person type edge\n");
-						int third = (*edge_itr2)->getSymbolPair().second;
-						const AGMModelSymbol::SPtr &symbolPersonType = newModel->getSymbolByIdentifier(third);
-						if (symbolPersonType->symbolType == "unknownPerson")
-						{
-							printf("got unknown!!!\n");
-							
-							
-							string symbolPersonType_str = getPersonType();
-
-
-							symbolPersonType->symbolType = symbolPersonType_str;
-							
-							if (symbolPersonType_str == "postman" or symbolPersonType_str == "deliMan")
-							{
-								AGMModelSymbol::SPtr packageObj = worldModel->newSymbol("object");
-								AGMModelSymbol::SPtr packageSts = worldModel->newSymbol("unknownPerson");
-								
-								worldModel->addEdgeByIdentifiers(1, packageObj->identifier, "know");
-								worldModel->addEdgeByIdentifiers(packageObj->identifier, symbolPerson->identifier, "in");
-								worldModel->addEdgeByIdentifiers(packageObj->identifier, packageSts->identifier, "hasStatus");
-							}
-							else if (symbolPersonType_str == "extranger")
-							{
-							}
-							else if (symbolPersonType_str == "medicineDoctor")
-							{
-							}
-
-	
-							sendModificationProposal(worldModel, newModel);
-						}
-					}
-				}
-			}
+			target = QVec::vec3(0,0,0);
 		}
+		else if (roomId == 17) //Puerta
+		{
+			target = QVec::vec3(-4400, -3200, -1.57);
+			//target = QVec::vec3(0, 1000, 0);
+		}
+		else if (roomId == 37) //Dormitorio
+		{
+			target = QVec::vec3(-4800, 2000, 1.57);
+			//target = QVec::vec3(0, 0, 0);
+		}
+
+
+		target.print("iriamos a");
+
+		try
+		{
+			TargetPose pose;
+			pose.x=target[0]; pose.z=target[1]; pose.ry=target[2];
+			pose.y=0;pose.rz=0; pose.rx=0; 
+			float dist = 0;
+			try
+			{
+				dist = trajectoryrobot2d_proxy->go(pose);
+			}
+			catch(...)
+			{
+				printf("can\'t sent target\n");
+			}
+			sleep(1);
+			std::string estado;
+			try
+			{
+				estado = trajectoryrobot2d_proxy->getState().state;
+			}
+			catch(...)
+			{
+				printf("can\'t get state\n");
+			}
+			if(estado == "IDLE")
+			{
+				printf("distance %f\n", dist);
+		 		trajectoryrobot2d_proxy->stop();
+				try {worldModel->addEdgeByIdentifiers(1,  7, "in"); } catch(...){}
+				try {worldModel->addEdgeByIdentifiers(1, 17, "in"); } catch(...){}
+				try {worldModel->addEdgeByIdentifiers(1, 37, "in"); } catch(...){}
+				worldModel->addEdgeByIdentifiers(1, roomId, "in");
+				try {sendModificationProposal(worldModel, worldModel);  } catch(...){printf("can\'t publish\n");}
+			}		
+		}
+		catch(Ice::Exception &e){ std::cout << e.what() << std::endl;}
+		catch(...){ std::cout << "some other exception (not ice)" << std::endl;}
+
 	}
-	ros::spinOnce();
+	else if (action == "recognizehumanasextranger" or
+	         action == "recognizeHumanAsDeliMan" or
+	         action == "recognizeHumanAsPostman" or
+	         action == "recognizeHumanAsDrKimble")
+	{
+		doRecognition();
+	}
+
 }
 
 
@@ -342,8 +398,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 {
 	try
 	{
-		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"doorbellAgent");
+		AGMMisc::publishModification(worldModel, agmagenttopic_proxy, worldModel,"doorbellAgent");
 	}
 	catch(...)
 	{
@@ -351,14 +406,17 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	}
 }
 
-void SpecificWorker::doorbellCallBack(std_msgs::Empty)
-{
-    doorbellRang();
-    doorbells++;
-}
+//void SpecificWorker::doorbellCallBack(std_msgs::Empty)
+//{
+ //   doorbellRang();
+  //  doorbells++;
+//}
 
 void SpecificWorker::doorbellRang()
 {
+	QMutexLocker l(mutex);
+
+
 	printf("Trying to include a human in the model, given that the door bell rang...\n");
 
 	AGMModelSymbol::SPtr newSymbolPerson =  worldModel->newSymbol("person");
@@ -370,9 +428,7 @@ void SpecificWorker::doorbellRang()
 	worldModel->addEdgeByIdentifiers(newSymbolPerson->identifier, 17, "in");
 	worldModel->addEdgeByIdentifiers(newSymbolPerson->identifier, typeSymbolPerson->identifier,"personIs");
 
-	AGMModel::SPtr newModel(new AGMModel(worldModel));
-	sendModificationProposal(worldModel, newModel);
-
+	sendModificationProposal(worldModel, worldModel);
 }
 
 
@@ -388,7 +444,59 @@ string SpecificWorker::getPersonType()
 // 	string symbolPersonType_str = "postman";
 // 	string symbolPersonType_str = "deliMan";
 // 	string symbolPersonType_str = "extranger";
-	string symbolPersonType_str = "medicineDoctor";
+//	string symbolPersonType_str = "medicineDoctor";
+
+
+	FaceClass fc;
+	Colour colour;
+	welcomevisitor_proxy->getColourAndClass(colour, fc);
+	if(colour == NOTHING and fc.fid!=-1)
+	{
+		if (fc.fclass == "medico")
+			return "medicineDoctor";
+		else
+			return "extranger";
+	}
+	else if (colour== WHITE)
+		return "deliMan";
+	else if (colour == YELLOW)
+		return "postman";
+	else
+		return "unknown";
+}
+
+
+void SpecificWorker::doRecognition()
+{
+	AGMModelSymbol::SPtr outside, symbolPerson, symbolPersonType;
+
+	for (AGMModelSymbol::iterator edge_itr=outside->edgesBegin(worldModel); edge_itr!=outside->edgesEnd(worldModel); edge_itr++)
+	{
+		if ((*edge_itr)->getLabel() == "in")
+		{
+			int second = (*edge_itr)->getSymbolPair().first;
+			const AGMModelSymbol::SPtr &symbolPerson = worldModel->getSymbolByIdentifier(second);
+			if (symbolPerson->symbolType == "person")
+			{
+				for (AGMModelSymbol::iterator edge_itr2=symbolPerson->edgesBegin(worldModel); edge_itr2!=symbolPerson->edgesEnd(worldModel); edge_itr2++)
+				{
+					if ((*edge_itr2)->getLabel() == "personIs")
+					{
+						int third = (*edge_itr2)->getSymbolPair().second;
+						const AGMModelSymbol::SPtr &symbolPersonType = worldModel->getSymbolByIdentifier(third);
+						if (symbolPersonType->symbolType == "unknownPerson")
+						{
+							printf("got unknown!!!\n");
+							string symbolPersonType_str = getPersonType();
+							symbolPersonType->symbolType = symbolPersonType_str;
+							sendModificationProposal(worldModel, worldModel);
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
 
 

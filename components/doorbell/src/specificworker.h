@@ -44,11 +44,11 @@ class SpecificWorker : public GenericWorker
         
         int doorbells;
         ros::Subscriber ben_state_sub;
-        ros::Subscriber doorbell_sub;
+    	ros::Subscriber bell_sub;
 	ros::Publisher  messages_saved_pub_;
-        
+
         ros::NodeHandle nh;
-        
+ 
 Q_OBJECT
 public:
 	SpecificWorker(MapPrx& mprx);	
@@ -70,15 +70,16 @@ public:
         void prepare();
         void execute();
         void end_execute();
+	void bell_callback(std_msgs::Empty::ConstPtr const& msg);
         void benchmark_state_callback(roah_rsbb_comm_ros::BenchmarkState::ConstPtr const& msg);
-        void doorbellCallBack(std_msgs::Empty);
+        
 	
         void removeCurrentPerson();
         
 public slots:
 	void compute();
         void doorbellRang();
-
+	void doRecognition();
 private:
 	std::string action;
 	ParameterMap params;

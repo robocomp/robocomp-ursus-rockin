@@ -67,6 +67,7 @@ void SpecificWorker::prepare()
 
 void SpecificWorker::execute()
 {
+    cout << "execute" <<endl;
     //first set the log
     //log set
 		

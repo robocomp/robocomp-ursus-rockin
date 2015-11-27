@@ -86,6 +86,10 @@
 #include <AGMCommonBehavior.h>
 #include <AGMWorldModel.h>
 #include <Camera.h>
+#include <Speech.h>
+#include <TrajectoryRobot2D.h>
+#include <WelcomeVisitor.h>
+
 
 
 // User includes here
@@ -99,6 +103,9 @@ using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMWorldModel;
 using namespace RoboCompCamera;
+using namespace RoboCompSpeech;
+using namespace RoboCompTrajectoryRobot2D;
+using namespace RoboCompWelcomeVisitor;
 
 
 
@@ -131,12 +138,66 @@ int ::doorbell::run(int argc, char* argv[])
 #endif
 	int status=EXIT_SUCCESS;
 
-         ros::init(argc,argv,"doorbell");
-        
+	ros::init(argc, argv, "doorbell");
+
 	AGMAgentTopicPrx agmagenttopic_proxy;
+	SpeechPrx speech_proxy;
+	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
+	WelcomeVisitorPrx welcomevisitor_proxy;
 
 	string proxy, tmp;
 	initialize();
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "SpeechProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy SpeechProxy\n";
+		}
+		speech_proxy = SpeechPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("SpeechProxy initialized Ok!");
+	mprx["SpeechProxy"] = (::IceProxy::Ice::Object*)(&speech_proxy);//Remote server proxy creation example
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "TrajectoryRobot2DProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy TrajectoryRobot2DProxy\n";
+		}
+		trajectoryrobot2d_proxy = TrajectoryRobot2DPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("TrajectoryRobot2DProxy initialized Ok!");
+	mprx["TrajectoryRobot2DProxy"] = (::IceProxy::Ice::Object*)(&trajectoryrobot2d_proxy);//Remote server proxy creation example
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "WelcomeVisitorProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy WelcomeVisitorProxy\n";
+		}
+		welcomevisitor_proxy = WelcomeVisitorPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("WelcomeVisitorProxy initialized Ok!");
+	mprx["WelcomeVisitorProxy"] = (::IceProxy::Ice::Object*)(&welcomevisitor_proxy);//Remote server proxy creation example
 
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 

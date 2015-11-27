@@ -28,12 +28,15 @@
 
 #include <CommonBehavior.h>
 #include <Camera.h>
+#include <TrajectoryRobot2D.h>
 #include <AGMWorldModel.h>
 #include <AGMAgent.h>
 #include <CommonHead.h>
 #include <AGMExecutive.h>
 #include <Planning.h>
+#include <Speech.h>
 #include <JointMotor.h>
+#include <WelcomeVisitor.h>
 #include <DifferentialRobot.h>
 #include <AGMCommonBehavior.h>
 
@@ -49,12 +52,15 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 using namespace std;
 
 using namespace RoboCompCamera;
+using namespace RoboCompTrajectoryRobot2D;
 using namespace RoboCompAGMWorldModel;
 using namespace RoboCompAGMAgent;
 using namespace RoboCompCommonHead;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompPlanning;
+using namespace RoboCompSpeech;
 using namespace RoboCompJointMotor;
+using namespace RoboCompWelcomeVisitor;
 using namespace RoboCompDifferentialRobot;
 using namespace RoboCompAGMCommonBehavior;
 
@@ -90,6 +96,9 @@ public:
 	
 
 	AGMAgentTopicPrx agmagenttopic_proxy;
+	SpeechPrx speech_proxy;
+	TrajectoryRobot2DPrx trajectoryrobot2d_proxy;
+	WelcomeVisitorPrx welcomevisitor_proxy;
 
 	virtual bool reloadConfigAgent() = 0;
 	virtual bool activateAgent(const ParameterMap &prs) = 0;

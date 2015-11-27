@@ -1,9 +1,14 @@
 import "/robocomp/interfaces/IDSLs/Camera.idsl";
+import "/robocomp/interfaces/IDSLs/Speech.idsl";
+import "/robocomp/interfaces/IDSLs/TrajectoryRobot2D.idsl";
+import "/robocomp/interfaces/IDSLs/WelcomeVisitor.idsl";
+
 
 Component doorbell
 {
 	Communications
 	{
+		requires Speech, TrajectoryRobot2D, WelcomeVisitor;
 	};
 	language Cpp;
 	gui Qt(QWidget);

@@ -28,6 +28,9 @@ QObject()
 #endif
 
 {
+	speech_proxy = (*(SpeechPrx*)mprx["SpeechProxy"]);
+	trajectoryrobot2d_proxy = (*(TrajectoryRobot2DPrx*)mprx["TrajectoryRobot2DProxy"]);
+	welcomevisitor_proxy = (*(WelcomeVisitorPrx*)mprx["WelcomeVisitorProxy"]);
 
 	agmagenttopic_proxy = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
 
