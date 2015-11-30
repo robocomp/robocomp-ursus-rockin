@@ -1,0 +1,128 @@
+spacePattern=3
+lineThickness=2
+fontName=Arial
+name=domain_navigation
+vertexDiameter=40
+shortPattern=1
+nodeThickness=2
+fontSize=12
+longPattern=3
+===
+
+changeRoom : active(1)
+{
+	{
+		s2:roomSt(25,75)
+		s1:roomSt(-200,75)
+		r1:object(-200,-35)
+		r2:object(25,-35)
+		robot:robot(-95,-145)
+		robot->r1(in)
+		r1->r2(connected)
+		r1->s1(room)
+		r2->s2(room)
+	}
+	=>
+	{
+		s2:roomSt(25,75)
+		s1:roomSt(-200,75)
+		r1:object(-200,-35)
+		r2:object(25,-35)
+		robot:robot(-95,-145)
+		robot->r2(in)
+		r1->r2(connected)
+		r1->s1(room)
+		r2->s2(room)
+	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in something robot)
+				(and
+					(not (in something s1))
+					(in something s2)
+				)
+			)
+		)
+	}
+}
+
+setObjectReach : active(1)
+{
+	{
+		status:objectSt(250,0)
+		object:object(65,0)
+		robot:robot(-205,0)
+		room:object(-70,0)
+		object->status(hasStatus)
+		object->status(noReach)
+		object->status(reachable)
+		object->room(in)
+		robot->room(in)
+	}
+	=>
+	{
+		status:objectSt(250,0)
+		object:object(65,0)
+		robot:robot(-205,0)
+		room:object(-70,0)
+		object->status(hasStatus)
+		object->status(reach)
+		object->status(reachable)
+		object->room(in)
+		robot->room(in)
+	}
+}
+
+setObjectNotReach : passive(1)
+{
+	{
+		status:objectSt(250,-40)
+		object:object(50,-40)
+		object->status(hasStatus)
+		object->status(reach)
+	}
+	=>
+	{
+		status:objectSt(250,-40)
+		object:object(50,-40)
+		object->status(hasStatus)
+		object->status(noReach)
+	}
+}
+
+setObjectReachable : passive(1)
+{
+	{
+		status:objectSt(250,-40)
+		object:object(35,-40)
+		object->status(hasStatus)
+		object->status(noReachable)
+	}
+	=>
+	{
+		status:objectSt(250,-40)
+		object:object(55,-40)
+		object->status(hasStatus)
+		object->status(reachable)
+	}
+}
+
+setObjectNotReachable : passive(1)
+{
+	{
+		status:objectSt(285,-40)
+		object:object(80,-40)
+		object->status(hasStatus)
+		object->status(reachable)
+	}
+	=>
+	{
+		status:objectSt(250,-40)
+		object:object(35,-45)
+		object->status(hasStatus)
+		object->status(noReachable)
+	}
+}

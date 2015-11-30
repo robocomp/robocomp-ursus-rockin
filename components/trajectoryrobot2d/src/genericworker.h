@@ -33,6 +33,7 @@
 #include <TrajectoryRobot2D.h>
 
 
+
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
 
@@ -44,6 +45,9 @@ using namespace RoboCompOmniRobot;
 using namespace RoboCompDifferentialRobot;
 using namespace RoboCompLaser;
 using namespace RoboCompTrajectoryRobot2D;
+
+
+
 
 class GenericWorker : 
 #ifdef USE_QTGUI
@@ -61,21 +65,24 @@ public:
 	
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
+	
 
 	LaserPrx laser_proxy;
 	OmniRobotPrx omnirobot_proxy;
 
 	virtual NavState getState() = 0;
-	virtual void goBackwards(const TargetPose &target) = 0;
+	virtual float goBackwards(const TargetPose &target) = 0;
 	virtual void stop() = 0;
-	virtual void goReferenced(const TargetPose &target, const float xRef, const float zRef) = 0;
-	virtual void changeTarget(const TargetPose &target) = 0;
-	virtual void go(const TargetPose &target) = 0;
+	virtual float goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold) = 0;
+	virtual float changeTarget(const TargetPose &target) = 0;
+	virtual float go(const TargetPose &target) = 0;
+	virtual void mapBasedTarget(const NavigationParameterMap &parameters) = 0;
 
 
 protected:
 	QTimer timer;
 	int Period;
+
 public slots:
 	virtual void compute() = 0;
 signals:

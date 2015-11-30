@@ -1,0 +1,35 @@
+spacePattern=3
+lineThickness=2
+fontName=Arial
+name=domain_hri
+vertexDiameter=40
+shortPattern=1
+nodeThickness=2
+fontSize=12
+longPattern=3
+===
+
+setRoomHumanFree : active(1)
+{
+	{
+		room:object(60,-40)
+		rs:objectSt(250,-40)
+		room->rs(room)
+	}
+	=>
+	{
+		room:object(20,-40)
+		rs:objectSt(250,-40)
+		room->rs(room)
+		room->rs(humanFree)
+	}
+	precondition
+	{
+		(forall
+			someone:person
+			(not (in someone room))
+		)
+	}
+}
+
+

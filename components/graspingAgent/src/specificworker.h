@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -16,18 +16,20 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SPECIFICWORKER_H
-#define SPECIFICWORKER_H
-
-#include <genericworker.h>
-
-#include <innermodel/innermodel.h>
-#include <agm.h>
 
 /**
        \brief
        @author authorname
 */
+
+#ifndef SPECIFICWORKER_H
+#define SPECIFICWORKER_H
+
+#include <genericworker.h>
+#include <innermodel/innermodel.h>
+#include <innermodel/innermodelviewer.h>
+
+#include <agm.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -41,30 +43,35 @@ public:
 	StateStruct getAgentState();
 	ParameterMap getAgentParameters();
 	bool setAgentParameters(const ParameterMap& prs);
-	void  killAgent();
+	void killAgent();
 	Ice::Int uptimeAgent();
 	bool reloadConfigAgent();
-	void  structuralChange(const RoboCompAGMWorldModel::Event& modification);
-	void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
-	void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
+	void structuralChange(const RoboCompAGMWorldModel::Event& modification);
+	void symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
+	void edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
 
 
 public slots:
- 	void compute();
+	void compute();
+	
+	void startManualMode();
 
 private:
+	bool manualMode;
+
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	bool active;
 	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
 
 
-	QVec getObjectsLocation(AGMModelSymbol::SPtr &object);
-	void sendRightArmToTargetPosition(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
-	void sendRightArmToTargetFullPose(AGMModelSymbol::SPtr &targetObject, QVec pose=QVec::vec3(0,0,0));
+	QVec getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object);
+	QVec fromRobotToRoom(std::map<std::string, AGMModelSymbol::SPtr> &symbols, const QVec vector);
+	int sendRightArmToPose(QVec p);
 
 	void manageReachedObjects();
+	void leaveObjectSimulation();
 
-
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 
 	void actionExecution();
 	void action_FindObjectVisuallyInTable(bool first=false);
@@ -74,21 +81,37 @@ private:
 	void directGazeTowards(AGMModelSymbol::SPtr symbol);
 	void saccadic3D(QVec point, QVec axis);
 	void saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz);
-	void updateInnerModel();
 
 
-bool isRoom(AGMModel::SPtr model, AGMModelSymbol::SPtr node);
-float distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr symbol);
-float distanceToPolygon(QVec reference, QVec position, std::string polygon_str);
+	bool isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr node, const std::string &t);
+	float distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr symbol);
+// 	float distanceToPolygon(QVec reference, QVec position, std::string polygon_str);
 
 	void setRightArmUp_Reflex();
-	void setRightArm_GRASP_0_Reflex();
+
+	void updateViewer();
+	void changeInner ();
+
+
 
 private:
+	
 	std::string action, backAction;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	osgGA::TrackballManipulator *manipulator;
+	OsgView *osgView;	
+	InnerModelViewer *innerViewer; 
+	
+	bool active;
+
+	int32_t sendHandToSymbol(AGMModelSymbol::SPtr symbol, QVec offset, std::map<std::string, AGMModelSymbol::SPtr> symbols);
+	
+	
+public slots:
+	void on_state1_clicked();
 };
 
 #endif
+

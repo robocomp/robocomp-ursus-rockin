@@ -7,11 +7,18 @@
 #sleep 2
 
 # Levantamos el RCIS sin errores:
+# qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+# sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+# qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/innerModelsWorlds'
+# qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 rcis'
+# qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'rcis pruebaRockin.xml'
+# qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'Rcis'
+# sleep 2
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/innerModelsWorlds'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd robocomp/components/robocomp-ursus/etc/'
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 rcis'
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'rcis pruebaRockin.xml'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'rcis ursus.xml'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'Rcis'
 sleep 2
 
@@ -26,7 +33,7 @@ sleep 3
 # Levantamos el RCMANAGER
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
-qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd robocomp/components/robocomp-ursus-rockin/etc/'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/'
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'rcmanager ursusmanagerSim.xml'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'Rcmanager'
 sleep 3  

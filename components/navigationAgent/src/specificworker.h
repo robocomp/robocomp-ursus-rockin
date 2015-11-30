@@ -22,7 +22,6 @@
 #include <genericworker.h>
 
 #include <innermodel/innermodel.h>
-#include <agm.h>
 
 /**
        \brief
@@ -47,6 +46,7 @@ public:
 	void  structuralChange(const RoboCompAGMWorldModel::Event& modification);
 	void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
 	void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
 
 
 public slots:
@@ -75,6 +75,10 @@ private:
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
+	bool haveTarget;
+	
+	RoboCompTrajectoryRobot2D::TargetPose currentTarget;
+	
 
 	RoboCompOmniRobot::TBaseState bState;
 	RoboCompTrajectoryRobot2D::NavState planningState;
@@ -92,7 +96,7 @@ private:
 	void action_NoAction(bool newAction = true);
 
 
-	void odometryAndLocationIssues();
+	bool odometryAndLocationIssues();
 
 };
 

@@ -1,0 +1,41 @@
+<AGMModel>
+
+	<symbol id="1" type="robot" />
+
+	<symbol id="7" type="object" />
+	<symbol id="8" type="objectSt" />
+
+	<symbol id="17" type="object" />
+	<symbol id="18" type="objectSt" />
+
+	<symbol id="37" type="object" />
+	<symbol id="38" type="objectSt" />
+
+
+	
+	<link src="1" dst="7"   label="in" />
+
+	<link src="1" dst="7"   label="know" />
+	<link src="1" dst="17"  label="know" />
+	<link src="1" dst="37"  label="know" />
+
+	<link  src="17"  dst="18"  label="room" />
+	<link  src="17"  dst="18"  label="public" />
+	<link  src="17"  dst="18"  label="outside" />
+
+	<link  src="7"  dst="8"  label="room" />
+	<link  src="7"  dst="8"  label="public" />
+
+	<link  src="37"  dst="38"  label="room" />
+	<link  src="37"  dst="38"  label="private" />
+
+
+
+
+	<link src="7" dst="17" label="connected" />
+	<link src="17" dst="7" label="connected" />
+	<link src="7" dst="37" label="connected" />
+	<link src="37" dst="7" label="connected" />
+	
+</AGMModel>
+

@@ -1,4 +1,3 @@
-
 /*
  *    Copyright (C) 2010 by RoboLab - University of Extremadura
  *
@@ -23,7 +22,7 @@
 */
 SpecificMonitor::SpecificMonitor(GenericWorker *_worker,Ice::CommunicatorPtr _communicator):GenericMonitor(_worker, _communicator)
 {
-
+	ready = false;
 }
 /**
 * \brief Default destructor
@@ -36,6 +35,7 @@ SpecificMonitor::~SpecificMonitor()
 void SpecificMonitor::run()
 {
 	initialize();
+	ready = true;
 	forever
 	{
 		//rDebug("specific monitor run");
@@ -66,6 +66,7 @@ void SpecificMonitor::initialize()
 	}
 	state = RoboCompCommonBehavior::Running;
 }
+
 bool SpecificMonitor::sendParamsToWorker(RoboCompCommonBehavior::ParameterList params)
 {
 	if(checkParams(params))
@@ -81,6 +82,7 @@ bool SpecificMonitor::sendParamsToWorker(RoboCompCommonBehavior::ParameterList p
 	return false;
 
 }
+
 ///Local Component parameters read at start
 ///Reading parameters from config file or passed in command line, with Ice machinery
 ///We need to supply a list of accepted values to each call
@@ -90,7 +92,7 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 	
 	RoboCompCommonBehavior::Parameter aux;
 	aux.editable = false;
-	configGetString( "GraspingAgent.InnerModel", aux.value,"no file");
+	configGetString( "GraspingAgent","InnerModel", aux.value,"no file");
 	params["GraspingAgent.InnerModel"] = aux;
 }
 

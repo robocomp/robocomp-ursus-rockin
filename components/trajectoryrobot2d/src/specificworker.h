@@ -87,12 +87,14 @@ public:
 	~SpecificWorker();
 			
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	void go(const TargetPose& target);
 	void setHeadingTo(const TargetPose& target);
-	void changeTarget(const TargetPose& target);
-	void stop();
 	RoboCompTrajectoryRobot2D::NavState	getState();
-	void goBackwards(const TargetPose& target);
+	
+	float goBackwards(const TargetPose &target);
+	void stop();
+	float goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold);
+	float changeTarget(const TargetPose &target);
+	float go(const TargetPose &target);
 		
 public slots:
  	void	compute(); 	
@@ -107,7 +109,7 @@ private:
 	RoboCompLaser::TLaserData datos;
 
 	CurrentTarget currentTarget;
-	CurrentTarget currentTargetAnt;
+	CurrentTarget currentTargetAnt, currentTargetBack;
 	
 	InnerModel *innerModel;
 
@@ -124,13 +126,17 @@ private:
 	Localizer *localizer;
 	
 	
-	//Commands correspondign to servant methods, but running on local thread
+	bool removeNode(const QString &item);
+	void addPlane(QString item, QString parent, QString path, QVec scale, QVec t, QVec r);
+
+//Commands correspondign to servant methods, but running on local thread
 	bool gotoCommand(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &state, WayPoints& myRoad, RoboCompLaser::TLaserData &lData);
 	bool setHeadingCommand(InnerModel* innerModel, float alfa, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad);
 	bool stopCommand( CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state);
 	bool changeTargetCommand(InnerModel* innerModel, CurrentTarget& target,  TrajectoryState &stat, WayPoints& myRoad);
 	bool goBackwardsCommand(InnerModel* innerModel, CurrentTarget& current,CurrentTarget &currentT, TrajectoryState& state, WayPoints& myRoad);
 	bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
+	bool insertObstacle();
 	
 	void changeCommand(CurrentTarget& target, CurrentTarget::Command newCommand);
 	//Smoother smoother;
@@ -142,15 +148,15 @@ private:
 	void printNumberOfElementsInIMV();
 	void calcularModuloFloat(QVec &angles, float mod);
 	float angmMPI(float angle);
+
+	void mapBasedTarget(const NavigationParameterMap  &parameters);
 	
-	
-	void goReferenced(const TargetPose &target, const float xRef, const float zRef);
+	void publicarROS();
 
 #ifdef USE_QTGUI
 	OsgView *osgView;
 	InnerModelViewer *innerViewer;
 	InnerModel *innerVisual;
-
 #endif
 	
 };

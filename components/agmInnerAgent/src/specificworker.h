@@ -22,12 +22,24 @@
        @author authorname
 */
 
+
+
+// THIS IS AN AGENT
+
+
+
+
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
+#include <innermodel/innermodelviewer.h>
 
+#include <agm.h>
+#include <qt4/QtCore/QHash>
+#include <qt4/QtCore/QList>
+#include <agmInner/agmInner.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -46,13 +58,44 @@ public:
 	bool deactivateAgent();
 	StateStruct getAgentState();
 	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
+	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	
 
 public slots:
 	void compute(); 	
+	
 
 private:
+	std::string action;
+	ParameterMap params;
+	AGMModel::SPtr worldModel;
+	InnerModel *innerModel,*innerModel1;
+	osgGA::TrackballManipulator *manipulator;
+	OsgView *osgView;
+	InnerModel *innerModelVacio;
+	InnerModelViewer *innerViewer; 
+	
+	AgmInner agmInner;
+	bool active;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+	
+
+	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);		
+	//void include_im(QHash< QString, ::int32_t > match);
+	void include_im(QHash<QString, int32_t>  match, InnerModel *im);
+
+	
+	int findName(QString n);	
+	AGMModelSymbol::SPtr ImNodeToSymbol(InnerModelNode* node);
+// 	InnerModel* extractInnerModel(QString imNodeName);
+// 	void recorrer(InnerModel* imNew, int& symbolID);
+// 	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
+	
+// 	void checkLoop(int& symbolID, QList< int >& visited, string linkType, bool& loop);
+
 };
 
 #endif

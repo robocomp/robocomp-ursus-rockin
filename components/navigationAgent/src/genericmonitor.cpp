@@ -58,8 +58,8 @@ int GenericMonitor::getPeriod()
 */
 void GenericMonitor::setPeriod(int _period)
 {
-	worker->setPeriod(_period);
 	period =_period;
+	worker->setPeriod(_period);
 }
 /**
 * \brief Kill component
@@ -106,6 +106,12 @@ void GenericMonitor::readPConfParams(RoboCompCommonBehavior::ParameterList &para
 	//nothing to do
 }
 
+//Ice method to read a variable from file
+//name, parameter config value
+//return value of parameter config
+//default value for the parameter
+//return false if the parameter does not exist. Throw exception in other case.
+//if you need one parameter mandatory you can pass empty string in default_value
 bool GenericMonitor::configGetString(const std::string prefix, const std::string name, std::string &value, const std::string default_value, QStringList *list)
 {
 	return GenericMonitor::configGetString(communicator, prefix, name, value, default_value, list);
@@ -115,9 +121,9 @@ bool GenericMonitor::configGetString(Ice::CommunicatorPtr communicator, const st
 {
 	std::string compound = name;
 	if (prefix.size() > 0) compound = prefix+std::string(".")+name;
+
 	value = communicator->getProperties()->getProperty(compound);
 
-	printf("<%s> --> <%s>\n", compound.c_str(), value.c_str());
 	if ( value.length() == 0)
 	{
 		if (default_value.length() != 0)
@@ -207,3 +213,4 @@ bool GenericMonitor::configGetString(Ice::CommunicatorPtr communicator, const st
 	std::cout << compound << " " << value << std::endl;
 	return true;
 }
+

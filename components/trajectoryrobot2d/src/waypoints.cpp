@@ -454,6 +454,10 @@ bool WayPoints::update()
 	QLine2D nose =  QLine2D(  QVec::vec2(robot3DPos.x(),robot3DPos.z()), QVec::vec2(noseInRobot.x(), noseInRobot.z()));
 
 	//Compute closest existing trajectory point to robot
+		if(getRobotDistanceToTarget() < 1000)
+	{
+		robot3DPos = innerModel->transform("world", "virtualRobot");
+	}
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 
 	//Compute roadTangent at closestPoint;
@@ -483,8 +487,8 @@ bool WayPoints::update()
 
 	//Check for arrival to target  TOO SIMPLE
 // 	if(	( ((int)getCurrentPointIndex()+1 == (int)size())  and  ( (int)getCurrentPointIndex()+1< 80) )
-	if((((int)getCurrentPointIndex()+1 == (int)size())  and  ( getRobotDistanceToTarget()< 80) )
-		or ( (getRobotDistanceToTarget() < 1000) and ( getRobotDistanceVariationToTarget() > 0) ) )
+	if(((((int)getCurrentPointIndex()+1 == (int)size())  or  ( getRobotDistanceToTarget()< 100) ))
+		or ( (getRobotDistanceToTarget() < 300) and ( getRobotDistanceVariationToTarget() > 0) ) )
 	{
 	
 		setFinished(true);		

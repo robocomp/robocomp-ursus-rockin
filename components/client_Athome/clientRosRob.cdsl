@@ -1,0 +1,12 @@
+import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
+
+Component clientRosRob
+{
+	Communications
+	{
+		publishes DifferentialRobot;
+	};
+	language Cpp;
+	gui Qt(QWidget);
+};
+

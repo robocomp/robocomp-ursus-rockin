@@ -32,9 +32,9 @@
 */
 class GenericMonitor : public QThread
 {
-  Q_OBJECT
+Q_OBJECT
 
-  public:
+public:
 	GenericMonitor(GenericWorker *_worker, Ice::CommunicatorPtr _communicator);
 	virtual ~GenericMonitor();
 
@@ -68,9 +68,9 @@ protected:
 public:
 	static bool configGetString(Ice::CommunicatorPtr communicator, const std::string prefix, const std::string name, std::string &value, const std::string default_value, QStringList *list=NULL);
 
-
 signals:
 	void kill();
+
 };
 
 #endif // GENERICMONITOR_H

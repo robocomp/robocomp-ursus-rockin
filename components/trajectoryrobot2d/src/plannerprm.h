@@ -89,6 +89,8 @@ class PlannerPRM : public QObject
 		bool learnPath(const QList<QVec> &path);
 		bool learnForAWhile();
 		const Sampler & getSampler() const  { return sampler; }
+		void removeGraph(InnerModelViewer *innerViewer);
+		void createGraph();
 		
 	private:
 		Graph graph;
@@ -131,6 +133,12 @@ class PlannerPRM : public QObject
 		bool planWithRRT(const QVec& origin, const QVec& target, QList<QVec> &path);
 		
 		bool graphDirtyBit;
+		uint graphNumPoints;
+		std::string fileName;
+		uint graphNeighPoints;
+		
+		QList<QRectF> innerRegions;
+		QRectF outerRegion;
 };
 
 //Graph writing classes

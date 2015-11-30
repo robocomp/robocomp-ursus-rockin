@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -19,20 +19,25 @@
 #ifndef GENERICWORKER_H
 #define GENERICWORKER_H
 
-// #include <ipp.h>
 #include "config.h"
 #include <QtGui>
 #include <stdint.h>
 #include <qlog/qlog.h>
+
+#include <ui_mainUI.h>
+
 #include <CommonBehavior.h>
-#include <ui_guiDlg.h>
-#include "config.h"
-#include <agm.h>
-#include <JointMotor.h>
-#include <BodyInverseKinematics.h>
+#include <InverseKinematics.h>
+#include <AGMWorldModel.h>
 #include <AGMAgent.h>
-#include <AGMCommonBehavior.h>
 #include <AGMExecutive.h>
+#include <Planning.h>
+#include <JointMotor.h>
+#include <AGMCommonBehavior.h>
+
+#include <agm.h>
+#include <agmInner/agmInner.h>
+
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -41,21 +46,24 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
 using namespace std;
 
-/**
-       \brief
-       @author authorname
-*/
-using namespace RoboCompJointMotor;
-using namespace RoboCompBodyInverseKinematics;
-using namespace RoboCompAGMCommonBehavior;
-using namespace RoboCompAGMExecutive;
+using namespace RoboCompInverseKinematics;
+using namespace RoboCompAGMWorldModel;
 using namespace RoboCompAGMAgent;
-struct BehaviorNavegacionParameters 
-		{
-			RoboCompPlanning::Action action;
-			std::vector< std::vector <std::string> > plan;
-		};
-class GenericWorker :
+using namespace RoboCompAGMExecutive;
+using namespace RoboCompPlanning;
+using namespace RoboCompJointMotor;
+using namespace RoboCompAGMCommonBehavior;
+
+
+struct BehaviorParameters 
+{
+	RoboCompPlanning::Action action;
+	std::vector< std::vector <std::string> > plan;
+};
+
+
+
+class GenericWorker : 
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
 #else
@@ -70,38 +78,43 @@ public:
 	virtual void setPeriod(int p);
 	
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
-	QMutex *mutex;                //Shared mutex with servant
-
-		
-	bool activate(const BehaviorNavegacionParameters& parameters);
+	QMutex *mutex;
+	bool activate(const BehaviorParameters& parameters);
 	bool deactivate();
 	bool isActive() { return active; }
 	RoboCompAGMWorldModel::BehaviorResultType status();
+	
+
+	AGMAgentTopicPrx agmagenttopic_proxy;
+	InverseKinematicsPrx inversekinematics_proxy;
 	JointMotorPrx jointmotor_proxy;
-	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
-	AGMAgentTopicPrx agmagenttopic;
-	virtual bool activateAgent(const ParameterMap& prs) = 0;
+
+	virtual bool reloadConfigAgent() = 0;
+	virtual bool activateAgent(const ParameterMap &prs) = 0;
+	virtual bool setAgentParameters(const ParameterMap &prs) = 0;
+	virtual ParameterMap getAgentParameters() = 0;
+	virtual void killAgent() = 0;
+	virtual int uptimeAgent() = 0;
 	virtual bool deactivateAgent() = 0;
 	virtual StateStruct getAgentState() = 0;
-	virtual ParameterMap getAgentParameters() = 0;
-	virtual bool setAgentParameters(const ParameterMap& prs) = 0;
-	virtual void  killAgent() = 0;
-	virtual Ice::Int uptimeAgent() = 0;
-	virtual bool reloadConfigAgent() = 0;
-	virtual void  structuralChange(const RoboCompAGMWorldModel::Event& modification) = 0;
-	virtual void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification) = 0;
-	virtual void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification) = 0;
+	virtual void structuralChange(const RoboCompAGMWorldModel::Event &modification) = 0;
+	virtual void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications) = 0;
+	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification) = 0;
+	virtual void symbolUpdated(const RoboCompAGMWorldModel::Node &modification) = 0;
+
 
 protected:
 	QTimer timer;
 	int Period;
-	int iter;
 	bool active;
 	AGMModel::SPtr worldModel;
+	BehaviorParameters p;
 	ParameterMap params;
-	BehaviorNavegacionParameters p;
+	AgmInner agmInner;
+	int iter;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	RoboCompPlanning::Action createAction(std::string s);
+
 public slots:
 	virtual void compute() = 0;
 signals:

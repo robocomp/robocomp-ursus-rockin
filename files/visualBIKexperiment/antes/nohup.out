@@ -1,0 +1,993 @@
+Gtk-Message: Failed to load module "overlay-scrollbar"
+BodyInverseKinematicsProxy bodyinversekinematics:tcp -h localhost -p 10220
+10:32:17:668::Info::main.cpp::153::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::BodyInverseKinematicsProxy initialized Ok!
+JointMotorProxy jointmotor:tcp -p 20000
+10:32:17:668::Info::main.cpp::170::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::JointMotorProxy initialized Ok!
+OmniRobotProxy omnirobot:tcp -p 12238
+10:32:17:668::Info::main.cpp::187::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::OmniRobotProxy initialized Ok!
+CommonBehavior.Endpoints tcp -p 10000
+10:32:17:684::Info::specificmonitor.cpp::56::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificmonitor.cpp::initialize::Starting monitor ...
+InnerModel /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificworker.cpp setParams 67 Reading Innermodel file  "/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml" 
+InnerModelReader: reading /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+BodyInverseKinematics.Endpoints tcp -p 10240
+AprilTagsTopic tcp -p 12938
+RoboComp VisualBIK:: VisualBIK started
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+InnerModelReader: reading include /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml
+InnerModelRGBD: 0.000000 {10097}
+Warning: Cannot create texture steel1k.jpg
+InnerModelRGBD: 0.000000 {10096}
+Warning: Cannot create texture steel1k.jpg
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Ha llegado un TARGET:  QVector(179.972, 850.439, 292.821, 0, 0, 3.1416) 
+Gtk-Message: Failed to load module "overlay-scrollbar"
+BodyInverseKinematicsProxy bodyinversekinematics:tcp -h localhost -p 10220
+10:36:09:710::Info::main.cpp::153::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::BodyInverseKinematicsProxy initialized Ok!
+JointMotorProxy jointmotor:tcp -p 20000
+10:36:09:710::Info::main.cpp::170::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::JointMotorProxy initialized Ok!
+OmniRobotProxy omnirobot:tcp -p 12238
+10:36:09:710::Info::main.cpp::187::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::OmniRobotProxy initialized Ok!
+CommonBehavior.Endpoints tcp -p 10000
+10:36:09:730::Info::specificmonitor.cpp::56::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificmonitor.cpp::initialize::Starting monitor ...
+InnerModel /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificworker.cpp setParams 67 Reading Innermodel file  "/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml" 
+InnerModelReader: reading /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+BodyInverseKinematics.Endpoints tcp -p 10240
+AprilTagsTopic tcp -p 12938
+RoboComp VisualBIK:: VisualBIK started
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+InnerModelReader: reading include /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml
+InnerModelRGBD: 0.000000 {10097}
+Warning: Cannot create texture steel1k.jpg
+InnerModelRGBD: 0.000000 {10096}
+Warning: Cannot create texture steel1k.jpg
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Ha llegado un TARGET:  QVector(167.348, 852.156, 338.194, 0, 0, 3.1416) 
+Gtk-Message: Failed to load module "overlay-scrollbar"
+BodyInverseKinematicsProxy bodyinversekinematics:tcp -h localhost -p 10220
+10:36:25:397::Info::main.cpp::153::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::BodyInverseKinematicsProxy initialized Ok!
+JointMotorProxy jointmotor:tcp -p 20000
+10:36:25:398::Info::main.cpp::170::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::JointMotorProxy initialized Ok!
+OmniRobotProxy omnirobot:tcp -p 12238
+10:36:25:398::Info::main.cpp::187::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::OmniRobotProxy initialized Ok!
+CommonBehavior.Endpoints tcp -p 10000
+10:36:25:414::Info::specificmonitor.cpp::56::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificmonitor.cpp::initialize::Starting monitor ...
+InnerModel /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificworker.cpp setParams 67 Reading Innermodel file  "/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml" 
+InnerModelReader: reading /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+BodyInverseKinematics.Endpoints tcp -p 10240
+AprilTagsTopic tcp -p 12938
+RoboComp VisualBIK:: VisualBIK started
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+InnerModelReader: reading include /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml
+InnerModelRGBD: 0.000000 {10097}
+Warning: Cannot create texture steel1k.jpg
+InnerModelRGBD: 0.000000 {10096}
+Warning: Cannot create texture steel1k.jpg
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Gtk-Message: Failed to load module "overlay-scrollbar"
+BodyInverseKinematicsProxy bodyinversekinematics:tcp -h localhost -p 10220
+10:36:40:942::Info::main.cpp::153::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::BodyInverseKinematicsProxy initialized Ok!
+JointMotorProxy jointmotor:tcp -p 20000
+10:36:40:942::Info::main.cpp::170::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::JointMotorProxy initialized Ok!
+OmniRobotProxy omnirobot:tcp -p 12238
+10:36:40:942::Info::main.cpp::187::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::OmniRobotProxy initialized Ok!
+CommonBehavior.Endpoints tcp -p 10000
+10:36:40:957::Info::specificmonitor.cpp::56::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificmonitor.cpp::initialize::Starting monitor ...
+InnerModel /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificworker.cpp setParams 67 Reading Innermodel file  "/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml" 
+InnerModelReader: reading /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+BodyInverseKinematics.Endpoints tcp -p 10240
+AprilTagsTopic tcp -p 12938
+RoboComp VisualBIK:: VisualBIK started
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+InnerModelReader: reading include /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml
+InnerModelRGBD: 0.000000 {10097}
+Warning: Cannot create texture steel1k.jpg
+InnerModelRGBD: 0.000000 {10096}
+Warning: Cannot create texture steel1k.jpg
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Ha llegado un TARGET:  QVector(123.511, 814.35, 386.237, 0, 0, 3.1416) 
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Recibido target
+Gtk-Message: Failed to load module "overlay-scrollbar"
+BodyInverseKinematicsProxy bodyinversekinematics:tcp -h localhost -p 10220
+10:37:36:272::Info::main.cpp::153::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::BodyInverseKinematicsProxy initialized Ok!
+JointMotorProxy jointmotor:tcp -p 20000
+10:37:36:272::Info::main.cpp::170::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::JointMotorProxy initialized Ok!
+OmniRobotProxy omnirobot:tcp -p 12238
+10:37:36:272::Info::main.cpp::187::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::OmniRobotProxy initialized Ok!
+CommonBehavior.Endpoints tcp -p 10000
+10:37:36:289::Info::specificmonitor.cpp::56::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificmonitor.cpp::initialize::Starting monitor ...
+InnerModel /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificworker.cpp setParams 67 Reading Innermodel file  "/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml" 
+InnerModelReader: reading /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+BodyInverseKinematics.Endpoints tcp -p 10240
+AprilTagsTopic tcp -p 12938
+RoboComp VisualBIK:: VisualBIK started
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+Warning: in 3ds loader: file has no nodes, traversing by meshes instead
+InnerModelReader: reading include /home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml
+InnerModelRGBD: 0.000000 {10097}
+Warning: Cannot create texture steel1k.jpg
+InnerModelRGBD: 0.000000 {10096}
+Warning: Cannot create texture steel1k.jpg
+--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: ConnectionI.cpp:402: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+--> Excepción en actualizar InnerModel: (i)--> Excepción reading OmniRobot: Instance.cpp:281: Ice::CommunicatorDestroyedException:
+communicator object destroyed
+Gtk-Message: Failed to load module "overlay-scrollbar"
+BodyInverseKinematicsProxy bodyinversekinematics:tcp -h localhost -p 10220
+10:46:03:591::Info::main.cpp::153::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::BodyInverseKinematicsProxy initialized Ok!
+JointMotorProxy jointmotor:tcp -p 20000
+10:46:03:592::Info::main.cpp::170::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::JointMotorProxy initialized Ok!
+OmniRobotProxy omnirobot:tcp -p 12238
+10:46:03:592::Info::main.cpp::187::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/main.cpp::run::OmniRobotProxy initialized Ok!
+CommonBehavior.Endpoints tcp -p 10000
+10:46:03:608::Info::specificmonitor.cpp::56::/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificmonitor.cpp::initialize::Starting monitor ...
+InnerModel /home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml
+/home/mercedes/robocomp/components/robocomp-ursus/components/visualbik/src/specificworker.cpp setParams 67 Reading Innermodel file  "/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_bik.xml" 
+[ VisualBIK]: Exception raised on main thread: 

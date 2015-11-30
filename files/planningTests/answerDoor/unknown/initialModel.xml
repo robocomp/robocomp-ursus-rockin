@@ -1,0 +1,37 @@
+<AGMModel>
+
+<!-- ROBOT -->
+	<symbol id="1" type="robot" />
+
+<!-- ROOM -->
+	<symbol id="3" type="object" />
+	<symbol id="4" type="roomSt" />
+	<link src="3" dst="4" label="room" />
+	<link src="1" dst="3" label="in" />
+	<link src="1" dst="3" label="know" />
+	
+<!-- OUTSIDE ROOM -->
+	<symbol id="5" type="object" />
+	<symbol id="6" type="roomSt" />
+	<link src="5" dst="6" label="room" />
+	<link src="1" dst="5" label="know" />
+
+<!-- TABLE -->
+	<!--<symbol id="20" type="object" />
+	<symbol id="21" type="objectSt" />
+	<link src="20" dst="3" label="in" />
+	<link src="20" dst="21" label="hasStatus" />
+	<link src="20" dst="21" label="noReach" />
+	<link src="20" dst="21" label="reachable" />
+	<link src="20" dst="21" label="table" />
+	<link src="1" dst="20" label="know" />
+-->
+
+<!-- 	<symbol id="100" type="person" /> -->
+<!-- 	<sym
+	bol id="101" type="person" /> -->
+
+
+
+
+</AGMModel>

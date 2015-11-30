@@ -23,7 +23,7 @@
 */
 SpecificMonitor::SpecificMonitor(GenericWorker *_worker,Ice::CommunicatorPtr _communicator):GenericMonitor(_worker, _communicator)
 {
-
+		ready = false;
 }
 /**
 * \brief Default destructor
@@ -36,13 +36,13 @@ SpecificMonitor::~SpecificMonitor()
 void SpecificMonitor::run()
 {
 	initialize();
+	ready = true;
 	forever
 	{
 		//rDebug("specific monitor run");
 		this->sleep(period);
 	}
 }
-
 /**
  * \brief Reads components parameters and checks set integrity before signaling the Worker thread to start running
  * There can be four (4) types of parameteres:
@@ -89,8 +89,8 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 	//Read params from config file
 
 	RoboCompCommonBehavior::Parameter aux;
-	aux.editable = false;
-	configGetString( "ObjectAgent.InnerModel", aux.value,"no file");
+	aux.editable = false;	
+	configGetString( "ObjectAgent","InnerModel", aux.value,"no file");	
 	params["ObjectAgent.InnerModel"] = aux;
 }
 

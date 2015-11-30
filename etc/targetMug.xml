@@ -1,0 +1,9 @@
+<AGMModel>
+
+	<symbol id="1" type="robot" />
+
+	<symbol id="11" type="object" />
+	
+	<link src="11" dst="1" label="in" />
+
+</AGMModel>

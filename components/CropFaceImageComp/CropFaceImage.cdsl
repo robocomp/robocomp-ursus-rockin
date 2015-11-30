@@ -1,0 +1,9 @@
+import "/robocomp/interfaces/IDSLs/CropFaceImage.idsl";
+import "/robocomp/interfaces/IDSLs/MSKFace.idsl";
+Component CropFaceImageComp{
+	Communications{
+		subscribesTo MSKFaceEvent;
+		implements CropFaceImage;
+	};
+	language Cpp;
+};

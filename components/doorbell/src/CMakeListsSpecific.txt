@@ -1,0 +1,20 @@
+
+# Sources set
+SET ( SOURCES
+  specificworker.cpp
+  specificmonitor.cpp
+)
+
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+)
+find_package(catkin REQUIRED)
+
+include_directories(  ${catkin_INCLUDE_DIRS} )
+SET ( LIBS ${LIBS} ${catkin_LIBRARIES} -L/opt/ros/jade/lib -lroscpp -lrosconsole -lroscpp_serialization) # -lrosbag
+
+
+ADD_DEFINITIONS( -std=c++11 )
+

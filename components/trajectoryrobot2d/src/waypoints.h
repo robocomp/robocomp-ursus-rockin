@@ -62,6 +62,7 @@ class WayPoints : public QList< WayPoint >
 		void reset();
 		void startRoad();
 		void endRoad();
+		void setThreshold(const float _threshold) 												{ threshold = _threshold;};
 		void setInnerModel( InnerModel *inner) 												{ innerModel = inner;};
 		void readRoadFromFile(InnerModel *innerModel, std::string name);
 		void readRoadFromList(QList<QVec> list);
@@ -130,6 +131,7 @@ class WayPoints : public QList< WayPoint >
 		float robotDistanceToTarget;
 		float robotDistanceVariationToTarget;
 		float robotDistanceToLastVisible;
+		float threshold;
 		bool finish;
 		ulong estimatedTimeOfArrival;
 		InnerModel *innerModel;

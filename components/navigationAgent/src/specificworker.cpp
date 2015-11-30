@@ -25,10 +25,14 @@
 
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
+	Period = 20;
 	active = false;
 
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
+	innerModel = new InnerModel();
+	haveTarget = false;
+
 }
 
 /**
@@ -42,270 +46,45 @@ SpecificWorker::~SpecificWorker()
 void SpecificWorker::compute( )
 {
 	// ODOMETRY AND LOCATION-RELATED ISSUES
-	odometryAndLocationIssues();
+	if (odometryAndLocationIssues() == false)
+		return;
+// 	innerModel->treePrint();
 
-	// ACTION EXECUTION
-	//
-// 	printf("<ae\n");
 	actionExecution();
+
 // 	printf("ae>\n");
 }
 
-bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
-{
-	try
-	{
-		RoboCompCommonBehavior::Parameter par = params.at("NavigationAgent.InnerModel") ;
-		if( QFile(QString::fromStdString(par.value)).exists() == true)
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-			innerModel = new InnerModel(par.value);
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-		}
-		else
-		{
-			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-			qFatal("Exiting now.");
-		}
-	}
-	catch(std::exception e)
-	{
-		qFatal("Error reading config params");
-	}
-
-	timer.start(Period);
-	return true;
-}
-
-bool SpecificWorker::activateAgent(const ParameterMap& prs)
-{
-	bool activated = false;
-	if (setParametersAndPossibleActivation(prs, activated))
-	{
-			if (not activated)
-			{
-				return activate(p);
-			}
-	}
-	else
-	{
-		return false;
-	}
-	return true;
-}
-
-bool SpecificWorker::deactivateAgent()
-{
-		return deactivate();
-}
-
-StateStruct SpecificWorker::getAgentState()
-{
-	StateStruct s;
-	if (isActive())
-	{
-		s.state = Running;
-	}
-	else
-	{
-		s.state = Stopped;
-	}
-	s.info = p.action.name;
-	return s;
-}
-
-ParameterMap SpecificWorker::getAgentParameters()
-{
-	return params;
-}
-
-bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
-{
-	bool activated = false;
-	return setParametersAndPossibleActivation(prs, activated);
-}
-
-void SpecificWorker::killAgent()
-{
-}
-
-Ice::Int SpecificWorker::uptimeAgent()
-{
-	return 0;
-}
-
-bool SpecificWorker::reloadConfigAgent()
-{
-	return true;
-}
-
-
-void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
-{
-	mutex->lock();
-	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
-		roomsPolygons = extractPolygonsFromModel(worldModel);
-	mutex->unlock();
-}
-
-void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
-{
-	mutex->lock();
-	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-	mutex->unlock();
-}
-void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
-{
-	mutex->lock();
-	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-	mutex->unlock();
-}
-
-bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
-{
-	printf("<<< setParametersAndPossibleActivation\n");
-	// We didn't reactivate the component
-	reactivated = false;
-
-	// Update parameters
-	params.clear();
-	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
-	{
-		params[it->first] = it->second;
-	}
-
-	try
-	{
-		action = params["action"].value;
-		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
-
-		if (action == "graspobject")
-		{
-			active = true;
-		}
-		else
-		{
-			active = true;
-		}
-	}
-	catch (...)
-	{
-		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
-		return false;
-	}
-
-	// Check if we should reactivate the component
-	if (active)
-	{
-		active = true;
-		reactivated = true;
-	}
-
-	printf("setParametersAndPossibleActivation >>>\n");
-
-	return true;
-}
-
-void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
-{
-	try
-	{
-		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "navigationAgent");
-	}
-	catch(...)
-	{
-		exit(1);
-	}
-}
-
-void SpecificWorker::go(float x, float z, float alpha, bool rot, float xRef, float zRef, float threshold)
-{
-// 	printf("go:\n   %f %f %f (%d)\n  %f\n  %f %f\n", x, z, alpha, rot, threshold, xRef, zRef);
-	
-	RoboCompTrajectoryRobot2D::TargetPose tp;
-	tp.x = x;
-	tp.z = z;
-	tp.y = 0;
-	tp.rx = 0;
-	tp.ry = 0;
-	tp.rz = 0;
-	if (rot)
-	{
-		tp.ry = alpha;
-		tp.doRotation = true;
-	}
-	else
-	{
-		tp.doRotation = false;
-	}
-	try
-	{
-		trajectoryrobot2d_proxy->goReferenced(tp, 80, 350, threshold);
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << std::endl;
-	}
-	catch(...)
-	{
-		printf("something else %d\n", __LINE__);
-	}
-}
-
-
-void SpecificWorker::stop()
-{
-	try
-	{
-		static QTime time;
-		static bool first = true;
-		if (first)
-		{
-			first = false;
-			time = QTime::currentTime();
-			trajectoryrobot2d_proxy->stop();
-		}
-		else if (time.elapsed()>3000)
-		{
-			time = QTime::currentTime();
-			trajectoryrobot2d_proxy->stop();
-		}
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << std::endl;
-	}
-	catch(...)
-	{
-		printf("something else %d\n", __LINE__);
-	}
-}
-
-
+/**
+ * \brief ESTE ES EL VERDADERO COMPUTE
+ */ 
 void SpecificWorker::actionExecution()
 {
+// 	return;
+	
 	QMutexLocker locker(mutex);
+	qDebug()<<"ACTION: "<<QString::fromStdString(action);
 
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
 
 	if (newAction)
+	{
 		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
+	}
 
-	try
-	{
-		planningState = trajectoryrobot2d_proxy->getState();
-	}
-	catch(const Ice::Exception &ex)
-	{
-		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
-	}
-	catch(...)
-	{
-		printf("something else %d\n", __LINE__);
-	}
+// 	try
+// 	{
+// 		planningState = trajectoryrobot2d_proxy->getState();
+// 	}
+// 	catch(const Ice::Exception &ex)
+// 	{
+// 		std::cout << ex << "Error talking to TrajectoryRobot2D" <<  std::endl;
+// 	}
+// 	catch(...)
+// 	{
+// 		printf("something else %d\n", __LINE__);
+// 	}
 
 	if (action == "changeroom")
 	{
@@ -325,8 +104,219 @@ void SpecificWorker::actionExecution()
 	}
 	else
 	{
-		action_NoAction();
+		action_NoAction(newAction);
 	}
+
+
+	if (newAction)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}
+	printf("actionExecution>>\n");
+}
+
+/**
+ * \brief elmeollo dl asunto
+ */ 
+void SpecificWorker::action_SetObjectReach(bool newAction)
+{
+	// Get symbols' map
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
+	try
+	{
+		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/); //ALL THE SYMBOLS GIVEN IN THE RULE
+	}
+	catch(...)
+	{
+		printf("navigationAgent: Couldn't retrieve action's parameters\n");
+		printf("<<WORLD\n");
+		AGMModelPrinter::printWorld(worldModel);
+		printf("WORLD>>\n");
+		if (worldModel->size() > 0) {	exit(-1);  }
+	}
+
+	// Get target
+	int roomID, objectID, robotID;
+	try
+	{
+		if (symbols["room"].get() and symbols["object"].get() and symbols["robot"].get())
+		{
+			roomID = symbols["room"]->identifier;   //7 ROOM
+			objectID =symbols["object"]->identifier;//9 TABLE
+			robotID = symbols["robot"]->identifier; //1 ROBOT
+		}
+		else
+		{
+			printf("parameters not in the model yet\n");
+			return;
+		}
+	}
+	catch(...)
+	{
+		printf("ERROR: SYMBOL DOESN'T EXIST \n");
+		exit(2);
+	}
+	
+
+	// GET THE INNERMODEL NAMES OF TH SYMBOLS
+	QString robotIMID;
+	QString roomIMID;
+	QString objectIMID;
+	try
+	{
+		robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+		roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
+		objectIMID = QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
+	}
+	catch(...)
+	{
+		printf("ERROR IN GET THE INNERMODEL NAMES\n");
+		exit(2);
+	}
+	
+
+	// GET THE TARGET POSE: 
+	//RoboCompTrajectoryRobot2D::TargetPose tp;
+	
+	try
+	{
+		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(objectIMID)))    return;
+		QVec poseInRoom = innerModel->transform6D(roomIMID, objectIMID); // FROM OBJECT TO ROOM
+		qDebug()<<" TARGET POSE: "<< poseInRoom;
+
+// 		currentTarget.first = objectID;
+		currentTarget.x = poseInRoom.x();
+		currentTarget.y = 0;
+		currentTarget.z = poseInRoom.z();
+		currentTarget.rx = 0;
+		currentTarget.ry = 0;
+		currentTarget.rz = 0;
+		currentTarget.doRotation = true;
+	}
+	catch (...) 
+	{ 
+		qDebug()<<"innerModel exception";
+	}
+
+	// Execute target
+	try
+	{
+// 		if (!haveTarget)
+		{
+			try
+			{
+				QVec graspRef = innerModel->transform("robot", "right_shoulder_grasp_pose");
+				float th=50;
+				trajectoryrobot2d_proxy->goReferenced(currentTarget, graspRef.x(), graspRef.z(), th);
+				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << graspRef.x() << ", " << graspRef.z() << " )\n";
+				haveTarget = true;
+			}
+			catch(const Ice::Exception &ex)
+			{
+				std::cout <<"ERROR trajectoryrobot2d->go "<< ex << std::endl;
+				throw ex;
+			}
+		}
+		string state;
+		try
+		{
+				state = trajectoryrobot2d_proxy->getState().state;
+		}
+		catch(const Ice::Exception &ex)
+		{
+				std::cout <<"trajectoryrobot2d->getState().state "<< ex << std::endl;
+				throw ex;
+		}
+
+		//state="IDLE";
+		std::cout<<state<<" haveTarget "<<haveTarget;
+		if (state=="IDLE" && haveTarget)
+		{
+			//std::cout<<"\ttrajectoryrobot2d_proxy->getState() "<<trajectoryrobot2d_proxy->getState().state<<"\n";
+			try
+			{
+// 				AGMModel::SPtr newModel(new AGMModel(worldModel));
+// 				int statusID =symbols["status"]->identifier;
+// 				newModel->getEdgeByIdentifiers(objectID, statusID, "noReach").setLabel("reach");
+// 				sendModificationProposal(worldModel, newModel);
+				haveTarget=false;
+			}
+			catch (...)
+			{
+				std::cout<<"\neeeee"<< "\n";
+			}
+		}
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
+}
+
+
+bool SpecificWorker::odometryAndLocationIssues()
+{
+	//
+	// Get ODOMETRY and update it in the graph. If there's a problem talking to the robot's platform, abort
+	try
+	{
+		omnirobot_proxy->getBaseState(bState);
+	}
+	catch(...)
+	{
+		printf("Can't connect to the robot!!\n");
+		return false;
+	}
+
+	int32_t robotId, roomId;
+
+	robotId = worldModel->getIdentifierByType("robot");
+	if (robotId < 0)
+	{
+		printf("Robot symbol not found, Waiting for the executive...\n");
+		return false;
+	}
+
+	//TODO fix this
+	roomId=7; // worldModel->getIdentifierByType("room");
+	if (roomId < 0)
+	{
+		printf("roomId not found, Waiting for Insert innerModel...\n");
+		return false;
+	}
+
+	try
+	{
+		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(roomId, robotId, "RT");
+		//printf("a %d\n", __LINE__);
+
+		float bStatex =str2float(edge->getAttribute("tx"));
+		float bStatez = str2float(edge->getAttribute("tz"));
+		float bStatealpha = str2float(edge->getAttribute("ry"));
+		
+		//to reduces the publication frequency
+		if (fabs(bStatex - bState.correctedX)>5 or fabs(bStatez - bState.correctedZ)>5 or fabs(bStatealpha - bState.correctedAlpha)>0.02)
+		{
+			//Publish update edge
+			printf("\nUpdate odometry...\n");
+			qDebug()<<"bState local --> "<<bStatex<<bStatez<<bStatealpha;
+			qDebug()<<"bState corrected --> "<<bState.correctedX<<bState.correctedZ<<bState.correctedAlpha;
+
+			edge->setAttribute("tx", float2str(bState.correctedX));
+			edge->setAttribute("tz", float2str(bState.correctedZ));
+			edge->setAttribute("ry", float2str(bState.correctedAlpha));
+// 			qDebug()<<"TODO: AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy)\n\n";
+			AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy);
+		}
+	}
+	catch (...)
+	{
+		printf("Can't update odometry in RT, edge does not exist? !!!\n");
+		return false;
+	}
+
+	return true;
 }
 
 void SpecificWorker::updateRobotsCognitiveLocation()
@@ -529,7 +519,7 @@ void SpecificWorker::action_ChangeRoom(bool newAction)
 
 void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 {
-	stop();
+// 	stop();
 
 
 	static float lastX = std::numeric_limits<float>::quiet_NaN();
@@ -537,7 +527,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 
 	AGMModelSymbol::SPtr goalTable;
 	AGMModelSymbol::SPtr robot;
-	int32_t tableId;
+	int32_t tableId = -1;
 	try
 	{
 		tableId = str2int(params["container"].value);
@@ -597,240 +587,285 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 }
 
 
-void SpecificWorker::action_SetObjectReach(bool newAction)
-{
-	printf("void SpecificWorker::action_SetObjectReach()\n");
-	static float lastX = std::numeric_limits<float>::quiet_NaN();
-	static float lastZ = std::numeric_limits<float>::quiet_NaN();
-	int32_t objectId = str2int(params["object"].value);
-	AGMModelSymbol::SPtr goalObject;
-	try
-	{
-		goalObject = worldModel->getSymbol(objectId);
-	}
-	catch(...)
-	{
-		printf("object %d not in our model\n", objectId);
-		return;
-	}
-	const float x = str2float(goalObject->getAttribute("tx"));
-	const float z = str2float(goalObject->getAttribute("tz"));
-	float alpha;
-	switch (objectId)
-	{
-		case 5:
-			alpha = -0;
-			break;
-		case 7:
-			alpha = -3.141592;
-			break;
-		case 9:
-			alpha = 0;
-			break;
-		default:
-			qFatal("navigation: can't get orientation goal for reaching object %d\n", objectId);
-			break;
-	}
-	printf("object (%f, %f, %f)\n", x, z, alpha);
-	const int32_t robotId = worldModel->getIdentifierByType("robot");
-	AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-	const float rx = str2float(robot->getAttribute("tx"));
-	const float rz = str2float(robot->getAttribute("tz"));
-	const float ralpha = str2float(robot->getAttribute("alpha"));
-	printf("robot (%f, %f, %f)\n", rx, rz, ralpha);
 
-	// Avoid repeating the same goal and confuse the navigator
-	const float errX = abs(rx-x);
-	const float errZ = abs(rz-z);
-	float errAlpha = abs(ralpha-alpha);
-	while (errAlpha > +M_PIl) errAlpha -= 2.*M_PIl;
-	while (errAlpha < -M_PIl) errAlpha += 2.*M_PIl;
-	errAlpha = abs(errAlpha);
-	if (errX<20 and errZ<20 and errAlpha<0.1)
-		return;
 
-	bool proceed = true;
-	if ( (planningState.state=="PLANNING" or planningState.state=="EXECUTING") )
-	{
-		if (abs(lastX-x)<10 and abs(lastZ-z)<10)
-		{
-			proceed = false;
-			printf("do not proceed because the coordinates do not differ (%s)\n", planningState.state.c_str());
-		}
-		else
-		{
-			proceed = true;
-			printf("proceed because the coordinates differ (%f, %f), (%f, %f)\n", x, z, lastX, lastZ);
-		}
-	}
-	else
-	{
-		proceed = true;
-		printf("proceed because it's not planning or executing\n");
-	}
 
-	static bool backp = true;
-	if (proceed)
-	{
-		lastX = x;
-		lastZ = z;
-		printf("proceed setobjectreach %d\n", objectId);
-		float xx = x;
-		float zz = z;
-// 		objectId==7?z+550:z-550
-		float aa = objectId==7?-3.141592:0;
-// 		qDebug() << xx << zz << aa;
-		go(xx, zz, aa, true, 80, 150, 50);
-		backp = true;
-	}
-	else if (backp)
-	{
-		printf("not proceeding %s\n", planningState.state.c_str());
-		backp = false;
-	}
 
-	printf("aaAdigejr\n");
-}
+
 
 void SpecificWorker::action_GraspObject(bool newAction)
 {
-	printf("SpecificWorker::action_GraspObject\n");
-	int32_t objectId;
-	AGMModelSymbol::SPtr goalObject;
-	AGMModelSymbol::SPtr robot;
+	std::string state = trajectoryrobot2d_proxy->getState().state;
+	printf("action_GraspObject: %s\n", state.c_str());
+	if (state != "IDLE")
+		trajectoryrobot2d_proxy->stop();
+}
 
-	stop();
+void SpecificWorker::action_NoAction(bool newAction)
+{
+	std::string state = trajectoryrobot2d_proxy->getState().state;
+	if (state != "IDLE")
+		stop();
+}
+
+bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
+{
+// 	try
+// 	{
+// 		RoboCompCommonBehavior::Parameter par = params.at("NavigationAgent.InnerModel") ;
+// 		if( QFile(QString::fromStdString(par.value)).exists() == true)
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
+// 			innerModel = new InnerModel(par.value);
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
+// 		}
+// 		else
+// 		{
+// 			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
+// 			qFatal("Exiting now.");
+// 		}
+// 	}
+// 	catch(std::exception e)
+// 	{
+// 		qFatal("Error reading config params");
+// 	}
+
+	timer.start(20);
+	return true;
+}
+
+bool SpecificWorker::activateAgent(const ParameterMap& prs)
+{
+	bool activated = false;
+	printf("<<activateAgent\n");
+	if (setParametersAndPossibleActivation(prs, activated))
+	{
+			if (not activated)
+			{
+				printf("activateAgent 0 >>\n");
+				return activate(p);
+			}
+	}
+	else
+	{
+		printf("activateAgent 1 >>\n");
+		return false;
+	}
+	printf("activateAgent 2 >>\n");
+	return true;
+}
+
+bool SpecificWorker::deactivateAgent()
+{
+		return deactivate();
+}
+
+StateStruct SpecificWorker::getAgentState()
+{
+	StateStruct s;
+	if (isActive())
+	{
+		s.state = Running;
+	}
+	else
+	{
+		s.state = Stopped;
+	}
+	s.info = p.action.name;
+	return s;
+}
+
+ParameterMap SpecificWorker::getAgentParameters()
+{
+	return params;
+}
+
+bool SpecificWorker::setAgentParameters(const ParameterMap& prs)
+{
+	bool activated = false;
+	return setParametersAndPossibleActivation(prs, activated);
+}
+
+void SpecificWorker::killAgent()
+{
+}
+
+Ice::Int SpecificWorker::uptimeAgent()
+{
+	return 0;
+}
+
+bool SpecificWorker::reloadConfigAgent()
+{
+	return true;
+}
+
+
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
+{
+	printf("pre <<structuralChange\n");
+	QMutexLocker l(mutex);
+	printf("<<structuralChange\n");
+
+	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+	//if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
+		//roomsPolygons = extractPolygonsFromModel(worldModel);
+
+	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
+	innerModel = agmInner.extractInnerModel("room", true);
+	printf("structuralChange>>\n");
+}
+
+void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
+{
+	QMutexLocker l(mutex);
+	printf("<<symbolUpdated\n");
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
+	innerModel = agmInner.extractInnerModel("room", true);
+	printf("symbolUpdated>>\n");
+}
+
+
+void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
+{
+	QMutexLocker lockIM(mutex);
+	agmInner.setWorld(worldModel);
+	for (auto modification : modifications)
+	{
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+		AGMModelEdge dst;
+		AGMModelConverter::fromIceToInternal(modification,dst);
+		agmInner.updateImNodeFromEdge(dst, innerModel);
+	}
+}
+
+
+/**
+ * \brief ACTUALIZACION DEL ENLACE EN INNERMODEL
+ */ 
+void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
+{
+	QMutexLocker lockIM(mutex);
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	agmInner.setWorld(worldModel);
+	AGMModelEdge dst;
+	AGMModelConverter::fromIceToInternal(modification,dst);
+	agmInner.updateImNodeFromEdge(dst, innerModel);
+}
+
+bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
+{
+	printf("<<< setParametersAndPossibleActivation\n");
+	// We didn't reactivate the component
+	reactivated = false;
+
+	// Update parameters
+	params.clear();
+	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
+	{
+		printf("param:%s   value:%s\n", it->first.c_str(), it->second.value.c_str());
+		params[it->first] = it->second;
+	}
+	printf("----\n");
 
 	try
 	{
-		objectId = str2int(params["object"].value);
-		goalObject = worldModel->getSymbol(objectId);
-		robot = worldModel->getSymbol(worldModel->getIdentifierByType("robot"));
+		action = params["action"].value;
+		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
+
+		if (action == "graspobject")
+		{
+			active = true;
+		}
+		else
+		{
+			active = true;
+		}
 	}
 	catch (...)
 	{
-		printf("do we have the model yet\n?");
-		return;
+		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
+		return false;
 	}
 
-	const float x = str2float(goalObject->getAttribute("tx"));
-	const float z = str2float(goalObject->getAttribute("tz"));
-	float alpha = (objectId==7 or objectId==100)?-3.141592:0;
+	// Check if we should reactivate the component
+	if (active)
+	{
+		active = true;
+		reactivated = true;
+	}
 
-	QVec::vec3( x, z, alpha).print("object");
+	printf("setParametersAndPossibleActivation >>>\n");
 
+	return true;
+}
+
+void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
+{
+	try
+	{
+		//AGMModelPrinter::printWorld(newModel);
+		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, "navigationAgent");
+		newModel->save("navigationAgent.xml");
+	}
+	catch(...)
+	{
+		exit(1);
+	}
+}
+
+void SpecificWorker::go(float x, float z, float alpha, bool rot, float xRef, float zRef, float threshold)
+{
 	RoboCompTrajectoryRobot2D::TargetPose tp;
 	tp.x = x;
 	tp.z = z;
 	tp.y = 0;
 	tp.rx = 0;
-	tp.ry = alpha;
+	tp.ry = 0;
 	tp.rz = 0;
-	trajectoryrobot2d_proxy->goReferenced(tp, 80, 350, 50);
-}
-
-
-void SpecificWorker::odometryAndLocationIssues()
-{
-	//
-	// Get ODOMETRY and update it in the graph. If there's a problem talking to the robot's platform, abort
+	if (rot)
+	{
+		tp.ry = alpha;
+		tp.doRotation = true;
+	}
+	else
+	{
+		tp.doRotation = false;
+	}
 	try
 	{
-		omnirobot_proxy->getBaseState(bState);
+		trajectoryrobot2d_proxy->goReferenced(tp, 80, 350, threshold);
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
 	}
 	catch(...)
 	{
-		printf("Can't connect to the robot!!\n");
-		return;
+		printf("something else %d\n", __LINE__);
 	}
+}
 
+
+void SpecificWorker::stop()
+{
 	try
 	{
-		
-		int32_t robotId;
-		//AGMModelPrinter::printWorld(worldModel);
-		robotId = worldModel->getIdentifierByType("robot");
-		if (robotId < 0)
-		{
-			printf("Waiting for the executive...\n");
-			return;
-		}
-		AGMModelSymbol::SPtr robot = worldModel->getSymbolByIdentifier(robotId);
-		try
-		{
-			robot->setAttribute("tx", float2str(bState.x));
-			robot->setAttribute("tz", float2str(bState.z));
-			robot->setAttribute("alpha", float2str(bState.alpha));
-		}
-		catch (...)
-		{
-			printf("Can't update odometry in the model A!!!\n");
-			return;
-		}
-		
-		
-		///link update
-		qDebug()<<bState.x<<bState.z<<bState.alpha;
-		
-                //AGMModelPrinter::printWorld(worldModel);                
-		AGMModelEdge edge  = worldModel->getEdgeByIdentifiers(20, 1, "RT");
-		
-		try
-		{
-			edge->setAttribute("tx", float2str(bState.x));
-			edge->setAttribute("tz", float2str(bState.z));
-			edge->setAttribute("ry", float2str(bState.alpha));
-		}
-		catch (...)
-		{
-			printf("Can't update odometry in RT !!!\n");
-			return;
-		}
-		
-		
-		
-// 		printf("a %d\n", __LINE__);
-		static float bStatex = 0;
-		static float bStatez = 0;
-		static float bStatealpha = 0;
-		if (fabs(bStatex - bState.x)>20 or fabs(bStatez - bState.z)>20 or fabs(bStatealpha - bState.alpha)>0.16)
-		{
-			AGMMisc::publishNodeUpdate(robot, agmagenttopic);
-			//Publish update edge
-			AGMMisc::publishEdgeUpdate(edge, agmagenttopic);
-			
-			bStatex = bState.x;
-			bStatez = bState.z;
-			bStatealpha = bState.alpha;
-                }
-                
-// 		printf("a %d\nv", __LINE__);
+		trajectoryrobot2d_proxy->stop();
 	}
-	catch (Ice::Exception &e)
+	catch(const Ice::Exception &ex)
 	{
-		printf("Ice: Can't update odometry in the model B!!!\n");
-		return;
+		std::cout << ex << std::endl;
 	}
-	catch (...)
+	catch(...)
 	{
-		printf("XX: Can't update odometry in the model B!!!\n");
-		return;
+		printf("something else %d\n", __LINE__);
 	}
-// 	printf("oki\n");
-	//  RELOCALIZATION
-	//
-	// to be done
-	//
-
-	//  UPDATE ROBOT'S LOCATION IN COGNITIVE MAP
-	//
-	updateRobotsCognitiveLocation();
 }
 
 
-void SpecificWorker::action_NoAction(bool newAction)
-{
-	stop();
-}
 
 

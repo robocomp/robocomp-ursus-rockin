@@ -39,11 +39,12 @@ public:
 	~TrajectoryRobot2DI();
 	
 	NavState getState(const Ice::Current&);
-	void goBackwards(const TargetPose  &target, const Ice::Current&);
+	float goBackwards(const TargetPose  &target, const Ice::Current&);
 	void stop(const Ice::Current&);
-	void goReferenced(const TargetPose  &target, const float  xRef, const float  zRef, const Ice::Current&);
-	void changeTarget(const TargetPose  &target, const Ice::Current&);
-	void go(const TargetPose  &target, const Ice::Current&);
+	float goReferenced(const TargetPose  &target, const float  xRef, const float  zRef, const float  threshold, const Ice::Current&);
+	float changeTarget(const TargetPose  &target, const Ice::Current&);
+	float go(const TargetPose  &target, const Ice::Current&);
+	void mapBasedTarget(const NavigationParameterMap  &parameters, const Ice::Current&);
 
 	QMutex *mutex;
 private:

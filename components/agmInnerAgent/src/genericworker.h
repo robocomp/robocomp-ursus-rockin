@@ -27,12 +27,14 @@
 #include <ui_mainUI.h>
 
 #include <CommonBehavior.h>
-#include <AGMWorldModel.h>
 #include <AGMAgent.h>
-#include <InnerModelManager.h>
-#include <AGMExecutive.h>
 #include <Planning.h>
+#include <AGMExecutive.h>
 #include <AGMCommonBehavior.h>
+#include <AGMWorldModel.h>
+
+#include <agm.h>
+#include <agmInner/agmInner.h>
 
 
 #define CHECK_PERIOD 5000
@@ -42,12 +44,20 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
 using namespace std;
 
-using namespace RoboCompAGMWorldModel;
 using namespace RoboCompAGMAgent;
-using namespace RoboCompInnerModelManager;
-using namespace RoboCompAGMExecutive;
 using namespace RoboCompPlanning;
+using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompAGMWorldModel;
+
+
+struct BehaviorParameters 
+{
+	RoboCompPlanning::Action action;
+	std::vector< std::vector <std::string> > plan;
+};
+
+
 
 class GenericWorker : 
 #ifdef USE_QTGUI
@@ -65,9 +75,13 @@ public:
 	
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
+	bool activate(const BehaviorParameters& parameters);
+	bool deactivate();
+	bool isActive() { return active; }
+	RoboCompAGMWorldModel::BehaviorResultType status();
+	
 
 	AGMAgentTopicPrx agmagenttopic_proxy;
-	InnerModelManagerPrx innermodelmanager_proxy;
 
 	virtual bool reloadConfigAgent() = 0;
 	virtual bool activateAgent(const ParameterMap &prs) = 0;
@@ -78,6 +92,7 @@ public:
 	virtual bool deactivateAgent() = 0;
 	virtual StateStruct getAgentState() = 0;
 	virtual void structuralChange(const RoboCompAGMWorldModel::Event &modification) = 0;
+	virtual void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications) = 0;
 	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification) = 0;
 	virtual void symbolUpdated(const RoboCompAGMWorldModel::Node &modification) = 0;
 
@@ -85,6 +100,15 @@ public:
 protected:
 	QTimer timer;
 	int Period;
+	bool active;
+	AGMModel::SPtr worldModel;
+	BehaviorParameters p;
+	ParameterMap params;
+	AgmInner agmInner;
+	int iter;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	RoboCompPlanning::Action createAction(std::string s);
+
 public slots:
 	virtual void compute() = 0;
 signals:

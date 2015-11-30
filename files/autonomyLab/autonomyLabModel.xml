@@ -1,0 +1,96 @@
+<innermodel>
+<transform id="world">
+	<include path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/ursus.xml"/>
+<!-- 	<include path="/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml"/> -->
+
+	<axes id="ax" length="200" width="30"/>
+        <plane id="floor_plane" ny="1" size="10000,6000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+	<transform id="floor" tx="3500" tz="2000">
+		<plane id="back" ny="1" size="7200,4400,10" texture="#ff8030" />
+	</transform>
+
+	<transform id="pared0" tx="1075.0" tz="0.0" ty="1500" >
+		<plane id="muro0" nx="-0.0" nz="2150.0" size="2150.0,3000" texture="#ff8030" />
+<!-- 		<plane id="muro0" nx="-0.0" nz="2150.0" size="2150.0,3000"  texture="#ffffff" /> -->
+	</transform>
+	<transform id="pared1" tx="3380.0" tz="0.0" ty="250" >
+		<plane id="muro1" nx="-0.0" nz="2460.0" size="2460.0,500"  texture="#aa6040" />
+	</transform>
+	<transform id="pared2" tx="5410.0" tz="0.0" ty="1500" >
+		<plane id="muro2" nx="-0.0" nz="1600.0" size="1600.0,3000" texture="#ff8030" />
+<!--<plane id="muro2" nx="-0.0" nz="1600.0" size="1600.0,3000"  texture="#ffffff" />-->
+	</transform>
+	<transform id="pared3" tx="6210.0" tz="495.0" ty="1500" >
+		<plane id="muro3" nx="-990.0" nz="0.0" size="990.0,3000"  texture="#ffffff" />
+	</transform>
+	<transform id="pared4" tx="6605.0" tz="990.0" ty="1500" >
+		<plane id="muro4" nx="-0.0" nz="790.0" size="790.0,3000"  texture="#ffffff" />
+	</transform>
+	<transform id="pared5" tx="7000.0" tz="2465.0" ty="1500" >
+		<plane id="muro5" nx="-2950.0" nz="0.0" size="2950.0,3000"  texture="#ffffff" />
+	</transform>
+	<transform id="pared6" tx="6600.0" tz="3940.0" ty="1500" >
+		<plane id="muro6" nx="-0.0" nz="-800.0" size="800.0,3000"  texture="#ffffff" />
+	</transform>
+	<transform id="pared7" tx="6200.0" tz="3865.0" ty="1500" >
+		<plane id="muro7" nx="150.0" nz="0.0" size="150.0,3000"  texture="#ffffff" />
+	</transform>
+	<transform id="pared8" tx="5935.0" tz="3790.0" ty="1500" >
+		<plane id="muro8" nx="-0.0" nz="-530.0" size="530.0,3000"  texture="#ffffff" />
+	</transform>
+	<transform id="pared9" tx="5670.0" tz="3910.0" ty="1500" >
+		<plane id="muro9" nx="-240.0" nz="0.0" size="240.0,3000"  texture="#ffffff" />
+	</transform>
+	<transform id="pared10" tx="2835.0" tz="4055.0" ty="1500" >
+		<plane id="muro10" nx="-50.0" nz="-5670.0" size="5670.22045427,3000"  texture="#ffffff" />
+	</transform>
+	<transform id="pared11" tx="0.0" tz="2040.0" ty="1500" >
+		<plane id="muro11" nx="4080.0" nz="0.0" size="4080.0,3000"  texture="#ffffff" />
+	</transform>
+
+	
+	
+	<transform id="pared12" tx="1400.0" tz="2750.0" ty="400" >
+		<plane id="muro12" nx="-0.0" nz="700.0" size="700.0,800"  texture="#883000" />
+	</transform>
+	<transform id="pared13" tx="1750.0" tz="2770.0" ty="400" >
+		<plane id="muro13" nx="-40.0" nz="0.0" size="40.0,800"  texture="#883000" />
+	</transform>
+	<transform id="pared14" tx="1700.0" tz="2790.0" ty="400" >
+		<plane id="muro14" nx="-0.0" nz="-100.0" size="100.0,800"  texture="#883000" />
+	</transform>
+	<transform id="pared15" tx="1650.0" tz="3180.0" ty="400" >
+		<plane id="muro15" nx="-780.0" nz="0.0" size="780.0,800"  texture="#883000" />
+	</transform>
+	<transform id="pared16" tx="1700.0" tz="3570.0" ty="400" >
+		<plane id="muro16" nx="-0.0" nz="100.0" size="100.0,800"  texture="#883000" />
+	</transform>
+	<transform id="pared17" tx="1750.0" tz="3590.0" ty="400" >
+		<plane id="muro17" nx="-40.0" nz="0.0" size="40.0,800"  texture="#883000" />
+	</transform>
+	<transform id="pared18" tx="1400.0" tz="3610.0" ty="400" >
+		<plane id="muro18" nx="-0.0" nz="-700.0" size="700.0,800"  texture="#883000" />
+	</transform>
+
+	<transform id="mesaCP" tx="1400" tz="3180" ty="800">
+		<plane id="mesaC" ny="1" size="1000,1750"  texture="#cccccc" />
+	</transform>
+
+	<transform id="table" tx="3800" tz="3200" ty="800">
+		<mesh id="mesaR" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="600,600,12" rx="1.5707" collide="1" />
+		<mesh id="mesaRb" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="30,30,400" rx="1.5707" ty="-400" collide="1" />
+		<mesh id="mesaRbb" file="/home/robocomp/robocomp/files/osgModels/basics/cylinder.3ds" scale="325,325,9" rx="1.5707" ty="-800" collide="1" />
+		<plane id="mesaTag" ny="1" py="11" size="70,-70,5.0" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/30.png" />
+		<plane id="mesaTagb" ny="1" py="11" size="80,-80,3.5" texture="#ffffff" />
+	</transform>
+
+	<transform id="mugRP" tx="3800" tz="2700" ty="910">
+		<transform id="mugRPr" tx="-10" ty="-50">
+			<mesh id="mugR" file="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/mug_blue.3ds" scale="120,120,120" rx="1.5707" rz="-1.5707" collide="1" />
+		</transform>
+		<plane id="mugTag" ny="1" py="0" size="70,-70,5.0" texture="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/31.png" />
+		<plane id="mugTagb" ny="1" py="0" size="80,-80,3.5" texture="#ffffff" />
+	</transform>
+</transform>
+</innermodel>
+

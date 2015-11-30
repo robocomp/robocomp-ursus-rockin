@@ -15,7 +15,7 @@
 	<transform id="corrected">
 		<transform id="correctedMenosError" />
 	</transform>
-	
-	<include path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/ficheros_Test_VisualBIK/ursus_errors.xml"/>
+	<!-- CHANGES-->
+	<include path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/visualBIKexperiment/ursus_errors.xml"/>
 
 </innerModel>

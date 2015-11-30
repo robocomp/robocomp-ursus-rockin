@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -16,8 +16,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef AGMEXECUTIVETOPICI_H
-#define AGMEXECUTIVETOPICI_H
+#ifndef AGMEXECUTIVETOPIC_H
+#define AGMEXECUTIVETOPIC_H
 
 // QT includes
 #include <QtCore/QObject>
@@ -37,11 +37,11 @@ Q_OBJECT
 public:
 	AGMExecutiveTopicI( GenericWorker *_worker, QObject *parent = 0 );
 	~AGMExecutiveTopicI();
-	void structuralChange(const RoboCompAGMWorldModel::Event&, const Ice::Current& = Ice::Current());
-	void symbolUpdated(   const RoboCompAGMWorldModel::Node&,  const Ice::Current& = Ice::Current());
-	void edgeUpdated(     const RoboCompAGMWorldModel::Edge&,  const Ice::Current& = Ice::Current());
-
-
+	
+	void structuralChange(const RoboCompAGMWorldModel::Event  &modification, const Ice::Current&);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&);
+	void edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&);
+	void symbolUpdated(const RoboCompAGMWorldModel::Node  &modification, const Ice::Current&);
 
 	QMutex *mutex;
 private:

@@ -1,0 +1,9 @@
+import "/robocomp/interfaces/IDSLs/FaceRecognition.idsl";
+import "/robocomp/interfaces/IDSLs/MSKFace.idsl";
+Component FaceRecognitionComp{
+	Communications{
+		subscribesTo MSKFaceEvent;
+		implements FaceRecognition;
+	};
+	language Cpp;
+};

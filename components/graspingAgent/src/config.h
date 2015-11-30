@@ -3,7 +3,9 @@
 
 // Comment out this line if your application has a QtGui
 #define USE_QTGUI
+
+
 #define PROGRAM_NAME    "graspingComp"
-#define SERVER_FULL_NAME   "RoboCompgraspingComp::graspingComp"
+#define SERVER_FULL_NAME   "RoboComp graspingComp:: graspingComp"
 
 #endif

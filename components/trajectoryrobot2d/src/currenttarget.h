@@ -38,7 +38,7 @@ class CurrentTarget
 		bool isBlocked() const;
 		
 		void setHasRotation(bool a);
-		enum class Command { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE};
+		enum class Command { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE, INSERTOBSTACLE};
 		Command command;
 		
 	private:
