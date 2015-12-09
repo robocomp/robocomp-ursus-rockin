@@ -39,7 +39,7 @@
 #include <agm.h>
 #include <qt4/QtCore/QHash>
 #include <qt4/QtCore/QList>
-#include <agmInner/agmInner.h>
+//#include <agmInner/agmInner.h>
 
 class SpecificWorker : public GenericWorker
 {

@@ -94,15 +94,17 @@ void SpecificWorker::compute()
 		/// ADDED to insert room from autonomyLabModel.xml
 		match.insert("room",7);
 		match.insert("robot",1);				
-		agmInner.include_im(worldModel, match,innerModel);
+		//agmInner.include_im(worldModel, match,innerModel);
+		AgmInner::include_im(worldModel,match,innerModel);
 		
 		worldModel->save("agmInnerAutonomyLabModel.xml");
 		qDebug()<<"\n\n*********** FIRST INNERMODEL included ************* \n\n";
 
 		qDebug()<<"\n\n******* Extract innerModel *****************";		
 		QString nodeName="room";
-		(agmInner.extractInnerModel(worldModel, nodeName))->treePrint();
-		(agmInner.extractInnerModel(worldModel, nodeName))->save("extractInnerModel.xml");
+		//(agmInner.extractInnerModel(worldModel, nodeName))->treePrint();
+		//(agmInner.extractInnerModel(worldModel, nodeName))->save("extractInnerModel.xml");
+		AgmInner::extractInnerModel(worldModel, nodeName)->save("extractInnerModel.xml");
 
 		qDebug()<<"\n\n*********** include_im *************";
 // 		///SECOND INNERMODEL
