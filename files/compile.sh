@@ -23,7 +23,7 @@ echo "update robocomp-ursus-rockin"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin
 git pull
 
-N=4
+N=2
 
 ###
 ### RoboComp
@@ -242,7 +242,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling human agent"
-	exit
+#	exit
 fi
 
 # apriltags

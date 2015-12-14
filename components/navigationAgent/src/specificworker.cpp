@@ -711,9 +711,9 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	//if (roomsPolygons.size()==0 and worldModel->numberOfSymbols()>0)
 		//roomsPolygons = extractPolygonsFromModel(worldModel);
 
-	agmInner.setWorld(worldModel);
+// 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
 	printf("structuralChange>>\n");
 }
 
@@ -722,9 +722,9 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	QMutexLocker l(mutex);
 	printf("<<symbolUpdated\n");
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-	agmInner.setWorld(worldModel);
+// 	agmInner.setWorld(worldModel);
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
 	printf("symbolUpdated>>\n");
 }
 
@@ -732,13 +732,13 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
 {
 	QMutexLocker lockIM(mutex);
-	agmInner.setWorld(worldModel);
+// 	agmInner.setWorld(worldModel);
 	for (auto modification : modifications)
 	{
 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 		AGMModelEdge dst;
 		AGMModelConverter::fromIceToInternal(modification,dst);
-		agmInner.updateImNodeFromEdge(dst, innerModel);
+		agmInner.updateImNodeFromEdge(worldModel, dst, innerModel);
 	}
 }
 
@@ -750,10 +750,10 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 {
 	QMutexLocker lockIM(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-	agmInner.setWorld(worldModel);
+// 	agmInner.setWorld(worldModel);
 	AGMModelEdge dst;
 	AGMModelConverter::fromIceToInternal(modification,dst);
-	agmInner.updateImNodeFromEdge(dst, innerModel);
+	agmInner.updateImNodeFromEdge(worldModel, dst, innerModel);
 }
 
 bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)

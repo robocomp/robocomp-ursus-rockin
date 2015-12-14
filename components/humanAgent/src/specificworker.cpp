@@ -231,7 +231,7 @@ void SpecificWorker::updatePeopleInnerFull()
 // 	
 // 	
 // 	///CAUTION CHAPUZA PA PROBAR A COLGAR DLE MUNDO 
-// 	 robotID = agmInner.findName("room");
+// 	 robotID = agmInner.findName(worldModel, "room");
 // 	if (robotID < 0)
 // 	{
 // 		printf("ROOOM symbol not found, \n");
@@ -299,7 +299,7 @@ void SpecificWorker::updatePeopleInnerFull()
 // 			updateInnerModel(personIt.second,personID);
 // 			
 // 			//TODO chequear esta funcion
-// 			//agmInner.updateAgmWithInnerModel(innerModelMap.at(personID));					
+// 			//agmInner.updateAgmWithInnerModel(worldModel, innerModelMap.at(personID));					
 // 		}
 // 		// añado la nueva en cualquier estado ??		
 // 		else 
@@ -324,7 +324,7 @@ void SpecificWorker::updatePeopleInnerFull()
 // 						
 // 			match.insert(pre+"XN_SKEL_TORSO",id);
 // 			
-// 			//agmInner.include_im(match,innerModelMap.at(id));
+// 			//agmInner.include_im(worldModel, match,innerModelMap.at(id));
 // // // 			//añado su arco calculado para innerModel, de la matzi kinect a la persona
 // 			std::map<string,string>att;
 // 			att["tx"]=float2str( innerModelMap.at(id)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
@@ -350,7 +350,7 @@ void SpecificWorker::updatePeopleInnerFull()
 // // 		worldModel->save("AGM_BeforeRemovePerson.xml");
 // // 		innerModelMap.at(l.at(i))->save("innerPersonToRemove.xml");
 // // 		qDebug()<<"\n innerModelMap.at(l.at(i))->getIDKeys()\n"<<innerModelMap.at(l.at(i))->getIDKeys()<<"\n";
-// 		//agmInner.remove_Im(innerModelMap.at(l.at(i)));	
+// 		//agmInner.remove_Im(worldModel, innerModelMap.at(l.at(i)));	
 // 		try{
 // 			innerModelMap.at(l.at(i)); 
 // 			innerModelMap.erase(l.at(i));
@@ -372,7 +372,6 @@ void SpecificWorker::updatePeopleInnerFull()
 // 	{
 // 		qDebug()<<"-------------------------------------";
 // 		AGMModel::SPtr newModel(new AGMModel(worldModel));	
-// 		//agmInner.setWorld(worldModel);
 // 		//sendModificationProposal(worldModel, newModel);					
 // // 		saveInnerModels(QString::number(number));
 // // 		number++;
@@ -394,7 +393,7 @@ void SpecificWorker::updatePeopleInnerFullB()
 	bool modification = false;
 
 	///CAUTION CHAPUZA PA PROBAR A COLGAR DLE MUNDO 
-	int32_t roomID = agmInner.findName("room");
+	int32_t roomID = agmInner.findName(worldModel, "room");
 	if (roomID < 0)
 	{
 		printf("ROOOM symbol not found, \n");
@@ -454,13 +453,13 @@ void SpecificWorker::updatePeopleInnerFullB()
 	for (int i=0; i<lSymbolsPersons.size(); i++)
 	{	
 	  
-		int symbolID = agmInner.findName(QString::fromStdString(int2str(lSymbolsPersons.at(i)))+"XN_SKEL_TORSO");
+		int symbolID = agmInner.findName(worldModel, QString::fromStdString(int2str(lSymbolsPersons.at(i)))+"XN_SKEL_TORSO");
 		qDebug()<<__FUNCTION__<<__LINE__<<innerModelMap.size()<<"lSymbolsPersons.at(i)"<<lSymbolsPersons.at(i)<<"symbol"<<symbolID;
 		//CAUTION el vector innermodelMap no contiene nada en esa posición
 		//agmInner.remove_Im(innerModelMap.at(lSymbolsPersons.at(i)));
 		QList <int> listaDescendientes;
 		bool loop=false;	
-		agmInner.checkLoop(symbolID,listaDescendientes,"RT",loop );
+		agmInner.checkLoop(worldModel, symbolID,listaDescendientes,"RT",loop );
 // 		
 		//qDebug()<<"listaDescendientes"<<listaDescendientes;
 		for (int j=0; j<listaDescendientes.size();j++)
@@ -534,7 +533,7 @@ void SpecificWorker::updatePeopleInnerFullB()
 		QHash<QString, int32_t>  match;
 		
 		match.insert(pre+"XN_SKEL_TORSO",personID);
-		agmInner.include_im(match, innerModelMap.at(TrackingId));
+		agmInner.include_im(worldModel, match, innerModelMap.at(TrackingId));
 		modification =true;
 	}
 	qDebug()<<"lUpdates:"<<lUpdates;
@@ -544,7 +543,7 @@ void SpecificWorker::updatePeopleInnerFullB()
 		try
 		{
 			InnerModel* imTmp =innerModelMap.at(lUpdates.at(i));
-			agmInner.updateAgmWithInnerModelAndPublish(imTmp,agmagenttopic_proxy);
+			agmInner.updateAgmWithInnerModelAndPublish(worldModel, imTmp, agmagenttopic_proxy);
 		}
 		catch (const std::out_of_range& oor)
 		{	
@@ -554,7 +553,7 @@ void SpecificWorker::updatePeopleInnerFullB()
 		}
 		
 		int TrackingId = lUpdates.at(i);
-		int symbolID = agmInner.findName(QString::fromStdString(int2str(TrackingId))+"XN_SKEL_TORSO");
+		int symbolID = agmInner.findName(worldModel, QString::fromStdString(int2str(TrackingId))+"XN_SKEL_TORSO");
 		
 		AGMModelSymbol::SPtr symbolPerson = worldModel->getSymbol(symbolID);
 		//rgb color
@@ -772,12 +771,11 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
 {
 	QMutexLocker m (mutex);	
  	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	agmInner.setWorld(worldModel);
 	if (innerModelAGM) 
 		delete innerModelAGM;
-	innerModelAGM = agmInner.extractInnerModel("room",true);
+	innerModelAGM = agmInner.extractInnerModel(worldModel, "room",true);
 	///TEST to check extractAGM
-	//AGMModel::SPtr worldClean = agmInner.extractAGM();
+	//AGMModel::SPtr worldClean = agmInner.extractAGM(worldModel);
 	//worldClean->save("worldClean.xml");
 	//AGMModelPrinter::printWorld(worldClean);
 }
@@ -785,13 +783,12 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
 void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
 {
 	QMutexLocker lockIM(mutex);
-	agmInner.setWorld(worldModel);
 	for (auto modification : modifications)
 	{
 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 		AGMModelEdge dst;
 		AGMModelConverter::fromIceToInternal(modification,dst);
-		agmInner.updateImNodeFromEdge(dst, innerModelAGM);
+		agmInner.updateImNodeFromEdge(worldModel, dst, innerModelAGM);
 	}
 }
 
@@ -799,15 +796,13 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification
 {
 	QMutexLocker m (mutex);	
   	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
- 	agmInner.updateImNodeFromEdge(modification,innerModelAGM);
- 	agmInner.setWorld(worldModel);
+ 	agmInner.updateImNodeFromEdge(worldModel, modification,innerModelAGM);
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modification)
 {
 	QMutexLocker m (mutex);	
  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);	
-	agmInner.setWorld(worldModel);
 }
 
 
@@ -1275,14 +1270,13 @@ void SpecificWorker::initDictionary()
 void SpecificWorker::saveInnerModels(QString number)
 {	
 	worldModel->save(number.toStdString()+"_agmWorldModelLocal.xml");
-	agmInner.getWorld()->save(number.toStdString()+"_agmWorldModel_agmInner.xml");	
 	for( auto m : innerModelMap )			
 	{		
 		QString pre =QString::fromStdString(int2str(m.first));
 		qDebug()<<"Saving innermodels : "<<pre+"innerHuman.xml";
 		m.second->save(number+"_"+pre+"innerHuman.xml");			
 	}		
-	agmInner.extractInnerModel("room", true)->save(number+"_extractInnerModelFromRoom.xml");
+	agmInner.extractInnerModel(worldModel, "room", true)->save(number+"_extractInnerModelFromRoom.xml");
 	
 }
 
