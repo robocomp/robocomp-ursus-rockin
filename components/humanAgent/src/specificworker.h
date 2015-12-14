@@ -94,8 +94,7 @@ private:
 	
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-	void updatePeopleInnerFull();
+	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);	
 	void updatePeopleInnerFullB();
 	map<string,QString> dictionaryNames;
 	map<string,RoboCompMSKBody::JointType> dictionaryEnum;
