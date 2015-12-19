@@ -2,8 +2,8 @@ CommonBehavior.Endpoints=tcp -p 12323
 
 
 # Proxies for required interfaces
-OmniRobotProxy = omnirobot:tcp -h 100.0.30.11 -p 12238
-TrajectoryRobot2DProxy = trajectoryrobot2d:tcp -h 100.0.30.11 -p 12204 
+OmniRobotProxy = omnirobot:tcp -h 10.0.30.11 -p 12238
+TrajectoryRobot2DProxy = trajectoryrobot2d:tcp -h 10.0.30.11 -p 12204 
 
 
 
