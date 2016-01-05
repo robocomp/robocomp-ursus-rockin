@@ -93,6 +93,7 @@ private:
 	void action_FindObjectVisuallyInTable(bool newAction = true);
 	void action_SetObjectReach(bool newAction = true);
 	void action_GraspObject(bool newAction = true);
+	void action_HandObject(bool newAction = true);
 	void action_NoAction(bool newAction = true);
 
 

@@ -102,6 +102,10 @@ void SpecificWorker::actionExecution()
 	{
 		action_GraspObject(newAction);
 	}
+	else if (action == "handobject")
+	{
+		action_HandObject(newAction);
+	}
 	else
 	{
 		action_NoAction(newAction);
@@ -115,6 +119,146 @@ void SpecificWorker::actionExecution()
 	}
 	printf("actionExecution>>\n");
 }
+
+void SpecificWorker::action_HandObject(bool newAction)
+{
+	// Get symbols' map
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
+	try
+	{
+		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/); //ALL THE SYMBOLS GIVEN IN THE RULE
+	}
+	catch(...)
+	{
+		printf("navigationAgent, action_HandObject: Couldn't retrieve action's parameters\n");
+		printf("<<WORLD\n");
+		AGMModelPrinter::printWorld(worldModel);
+		printf("WORLD>>\n");
+		if (worldModel->size() > 0) {	exit(-1);  }
+	}
+
+	// Get target
+	int roomID, personID, robotID;
+	try
+	{
+		if (symbols["room"].get() and symbols["person"].get() and symbols["robot"].get())
+		{
+			roomID = symbols["room"]->identifier;   //7 ROOM
+			personID =symbols["person"]->identifier;//  PERSON
+			robotID = symbols["robot"]->identifier; //1 ROBOT
+		}
+		else
+		{
+			printf("navigationAgent, action_HandObject: parameters not in the model yet\n");
+			return;
+		}
+	}
+	catch(...)
+	{
+		printf("navigationAgent, action_HandObject ERROR: SYMBOL DOESN'T EXIST \n");
+		exit(2);
+	}
+	
+	// GET THE INNERMODEL NAMES OF TH SYMBOLS
+	QString robotIMID;
+	QString roomIMID;
+	QString personIMID;
+	try
+	{
+		robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+		roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
+		//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
+		QString trackingId= QString::fromStdString(worldModel->getSymbol(personID)->getAttribute("TrackingId"));
+		personIMID = trackingId +"XN_SKEL_TORSO";
+	}
+	catch(...)
+	{
+		printf("navigationAgent, action_HandObject: ERROR IN GET THE INNERMODEL NAMES\n");
+		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
+		exit(2);
+	}
+	
+	// GET THE TARGET POSE: 
+	//RoboCompTrajectoryRobot2D::TargetPose tp;
+	
+	try
+	{
+		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(personIMID)))    return;
+		
+		QVec poseInRoom = innerModel->transform6D(roomIMID, personIMID); // FROM OBJECT TO ROOM
+		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
+		qDebug()<<" TARGET POSE: "<< poseInRoom;
+
+// 		currentTarget.first = objectID;
+		currentTarget.x = poseInRoom.x();
+		currentTarget.y = 0;
+		currentTarget.z = poseInRoom.z();
+		currentTarget.rx = 0;
+		currentTarget.ry = 0;
+		currentTarget.rz = 0;
+		currentTarget.doRotation = true;
+	}
+	catch (...) 
+	{ 
+		qDebug()<<"navigationAgent, action_HandObject: innerModel exception";
+	}
+
+	try
+	{
+// 		if (!haveTarget)
+		{
+			try
+			{
+				QVec graspRef = innerModel->transform("robot", "right_shoulder_grasp_pose");
+				float th=50;
+				trajectoryrobot2d_proxy->goReferenced(currentTarget, graspRef.x(), graspRef.z(), th);
+				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << graspRef.x() << ", " << graspRef.z() << " )\n";
+				haveTarget = true;
+			}
+			catch(const Ice::Exception &ex)
+			{
+				std::cout <<"navigationAgent, action_HandObject: ERROR trajectoryrobot2d->go "<< ex << std::endl;
+				throw ex;
+			}
+		}
+		string state;
+		try
+		{
+				state = trajectoryrobot2d_proxy->getState().state;
+		}
+		catch(const Ice::Exception &ex)
+		{
+				std::cout <<"navigationAgent, action_HandObject: trajectoryrobot2d->getState().state "<< ex << std::endl;
+				throw ex;
+		}
+
+		//state="IDLE";
+		std::cout<<state<<" haveTarget "<<haveTarget;
+		if (state=="IDLE" && haveTarget)
+		{
+			//std::cout<<"\ttrajectoryrobot2d_proxy->getState() "<<trajectoryrobot2d_proxy->getState().state<<"\n";
+			try
+			{
+// 				AGMModel::SPtr newModel(new AGMModel(worldModel));
+// 				int statusID =symbols["status"]->identifier;
+// 				newModel->getEdgeByIdentifiers(objectID, statusID, "noReach").setLabel("reach");
+// 				sendModificationProposal(worldModel, newModel);
+				haveTarget=false;
+			}
+			catch (...)
+			{
+				std::cout<<"\neeeee"<< "\n";
+			}
+		}
+	}
+	catch(const Ice::Exception &ex)
+	{
+		std::cout << ex << std::endl;
+	}
+	
+
+}
+
 
 /**
  * \brief elmeollo dl asunto
