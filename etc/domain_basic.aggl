@@ -87,48 +87,6 @@ findObjectVisuallyInTable : active(1)
 	}
 }
 
-findGranny : active(1)
-{
-	{
-		person:person(-15,-75)
-		roomSt:roomSt(200,50)
-		robot:robot(-190,-75)
-		personSt:personSt(200,-75)
-		room:object(-15,50)
-		robot->person(know)
-		person->personSt(granny)
-		person->personSt(noLocalized)
-		robot->room(in)
-		room->roomSt(room)
-		room->roomSt(noExplored)
-	}
-	=>
-	{
-		person:person(-15,-75)
-		roomSt:roomSt(200,55)
-		robot:robot(-190,-75)
-		personSt:personSt(200,-75)
-		room:object(-15,55)
-		robot->person(know)
-		person->personSt(granny)
-		person->room(in)
-		person->personSt(localized)
-		robot->room(in)
-		room->roomSt(room)
-		room->roomSt(noExplored)
-	}
-	effect
-	{
-		(forall
-			aRoom:room
-			aRoomSt:roomSt
-			(and
-				(not (explored aRoom aRoomSt))
-				(noExplored aRoom aRoomSt)
-			)
-		)
-	}
-}
 
 recognizeObjGlasses : active(1)
 {
@@ -293,6 +251,23 @@ graspObject : active(1)
 	}
 }
 
+detectPerson : active(1) success(0.7)
+{
+	{
+		robot:robot(0,-110)
+		room:object(-130,0)
+		robot->room(in)
+	}
+	=>
+	{
+		person:person(0,110)
+		robot:robot(0,-110)
+		room:object(-130,0)
+		robot->room(in)
+		person->room(in)
+	}
+}
+
 handObject : active(1)
 {
 	{
@@ -302,6 +277,32 @@ handObject : active(1)
 		room:object(-130,0)
 		robot->object(know)
 		object->robot(in)
+		robot->room(in)
+		person->room(in)
+	}
+	=>
+	{
+		person:person(0,110)
+		object:object(130,0)
+		robot:robot(0,-110)
+		room:object(-130,0)
+		robot->object(know)
+		object->robot(in)
+		object->person(in)
+		robot->room(in)
+		person->room(in)
+	}
+}
+releaseObject : active(1)
+{
+	{
+		person:person(0,110)
+		object:object(130,0)
+		robot:robot(0,-110)
+		room:object(-130,0)
+		robot->object(know)
+		object->robot(in)
+		object->person(in)
 		robot->room(in)
 		person->room(in)
 	}
