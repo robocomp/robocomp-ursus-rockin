@@ -222,33 +222,41 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
  	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
  
 	delete innerModel;
-	innerModel = agmInner.extractInnerModel(worldModel);
+	innerModel = AgmInner::extractInnerModel(worldModel);
 	mutex->unlock();
 }
 
 void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
 {
-
+	QMutexLocker lockIM(mutex);
+	for (auto modification : modifications)
+	{
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+		AGMModelEdge dst;
+		AGMModelConverter::fromIceToInternal(modification,dst);
+		AgmInner::updateImNodeFromEdge(worldModel, dst, innerModel);
+	}
+	
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
 {
-	mutex->lock();
- 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
- 
-	delete innerModel;
-	innerModel = agmInner.extractInnerModel(worldModel);
-	mutex->unlock();
+	QMutexLocker lockIM(mutex);
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	AGMModelEdge dst;
+	AGMModelConverter::fromIceToInternal(modification,dst);
+	AgmInner::updateImNodeFromEdge(worldModel, dst, innerModel);
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modification)
 {
-	mutex->lock();
- 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
- 
-	delete innerModel;
-	innerModel = agmInner.extractInnerModel(worldModel);
-	mutex->unlock();
+	QMutexLocker l(mutex);
+	printf("<<symbolUpdated\n");
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+// 	agmInner.setWorld(worldModel);
+	if (innerModel) delete innerModel;
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
+	printf("symbolUpdated>>\n");
 }
 
 
