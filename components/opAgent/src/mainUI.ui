@@ -13,6 +13,22 @@
   <property name="windowTitle">
    <string>opAgent</string>
   </property>
+  <widget class="QCheckBox" name="cbReleaseObject">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>10</y>
+     <width>131</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>ReleaseObject</string>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

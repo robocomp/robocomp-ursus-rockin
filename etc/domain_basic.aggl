@@ -287,13 +287,12 @@ handObject : active(1)
 		robot:robot(0,-110)
 		room:object(-130,0)
 		robot->object(know)
-		object->robot(in)
 		object->person(in)
 		robot->room(in)
 		person->room(in)
 	}
 }
-releaseObject : active(1)
+releaseObject : passive(1)
 {
 	{
 		person:person(0,110)

@@ -28,6 +28,9 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
+	QObject::connect(cbReleaseObject, SIGNAL(clicked()),
+                      this, SLOT(setValue(int)));
+	
 }
 
 /**
@@ -71,18 +74,84 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
-}
+	int robotId = worldModel->getIdentifierByType("robot");
+	if (robotId < 0)
+	{
+		printf("Robot symbol not found, Waiting for the executive...\n");
+		return;
+	}
+	
+// 	innerModel->treePrint();
 
+	actionExecution();
+
+// 	printf("ae>\n");
+}
+void SpecificWorker::actionExecution()
+{
+		QMutexLocker locker(mutex);
+	qDebug()<<"ACTION: "<<QString::fromStdString(action);
+
+	static std::string previousAction = "";
+	bool newAction = (previousAction != action);
+
+	if (newAction)
+	{
+		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
+	}
+
+
+	if (action == "handobject")
+	{
+		action_HandObject(newAction);
+	}
+	
+
+
+	if (newAction)
+	{
+		previousAction = action;
+		printf("New action: %s\n", action.c_str());
+	}
+	printf("actionExecution>>\n");
+}	
+
+//check distance and stop
+void SpecificWorker::action_HandObject(bool newAction)
+{
+	// Get symbols' map
+	std::map<std::string, AGMModelSymbol::SPtr> symbols;
+	try
+	{
+		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/); //ALL THE SYMBOLS GIVEN IN THE RULE
+	}
+	catch(...)
+	{
+		printf("navigationAgent, action_HandObject: Couldn't retrieve action's parameters\n");
+		printf("<<WORLD\n");
+		AGMModelPrinter::printWorld(worldModel);
+		printf("WORLD>>\n");
+		if (worldModel->size() > 0) {	exit(-1);  }
+	}
+	
+	//
+	if (cbReleaseObject->checkState())
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+		int objectID =symbols["object"]->identifier;
+		int robotID =symbols["robot"]->identifier;
+		int personID =symbols["person"]->identifier;
+		
+		newModel->removeEdgeByIdentifiers(objectID, robotID, "in");
+		newModel->addEdgeByIdentifiers(objectID, personID, "in");
+		
+		sendModificationProposal(worldModel, newModel);
+	}
+
+	
+	
+}
 
 bool SpecificWorker::reloadConfigAgent()
 {

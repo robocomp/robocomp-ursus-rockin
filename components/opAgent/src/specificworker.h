@@ -67,6 +67,8 @@ private:
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+	void actionExecution();
+	void action_HandObject(bool newAction);
 	
 };
 
