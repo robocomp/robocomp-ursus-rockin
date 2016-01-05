@@ -3,12 +3,43 @@
 		<attribute key="imName" value="robot" />
 		<attribute key="imType" value="omniRobot" />
 	</symbol>
+	
+	<symbol id="7" type="object" >
+		<attribute key="imName" value="room" />
+		<attribute key="imType" value="transform" />
+	</symbol>
 
 	<symbol id="9" type="object" >
 		<attribute key="imName" value="table" />
 		<attribute key="imType" value="transform" />
 		<attribute key="tag" value="30" />
 	</symbol>
+	
+	<symbol id="100" type="world" >
+                <attribute key="imName" value="world" />
+                <attribute key="imType" value="transform" />
+        </symbol>
+	
+	
+        <link  src="100"  dst="1"     label="RT">
+                <linkAttribute key="rx" value="0" />
+                <linkAttribute key="ry" value="0" />
+                <linkAttribute key="rz" value="0" />
+                <linkAttribute key="tx" value="0" />
+                <linkAttribute key="ty" value="0" />
+                <linkAttribute key="tz" value="0" />
+        </link>
+	<link  src="7"  dst="100"      label="in" />
+	
+	<link  src="100"  dst="7"     label="RT">
+                <linkAttribute key="rx" value="0" />
+                <linkAttribute key="ry" value="0" />
+                <linkAttribute key="rz" value="0" />
+                <linkAttribute key="tx" value="0" />
+                <linkAttribute key="ty" value="0" />
+                <linkAttribute key="tz" value="0" />
+        </link>
+
 
 	<link  src="1"  dst="9"      label="know" />
 	<symbol id="10" type="objectSt" />
@@ -20,10 +51,7 @@
 	<link  src="9"  dst="10"     label="notSee" />
 	<link  src="9"  dst="10"     label="position" />
 
-	<symbol id="7" type="object" >
-		<attribute key="imName" value="room" />
-		<attribute key="imType" value="transform" />
-	</symbol>
+	
 	<link  src="1"  dst="7"      label="know" />
 	<symbol id="8" type="objectSt" />
 	<link  src="7"  dst="8"  label="room" />

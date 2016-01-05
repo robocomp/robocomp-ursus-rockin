@@ -39,7 +39,7 @@
 #include <agm.h>
 #include <qt4/QtCore/QHash>
 #include <qt4/QtCore/QList>
-//#include <agmInner/agmInner.h>
+#include <agmInner/agmInner.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -64,20 +64,21 @@ public:
 	
 
 public slots:
-	void compute(); 	
+	void compute();
 	
 
+public:
+	std::vector<std::pair<InnerModel *, QString> > innerModelInfoVector;
 private:
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
-	InnerModel *innerModel,*innerModel1;
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;
 	InnerModel *innerModelVacio;
 	InnerModelViewer *innerViewer; 
 	
-	AgmInner agmInner;
+	//AgmInner agmInner;
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
@@ -85,7 +86,7 @@ private:
 
 	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);		
 	//void include_im(QHash< QString, ::int32_t > match);
-	void include_im(QHash<QString, int32_t>  match, InnerModel *im);
+// 	void include_im(QHash<QString, int32_t>  match, InnerModel *im);
 
 	
 	int findName(QString n);	
