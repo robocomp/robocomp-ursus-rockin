@@ -17,6 +17,7 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "specificworker.h"
+#include "specificmonitor.h"
 
 void SpecificWorker::compute()
 {
@@ -335,13 +336,37 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 /**
 * \brief Default constructor
 */
-SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
+SpecificWorker::SpecificWorker(MapPrx& mprx, Ice::CommunicatorPtr communicator) : GenericWorker(mprx)
 {
+
+
+	show();
+printf("%s: %d\n", __FILE__, __LINE__);
 	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";	
+printf("%s: %d\n", __FILE__, __LINE__);
 	
 	timer.start(33);
+printf("%s: %d\n", __FILE__, __LINE__);
+
+
+	std::string auxvalue;
+	GenericMonitor::configGetString(communicator, "AGMInnerAgent","InnerModels", auxvalue, "");
+	for (auto s : QString::fromStdString(auxvalue).split(";"))
+	{
+		auto v = s.split(",");
+		if( QFile(v[0]).exists() == true)
+		{
+			InnerModel *innerModel = new InnerModel(v[0].toStdString());
+			innerModelInfoVector.push_back(std::pair<InnerModel *, QString>(innerModel, v[1]));
+		}
+		else
+		{
+			qFatal("File %s specifed in config file not found: Exiting now.", v[0].toStdString().c_str());
+		}
+	}
+
 }
 
 /**
@@ -354,45 +379,6 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-	for (auto i : params)
-		printf("%s\n", i.first.c_str());
-
-	
-	
-printf("%s: %d\n", __FILE__, __LINE__);
-	
-	RoboCompCommonBehavior::Parameter par;
-	try
-	{
-printf("%s: %d\n", __FILE__, __LINE__);
-		 par = params.at("AGMInnerAgent.InnerModels");
-printf("%s: %d\n", __FILE__, __LINE__);
-	}
-	catch(std::exception e)
-	{
-		qFatal("Error reading config params: %s\n", e.what());
-	}
-
-printf("%s: %d\n", __FILE__, __LINE__);
-	for (auto s : QString::fromStdString(par.value).split(";"))
-	{
-printf("%s: %d\n", __FILE__, __LINE__);	
-		auto v = s.split(",");
-		if( QFile(v[0]).exists() == true)
-		{
-printf("%s\n%s: %d\n", par.value.c_str(), __FILE__, __LINE__);
-			InnerModel *innerModel = new InnerModel(v[0].toStdString());
-printf("%s: %d\n", __FILE__, __LINE__);
-			innerModelInfoVector.push_back(std::pair<InnerModel *, QString>(innerModel, v[1]));
-printf("%s: %d\n", __FILE__, __LINE__);
-		}
-		else
-		{
-			qFatal("File %s specifed in config file not found: Exiting now.", v[0].toStdString().c_str());
-		}
-	}
-	
-
 	return true;
 }
 

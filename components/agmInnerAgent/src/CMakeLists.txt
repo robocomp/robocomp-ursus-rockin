@@ -28,6 +28,7 @@ SET ( SOURCES
   specificworker.cpp
   agmcommonbehaviorI.cpp
   agmexecutivetopicI.cpp
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.cpp
 )
 
 # Headers set
@@ -40,6 +41,7 @@ SET ( HEADERS
   specificworker.h
   agmcommonbehaviorI.h
   agmexecutivetopicI.h
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.h
 )
 
 
