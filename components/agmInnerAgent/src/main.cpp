@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2015 by YOUR NAME HERE
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -160,20 +160,12 @@ int ::agmInnerComp::run(int argc, char* argv[])
 
 
 
-	SpecificWorker *worker = new SpecificWorker(mprx);
+	SpecificWorker *worker = new SpecificWorker(mprx, communicator());
 	//Monitor thread
 	SpecificMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor, SIGNAL(kill()), &a, SLOT(quit()));
 	QObject::connect(worker, SIGNAL(kill()), &a, SLOT(quit()));
-	monitor->start();
-
-	if ( !monitor->isRunning() )
-		return status;
 	
-	while (!monitor->ready)
-	{
-		usleep(10000);
-	}
 	
 	try
 	{
@@ -183,7 +175,7 @@ int ::agmInnerComp::run(int argc, char* argv[])
 			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy CommonBehavior\n";
 		}
 		Ice::ObjectAdapterPtr adapterCommonBehavior = communicator()->createObjectAdapterWithEndpoints("commonbehavior", tmp);
-		CommonBehaviorI *commonbehaviorI = new CommonBehaviorI(monitor );
+		CommonBehaviorI *commonbehaviorI = new CommonBehaviorI(monitor);
 		adapterCommonBehavior->add(commonbehaviorI, communicator()->stringToIdentity("commonbehavior"));
 		adapterCommonBehavior->activate();
 
