@@ -1464,29 +1464,34 @@ void SpecificWorker::updateHumanInnerFull()
 	//update	
 	else 
 	{
-		// GET THE INNERMODEL NAMES OF THe SYMBOLS
-		QString robotIMID;
-		QString roomIMID;
-		QString personIMID;
-		try
-		{
-			robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
-			roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
-			//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
-			QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
-			personIMID = trackingId +"XN_SKEL_TORSO";
-		}
-		catch(...)
-		{
-			printf("navigationAgent, action_HandObject: ERROR IN GET THE INNERMODEL NAMES\n");
-			qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
-			exit(2);
-		}
+// 		// GET THE INNERMODEL NAMES OF THe SYMBOLS
+// 		QString robotIMID;
+// 		QString roomIMID;
+// 		QString personIMID;
+// 		try
+// 		{
+// 			robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+// 			roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
+// 			//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
+// 			QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
+// 			personIMID = trackingId +"XN_SKEL_TORSO";
+// 		}
+// 		catch(...)
+// 		{
+// 			printf("navigationAgent, action_HandObject: ERROR IN GET THE INNERMODEL NAMES\n");
+// 			qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
+// 			exit(2);
+// 		}
+		InnerModel* imTmp =innerModelMap.at(idSingle);
+		//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
+		QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
+		QString personIMID = trackingId +"XN_SKEL_TORSO";
+		
 		
 		//update if > 1000 meter
-		float distance = innerModelAGM->transform(roomIMID, personIMID).norm2() ; // FROM OBJECT TO ROOM
+		float distance = imTmp->transform("root", personIMID).norm2() ; // FROM OBJECT TO ROOM
 		float th=1500.0;
-		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
+		qDebug()<<"personIMID"<<personIMID<<"]";
 		qDebug()<<" distance "<< distance;
 		
 		if (distance > th)
@@ -1494,7 +1499,7 @@ void SpecificWorker::updateHumanInnerFull()
 			//update
 			try
 			{
-				InnerModel* imTmp =innerModelMap.at(idSingle);		
+				//InnerModel* imTmp =innerModelMap.at(idSingle);		
 				AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
 			}
 			catch (const std::out_of_range& oor)
