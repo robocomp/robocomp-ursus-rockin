@@ -1,5 +1,5 @@
 # Endpoints for implemented interfaces
-CommonBehavior.Endpoints=tcp -p 4310
+CommonBehavior.Endpoints=tcp -p 43101
 
 
 # This property is used by the clients to connect to IceStorm.
