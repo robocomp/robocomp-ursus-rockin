@@ -1338,10 +1338,10 @@ void SpecificWorker::updateViewerLocalInnerModelSingle()
 // 	qDebug()<<"innerModelMap.size()" <<innerModelMap.size();
 // 	innerModelMap.at(idSingle)->save("idSingle");
 
-	if (personList.empty())
+/*	if (personList.empty())
 	{
 		return;
-	}
+	}*/
 	
 	//update	
 	//itPersonList = personList.cbegin();
@@ -1484,7 +1484,7 @@ void SpecificWorker::updateHumanInnerFull()
 		}
 		
 		//update if > 1000 meter
-		float distance = innerModelAGM->transform(robotIMID, personIMID).norm2() ; // FROM OBJECT TO ROOM
+		float distance = innerModelAGM->transform(roomIMID, personIMID).norm2() ; // FROM OBJECT TO ROOM
 		float th=1500.0;
 		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
 		qDebug()<<" distance "<< distance;
