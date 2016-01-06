@@ -209,12 +209,12 @@ void SpecificWorker::compute()
 	updateViewerLocalInnerModels();
 *******************************************************************/	
 // 	qDebug()<<"newBodyEvent"<<newBodyEvent;	
-// 	if (newBodyEvent)
-// 	{
-// 		//Insertar simbolos para todo el torso		
-// 								
-// 		newBodyEvent=false;	
-// 	}
+	if (newBodyEvent==false)
+	{
+		//Insertar simbolos para todo el torso		
+								
+		return;
+	}
 	
 	//multi
 //	updateViewerLocalInnerModels();		
@@ -1485,7 +1485,7 @@ void SpecificWorker::updateHumanInnerFull()
 		
 		//update if > 1000 meter
 		float distance = innerModelAGM->transform(robotIMID, personIMID).norm2() ; // FROM OBJECT TO ROOM
-		float th=800.0;
+		float th=1500.0;
 		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
 		qDebug()<<" distance "<< distance;
 		
