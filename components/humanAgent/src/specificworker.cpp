@@ -1376,7 +1376,7 @@ void SpecificWorker::updateHumanInnerFull()
 	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(roomID);
 	
 	//encontrar a la persona
-	int symbolID=worldModel->getIdentifierByType("person");
+	int symbolPersonID=worldModel->getIdentifierByType("person");
 	
 // 	//borrar
 // 	qDebug()<<__FUNCTION__<<__LINE__<<"symbolID"<<symbolID<<"personList.empty()"<<personList.empty();	
@@ -1396,9 +1396,9 @@ void SpecificWorker::updateHumanInnerFull()
 // 	}
 	
 	
-	qDebug()<<__FUNCTION__<<__LINE__<<"symbolID"<<symbolID<<"personList.empty()"<<personList.empty();	
+	qDebug()<<__FUNCTION__<<__LINE__<<"symbolID"<<symbolPersonID<<"personList.empty()"<<personList.empty();	
 	//añadir
-	if ( symbolID == -1 )
+	if ( symbolPersonID == -1 )
 	{
 		AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");
 		//newSymbolPerson->setIdentifier(idSingle);
@@ -1464,15 +1464,44 @@ void SpecificWorker::updateHumanInnerFull()
 	//update	
 	else 
 	{
+		// GET THE INNERMODEL NAMES OF THe SYMBOLS
+		QString robotIMID;
+		QString roomIMID;
+		QString personIMID;
 		try
 		{
-			InnerModel* imTmp =innerModelMap.at(idSingle);		
-			AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
+			robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+			roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
+			//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
+			QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
+			personIMID = trackingId +"XN_SKEL_TORSO";
 		}
-		catch (const std::out_of_range& oor)
-		{	
-			qDebug()<<"at exception InnerModelMap"<<__FUNCTION__<<__LINE__;
-			std::cerr << "Out of Range error: " << oor.what() << '\n';				
+		catch(...)
+		{
+			printf("navigationAgent, action_HandObject: ERROR IN GET THE INNERMODEL NAMES\n");
+			qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
+			exit(2);
+		}
+		
+		//update if > 1000 meter
+		float distance = innerModelAGM->transform(robotIMID, personIMID).norm2() ; // FROM OBJECT TO ROOM
+		float th=800.0;
+		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
+		qDebug()<<" distance "<< distance;
+		
+		if (distance > th)
+		{
+			//update
+			try
+			{
+				InnerModel* imTmp =innerModelMap.at(idSingle);		
+				AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
+			}
+			catch (const std::out_of_range& oor)
+			{	
+				qDebug()<<"at exception InnerModelMap"<<__FUNCTION__<<__LINE__;
+				std::cerr << "Out of Range error: " << oor.what() << '\n';				
+			}
 		}
 	}
 	
