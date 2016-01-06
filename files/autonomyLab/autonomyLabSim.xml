@@ -1,0 +1,7 @@
+<innermodel>
+	
+	<include path="/home/robocomp/robocomp/components/robocomp-ursus/etc/ursus.xml"/> 
+	
+ 	<include path="/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/autonomyLab/autonomyLabModel.xml"/> 
+</innermodel>
+
