@@ -91,19 +91,11 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
  	aux.editable = false;
  	string name = PROGRAM_NAME;
 	std::cout<<"\t\t***************** "<< name <<"\n";
-// 	AgmInnerAgent.InnerModel
- 	configGetString("AgmInnerAgent","InnerModel", aux.value, "no file");
-// 	//Check valid ranges
-// 	if( aux.value != "val1" and aux.value != "val2")
-// 	{
-// 		std::cout << __FUNCTION__ << "Warning. Wrong XXX value. Using default xxx" << std::endl;
-// 		params[name+".param_name"] = "xxx";
-// 	}
-	params["AgmInnerAgent.InnerModel"] = aux;
+
+	configGetString("AGMInnerAgent","InnerModels", aux.value, "");
+	params["AGMInnerAgent.InnerModels"] = aux;
 	
 	//todo better if necessary
-	configGetString("AgmInnerAgent","InnerModel1", aux.value, "no file");
-	params["AgmInnerAgent.InnerModel1"] = aux;
 	
 }
 

@@ -23,7 +23,7 @@ echo "update robocomp-ursus-rockin"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin
 git pull
 
-N=4
+N=2
 
 ###
 ### RoboComp
@@ -191,7 +191,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling navigation agent"
-	exit
+#	exit
 fi
 
 # proprioceptionAgent
@@ -201,7 +201,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling proprioception agent"
-	exit
+#	exit
 fi
 
 # graspingAgent
@@ -211,7 +211,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling grasping agent"
-	exit
+#	exit
 fi
 
 # objectAgent
@@ -221,7 +221,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling object agent"
-	exit
+#	exit
 fi
 
 # AgmInnerAgent
@@ -231,7 +231,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling agminner agent"
-	exit
+#	exit
 fi
 
 
@@ -242,7 +242,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling human agent"
-	exit
+#	exit
 fi
 
 # apriltags

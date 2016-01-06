@@ -351,7 +351,7 @@ void SpecificWorker::changeInner ()
 		//borra innermodel dentro de InnerModelViewer
 		osgView->getRootGroup()->removeChild(innerViewer);				
 	}
-	innerModel = agmInner.extractInnerModel("room", false);
+	innerModel = agmInner.extractInnerModel(worldModel, "room", false);
 	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
 	
@@ -362,13 +362,12 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	QMutexLocker locker(mutex);
 
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	agmInner.setWorld(worldModel);
 	
 #ifdef USE_QTGUI
 	changeInner( );
 #else
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);	
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);	
 #endif	
 }
 
@@ -377,12 +376,11 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	QMutexLocker locker(mutex);
 
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-	agmInner.setWorld(worldModel);
 #ifdef USE_QTGUI
 	changeInner( );
 #else
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);	
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);	
 #endif	
 	
 }
@@ -390,13 +388,12 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
 {
 	QMutexLocker lockIM(mutex);
-	agmInner.setWorld(worldModel);
 	for (auto modification : modifications)
 	{
 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 		AGMModelEdge dst;
 		AGMModelConverter::fromIceToInternal(modification,dst);
-		agmInner.updateImNodeFromEdge(dst, innerModel);
+		agmInner.updateImNodeFromEdge(worldModel, dst, innerModel);
 	}
 }
 
@@ -405,15 +402,12 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	QMutexLocker locker(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	try {
-		agmInner.updateImNodeFromEdge(modification, innerModel);
+		agmInner.updateImNodeFromEdge(worldModel, modification, innerModel);
 	}
 	catch (...)
 	{
 		qDebug()<<"\n";
 	}
-	
-	agmInner.setWorld(worldModel);
-	
 }
 
 

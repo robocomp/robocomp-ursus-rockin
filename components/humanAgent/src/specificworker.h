@@ -86,7 +86,7 @@ private:
 	PersonList personList;
 	long int timeStamp;
 	QTimer timerTimeStamp;
-	int number;
+	int number, idSingle;
 	
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;	
@@ -116,9 +116,13 @@ private:
 	void updateViewer();
 	void updateViewerLocalInnerModels();
 
-
 	HsvColor rgb2hsv(RgbColor colorRGB);
 	string getColorName(HsvColor hsv);
+	
+	//single mode
+	void updateViewerLocalInnerModelSingle();		
+	void updateHumanInnerFull();
+	
 };
 
 #endif

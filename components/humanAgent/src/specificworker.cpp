@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#define SINGLE_MODE 
 
 /**
 * \brief Default constructor
@@ -35,19 +36,46 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	imHumanGeneric = new InnerModel("/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/person.xml");
 	newBodyEvent = false;
 	number=0;
+	idSingle=3000;
+	
+	innerModelMap.clear();
+	initDictionary();
+	personList.clear();
+	
+#ifdef SINGLE_MODE	
+	qDebug()<<__LINE__;
+	innerModelMap[idSingle]=innerModelVacio;	
+	qDebug()<<__LINE__;
+	QString pre =QString::fromStdString(int2str(idSingle));
+	qDebug()<<__LINE__;
+	newInnerModel(imHumanGeneric, innerModelMap.at(idSingle),pre);
+	qDebug()<<__LINE__;
+	
+	QList<InnerModelNode *>	l;
+	l.clear();
+	innerModelMap.at(idSingle)->getSubTree(innerModelMap.at(idSingle)->getNode("root"),&l);		
+	QList<InnerModelNode*>::iterator it;
+	for (it=l.begin();it!=l.end();it++)
+	{
+		insertNodeInnerModel(innerModelsLocals,(*it));
+	}
+// 	innerViewer = new InnerModelViewer(innerModelsLocals, "root", osgView->getRootGroup(), true);	
+	qDebug()<<__LINE__<<innerModelMap.size();
+#endif
 	
 #ifdef USE_QTGUI
 	osgView = new OsgView(this);
+	
 	innerViewer = new InnerModelViewer(innerModelsLocals, "root", osgView->getRootGroup(), true);
+
 	manipulator = new osgGA::TrackballManipulator;
 	osgView->setCameraManipulator(manipulator, true);
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::FRONT_POV);
 	show();
+	
 #endif
-
-	innerModelMap.clear();
-	initDictionary();
-	personList.clear();
+	
+	
 }
 
 /**
@@ -64,8 +92,8 @@ void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &times
 	this->timeStamp = timestamp;
 	
 	///esto es pq cuando hay 0 personas no me envia nada
-	timerTimeStamp.setSingleShot(true);
-	timerTimeStamp.start(1000);
+// 	timerTimeStamp.setSingleShot(true);
+// 	timerTimeStamp.start(1000);
 	newBodyEvent = true;	
 }
 
@@ -188,15 +216,21 @@ void SpecificWorker::compute()
 // 		newBodyEvent=false;	
 // 	}
 	
-	updateViewerLocalInnerModels();		
-	updatePeopleInnerFullB(); 
+	//multi
+//	updateViewerLocalInnerModels();		
+//	updatePeopleInnerFullB(); 
+	
+	//single
+	updateViewerLocalInnerModelSingle();		
+	updateHumanInnerFull(); 
+
 	
 	
 	//clear personList after a while without to recive any event
-	if (timerTimeStamp.isActive() == false and !personList.empty())		
-	{		
-		std::cout<<"\t clear list \n";
-		personList.clear();		
+// 	if (timerTimeStamp.isActive() == false and !personList.empty())		
+// 	{		
+// 		std::cout<<"\t clear list \n";
+// 		personList.clear();		
 
 // 		/*updatePeopleInnerFull();
 // 		if (!innerModelMap.empty())
@@ -206,7 +240,7 @@ void SpecificWorker::compute()
 // 			qDebug()<<"innerModelMap.size()"<<innerModelMap.size();			
 // 			qFatal("fary innerModelMap not empty");
 // 		}
-	}
+//	}
 
 #ifdef USE_QTGUI	
 	innerViewer->update();
@@ -323,9 +357,9 @@ void SpecificWorker::updatePeopleInnerFullB()
 		{
 			int state = personList.at(TrackingId).state;
 			newSymbolPerson->setAttribute("State",int2str(state));
-			newSymbolPerson->setAttribute("Red",int2str(personList.at(TrackingId).spineJointColor.R));
-			newSymbolPerson->setAttribute("Green",int2str(personList.at(TrackingId).spineJointColor.G));
-			newSymbolPerson->setAttribute("Blue",int2str(personList.at(TrackingId).spineJointColor.B));
+// 			newSymbolPerson->setAttribute("Red",int2str(personList.at(TrackingId).spineJointColor.R));
+// 			newSymbolPerson->setAttribute("Green",int2str(personList.at(TrackingId).spineJointColor.G));
+// 			newSymbolPerson->setAttribute("Blue",int2str(personList.at(TrackingId).spineJointColor.B));
 			
 		}
 
@@ -397,9 +431,9 @@ void SpecificWorker::updatePeopleInnerFullB()
 		
 		AGMModelSymbol::SPtr symbolPerson = worldModel->getSymbol(symbolID);
 		//rgb color
-		symbolPerson->setAttribute("Red",int2str(personList.at(TrackingId).spineJointColor.R));
-		symbolPerson->setAttribute("Green",int2str(personList.at(TrackingId).spineJointColor.G));
-		symbolPerson->setAttribute("Blue",int2str(personList.at(TrackingId).spineJointColor.B));
+// 		symbolPerson->setAttribute("Red",int2str(personList.at(TrackingId).spineJointColor.R));
+// 		symbolPerson->setAttribute("Green",int2str(personList.at(TrackingId).spineJointColor.G));
+// 		symbolPerson->setAttribute("Blue",int2str(personList.at(TrackingId).spineJointColor.B));
 		
 // 		========================== MARIO =======================
 		//int b = personList.at(TrackingId).spineJointColor.B;
@@ -408,9 +442,9 @@ void SpecificWorker::updatePeopleInnerFullB()
 // 					 personList.at(TrackingId).spineJointColor.B);
 
 		RgbColor colorRGB;
-		colorRGB.r = personList.at(TrackingId).spineJointColor.R;
-		colorRGB.g = personList.at(TrackingId).spineJointColor.G;
-		colorRGB.b = personList.at(TrackingId).spineJointColor.B;
+// 		colorRGB.r = personList.at(TrackingId).spineJointColor.R;
+// 		colorRGB.g = personList.at(TrackingId).spineJointColor.G;
+// 		colorRGB.b = personList.at(TrackingId).spineJointColor.B;
 		HsvColor colorHSV = rgb2hsv(colorRGB);
 		
                 
@@ -428,7 +462,7 @@ void SpecificWorker::updatePeopleInnerFullB()
                 
                 
 		std::cout<<"---------------------------"<<std::endl;
-		std::cout<<"rgb("<<int2str(personList.at(TrackingId).spineJointColor.R)<<","<<int2str(personList.at(TrackingId).spineJointColor.G)<<","<<int2str(personList.at(TrackingId).spineJointColor.B)<<")"<<std::endl;
+// 		std::cout<<"rgb("<<int2str(personList.at(TrackingId).spineJointColor.R)<<","<<int2str(personList.at(TrackingId).spineJointColor.G)<<","<<int2str(personList.at(TrackingId).spineJointColor.B)<<")"<<std::endl;
 		std::cout<<"hsv("<<int2str(colorHSV.h)<<","<<int2str(colorHSV.s)<<","<<int2str(colorHSV.v)<<")"<<std::endl;
 		std::cout<<"---------------------------"<<std::endl;
 		
@@ -795,7 +829,7 @@ void SpecificWorker::initDictionary()
 	float x,y,z,rx,ry,rz;
 	string idJoint;
 	
-	qDebug()<<"RGB("<<person.spineJointColor.R<<person.spineJointColor.G<<person.spineJointColor.B<<") (X,Y"<<person.spineJointColor.X<<person.spineJointColor.Y<<")";
+// 	qDebug()<<"RGB("<<person.spineJointColor.R<<person.spineJointColor.G<<person.spineJointColor.B<<") (X,Y"<<person.spineJointColor.X<<person.spineJointColor.Y<<")";
 
 	calculateJointRotations(person);
 	
@@ -1199,6 +1233,8 @@ void SpecificWorker::updateViewerLocalInnerModels()
 	//actgualizar y añadir	
 	for( auto personIt : personList )
 	{
+		qDebug()<<__FILE__<<__FUNCTION__<<__LINE__<<"TPerson.TrackingId"<<personIt.second.TrackingId;
+		
 		int id = personIt.first;
 		
 		//lo busco 
@@ -1294,3 +1330,160 @@ void SpecificWorker::updateViewerLocalInnerModels()
 // 	
 // 	return;
 
+
+void SpecificWorker::updateViewerLocalInnerModelSingle()
+{
+	QMutexLocker m (mutex);	
+// 	qDebug()<<"-- init SINGLE --"<<"personList.empty()"<<personList.empty();
+// 	qDebug()<<"innerModelMap.size()" <<innerModelMap.size();
+// 	innerModelMap.at(idSingle)->save("idSingle");
+
+	if (personList.empty())
+	{
+		return;
+	}
+	
+	//update	
+	//itPersonList = personList.cbegin();
+	updateInnerModel((*personList.begin()).second,idSingle);
+
+
+}
+
+void SpecificWorker::updateHumanInnerFull()
+{
+	QMutexLocker m (mutex);
+	int32_t robotID = worldModel->getIdentifierByType("robot");
+	if (robotID < 0)
+	{
+		printf("Robot symbol not found, Waiting for the executive...\n");
+		return;
+	}
+	bool modification = false;
+
+	///CAUTION CHAPUZA PA PROBAR A COLGAR DEL MUNDO 
+	int32_t roomID = AgmInner::findSymbolIDWithInnerModelName(worldModel,"room");
+	if (roomID < 0)
+	{
+		printf("ROOOM symbol not found, \n");
+		qFatal("abort");
+		return;
+	}
+	
+	if (personList.empty() )
+		return;
+	
+	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(roomID);
+	
+	//encontrar a la persona
+	int symbolID=worldModel->getIdentifierByType("person");
+	
+// 	//borrar
+// 	qDebug()<<__FUNCTION__<<__LINE__<<"symbolID"<<symbolID<<"personList.empty()"<<personList.empty();	
+// 	if (personList.empty() and symbolID!=-1)
+// 	{
+// // 		int symbolID = AgmInner::findSymbolIDWithInnerModelName(worldModel, QString::fromStdString(int2str(idSingle)+"XN_SKEL_TORSO"));		
+// 		qDebug()<<__FUNCTION__<<__LINE__<<innerModelMap.size()<<"idSingle"<<idSingle<<"symbol"<<symbolID;
+// 		
+// 		//CAUTION el vector innermodelMap no contiene nada en esa posición
+// 		//agmInner.remove_Im(innerModelMap.at(lSymbolsPersons.at(i)));
+// 		QList <int> listaDescendientes;
+// 		bool loop=false;	
+// 		AgmInner::checkLoop(worldModel, symbolID,listaDescendientes,"RT",loop);
+// 		for (int j=0; j<listaDescendientes.size();j++)
+// 			worldModel->removeSymbol(listaDescendientes.at(j));
+// 		modification = true;
+// 	}
+	
+	
+	qDebug()<<__FUNCTION__<<__LINE__<<"symbolID"<<symbolID<<"personList.empty()"<<personList.empty();	
+	//añadir
+	if ( symbolID == -1 )
+	{
+		AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");
+		//newSymbolPerson->setIdentifier(idSingle);
+		
+		int personID = newSymbolPerson->identifier;
+	
+		newSymbolPerson->setAttribute("TrackingId",int2str(idSingle));
+		std::cout<<" añado un nuevo symbolo persona "<<newSymbolPerson->toString()<<" TrackingID "<<idSingle<<"\n";
+		
+		//state está en personList
+		try
+		{
+// 			(*personList.begin())
+			int state = (*personList.begin()).second.state;
+			newSymbolPerson->setAttribute("State",int2str(state));
+// 			newSymbolPerson->setAttribute("Red",int2str(personList.begin().spineJointColor.R));
+// 			newSymbolPerson->setAttribute("Green",int2str(personList.begin().spineJointColor.G));
+// 			newSymbolPerson->setAttribute("Blue",int2str(personList.begin().spineJointColor.B));
+			
+		}
+
+		catch (const std::out_of_range& oor)
+		{
+			qDebug()<<"PersonList at exception";
+			std::cerr << "Out of Range error: " << oor.what() << '\n';			
+		}
+		
+		
+		//añado su arco calculado para innerModel, de la matzi kinect a la persona
+// 		QString pre =QString::number(idSingle);
+// 		std::map<string,string>att;
+		try
+		{
+			try
+			{
+// 				att["tx"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
+// 				att["ty"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
+// 				att["tz"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
+// 				att["rx"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
+// 				att["ry"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
+// 				att["rz"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
+				worldModel->addEdgeByIdentifiers(roomID,personID,"RT");
+				worldModel->addEdgeByIdentifiers(personID,roomID,"in");
+				//worldModel->addEdgeByIdentifiers(personID,typeSymbolPerson->identifier,"personIs");
+			}
+			catch (const std::out_of_range& oor)
+			{	
+				qDebug()<<"at exception InnerModelMap";
+				std::cerr << "Out of Range error: " << oor.what() << '\n';							
+			}
+			
+		}
+		catch (...)
+		{
+			qDebug()<<"si no existe el torso q qFatal"<<__FUNCTION__<<__LINE__;
+			qFatal("abort fary");
+		}
+		//el prefijo es el ID del tracking, pero cuelga/inicia en la persona. Debo crear el arco entre room--RT-->person
+			
+		AgmInner::includeInnerModel(worldModel,personID,innerModelMap.at(idSingle));
+		modification =true;
+	}
+	//update	
+	else 
+	{
+		try
+		{
+			InnerModel* imTmp =innerModelMap.at(idSingle);		
+			AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
+		}
+		catch (const std::out_of_range& oor)
+		{	
+			qDebug()<<"at exception InnerModelMap"<<__FUNCTION__<<__LINE__;
+			std::cerr << "Out of Range error: " << oor.what() << '\n';				
+		}
+	}
+	
+	if (modification)
+	{
+		qDebug()<<"----------- MODIFICATION -----------------------";
+ 		AGMModel::SPtr newModel(new AGMModel(worldModel));	
+ 		sendModificationProposal(worldModel, newModel);					
+		//saveInnerModels(QString::number(number));
+		number++;
+// 		if (number>2)
+// 			qFatal("fary");
+	}
+}

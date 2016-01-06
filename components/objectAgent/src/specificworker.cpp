@@ -151,9 +151,8 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 
 	QMutexLocker l(mutex);
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	agmInner.setWorld(worldModel);
 	if (innerModel != NULL) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
 
 	printf("structuralChange>>\n");
 }
@@ -162,33 +161,30 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 {
 	QMutexLocker l(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-	agmInner.setWorld(worldModel);
 
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel("room", true);
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	QMutexLocker l(mutex);
 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-	agmInner.setWorld(worldModel);
 	AGMModelEdge dst;
 	AGMModelConverter::fromIceToInternal(modification,dst);
-	agmInner.updateImNodeFromEdge(dst, innerModel);
+	agmInner.updateImNodeFromEdge(worldModel, dst, innerModel);
 }
 
 
 void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
 {
 	QMutexLocker lockIM(mutex);
-	agmInner.setWorld(worldModel);
 	for (auto modification : modifications)
 	{
 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 		AGMModelEdge dst;
 		AGMModelConverter::fromIceToInternal(modification,dst);
-		agmInner.updateImNodeFromEdge(dst, innerModel);
+		agmInner.updateImNodeFromEdge(worldModel, dst, innerModel);
 	}
 }
 
@@ -380,10 +376,8 @@ bool SpecificWorker::updateTable(const RoboCompAprilTags::tag &t, AGMModel::SPtr
 						edgeRT->setAttribute("ry", float2str(poseFromParent.ry()));
 						edgeRT->setAttribute("rz", float2str(poseFromParent.rz()));
 						
-						agmInner.setWorld(newModel);
 // 						agmInner.updateAgmWithInnerModelAndPublish(innerModel, agmagenttopic_proxy);
-						agmInner.setWorld(newModel);
-						agmInner.updateImNodeFromEdge(edgeRT, innerModel);
+						agmInner.updateImNodeFromEdge(newModel, edgeRT, innerModel);
 						AGMMisc::publishEdgeUpdate(edgeRT, agmagenttopic_proxy);
 					}
 					catch(...){ qFatal("Impossible to update the RT edge"); }
