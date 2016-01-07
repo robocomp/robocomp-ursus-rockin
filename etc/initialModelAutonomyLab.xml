@@ -58,7 +58,7 @@
 	<link  src="7"  dst="8"  label="classified" />
 	<link  src="1"  dst="7"  label="in" />
 	<link  src="9"  dst="7"  label="in" />
-	
+	<link  src="7"  dst="1"  label="RT"/>
 
 	<link  src="7"  dst="9"     label="RT">
 		<linkAttribute key="rx" value="0" />
