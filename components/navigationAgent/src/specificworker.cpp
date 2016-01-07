@@ -196,7 +196,7 @@ void SpecificWorker::action_HandObject(bool newAction)
 		currentTarget.rx = 0;
 		currentTarget.ry = 0;
 		currentTarget.rz = 0;
-		currentTarget.doRotation = true;
+		currentTarget.doRotation = false;
 	}
 	catch (...) 
 	{ 
@@ -212,7 +212,7 @@ void SpecificWorker::action_HandObject(bool newAction)
 				QVec graspRef = innerModel->transform("robot", "right_shoulder_grasp_pose");
 				float th=50;
 				trajectoryrobot2d_proxy->goReferenced(currentTarget, graspRef.x(), graspRef.z(), th);
-				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << graspRef.x() << ", " << graspRef.z() << " )\n";
+				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << currentTarget.doRotation << ", " << graspRef.x() << ", " << graspRef.z() << " )\n";
 				haveTarget = true;
 			}
 			catch(const Ice::Exception &ex)
@@ -399,7 +399,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 }
 
 
-bool SpecificWorker::odometryAndLocationIssues()
+bool SpecificWorker::odometryAndLocationIssues(bool force)
 {
 	//
 	// Get ODOMETRY and update it in the graph. If there's a problem talking to the robot's platform, abort
@@ -422,8 +422,8 @@ bool SpecificWorker::odometryAndLocationIssues()
 		return false;
 	}
 
-	//TODO fix this
-	roomId=7; // worldModel->getIdentifierByType("room");
+	//
+	roomId = 7;//worldModel->getIdentifierByName("object_7");
 	if (roomId < 0)
 	{
 		printf("roomId not found, Waiting for Insert innerModel...\n");
@@ -440,7 +440,7 @@ bool SpecificWorker::odometryAndLocationIssues()
 		float bStatealpha = str2float(edge->getAttribute("ry"));
 		
 		//to reduces the publication frequency
-		if (fabs(bStatex - bState.correctedX)>5 or fabs(bStatez - bState.correctedZ)>5 or fabs(bStatealpha - bState.correctedAlpha)>0.02)
+		if (fabs(bStatex - bState.correctedX)>5 or fabs(bStatez - bState.correctedZ)>5 or fabs(bStatealpha - bState.correctedAlpha)>0.02 or force)
 		{
 			//Publish update edge
 			printf("\nUpdate odometry...\n");
@@ -450,7 +450,6 @@ bool SpecificWorker::odometryAndLocationIssues()
 			edge->setAttribute("tx", float2str(bState.correctedX));
 			edge->setAttribute("tz", float2str(bState.correctedZ));
 			edge->setAttribute("ry", float2str(bState.correctedAlpha));
-// 			qDebug()<<"TODO: AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy)\n\n";
 			AGMMisc::publishEdgeUpdate(edge, agmagenttopic_proxy);
 		}
 	}

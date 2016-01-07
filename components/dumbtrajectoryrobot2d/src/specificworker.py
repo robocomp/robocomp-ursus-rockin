@@ -122,23 +122,31 @@ class SpecificWorker(GenericWorker):
 				self.relErrX -= self.xRef
 				self.relErrZ -= self.zRef
 				self.relAng   = math.atan2(self.relErrX, self.relErrZ)
-				#if not self.target.doRotation:
-					
+
 				# Final relative coordinates of the target
 				print 'command', self.relErrX, self.relErrZ
+				command = np.array([self.relErrX, self.relErrZ])
+
+				# Ignore angular error if we are not supposed to adopt a final angle
+				if not self.target.doRotation:
+					if np.linalg.norm(command)<=400:
+						errAlpha = 0
+					else:
+						errAlpha = self.relAng
+					
 				
 				proceed = True
-				command = np.array([self.relErrX, self.relErrZ])
 				if np.linalg.norm(command)<=400:
 					command = np.array([0.25*self.relErrX, 0.25*self.relErrZ])
 				
-				elif np.linalg.norm(command)<=self.threshold and abs(errAlpha) < 0.08:
+				if np.linalg.norm(command)<=self.threshold and abs(errAlpha) < 0.15:
 					print 'stop by threshold'
 					proceed = False
-					
+				else:
+					print np.linalg.norm(command), abs(errAlpha)
 			
 				if proceed:
-					maxspeed = 100.
+					maxspeed = 130.
 					if np.linalg.norm(command)<0.1:
 						command = np.array([0,0])
 					else:

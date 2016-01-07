@@ -1,9 +1,9 @@
 # Endpoints for implemented interfaces
-CommonBehavior.Endpoints=tcp -p 43101
+CommonBehavior.Endpoints=tcp -p 9472 
 
 
 # This property is used by the clients to connect to IceStorm.
-TopicManager.Proxy=IceStorm/TopicManager:default -p 9999 -h robonuc1.local
+TopicManager.Proxy=IceStorm/TopicManager:default -p 9999 -h 10.0.30.11
 
 
 Ice.Warn.Connections=0
