@@ -213,23 +213,30 @@ void SpecificWorker::compute()
 	}	
 	updateViewerLocalInnerModels();
 *******************************************************************/	
-// 	qDebug()<<"newBodyEvent"<<newBodyEvent;	
+
 	if (newBodyEvent==false)
 	{
-		//Insertar simbolos para todo el torso		
-								
+		qDebug()<<"newBodyEvent"<<newBodyEvent;	
 		return;
 	}
 	
-	//multi
-//	updateViewerLocalInnerModels();		
-//	updatePeopleInnerFullB(); 
-	
 	//single
+	TPerson p =(*personList.begin()).second;
+	float zTorso = p.joints[dictionaryEnum["Spine"]].Position.Z;
+	qDebug()<<"ZZZZZZZZZZ"<<zTorso;
+	
+	if (zTorso < 1.5 or zTorso > 5.0)
+	{
+		qDebug()<<"distance wrong to update"<<zTorso<<"meters";
+		return;
+	}
 	updateViewerLocalInnerModelSingle();		
 	updateHumanInnerFull(); 
 
-	
+	//multi
+//	updateViewerLocalInnerModels();		
+//	updatePeopleInnerFullB(); 
+
 	
 	//clear personList after a while without to recive any event
 // 	if (timerTimeStamp.isActive() == false and !personList.empty())		
@@ -836,7 +843,7 @@ void SpecificWorker::initDictionary()
 	string idJoint;
 	
 // 	qDebug()<<"RGB("<<person.spineJointColor.R<<person.spineJointColor.G<<person.spineJointColor.B<<") (X,Y"<<person.spineJointColor.X<<person.spineJointColor.Y<<")";
-
+	
 	calculateJointRotations(person);
 	
 	for( auto dictionaryNamesIt : dictionaryNames )
@@ -1380,6 +1387,7 @@ void SpecificWorker::updateViewerLocalInnerModelSingle()
 	
 	//update	
 	//itPersonList = personList.cbegin();
+		//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
 	updateInnerModel((*personList.begin()).second,idSingle);
 
 
@@ -1435,8 +1443,7 @@ void SpecificWorker::updateHumanInnerFull()
 	//añadir
 	if ( symbolPersonID == -1 )
 	{
-		AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");
-		//newSymbolPerson->setIdentifier(idSingle);
+		AGMModelSymbol::SPtr newSymbolPerson =worldModel->newSymbol("person");		
 		
 		int personID = newSymbolPerson->identifier;
 	
@@ -1446,13 +1453,8 @@ void SpecificWorker::updateHumanInnerFull()
 		//state está en personList
 		try
 		{
-// 			(*personList.begin())
 			int state = (*personList.begin()).second.state;
 			newSymbolPerson->setAttribute("State",int2str(state));
-// 			newSymbolPerson->setAttribute("Red",int2str(personList.begin().spineJointColor.R));
-// 			newSymbolPerson->setAttribute("Green",int2str(personList.begin().spineJointColor.G));
-// 			newSymbolPerson->setAttribute("Blue",int2str(personList.begin().spineJointColor.B));
-			
 		}
 
 		catch (const std::out_of_range& oor)
@@ -1461,89 +1463,44 @@ void SpecificWorker::updateHumanInnerFull()
 			std::cerr << "Out of Range error: " << oor.what() << '\n';			
 		}
 		
-		
-		//añado su arco calculado para innerModel, de la matzi kinect a la persona
-// 		QString pre =QString::number(idSingle);
-// 		std::map<string,string>att;
 		try
 		{
 			try
 			{
-// 				att["tx"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getTr().x());				
-// 				att["ty"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getTr().y());
-// 				att["tz"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getTr().z());
-// 				att["rx"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getRxValue());
-// 				att["ry"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getRyValue());
-// 				att["rz"]=float2str(innerModelMap.at(idSingle)->getTransform(pre+"XN_SKEL_TORSO")->getRzValue());
 				worldModel->addEdgeByIdentifiers(roomID,personID,"RT");
 				worldModel->addEdgeByIdentifiers(personID,roomID,"in");
-				//worldModel->addEdgeByIdentifiers(personID,typeSymbolPerson->identifier,"personIs");
+				AgmInner::includeInnerModel(worldModel,personID,innerModelMap.at(idSingle));
+				modification =true;
 			}
 			catch (const std::out_of_range& oor)
 			{	
-				qDebug()<<"at exception InnerModelMap";
+				qDebug()<<__FILE__<<__LINE__<<"at exception InnerModelMap";
 				std::cerr << "Out of Range error: " << oor.what() << '\n';							
 			}
-			
 		}
 		catch (...)
 		{
-			qDebug()<<"si no existe el torso q qFatal"<<__FUNCTION__<<__LINE__;
+			qDebug()<<"Exception adding edges"<<__FUNCTION__<<__LINE__;
 			qFatal("abort fary");
-		}
-		//el prefijo es el ID del tracking, pero cuelga/inicia en la persona. Debo crear el arco entre room--RT-->person
-			
-		AgmInner::includeInnerModel(worldModel,personID,innerModelMap.at(idSingle));
-		modification =true;
+		}		
 	}
 	//update	
 	else 
 	{
-// 		// GET THE INNERMODEL NAMES OF THe SYMBOLS
-// 		QString robotIMID;
-// 		QString roomIMID;
-// 		QString personIMID;
-// 		try
-// 		{
-// 			robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
-// 			roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
-// 			//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
-// 			QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
-// 			personIMID = trackingId +"XN_SKEL_TORSO";
-// 		}
-// 		catch(...)
-// 		{
-// 			printf("navigationAgent, action_HandObject: ERROR IN GET THE INNERMODEL NAMES\n");
-// 			qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
-// 			exit(2);
-// 		}
-		InnerModel* imTmp =innerModelMap.at(idSingle);
-		//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
-		QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
-		QString personIMID = trackingId +"XN_SKEL_TORSO";
 		
-		
-		//update if > 1000 meter
-		float distance = imTmp->transform("root", personIMID).norm2() ; // FROM OBJECT TO ROOM
-		float th=1500.0;
-		qDebug()<<"personIMID"<<personIMID<<"]";
-		qDebug()<<" distance "<< distance;
-		
-		if (distance > th)
+		//update
+		qDebug()<<"update Human in mission";
+		try
 		{
-			//update
-			qDebug()<<"update Human in mission";
-			try
-			{
-				//InnerModel* imTmp =innerModelMap.at(idSingle);		
-				AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
-			}
-			catch (const std::out_of_range& oor)
-			{	
-				qDebug()<<"at exception InnerModelMap"<<__FUNCTION__<<__LINE__;
-				std::cerr << "Out of Range error: " << oor.what() << '\n';				
-			}
+			InnerModel* imTmp =innerModelMap.at(idSingle);		
+			AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
 		}
+		catch (const std::out_of_range& oor)
+		{	
+			qDebug()<<"at exception InnerModelMap"<<__FUNCTION__<<__LINE__;
+			std::cerr << "Out of Range error: " << oor.what() << '\n';				
+		}
+		
 	}
 	
 	if (modification)
