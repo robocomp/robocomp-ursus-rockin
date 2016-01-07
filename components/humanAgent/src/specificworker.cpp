@@ -196,6 +196,11 @@ void SpecificWorker::compute()
 {
 
   QMutexLocker m (mutex);	
+  if (worldModel->numberOfSymbols()==0)
+  {
+	  qDebug()<<"waiting for executive";
+	  return;
+  }
 	
 /********************* TEST CODE***********************************************	
 	if (innerModelMap.empty())
@@ -209,12 +214,12 @@ void SpecificWorker::compute()
 	updateViewerLocalInnerModels();
 *******************************************************************/	
 // 	qDebug()<<"newBodyEvent"<<newBodyEvent;	
-// 	if (newBodyEvent)
-// 	{
-// 		//Insertar simbolos para todo el torso		
-// 								
-// 		newBodyEvent=false;	
-// 	}
+	if (newBodyEvent==false)
+	{
+		//Insertar simbolos para todo el torso		
+								
+		return;
+	}
 	
 	//multi
 //	updateViewerLocalInnerModels();		
@@ -648,7 +653,8 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modifi
 	
 	if (innerModelAGM) 
 		delete innerModelAGM;
-	innerModelAGM = AgmInner::extractInnerModel(worldModel, "room",true);
+	innerModelAGM = AgmInner::extractInnerModel(worldModel, "world");
+	innerModelAGM->save("innerModelAGM.xml");
 	///TEST to check extractAGM
 	//AGMModel::SPtr worldClean = AgmInner::extractSymbolicGraph(worldModel);
 	//worldClean->save("worldClean.xml");
@@ -840,24 +846,28 @@ void SpecificWorker::initDictionary()
 			idJoint = dictionaryNamesIt.first;
 			x=y=z=rx=ry=rz=0.0;
 			
-		
 			x = 1000*mapJointRotations[ idJoint ].getTr().x();
 			y = 1000*mapJointRotations[ idJoint ].getTr().y();
 			z = 1000*mapJointRotations[ idJoint ].getTr().z();		
 			
-			rx = mapJointRotations[ idJoint ].getRxValue();
-			ry = mapJointRotations[ idJoint ].getRyValue();
-			rz = mapJointRotations[ idJoint ].getRzValue();
+			QVec rot =mapJointRotations[ idJoint ].extractAnglesR_min();
+			rx = rot(0);
+			ry = rot(1);
+			rz = rot(2);
 				
-			//qDebug()<<QString::fromStdString( idJoint)<<pose.x<<pose.y<<pose.z<<"( "<<pose.rx<<pose.ry<<pose.rz<<" )";
+			
 			//nan check			
 			if ( (x!=x) or (y!=y) or (z!=z) or (rx!=rx) or (ry!=ry) or (rz!=rz) )
 				continue;
 			string idNode = int2str(idPerson) + dictionaryNamesIt.second.toStdString();			
+			
+			
+			
+			
 			if (idJoint=="Spine")
 			{
 				innerModelMap[ idPerson ]->updateTransformValues( QString::fromStdString(idNode),x,y,z,rx,ry,rz );
-				
+				qDebug()<<"idNode"<<QString::fromStdString(idNode)<<"idjoint"<<QString::fromStdString( idJoint)<<"[" <<x<<y<<z<<"( "<<rx<<ry<<rz<<" )";
 				try
 				{
 					innerModelsLocals->updateTransformValues(QString::fromStdString(idNode),x,y,z,rx,ry,rz);
@@ -885,6 +895,23 @@ void SpecificWorker::initDictionary()
 			qDebug( )<<"error updateInnerModel"<<e.what( );
 		}
 	}
+	
+
+	const float fScale = 0.83;
+	QString torsoName= QString::fromStdString(int2str(idPerson)) +"XN_SKEL_TORSO";
+	QVec v = innerModelMap[ idPerson ]->getTransform(torsoName)->getTr();
+	float rxValue= innerModelMap[ idPerson ]->getTransform(torsoName)->extractAnglesR_min().x();
+	float ryValue= innerModelMap[ idPerson ]->getTransform(torsoName)->extractAnglesR_min().y();
+	float rzValue= innerModelMap[ idPerson ]->getTransform(torsoName)->extractAnglesR_min().z();
+	
+	v.print("v");
+	v(0)*=fScale;v(1)*=fScale;v(2)*=fScale;
+	QVec ff = innerModelAGM->transform6D("room",QVec::vec6 ( v.x(),v.y(),v.z(), rxValue,ryValue,rzValue),"rgbdHumanPose");
+	
+	ff.print("ff");
+	innerModelMap[ idPerson ]->updateTransformValues( torsoName,ff(0),ff(1),ff(2),ff(3),ff(4),ff(5) );
+	innerModelsLocals->updateTransformValues( torsoName,ff.x(),ff.y(),ff.z(),ff.rx(),ff.ry(),ff.rz() );
+
 }
  /**
  * @brief Given a person, this method calculates the Rotation Matrix of all the Joints. person is in metres
@@ -907,19 +934,23 @@ void SpecificWorker::initDictionary()
 		jointList[iter.first].Position.X = -1.*jointList[iter.first].Position.X;
 // 		qDebug()<<jointList[iter.first].Position.X;
 	}
-// 	qFatal("fary");
+
 	///*********************** TODO transform ***************************	
-	try
-	{		
-		kinect=innerModelAGM->getTransformationMatrix("rgbdHumanPose","room");
-		kinect.setTr(kinect.getTr().x()/1000.0, kinect.getTr().y()/1000.0,kinect.getTr().z()/1000.0);
-	}
-	catch (...)
-	{
-		qDebug()<<"not found kinect using identity RTMat kinect";
-	}
-	//kinect.print("kinect");
-	
+// 	try
+// 	{		
+// 		//kinect=innerModelAGM->getTransformationMatrix("rgbdHumanPose","room");
+// 		kinect=innerModelAGM->getTransformationMatrix("room","rgbdHumanPose");				
+// 		kinect.getTr().print("Kinect: TR");
+// 		kinect.extractAnglesR_min().print("extractAnglesR_min");
+// 		//qDebug()<<"["<< kinect.getRxValue()<<kinect.getRyValue()<<kinect.getRzValue()<<"]";
+// 		kinect.print("kinect matrix");
+// 		kinect.setTr(kinect.getTr().x()/1000.0, kinect.getTr().y()/1000.0,kinect.getTr().z()/1000.0);
+// 
+// 	}
+// 	catch (...)
+// 	{
+// 		qDebug()<<"not found kinect using identity RTMat kinect";
+// 	}
 	
 	/// apunta el torso (inclinación alante/atrás y lateral del torso)
 	mapJointRotations[ "Spine" ]=
@@ -1127,17 +1158,21 @@ void SpecificWorker::initDictionary()
 
 	float angulo = atan2( eje.y( ),eje.x( ) );	//Calculamos el giro necesario para alinear los hombros con el eje
 	
-	QVec rrobot = QVec::vec3(0,0,0);
-	try
-	{
-		rrobot = innerModelAGM->getRotationMatrixTo("rgbdHumanPose","room").extractAnglesR_min();
-	}
-	catch (...)
-	{
-	}
+// 	QVec rrobot = QVec::vec3(0,0,0);
+// 	try
+// 	{
+// 		rrobot = innerModelAGM->getRotationMatrixTo("rgbdHumanPose","room").extractAnglesR_min();
+// 		
+// 		
+// 	}
+// 	catch (...)
+// 	{
+// 	}
 // 	rrobot.print("\nrotacion del robot \n");
+	//mapJointRotations[ "Spine" ].setRZ( angulo - rrobot(1) ); 
 	
-	mapJointRotations[ "Spine" ].setRZ( angulo - rrobot(1) ); // Aplicamos dicho giro al eje Z del torso
+	mapJointRotations[ "Spine" ].setRZ( angulo ); // Aplicamos dicho giro al eje Z del torso
+	
 	
 	return true;
 }
@@ -1338,10 +1373,10 @@ void SpecificWorker::updateViewerLocalInnerModelSingle()
 // 	qDebug()<<"innerModelMap.size()" <<innerModelMap.size();
 // 	innerModelMap.at(idSingle)->save("idSingle");
 
-	if (personList.empty())
+/*	if (personList.empty())
 	{
 		return;
-	}
+	}*/
 	
 	//update	
 	//itPersonList = personList.cbegin();
@@ -1361,7 +1396,7 @@ void SpecificWorker::updateHumanInnerFull()
 	}
 	bool modification = false;
 
-	///CAUTION CHAPUZA PA PROBAR A COLGAR DEL MUNDO 
+	///Human hangs on room symbol
 	int32_t roomID = AgmInner::findSymbolIDWithInnerModelName(worldModel,"room");
 	if (roomID < 0)
 	{
@@ -1464,37 +1499,43 @@ void SpecificWorker::updateHumanInnerFull()
 	//update	
 	else 
 	{
-		// GET THE INNERMODEL NAMES OF THe SYMBOLS
-		QString robotIMID;
-		QString roomIMID;
-		QString personIMID;
-		try
-		{
-			robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
-			roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
-			//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
-			QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
-			personIMID = trackingId +"XN_SKEL_TORSO";
-		}
-		catch(...)
-		{
-			printf("navigationAgent, action_HandObject: ERROR IN GET THE INNERMODEL NAMES\n");
-			qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
-			exit(2);
-		}
+// 		// GET THE INNERMODEL NAMES OF THe SYMBOLS
+// 		QString robotIMID;
+// 		QString roomIMID;
+// 		QString personIMID;
+// 		try
+// 		{
+// 			robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
+// 			roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
+// 			//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
+// 			QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
+// 			personIMID = trackingId +"XN_SKEL_TORSO";
+// 		}
+// 		catch(...)
+// 		{
+// 			printf("navigationAgent, action_HandObject: ERROR IN GET THE INNERMODEL NAMES\n");
+// 			qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
+// 			exit(2);
+// 		}
+		InnerModel* imTmp =innerModelMap.at(idSingle);
+		//we need to obtain the imName of the torso node. TrackingId+"XN_SKEL_TORSO"
+		QString trackingId= QString::fromStdString(worldModel->getSymbol(symbolPersonID)->getAttribute("TrackingId"));
+		QString personIMID = trackingId +"XN_SKEL_TORSO";
+		
 		
 		//update if > 1000 meter
-		float distance = innerModelAGM->transform(robotIMID, personIMID).norm2() ; // FROM OBJECT TO ROOM
-		float th=800.0;
-		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
+		float distance = imTmp->transform("root", personIMID).norm2() ; // FROM OBJECT TO ROOM
+		float th=1500.0;
+		qDebug()<<"personIMID"<<personIMID<<"]";
 		qDebug()<<" distance "<< distance;
 		
 		if (distance > th)
 		{
 			//update
+			qDebug()<<"update Human in mission";
 			try
 			{
-				InnerModel* imTmp =innerModelMap.at(idSingle);		
+				//InnerModel* imTmp =innerModelMap.at(idSingle);		
 				AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
 			}
 			catch (const std::out_of_range& oor)
