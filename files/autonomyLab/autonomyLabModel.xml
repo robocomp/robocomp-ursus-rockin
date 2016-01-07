@@ -2,7 +2,8 @@
 <transform id="world">
 
 	<axes id="ax" length="200" width="30"/>
-        <plane id="floor_plane" ny="1" size="10000,6000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" />
+<!--        <plane id="floor_plane" ny="1" size="10000,6000,10" texture="/home/robocomp/robocomp/files/osgModels/textures/wood.jpg" /> -->
+        <plane id="floor_plane" ny="1" size="10000,6000,5" texture="#ffff30"/>
 	<transform id="floor" tx="3500" tz="2000">
 		<plane id="back" ny="1" size="7200,4400,10" texture="#ff8030" />
 	</transform>
