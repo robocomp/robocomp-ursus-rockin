@@ -90,7 +90,7 @@ void SpecificWorker::compute()
 void SpecificWorker::actionExecution()
 {
 		QMutexLocker locker(mutex);
-	qDebug()<<"ACTION: "<<QString::fromStdString(action);
+	//qDebug()<<"ACTION: "<<QString::fromStdString(action);
 
 	static std::string previousAction = "";
 	bool newAction = (previousAction != action);
@@ -113,7 +113,7 @@ void SpecificWorker::actionExecution()
 		previousAction = action;
 		printf("New action: %s\n", action.c_str());
 	}
-	printf("actionExecution>>\n");
+// 	printf("actionExecution>>\n");
 }	
 
 //check distance and stop
@@ -123,34 +123,66 @@ void SpecificWorker::action_HandObject(bool newAction)
 	std::map<std::string, AGMModelSymbol::SPtr> symbols;
 	try
 	{
-		symbols = worldModel->getSymbolsMap(params/*,  "robot", "room", "object", "status"*/); //ALL THE SYMBOLS GIVEN IN THE RULE
+		symbols = worldModel->getSymbolsMap(params,  "robot", "person", "object"); //ALL THE SYMBOLS GIVEN IN THE RULE
 	}
 	catch(...)
 	{
 		printf("navigationAgent, action_HandObject: Couldn't retrieve action's parameters\n");
-		printf("<<WORLD\n");
-		AGMModelPrinter::printWorld(worldModel);
-		printf("WORLD>>\n");
+// 		printf("<<WORLD\n");
+// 		AGMModelPrinter::printWorld(worldModel);
+// 		printf("WORLD>>\n");
 		if (worldModel->size() > 0) {	exit(-1);  }
+		
 	}
 	
 	//
 	if (cbReleaseObject->checkState())
 	{
 		AGMModel::SPtr newModel(new AGMModel(worldModel));
-
+		
 		int objectID =symbols["object"]->identifier;
 		int robotID =symbols["robot"]->identifier;
 		int personID =symbols["person"]->identifier;
+
+		try 
+		{
+			AGMModelEdge e = newModel->getEdgeByIdentifiers(objectID, personID, "in");
+			qDebug()<<"modification not necessary. The edge: object "<<objectID<<"-- in -->"<<"person"<<personID<<" exist";
+			return;
+		}
+		catch (...)
+		{
+			
+		}
 		
+		//new model
 		newModel->removeEdgeByIdentifiers(objectID, robotID, "in");
 		newModel->addEdgeByIdentifiers(objectID, personID, "in");
 		
 		sendModificationProposal(worldModel, newModel);
+		
+		///release object
+		RoboCompJointMotor::MotorGoalPosition goal,goal2;
+
+		goal.name = "rightFinger1";
+		goal.maxSpeed = 0.5;
+		goal.position = -0.2;
+		
+		goal2.name = "rightFinger2";
+		goal2.maxSpeed = 0.5;
+		goal2.position = 0.2;
+		
+		try {
+			jointmotor_proxy->setPosition(goal);
+			jointmotor_proxy->setPosition(goal2);
+		}
+		catch(Ice::Exception e)
+		{
+			qDebug()<<"Can't connect with jointmotor_proxy";
+			return;
+		}
 	}
 
-	
-	
 }
 
 bool SpecificWorker::reloadConfigAgent()
