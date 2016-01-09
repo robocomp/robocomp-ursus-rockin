@@ -125,7 +125,8 @@ class SpecificWorker(GenericWorker):
 
 				# Final relative coordinates of the target
 				print 'command', self.relErrX, self.relErrZ
-				command = np.array([self.relErrX, self.relErrZ])
+				errorVector = np.array([self.relErrX, self.relErrZ])
+				command = np.array([self.relErrX, self.relErrZ])				
 
 				# Ignore angular error if we are not supposed to adopt a final angle
 				if not self.target.doRotation:
@@ -139,7 +140,7 @@ class SpecificWorker(GenericWorker):
 				if np.linalg.norm(command)<=400:
 					command = np.array([0.25*self.relErrX, 0.25*self.relErrZ])
 				
-				if np.linalg.norm(command)<=self.threshold and abs(errAlpha) < 0.15:
+				if np.linalg.norm(errorVector)<=self.threshold and abs(errAlpha) < 0.15:
 					print 'stop by threshold'
 					proceed = False
 				else:
@@ -193,7 +194,7 @@ class SpecificWorker(GenericWorker):
 					SEND = True
 					laserData = self.laser_proxy.getLaserData()
 					for l in laserData:
-						if l.dist<200:
+						if l.dist<200 and abs(l.angle)<0.78:
 							self.collisions += 1
 							self.currentVel = [0.7*x for x in self.currentVel]
 							if SEND: self.omnirobot_proxy.setSpeedBase(self.currentVel[0], self.currentVel[1], self.currentVel[2])
