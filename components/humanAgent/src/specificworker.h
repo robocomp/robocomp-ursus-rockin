@@ -85,7 +85,7 @@ private:
 	bool active, newBodyEvent;
 	PersonList personList;
 	long int timeStamp;
-	QTimer timerTimeStamp;
+// 	QTimer timerTimeStamp;
 	int number, idSingle;
 	
 	osgGA::TrackballManipulator *manipulator;

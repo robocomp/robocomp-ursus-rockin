@@ -92,8 +92,8 @@ void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &times
 	this->timeStamp = timestamp;
 	
 	///esto es pq cuando hay 0 personas no me envia nada
-	timerTimeStamp.setSingleShot(true);
-	timerTimeStamp.start(500);
+// 	timerTimeStamp.setSingleShot(true);
+// 	timerTimeStamp.start(500);
 	newBodyEvent = true;	
 }
 
@@ -194,8 +194,7 @@ void SpecificWorker::insertNodeInnerModel(InnerModel* im, InnerModelNode* node, 
 
 void SpecificWorker::compute()
 {
-
-  QMutexLocker m (mutex);	
+  QMutexLocker m (mutex);
   if (worldModel->numberOfSymbols()==0)
   {
 	  qDebug()<<"waiting for executive";
@@ -219,10 +218,10 @@ void SpecificWorker::compute()
 		qDebug()<<"newBodyEvent"<<newBodyEvent;	
 		return;
 	}
-	if (timerTimeStamp.isActive()==false)
-	{
+// 	if (timerTimeStamp.isActive()==false)
+// 	{
 		newBodyEvent=false;
-	}
+// 	}
 	
 	//single
 	TPerson p =(*personList.begin()).second;
@@ -258,10 +257,10 @@ void SpecificWorker::compute()
 // 		}
 //	}
 
-#ifdef USE_QTGUI	
+#ifdef USE_QTGUI
 	innerViewer->update();
-	osgView->autoResize();						
-	osgView->frame();			
+	osgView->autoResize();
+	osgView->frame();
 #endif	
 	
 }
