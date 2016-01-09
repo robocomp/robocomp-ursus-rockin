@@ -94,13 +94,13 @@ void SpecificWorker::actionExecution()
 	{
 		action_FindObjectVisuallyInTable(newAction);
 	}
-	else if (action == "setobjectreach")
+	else if (action == "setobjectreach" or action == "graspobject")
 	{
 		action_SetObjectReach(newAction);
 	}
-	else if (action == "graspobject")
+	else if (action == "detectperson")
 	{
-		action_GraspObject(newAction);
+		action_DetectPerson(newAction);
 	}
 	else if (action == "handobject")
 	{
@@ -118,6 +118,26 @@ void SpecificWorker::actionExecution()
 		printf("New action: %s\n", action.c_str());
 	}
 	printf("actionExecution>>\n");
+}
+
+void SpecificWorker::action_DetectPerson(bool newAction)
+{
+
+	static bool b=false;
+	if (b==false)
+        {
+		trajectoryrobot2d_proxy->stop();
+		b=true;
+	}
+	try
+	{
+		omnirobot_proxy->setSpeedBase(0.,0.,0.1);
+	}
+	catch(...)
+	{
+		printf("Can't connect to the robot!!\n");
+	}
+
 }
 
 void SpecificWorker::action_HandObject(bool newAction)
@@ -179,8 +199,6 @@ void SpecificWorker::action_HandObject(bool newAction)
 	}
 	
 	// GET THE TARGET POSE: 
-	//RoboCompTrajectoryRobot2D::TargetPose tp;
-	
 	try
 	{
 		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(personIMID)))    return;
@@ -210,7 +228,7 @@ void SpecificWorker::action_HandObject(bool newAction)
 			try
 			{
 				QVec graspRef = innerModel->transform("robot", "right_shoulder_grasp_pose");
-				float th=50;
+				float th=20;
 				trajectoryrobot2d_proxy->goReferenced(currentTarget, graspRef.x(), graspRef.z(), th);
 				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << currentTarget.doRotation << ", " << graspRef.x() << ", " << graspRef.z() << " )\n";
 				haveTarget = true;
@@ -286,9 +304,9 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	{
 		if (symbols["room"].get() and symbols["object"].get() and symbols["robot"].get())
 		{
-			roomID = symbols["room"]->identifier;   //7 ROOM
-			objectID =symbols["object"]->identifier;//9 TABLE
-			robotID = symbols["robot"]->identifier; //1 ROBOT
+			roomID = symbols["room"]->identifier;
+			objectID =symbols["object"]->identifier;
+			robotID = symbols["robot"]->identifier;
 		}
 		else
 		{
@@ -321,8 +339,6 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 	
 
 	// GET THE TARGET POSE: 
-	//RoboCompTrajectoryRobot2D::TargetPose tp;
-	
 	try
 	{
 		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(objectIMID)))    return;
@@ -350,8 +366,11 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		{
 			try
 			{
+				QVec O = innerModel->transform("right_shoulder_grasp_pose", objectIMID);
+				O.print("pose relativa");
+				printf("__%f__\n", O.norm2());
 				QVec graspRef = innerModel->transform("robot", "right_shoulder_grasp_pose");
-				float th=50;
+				float th=20;
 				trajectoryrobot2d_proxy->goReferenced(currentTarget, graspRef.x(), graspRef.z(), th);
 				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << graspRef.x() << ", " << graspRef.z() << " )\n";
 				haveTarget = true;
@@ -734,7 +753,7 @@ void SpecificWorker::action_FindObjectVisuallyInTable(bool newAction)
 
 
 
-
+/*
 
 void SpecificWorker::action_GraspObject(bool newAction)
 {
@@ -743,6 +762,8 @@ void SpecificWorker::action_GraspObject(bool newAction)
 	if (state != "IDLE")
 		trajectoryrobot2d_proxy->stop();
 }
+
+*/
 
 void SpecificWorker::action_NoAction(bool newAction)
 {

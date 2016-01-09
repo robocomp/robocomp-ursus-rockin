@@ -103,7 +103,8 @@ void SpecificWorker::compute( )
 
 void SpecificWorker::manageReachedObjects()
 {
-	float THRESHOLD_object = 150;
+	float schmittTriggerThreshold = 30;
+	float THRESHOLD_mug = 100;
 	float THRESHOLD_table = 400;
 	
 	bool changed = false;
@@ -119,6 +120,8 @@ void SpecificWorker::manageReachedObjects()
 		{
 			// Avoid working with rooms
 			if (isObjectType(newModel, node, "room")) continue;
+			// Avoid working with rooms
+			if (isObjectType(newModel, node, "table")) continue;
 
 			/// Compute distance and new state
 			float d2n;
@@ -131,34 +134,43 @@ void SpecificWorker::manageReachedObjects()
 				printf("Ref: right_shoulder_grasp_pose: %p\n", (void *)innerModel->getNode("right_shoulder_grasp_pose"));
 				printf("Obj: %s: %p\n", node->getAttribute("imName").c_str(), (void *)innerModel->getNode(node->getAttribute("imName").c_str()));
 			}
-			
-			QVec graspPosition = innerModel->transform("room", QVec::vec3(0, 0, 0), "right_shoulder_grasp_pose");
+
+/*			
+			QVec graspPosition = innerModel->transform("room", "right_shoulder_grasp_pose");
 			graspPosition(1) = 0;
 			QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
 			obj(1) = 0;
-// 			graspPosition.print("  no");
-// 			obj.print("  obj");
-
-			float THRESHOLD = THRESHOLD_object;
-			if (isObjectType(newModel, node, "table"))
+ 			graspPosition.print("  no");
+ 			obj.print("  obj");
+// 			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (graspPosition-obj).norm2(), THRESHOLD);
+*/
+			float THRESHOLD;
+			if (isObjectType(newModel, node, "mug"))
+			{
+				THRESHOLD = THRESHOLD_mug;
+			}
+			else if (isObjectType(newModel, node, "table"))
 			{
 				THRESHOLD = THRESHOLD_table;
 			}
-			
-			
-// 			printf("%s: %f  (th:%f)\n", node->getAttribute("imName").c_str(), (graspPosition-obj).norm2(), THRESHOLD);
+			else
+			{
+				qFatal("dededcef or4j ");
+			}
+			QString name = QString::fromStdString(node->toString());
+			qDebug()<<"Distance To Node (" << node->identifier << ") :"<<name <<" d2n "<<d2n<<"THRESHOLD"<<THRESHOLD;
 
 
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
 				AGMModelEdge &edge = *edge_itr;
-				if (edge->getLabel() == "reach" and d2n > THRESHOLD)
+				if (edge->getLabel() == "reach" and d2n > THRESHOLD+schmittTriggerThreshold )
 				{
 					edge->setLabel("noReach");
 					printf("object %d STOPS REACH\n", node->identifier);
 					changed = true;
 				}
-				else if (edge->getLabel() == "noReach" and d2n < THRESHOLD)
+				else if (edge->getLabel() == "noReach" and d2n < THRESHOLD-schmittTriggerThreshold)
 				{
 					edge->setLabel("reach");
 					printf("___ %s ___\n", edge->getLabel().c_str());
@@ -172,6 +184,13 @@ void SpecificWorker::manageReachedObjects()
 	/// Publish new model if changed
 	if (changed)
 	{
+		printf("PUBLISH!!!!\n");
+		printf("PUBLISH!!!!\n");
+		printf("PUBLISH!!!!\n");
+		printf("PUBLISH!!!!\n");
+		printf("PUBLISH!!!!\n");
+		printf("PUBLISH!!!!\n");
+		printf("PUBLISH!!!!\n");
 		printf("PUBLISH!!!!\n");
 		sendModificationProposal(newModel, worldModel);
 	}
@@ -678,7 +697,7 @@ void SpecificWorker::action_GraspObject(bool first)
 		case 4:
 			try
 			{
-				usleep(500000);
+				usleep(200000);
 				if (not manualMode)
 				{
 					newModel->removeEdge(symbols["object"], symbols["table"], "in");
@@ -712,7 +731,7 @@ void SpecificWorker::action_GraspObject(bool first)
 			break;
 	}
 	
-	usleep(500000);
+	usleep(200000);
 }
 
 void SpecificWorker::leaveObjectSimulation()
