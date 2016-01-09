@@ -92,8 +92,8 @@ void SpecificWorker::newMSKBodyEvent(const PersonList &people, const long &times
 	this->timeStamp = timestamp;
 	
 	///esto es pq cuando hay 0 personas no me envia nada
-// 	timerTimeStamp.setSingleShot(true);
-// 	timerTimeStamp.start(1000);
+	timerTimeStamp.setSingleShot(true);
+	timerTimeStamp.start(500);
 	newBodyEvent = true;	
 }
 
@@ -218,6 +218,10 @@ void SpecificWorker::compute()
 	{
 		qDebug()<<"newBodyEvent"<<newBodyEvent;	
 		return;
+	}
+	if (timerTimeStamp.isActive()==false)
+	{
+		newBodyEvent=false;
 	}
 	
 	//single
