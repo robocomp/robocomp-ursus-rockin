@@ -252,7 +252,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling apriltags"
-	exit
+	#exit
 fi
 
 # apriltags
