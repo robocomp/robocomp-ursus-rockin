@@ -151,7 +151,19 @@ class SpecificWorker(GenericWorker):
 			self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
 			
 			part = "RIGHTARM"
-			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
+			#identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)			
+			scalarPose6D = {}
+			scalarPose6D["tty"] = pose6D.y
+			scalarPose6D["thresholdT"] = 9999
+			scalarPose6D["thresholdR"] = 9999
+			#pose6derror["ttx"] = pose6D.y
+			#pose6derror["ttx"] = pose6D.z
+			#pose6derror["ttx"] = pose6D.x
+			#pose6derror["ttx"] = pose6D.y
+			#pose6derror["ttx"] = pose6D.z
+			stringMapPose6D = {}
+			
+			identificador = self.inversekinematics_proxy.mapBasedTarget(part,stringMapPose6D,scalarPose6D)
 			#print 'Mirando estado'
 			#state = RoboCompInverseKinematics.TargetState()
 			#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
