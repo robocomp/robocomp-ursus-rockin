@@ -215,7 +215,7 @@ void SpecificWorker::compute()
 
 	if (newBodyEvent==false)
 	{
-		qDebug()<<"newBodyEvent"<<newBodyEvent;	
+		//qDebug()<<"newBodyEvent"<<newBodyEvent;	
 		return;
 	}
 // 	if (timerTimeStamp.isActive()==false)

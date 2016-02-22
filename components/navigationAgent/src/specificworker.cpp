@@ -57,11 +57,11 @@ void SpecificWorker::compute( )
 
 /**
  * \brief ESTE ES EL VERDADERO COMPUTE
- */ 
+ */
 void SpecificWorker::actionExecution()
 {
 // 	return;
-	
+
 	QMutexLocker locker(mutex);
 	qDebug()<<"ACTION: "<<QString::fromStdString(action);
 
@@ -178,7 +178,7 @@ void SpecificWorker::action_HandObject(bool newAction)
 		printf("navigationAgent, action_HandObject ERROR: SYMBOL DOESN'T EXIST \n");
 		exit(2);
 	}
-	
+
 	// GET THE INNERMODEL NAMES OF TH SYMBOLS
 	QString robotIMID;
 	QString roomIMID;
@@ -197,12 +197,12 @@ void SpecificWorker::action_HandObject(bool newAction)
 		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
 		exit(2);
 	}
-	
-	// GET THE TARGET POSE: 
+
+	// GET THE TARGET POSE:
 	try
 	{
 		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(personIMID)))    return;
-		
+
 		QVec poseInRoom = innerModel->transform6D(roomIMID, personIMID); // FROM OBJECT TO ROOM
 		qDebug()<<"[robotIMID"<<robotIMID<<"roomIMID"<<roomIMID<<"personIMID"<<personIMID<<"]";
 		qDebug()<<" TARGET POSE: "<< poseInRoom;
@@ -216,8 +216,8 @@ void SpecificWorker::action_HandObject(bool newAction)
 		currentTarget.rz = 0;
 		currentTarget.doRotation = false;
 	}
-	catch (...) 
-	{ 
+	catch (...)
+	{
 		qDebug()<<"navigationAgent, action_HandObject: innerModel exception";
 	}
 
@@ -228,7 +228,7 @@ void SpecificWorker::action_HandObject(bool newAction)
 			try
 			{
 				QVec graspRef = innerModel->transform("robot", "right_shoulder_grasp_pose");
-				float th=20;
+				float th=300;
 				trajectoryrobot2d_proxy->goReferenced(currentTarget, graspRef.x(), graspRef.z(), th);
 				std::cout << "trajectoryrobot2d->go(" << currentTarget.x << ", " << currentTarget.z << ", " << currentTarget.ry << ", " << currentTarget.doRotation << ", " << graspRef.x() << ", " << graspRef.z() << " )\n";
 				haveTarget = true;
@@ -273,14 +273,14 @@ void SpecificWorker::action_HandObject(bool newAction)
 	{
 		std::cout << ex << std::endl;
 	}
-	
+
 
 }
 
 
 /**
  * \brief elmeollo dl asunto
- */ 
+ */
 void SpecificWorker::action_SetObjectReach(bool newAction)
 {
 	// Get symbols' map
@@ -319,7 +319,7 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		printf("ERROR: SYMBOL DOESN'T EXIST \n");
 		exit(2);
 	}
-	
+
 
 	// GET THE INNERMODEL NAMES OF TH SYMBOLS
 	QString robotIMID;
@@ -336,9 +336,9 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		printf("ERROR IN GET THE INNERMODEL NAMES\n");
 		exit(2);
 	}
-	
 
-	// GET THE TARGET POSE: 
+
+	// GET THE TARGET POSE:
 	try
 	{
 		if (not (innerModel->getNode(roomIMID) and innerModel->getNode(objectIMID)))    return;
@@ -354,8 +354,8 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 		currentTarget.rz = 0;
 		currentTarget.doRotation = true;
 	}
-	catch (...) 
-	{ 
+	catch (...)
+	{
 		qDebug()<<"innerModel exception";
 	}
 
@@ -420,6 +420,8 @@ void SpecificWorker::action_SetObjectReach(bool newAction)
 
 bool SpecificWorker::odometryAndLocationIssues(bool force)
 {
+	if (action=="graspobject")
+		return true;
 	//
 	// Get ODOMETRY and update it in the graph. If there's a problem talking to the robot's platform, abort
 	try
@@ -457,7 +459,7 @@ bool SpecificWorker::odometryAndLocationIssues(bool force)
 		float bStatex =str2float(edge->getAttribute("tx"));
 		float bStatez = str2float(edge->getAttribute("tz"));
 		float bStatealpha = str2float(edge->getAttribute("ry"));
-		
+
 		//to reduces the publication frequency
 		if (fabs(bStatex - bState.correctedX)>5 or fabs(bStatez - bState.correctedZ)>5 or fabs(bStatealpha - bState.correctedAlpha)>0.02 or force)
 		{
@@ -909,7 +911,7 @@ void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &mod
 
 /**
  * \brief ACTUALIZACION DEL ENLACE EN INNERMODEL
- */ 
+ */
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	QMutexLocker lockIM(mutex);
