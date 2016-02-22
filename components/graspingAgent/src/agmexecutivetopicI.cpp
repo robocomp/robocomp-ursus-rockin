@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2015 by YOUR NAME HERE
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -29,24 +29,29 @@ AGMExecutiveTopicI::~AGMExecutiveTopicI()
 {
 }
 
-void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event  &modification, const Ice::Current&)
+void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::World  &w, const Ice::Current&)
 {
-	worker->structuralChange(modification);
+	worker->structuralChange(w);
 }
 
-void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&)
+void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &es, const Ice::Current&)
 {
-	worker->edgesUpdated(modifications);
+	worker->edgesUpdated(es);
 }
 
-void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&)
+void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge  &e, const Ice::Current&)
 {
-	worker->edgeUpdated(modification);
+	worker->edgeUpdated(e);
 }
 
-void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node  &modification, const Ice::Current&)
+void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node  &n, const Ice::Current&)
 {
-	worker->symbolUpdated(modification);
+	worker->symbolUpdated(n);
+}
+
+void AGMExecutiveTopicI::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence  &ns, const Ice::Current&)
+{
+	worker->symbolsUpdated(ns);
 }
 
 

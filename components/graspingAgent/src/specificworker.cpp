@@ -376,11 +376,11 @@ void SpecificWorker::changeInner ()
 	
 }
 
-void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World& modification)
 {
 	QMutexLocker locker(mutex);
 
-	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+	AGMModelConverter::fromIceToInternal(modification, worldModel);
 	
 #ifdef USE_QTGUI
 	changeInner( );
@@ -427,6 +427,17 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	{
 		qDebug()<<"\n";
 	}
+}
+
+void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications)
+{
+	QMutexLocker l(mutex);
+
+	for (auto modification : modifications)
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+
+	if (innerModel) delete innerModel;
+	innerModel = agmInner.extractInnerModel(worldModel, "world", true);
 }
 
 
@@ -481,7 +492,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel
 
 	try
 	{
-		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, "graspingAgent");
+		AGMMisc::publishModification(newModel, agmexecutive_proxy, "graspingAgent");
 	}
 	catch(...)
 	{
