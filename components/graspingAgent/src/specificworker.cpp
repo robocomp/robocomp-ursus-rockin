@@ -34,7 +34,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
 	innerModel = new InnerModel();
-#ifdef USE_QTGUI	
+#ifdef USE_QTGUI
 	osgView = new OsgView(widget);
 	show();
 //  	printf("%s: %d\n", __FILE__, __LINE__);
@@ -45,16 +45,16 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 // 	printf("%s: %d\n", __FILE__, __LINE__);
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
 #endif
-	
+
 	manualMode = false;
 	show();
 
 	setRightArmUp_Reflex();
-	
+
 	connect(manualButton, SIGNAL(clicked()), this, SLOT(startManualMode()));
 	connect(buttonLeave,  SIGNAL(clicked()), this, SLOT(leaveObjectSimulation()));
-	
-	
+
+
 }
 
 /**
@@ -62,15 +62,15 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 */
 SpecificWorker::~SpecificWorker()
 {
-	
+
 }
 void SpecificWorker::updateViewer()
 {
 	if (!innerModel) return;
-	
+
 	innerViewer->update();
-	osgView->autoResize();		
-	osgView->frame();	
+	osgView->autoResize();
+	osgView->frame();
 }
 
 void SpecificWorker::compute( )
@@ -85,7 +85,7 @@ void SpecificWorker::compute( )
 	}
 	manageReachedObjects();
 
-	
+
 	if (manualMode)
 	{
 		action_GraspObject();
@@ -97,7 +97,7 @@ void SpecificWorker::compute( )
 	}
 #ifdef USE_QTGUI
 	updateViewer();
-#endif	
+#endif
 }
 
 
@@ -106,22 +106,42 @@ void SpecificWorker::manageReachedObjects()
 	float schmittTriggerThreshold = 30;
 	float THRESHOLD_mug = 100;
 	float THRESHOLD_table = 400;
-	
+	std::string m ="  ";
+
 	bool changed = false;
-	
+
 	QMutexLocker locker(mutex);
-	
+
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+
+	int robotID = newModel->getIdentifierByType("robot");
+
 
 	for (AGMModel::iterator symbol_itr=newModel->begin(); symbol_itr!=newModel->end(); symbol_itr++)
 	{
 		AGMModelSymbol::SPtr node = *symbol_itr;
 		if (node->symboltype() == "object")
 		{
-			// Avoid working with rooms
+			// Avoid working with rcooms
 			if (isObjectType(newModel, node, "room")) continue;
 			// Avoid working with rooms
 			if (isObjectType(newModel, node, "table")) continue;
+
+			//if the object is in robot continue
+			try
+			{
+				AGMModelEdge e = newModel->getEdgeByIdentifiers(node->identifier, robotID, "in");
+				qDebug()<<"MUG IN ROBOT";
+				continue;
+			}
+			catch (...)
+			{
+				qDebug()<<"MUG NOT IN ROBOT";
+			}
+
+
+
 
 			/// Compute distance and new state
 			float d2n;
@@ -135,7 +155,7 @@ void SpecificWorker::manageReachedObjects()
 				printf("Obj: %s: %p\n", node->getAttribute("imName").c_str(), (void *)innerModel->getNode(node->getAttribute("imName").c_str()));
 			}
 
-/*			
+/*
 			QVec graspPosition = innerModel->transform("room", "right_shoulder_grasp_pose");
 			graspPosition(1) = 0;
 			QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
@@ -161,6 +181,7 @@ void SpecificWorker::manageReachedObjects()
 			qDebug()<<"Distance To Node (" << node->identifier << ") :"<<name <<" d2n "<<d2n<<"THRESHOLD"<<THRESHOLD;
 
 
+
 			for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(newModel); edge_itr!=node->edgesEnd(newModel); edge_itr++)
 			{
 				AGMModelEdge &edge = *edge_itr;
@@ -168,6 +189,7 @@ void SpecificWorker::manageReachedObjects()
 				{
 					edge->setLabel("noReach");
 					printf("object %d STOPS REACH\n", node->identifier);
+					m += " action " + action + " edge->toString() "+ edge->toString(newModel);
 					changed = true;
 				}
 				else if (edge->getLabel() == "noReach" and d2n < THRESHOLD-schmittTriggerThreshold)
@@ -175,6 +197,7 @@ void SpecificWorker::manageReachedObjects()
 					edge->setLabel("reach");
 					printf("___ %s ___\n", edge->getLabel().c_str());
 					printf("object %d STARTS REACH\n", node->identifier);
+					m += " action " + action + " edge->toString() "+ edge->toString(newModel);
 					changed = true;
 				}
 			}
@@ -189,10 +212,7 @@ void SpecificWorker::manageReachedObjects()
 		printf("PUBLISH!!!!\n");
 		printf("PUBLISH!!!!\n");
 		printf("PUBLISH!!!!\n");
-		printf("PUBLISH!!!!\n");
-		printf("PUBLISH!!!!\n");
-		printf("PUBLISH!!!!\n");
-		sendModificationProposal(newModel, worldModel);
+		sendModificationProposal(newModel, worldModel,m);
 	}
 }
 
@@ -216,7 +236,7 @@ bool SpecificWorker::isObjectType(AGMModel::SPtr model, AGMModelSymbol::SPtr nod
 float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr model, AGMModelSymbol::SPtr node)
 {
 	QMutexLocker locker(mutex);
-	
+
 	// check if it's a polygon
 // 	bool isPolygon = false;
 // 	for (AGMModelSymbol::iterator edge_itr=node->edgesBegin(model); edge_itr!=node->edgesEnd(model) and isPolygon == false; edge_itr++)
@@ -245,7 +265,7 @@ float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr 
 // {
 // 	boost::geometry::model::d2::point_xy<int> point(reference(0), reference(2));
 // 	boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<float> > poly;
-// 
+//
 // // 	printf("p %s\n", polygon_str.c_str());
 // 	std::vector<std::string> strs;
 // 	boost::split(strs, polygon_str, boost::is_any_of(";"));
@@ -265,8 +285,8 @@ float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr 
 // 		boost::geometry::model::d2::point_xy<float> vertex(x, z);
 // 		boost::geometry::append(poly, vertex);
 // 	}
-// 
-// 
+//
+//
 // 	return boost::geometry::distance(poly, point);
 // }
 
@@ -364,16 +384,16 @@ bool SpecificWorker::reloadConfigAgent()
 }
 
 void SpecificWorker::changeInner ()
-{	
+{
 	if (innerViewer)
 	{
 		//borra innermodel dentro de InnerModelViewer
-		osgView->getRootGroup()->removeChild(innerViewer);				
+		osgView->getRootGroup()->removeChild(innerViewer);
 	}
 	innerModel = agmInner.extractInnerModel(worldModel, "room", false);
 	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
-	
+
 }
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
@@ -381,13 +401,13 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 	QMutexLocker locker(mutex);
 
 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-	
+
 #ifdef USE_QTGUI
 	changeInner( );
 #else
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel(worldModel, "room", true);	
-#endif	
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
+#endif
 }
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
@@ -399,9 +419,9 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	changeInner( );
 #else
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel(worldModel, "room", true);	
-#endif	
-	
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
+#endif
+
 }
 
 void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
@@ -475,13 +495,13 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 	return true;
 }
 
-void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel)
+void SpecificWorker::sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel, string m)
 {
 	QMutexLocker locker(mutex);
 
 	try
 	{
-		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, "graspingAgent");
+		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel, std::string( "graspingAgent")+m);
 	}
 	catch(...)
 	{
@@ -499,7 +519,7 @@ void SpecificWorker::actionExecution()
 	qDebug()<<"---------------------------------";
 	cout<<action<<endl;
 	qDebug()<<"---------------------------------";
-	
+
 	if (newAction)
 		printf("prev:%s  new:%s\n", previousAction.c_str(), action.c_str());
 
@@ -579,11 +599,11 @@ void SpecificWorker::action_GraspObject(bool first)
 	AGMModel::SPtr newModel(new AGMModel(worldModel));
 	TargetState ikState;
 	static int lastTargetId = 0;
-	
+
 	if (first) state = 0;
 	printf("action_GraspObject: first:%d  state=%d\n", (int)first, state);
 
-	
+
 	QVec pose = QVec::vec6();
 	if (not manualMode)
 	{
@@ -730,7 +750,7 @@ void SpecificWorker::action_GraspObject(bool first)
 		default:
 			break;
 	}
-	
+
 	usleep(200000);
 }
 
@@ -753,7 +773,7 @@ void SpecificWorker::leaveObjectSimulation()
 		printf("graspingAgent: Couldn't publish new model\n");
 		qFatal("2264w7ertytynvc8");
 	}
-	
+
 }
 
 
@@ -769,7 +789,7 @@ int32_t SpecificWorker::sendHandToSymbol(AGMModelSymbol::SPtr symbol, QVec offse
 		innerModel->transformS("robot", QVec::vec3(0,0,0), symbol->getAttribute("imName")).print("directo");
 	}
 	catch (...) { printf("%s: %d\n", __FILE__, __LINE__); }
-	
+
 	objectsLocationInRobot.print("objectsLocationInRobot");
 	// add offset and put rotation
 	for (int i=0; i<3; i++) objectsLocationInRobot(i)  += offset(i);
@@ -799,7 +819,7 @@ int32_t SpecificWorker::sendHandToSymbol(AGMModelSymbol::SPtr symbol, QVec offse
  * @param symbols the symbols of AGM model
  * @param object the goal object
  * @return POSE 6D
- */ 
+ */
 QVec SpecificWorker::getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object)
 {
 	QMutexLocker locker(mutex);
@@ -808,7 +828,7 @@ QVec SpecificWorker::getObjectsLocationInRobot(std::map<std::string, AGMModelSym
 	int robotID, objectID;
 	robotID = symbols["robot"]->identifier;
 	objectID = symbols["object"]->identifier;
-	
+
 	QString  robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
 	QString  objectIMID = QString::fromStdString(worldModel->getSymbol(objectID)->getAttribute("imName"));
 
@@ -823,18 +843,18 @@ QVec SpecificWorker::fromRobotToRoom(std::map<std::string, AGMModelSymbol::SPtr>
 	int roomID, robotID;
 	roomID = symbols["room"]->identifier;
 	robotID = symbols["robot"]->identifier;
-	
+
 	QString  robotIMID = QString::fromStdString(worldModel->getSymbol(robotID)->getAttribute("imName"));
 	QString  roomIMID = QString::fromStdString(worldModel->getSymbol(roomID)->getAttribute("imName"));
 
 	qDebug() << roomIMID << "  " << robotIMID;
-	
+
 	innerModel->getTransformationMatrix(roomIMID, robotIMID).print("robot to room");
-	
-	
-	
+
+
+
 	innerModel->getTransformationMatrix(roomIMID, robotIMID).extractAnglesR_min().print("angles");
-	
+
 	return innerModel->transform6D(roomIMID, vector, robotIMID);
 }
 
@@ -924,7 +944,7 @@ void SpecificWorker::action_SetObjectReach(bool first)
 					angle = currentYaw - 10.*M_PI/180.;
 			}
 			printf(" -> %f\n", angle);
-			
+
 			if (angle > +.4) angle = +.4;
 			if (angle < -.4) angle = -.4;
 
@@ -1023,7 +1043,7 @@ void SpecificWorker::on_state1_clicked()
 {
 	action = "graspobject";
 	action_GraspObject(true);
-	
+
 	params["object"].value = "11";
 	params["room"  ].value = "7";
 	params["robot" ].value = "1";

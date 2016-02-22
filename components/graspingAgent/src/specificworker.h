@@ -61,7 +61,7 @@ private:
 	bool manualMode;
 
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
+	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel, std::string m="");
 
 
 	QVec getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object);
