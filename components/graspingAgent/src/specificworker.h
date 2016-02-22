@@ -46,11 +46,11 @@ public:
 	void killAgent();
 	Ice::Int uptimeAgent();
 	bool reloadConfigAgent();
-	void structuralChange(const RoboCompAGMWorldModel::Event& modification);
+	void structuralChange(const RoboCompAGMWorldModel::World& modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
-
+	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications);
 
 public slots:
 	void compute();

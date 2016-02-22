@@ -28,6 +28,7 @@ SET ( SOURCES
   specificworker.cpp
   agmcommonbehaviorI.cpp
   agmexecutivetopicI.cpp
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.cpp
 )
 
 # Headers set
@@ -46,7 +47,7 @@ SET ( HEADERS
 
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior AGMAgent AGMWorldModel AGMExecutive AGMWorldModel Planning AGMCommonBehavior AGMWorldModel JointMotor InverseKinematics )
+ROBOCOMP_WRAP_ICE( CommonBehavior AGMExecutive AGMWorldModel Planning AGMCommonBehavior AGMWorldModel JointMotor InverseKinematics )
 SET (EXECUTABLE_OUTPUT_PATH ${RC_COMPONENT_DEVEL_PATH}/bin)
 
 # Qt4

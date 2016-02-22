@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2015 by YOUR NAME HERE
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -38,10 +38,11 @@ public:
 	AGMExecutiveTopicI( GenericWorker *_worker, QObject *parent = 0 );
 	~AGMExecutiveTopicI();
 	
-	void structuralChange(const RoboCompAGMWorldModel::Event  &modification, const Ice::Current&);
-	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&);
-	void edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node  &modification, const Ice::Current&);
+	void structuralChange(const RoboCompAGMWorldModel::World  &w, const Ice::Current&);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &es, const Ice::Current&);
+	void edgeUpdated(const RoboCompAGMWorldModel::Edge  &e, const Ice::Current&);
+	void symbolUpdated(const RoboCompAGMWorldModel::Node  &n, const Ice::Current&);
+	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence  &ns, const Ice::Current&);
 
 	QMutex *mutex;
 private:
