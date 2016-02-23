@@ -1,10 +1,10 @@
 <AGMModel>
 	<symbol id="1" type="robot" >
 		<attribute key="imName" value="robot" />
-		<attribute key="imType" value="omniRobot" />
+		<attribute key="imType" value="transform" />
 	</symbol>
 	
-	<symbol id="7" type="object" >
+	<symbol id="7" type="room" >
 		<attribute key="imName" value="room" />
 		<attribute key="imType" value="transform" />
 	</symbol>
@@ -45,13 +45,21 @@
 
 	
 	<link  src="1"  dst="7"      label="know" />
-	<symbol id="8" type="objectSt" />
+	<symbol id="8" type="roomSt" />
 	<link  src="7"  dst="8"  label="room" />
 	<link  src="7"  dst="8"  label="classified" />
 	<link  src="1"  dst="7"  label="in" />
 	<link  src="9"  dst="7"  label="in" />
-	<link  src="7"  dst="1"  label="RT"/>
-
+	<link  src="7"  dst="1"  label="RT">
+                <linkAttribute key="rx" value="0" />
+                <linkAttribute key="ry" value="0" />
+                <linkAttribute key="rz" value="0" />
+                <linkAttribute key="tx" value="0" />
+                <linkAttribute key="ty" value="0" />
+                <linkAttribute key="tz" value="0" />
+        </link>
+	
+	
 	<link  src="7"  dst="9"     label="RT">
 		<linkAttribute key="rx" value="0" />
 		<linkAttribute key="ry" value="0" />

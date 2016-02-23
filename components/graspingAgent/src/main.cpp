@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2015 by YOUR NAME HERE
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -81,7 +81,6 @@
 #include <agmcommonbehaviorI.h>
 #include <agmexecutivetopicI.h>
 
-#include <AGMAgent.h>
 #include <AGMExecutive.h>
 #include <AGMCommonBehavior.h>
 #include <AGMWorldModel.h>
@@ -95,7 +94,6 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 
-using namespace RoboCompAGMAgent;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMWorldModel;
@@ -133,12 +131,29 @@ int ::graspingComp::run(int argc, char* argv[])
 #endif
 	int status=EXIT_SUCCESS;
 
-	AGMAgentTopicPrx agmagenttopic_proxy;
+	AGMExecutivePrx agmexecutive_proxy;
 	InverseKinematicsPrx inversekinematics_proxy;
 	JointMotorPrx jointmotor_proxy;
 
 	string proxy, tmp;
 	initialize();
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveProxy\n";
+		}
+		agmexecutive_proxy = AGMExecutivePrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("AGMExecutiveProxy initialized Ok!");
+	mprx["AGMExecutiveProxy"] = (::IceProxy::Ice::Object*)(&agmexecutive_proxy);//Remote server proxy creation example
 
 
 	try
@@ -175,29 +190,6 @@ int ::graspingComp::run(int argc, char* argv[])
 	mprx["JointMotorProxy"] = (::IceProxy::Ice::Object*)(&jointmotor_proxy);//Remote server proxy creation example
 
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
-
-	IceStorm::TopicPrx agmagenttopic_topic;
-	while (!agmagenttopic_topic)
-	{
-		try
-		{
-			agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic");
-		}
-		catch (const IceStorm::NoSuchTopic&)
-		{
-			try
-			{
-				agmagenttopic_topic = topicManager->create("AGMAgentTopic");
-			}
-			catch (const IceStorm::TopicExists&){
-				// Another client created the topic.
-			}
-		}
-	}
-	Ice::ObjectPrx agmagenttopic_pub = agmagenttopic_topic->getPublisher()->ice_oneway();
-	AGMAgentTopicPrx agmagenttopic = AGMAgentTopicPrx::uncheckedCast(agmagenttopic_pub);
-	mprx["AGMAgentTopicPub"] = (::IceProxy::Ice::Object*)(&agmagenttopic);
-
 
 
 	SpecificWorker *worker = new SpecificWorker(mprx);

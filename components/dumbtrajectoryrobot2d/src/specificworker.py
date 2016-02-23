@@ -141,7 +141,7 @@ class SpecificWorker(GenericWorker):
 					command = np.array([0.25*self.relErrX, 0.25*self.relErrZ])
 				
 				if np.linalg.norm(errorVector)<=self.threshold and abs(errAlpha) < 0.15:
-					print 'stop by threshold'
+					print 'stop by threshold', self.threshold
 					proceed = False
 				else:
 					print np.linalg.norm(command), abs(errAlpha)

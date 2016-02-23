@@ -46,11 +46,11 @@ public:
 	void killAgent();
 	Ice::Int uptimeAgent();
 	bool reloadConfigAgent();
-	void structuralChange(const RoboCompAGMWorldModel::Event& modification);
+	void structuralChange(const RoboCompAGMWorldModel::World& modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
-
+	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications);
 
 public slots:
 	void compute();
@@ -61,7 +61,7 @@ private:
 	bool manualMode;
 
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel);
+	void sendModificationProposal(AGMModel::SPtr &newModel, AGMModel::SPtr &worldModel, std::string m="");
 
 
 	QVec getObjectsLocationInRobot(std::map<std::string, AGMModelSymbol::SPtr> &symbols, AGMModelSymbol::SPtr &object);
