@@ -23,6 +23,7 @@ echo "update robocomp-ursus-rockin"
 cd /home/robocomp/robocomp/components/robocomp-ursus-rockin
 git pull
 
+sleep 4
 N=2
 
 ###
@@ -129,7 +130,7 @@ cmake .
 make -j$N
 if [ $? -ne 0 ]; then
 	echo "error compiling gik"
-#	exit
+	exit
 fi
 
 
@@ -166,7 +167,7 @@ fi
 
 # laserRGBD
 echo "make laserRGBD"
-cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/laserRGBDComp/
+cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/laserRGBDComp2/
 cmake .
 make -j$N
 if [ $? -ne 0 ]; then
