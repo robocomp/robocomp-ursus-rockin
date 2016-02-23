@@ -192,19 +192,20 @@ class SpecificWorker(GenericWorker):
 
 
 					SEND = True
-					laserData = self.laser_proxy.getLaserData()
-					for l in laserData:
-						if l.dist<200 and abs(l.angle)<0.78:
-							self.collisions += 1
-							self.currentVel = [0.7*x for x in self.currentVel]
-							if SEND: self.omnirobot_proxy.setSpeedBase(self.currentVel[0], self.currentVel[1], self.currentVel[2])
-							if self.collisions > 50:
-								print '<Now IDLE  BY COLLISIONS!!!!'
-								self.stop()
-								self.state.state = 'IDLE'
-								print 'Now IDLE>'
-							return
-					self.collisions = 0
+
+					#laserData = self.laser_proxy.getLaserData()
+					#for l in laserData:
+						#if l.dist<200 and abs(l.angle)<0.78:
+							#self.collisions += 1
+							#self.currentVel = [0.7*x for x in self.currentVel]
+							#if SEND: self.omnirobot_proxy.setSpeedBase(self.currentVel[0], self.currentVel[1], self.currentVel[2])
+							#if self.collisions > 50:
+								#print '<Now IDLE  BY COLLISIONS!!!!'
+								#self.stop()
+								#self.state.state = 'IDLE'
+								#print 'Now IDLE>'
+							#return
+					#self.collisions = 0
 
 					self.currentVel = [command[0], command[1], commandAlpha]
 					print self.currentVel
