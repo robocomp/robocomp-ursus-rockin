@@ -1,6 +1,6 @@
 <AGMModel>
 	<symbol id="1" type="robot" >
-		<attribute key="imName" value="robot" />
+		<attribute key="imName" value="robot2" />
 		<attribute key="imType" value="omniRobot" />
 	</symbol>
 	
