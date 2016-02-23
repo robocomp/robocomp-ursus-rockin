@@ -4,7 +4,7 @@
 		<attribute key="imType" value="omniRobot" />
 	</symbol>
 	
-	<symbol id="7" type="object" >
+	<symbol id="7" type="room" >
 		<attribute key="imName" value="room" />
 		<attribute key="imType" value="transform" />
 	</symbol>
@@ -45,7 +45,7 @@
 
 	
 	<link  src="1"  dst="7"      label="know" />
-	<symbol id="8" type="objectSt" />
+	<symbol id="8" type="roomSt" />
 	<link  src="7"  dst="8"  label="room" />
 	<link  src="7"  dst="8"  label="classified" />
 	<link  src="1"  dst="7"  label="in" />
