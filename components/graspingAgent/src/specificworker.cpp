@@ -69,18 +69,23 @@ void SpecificWorker::updateViewer()
 	if (!innerModel) return;
 	
 	innerViewer->update();
-	osgView->autoResize();		
-	osgView->frame();	
+	osgView->autoResize();
+	osgView->frame();
 }
 
 void SpecificWorker::compute( )
 {
 	QMutexLocker locker(mutex);
 	{
-		if (not innerModel->getNode("grabPositionHandR") and not manualMode)
+		if (not manualMode)
 		{
-			printf("waiting for AGM*\n");
-			return;
+			printf("Not in manual mode\n");
+			if (not innerModel->getNode("right_shoulder_grasp_pose"))
+			{
+				printf("waiting for AGM*\n");
+				innerModel->save("extractInnerModel.xml");
+				return;
+			}
 		}
 	}
 	manageReachedObjects();
@@ -123,10 +128,11 @@ void SpecificWorker::manageReachedObjects()
 		AGMModelSymbol::SPtr node = *symbol_itr;
 		if (node->symboltype() == "object")
 		{
+			printf("OBJECT: %d\n", node->identifier);
 			// Avoid working with rooms
 			if (isObjectType(newModel, node, "room")) continue;
 			// Avoid working with rooms
-			if (isObjectType(newModel, node, "table")) continue;
+// 			if (isObjectType(newModel, node, "table")) continue;
 
 			//if the object is in robot continue
 			try
@@ -252,9 +258,9 @@ float SpecificWorker::distanceToNode(std::string reference_name, AGMModel::SPtr 
 // 	}
 // 	else
 // 	{
-		QVec arm = innerModel->transformS("room", reference_name);
+		QVec arm = innerModel->transformS("world", reference_name);
 		arm(1) = 0;
-		QVec obj = innerModel->transformS("room", node->getAttribute("imName"));
+		QVec obj = innerModel->transformS("world", node->getAttribute("imName"));
 		obj(1) = 0;
 		return (arm-obj).norm2();
 // 	}
@@ -389,7 +395,7 @@ void SpecificWorker::changeInner ()
 		//borra innermodel dentro de InnerModelViewer
 		osgView->getRootGroup()->removeChild(innerViewer);
 	}
-	innerModel = agmInner.extractInnerModel(worldModel, "room", false);
+	innerModel = AgmInner::extractInnerModel(worldModel, "world");
 	innerViewer = new InnerModelViewer(innerModel, "root", osgView->getRootGroup(), true);
 	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
 
@@ -402,10 +408,11 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World& modifi
 	AGMModelConverter::fromIceToInternal(modification, worldModel);
 	
 #ifdef USE_QTGUI
-	changeInner( );
+	changeInner();
 #else
+
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
+	innerModel = AgmInner::extractInnerModel(worldModel, "world");
 #endif
 }
 
@@ -418,7 +425,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	changeInner( );
 #else
 	if (innerModel) delete innerModel;
-	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
+	innerModel = AgmInner::extractInnerModel(worldModel, "world");
 #endif
 }
 
@@ -562,7 +569,7 @@ void SpecificWorker::directGazeTowards(AGMModelSymbol::SPtr symbol)
 		const float y = str2float(symbol->getAttribute("ty"));
 		const float z = str2float(symbol->getAttribute("tz"));
 		QVec worldRef = QVec::vec3(x, y, z);
-		QVec robotRef = innerModel->transform("robot", worldRef, "room");
+		QVec robotRef = innerModel->transform("robot", worldRef, "world");
 		printf("saccadic3D\n");
 		printf("\n");
 		saccadic3D(robotRef, QVec::vec3(0,0,1));
@@ -902,8 +909,8 @@ void SpecificWorker::action_SetObjectReach(bool first)
 	///
 	///  Lift the hand if it's down, to avoid collisions
 	///
-	printf("altura mano %f\n", innerModel->transform("room", "grabPositionHandR")(1));
-	if (first or innerModel->transform("room", "grabPositionHandR")(1)<1500)
+	printf("altura mano %f\n", innerModel->transform("world", "right_shoulder_grasp_pose")(1));
+	if (first or innerModel->transform("world", "right_shoulder_grasp_pose")(1)<1500)
 	{
 		inversekinematics_proxy->setJoint("head_yaw_joint", 0, 0.5);
 		backAction = action;
@@ -989,7 +996,7 @@ void SpecificWorker::saccadic3D(QVec point, QVec axis)
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
-	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "room");
+	QVec rel = innerModel->transform("rgbd", QVec::vec3(tx, ty, tz), "world");
 // 	rel.print("desde la camara");
 
 	float errYaw   = -atan2(rel(0), rel(2));
