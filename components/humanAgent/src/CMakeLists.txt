@@ -29,6 +29,7 @@ SET ( SOURCES
   agmcommonbehaviorI.cpp
   agmexecutivetopicI.cpp
   mskbodyeventI.cpp
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.cpp
 )
 
 # Headers set
@@ -48,7 +49,7 @@ SET ( HEADERS
 
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior AGMAgent AGMWorldModel AGMExecutive AGMWorldModel Planning AGMCommonBehavior AGMWorldModel MSKBody )
+ROBOCOMP_WRAP_ICE( CommonBehavior AGMExecutive AGMWorldModel Planning AGMCommonBehavior AGMWorldModel MSKBody )
 SET (EXECUTABLE_OUTPUT_PATH ${RC_COMPONENT_DEVEL_PATH}/bin)
 
 # Qt4
@@ -59,10 +60,11 @@ SET( QT_USE_QTOPENGL TRUE )
 SET( QT_USE_QTXML TRUE )
 SET( QT_USE_QTSTATE TRUE )
 SET( QT_USE_QTSTATEMACHINE TRUE )
+SET( CMAKE_AUTOMOC TRUE )
 INCLUDE( ${QT_USE_FILE} )
 
 QT4_WRAP_UI( UI_HEADERS mainUI.ui )
-QT4_WRAP_CPP( MOC_SOURCES ${HEADERS} )
+
 
 
 # Specify construction and link process

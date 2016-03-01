@@ -51,11 +51,12 @@ public:
 	int uptimeAgent();
 	bool deactivateAgent();
 	StateStruct getAgentState();
-	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
+	void structuralChange(const RoboCompAGMWorldModel::World &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
 
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modification);
 
 public slots:
 	void compute(); 	

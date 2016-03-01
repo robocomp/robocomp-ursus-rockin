@@ -5,6 +5,8 @@ AGMExecutiveTopicTopic.Endpoints=tcp -p 12335
 
 JointMotorProxy = jointmotor:tcp -h localhost -p 20000
 
+AGMExecutiveProxy = agmexecutive:tcp -h localhost -p 10198
+
 
 # This property is used by the clients to connect to IceStorm.
 TopicManager.Proxy=IceStorm/TopicManager:default -p 9999

@@ -121,7 +121,7 @@ void SpecificWorker::compute()
 // 								printf("  edge rx %s\n", e.getAttribute("rx").c_str());
 // 								printf("  edge rz %s\n", e.getAttribute("rz").c_str());
 // 								printf("  edge ry %s\n", e.getAttribute("ry").c_str());
-								AGMMisc::publishEdgeUpdate(e, agmagenttopic_proxy);
+								AGMMisc::publishEdgeUpdate(e, agmexecutive_proxy);
 								usleep(500);
 // 								printf(" done!\n");
 							}
@@ -219,10 +219,10 @@ StateStruct SpecificWorker::getAgentState()
 	return s;
 }
 
-void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modification)
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &modification)
 {
 	mutex->lock();
- 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+ 	AGMModelConverter::fromIceToInternal(modification, worldModel);
 	delete innerModel;
 	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
 	mutex->unlock();
@@ -254,6 +254,16 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modificati
 {
 	mutex->lock();
  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	delete innerModel;
+	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
+	mutex->unlock();
+}
+
+void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications)
+{
+	mutex->lock();
+	for (auto modification : modifications)
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 	delete innerModel;
 	innerModel = agmInner.extractInnerModel(worldModel, "room", true);
 	mutex->unlock();
@@ -313,7 +323,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"propioception");
+		AGMMisc::publishModification(newModel, agmexecutive_proxy,"propioception");
 	}
 	catch(...)
 	{

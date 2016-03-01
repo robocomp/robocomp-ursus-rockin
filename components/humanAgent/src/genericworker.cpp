@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2015 by YOUR NAME HERE
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -28,8 +28,8 @@ QObject()
 #endif
 
 {
+	agmexecutive_proxy = (*(AGMExecutivePrx*)mprx["AGMExecutiveProxy"]);
 
-	agmagenttopic_proxy = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
 
 	mutex = new QMutex(QMutex::Recursive);
 
@@ -99,12 +99,6 @@ RoboCompPlanning::Action GenericWorker::createAction(std::string s)  // ESTO POD
 		return ret;
 	}	
 	
-	RoboCompAGMWorldModel::BehaviorResultType GenericWorker::status()
-	{
-		if (active)
-			return RoboCompAGMWorldModel::StatusActive;
-		return RoboCompAGMWorldModel::StatusIdle;
-	}
 	
 	bool GenericWorker::activate(const BehaviorParameters &prs)
 	{
