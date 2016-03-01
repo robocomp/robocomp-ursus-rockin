@@ -68,10 +68,11 @@ public:
 	int uptimeAgent();
 	bool deactivateAgent();
 	StateStruct getAgentState();
-	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
+	void structuralChange(const RoboCompAGMWorldModel::World &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications);
 	void newMSKBodyEvent(const PersonList &people, const long &timestamp);
 
 public slots:

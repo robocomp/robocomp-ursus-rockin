@@ -431,8 +431,8 @@ void SpecificWorker::updatePeopleInnerFullB()
 		try
 		{
 			InnerModel* imTmp =innerModelMap.at(lUpdates.at(i));
-			//agmInner.updateAgmWithInnerModelAndPublish(imTmp,agmagenttopic_proxy);
-			AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
+			//agmInner.updateAgmWithInnerModelAndPublish(imTmp,agmexecutive_proxy);
+			AgmInner::updateAgmWithInnerModelAndPublish(worldModel, imTmp, agmexecutive_proxy);
 		}
 		catch (const std::out_of_range& oor)
 		{	
@@ -514,18 +514,18 @@ void SpecificWorker::updatePeopleInnerFullB()
 			{
 				qDebug()<<"publish typeSymbolPerson->setType( extranger )"<< "idTypeSymbolPerson" <<idTypeSymbolPerson;	
 				typeSymbolPerson->setType("extranger");							
-				AGMMisc::publishNodeUpdate(typeSymbolPerson,agmagenttopic_proxy);
+				AGMMisc::publishNodeUpdate(typeSymbolPerson,agmexecutive_proxy);
 				usleep(500);
 			}	
 // 			else
 // 			{
 // 				typeSymbolPerson->setType("unknownPerson");
-// 				AGMMisc::publishNodeUpdate(typeSymbolPerson,agmagenttopic_proxy);
+// 				AGMMisc::publishNodeUpdate(typeSymbolPerson,agmexecutive_proxy);
 // 				usleep(500);
 // 			}
 			
 		}
-		AGMMisc::publishNodeUpdate(symbolPerson,agmagenttopic_proxy);
+		AGMMisc::publishNodeUpdate(symbolPerson,agmexecutive_proxy);
 		
 	}
 	qDebug()<<"\n ********** \n";
@@ -656,10 +656,10 @@ StateStruct SpecificWorker::getAgentState()
 	return s;
 }
 
-void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event &modification)
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &modification)
 {
 	QMutexLocker m (mutex);	
- 	AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
+ 	AGMModelConverter::fromIceToInternal(modification, worldModel);
 	
 	if (innerModelAGM) 
 		delete innerModelAGM;
@@ -696,6 +696,13 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modificati
 {
 	QMutexLocker m (mutex);	
  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);		
+}
+
+void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications)
+{
+	QMutexLocker m (mutex);
+	for (auto modification : modifications)
+		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);		
 }
 
 
@@ -751,7 +758,7 @@ void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMMod
 	try
 	{
 // 		AGMModelPrinter::printWorld(newModel);
-		AGMMisc::publishModification(newModel, agmagenttopic_proxy, worldModel,"humanCompAgent");
+		AGMMisc::publishModification(newModel, agmexecutive_proxy, "humanCompAgent");
 	}
 	catch(Ice::Exception e)
 	{
@@ -1496,7 +1503,7 @@ void SpecificWorker::updateHumanInnerFull()
 		try
 		{
 			InnerModel* imTmp =innerModelMap.at(idSingle);		
-			AgmInner::updateAgmWithInnerModelAndPublish(worldModel,imTmp,agmagenttopic_proxy);
+			AgmInner::updateAgmWithInnerModelAndPublish(worldModel, imTmp, agmexecutive_proxy);
 		}
 		catch (const std::out_of_range& oor)
 		{	

@@ -95,7 +95,6 @@ public:
 	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &e) = 0;
 	virtual void symbolUpdated(const RoboCompAGMWorldModel::Node &n) = 0;
 	virtual void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns) = 0;
-	virtual void newMSKBodyEvent(const PersonList &people) = 0;
 	virtual void newMSKBodyEvent(const PersonList &people, const long &timestamp) = 0;
 
 
