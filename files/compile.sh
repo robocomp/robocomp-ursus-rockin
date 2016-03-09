@@ -81,6 +81,28 @@ fi
 ### COMPONENTS 
 ###
 
+# ALWAYS
+
+# april localization
+echo "make april localization"
+cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/aprilBasedPublish/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+        echo "error compiling april localization"
+        exit
+fi
+
+# joystickcomp
+echo "make joystickcomp"
+cd /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/
+cmake .
+make -j$N
+if [ $? -ne 0 ]; then
+        echo "error compiling joystickOmni"
+        exit
+fi
+
 # NUC 1
 if [ "$1" == 1 ] || [ $# == 0 ]; then
     echo "Compiling NUC1 components"
@@ -155,15 +177,7 @@ if [ "$1" == 1 ] || [ $# == 0 ]; then
             exit
     fi
 
-    # hokuyo
-    echo "make hokuyo"
-    cd /home/robocomp/robocomp/components/robocomp-robolab/components/hokuyoComp
-    cmake .
-    make -j$N
-    if [ $? -ne 0 ]; then
-            echo "error compiling hokuyo"
-            exit
-    fi
+
 
     # dynamixel
     echo "make dynamixel"
@@ -182,7 +196,7 @@ if [ "$1" == 1 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling faulhaber"
-    #	exit
+            exit
     fi
 
     # inversekinematics
@@ -192,7 +206,7 @@ if [ "$1" == 1 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling IK"
-    #	exit
+            exit
     fi
 
     # gik visual
@@ -202,7 +216,7 @@ if [ "$1" == 1 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling gik"
-    #	exit
+            exit
     fi
 
     # ik visual
@@ -212,16 +226,6 @@ if [ "$1" == 1 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling visualik"
-    #	exit
-    fi
-
-    # cameraV4l
-    echo "make cameraV4l"
-    cd /home/robocomp/robocomp/components/robocomp-robolab/components/cameraV4lComp/
-    cmake .
-    make -j$N
-    if [ $? -ne 0 ]; then
-            echo "error compiling cameraV4l"
             exit
     fi
 
@@ -238,7 +242,7 @@ if [ "$1" == 2 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling navigation agent"
-    #	exit
+            exit
     fi
 
     # proprioceptionAgent
@@ -248,7 +252,7 @@ if [ "$1" == 2 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling proprioception agent"
-    #	exit
+            exit
     fi
 
     # graspingAgent
@@ -258,7 +262,7 @@ if [ "$1" == 2 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling grasping agent"
-    #	exit
+            exit
     fi
 
     # objectAgent
@@ -268,7 +272,7 @@ if [ "$1" == 2 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling object agent"
-    #	exit
+            exit
     fi
 
     # AgmInnerAgent
@@ -278,7 +282,7 @@ if [ "$1" == 2 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling agminner agent"
-    #	exit
+            exit
     fi
 
     # human
@@ -288,7 +292,7 @@ if [ "$1" == 2 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling human agent"
-    #	exit
+            exit
     fi
 
 fi
@@ -298,16 +302,6 @@ fi
 if [ "$1" == 3 ] || [ $# == 0 ]; then
     echo "Compiling NUC3 components"
 
-    # joystickcomp
-    echo "make joystickcomp"
-    cd /home/robocomp/robocomp/components/robocomp-robolab/components/joystickOmniComp/
-    cmake .
-    make -j$N
-    if [ $? -ne 0 ]; then
-            echo "error compiling joystickOmni"
-            exit
-    fi
-        
     # primesense
     echo "make primesense"
     cd /home/robocomp/robocomp/components/robocomp-robolab/components/openni2RGBD/
@@ -315,7 +309,7 @@ if [ "$1" == 3 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling openni2RGBD"
-    #	exit
+            exit
     fi    
 
     # apriltags
@@ -325,17 +319,17 @@ if [ "$1" == 3 ] || [ $# == 0 ]; then
     make -j$N
     if [ $? -ne 0 ]; then
             echo "error compiling apriltags"
-            #exit
-    fi
-
-    # april localization
-    echo "make april localization"
-    cd /home/robocomp/robocomp/components/robocomp-robolab/experimental/aprilBasedPublish/
-    cmake .
-    make -j$N
-    if [ $? -ne 0 ]; then
-            echo "error compiling april localization"
             exit
     fi
 
+    # hokuyo
+    echo "make hokuyo"
+    cd /home/robocomp/robocomp/components/robocomp-robolab/components/hokuyoComp
+    cmake .
+    make -j$N
+    if [ $? -ne 0 ]; then
+            echo "error compiling hokuyo"
+            exit
+    fi
+    
 fi
