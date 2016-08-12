@@ -68,10 +68,11 @@ public:
 	int uptimeAgent();
 	bool deactivateAgent();
 	StateStruct getAgentState();
-	void structuralChange(const RoboCompAGMWorldModel::Event &modification);
+	void structuralChange(const RoboCompAGMWorldModel::World &modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications);
 	void newMSKBodyEvent(const PersonList &people, const long &timestamp);
 
 public slots:
@@ -85,8 +86,8 @@ private:
 	bool active, newBodyEvent;
 	PersonList personList;
 	long int timeStamp;
-	QTimer timerTimeStamp;
-	int number;
+// 	QTimer timerTimeStamp;
+	int number, idSingle;
 	
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;	
@@ -94,8 +95,7 @@ private:
 	
 	
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-	void updatePeopleInnerFull();
+	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);	
 	void updatePeopleInnerFullB();
 	map<string,QString> dictionaryNames;
 	map<string,RoboCompMSKBody::JointType> dictionaryEnum;
@@ -117,9 +117,13 @@ private:
 	void updateViewer();
 	void updateViewerLocalInnerModels();
 
-
 	HsvColor rgb2hsv(RgbColor colorRGB);
 	string getColorName(HsvColor hsv);
+	
+	//single mode
+	void updateViewerLocalInnerModelSingle();		
+	void updateHumanInnerFull();
+	
 };
 
 #endif

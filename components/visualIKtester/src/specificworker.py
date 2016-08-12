@@ -47,12 +47,12 @@ class SpecificWorker(GenericWorker):
 		self.Period = 2000
 		self.timer.start(self.Period)
 		
-		self.ui.txbox.setValue(200)
-		self.ui.tybox.setValue(950)
+		self.ui.txbox.setValue(0.0)
+		self.ui.tybox.setValue(850)
 		self.ui.tzbox.setValue(400)
-		self.ui.rxbox.setValue(0)
-		self.ui.rybox.setValue(-0.78)
-		self.ui.rzbox.setValue(0)
+		self.ui.rxbox.setValue(0.0)
+		self.ui.rybox.setValue(0.0)
+		self.ui.rzbox.setValue(0.0)
 		self.ui.weightbutton.setChecked(True)
 		
 		self.ui.homebutton.clicked.connect(self.goHome)
@@ -62,7 +62,7 @@ class SpecificWorker(GenericWorker):
 		self.ui.sendbutton.clicked.connect(self.sendPose6D)
 		self.ui.alignaxisbutton.clicked.connect(self.sendPoseAlignAxis)
 		#self.ui.advanceaxisbutton.clicked.connect(self.sendPoseAdvanceAxis)
-		self.mapa = {'rightShoulder1':-0.5, 'rightShoulder2':-0.70, 'rightShoulder3':.50 , 'rightElbow':1.30 , 'rightForeArm':-.689, 'head_yaw_joint':0.30, 'head_pitch_joint':0.20}
+		self.mapa = { 'armY':0.0, 'armX1':0.0 , 'armX2':0.0 , 'wristX':0.0, 'head_yaw_joint':0.0, 'head_pitch_joint':0.70}
 		
 		#self.prueba10puntos()
 		
@@ -71,7 +71,7 @@ class SpecificWorker(GenericWorker):
 				#print "El fichero no existe"
 				#sys.exit(-1)
 				
-			#if self.inversekinematics_proxy.getPartState("RIGHTARM") == True:
+			#if self.inversekinematics_proxy.getPartState("ARM") == True:
 				#sys.exit(0)
 
 	def setParams(self, params):
@@ -101,7 +101,7 @@ class SpecificWorker(GenericWorker):
 		print "GO HOME"
 		import RoboCompInverseKinematics
 		try:
-			self.inversekinematics_proxy.goHome("RIGHTARM");
+			self.inversekinematics_proxy.goHome("ARM");
 		except RoboCompInverseKinematics.IKException, e:
 			print "Exception in tester (GO HOME)): ", e
 			
@@ -111,7 +111,7 @@ class SpecificWorker(GenericWorker):
 		print "STOP"
 		import RoboCompInverseKinematics
 		try:
-			self.inversekinematics_proxy.stop("RIGHTARM");
+			self.inversekinematics_proxy.stop("ARM");
 		except RoboCompInverseKinematics.IKException, e:
 			print "Exception in tester (STOP): ", e
 	
@@ -119,7 +119,7 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sendPose6D(self):
 		print "SEND POSE 6D"
-		self.inversekinematics_proxy.stop("RIGHTARM");
+		self.inversekinematics_proxy.stop("ARM");
 		
 		import RoboCompInverseKinematics
 		pose6D = RoboCompInverseKinematics.Pose6D() #target al que se movera
@@ -142,32 +142,37 @@ class SpecificWorker(GenericWorker):
 			weights.rx = 0
 			weights.ry = 0
 			weights.rz = 0
-		try:
-			axis = RoboCompInverseKinematics.Axis() #vector de pesos
-			axis.x = 0
-			axis.y = 0
-			axis.z = 1
-			part = "HEAD"
-			self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
-			
-			part = "RIGHTARM"
-			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
+		try:			
+			part = "ARM"
+			#scalarPose6D = {}
+			#scalarPose6D["tty"] = pose6D.y
+			#scalarPose6D["thresholdT"] = 9999
+			#scalarPose6D["thresholdR"] = 9999
+			##pose6derror["ttx"] = pose6D.y
+			##pose6derror["ttx"] = pose6D.z
+			##pose6derror["ttx"] = pose6D.x
+			##pose6derror["ttx"] = pose6D.y
+			##pose6derror["ttx"] = pose6D.z
+			#stringMapPose6D = {}
+			#identificador = self.inversekinematics_proxy.mapBasedTarget(part,stringMapPose6D,scalarPose6D)
+
+			identificador = self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)			
 			#print 'Mirando estado'
-			#state = RoboCompInverseKinematics.TargetState()
-			#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-			#while state.finish!=True:
-				#state = self.inversekinematics_proxy.getTargetState("RIGHTARM", identificador)
-			#print 'Moviemdo motores!!'
-#			for motor in state.motors:
-#				print motor
-#				goal = MotorGoalPosition()
-#				goal.position = motor.angle
-#				goal.name = motor.name
-#				goal.maxSpeed = 0.5
-#				try:
-#					self.jointmotor_proxy.setPosition(goal)
-#				except CollisionException:
-#					print "Error en arriba_R: ",CollisionException
+			state = RoboCompInverseKinematics.TargetState()
+			state = self.inversekinematics_proxy.getTargetState("ARM", identificador)
+			while state.finish!=True:
+				state = self.inversekinematics_proxy.getTargetState("ARM", identificador)
+			print 'Moviemdo motores!!'
+			for motor in state.motors:
+				print motor
+				goal = MotorGoalPosition()
+				goal.position = motor.angle
+				goal.name = motor.name
+				goal.maxSpeed = 0.5
+				try:
+					self.jointmotor_proxy.setPosition(goal)
+				except CollisionException:
+					print "Error en arriba_R: ",CollisionException
 		except RoboCompInverseKinematics.IKException, e:
 			print "Expection in tester (sendPose): ", e
 				
@@ -221,7 +226,7 @@ class SpecificWorker(GenericWorker):
 			#try:
 			#part = "HEAD"
 			#self.inversekinematics_proxy.setTargetAlignaxis(part, pose6D, axis)
-			part = "RIGHTARM"
+			part = "ARM"
 			self.inversekinematics_proxy.setTargetPose6D(part,pose6D, weights)
 
 
