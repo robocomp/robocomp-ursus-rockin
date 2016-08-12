@@ -18,7 +18,6 @@ SET ( SOURCES
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
-  controller.h
   localizer.h
   plannerprm.h
   plannerompl.h
@@ -29,4 +28,4 @@ find_package(OMPL)
 SET (LIBS ${LIBS} -losgViewer)
 
 ADD_DEFINITIONS( -std=c++14 -DEIGEN_NO_EIGEN2_DEPRECATED_WARNING)
-SET (LIBS ${LIBS} -lfcl -lpointmatcher -lnabo -lboost_system  -lboost_filesystem -lrt -lompl -lboost_graph)
+SET (LIBS ${LIBS} -L/usr/local/lib/ fcl -lpointmatcher -lnabo -lboost_system  -lboost_filesystem -lrt -lompl -lboost_graph)

@@ -349,7 +349,7 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 	//}
 
 	QLine2D l( ant->pos , post->pos );
-	if( isnan(l[0]) or isnan(l[1]) or isnan(l[2]))
+	if(std::isnan(l[0]) or std::isnan(l[1]) or std::isnan(l[2]))
 	{
 		ant->pos.print("ant");
  		post->pos.print("post");
@@ -423,7 +423,7 @@ float WayPoints::computeRoadCurvature(WayPoints::iterator closestPoint, uint poi
 		//qDebug() << achieved << road.size() << ang;
 		sumAng += ang;
 	}
-	if( achieved > 0 and isnan(sumAng)==false)
+	if( achieved > 0 and std::isnan(sumAng)==false)
 		return sumAng/achieved;
 	else
 		return 0;
@@ -474,7 +474,7 @@ bool WayPoints::update()
 	//Compute signed perpenduicular distance from robot to tangent at closest point
 	setRobotPerpendicularDistanceToRoad( tangent.perpendicularDistanceToPoint(robot3DPos) );
 	float ang = nose.signedAngleWithLine2D( tangent );
-	if (isnan(ang))
+	if (std::isnan(ang))
 		ang = 0;
  	setAngleWithTangentAtClosestPoint( ang );
 

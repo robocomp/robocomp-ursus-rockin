@@ -60,48 +60,6 @@ SpecificWorker::~SpecificWorker()
  * @return bool
  */
 
-bool SpecificWorker::removeNode(const QString &item)
-{
-	if (item=="root")
-	{
-		qDebug() << "Can't remove root elements" << item;
-		return false;
-	}
-
-	InnerModelNode *node = innerModel->getNode(item);
-	if (node == NULL)
-	{
-		qDebug() << "Can't remove not existing elements" << item;
-		return false;
-	}
-
-	QStringList l;
-	innerModel->getSubTree(node, &l);
-	innerModel->removeSubTree(node, &l);
-
-	return true;
-}
-
-/**
- * @brief Adds a plane to InnerModel
- * 
- * @param item ...
- * @param parentS ...
- * @param path ...
- * @param scale ...
- * @param t ...
- * @param r ...
- * @return void
- */
-void SpecificWorker::addPlane(QString item, QString parentS, QString path, QVec scale, QVec t, QVec r)
-{
-	InnerModelTransform *parent = dynamic_cast<InnerModelTransform*>(innerModel->getNode(parentS));
-	if (innerModel->getNode(item) != NULL)
-		removeNode(item);
-	InnerModelMesh *mesh = innerModel->newMesh (item, parent, path, scale(0), scale(1), scale(2), 0, t(0), t(1), t(2), r(0), r(1), r(2));
-	mesh->setScale(scale(0), scale(1), scale(2));
-	parent->addChild(mesh);
-}
 
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -131,8 +89,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	}
 
 	//Update InnerModel from robot
-	//try { differentialrobot_proxy->getBaseState(bState); }
-
  	try {  omnirobot_proxy->getBaseState(bState); }
 	catch(const Ice::Exception &ex) { cout << ex << endl; qFatal("Aborting, can't communicate with robot proxy");}
 	try { laserData = laser_proxy->getLaserData(); }
@@ -175,7 +131,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	// 	qDebug() << __FUNCTION__ << "----- controller set";
 
  	//Localizer stuff
- 	localizer = new Localizer(innerModel);
+ 	//localizer = new Localizer(innerModel);
 	
 	timer.start(20);
 	return true;
@@ -191,6 +147,7 @@ void SpecificWorker::compute( )
 {
 	static QTime reloj = QTime::currentTime();
 	static int cont = 0;
+	
 	// Check for connection failure
 	if ( updateInnerModel(innerModel, tState) == false )
 	{
@@ -306,6 +263,50 @@ void SpecificWorker::compute( )
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
+
+bool SpecificWorker::removeNode(const QString &item)
+{
+	if (item=="root")
+	{
+		qDebug() << "Can't remove root elements" << item;
+		return false;
+	}
+
+	InnerModelNode *node = innerModel->getNode(item);
+	if (node == NULL)
+	{
+		qDebug() << "Can't remove not existing elements" << item;
+		return false;
+	}
+
+	QStringList l;
+	innerModel->getSubTree(node, &l);
+	innerModel->removeSubTree(node, &l);
+
+	return true;
+}
+
+/**
+ * @brief Adds a plane to InnerModel
+ * 
+ * @param item ...
+ * @param parentS ...
+ * @param path ...
+ * @param scale ...
+ * @param t ...
+ * @param r ...
+ * @return void
+ */
+void SpecificWorker::addPlane(QString item, QString parentS, QString path, QVec scale, QVec t, QVec r)
+{
+	InnerModelTransform *parent = dynamic_cast<InnerModelTransform*>(innerModel->getNode(parentS));
+	if (innerModel->getNode(item) != NULL)
+		removeNode(item);
+	InnerModelMesh *mesh = innerModel->newMesh (item, parent, path, scale(0), scale(1), scale(2), 0, t(0), t(1), t(2), r(0), r(1), r(2));
+	mesh->setScale(scale(0), scale(1), scale(2));
+	parent->addChild(mesh);
+}
+
 
 bool SpecificWorker::insertObstacle()
 {

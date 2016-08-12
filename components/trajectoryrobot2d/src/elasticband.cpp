@@ -58,7 +58,7 @@ bool ElasticBand::update(InnerModel *innermodel, WayPoints &road, const RoboComp
 bool ElasticBand::checkIfNAN(const WayPoints &road)
 {
 	for(auto it = road.begin(); it != road.end(); ++it)
-		if( isnan(it->pos.x()) or isnan(it->pos.y()) or isnan(it->pos.z()) )
+		if( std::isnan(it->pos.x()) or std::isnan(it->pos.y()) or std::isnan(it->pos.z()) )
 		{
 			road.print();
 			return true;
@@ -234,7 +234,7 @@ float ElasticBand::computeForces(InnerModel *innermodel, WayPoints &road, const 
 			
 		QVec change = (atractionForce*alpha) + (repulsionForce*beta);		
 		
-		if(isnan(change.x()) or isnan(change.y()) or isnan(change.z()))
+		if(std::isnan(change.x()) or std::isnan(change.y()) or std::isnan(change.z()))
 		{
 			road.print();
 			qDebug() << atractionForce << repulsionForce;
