@@ -28,6 +28,8 @@
 #include <innermodel/innermodel.h>
 #include <Laser.h>
 
+#define MAX_LAG 100  
+
 class Controller
 {
 	public:
@@ -43,6 +45,8 @@ class Controller
 		bool avoidanceControl(InnerModel* innerModel, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot);
 		std::vector<float> computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData);
 		std::vector<float> baseOffsets;
+		float MAX_ADV_SPEED = 200.f;
+		float MAX_ROT_SPEED = 0.3;
 };
 
 #endif // CONTROLLER_H

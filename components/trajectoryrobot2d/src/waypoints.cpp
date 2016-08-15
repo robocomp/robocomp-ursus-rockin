@@ -112,6 +112,7 @@ void WayPoints::readRoadFromList( QList< QVec > list)
 	{
 		append(WayPoint(point));
 	}
+	//print();
 }
 
 void WayPoints::computeDistancesToNext()
@@ -204,19 +205,19 @@ void WayPoints::printRobotState(InnerModel* innerModel, const CurrentTarget &cur
 
 void WayPoints::print() const
 {
-	qDebug() << "Printing Road";
+	qDebug() << __FUNCTION__ << "Printing Road";
 	for(int i=0; i<this->size(); i++)
 	{
 		const WayPoint &w = (*this)[i];
-		qDebug() << "		" << w.pos << i << "Visible" << w.isVisible << "MinDist" << w.minDist << "MinDistVector" << w.minDistPoint
-							<< "visibilityAngle" << w.visibleLaserAngle << "visibilityDistance" << w.visibleLaserDist << "in robot frame" << w.posInRobotFrame;
+		qDebug() << "		-" << w.pos << i << "Visible" << w.isVisible << "MinDist" << w.minDist << "MinDistVector" << w.minDistPoint;
+		qDebug() << "		" << "laser ang visibility" << w.visibleLaserAngle << "laser dist visibility" << w.visibleLaserDist << "in robot frame" << w.posInRobotFrame;
 	}
 }
 
 bool WayPoints::draw(InnerModelViewer *innerViewer, InnerModel *innerModel, const CurrentTarget &currentTarget)
 {
 	if (size() == 0) return false;
-	InnerModelDraw::addTransform_ignoreExisting(innerViewer, "road", "floor");
+	InnerModelDraw::addTransform_ignoreExisting(innerViewer, "road", "world");
 	
 	//Draw all points now
 	for(int i=1; i<size(); i++)

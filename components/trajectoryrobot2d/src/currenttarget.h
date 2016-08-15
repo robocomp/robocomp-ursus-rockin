@@ -21,11 +21,15 @@
 #include <QMutexLocker>
 #include <qmat/QMatAll>
 
+/**
+ * @brief Holds the current target since it is created until it is destroyed
+ * 
+ */
 class CurrentTarget
 {
 	public:
 		CurrentTarget();					
-		void reset(); 						
+		void reset(const QVec &t = QVec::zeros(3), const QVec &r = QVec::zeros(3), bool hasRotation = false); 						
 		QVec getTranslation() const;			
 		void setTranslation(const QVec &t);
 		QVec getRotation() const;		
@@ -36,10 +40,10 @@ class CurrentTarget
 		ulong getElapsedTime() const;  //ms
 		bool hasRotation() const;
 		bool isBlocked() const;
-		
 		void setHasRotation(bool a);
-		enum class Command { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE, INSERTOBSTACLE};
-		Command command;
+		enum class State { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE, INSERTOBSTACLE, LEARNPATH};
+		State state;
+		void setState(State st);
 		
 	private:
 		mutable QMutex mutex;

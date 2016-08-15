@@ -50,7 +50,7 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	//OUTERREGION (REGION WITH GRAPH) -- INNERREGION (REGION WHITOUT GRAPH)
 	if (floor != NULL)
 	{
-		QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
+		//QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
 		
 		QVec upperLeft = innerModel->transform("world", QVec::vec3(floor->width/2, 0, floor->height/2), "floor");
 		QVec downRight = innerModel->transform("world", QVec::vec3(-floor->width/2, 0, -floor->height/2), "floor");
@@ -118,7 +118,7 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
  */
 bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 {
-// 	qDebug() << __FUNCTION__ << "Starting planning with robot at:" << inner->transform("world","robot") <<  "and target at:" << target;
+ 	qDebug() << __FUNCTION__ << "Starting planning with robot at:" << inner->transform("world","robot") <<  "and target at:" << target;
 
 	QVec currentTarget = target;  //local variable to get samples from free space
 
@@ -129,27 +129,36 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 
 	currentPath.clear();
 
+	/////////////////////////////////////////////
 	//If target on obstacle find a point close to it on the robot-target line
+	/////////////////////////////////////////////
 	if( sampler.searchRobotValidStateCloseToTarget(target) == false )
 	{
-		qDebug() << __FILE__ << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
+		qDebug() << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		return false;
 	}
+	
+	/////////////////////////////////////////////
 	//Check if the target is in "plain sight"
+	/////////////////////////////////////////////
 	QVec point;
 	//qDebug() << __LINE__;
 	if ( sampler.checkRobotValidDirectionToTargetOneShot( robot, target) )
 	{
- 		qDebug() << __FILE__ << __FUNCTION__ << "-------- Target on sight. Proceeding";
+ 		qDebug() << __FUNCTION__ << "-------- Target on sight. Proceeding";
 		currentPath << robot << target;
 		return true;
 	}
 	
+	/////////////////////////////////////////////
 	//Now search in KD-tree for closest points to origin and target
+	/////////////////////////////////////////////
 	Vertex robotVertex, targetVertex;
 	searchClosestPoints(robot, target, robotVertex, targetVertex);
 
+	/////////////////////////////////////////////
 	//Obtain a free path from [robot] to [robotVertex] using RRTConnect. Return if fail.
+	/////////////////////////////////////////////
  	QList<QVec> path;
 	if (planWithRRT(robot, graph[robotVertex].pose, path) )
  	{
@@ -166,8 +175,10 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
  	else
  		 return false;
 
+	/////////////////////////////////////////////
 	//Now we are in the graph
 	//Search in graph minimun path. Return if fail
+	/////////////////////////////////////////////
 	if( robotVertex != targetVertex )  //Same node for both. We should skip searchGraph
 	{
 		std::vector<Vertex> vertexPath;
@@ -189,7 +200,9 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	else	//add the only node
 		currentPath += graph[robotVertex].pose;
 
+	/////////////////////////////////////////////
 	//Obtain a free path from [target] to [targetVertex] using RRTConnect. Return if fail.
+	/////////////////////////////////////////////
 	path.clear();
 	if (planWithRRT(graph[targetVertex].pose, target, path) )
 	{

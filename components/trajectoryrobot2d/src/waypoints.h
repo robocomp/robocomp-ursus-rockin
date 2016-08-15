@@ -63,7 +63,7 @@ class WayPoints : public QList< WayPoint >
 		void startRoad();
 		void endRoad();
 		void setThreshold(const float _threshold) 												{ threshold = _threshold;};
-		void setInnerModel( InnerModel *inner) 												{ innerModel = inner;};
+		void setInnerModel( InnerModel *inner) 														{ innerModel = inner;};
 		void readRoadFromFile(InnerModel *innerModel, std::string name);
 		void readRoadFromList(QList<QVec> list);
 		void printRobotState(InnerModel* innerModel, const CurrentTarget& currentTarget);

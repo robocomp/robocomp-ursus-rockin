@@ -31,21 +31,31 @@ bool ElasticBand::update(InnerModel *innermodel, WayPoints &road, const RoboComp
 	if( road.isFinished() == true )
 			return false;
 
+	/////////////////////////////////////////////
 	//Tags all points in the road ar visible or blocked, depending on laser visibility. Only visible points are processed in this iteration
+	/////////////////////////////////////////////
 	checkVisiblePoints(innermodel, road, laserData);	
 	 
 	//shortCut(road);
 	
+	/////////////////////////////////////////////
 	//Add points to achieve an homogenoeus chain
+	/////////////////////////////////////////////
  	addPoints(road, currentTarget);
 
+	/////////////////////////////////////////////
 	//Remove point too close to each other
+	/////////////////////////////////////////////
  	cleanPoints(road);
 	
+	/////////////////////////////////////////////
 	//Compute the scalar magnitudes
+	/////////////////////////////////////////////
 	computeForces(innermodel, road, laserData); 	 
 		
+	/////////////////////////////////////////////
 	//Delete half the tail behind, if greater than 6, to release resources
+	/////////////////////////////////////////////
 	if( road.getOrderOfClosestPointToRobot() > 6)
 	{
 		for(auto it = road.begin(); it != road.begin() + (road.getOrderOfClosestPointToRobot() / 2); ++it)
@@ -96,7 +106,6 @@ bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
  */
 void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 {		
-	//qDebug() << __FUNCTION__ ;
 	int offset = 1;
 	
 	for(int i=0; i< road.size()-offset; i++)	
@@ -104,14 +113,14 @@ void ElasticBand::addPoints(WayPoints& road, const CurrentTarget& currentTarget)
 		if( i>0 and road[i].isVisible == false )
 			break;
 	
-		WayPoint &w = road[i];
-		WayPoint &wNext = road[i+1];
-		float dist = (w.pos-wNext.pos).norm2();
-		if( dist > ROAD_STEP_SEPARATION)  //SHOULD GET FROM IM
-		{
-			float l = 0.9*ROAD_STEP_SEPARATION/dist;   //Crucial que el punto se ponga mas cerca que la condición de entrada
-			WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
-			road.insert(i+1,wNew);
+			WayPoint &w = road[i];
+			WayPoint &wNext = road[i+1];
+			float dist = ( w.pos-wNext.pos ).norm2();
+			if( dist > ROAD_STEP_SEPARATION)  //SHOULD GET FROM IM
+			{
+				float l = 0.9 * ROAD_STEP_SEPARATION / dist;   //Crucial que el punto se ponga mas cerca que la condición de entrada
+				WayPoint wNew( (w.pos * (1-l)) + (wNext.pos * l));
+				road.insert(i+1,wNew);
 		}
 	}
 	

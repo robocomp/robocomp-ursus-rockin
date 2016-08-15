@@ -22,15 +22,21 @@ CurrentTarget::CurrentTarget()
 	reset();
 }
 
-void CurrentTarget::reset()
+void CurrentTarget::reset(const QVec &t, const QVec &r, bool hasRotation)
 {
 	QMutexLocker  ml(&mutex);
 	withoutPlan = true;
-	targetTr = QVec::zeros(3);
-	targetRot = QVec::zeros(3);
+	targetTr = t;
+	targetRot = r;
 	reloj.start();
-	doRotation = false;
-	command  = Command::IDLE;
+	doRotation = hasRotation;
+	state = State::IDLE;
+}
+
+void CurrentTarget::setState(State st)
+{
+	QMutexLocker ml(&mutex);
+	state = st;
 }
 
 QVec CurrentTarget::getTranslation() const

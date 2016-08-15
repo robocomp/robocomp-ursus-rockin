@@ -39,9 +39,14 @@
 #endif
 
 /**
-       \brief Algorithm to control de robot along a trajectory defined by a set of points
+       \brief Code to control de robot along a trajectory defined by a set of points
        @author authorname
 */
+
+/**
+ * @brief ...Auxiliary class to keep the state of the algorithm and make it accesible to the middleware
+ * 
+ */
 class TrajectoryState
 {
 	public:
@@ -138,7 +143,6 @@ private:
 	bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
 	bool insertObstacle();
 	
-	void changeCommand(CurrentTarget& target, CurrentTarget::Command newCommand);
 	//Smoother smoother;
 	void readRoadFromFile(string name, WayPoints *road);
 	void setRobotInitialPose(float x, float z, float alpha);

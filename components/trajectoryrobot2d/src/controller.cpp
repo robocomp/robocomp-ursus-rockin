@@ -36,27 +36,41 @@ Controller::~Controller()
 bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints &road)
 {
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
-	/*static*/ long epoch = 100;
-	static float lastVadvance = 0.f;
-	const float umbral = 25.f;	//salto maximo de velocidad
-	static float lastVrot = 0.f;
-	const float umbralrot = 0.08f;	//salto maximo de rotación
+	long epoch = 100;
+ 	static float lastVadvance = 0.f;
+ 	static float lastVrot = 0.f;
+// 	const float umbral = 25.f;	//salto maximo de velocidad
+// 	const float umbralrot = 0.08f;	//salto maximo de rotación
 
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
 
-	//Check robot state
-	if( (road.isFinished() == true ) or (road.requiresReplanning== true) or (road.isLost == true))
-	{
-		 		if( road.isFinished() ) qDebug() << "road finished";
-		 		if( road.requiresReplanning ) qDebug() << "requiresReplanning";
-		 		if( road.isLost ) qDebug() << "robot is lost";
+	//////////////////////////////////////////////	
+	// Check if robot goal is achieved already
+	//////////////////////////////////////////////	
+	
+	if(road.isFinished() == true ) 
+	{		
+		qDebug() << __FUNCTION__ << "road finished. Returning to main";
 		stopTheRobot(omnirobot_proxy);
-
 		return false;
 	}
-
-	///CHECK ROBOT INMINENT COLLISION
+	if(road.requiresReplanning == true ) 
+	{		
+		qDebug() << __FUNCTION__ << "requiresReplanning. Returning to main";
+		stopTheRobot(omnirobot_proxy);
+		return false;
+	}
+	if(road.isLost == true ) 
+	{		
+		qDebug() << __FUNCTION__ << "robot is lost. Returning to main";
+		stopTheRobot(omnirobot_proxy);
+		return false;
+	}
+		
+	//////////////////////////////////////////////	
+	///CHECK ROBOT FOR INMINENT COLLISION
+	///////////////////////////////////////////////
 	float vside = 0;
 	int j=0;
 	road.setBlocked(false);
@@ -67,10 +81,10 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		if( i.dist < baseOffsets[j] + 50 )
 		{
 			if(i.angle>-1.30 && i.angle<1.30){
-			qDebug() << __FILE__ << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
+			qDebug() << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
 			stopTheRobot(omnirobot_proxy);
 			road.setBlocked(true);		//AQUI SE BLOQUEA PARA REPLANIFICAR
-			qDebug()<<"DETECTADO OBSTACULO, REPLANIFICANDO";
+			qDebug() << __FUNCTION__ << "Inminent collision, REPLANNING";
  			break;
 			}
 		}
@@ -92,129 +106,126 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	}
 
 	/////////////////////////////////////////////////
-	//////  CHECK CPU AVAILABILITY
+	//////  CHECK CPU AVAILABILITY. If lagging reduce speed
 	/////////////////////////////////////////////////
-	if ( time.elapsed() > delay )   //Initial wait in secs so the robot waits for everything is setup. Maybe it could be moved upwards
+	if ( this->time.elapsed() > this->delay )   //Initial wait in secs so the robot waits for everything is setup. Maybe it could be moved upwards
 	{
-		float MAX_ADV_SPEED = 200.f;
-		float MAX_ROT_SPEED = 0.3;
-		if( (epoch-100) > 0 )				//Damp max speeds if elapsed time is too long
+		if( epoch  > MAX_LAG )				//Damp max speed if elapsed time is too long  TAKE CONSTANT OUT!
 		{
 			MAX_ADV_SPEED = 200 * exponentialFunction(epoch-100, 200, 0.2);
 			MAX_ROT_SPEED = 0.3 * exponentialFunction(epoch-100, 200, 0.2);
 		}
-		float vadvance = 0;
-		float vrot = 0;
-		/////////////////////////////////////////////////
-		//////   ROTATION SPEED
-		////////////////////////////////////////////////
+		//float vadvance = 0;
+		//float vrot = 0;
+	}
+	
+	/////////////////////////////////////////////////
+	//////   ROTATION SPEED
+	////////////////////////////////////////////////
 
-		// VRot is computed as the sum of three terms: angle with tangent to road + atan(perp. distance to road) + road curvature
-		// as descirbed in Thrun's paper on DARPA challenge
-		vrot = road.getAngleWithTangentAtClosestPoint() + atan( road.getRobotPerpendicularDistanceToRoad()/800.) + 0.8 * road.getRoadCurvatureAtClosestPoint() ;  //350->800.
+	// VRot is computed as the sum of three terms: 
+	// --   angle between robot nose and tangent to road at its closest point
+	// --   atan(perp. distance to road), to force an inwards turn when the robot is off the center line
+	// --   road curvature, to reduce speed inside curves
+	//
+	// as descirbed in Thrun's paper on DARPA challenge
+	
+	float vrot = 0.5 * road.getAngleWithTangentAtClosestPoint() + 
+							 1.0 * atan( road.getRobotPerpendicularDistanceToRoad()/1000.) + 
+							 0.8 * road.getRoadCurvatureAtClosestPoint() ;  //350->800.
+	
 	// Limiting filter
- 		if( vrot > MAX_ROT_SPEED )
- 			vrot = MAX_ROT_SPEED;
- 		if( vrot < -MAX_ROT_SPEED )
- 			vrot = -MAX_ROT_SPEED;
+	if( vrot > MAX_ROT_SPEED )
+		vrot = MAX_ROT_SPEED;
+	if( vrot < -MAX_ROT_SPEED )
+		vrot = -MAX_ROT_SPEED;
 
-		/////////////////////////////////////////////////
-		//////   ADVANCE SPEED
-		////////////////////////////////////////////////
+	/////////////////////////////////////////////////
+	//////   ADVANCE SPEED
+	////////////////////////////////////////////////
 
-		// Factor to be used in speed control when approaching the end of the road
-		float teta;
-		if( road.getRobotDistanceToTarget() < 1000)
-			teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
-		else
-			teta= 1;
-		
-		// Factor to be used in speed control when approaching the end of the road
-		
+	// Factor to be used in speed control when approaching the end of the road
+	float teta;
+	if( road.getRobotDistanceToTarget() < 1000)
+		teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
+	else
+		teta= 1;
+	
+	//VAdv is computed as a factored reduction of MAX_ADV_SPEED by three computed functions:
+	//				* road curvature reduces forward speed
+	//				* VRot reduces forward speed
+	//				* reduction is 1 if there are not obstacle.
+	//				* teta that applies when getting close to the target (1/roadGetCurvature)
+	//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
+	float vadvance = MAX_ADV_SPEED 
+								* exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
+								* exponentialFunction(vrot, 0.8, 0.01)
+								* teta;
+								//* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
+								//* sunk;
 
-		//VAdv is computed as a reduction of MAX_ADV_SPEED by three computed functions:
-		//				* road curvature reduces forward speed
-		//				* VRot reduces forward speed
-		//				* reduction is 1 if there are not obstacle.
-		//				* teta that applies when getting close to the target (1/roadGetCurvature)
-		//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
-		vadvance = MAX_ADV_SPEED * exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
-								 * exponentialFunction(vrot, 0.8, 0.01)
-								 * teta;
-                                                                                                                                //* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
-								 //* sunk;
+// 	if(fabs(vrot - lastVrot) > umbralrot)
+// 	{
+// 		//qDebug()<<"lastrot "<<lastVrot << "\n vrot "<< vrot;
+// 		if(vrot > lastVrot)
+// 			vrot = lastVrot + umbralrot;
+// 		else vrot = lastVrot - umbralrot;
+// 	}
+	lastVrot=vrot;
 
+	//Pre-limiting filter to avoid displacements in very closed turns
+	if( fabs(vrot) == 0.3)
+		vadvance = 0;
+		vside = 0;
+	
+	//stopping speed jump
+// 	if(fabs(vadvance - lastVadvance) > umbral)
+// 	{
+// 		//qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
+// 		if(vadvance > lastVadvance)
+// 			vadvance = lastVadvance + umbral;
+// 		else vadvance = lastVadvance - umbral;
+// 	}
+	lastVadvance=vadvance;
 
-		if(fabs(vrot - lastVrot) > umbralrot)
-		{
-			//qDebug()<<"lastrot "<<lastVrot << "\n vrot "<< vrot;
-			if(vrot > lastVrot)
-				vrot = lastVrot + umbralrot;
-			else vrot = lastVrot - umbralrot;
-		}
-		lastVrot=vrot;
+	// Limiting filter
+	if( vadvance > MAX_ADV_SPEED )
+		vadvance = MAX_ADV_SPEED;
+	
 
-		//Pre-limiting filter to avoid displacements in very closed turns
-		if( fabs(vrot) == 0.3)
-			vadvance = 0;
-			vside = 0;
-		
-		//stopping speed jump
-		if(fabs(vadvance - lastVadvance) > umbral)
-		{
-			//qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
-			if(vadvance > lastVadvance)
-				vadvance = lastVadvance + umbral;
-			else vadvance = lastVadvance - umbral;
-		}
-		lastVadvance=vadvance;
+	//vside = vrot*MAX_ADV_SPEED;
+	
+	/////////////////////////////////////////////////
+	//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
+	////////////////////////////////////////////////
 
- 		// Limiting filter
- 		if( vadvance > MAX_ADV_SPEED )
- 			vadvance = MAX_ADV_SPEED;
-		
-
-
-		//vside = vrot*MAX_ADV_SPEED;
-		
-		/////////////////////////////////////////////////
-		//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
-		////////////////////////////////////////////////
-
-		//bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
+	//bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
 //  		if( collision )
 //  			road.setBlocked(true);
 
-		/////////////////////////////////////////////////
-		///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
-		/////////////////////////////////////////////////
-		//TODO: PROBAR EN URSUS A VER COMO QUEDA..
-		
+	/////////////////////////////////////////////////
+	///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
+	/////////////////////////////////////////////////
+	//TODO: PROBAR EN URSUS A VER COMO QUEDA..
+	
 // 		std::sort(laserData.begin(), laserData.end(), [](auto a, auto b){ return a.dist < b.dist;});
 // 		if(laserData.front().dist > 300 && vside == 0)// and fabs(laserData.front().angle)>0.3)
 // 		{
 // 			if( laserData.front().angle > 0) vside  = -30;
 // 			else vside = 30;
 // 		}
-		
-		/////////////////////////////////////////////////
-		//////   EXECUTION
-		////////////////////////////////////////////////
+	
+	/////////////////////////////////////////////////
+	//////   EXECUTION
+	////////////////////////////////////////////////
 
 // 		qDebug() << "------------------Controller Report ---------------;";
 // 		qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
 // 		qDebug() << "---------------------------------------------------;";
-                
-   		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
-   		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
-	}
-	else		//Too long delay. Stopping robot.
-	{	
-		qDebug() << __FILE__ << __FUNCTION__ << "Processing delay" << epoch << "ms. too high. Stopping the robot for safety";
-		try { omnirobot_proxy->setSpeedBase( 0, 0, 0);	}
+							
+		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
 		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
-	}
-
+	
 	epoch = reloj.restart();  //epoch time in ms
 	return false;
 
@@ -255,7 +266,7 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 			vadvance = 0;
 			vrot = 0;
 		}
-		printf("min distance = %f\n", minD);
+		qDebug() << __FUNCTION__ << "min distance = " << minD;
 	}
 	return collision;
 }
@@ -294,6 +305,7 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 void Controller::stopTheRobot(RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy)
 {
 	///CHECK IF ROBOT IS MOVING BEFORE
+	qDebug() << __FUNCTION__ << "Stopping the robot";
 	try {	omnirobot_proxy->setSpeedBase( 0.f, 0.f, 0.f);	}
 	catch (const Ice::Exception &e) { std::cout << e << std::endl;}
 }

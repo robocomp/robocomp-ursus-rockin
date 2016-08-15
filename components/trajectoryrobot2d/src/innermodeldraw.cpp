@@ -108,8 +108,6 @@ bool InnerModelDraw::addTransform(InnerModelViewer *innerViewer, QString item, Q
 	}
 }
 
-
-// void InnerModelDraw::addPlane_ignoreExisting(InnerModelViewer *innerViewer, QString item, QString baseaseaseasease, const RoboCompInnerModelManager::Plane3D &p)
 bool InnerModelDraw::addPlane_ignoreExisting(InnerModelViewer *innerViewer, const QString &item, const QString &base, const QVec &p, const QVec &n, const QString &texture, const QVec &size)
 {
 	
