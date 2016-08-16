@@ -167,6 +167,7 @@ void SpecificWorker::compute( )
 			break;
 		case CurrentTarget::State::LEARNPATH:
 			planner->learnPath(road.backList);
+			break;
 		case CurrentTarget::State::INSERTOBSTACLE:
 			insertObstacle();
 			break;
@@ -174,7 +175,7 @@ void SpecificWorker::compute( )
 			break;
 	}
 
-	if(reloj.elapsed() > 1000)	//to draw only every 2 secs
+	if(reloj.elapsed() > 2000)	//to draw only every 2 secs
 	{
 		#ifdef USE_QTGUI
 				road.clearDraw(innerViewer);
@@ -335,6 +336,7 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 	}
 	if (myRoad.isFinished() == true)
 	{
+		planner->learnPath(myRoad.backList);
 		if( target.hasRotation() )
 		{
 			qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
@@ -648,7 +650,7 @@ float SpecificWorker::changeTarget(const TargetPose& target)
  */
 float SpecificWorker::go(const TargetPose& target)
 {
-        return goReferenced(target,0,0,100);
+   return goReferenced(target,0,0,100);
 }
 
 /**
@@ -683,8 +685,8 @@ float SpecificWorker::goReferenced(const TargetPose &target, const float xRef, c
     return (current - innerModel->transform("world",QVec::vec3(0,0,0),"robot")).norm2();
 	}
 
-	qDebug() << __FUNCTION__ << "Target received" << currentTarget.getTranslation() << currentTarget.getRotation();
-	qDebug()<< __FUNCTION__ << "Distance to target"<< (currentTarget.getTranslation() - innerModel->transform("world",QVec::vec3(0,0,0),"robot")).norm2();
+	qDebug() << __FUNCTION__ << "Target received" << target.x << target.y << target.z;
+	qDebug()<< __FUNCTION__ << "Distance to target"<< (currentTarget.getTranslation() - innerModel->transform("world",QVec::vec3(0,0,0),"robot")).norm2() << "mm";
 	qDebug() << __FUNCTION__ << "Robot current position" << innerModel->transform("world",QVec::vec3(0,0,0),"robot");
 	
 	innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");

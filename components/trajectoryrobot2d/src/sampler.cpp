@@ -173,7 +173,7 @@ bool Sampler::checkRobotValidStateAtTarget(const QVec &targetPos, const QVec &ta
 		for ( auto out : restNodes )
 			if ( innerModel->collide( in, out))
 			{
-				//qDebug() << "collision de " << in << " con " << out;
+				//qDebug() << __FUNCTION__ << "collision de " << in << " con " << out;
 				return false;
 			}
 
@@ -194,44 +194,6 @@ bool Sampler::isStateValid(const ompl::base::State *state)
 				return false;
 			}
 	return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-// PRIVATE
-///////////////////////////////////////////////////////////////////////////////////////////
-
-void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out, std::set<QString> &excluded)
-{
-	if (node->id == robotId)
-	{
-		inside = true;
-	}
-	
-	InnerModelMesh *mesh;
-	InnerModelPlane *plane;
-	InnerModelTransform *transformation;
-
-	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))  
-	{
-		for (int i=0; i<node->children.size(); i++)
-		{
-			recursiveIncludeMeshes(node->children[i], robotId, inside, in, out, excluded);
-		}
-	}
-	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
-	{
-		if( std::find(excluded.begin(), excluded.end(), node->id) == excluded.end() )			
-		{
-			if (inside)
-			{
-				in.push_back(node->id);
-			}
-			else
-			{
-				out.push_back(node->id);
-			}
-		}
-	}
 }
 
 /**
@@ -278,6 +240,45 @@ bool Sampler::checkRobotValidDirectionToTarget(const QVec & origin , const QVec 
 	}
 	return true;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// PRIVATE
+///////////////////////////////////////////////////////////////////////////////////////////
+
+void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out, std::set<QString> &excluded)
+{
+	if (node->id == robotId)
+	{
+		inside = true;
+	}
+	
+	InnerModelMesh *mesh;
+	InnerModelPlane *plane;
+	InnerModelTransform *transformation;
+
+	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))  
+	{
+		for (int i=0; i<node->children.size(); i++)
+		{
+			recursiveIncludeMeshes(node->children[i], robotId, inside, in, out, excluded);
+		}
+	}
+	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
+	{
+		if( std::find(excluded.begin(), excluded.end(), node->id) == excluded.end() )			
+		{
+			if (inside)
+			{
+				in.push_back(node->id);
+			}
+			else
+			{
+				out.push_back(node->id);
+			}
+		}
+	}
+}
+
 
 bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint) const
 {
@@ -381,7 +382,7 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 }
 
 /**
- * @brief ...
+ * @brief Checks is there is a valid straight tunnel from origin to target the size of the robot
  * 
  * @param origin ...
  * @param target ...
@@ -390,17 +391,17 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 
 bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target) const
 {
+	//qDebug() << __FUNCTION__ << "Checking between: " << origin << "and " << target;
+	
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
 	QVec finalPoint;
 	float wRob=420, hRob=1600;  //GET FROM INNERMODEL!!! 
-//	float wRob=0.1, hRob=0.1;  //GET FROM INNERMODEL!!!
-
 	
-	if( MAX_LENGTH_ALONG_RAY < 50)   //FRACTION OF ROBOT SIZE
-	{
-		qDebug() << __FUNCTION__ << "target y origin too close";
-		return false;
-	}
+// 	if( MAX_LENGTH_ALONG_RAY < 50)   //COMMENT THIS FOR NOW ::::::::::::::::::::...
+// 	{
+// 		qDebug() << __FUNCTION__ << "target y origin too close";
+// 		return false;
+// 	}
 		
 	//Compute angle between origin-target line and world Zaxis
 	float alfa1 = QLine2D(target,origin).getAngleWithZAxis();
@@ -440,7 +441,7 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 	{
 		if ( innerModel->collide(it, &robotBoxCol))
 		{
-			qDebug() << __FUNCTION__ << "collide with " << it;
+			//qDebug() << __FUNCTION__ << ": Robot collides with " << it;
 			return false;
 		}
 	}
