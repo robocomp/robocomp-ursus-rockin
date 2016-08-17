@@ -48,7 +48,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//////////////////////////////////////////////	
 	// Check if robot goal is achieved already
 	//////////////////////////////////////////////	
-	
 	if(road.isFinished() == true ) 
 	{		
 		qDebug() << __FUNCTION__ << "road finished. Returning to main";
@@ -76,16 +75,15 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	road.setBlocked(false);
 	for(auto i : laserData)
 	{
-		//printf("laser dist %f || baseOffsets %f \n",i.dist,baseOffsets[j]);
 		if(i.dist < 10) i.dist = 30000;
 		if( i.dist < baseOffsets[j] + 50 )
 		{
-			if(i.angle>-1.30 && i.angle<1.30){
-			qDebug() << __FUNCTION__<< "Robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
-			stopTheRobot(omnirobot_proxy);
-			road.setBlocked(true);		//AQUI SE BLOQUEA PARA REPLANIFICAR
-			qDebug() << __FUNCTION__ << "Inminent collision, REPLANNING";
- 			break;
+			if( i.angle > -1.30 and i.angle < 1.30)
+			{
+				qDebug() << __FUNCTION__<< "Controller: robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
+				stopTheRobot(omnirobot_proxy);
+				road.setBlocked(true);		// MIRAR ESTO
+				break;
 			}
 		}
 		else
@@ -159,7 +157,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
 	float vadvance = MAX_ADV_SPEED 
 								* exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
-								* exponentialFunction(vrot, 0.8, 0.01)
+								* exponentialFunction(vrot, 0.6, 0.01)
 								* teta;
 								//* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
 								//* sunk;

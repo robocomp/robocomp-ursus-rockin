@@ -35,24 +35,24 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 	qsrand( QTime::currentTime().msec() );
 	
 }
+
+
 /**
-* @brief Picks a random point within the limits of outerRegion and innerRegions and checks that it is out of obstacles (Free Space)
-* 
-* @return RMat::QVec, a 3D vector with 0 in the Y coordinate
-*/
+ * @brief Samples nPoints from robot free space delimited by the union of rectangles in outerregion and 
+ * excluding the union of rectangles in innerRegion.
+ * 
+ * @param nPoints number of points to sample. For a very dense set of points it might take a long time.
+ * @return QList< QVec > List of sampled points
+ */
 QList<QVec> Sampler::sampleFreeSpaceR2(uint nPoints)  
 {
  	bool validState = false;
 	QVec p,q,res(3,0.f);
 	QList<QVec> list;
-	
-	
-	printf(" %f %f\n", outerRegion.left(), outerRegion.right());
-	printf(" %f %f\n", outerRegion.top(), outerRegion.bottom());
-	
+
 	for(uint32_t i=0; i<nPoints;i++)
 	{
-		while( validState == false )   ///CHECK ALSO FOR TIMEOUT
+		while( validState == false )   ///SHOULD CHECK ALSO FOR TIMEOUT
 		{
 			p =	QVec::uniformVector(1, outerRegion.left(), outerRegion.right());
 			q =	QVec::uniformVector(1, outerRegion.top(), outerRegion.bottom());
@@ -73,7 +73,6 @@ QList<QVec> Sampler::sampleFreeSpaceR2(uint nPoints)
 				validState = checkRobotValidStateAtTarget(res);
 			}
 		}
-		res = innerModel->transform("floor_plane", res, "root");
 		list.append(res);
 		validState = false;
 	}

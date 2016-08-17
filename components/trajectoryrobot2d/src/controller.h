@@ -45,7 +45,9 @@ class Controller
 		bool avoidanceControl(InnerModel* innerModel, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot);
 		std::vector<float> computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData);
 		std::vector<float> baseOffsets;
-		float MAX_ADV_SPEED = 200.f;
+		
+	  // Constants that should be out
+		float MAX_ADV_SPEED = 500.f;
 		float MAX_ROT_SPEED = 0.3;
 };
 

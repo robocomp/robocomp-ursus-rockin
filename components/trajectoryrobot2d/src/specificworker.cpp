@@ -278,8 +278,7 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 		if (coolPlan == false)
 		{
 			qDebug() << __FUNCTION__ << "Path NOT found. Resetting to IDLE state";
-			state.setState("IDLE");
-			target.reset();
+			target.setState(CurrentTarget::State::STOP);
 			return false;
 		}
 		target.setTranslation(localT);
@@ -288,11 +287,7 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 		updateInnerModel(innerModel, state);
 		target.setWithoutPlan( false );
 
-		#ifdef USE_QTGUI
-			planner->cleanGraph(innerViewer);
-			planner->drawGraph(innerViewer);
-		#endif
-		
+	
 		//Init road
 		myRoad.reset();
 		myRoad.readRoadFromList( planner->getPath() );
@@ -337,8 +332,12 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 	if (myRoad.isFinished() == true)
 	{
 		myRoad.setFinished(true);
+		
 		planner->learnPath(myRoad.backList);
-		planner->drawGraph(innerViewer);
+		#ifdef USE_QTGUI
+			planner->drawGraph(innerViewer);
+		#endif
+	
 		if( target.hasRotation() )
 		{
 			qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
@@ -348,10 +347,10 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 		else
 		{
 			target.setState(CurrentTarget::State::STOP);
-			#ifdef USE_QTGUI
-						planner->cleanGraph(innerViewer);
-						planner->drawGraph(innerViewer);
-			#endif
+// 			#ifdef USE_QTGUI
+// 						planner->cleanGraph(innerViewer);
+// 						planner->drawGraph(innerViewer);
+// 			#endif
 		}
 	}
 
@@ -362,7 +361,7 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 		//computePlan(innerModel);
 	}
 	state.setEstimatedTime(myRoad.getETA());
-
+	
 	return true;
 }
 

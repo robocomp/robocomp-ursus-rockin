@@ -104,9 +104,9 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 	else
 	{
 		qDebug() << __FUNCTION__ << "Graph file DOES NOT exit. Creating with " << nPoints << "nodes and " << neigh << "neighboors";
-		//createGraph(nPoints, neigh, 2500.f);  //MAX distance apart for two points to be considered.
 		QList<QVec> pointList = sampler.sampleFreeSpaceR2(nPoints);
-  	constructGraph(pointList, neigh, 5000.f, 500);  ///GET From IM ----------------------------------
+			
+  	constructGraph(pointList, neigh, 3500.f, 500);  ///GET From IM ----------------------------------
 		std::ofstream fout(fileName);
 		writeGraphToStream(fout);
 	}
@@ -1057,24 +1057,50 @@ void PlannerPRM::smoothPathIter(QList<QVec> & list)
 /// DRAW
 ////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Draws the graph on a InnerModelViewer instance
+ * 
+ * @param innerViewer ...
+ * @return bool
+ */
 bool PlannerPRM::drawGraph(InnerModelViewer *innerViewer)
 {
 	cleanGraph(innerViewer);
-	InnerModelDraw::addTransform(innerViewer, "graph", "floor");
+	InnerModelDraw::addTransform(innerViewer, "graph", "world");
 
 	QString item;
-
 	int i=0;
-	BGL_FORALL_VERTICES(v, graph, Graph)
-    {
-		item = "g_" + QString::number(i);
-		QString  parentT = QString("g_") + QString::number(i);
-		InnerModelDraw::addTransform(innerViewer, parentT, "graph");
-		innerViewer->innerModel->updateTransformValues(parentT, graph[v].pose.x(), 10, graph[v].pose.z(), 0,0,0);
-		InnerModelDraw::addPlane_ignoreExisting(innerViewer, item+"_plane", parentT, QVec::vec3(0,0,0), QVec::vec3(0,1,0), "#00A0A0", QVec::vec3(60,60,10));
-		//qDebug() << "Vertices inserted " << item << item + "_plane";
-		i++;
+	
+	//compute connected components
+	ComponentMap cm;
+	ConnectedComponents components = connectedComponents(cm);
+	QString color;
+	
+	for(auto comp : components)
+	{
+		color = "#A0A0A0";
+		for(auto elem : comp.second)
+		{			
+			item = "g_" + QString::number(i);
+			QString  parentT = QString("g_") + QString::number(i);
+			InnerModelDraw::addTransform(innerViewer, parentT, "graph");
+			innerViewer->innerModel->updateTransformValues(parentT, graph[elem].pose.x(), 10, graph[elem].pose.z(), 0,0,0);
+			InnerModelDraw::addPlane_ignoreExisting(innerViewer, item + "_plane", parentT, QVec::vec3(0,0,0), QVec::vec3(0,1,0), 
+																					color, QVec::vec3(60,60,10));
+			i++;
+		}
 	}
+	
+// 	BGL_FORALL_VERTICES(v, graph, Graph)
+//   {
+// 		item = "g_" + QString::number(i);
+// 		QString  parentT = QString("g_") + QString::number(i);
+// 		InnerModelDraw::addTransform(innerViewer, parentT, "graph");
+// 		innerViewer->innerModel->updateTransformValues(parentT, graph[v].pose.x(), 10, graph[v].pose.z(), 0,0,0);
+// 		InnerModelDraw::addPlane_ignoreExisting(innerViewer, item + "_plane", parentT, QVec::vec3(0,0,0), QVec::vec3(0,1,0), 
+// 																						"#00A0A0", QVec::vec3(60,60,10));
+// 		i++;
+// 	}
 
 	i=0;
 	BGL_FORALL_EDGES(e, graph, Graph)
@@ -1086,8 +1112,10 @@ bool PlannerPRM::drawGraph(InnerModelViewer *innerViewer)
 
 		QString  parentTE = QString("ge_") + QString::number(i);
 		InnerModelDraw::addTransform(innerViewer, parentTE, "graph");
-		innerViewer->innerModel->updateTransformValues(parentTE, p1.x()+center.x(), p1.y()+center.y(), p1.z()+center.z(),  0, QLine2D(p1,p2).getAngleWithZAxis()+M_PI/2, 0 );
-		InnerModelDraw::addPlane_ignoreExisting(innerViewer, QString("ge_")+QString::number(i)+"_plane", parentTE, QVec::vec3(0,0,0), QVec::vec3(0,1,0), "#00A0A0", QVec::vec3((p1-p2).norm2(), 15 , 15));
+		innerViewer->innerModel->updateTransformValues(parentTE, p1.x()+center.x(), p1.y()+center.y(), p1.z()+center.z(), 
+																									 0, QLine2D(p1,p2).getAngleWithZAxis()+M_PI/2, 0 );
+		InnerModelDraw::addPlane_ignoreExisting(innerViewer, QString("ge_")+QString::number(i)+"_plane", parentTE, QVec::vec3(0,0,0), 
+																						QVec::vec3(0,1,0), "#00A0A0", QVec::vec3((p1-p2).norm2(), 15 , 15));
 		i++;
 	}
 	return true;
