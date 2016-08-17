@@ -336,7 +336,9 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 	}
 	if (myRoad.isFinished() == true)
 	{
+		myRoad.setFinished(true);
 		planner->learnPath(myRoad.backList);
+		planner->drawGraph(innerViewer);
 		if( target.hasRotation() )
 		{
 			qDebug() << __FUNCTION__ << "Changing to SETHEADING command";

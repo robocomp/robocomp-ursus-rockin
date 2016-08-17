@@ -68,10 +68,11 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
 		outerRegion.setTop( upperLeft.z() + floor->point.z() );
 		*/
  		outerRegion.setLeft( 0 );
- 		outerRegion.setRight( 7000  );
+ 		outerRegion.setRight( 6000  );
  		outerRegion.setBottom( -4250 );
  		outerRegion.setTop( 4250 );
-	}	
+		
+		}	
 	catch (QString err)
 	{
  		  qDebug() << __FUNCTION__<< "Aborting. We need a plane named 'floor_plane' in InnerModel.xml";
