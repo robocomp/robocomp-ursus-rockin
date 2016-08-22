@@ -46,7 +46,7 @@ class PlannerOMPL : public QObject
 		PlannerOMPL(InnerModel *innerModel_, QObject *parent=0);
 		bool setPath(const QVec& origin, const QVec &target);
 		bool computePath(const QVec& origin, const QVec& target, int maxTime);
-		void initialize(Sampler *sampler);
+		void initialize(Sampler* sampler);
 		ob::PlannerStatus getPlanState();
 		QList<QVec> getPath() { return currentPath; }
 		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax)		{xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;};

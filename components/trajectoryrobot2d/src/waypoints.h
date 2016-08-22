@@ -71,9 +71,8 @@ class WayPoints : public QList< WayPoint >
 		bool draw(InnerModelViewer *innerViewer, InnerModel *innerModel, const CurrentTarget &currentTarget);  //Default in upTo means all list
 		void clearDraw(InnerModelViewer *innerViewer);
 		QList<QVec> backList;
-		bool update();
+		void update();
 		
-		//GOOD ONES
 		float robotDistanceToCurrentPoint(InnerModel *innerModel);
 		float robotDistanceToNextPoint(InnerModel *innerModel);
 		WayPoint const getCurrentPoint() const 												{return (*this)[currentPointIndex];};

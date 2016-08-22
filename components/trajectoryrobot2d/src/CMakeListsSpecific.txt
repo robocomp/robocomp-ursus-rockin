@@ -9,6 +9,7 @@ SET ( SOURCES
   waypoints.cpp
   localizer.cpp
   plannerompl.cpp
+  #plannerthunder.cpp
   currenttarget.cpp
   plannerprm.cpp
   sampler.cpp
@@ -23,7 +24,7 @@ SET ( HEADERS
   plannerompl.h
 )
 
-find_package(OMPL)
+#find_package(OMPL)
 
 SET (LIBS ${LIBS} -losgViewer)
 

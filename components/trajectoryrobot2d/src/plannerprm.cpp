@@ -25,94 +25,47 @@
  * @param neigh ...
  * @param parent ...
  */
-PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObject *parent)
+PlannerPRM::PlannerPRM()
 {	
-	innerModel = innerModel_;
-	
 	//Number of points in graph
-	graphNumPoints = nPoints;
+	//graphNumPoints = nPoints;
 	
 	//Number of neighbours in the graph
-	graphNeighPoints = neigh;
+	//graphNeighPoints = neigh;
 	
-	//file name
-	fileName = "grafo.dot";
+	//Default file name
 	
-	//Get outerRegion extension from floor definition
-	InnerModelPlane *floor = NULL;
-	try
-	{		
-		floor = innerModel->getPlane("floor_plane");  ///TIENE QUE HABER UN FLOOR_PLANE
-		qDebug() << __FUNCTION__ << "Floor_plan dimensions: " << floor->width << "W" << floor->height << "H";
-			//QVec center = innerModel->transform("world", QVec::zeros(3), "floor");
-		
-		QVec upperLeft = innerModel->transform("world", QVec::vec3(floor->width/2, 0, floor->height/2), "floor");
-		QVec downRight = innerModel->transform("world", QVec::vec3(-floor->width/2, 0, -floor->height/2), "floor");
-		
-		//QVec upperLeft = innerModel->transform("world",QVec::vec3(center.x() - floor->width/2, center.y(), center.z() + floor->height/2), "floor");
-		//QVec downRight = innerModel->transform("world",QVec::vec3(center.x() + floor->width/2, center.y(), center.z() - floor->height/2), "floor");
-		qDebug() << __FUNCTION__ << "QRect representation:";
-		upperLeft.print("UL");
-		downRight.print("DR");
-		
-		outerRegion.setLeft( upperLeft.x() );
-		outerRegion.setRight( downRight.x());
-		outerRegion.setBottom( downRight.z() );
-		outerRegion.setTop( upperLeft.z() );
-		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
-		
-		/*
-		outerRegion.setLeft( upperLeft.x() + floor->point.x() );
-		outerRegion.setRight( downRight.x() + floor->point.x() );
-		outerRegion.setBottom( downRight.z() + floor->point.z() );
-		outerRegion.setTop( upperLeft.z() + floor->point.z() );
-		*/
- 		outerRegion.setLeft( 0 );
- 		outerRegion.setRight( 6000  );
- 		outerRegion.setBottom( -4250 );
- 		outerRegion.setTop( 4250 );
-		
-		}	
-	catch (QString err)
-	{
- 		  qDebug() << __FUNCTION__<< "Aborting. We need a plane named 'floor_plane' in InnerModel.xml";
-   		throw err;
-	}
-		
-	// for Rocking apartment                         y = x       x = -y
-// 	innerRegions << QRectF(-6000,-5000, 12000, 1000) << QRectF(-6000, -2700, 2900, 3500)
-// 				 << QRectF(6000, 0, -2900 , -5000) << QRectF(4500, 5000, 1800, -10000)<< QRectF(-1800, 3000, 7800, 2000);// << QRectF(-200, -200, 1800, -5000);
+}
 
-	////////////////////////
-	/// Initialize sampler of free space
-	////////////////////////
-	sampler.initialize(innerModel, outerRegion, innerRegions);
+void PlannerPRM::initialize(Sampler* sampler_, int nPointsInGraph, int nNeighboursInGraph)
+{
+	sampler = sampler_;
 	
 	////////////////////////
 	/// Initialize RRTplaner
 	////////////////////////
-	plannerRRT.initialize(&sampler); 
+	plannerRRT.initialize(sampler); 
+	 
 	
 	////////////////////////
-	/// Check if gaph already exists
+	/// Check if graph already exists
 	////////////////////////
-	if( QFile("grafo.dot").exists())
+	if( QFile(fileName).exists())
 	{
 		qDebug() << __FUNCTION__ << "Graph file exits. Loading";
 		readGraphFromFile("grafo.dot");
 	}
 	else
 	{
-		qDebug() << __FUNCTION__ << "Graph file DOES NOT exit. Creating with " << nPoints << "nodes and " << neigh << "neighboors";
-		QList<QVec> pointList = sampler.sampleFreeSpaceR2(nPoints);
-			
-  	constructGraph(pointList, neigh, 3500.f, 500);  ///GET From IM ----------------------------------
-		std::ofstream fout(fileName);
+		qDebug() << __FUNCTION__ << "Graph file DOES NOT exit. Creating with " << nPointsInGraph << "nodes and " 
+						 << nNeighboursInGraph << "neighboors";
+		QList<QVec> pointList = sampler->sampleFreeSpaceR2(nPointsInGraph);
+  	constructGraph(pointList, nNeighboursInGraph, 3500.f, 500);  ///GET From IM ----------------------------------
+		std::ofstream fout(fileName.toStdString());
 		writeGraphToStream(fout);
 	}
 	graphDirtyBit = true;
 }
-
 /**
  * @brief Main callable method. Computes a path for the robot given a target pose and a point to Innermodel. inner is used to synchronize the current copy of Innermodel.
  * This is done so the planner can ran as a thread in the future.
@@ -122,16 +75,17 @@ PlannerPRM::PlannerPRM(InnerModel *innerModel_, uint nPoints, uint neigh,  QObje
  * @return true if a path of at least two waypoints have been found. Path is written to class variable currentPath.
  * Additional chekcs on max and min lenght for the path should be applied
  */
-bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
+bool PlannerPRM::computePath(QVec& target, InnerModel* innerModel)
 {
-	QVec robot = inner->transform("world","robot");
-	QVec robotRotation = inner->getRotationMatrixTo("world", "robot").extractAnglesR_min();
+	QVec robot = innerModel->transform("world","robot");
+	QVec robotRotation = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min();
+	
  	qDebug() << __FUNCTION__ << "Starting planning with robot at:" << robot <<  "and target at:" << target;
 
 	/////////////////////////////////////////////
 	//If robot on obstacle we can¡t proceed
 	/////////////////////////////////////////////
-	if( sampler.checkRobotValidStateAtTarget(robot, robotRotation) == false)
+	if( std::get<bool>(sampler->checkRobotValidStateAtTarget(robot, robotRotation)) == false)
 	{
 		qDebug() << __FUNCTION__ << "Robot collides in origin. Aborting planner";  
 		return false;
@@ -140,7 +94,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	/////////////////////////////////////////////
 	//If target on obstacle find a point close to it on the robot-target line. For now returns
 	/////////////////////////////////////////////
-	if( sampler.searchRobotValidStateCloseToTarget(target) == false )
+	if( sampler->searchRobotValidStateCloseToTarget(target) == false )
 	{
 		qDebug() << __FUNCTION__ << "Robot collides in target. Aborting planner";  //Should search a next obs-free target
 		return false;
@@ -149,7 +103,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	////////////////////////////////////////////
 	// PLanner uses another instance of InnerModel to plan so we resynchronize both before initiate planning
 	////////////////////////////////////////////
-	innerModel->updateTransformValues("robot", robot.x(), robot.y(), robot.z(), robotRotation.x(), robotRotation.y(), robotRotation.z());
+	//innerModel->updateTransformValues("robot", robot.x(), robot.y(), robot.z(), robotRotation.x(), robotRotation.y(), robotRotation.z());
 
 	//Clean former path
 	currentPath.clear();
@@ -157,7 +111,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	/////////////////////////////////////////////
 	//Check if the target is in "plain sight"
 	/////////////////////////////////////////////
-	if ( sampler.checkRobotValidDirectionToTargetOneShot( robot, target) )
+	if ( sampler->checkRobotValidDirectionToTargetOneShot( robot, target) )
 	{
  		qDebug() << __FUNCTION__ << "Target on sight. Proceeding";
 		currentPath << robot << target;
@@ -178,7 +132,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	// Check if the closest point in the graph is in "plain sight"
 	// Otherwise call the planner
 	/////////////////////////////////////////////
-	if ( sampler.checkRobotValidDirectionToTargetOneShot( robot, graph[robotVertex].pose) )
+	if ( sampler->checkRobotValidDirectionToTargetOneShot( robot, graph[robotVertex].pose) )
 	{
  		qDebug() << __FUNCTION__ << "Closest point to robot in graph is ON sight";
 		currentPath << robot << graph[robotVertex].pose;
@@ -237,7 +191,7 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	// Check if the closest point in the graph to the TARGET is in "plain sight".
 	// Otherwise call the planner
 	////////////////////////////////////////////////////////////7
-	if ( sampler.checkRobotValidDirectionToTargetOneShot( graph[targetVertex].pose, target ))
+	if ( sampler->checkRobotValidDirectionToTargetOneShot( graph[targetVertex].pose, target ))
 	{
  		qDebug() << __FUNCTION__ << "Closest point to target in graph ON sight";
 		currentPath << target << graph[targetVertex].pose;
@@ -266,21 +220,8 @@ bool PlannerPRM::computePath(QVec& target, InnerModel* inner)
 	/////////////////////////////////////
 	// Smoothing
 	/////////////////////////////////////
-	qDebug() << __FUNCTION__ << "Smoothing";
-	if( currentPath.size() < 2 )
-		return false;
-	else
-	{
-		currentSmoothedPath.clear();
-// 		qDebug() << __FUNCTION__ << "Smoothing";
-		smoothPath(currentPath);
-		currentPath = currentSmoothedPath;
-//  		qDebug() << __FUNCTION__ << "Final path size " << currentPath.size();
-// 		constructGraph(currentPath);
-
-		return true;
-	}
-
+	pathSmoother(currentPath);
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -301,7 +242,7 @@ bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec>
 	}
 
 	QVec point;
-	if (sampler.checkRobotValidDirectionToTargetOneShot( origin, target ))
+	if (sampler->checkRobotValidDirectionToTargetOneShot( origin, target ))
 	{
 		qDebug() << __FUNCTION__ << "Found target directly in line of sight. Returning trivial path";
 		path << origin << target;
@@ -443,7 +384,7 @@ ConnectedComponents PlannerPRM::connectedComponents(ComponentMap &componentMap, 
 
   int numComps = boost::connected_components(graph, compIterMap, vertex_index_map(index));
 
-	std::cout << __FUNCTION__ << " Number of connected components " << numComps << std::endl;
+	//std::cout << __FUNCTION__ << " Number of connected components " << numComps << std::endl;
 
 	//Create a nice data structure to return info
 	ConnectedComponents compList(numComps);
@@ -472,7 +413,7 @@ ConnectedComponents PlannerPRM::connectedComponents(ComponentMap &componentMap, 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-/// Elementary learning operations
+/// Graph operations
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -546,7 +487,7 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 				QVec lastPoint;
 				const QVec iiv = QVec::vec3(data(0,i), data(1,i), data(2,i));
 				const QVec ijdie = QVec::vec3(data(0,indKI), data(1,indKI), data(2,indKI));
-				reachEnd = sampler.checkRobotValidDirectionToTargetOneShot(iiv, ijdie);
+				reachEnd = sampler->checkRobotValidDirectionToTargetOneShot(iiv, ijdie);
 				//qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
 
 				// If free path to neighboor, insert it in the graph
@@ -657,7 +598,7 @@ bool PlannerPRM::connectIsolatedComponents(int32_t &numConnections)
 		Vertex v = vertexMapL.value(indicesL(0,i));
 		Vertex vv = vertexMapLL.value(i);
 		qDebug() << __LINE__;
-		if( sampler.checkRobotValidDirectionToTargetOneShot( graph[v].pose , graph[vv].pose) )
+		if( sampler->checkRobotValidDirectionToTargetOneShot( graph[v].pose , graph[vv].pose) )
 		{
 			qDebug() << "aqui";
 			EdgePayload edge;
@@ -676,8 +617,8 @@ bool PlannerPRM::connectIsolatedComponents(int32_t &numConnections)
 
 // 	//sample a few points aronud closestPose. a Gaussian sample would be better
 // 	const uint32_t MAX_POINTS = 5;
-// 	//QList<QVec> pList = sampler.sampleFreeSpaceR2Uniform( QRectF(10, 20, 50, 70), MAX_POINTS);
-// 	QList<QVec> pList = sampler.sampleFreeSpaceR2Gaussian(closestPose.x(), closestPose.z(), sqrt(minDist),sqrt(minDist), MAX_POINTS);
+// 	//QList<QVec> pList = sampler->sampleFreeSpaceR2Uniform( QRectF(10, 20, 50, 70), MAX_POINTS);
+// 	QList<QVec> pList = sampler->sampleFreeSpaceR2Gaussian(closestPose.x(), closestPose.z(), sqrt(minDist),sqrt(minDist), MAX_POINTS);
 
 	//try to join random points form both components
 
@@ -863,10 +804,6 @@ void PlannerPRM::readGraphFromFile(QString name)
 	connectedComponents(cm);
 }
 
-void PlannerPRM::setInnerModel(InnerModel *innerModel_)
-{
-	innerModel = new InnerModel(*innerModel_);
-}
 
 ////////////////////////////////////////////////////////////////////////
 /// LEARNERS
@@ -899,7 +836,7 @@ bool PlannerPRM::learnForAWhile()
 	ind  = cola[iter++%10];
 	switch (ind) {
  		case 0:
- 			points = sampler.sampleFreeSpaceR2( 5 );
+ 			points = sampler->sampleFreeSpaceR2( 5 );
 			pointsAdded = constructGraph(points);
 			break;
 		case 1:
@@ -952,7 +889,6 @@ bool PlannerPRM::learnForAWhile()
 	//remember
 	std::ofstream fout("grafo.dot");
 	writeGraphToStream(fout);
-
 	return true;
 }
 
@@ -997,6 +933,16 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
 ////////////////////////////////////////////////////////////////////////
 /// SMOOTHERS
 ////////////////////////////////////////////////////////////////////////
+bool PlannerPRM::pathSmoother(QList<QVec> & pointList)
+{
+	currentSmoothedPath.clear();
+	qDebug() << __FUNCTION__ << "number of points " << pointList.size();
+	smoothPath(pointList);
+	qDebug() << __FUNCTION__ << "number of points " << currentSmoothedPath.size();
+	
+	pointList = currentSmoothedPath;
+	return true;
+}
 
 /**
  * @brief Fast recursive smoother that takes a list of poses and returns a safe shorter path free of collisions.
@@ -1007,7 +953,8 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
 void PlannerPRM::smoothPath( const QList<QVec> & list)
 {
 	qDebug() << __LINE__;
-	if ( sampler.checkRobotValidDirectionToTargetOneShot( list.first(), list.last()) )
+	
+	if ( sampler->checkRobotValidDirectionToTargetOneShot( list.first(), list.last()) )
 	{
 		if(currentSmoothedPath.contains(list.first()) == false)
 		  currentSmoothedPath.append(list.first());
@@ -1027,6 +974,7 @@ void PlannerPRM::smoothPath( const QList<QVec> & list)
 
 void PlannerPRM::smoothPathIter(QList<QVec> & list)
 {
+	
 
 	//pick two ordered points and check free path between them
 	int tam = list.size()*3;
@@ -1040,7 +988,7 @@ void PlannerPRM::smoothPathIter(QList<QVec> & list)
 		QList<QVec>::iterator itt = list.begin()+second;
 
 		qDebug() << __LINE__;
-		if ( sampler.checkRobotValidDirectionToTargetOneShot( *it, *itt ))
+		if ( sampler->checkRobotValidDirectionToTargetOneShot( *it, *itt ))
 		{
 			for(QList<QVec>::iterator ir = it + 1; ir != itt-1; ++ir)
 			{
@@ -1137,20 +1085,22 @@ void PlannerPRM::removeGraph(InnerModelViewer* innerViewer)
   
 }
 
-/**
- * @brief Creates a grpah if it does not exist
- * 
- * @return void
- */
-void PlannerPRM::createGraph()
-{
-	sampler.initialize(innerModel, outerRegion, innerRegions);
-	QList<QVec> pointList = sampler.sampleFreeSpaceR2(graphNumPoints);
-	qDebug() << __FUNCTION__ << "constructing new graph";
-	constructGraph(pointList,graphNeighPoints, 2500.f, 400);
-	std::ofstream fout(fileName);
-	writeGraphToStream(fout);
-}
+// /**
+//  * @brief Creates a grpah if it does not exist
+//  * 
+//  * @return void
+//  */
+// void PlannerPRM::createGraph()
+// {
+// 	//remove this, sampler must be up  and running
+// 	//sampler->initialize(innerModel, outerRegion, innerRegions);
+// 	
+// 	QList<QVec> pointList = sampler->sampleFreeSpaceR2(graphNumPoints);
+// 	qDebug() << __FUNCTION__ << "constructing new graph";
+// 	constructGraph(pointList,graphNeighPoints, 2500.f, 400);
+// 	std::ofstream fout(fileName);
+// 	writeGraphToStream(fout);
+// }
 // std::tuple<std::vector<Vertex>, QMap<u_int32_t, VertexIndex> > PlannerPRM::connectedComponents()
 // {
 // 	qDebug() << __FUNCTION__;

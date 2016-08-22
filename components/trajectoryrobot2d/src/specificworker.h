@@ -28,7 +28,10 @@
 #include "localizer.h"
 #include "plannerompl.h"
 #include "plannerprm.h"
+//#include "plannerthunder.h"
+
 #include "currenttarget.h"
+#include "sampler.h"
 
 //#include "ParabolicPathSmooth/smoother.h"
 
@@ -84,6 +87,7 @@ class TrajectoryState
 		long planningTime;
 		std::string state;
 };
+
 class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
@@ -117,29 +121,46 @@ private:
 	CurrentTarget currentTargetAnt, currentTargetBack;
 	
 	InnerModel *innerModel;
+	
+	//Sampler of robot's freespace
+	Sampler sampler;
+	QList<QRectF> innerRegions;
+	QRectF outerRegion;
 
 	QVec target;
 	QTime taskReloj;
 	QMutex mutex_inner,mutex_command; //mutex_inner es TEMPORAL HASTA QUE INNERMODEL TENGA SU PROPIO MUTEX
- 	
-	QVec P;
-	WayPoints road;
-	Controller *controller;
-	ElasticBand *elasticband;
-	PlannerOMPL *plannerOMPL;
-	PlannerPRM *plannerPRM, *planner;
-	Localizer *localizer;
+ 	QVec P;
 	
+	// Roas structure
+	WayPoints road;
+	
+	// Controller
+	Controller *controller;
+	
+	// road-world interaction through a force field (laser)
+	ElasticBand *elasticband;
+	
+	PlannerOMPL *plannerOMPL;
+	
+	// Access to OMPL planners
+	PlannerPRM plannerPRM;
+	
+	//Localizer *localizer;
+	
+	QTime relojForInputRateControl;
 	
 	bool removeNode(const QString &item);
 	void addPlane(QString item, QString parent, QString path, QVec scale, QVec t, QVec r);
 
-//Commands correspondign to servant methods, but running on local thread
+	//Commands correspondign to servant methods, but running on local thread
 	bool gotoCommand(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &state, WayPoints& myRoad, RoboCompLaser::TLaserData &lData);
 	bool setHeadingCommand(InnerModel* innerModel, float alfa, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad);
 	bool stopCommand( CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state);
 	bool changeTargetCommand(InnerModel* innerModel, CurrentTarget& target,  TrajectoryState &stat, WayPoints& myRoad);
 	bool goBackwardsCommand(InnerModel* innerModel, CurrentTarget& current,CurrentTarget &currentT, TrajectoryState& state, WayPoints& myRoad);
+	bool learnCommand(CurrentTarget &target,const WayPoints& myRoad);
+	
 	bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
 	bool insertObstacle();
 	
@@ -155,8 +176,6 @@ private:
 
 	void mapBasedTarget(const NavigationParameterMap  &parameters);
 	
-	void publicarROS();
-
 #ifdef USE_QTGUI
 	OsgView *osgView;
 	InnerModelViewer *innerViewer;

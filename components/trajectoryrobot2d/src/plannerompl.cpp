@@ -58,6 +58,7 @@ ob::ValidStateSamplerPtr PlannerOMPL::allocOBValidStateSampler(const ob::SpaceIn
 	return ob::ValidStateSamplerPtr(new ob::ObstacleBasedValidStateSampler(si));
 }
 
+//void PlannerOMPL::initialize(const Sampler &sampler )
 void PlannerOMPL::initialize(Sampler *sampler )
 {
 	QRectF outerRegion = sampler->getOuterRegion();
@@ -65,6 +66,7 @@ void PlannerOMPL::initialize(Sampler *sampler )
 	xMax = outerRegion.right();
 	zMin = outerRegion.bottom();
 	zMax = outerRegion.top();
+	
 	//Create state space as R2
 	ob::RealVectorStateSpace *space = new ob::RealVectorStateSpace();
 	space->addDimension(xMin, xMax);
@@ -78,7 +80,6 @@ void PlannerOMPL::initialize(Sampler *sampler )
 	
 	// set state validity checking for this space
 
-	//simpleSetUp->setStateValidityChecker(boost::bind(&PlannerOMPL::isStateValid, this, _1));
 	simpleSetUp->setStateValidityChecker(boost::bind(&Sampler::isStateValid, sampler, _1));
 	space->setup();
 	
@@ -113,7 +114,6 @@ bool PlannerOMPL::setPath(const QVec& origin, const QVec &target)
 bool PlannerOMPL::computePath(const QVec& origin, const QVec &target, int maxTime)  //maxTime in seconds
 {	
 
-	
 	simpleSetUp->clear();
 	ob::ScopedState<> start(simpleSetUp->getStateSpace());
 	start[0] = origin.x();	start[1] = origin.z();

@@ -446,60 +446,74 @@ void WayPoints::setETA()
  *
  * @return void
  */
-bool WayPoints::update()
+void WayPoints::update()
 {
-
+	//////////////////////////////////////////////////////
 	//Get robot's position in world and create robot's nose
+	//////////////////////////////////////////////////////
 	QVec robot3DPos = innerModel->transform("world", "robot");
 	QVec noseInRobot = innerModel->transform("world", QVec::vec3(0,0,1000), "robot");
 	QLine2D nose =  QLine2D(  QVec::vec2(robot3DPos.x(),robot3DPos.z()), QVec::vec2(noseInRobot.x(), noseInRobot.z()));
-
+	
+	////////////////////////////////////////////////////
 	//Compute closest existing trajectory point to robot
-		if(getRobotDistanceToTarget() < 1000)
+	///////////////////////////////////////////////////
+	if(getRobotDistanceToTarget() < 1000)
 	{
 		robot3DPos = innerModel->transform("world", "virtualRobot");
 	}
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 
-	//Compute roadTangent at closestPoint;
-	//qDebug() << __FILE__  << __FUNCTION__ << "just here"  << getRobotDistanceToClosestPoint();
-// 	if(closestPoint == this->end())
-// 	{
-// 		qDebug("fary en Compute Forces");
-// 		return false;
-// 	}
-
+	///////////////////////////////////////
+	//Compute roadTangent at closestPoint
+	///////////////////////////////////////
 	QLine2D tangent = computeTangentAt( closestPoint );
 	setTangentAtClosestPoint(tangent);
 
+	//////////////////////////////////////////////////////////////////////////////
 	//Compute signed perpenduicular distance from robot to tangent at closest point
+	///////////////////////////////////////////////////////////////////////////////
 	setRobotPerpendicularDistanceToRoad( tangent.perpendicularDistanceToPoint(robot3DPos) );
+	
+	////////////////////////////////////////////////////
+	//Compute signed angle between nose and tangent at closest point
+	////////////////////////////////////////////////////
 	float ang = nose.signedAngleWithLine2D( tangent );
 	if (std::isnan(ang))
 		ang = 0;
  	setAngleWithTangentAtClosestPoint( ang );
 
-	//Compute distanceToTarget along trajectory
-  	setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );  //computes robotDistanceVariationToTarget
+	/////////////////////////////////////////////
+	//Compute distance to target along trajectory
+	/////////////////////////////////////////////
+  setRobotDistanceToTarget( computeDistanceToTarget(closestPoint, robot3DPos) );  //computes robotDistanceVariationToTarget
 	setRobotDistanceVariationToTarget( robotDistanceVariationToTarget);
 
+	//////////////////////////////////
 	//Update estimated time of arrival
+	//////////////////////////////////
 	setETA();
 
-	//Check for arrival to target  TOO SIMPLE
-// 	if(	( ((int)getCurrentPointIndex()+1 == (int)size())  and  ( (int)getCurrentPointIndex()+1< 80) )
-	if(((((int)getCurrentPointIndex()+1 == (int)size())  or  ( getRobotDistanceToTarget()< 100) ))
-		or ( (getRobotDistanceToTarget() < 300) and ( getRobotDistanceVariationToTarget() > 0) ) )
-	{
+	////////////////////////////////////////////////////////////
+	//Compute curvature of trajectory at closest point to robot
+	////////////////////////////////////////////////////////////
+  setRoadCurvatureAtClosestPoint( computeRoadCurvature(closestPoint, 3) );
 	
-		setFinished(true);		
-//		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
-// 		getIndexOfClosestPointToRobot()->pos.print("closest point");
-	}
-
-	//compute curvature of trajectory at closest point to robot
-  	setRoadCurvatureAtClosestPoint( computeRoadCurvature(closestPoint, 3) );
+	////////////////////////////////////////////////////////////
+	//Compute distance to last road point visible with laser field
+	////////////////////////////////////////////////////////////
 	setRobotDistanceToLastVisible( computeDistanceToLastVisible(closestPoint, robot3DPos ) );
-	return true;
+	
+		///////////////////////////////////////////
+	//Check for arrival to target (translation)  TOO SIMPLE
+	///////////////////////////////////////////
+	if(((((int)getCurrentPointIndex()+1 == (int)size())  or  
+		( getRobotDistanceToTarget()< 50) ))	or 
+		( (getRobotDistanceToTarget() < 100) and ( getRobotDistanceVariationToTarget() > 0) ) )
+	{
+		setFinished(true);		
+	//		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
+	// 		getIndexOfClosestPointToRobot()->pos.print("closest point");
+	}
 }
 
