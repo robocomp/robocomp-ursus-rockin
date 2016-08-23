@@ -96,9 +96,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	innerModel->updateRotationValues("robot", 0, bState.correctedAlpha, 0);
 	innerModel->newTransform("virtualRobot","static",innerModel->getNode("robot"));
 	
-	//	setRobotInitialPose(800, -1500, M_PI);
-	//	baseOffsets = computeRobotOffsets(innerModel, laserData);
-
 	//////////////////////////////////////
 	/// Initialize sampler of free space
 	/////////////////////////////////////
@@ -179,10 +176,9 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 void SpecificWorker::compute( )
 {
 	static QTime reloj = QTime::currentTime();
+	static QTime learnReloj = QTime::currentTime();
 	static int cont = 0;
-	
-	//InnerModelDraw::addPlane_ignoreExisting(innerViewer, "target", "world", QVec::vec3(2000, 500, 1000), QVec::vec3(1,0,0), "#990000", QVec::vec3(100,100,100));
-	
+		
 	// Check for connection failure
 	if ( updateInnerModel(innerModel, tState) == false )
 	{
@@ -215,13 +211,18 @@ void SpecificWorker::compute( )
 			insertObstacle();
 			break;
 		case CurrentTarget::State::IDLE:
+			if( learnReloj.elapsed() > 3000 )
+			{
+				if( plannerPRM.learnForAWhile(150, true) ) //Max number of nodes in the graph
+					plannerPRM.drawGraph(innerViewer);
+				learnReloj.restart();
+			}
 			break;
 	}
 
-	if(reloj.elapsed() > 2000)	//to draw only every 2 secs
+	if(reloj.elapsed() > 3000)	//to draw only every 2 secs
 	{
 		#ifdef USE_QTGUI
-				road.clearDraw(innerViewer);
 				road.draw(innerViewer, innerModel, currentTarget);
 		#endif
 		qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed()/cont << "State. Robot at:" << innerModel->transform("world","robot");
@@ -319,7 +320,7 @@ bool SpecificWorker::gotoCommand(InnerModel* innerModel, CurrentTarget& target, 
 	{
 		controller->stopTheRobot(omnirobot_proxy);
 		qDebug() << __FUNCTION__ << "Changing to SETHEADING command";
-		target.setState(CurrentTarget::State::LEARNPATH);
+		target.setState(CurrentTarget::State::SETHEADING);
 	}
 	if(myRoad.isBlocked() == true)
 	{
@@ -524,10 +525,10 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 
 bool SpecificWorker::learnCommand(CurrentTarget &target, const WayPoints &myRoad)
 {
-		plannerPRM.learnPath(myRoad.backList);
-		#ifdef USE_QTGUI
-			plannerPRM.drawGraph(innerViewer);
-		#endif
+// 		plannerPRM.learnPath(myRoad.backList);
+// 		#ifdef USE_QTGUI
+// 			plannerPRM.drawGraph(innerViewer);
+// 		#endif
 		target.setState(CurrentTarget::State::SETHEADING);
 		return true;
 }
@@ -623,7 +624,6 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 	///////////////////////////////////////////////
 	// Check if robot is inside limits and not in collision.
 	///////////////////////////////////////////////	
-	QString diagnosis;
 	auto r = sampler.checkRobotValidStateAtTarget( targetT, targetRot);
 	if( std::get<bool>(r) == false)
 	{
@@ -649,16 +649,19 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 	// Let's see what these guys want
 	// Everything here must be thread safe
 	///////////////////////////////////////////////	
-	innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");
-	InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,1000,50));
+	
+	//CHECK IF ALL THESE TWO ARE THREAD SAFE
+	
+	//innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");
+	//InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,1000,50));
 	
 	tState.setState("EXECUTING");
-	road.setThreshold(threshold);
+	//road.setThreshold(threshold);
 	currentTarget.reset( targetT , targetRot);
 	currentTarget.setState(CurrentTarget::State::GOTO);
 	if( target_.doRotation == true)
 		currentTarget.setHasRotation(true);
-	drawTarget(targetT);
+	//drawTarget(targetT);
 	taskReloj.restart();
 	return (robotT - targetT).norm2();
 	
@@ -807,7 +810,7 @@ void SpecificWorker::drawTarget(const QVec& target)
 #ifdef USE_QTGUI
 	//Draw target as red box
 	QMutexLocker ml(&mutex_inner);
-	InnerModelDraw::addPlane_ignoreExisting(innerViewer, "target", "world", QVec::vec3(target(0), 5, target(2)), QVec::vec3(1,0,0), "#990000", QVec::vec3(80,80,80));
+	InnerModelDraw::addPlane_ignoreExisting(innerViewer, "target", "world", QVec::vec3(target(0), 5, target(2)), QVec::vec3(1,0,0), "#990000", QVec::vec3(80,80,80));	
 #endif
 }
 

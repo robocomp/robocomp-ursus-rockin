@@ -216,6 +216,7 @@ void WayPoints::print() const
 
 bool WayPoints::draw(InnerModelViewer *innerViewer, InnerModel *innerModel, const CurrentTarget &currentTarget)
 {
+	clearDraw(innerViewer);
 	if (size() == 0) return false;
 	InnerModelDraw::addTransform_ignoreExisting(innerViewer, "road", "world");
 	
@@ -386,7 +387,7 @@ float WayPoints::computeDistanceToLastVisible(WayPoints::iterator closestPoint, 
 }
 
 /**
- * @brief Computes the distance to the Target along the road
+ * @brief Computes the distance to the Target along the road starting at closestPoint
  *
  * @param road ...
  * @param robotPos ...
@@ -405,6 +406,25 @@ float WayPoints::computeDistanceToTarget(WayPoints::iterator closestPoint, const
 	antDist = distE;
 	return dist;
 }
+
+
+/**
+ * @brief Computes distance between two points along the road 
+ * 
+ * @param firstPoint ...
+ * @param secondPoint ...
+ * @return float distance (-1 if it could not be computed)
+ */
+float WayPoints::computeDistanceBetweenPointsAlongRoad(WayPoints::iterator firstPoint, WayPoints::iterator secondPoint)
+{
+	float dist = 0.f;
+	for( WayPoints::iterator it = firstPoint; it != secondPoint; ++it)
+	{
+		dist += (it->pos - (it+1)->pos).norm2();
+	}
+	return dist;
+}
+
 
 /**
  * @brief Compute angle between current and next segment using the cross product

@@ -46,6 +46,7 @@
        @author authorname
 */
 
+
 /**
  * @brief ...Auxiliary class to keep the state of the algorithm and make it accesible to the middleware
  * 
@@ -88,101 +89,100 @@ class TrajectoryState
 		std::string state;
 };
 
+
 class SpecificWorker : public GenericWorker
 {
-Q_OBJECT
-public:
-	SpecificWorker(MapPrx& mprx, QWidget *parent = 0);
-	~SpecificWorker();
-			
-	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	void setHeadingTo(const TargetPose& target);
-	RoboCompTrajectoryRobot2D::NavState	getState();
-	
-	float goBackwards(const TargetPose &target);
-	void stop();
-	float goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold);
-	float changeTarget(const TargetPose &target);
-	float go(const TargetPose &target);
+	Q_OBJECT
+	public:
+		SpecificWorker(MapPrx& mprx, QWidget *parent = 0);
+		~SpecificWorker();
+		bool setParams(RoboCompCommonBehavior::ParameterList params);
 		
-public slots:
- 	void	compute(); 	
-	
-private:
-	//RoboCompDifferentialRobot::TBaseState 	bState;
-	RoboCompOmniRobot::TBaseState bState;
-	//RoboCompTrajectoryRobot2D::NavState compState;
-	TrajectoryState tState;
-	RoboCompCommonBehavior::ParameterList params;
-	RoboCompLaser::TLaserData laserData;
-	RoboCompLaser::TLaserData datos;
+		//////////
+		//SERVANTS
+		//////////
+		RoboCompTrajectoryRobot2D::NavState	getState();
+		float goBackwards(const TargetPose &target);
+		void stop();
+		void setHeadingTo(const TargetPose& target);
+		float goReferenced(const TargetPose &target, const float xRef, const float zRef, const float threshold);
+		float changeTarget(const TargetPose &target);
+		float go(const TargetPose &target);
+			
+	public slots:
+		void	compute(); 	
+		
+	private:
+		RoboCompOmniRobot::TBaseState bState;
+		TrajectoryState tState;
+		RoboCompCommonBehavior::ParameterList params;
+		RoboCompLaser::TLaserData laserData;
+		RoboCompLaser::TLaserData datos;
 
-	CurrentTarget currentTarget;
-	CurrentTarget currentTargetAnt, currentTargetBack;
-	
-	InnerModel *innerModel;
-	
-	//Sampler of robot's freespace
-	Sampler sampler;
-	QList<QRectF> innerRegions;
-	QRectF outerRegion;
+		CurrentTarget currentTarget;
+		CurrentTarget currentTargetAnt, currentTargetBack;
+		
+		InnerModel *innerModel;
+		
+		//Sampler of robot's freespace
+		Sampler sampler;
+		QList<QRectF> innerRegions;
+		QRectF outerRegion;
 
-	QVec target;
-	QTime taskReloj;
-	QMutex mutex_inner,mutex_command; //mutex_inner es TEMPORAL HASTA QUE INNERMODEL TENGA SU PROPIO MUTEX
- 	QVec P;
-	
-	// Roas structure
-	WayPoints road;
-	
-	// Controller
-	Controller *controller;
-	
-	// road-world interaction through a force field (laser)
-	ElasticBand *elasticband;
-	
-	PlannerOMPL *plannerOMPL;
-	
-	// Access to OMPL planners
-	PlannerPRM plannerPRM;
-	
-	//Localizer *localizer;
-	
-	QTime relojForInputRateControl;
-	
-	bool removeNode(const QString &item);
-	void addPlane(QString item, QString parent, QString path, QVec scale, QVec t, QVec r);
+		QMutex mutex_inner,mutex_command; //mutex_inner es TEMPORAL HASTA QUE INNERMODEL TENGA SU PROPIO MUTEX
+		
+		// Road structure
+		WayPoints road;
+		
+		// Controller
+		Controller *controller;
+		
+		// road-world interaction through a force field (laser)
+		ElasticBand *elasticband;
+		
+		PlannerOMPL *plannerOMPL;
+		
+		// Access to OMPL planners
+		PlannerPRM plannerPRM;
+		
+		//Timers to control real time events
+		QTime relojForInputRateControl;
+		QTime taskReloj;
+		
+		
+		////////////////////////////////////////////////////////////////////////
+		//Commands corresponding to servant methods, but running on local thread
+		/////////////////////////////////////////////////////////////////////////
+		bool gotoCommand(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &state, WayPoints& myRoad, RoboCompLaser::TLaserData &lData);
+		bool setHeadingCommand(InnerModel* innerModel, float alfa, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad);
+		bool stopCommand( CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state);
+		bool changeTargetCommand(InnerModel* innerModel, CurrentTarget& target,  TrajectoryState &stat, WayPoints& myRoad);
+		bool goBackwardsCommand(InnerModel* innerModel, CurrentTarget& current,CurrentTarget &currentT, TrajectoryState& state, WayPoints& myRoad);
+		bool learnCommand(CurrentTarget &target,const WayPoints& myRoad);
+		
+		////////////////////////////////////////////////////////////////////////
+		//Auxiliary methods
+		/////////////////////////////////////////////////////////////////////////
+		bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
+		bool insertObstacle();
+		bool removeNode(const QString &item);
+		void addPlane(QString item, QString parent, QString path, QVec scale, QVec t, QVec r);
+		void readRoadFromFile(string name, WayPoints *road);
+		void setRobotInitialPose(float x, float z, float alpha);
+		void drawTarget(const QVec &target);
+		void drawGreenBoxOnTarget(const QVec &target);
+		void printNumberOfElementsInIMV();
+		float angmMPI(float angle);
 
-	//Commands correspondign to servant methods, but running on local thread
-	bool gotoCommand(InnerModel* innerModel, CurrentTarget& target, TrajectoryState &state, WayPoints& myRoad, RoboCompLaser::TLaserData &lData);
-	bool setHeadingCommand(InnerModel* innerModel, float alfa, CurrentTarget& target, TrajectoryState& state, WayPoints& myRoad);
-	bool stopCommand( CurrentTarget& target, WayPoints& myRoad, TrajectoryState &state);
-	bool changeTargetCommand(InnerModel* innerModel, CurrentTarget& target,  TrajectoryState &stat, WayPoints& myRoad);
-	bool goBackwardsCommand(InnerModel* innerModel, CurrentTarget& current,CurrentTarget &currentT, TrajectoryState& state, WayPoints& myRoad);
-	bool learnCommand(CurrentTarget &target,const WayPoints& myRoad);
-	
-	bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
-	bool insertObstacle();
-	
-	//Smoother smoother;
-	void readRoadFromFile(string name, WayPoints *road);
-	void setRobotInitialPose(float x, float z, float alpha);
-	bool targetHasAPlan(InnerModel* inner, CurrentTarget& target, TrajectoryState &state, WayPoints &myRoad);
-	void drawTarget(const QVec &target);
-	void drawGreenBoxOnTarget(const QVec &target);
-	void printNumberOfElementsInIMV();
-	void calcularModuloFloat(QVec &angles, float mod);
-	float angmMPI(float angle);
-
-	void mapBasedTarget(const NavigationParameterMap  &parameters);
-	
-#ifdef USE_QTGUI
-	OsgView *osgView;
-	InnerModelViewer *innerViewer;
-	InnerModel *innerVisual;
-#endif
-	
+		void mapBasedTarget(const NavigationParameterMap  &parameters);
+		
+	#ifdef USE_QTGUI
+		OsgView *osgView;
+		InnerModelViewer *innerViewer;
+		InnerModel *innerVisual;
+	#endif
 };
+
 
 
 #endif

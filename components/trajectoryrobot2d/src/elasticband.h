@@ -50,7 +50,7 @@ class ElasticBand
 		float computeForces(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData& laserData);
 		void cleanPoints(WayPoints &road);
 		bool checkVisiblePoints(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData &laserData);
-		bool shortCut(WayPoints& road);
+		bool shortCut(InnerModel *innermodel, WayPoints& road, const RoboCompLaser::TLaserData &laserData);
 		bool checkIfNAN(const WayPoints &road);
 };
 

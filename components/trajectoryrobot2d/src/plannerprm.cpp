@@ -50,10 +50,10 @@ void PlannerPRM::initialize(Sampler* sampler_, int nPointsInGraph, int nNeighbou
 	////////////////////////
 	/// Check if graph already exists
 	////////////////////////
-	if( QFile(fileName).exists())
+	if( QFile(graphFileName).exists())
 	{
 		qDebug() << __FUNCTION__ << "Graph file exits. Loading";
-		readGraphFromFile("grafo.dot");
+		readGraphFromFile(graphFileName);
 	}
 	else
 	{
@@ -61,8 +61,7 @@ void PlannerPRM::initialize(Sampler* sampler_, int nPointsInGraph, int nNeighbou
 						 << nNeighboursInGraph << "neighboors";
 		QList<QVec> pointList = sampler->sampleFreeSpaceR2(nPointsInGraph);
   	constructGraph(pointList, nNeighboursInGraph, 3500.f, 500);  ///GET From IM ----------------------------------
-		std::ofstream fout(fileName.toStdString());
-		writeGraphToStream(fout);
+		writeGraphToFile(graphFileName);
 	}
 	graphDirtyBit = true;
 }
@@ -260,6 +259,10 @@ bool PlannerPRM::planWithRRT(const QVec &origin, const QVec &target, QList<QVec>
 		return false;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+/// Graph operations
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * @brief Searches in the graph closest points to origin and target
  * 
@@ -364,7 +367,8 @@ bool PlannerPRM::searchGraph(const Vertex &originVertex, const Vertex &targetVer
 	}
 }
 
-ConnectedComponents PlannerPRM::connectedComponents(ComponentMap &componentMap, bool print)
+//ConnectedComponents PlannerPRM::connectedComponents(ComponentMap &componentMap, bool print)
+void PlannerPRM::connectedComponents(ComponentMap &componentMap, ConnectedComponents &compList, bool print) const
 {
 	//qDebug() << __FUNCTION__;
 
@@ -383,18 +387,14 @@ ConnectedComponents PlannerPRM::connectedComponents(ComponentMap &componentMap, 
 	boost::iterator_property_map< std::vector<int>::iterator, IndexMap> compIterMap( components.begin(), index );
 
   int numComps = boost::connected_components(graph, compIterMap, vertex_index_map(index));
-
-	//std::cout << __FUNCTION__ << " Number of connected components " << numComps << std::endl;
-
+	
 	//Create a nice data structure to return info
-	ConnectedComponents compList(numComps);
+	compList.resize(numComps);
 	for(auto it : compList)
 		it = std::make_pair(0, std::vector<Vertex>());
 
-	componentMap.clear();
 	BGL_FORALL_VERTICES(v, graph, Graph)
 	{
-		//qDebug() << graph[v].index << "is in comp" << get(compIterMap, v);
 		compList[get(compIterMap, v)].second.push_back( v );
 		compList[get(compIterMap, v)].first++;
 		componentMap.insert( std::pair<Vertex,int32_t>( v, get(compIterMap, v )));
@@ -408,17 +408,13 @@ ConnectedComponents PlannerPRM::connectedComponents(ComponentMap &componentMap, 
 				std::cout <<  graph[itt].vertex_id << " " ;
 			std::cout << std::endl;
 		}
-
-	return compList;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-/// Graph operations
-/////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 /**
- * @brief 
+ * @brief Expand an existing graph by adding pointList and trying to connect the new points to the existing ones 
+ * It uses original algorithm: 
+ * 		for each new point, NEIGHBOURS points are searched in the existing graph sorted by distance.
+ * 		each point in the sorted list is tried to connect to the graph point using Sampler
  * 
  * @param pointList list of smapled points
  * @param NEIGHBOORS max number of neighbours
@@ -434,14 +430,21 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 	int ROBOT_SIZE_SQR = robotSize*robotSize; //mm  OBTAIN FROM ROBOT'S BOUNDING BOX!!!!!
 	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
 
+	/////////////////////////////////////////////////////////////////////////////////////////
 	//Expand the matrix with new points, insert new vertices and update de <int,vertex> map
+	////////////////////////////////////////////////////////////////////////////////////////
 	int lastCol = data.cols();
 	data.conservativeResize(3, data.cols() + pointList.size() );
 
-	//create the query matrix
+	//////////////////////////
+	//Create the query matrix
+	//////////////////////////
 	Eigen::MatrixXf query(data.rows(), pointList.size());
 	//qDebug() << __FUNCTION__ << "Data matrix resized" << data.rows() << data.cols() << "lastCol" << lastCol;
 
+	//////////////////////////
+	//Add points to data matrix and to graph
+	//////////////////////////
 	for(int i=lastCol, k=0; i< data.cols(); i++, k++)
 	{
 		data(0,i) = pointList[k].x();
@@ -457,32 +460,39 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 		//qDebug() << __FUNCTION__ << "Inserted vertex " << i;
 	}
 
-	//Compute KdTre
-
+	/////////////////////
+	//Compute KdTree
+	/////////////////////
 	try{ nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data); }
 	catch(std::exception &ex){ std::cout << ex.what() << std::endl; qFatal("fary en Nabo");}
 
-	//Query for sorted distances to NEIGHBOORS neighboors
+	////////////////////////////////////////////////////
+	//Query KDTree for sorted distances to NEIGHBOORS neighbours
+	//////////////////////////////////////////////////////
 	Eigen::MatrixXi indices(NEIGHBOORS, pointList.size() );
 	Eigen::MatrixXf distsTo(NEIGHBOORS, pointList.size() );
 	if( NEIGHBOORS >= data.cols())
 		NEIGHBOORS = data.cols()-1;
 	nabo->knn(query, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
 
+	/////////////////////////
 	//Connect the new points
+	//////////////////////////
 	bool reachEnd;
 	int32_t numExit = 0;
-	bool connected = false;
-	//qDebug() << __FUNCTION__ << lastCol + pointList.size() << indices.rows() << indices.cols();
+	
+	// First go through new points
 	for(int i=lastCol, j=0; i<lastCol+pointList.size(); i++, j++)
 	{
 		Vertex vertexNew = vertexMap.value(i);
+		//for each new point locate a set of neighbours sorted by increasing distance
 		for(uint k=0; k<NEIGHBOORS; k++)
 		{
 			int indKI = indices(k,j);
 			Vertex vertexOld = vertexMap.value(indKI);
 			//qDebug() << __FUNCTION__ << "Trying" << i << j <<k << "dist" << distsTo(k,j) << "indKI" << indKI;
-			if( (distsTo(k,j) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,j) > ROBOT_SIZE_SQR ))  //check distance to be lower that threshold and greater than robot size
+			//check distance to be lower that max limit and greater than robot size and try to connect both dots
+			if( (distsTo(k,j) < MAX_DISTANTE_TO_CHECK_SQR) and (distsTo(k,j) > ROBOT_SIZE_SQR )) 
 			{
 				QVec lastPoint;
 				const QVec iiv = QVec::vec3(data(0,i), data(1,i), data(2,i));
@@ -490,12 +500,15 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 				reachEnd = sampler->checkRobotValidDirectionToTargetOneShot(iiv, ijdie);
 				//qDebug() << __FUNCTION__ << "i" << i << "to k" << k << indKI << "at dist " << distsTo(k,j) << "reaches the end:" << reachEnd;
 
-				// If free path to neighboor, insert it in the graph
+				// If there is a free path to the neighboor, insert it in the graph
 				if( reachEnd == true)
 				{
-					//Compute con comps to check it tne vertices belong to the same comp.
+					//Compute connected comps to check it tne vertices belong to the same comp.
+					//ComponentMap componentMap;
+					//ConnectedComponents components = connectedComponents(componentMap);
 					ComponentMap componentMap;
-					ConnectedComponents components = connectedComponents(componentMap);
+					ConnectedComponents compList;
+					connectedComponents(componentMap, compList);
 
 					//Reject connecting elements belonging to the same connected component and already existing edges between vertices
 					if( (boost::edge(vertexOld,vertexNew,graph).second == false )
@@ -505,54 +518,47 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 						edge.dist = (QVec(graph[vertexNew].pose) - QVec(graph[vertexOld].pose)).norm2();
 						boost::add_edge(vertexOld, vertexNew, edge, graph);
 						numExit++;
-						connected = true;
 					}
 				}
 			}
 		}
-		if( connected == false )
-		{
-// 			qDebug() << "---------- Could not connect to any of the existing ----------";
-			connected = false;
-		}
 	}
-
-	if( numExit > 0 )
+	if( numExit > 0 ) 
 		graphDirtyBit = true;
-
+	removeSmallComponents(3); //This will rebuild data hash and indices
+	if( graphDirtyBit == true)
+		rebuildExternalData();
 	return numExit;
 }
 
-
 /**
- * @brief Selects the two biggest con comps and try to connect their closest points. The number of vertices does not change
+ * @brief Selects the two biggest connected comps and try to connect their closest points. The number of vertices does not change
  * @return void
  */
 bool PlannerPRM::connectIsolatedComponents(int32_t &numConnections)
 {
-// 	qDebug() << __FUNCTION__ << "Expanding graph...";
-
 	//compute connected components
-	ComponentMap cm;
-	ConnectedComponents components = connectedComponents(cm);
+	ComponentMap componentMap;
+	ConnectedComponents compList;
+	connectedComponents(componentMap, compList);
 
 	//If only one component, ntohing to do here
-	if( components.size() < 2)
+	if( compList.size() < 2)
 		return false;
 
-	//Sort the components by size
-	std::sort( components.begin(), components.end(),
+	//Sort the compList by size
+	std::sort( compList.begin(), compList.end(),
 			   []( CComponent a, CComponent b){ return a.first > b.first; });
 
 	//Recover the two first indexes
-	uint32_t largestSize  = components.front().first;
-	uint32_t largest2Size = (*(components.cbegin() + 1)).first;
+	uint32_t largestSize  = compList.front().first;
+	uint32_t largest2Size = (*(compList.cbegin() + 1)).first;
 
 	// Compute closest points between both comps using KdTree.
 	// Fist, build a Matrix with the elements of the largest to create a KdTree
 
-// 	qDebug() << __FUNCTION__ << "Sizes: " << largestSize << largest2Size;
-	const uint32_t neighboors = 1;
+	// qDebug() << __FUNCTION__ << "Sizes: " << largestSize << largest2Size;
+	const uint32_t neighboors = 1;							//K=1 Only the closest one
 	Eigen::MatrixXf dataL( 3 , largestSize );   //Watch R3 dependant
 	Eigen::MatrixXf queryL(3 , largest2Size );
 	Eigen::MatrixXi indicesL(neighboors, largest2Size );
@@ -560,8 +566,7 @@ bool PlannerPRM::connectIsolatedComponents(int32_t &numConnections)
 
  	QHash<uint32_t,Vertex> vertexMapL, vertexMapLL;
 	uint32_t i = 0;
-	//qDebug()  << __FUNCTION__ << "comps in C1";
-	for( auto it : components[0].second)
+	for( auto it : compList[0].second)
 	{
 		dataL(0,i) = graph[it].pose.x();
 		dataL(1,i) = graph[it].pose.y();
@@ -570,61 +575,48 @@ bool PlannerPRM::connectIsolatedComponents(int32_t &numConnections)
 		i++;
 		//qDebug() << graph[it].pose;
 	}
-	//build the query matrix qith the second comp
-	//pair = components[largest2];
-	//qDebug()  << __FUNCTION__ << "comps in C2";
+
+	//build the query matrix with the second comp
 	i=0;
-	for( auto it : components[1].second)
+	for( auto it : compList[1].second)
 	{
 		queryL(0,i) = graph[it].pose.x();
 		queryL(1,i) = graph[it].pose.y();
 		queryL(2,i) = graph[it].pose.z();
 		vertexMapLL.insert(i,it);
 		i++;
-		//qDebug() << graph[it].pose;
 	}
+
 	// Build the KdTree is valid here.
 	Nabo::NNSearchF *naboL = Nabo::NNSearchF::createKDTreeTreeHeap(dataL);
 
 	// Query for sorted distances from one elements in C2  to elements in C1
 	naboL->knn(queryL, indicesL, distsToL, neighboors, 0, 0);
 
-	// Pick 5 elements from indicesa and try to connect them
-	QVec inds = QVec::uniformVector(largest2Size, 0, largest2Size-1);
-
+	/////////////////////////////////
+	// Try to connect elements from both components
+	/////////////////////////////////
 	int nExit = 0;
 	for (uint i=0; i<largest2Size; i++)
 	{
-		Vertex v = vertexMapL.value(indicesL(0,i));
 		Vertex vv = vertexMapLL.value(i);
-		qDebug() << __LINE__;
+		Vertex v = vertexMapL.value(indicesL(0,i));
+		
 		if( sampler->checkRobotValidDirectionToTargetOneShot( graph[v].pose , graph[vv].pose) )
 		{
-			qDebug() << "aqui";
 			EdgePayload edge;
-			edge.dist = distsToL(i);
+			edge.dist = distsToL(0,i);
 			boost::add_edge(v, vv, edge, graph);
-// 			qDebug() << __FUNCTION__ << "Exito" << graph[v].vertex_id << "to " << graph[vv].vertex_id;
 			nExit++;
+			break;			//connected!
 		}
 	}
-
-// 	qDebug() << __FUNCTION__  << "After expand, " << nExit << " new connections";
+	
 	numConnections = nExit;
-
 	if( numConnections > 0)
-		graphDirtyBit = true;
-
-// 	//sample a few points aronud closestPose. a Gaussian sample would be better
-// 	const uint32_t MAX_POINTS = 5;
-// 	//QList<QVec> pList = sampler->sampleFreeSpaceR2Uniform( QRectF(10, 20, 50, 70), MAX_POINTS);
-// 	QList<QVec> pList = sampler->sampleFreeSpaceR2Gaussian(closestPose.x(), closestPose.z(), sqrt(minDist),sqrt(minDist), MAX_POINTS);
-
-	//try to join random points form both components
-
-
-	//call construct
-	//constructGraph(pList);
+	{ 
+		rebuildExternalData();
+	}
 
 	return true;
 }
@@ -632,18 +624,19 @@ bool PlannerPRM::connectIsolatedComponents(int32_t &numConnections)
 /**
  * @brief Remove all small components in the graph with a size smaller thatn minSize.
  *
- * @param minSize ...
+ * @param minSize min number of vertices in a conn. compo to be removed.
  * @return number of componets removed
  */
 int32_t PlannerPRM::removeSmallComponents(int32_t minSize)
 {
 	//qDebug() << __FUNCTION__;
+	
+	ComponentMap componentMap;
+	ConnectedComponents compList;
+  connectedComponents(componentMap, compList);
 
-	ComponentMap cm;
-	ConnectedComponents components = connectedComponents(cm);
 	uint32_t nc = 0;
-
- 	for( auto p : components )
+ 	for( auto p : compList )
 	{
 		if( p.first < minSize )
 		{
@@ -655,55 +648,59 @@ int32_t PlannerPRM::removeSmallComponents(int32_t minSize)
 			nc++;
 		}
 	}
-	//qDebug() << __FUNCTION__  << "Graph after removing has " << boost::num_vertices(graph) << " vertices and" << components.size() << "components" ;
+	qDebug() << __FUNCTION__  << "Graph after removing has " << boost::num_vertices(graph) << " vertices and" << compList.size() << "components" ;
 
 	if( nc > 0 )
 	{
 		rebuildExternalData();
-		graphDirtyBit = true;
 	}
-
 	return nc;
 }
 
 /**
- * @brief Remove elements that are too closed
+ * @brief Connect nearby components to facilitate the creation of loops
  *
- * @return void
+ * @return number of edges created
  */
-int32_t PlannerPRM::removeTooCloseElements( int32_t maxDist)
+int32_t PlannerPRM::connectCloseElements( float thoseCloserThan)
 {
-	std::vector<Vertex> toDelete;
-
+	qDebug() << __FUNCTION__;
+		
 	//libNabo uses squared dist
-	maxDist = maxDist*maxDist;
+	thoseCloserThan = thoseCloserThan*thoseCloserThan;
 
 	// We use the KDTree structure to compute distances
 	Eigen::MatrixXi indices(1, data.cols() );
 	Eigen::MatrixXf distsTo(1, data.cols() );
 
 	nabo->knn(data, indices, distsTo, 1, 0, Nabo::NNSearchF::SORT_RESULTS);
-
+	
+	int nExit = 0;
+	
 	for(int i=0; i<data.cols(); i++)
-		if( distsTo(0,i) < maxDist )
-			toDelete.push_back( vertexMap.value(i) );
+		if( distsTo(0,i) < thoseCloserThan )
+		{
+			Vertex v = vertexMap.value(indices(0,i));
+			Vertex vv = vertexMap.value(i);
+			if( sampler->checkRobotValidDirectionToTargetOneShot( graph[v].pose, graph[vv].pose) )
+			 {
+					EdgePayload edge;
+					edge.dist = distsTo(0,i);
+					boost::add_edge(v, vv, edge, graph);
+					nExit++;
+			 }
+		}
 
-	for( auto it : toDelete )				//CHECK THAT NO NEW DISC COMPS ARE CREATED
-	{
-		boost::clear_vertex( it, graph);
- 		boost::remove_vertex(it, graph);
-	}
-
-	if( toDelete.size() > 0 )
+	if( nExit > 0 )
 	{
 		rebuildExternalData();
-		graphDirtyBit = true;
 	}
-	return toDelete.size();
+	qDebug() << __FUNCTION__ << "Connected " << nExit << "pairs of nodes";
+	return nExit;
 }
 
 ////////////////////////////////////////////////////////////////////////
-/// UTILITIES
+/// GRaph UTILITIES
 ////////////////////////////////////////////////////////////////////////
 
 /**
@@ -713,9 +710,9 @@ int32_t PlannerPRM::removeTooCloseElements( int32_t maxDist)
  */
 bool PlannerPRM::rebuildExternalData()
 {
-
 	//get size of graph
 	int nPoints = boost::num_vertices(graph);
+	graphDirtyBit = true;
 
 	if( nPoints == 0 )
 	{
@@ -745,19 +742,31 @@ bool PlannerPRM::rebuildExternalData()
 	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
 
 	//Ready to go!!
+	graphDirtyBit = false;
 	return true;
 }
 
-
-void PlannerPRM::writeGraphToStream(std::ostream &stream)
+void PlannerPRM::writeGraphToFile(const QString &fileName)
 {
+	std::filebuf fb;
+	//Check if empty default name is used. If so use the class variable
+	if( fileName == "")
+		fb.open (graphFileName.toStdString(),std::ios::out);
+	else
+		fb.open(fileName.toStdString(),std::ios::out);		
+	std::ostream stream(&fb);
+	
+	////////////////////////////////
 	// Create a vertex_index property map, since VertexList is listS and the graph does not have a "natural" index
+	////////////////////////////////
  	typedef std::map<Vertex, size_t> IMap;
  	typedef boost::associative_property_map<IMap> IndexMap;
 	IMap indexMap;
 	IndexMap index( indexMap );
 
- 	//indexing the vertices
+	///////////////////////
+ 	//Indexing the vertices
+	////////////////////////
  	BGL_FORALL_VERTICES(v, graph, Graph)
  		boost::put(index, v, graph[v].vertex_id);
 
@@ -787,8 +796,7 @@ void PlannerPRM::readGraphFromFile(QString name)
   catch (std::exception& e){ std::cout << e.what() << std::endl; }
   
 	data.resize(3,boost::num_vertices(graph));		//ONLY 3D POINTS SO FAR
- 	qDebug() << __FUNCTION__ << "Graph size" << boost::num_vertices(graph);
-	int i=0;
+ 	int i=0;
 
 	BGL_FORALL_VERTICES(v, graph, Graph)
     {
@@ -800,8 +808,11 @@ void PlannerPRM::readGraphFromFile(QString name)
 	}
 	nabo = Nabo::NNSearchF::createKDTreeTreeHeap(data);
 
-	ComponentMap cm;
-	connectedComponents(cm);
+	ComponentMap componentMap;
+	ConnectedComponents compList;
+  connectedComponents(componentMap, compList);
+
+	qDebug() << __FUNCTION__ << "Graph size" << boost::num_vertices(graph) << "Nº of connected components" << compList.size();
 }
 
 
@@ -809,88 +820,74 @@ void PlannerPRM::readGraphFromFile(QString name)
 /// LEARNERS
 ////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief Called form above to do some learning while awaiting for new orders. Each learning primitive has to take short
- *
- * @return bool
- */
-bool PlannerPRM::learnForAWhile()
+bool PlannerPRM::learnForAWhile(uint maxGraphNodes, bool print, bool save)
 {
-	ComponentMap cm;
-	static int iter = 0, verticesAnt=0, edgesAnt=0, compsAnt=0;
-	int32_t connected, pointsAdded, deles;
-	QList<QVec> points;
-	int32_t removed=0;
-	QVector<int> cola;
-
-	if( verticesAnt > 100)
+	static int verticesAnt=0, edgesAnt=0, compsAnt=0;
+	static bool firstTime = true;
+	
+	/////////////////////////
+	// Check Graph health
+	//////////////////////////
+	ComponentMap componentMap;
+	ConnectedComponents compList;
+	connectedComponents(componentMap, compList);
+	rInfo("");
+	int nComps = compList.size();
+	
+	if( print )
 	{
-// 		qDebug() << __FUNCTION__ << "Graph with 100 nodes. Only CONNECTING, REMOVE Y TOOCLOSE";
-		cola << 1 << 1 << 1 << 2 << 1 << 1 << 2 << 1 << 2 << 3;   //relative ratios of primitive execution
+		qDebug() << __FUNCTION__ << "-------------------------Graph Health----------------------------------------";
+		qDebug() << "		Vertices:" << boost::num_vertices(graph);
+		qDebug() << "		Vertices variation:" << boost::num_vertices(graph) - verticesAnt;
+		qDebug() <<	"		Edges:" << boost::num_edges(graph);
+		qDebug() << "		Edges variation:" << boost::num_edges(graph) - edgesAnt;
+		qDebug() << "		Components:" << nComps;
+		qDebug() << "		Components variation:" << nComps - compsAnt;
+		QString cls;
+		for(auto c : compList)
+			cls += QString::number(c.second.size()) + " ";
+		qDebug() << "		Components sizes:" << cls;	
+		qDebug() << __FUNCTION__ << "-------------------------END of Graph Health-----------------------------------------";
 	}
-	else
-	{
-		cola << 0 << 0 << 1 << 0 << 0 << 1 << 0 << 0 << 2 << 0;   //relative ratios of primitive execution
-	}
-	int ind;
-	ind  = cola[iter++%10];
-	switch (ind) {
- 		case 0:
- 			points = sampler->sampleFreeSpaceR2( 5 );
-			pointsAdded = constructGraph(points);
-			break;
-		case 1:
-			connected = connectIsolatedComponents(connected);
-			break;
-		case 2:
-			removed = removeSmallComponents();
-			break;
-		case 3:
- 			deles = removeTooCloseElements();
- 		default:
-			break;
-	}
-
-// 	qDebug() << __FUNCTION__ << "--------------------------BEGIN--------------------------------------";
-// 	qDebug() << "Action taken:";
-	switch (iter) {
-		case 0:
-// 			qDebug() << "	RemoveSmallComponents:" << removed << "components removed";
-			break;
-		case 1:
-// 			qDebug() << "	ConnectIsolatedComponents:" << connected << "components connected";
-			break;
-		case 2:
-// 			qDebug() << "	ConstructGraph:" <<  pointsAdded << "new points inserted";
-			break;
- 		case 3:
-// 			qDebug() << "	RemoveTooCloseElements:" <<  deles << "points deleted";
-		default:
-			break;
-	}
-	int comps = connectedComponents(cm).size();
-// 	qDebug() << "The graph now has: ";
-// 	qDebug() << "	Vertices:" << boost::num_vertices(graph);
-// 	qDebug() << "	Vertices variation:" << boost::num_vertices(graph) - verticesAnt;
-// 	qDebug() <<	"	Edges:" << boost::num_edges(graph);
-// 	qDebug() << "	Edges variation:" << boost::num_edges(graph) - edgesAnt;
-// 	qDebug() << "	Components:" << comps;
-// 	qDebug() << "	Components variation:" << comps - compsAnt;
-// 	qDebug() << __FUNCTION__ << "-------------------------END-----------------------------------------";
-
-	compsAnt = comps;
+	compsAnt = nComps;
 	verticesAnt = boost::num_vertices(graph);
 	edgesAnt = boost::num_edges(graph);
-	//iter = (iter+1) % 3;
-
-	//We need a measure of progress. Some comb of conn comps, removed, connected and graph size
-	//With this measure we can control de learning time and the amount dedicated to each primitive.
-
-	//remember
-	std::ofstream fout("grafo.dot");
-	writeGraphToStream(fout);
+	
+	if (nComps == 1 and boost::num_vertices(graph) >= maxGraphNodes )
+	{
+		if( firstTime )
+		{
+			if( connectCloseElements(300) > 0 )
+				if( save ) writeGraphToFile();
+			firstTime = false;
+			return true;
+		}
+		return false;
+	}
+	
+	/////////////////////////
+	// First try to connect everything
+	//////////////////////////
+	if (nComps > 1)
+	{
+		int connected = connectIsolatedComponents(connected);
+		qDebug() << __FUNCTION__ << "After CONNECTING comps there are" << connected << "components";
+		if( save ) writeGraphToFile();
+		return true;
+	}
+	
+	////////////////////////////////////////////
+	// Otherwise expand the Graph to remote zones
+	///////////////////////////////////////////
+	QList<QVec> points;
+	int32_t pointsAdded;
+	points = sampler->sampleFreeSpaceR2( 5 );  //THE sampler could be more "smart" to bias zones around less visited nodes in the graph
+	pointsAdded = constructGraph(points);
+	qDebug() << __FUNCTION__ << "After EXPANDING the graph has " << pointsAdded << "new nodes";
+	if( save ) writeGraphToFile();
 	return true;
 }
+
 
 
 /**
@@ -901,7 +898,7 @@ bool PlannerPRM::learnForAWhile()
  */
 bool PlannerPRM::learnPath(const QList< QVec >& path)
 {
- 	qDebug() << __FUNCTION__ << "Learning the path with" << path.size() << " points";
+ 	qDebug() << __FUNCTION__ << "Learning an intial path of" << path.size() << " points";
 
 //	const int nWays=10;   //Max number of point to be inserted
 	const int MIN_STEP = 350;
@@ -923,10 +920,8 @@ bool PlannerPRM::learnPath(const QList< QVec >& path)
 		}
 	}
 
- 	qDebug() << __FUNCTION__ << "Learning with shortened path of" << sList.size() << " points";
+ 	qDebug() << __FUNCTION__ << "Learning with a shortened path of" << sList.size() << " points";
 	constructGraph( sList, 10, 100, 10);
-	constructGraph(currentPath);
-	learnForAWhile();
 	return true;
 }
 
@@ -952,8 +947,6 @@ bool PlannerPRM::pathSmoother(QList<QVec> & pointList)
  */
 void PlannerPRM::smoothPath( const QList<QVec> & list)
 {
-	qDebug() << __LINE__;
-	
 	if ( sampler->checkRobotValidDirectionToTargetOneShot( list.first(), list.last()) )
 	{
 		if(currentSmoothedPath.contains(list.first()) == false)
@@ -1020,21 +1013,25 @@ bool PlannerPRM::drawGraph(InnerModelViewer *innerViewer)
 	int i=0;
 	
 	//compute connected components
-	ComponentMap cm;
-	ConnectedComponents components = connectedComponents(cm);
-	QString color;
-	
-	for(auto comp : components)
+	//ComponentMap cm;
+	ComponentMap componentMap;
+	ConnectedComponents compList;
+	connectedComponents(componentMap, compList);
+
+	QStringList color;
+	color << "#AA0000" << "#00AA00" << "#0000AA" << "#AA00AA" << "#AAAA00";
+	int j=0;
+	for(auto comp : compList)
 	{
-		color = "#A0A0A0";
+		QString c = color.at(j++%color.size());
+		qDebug() << __FUNCTION__<< "color " << c << comp.second.size();
 		for(auto elem : comp.second)
-		{			
+		{	
 			item = "g_" + QString::number(i);
 			QString  parentT = QString("g_") + QString::number(i);
 			InnerModelDraw::addTransform(innerViewer, parentT, "graph");
 			innerViewer->innerModel->updateTransformValues(parentT, graph[elem].pose.x(), 10, graph[elem].pose.z(), 0,0,0);
-			InnerModelDraw::addPlane_ignoreExisting(innerViewer, item + "_plane", parentT, QVec::vec3(0,0,0), QVec::vec3(0,1,0), 
-																					color, QVec::vec3(60,60,10));
+			InnerModelDraw::addPlane_ignoreExisting(innerViewer, item + "_plane", parentT, QVec::vec3(0,0,0), QVec::vec3(0,1,0),c, QVec::vec3(60,60,10));
 			i++;
 		}
 	}

@@ -75,6 +75,7 @@ class WayPoints : public QList< WayPoint >
 		
 		float robotDistanceToCurrentPoint(InnerModel *innerModel);
 		float robotDistanceToNextPoint(InnerModel *innerModel);
+		float computeDistanceBetweenPointsAlongRoad(WayPoints::iterator firstPoint, WayPoints::iterator secondPoint);
 		WayPoint const getCurrentPoint() const 												{return (*this)[currentPointIndex];};
 		WayPoint const getNextPoint() const 												{return (*this)[nextPointIndex];};
 		QLine2D getRobotZAxis(InnerModel* innerModel);
@@ -147,7 +148,6 @@ class WayPoints : public QList< WayPoint >
 		float computeDistanceToLastVisible(WayPoints::iterator closestPoint, const QVec &robotPos);
 		QLine2D computeTangentAt(WayPoints::iterator w) const;
 		WayPoints::iterator computeClosestPointToRobot(const QVec& robot);
-		
 };
 
 #endif // WAYPOINTS_H

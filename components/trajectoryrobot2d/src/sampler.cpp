@@ -46,8 +46,6 @@ void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QL
 	
 	//Init random sequence generator
 	qsrand( QTime::currentTime().msec() );
-	
-	//innerModelSampler->print();
 }
 
 /**
@@ -181,7 +179,8 @@ QList<QVec> Sampler::sampleFreeSpaceR2Uniform( const QRectF &box, uint32_t nPoin
 
 
 /**
-* @brief Picks a (list of) random point within the limits of a given box and checks that it is out of obstacles (Free Space)
+* @brief Picks a list of random points form a gaussian distribution defined by its mean (meanX, meanY) and diagonal variance and checks 
+* that they fall in robot's free space.
 * 
 * @return RMat::QVec, a 3D vector with 0 in the Y coordinate
 */
@@ -214,9 +213,8 @@ QList<QVec> Sampler::sampleFreeSpaceR2Gaussian(float meanX, float meanY, float s
 	return list;
 }
 
-
 /**
- * @brief To provide a state checker for OMPL.
+ * @brief Provides a free state checker for OMPL. No rotation
  * 
  * @param state ...
  * @return bool
@@ -239,7 +237,7 @@ bool Sampler::isStateValid(const ompl::base::State *state)
 
 /**
  * @brief Local controller. Goes along a straight line connecting the current robot pose and target pose in world coordinates
- * checking collisions with the environment
+ * checking collisions with the environment. It makes the robot advance through a straight line.
  * @param origin Current pose
  * @param target Target pose 
  * @param reachEnd True is successful
@@ -249,8 +247,6 @@ bool Sampler::isStateValid(const ompl::base::State *state)
  */
 bool Sampler::checkRobotValidDirectionToTarget(const QVec & origin , const QVec & target, QVec &lastPoint)
 {
-	//return trySegmentToTargetBinarySearch(origin, target, reachEnd, arbol, nodeCurrentPos);
-	
 	float stepSize = 100.f; //100 mms chunks  SHOULD BE RELATED TO THE ACTUAL SIZE OF THE ROBOT!!!!!
 	uint nSteps = (uint)rint((origin - target).norm2() / stepSize);  
 	float step;
@@ -286,6 +282,17 @@ bool Sampler::checkRobotValidDirectionToTarget(const QVec & origin , const QVec 
 // PRIVATE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Constructs the list of robot and world meshes from InnerModel that will be used in detection of collisions
+ * 
+ * @param node pointer to node used to traverse the tree
+ * @param robotId robot's tag name
+ * @param inside flag
+ * @param in growing list of mesh names belonging to the robot
+ * @param out growing list of mesh names belonging to the world
+ * @param excluded list of meshes to be excluded from both lists
+ * @return void
+ */
 void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out, std::set<QString> &excluded)
 {
 	if (node->id == robotId)
@@ -320,7 +327,7 @@ void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 	}
 }
 
-
+//NOT WORKING WELL
 bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin , const QVec & target, QVec &lastPoint) const
 {
 	const float MAX_LENGTH_ALONG_RAY = (target-origin).norm2();
@@ -399,7 +406,6 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 				if (hit)
 					break;
 			}
-			
 			// Manage next min-max range
 			if (hit)
 				max = hitDistance;
@@ -424,10 +430,11 @@ bool Sampler::checkRobotValidDirectionToTargetBinarySearch(const QVec & origin ,
 
 /**
  * @brief Checks is there is a valid straight tunnel from origin to target the size of the robot
+ * Fast implementation using an extrusion of the bounding box of the robot in the direction of the origin-to-target line
  * 
- * @param origin ...
- * @param target ...
- * @return bool
+ * @param origin initial position
+ * @param target final position
+ * @return bool True is there is free space all along the segment
  */
 
 bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , const QVec & target) const
@@ -489,6 +496,8 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 	return true;
 }
 
+
+///UNFiNISHED
 bool Sampler::searchRobotValidStateCloseToTarget(QVec& target)
 {
 	//If current is good, return

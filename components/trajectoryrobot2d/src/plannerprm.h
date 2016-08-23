@@ -42,6 +42,7 @@
 #include <nabo/nabo.h>
 #include <innermodeldraw.h>
 #include "sampler.h"
+#include <qlog/qlog.h>
 
 #include "plannerompl.h"
 
@@ -87,10 +88,11 @@ class PlannerPRM : public QObject
 		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax) {xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;}
 		bool drawGraph(InnerModelViewer *innerViewer);
 		void cleanGraph(InnerModelViewer *innerViewer);
-		bool learnPath(const QList<QVec> &path);
-		bool learnForAWhile();
-		//const Sampler & getSampler() const  { return sampler; }
 		void removeGraph(InnerModelViewer *innerViewer);
+			
+		// Learning
+		bool learnPath(const QList<QVec> &path);
+		bool learnForAWhile(uint maxGraphNodes = 150, bool print = true, bool save = true);
 		
 		//Sampler
 		Sampler *sampler;
@@ -103,20 +105,22 @@ class PlannerPRM : public QObject
 		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
 		bool rebuildExternalData();
 		void readGraphFromFile(QString name);
-		void writeGraphToStream(std::ostream &stream);
+		void writeGraphToFile(const QString& fileName = "");
 		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);
-		ConnectedComponents connectedComponents( ComponentMap& componentMap, bool print = false);
+		void connectedComponents( ComponentMap &componentMap, ConnectedComponents &comps, bool print = false) const;
 		
 		//smoothers
 		bool pathSmoother(QList<QVec> & pointlist);
 		void smoothPath( const QList<QVec> & list);
 		void smoothPathIter( QList<QVec> & list);
-		int32_t removeSmallComponents(int32_t minSize = 5);
-		bool connectIsolatedComponents(int32_t& numConnections);
-		int32_t removeTooCloseElements(int32_t maxDist = 500);
-	
 		QList<QVec> currentSmoothedPath;
 		QList<QVec> currentPath;   			//Results will be saved here
+		
+		//learners
+		int32_t removeSmallComponents(int32_t minSize = 3);
+		bool connectIsolatedComponents(int32_t& numConnections);
+		int32_t connectCloseElements(float thoseCloserThan = 500);  //mm
+	
 		float xMin, xMax, zMin, zMax; 		//Limits of environmnent QUITAR
 		
 		//Libnabo fast KDTree for low dimension
@@ -135,7 +139,7 @@ class PlannerPRM : public QObject
 		
 		bool graphDirtyBit;
 		uint graphNumPoints;
-		QString fileName = "grafo.dot";
+		QString graphFileName = "grafo.dot";
 		uint graphNeighPoints;
 };
 

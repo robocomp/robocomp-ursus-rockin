@@ -36,7 +36,10 @@ bool ElasticBand::update(InnerModel *innermodel, WayPoints &road, const RoboComp
 	/////////////////////////////////////////////
 	checkVisiblePoints(innermodel, road, laserData);	
 	 
-	//shortCut(road);
+	/////////////////////////////////////////////
+	//Check if there is a sudden shortcut to take
+	/////////////////////////////////////////////
+	shortCut(innermodel, road, laserData);
 	
 	/////////////////////////////////////////////
 	//Add points to achieve an homogenoeus chain
@@ -76,26 +79,36 @@ bool ElasticBand::checkIfNAN(const WayPoints &road)
 	return false;
 }
 
-bool ElasticBand::shortCut(WayPoints &road)  //NO FUNCIONA
-{
-	// Check if the target is visible and go straight to it
-	static bool inhibit = false;
-	static int veces = 0;
-	int offset = road.size()/3;
-	
-	if( road.last().isVisible and (inhibit == false ))   //Probar a borrar fr 2/3 para alante
+/**
+ * @brief Check if some point ahead on the road is closer (L2) than along the road, to take a shortcut
+ * 
+ * @param innermodel ...
+ * @param road ...
+ * @param laserData ...
+ * @return bool
+ */
+bool ElasticBand::shortCut(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData &laserData)  //TESTING
+{	
+	//Compute distances from robot to all points ahead
+	//If any of them is laser-visible and  significantly shorter than de distance along de road, try it!
+	WayPoints::iterator robot = road.getIndexOfClosestPointToRobot();
+	for( WayPoints::iterator it = robot+1; it != road.end(); it++ )
 	{
-		for( WayPoints::iterator it = road.begin()+offset; it != road.end()-1; it = road.erase(it));
-		inhibit = true;  //periodo refractario
+		//qDebug() << __FUNCTION__ << it->isVisible << (it->pos - robot->pos).norm2() << road.computeDistanceBetweenPointsAlongRoad(robot, it);
+		if( it->isVisible and (it->pos - robot->pos).norm2() < road.computeDistanceBetweenPointsAlongRoad(robot, it))
+		{	
+			qDebug() << __FUNCTION__ << "Candidato";
+			//Check if the robot passes through the straight line
+			if( computeFreePath(innermodel, *robot, *it, laserData) )
+			{
+				//Is so remove all intermadiate points between robot and new subtarget
+				qDebug() << __FUNCTION__ << "Confirmado";
+				//qFatal("fary SHORTCUT");
+				return true;
+			}
+		}
+		return false;
 	}
-	if( inhibit )
-	{
-		veces = veces + 1;
-		veces = veces % 50;  //aprox 5 segs
-	}
-	if( veces == 0 )
-		inhibit = false;
-	return true;
 }
 
 /**
@@ -238,8 +251,8 @@ float ElasticBand::computeForces(InnerModel *innermodel, WayPoints &road, const 
 // 		computeDistanceField(w1, laserData, FORCE_DISTANCE_LIMIT);
 // 		repulsionForce = w1.minDistPoint * (FORCE_DISTANCE_LIMIT - w1.minDist);
 		
-		float alpha = -0.4;//0.6
-		float beta = 0.80; //0.09
+		float alpha = -0.3; //Negative values between -0.1 and -1. The bigger in magnitude, the stiffer the road becomes
+		float beta = 0.80;  //Posibite values between  0.1 and 1	 The bigger in magnitude, more separation from obstacles
 			
 		QVec change = (atractionForce*alpha) + (repulsionForce*beta);		
 		
