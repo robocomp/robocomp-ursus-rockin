@@ -39,7 +39,7 @@ bool ElasticBand::update(InnerModel *innermodel, WayPoints &road, const RoboComp
 	/////////////////////////////////////////////
 	//Check if there is a sudden shortcut to take
 	/////////////////////////////////////////////
-	shortCut(innermodel, road, laserData);
+	//shortCut(innermodel, road, laserData);
 	
 	/////////////////////////////////////////////
 	//Add points to achieve an homogenoeus chain
@@ -68,17 +68,6 @@ bool ElasticBand::update(InnerModel *innermodel, WayPoints &road, const RoboComp
 	return true;
 }
 
-bool ElasticBand::checkIfNAN(const WayPoints &road)
-{
-	for(auto it = road.begin(); it != road.end(); ++it)
-		if( std::isnan(it->pos.x()) or std::isnan(it->pos.y()) or std::isnan(it->pos.z()) )
-		{
-			road.print();
-			return true;
-		}
-	return false;
-}
-
 /**
  * @brief Check if some point ahead on the road is closer (L2) than along the road, to take a shortcut
  * 
@@ -87,15 +76,16 @@ bool ElasticBand::checkIfNAN(const WayPoints &road)
  * @param laserData ...
  * @return bool
  */
-bool ElasticBand::shortCut(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData &laserData)  //TESTING
+bool ElasticBand::shortCut(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData &laserData) 
 {	
 	//Compute distances from robot to all points ahead
 	//If any of them is laser-visible and  significantly shorter than de distance along de road, try it!
 	WayPoints::iterator robot = road.getIndexOfClosestPointToRobot();
-	for( WayPoints::iterator it = robot+1; it != road.end(); it++ )
+	WayPoints::iterator best = road.begin();
+	for( WayPoints::iterator it = robot+1; it != road.end(); ++it )
 	{
 		//qDebug() << __FUNCTION__ << it->isVisible << (it->pos - robot->pos).norm2() << road.computeDistanceBetweenPointsAlongRoad(robot, it);
-		if( it->isVisible and (it->pos - robot->pos).norm2() < road.computeDistanceBetweenPointsAlongRoad(robot, it))
+		if( it->isVisible and ((road.computeDistanceBetweenPointsAlongRoad(robot, it) - (it->pos - robot->pos).norm2()) > 300) ) //Half robot SACARRRR
 		{	
 			qDebug() << __FUNCTION__ << "Candidato";
 			//Check if the robot passes through the straight line
@@ -103,12 +93,13 @@ bool ElasticBand::shortCut(InnerModel *innermodel, WayPoints &road, const RoboCo
 			{
 				//Is so remove all intermadiate points between robot and new subtarget
 				qDebug() << __FUNCTION__ << "Confirmado";
-				//qFatal("fary SHORTCUT");
-				return true;
+				best = it;
 			}
 		}
-		return false;
 	}
+	if( best != road.begin() and (robot+1) != road.end())
+		road.erase(robot+1, best);
+	return false;
 }
 
 /**
@@ -482,7 +473,8 @@ bool ElasticBand::computeFreePath(InnerModel *innermodel, const WayPoint &w1, co
 	float length = (w1.pos -w2.pos).norm2();
 	float landa = 150. / length; ///CHECK
 	p = (w1.pos * (T)(1. - landa)) + (w2.pos * landa);
-	QVec pr = innermodel->transform("base", p, "world");
+	
+	QVec pr = innermodel->transform("robot", p, "world");
 	float angle = atan2(pr.x(),pr.z());
 			
 	//We go through the laser array until the nearest beam is found
@@ -491,7 +483,7 @@ bool ElasticBand::computeFreePath(InnerModel *innermodel, const WayPoint &w1, co
 	uint i;
 	float init = laserData[0].angle;
 			
-	qDebug() << __FILE__<< __FUNCTION__ << "angle" << angle << "length" << length << "init" << init << pr << w1.pos << w2.pos;
+	// qDebug() << __FUNCTION__ << "angle" << angle << "length" << length << "init" << init << pr << w1.pos << w2.pos;
 	for(i=1; i< laserData.size();i++)
 	{
 		if( laserData[i].angle > init ) //ascending order
@@ -509,7 +501,7 @@ bool ElasticBand::computeFreePath(InnerModel *innermodel, const WayPoint &w1, co
 	//Now is the path to the next bubble is blocked we find an alternative free direction or report complete failure.
 	//additional criteria: free dir with minimun angle wrt to previous segment aka inertial term
 	
-	qDebug() << __FILE__ << __FUNCTION__ << "i" << i << pr.norm2()+250. << laserData[i].dist;
+	// qDebug() << __FUNCTION__ << "i" << i << pr.norm2()+250. << laserData[i].dist;
 	//now we have the k index. we need a simple interpolation among neighboors and the final check
 	if( pr.norm2()+250. > laserData[i].dist ) // laser beam is smaller than p point. The path is crossed by an obstacle
 	{
@@ -517,6 +509,120 @@ bool ElasticBand::computeFreePath(InnerModel *innermodel, const WayPoint &w1, co
 	}
 	return free;
 }
+
+/**
+ * @brief Moves a virtual copy of the robot along the road checking for enough free space around it
+ * 
+ * @param innermodel ...
+ * @param road ...
+ * @param laserData ...
+ * @param robotRadius ...
+ * @return bool
+ */
+// bool ElasticBand::checkCollisionAlongRoad(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData& laserData, float robotRadius)
+// {
+// 	for(auto w : road)
+// 	{
+// 		// move to vrobot to w and check it against the laser field 
+// 		// there should be free space in all directions around the robot where there is a laser measure
+// 		// we need a function that tells us, for each laser beam if it is too close to the robot
+// 		// we have baseOffsets
+// 		
+// 		pr = innermodel->transform("base", p, "world");
+// 			//float minDist = std::numeric_limits<float>::max();
+// 			//qDebug() << "point" << i << w1.pos << w2.pos << p;
+// 			for(uint j=0; j<laserData.size(); j++)
+// 			{
+// 				QVec l = innermodel->laserTo("base","laser",laserData[j].dist, laserData[j].angle);
+// 				float dist = (l-pr).norm2();
+// 		
+// 				if( dist < robotRadius ) 
+// 				{	
+// 				
+// 					//Fix the collision and break
+// 					//Estimate the Jacobian first by perturbating the point pr
+// 					float h = 50; //Delta 
+// 					QVec jacobian = QVec::vec3( (l-(pr - QVec::vec3(h,0,0))).norm2() - (l-(pr + QVec::vec3(h,0,0))).norm2(), 
+// 																			 0 ,
+// 																			(l-(pr - QVec::vec3(0,0,h))).norm2() - (l-(pr + QVec::vec3(0,0,h))).norm2()) * (T)(1.f/(2.f*h));
+// 					// exact jump to go along gradient up to 270 away from center											
+// 					// float jump = sqrt((270*270 - pow(l.x()-pr.x(),2) - pow(l.z()-pr.z(),2) ) / pow(jacobian.x() + jacobian.z(),2));
+// 					// qDebug() << "jump" << jump << (l-(pr-(jacobian*jump))).norm2();
+// 					// pr = pr - (jacobian * jump);
+// 																			
+// 					///Linear search along the jacobian direction performs better
+// 					pr = pr - (jacobian * ( (robotRadius - dist)));
+// 					int cont=0;
+// 					while( (l-pr).norm2() < robotRadius or cont > 10)
+// 					{
+// 						pr = pr - jacobian;
+// 						cont++;
+// 					}
+// 					//if (cont>10) the Jac is not working
+// 					
+// 					QVec q = innermodel->transform("world", pr, "base");
+// 					float distQ = (l-pr).norm2();
+// 					//If p==w2, move the point, if not, Insert a new point and move it
+// 					int m;
+// 				
+// 					QVec w2b = w2.pos;
+// 					
+// 					if( (q-w2.pos).max(m) > 100)
+// 					{
+// 						WayPoint w(q);
+// 						w.minDist = dist;
+// 						road.insert(i+1, w);
+// 						road.currentCollisionIndex = i+1;
+// 						qDebug() << "INSERTING point at " << q;
+// 					}
+// 					else
+// 					{
+// 						w2.pos = q;
+// 						w2.minDist = distQ;
+// 						road.currentCollisionIndex = i;
+// 						//We should check here is the new w2.pos collides with other laser beams, in case of, we are probably in a narrow passage and
+// 						//we should report the situation as blocked
+// 					}
+// 					qDebug() << "point" << i << "dist" << dist << "p" << p << "w1" << w1.pos << "w2" << w2b << "q" << q << "road size" << road.size() 
+// 										<< "jac" << jacobian* ( (robotRadius - dist) ) << "distQ" << distQ << "k" << k << "landa" << landa << landa + k << "error" << dist-robotRadius;
+// 					return true;
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return false;
+// }
+// 
+// 
+// /**
+//  * @brief Computation of laser beams offsets that fall inside the robot base
+//  *
+//  * @param innerModel ...
+//  * @param laserData ...
+//  * @return std::vector< float, std::allocator >
+//  */
+// std::vector<std::pair<float, float> > ElasticBand::computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData)
+// {
+// 	//Base geometry as a rectangle centered in robot RS
+// 	QRectF base( QPointF(-200, 200), QPointF(200, -200));
+// 	std::vector<std::pair<float,float> > baseOffsets;
+// 	QVec p(3,0.f);
+// 	int k;
+// 
+// 	for(auto i : laserData)
+// 	{
+// 		for(k = 5; k < 4000; k++)
+// 		{
+// 			p = innerModel->laserTo("robot","laser",k,i.angle);
+// 			//p[1] = 0.f;
+// 			//if( p.norm2() - 250 >= 0) 
+// 			if( base.contains( QPointF( p.x(), p.z() ) ) == false )
+// 				break;
+// 		}
+// 		baseOffsets.push_back(std::make_pair(k,i.angle));
+// 	}
+// 	return baseOffsets;
+// }
 
 
 bool ElasticBand::checkCollision(InnerModel *innermodel, WayPoints &road, const RoboCompLaser::TLaserData& laserData, float robotRadius)
@@ -603,6 +709,22 @@ bool ElasticBand::checkCollision(InnerModel *innermodel, WayPoints &road, const 
 	return false;
 }
 
+/**
+ * @brief Check if any of the waypoints has nan coordinates
+ * 
+ * @param road ...
+ * @return bool
+ */
+bool ElasticBand::checkIfNAN(const WayPoints &road)
+{
+	for(auto it = road.begin(); it != road.end(); ++it)
+		if( std::isnan(it->pos.x()) or std::isnan(it->pos.y()) or std::isnan(it->pos.z()) )
+		{
+			road.print();
+			return true;
+		}
+	return false;
+}
 
 ///////////////////
 /// Continuous smoothing of the road to provide opportunistic skills

@@ -22,7 +22,6 @@
 #define CONTROLLER_H
 
 #include <QtCore>
-#include "pointstoroad.h"
 #include <OmniRobot.h>
 #include "waypoints.h"
 #include <innermodel/innermodel.h>

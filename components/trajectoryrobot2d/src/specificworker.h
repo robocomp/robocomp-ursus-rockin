@@ -25,7 +25,6 @@
 #include "controller.h"
 #include "elasticband.h"
 #include "waypoints.h"
-#include "localizer.h"
 #include "plannerompl.h"
 #include "plannerprm.h"
 //#include "plannerthunder.h"

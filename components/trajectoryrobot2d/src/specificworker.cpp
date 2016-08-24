@@ -618,6 +618,7 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 									+ QString::number(targetRot.y() - robotRot.y()) + "rads. Min = 0.05rads";
 		qDebug() <<__FUNCTION__ << s;
 		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = s.toStdString();
+		tState.setState("IDLE - TARGET TOO CLOSE");
 		throw ex;
 	}
 	
@@ -630,6 +631,7 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 		qDebug() << __FUNCTION__ << std::get<QString>(r);
 		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Fail. Robot is outside limits or colliding. Ignoring request. " + 	
 																																std::get<QString>(r).toStdString();
+		tState.setState("IDLE - COLLISION AT ORIGIN");
 		throw ex;
 	}
 	
@@ -642,6 +644,7 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 		qDebug() << __FUNCTION__ << std::get<QString>(r);
 		RoboCompTrajectoryRobot2D::RoboCompException ex; ex.text = "Fail. Target outside limits or colliding. Ignoring request. " + 
 																																std::get<QString>(r).toStdString();
+		tState.setState("IDLE - COLLISION AT TARGET");
 		throw ex;
 	}
 		

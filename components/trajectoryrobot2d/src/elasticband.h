@@ -23,7 +23,7 @@
 #include <innermodel/innermodel.h>
 #include <innermodeldraw.h>
 #include <Laser.h>
-#include <limits>       // std::numeric_limits
+#include <limits>       
 #include "waypoints.h"
 #include <assert.h>
 #include "currenttarget.h"
@@ -33,6 +33,10 @@
 #define DELTA_H 50
 #define ROAD_STEP_SEPARATION 400
 
+/**
+ * @brief This class computes laser-road force interaction, effectively projecting the "mental" road onto the physical world of distances
+ * 
+ */
 class ElasticBand
 {
 	public:

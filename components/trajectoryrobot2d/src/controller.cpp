@@ -67,41 +67,41 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		return false;
 	}
 		
-// 	//////////////////////////////////////////////	
-// 	///CHECK ROBOT FOR INMINENT COLLISION
-// 	///////////////////////////////////////////////
-// 	float vside = 0;
-// 	int j=0;
-// 	road.setBlocked(false);
-// 	for(auto i : laserData)
-// 	{
-// 		if(i.dist < 10) i.dist = 30000;
-// 		if( i.dist < baseOffsets[j] + 50 )
-// 		{
-// 			if( i.angle > -1.30 and i.angle < 1.30)
-// 			{
-// 				qDebug() << __FUNCTION__<< "Controller: robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
-// 				stopTheRobot(omnirobot_proxy);
-// 				road.setBlocked(true);		// MIRAR ESTO
-// 				break;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			if (i.dist < baseOffsets[j] + 150) 
-// 			{
-// 				if (i.angle > 0)
-// 				{
-// 					vside  = -80;
-// 				}
-// 				else
-// 				{
-// 					vside = 80;
-// 				}
-// 			}
-// 		}
-// 		j++;
-// 	}
+	//////////////////////////////////////////////	
+	///CHECK ROBOT FOR INMINENT COLLISION
+	///////////////////////////////////////////////
+	float vside = 0;
+	int j=0;
+	road.setBlocked(false);
+	for(auto i : laserData)
+	{
+		if(i.dist < 10) i.dist = 30000;
+		if( i.dist < baseOffsets[j] + 50 )
+		{
+			if( i.angle > -1.30 and i.angle < 1.30)
+			{
+				qDebug() << __FUNCTION__<< "Controller: robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
+				stopTheRobot(omnirobot_proxy);
+				road.setBlocked(true);		// MIRAR ESTO
+				break;
+			}
+		}
+		else
+		{
+			if (i.dist < baseOffsets[j] + 150) 
+			{
+				if (i.angle > 0)
+				{
+					vside  = -80;
+				}
+				else
+				{
+					vside = 80;
+				}
+			}
+		}
+		j++;
+	}
 
 	/////////////////////////////////////////////////
 	//////  CHECK CPU AVAILABILITY. If lagging reduce speed
@@ -141,7 +141,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	/////////////////////////////////////////////////
 	//////   ADVANCE SPEED
 	////////////////////////////////////////////////
-	float vside = 0;
+	//float vside = 0;
 	// Factor to be used in speed control when approaching the end of the road
 	float teta;
 	if( road.getRobotDistanceToTarget() < 1000)
@@ -270,7 +270,7 @@ bool Controller::avoidanceControl(InnerModel *innerModel, const RoboCompLaser::T
 }
 
 /**
- * @brief Offset computation of each laser beam to account for the geometry of the getBaseState
+ * @brief Offset computation of each laser beam to account for the geometry of the Robot base
  *
  * @param innerModel ...
  * @param laserData ...
