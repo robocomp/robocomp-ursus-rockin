@@ -105,8 +105,9 @@ T QLine2D::signedAngleWithLine2D(const QLine2D& line)
 
 QLine2D QLine2D::getPerpendicularLineThroughPoint(const QVec& point)
 {
-		Q_ASSERT_X(point.size()==2,"QLine2D::perpendicularDistanceToPoint", "Point size != 2");
- 		return QLine2D( this->getPerpendicularVector(), point.x(), point.y());
+	Q_ASSERT_X(point.size()==2,"QLine2D::perpendicularDistanceToPoint", "Point size != 2");
+
+	return QLine2D( this->getPerpendicularVector(), point.x(), point.y());
 }
 
 QVec QLine2D::intersectionPoint(const QLine2D& l)

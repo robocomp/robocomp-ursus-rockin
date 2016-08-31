@@ -41,7 +41,7 @@ class CurrentTarget
 		bool hasRotation() const;
 		bool isBlocked() const;
 		void setHasRotation(bool a);
-		enum class State { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE, INSERTOBSTACLE, LEARNPATH};
+		enum class State { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE, DISCONNECTED, LEARNPATH};
 		State state;
 		void setState(State st);
 		

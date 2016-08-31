@@ -83,8 +83,8 @@ std::tuple<bool, QString> Sampler::checkRobotValidStateAtTarget(const QVec &targ
 	///////////////////////
 	//// Check if the robot at the target collides with any know object
 	///////////////////////	
-	for ( auto in : robotNodes )
-		for ( auto out : restNodes )
+	for ( auto &in : robotNodes )
+		for ( auto &out : restNodes )
 		{
 			if ( innerModelSampler->collide( in, out))
 			{
@@ -485,7 +485,7 @@ bool Sampler::checkRobotValidDirectionToTargetOneShot(const QVec & origin , cons
 	robotBoxCol.setTransform(R1, fcl::Vec3f(boxBack(0), boxBack(1), boxBack(2)));
 		
 	//Check collision of the box with the world
-	for (auto it : restNodes)
+	for ( auto &it : restNodes)
 	{
 		if ( innerModelSampler->collide(it, &robotBoxCol))
 		{

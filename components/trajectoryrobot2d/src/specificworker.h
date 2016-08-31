@@ -28,7 +28,7 @@
 #include "plannerompl.h"
 #include "plannerprm.h"
 //#include "plannerthunder.h"
-
+#include "innerviewer.h"
 #include "currenttarget.h"
 #include "sampler.h"
 
@@ -147,8 +147,8 @@ class SpecificWorker : public GenericWorker
 		//Timers to control real time events
 		QTime relojForInputRateControl;
 		QTime taskReloj;
-		
-		
+
+
 		////////////////////////////////////////////////////////////////////////
 		//Commands corresponding to servant methods, but running on local thread
 		/////////////////////////////////////////////////////////////////////////
@@ -162,6 +162,7 @@ class SpecificWorker : public GenericWorker
 		////////////////////////////////////////////////////////////////////////
 		//Auxiliary methods
 		/////////////////////////////////////////////////////////////////////////
+		void tryingToConnect();
 		bool updateInnerModel(InnerModel* inner, TrajectoryState &state);
 		bool insertObstacle();
 		bool removeNode(const QString &item);
@@ -180,6 +181,8 @@ class SpecificWorker : public GenericWorker
 		InnerModelViewer *innerViewer;
 		InnerModel *innerVisual;
 	#endif
+
+		InnerViewer *viewer;
 };
 
 

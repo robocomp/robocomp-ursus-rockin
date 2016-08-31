@@ -50,13 +50,13 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//////////////////////////////////////////////	
 	if(road.isFinished() == true ) 
 	{		
-		qDebug() << __FUNCTION__ << "road finished. Returning to main";
+		qDebug() << __FUNCTION__ << "Controller: road finished. Returning to main";
 		stopTheRobot(omnirobot_proxy);
 		return false;
 	}
 	if(road.requiresReplanning == true ) 
 	{		
-		qDebug() << __FUNCTION__ << "requiresReplanning. Returning to main";
+		qDebug() << __FUNCTION__ << "Controller: requiresReplanning. Returning to main";
 		stopTheRobot(omnirobot_proxy);
 		return false;
 	}
@@ -297,7 +297,6 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 	}
 	return baseOffsets;
 }
-
 
 
 void Controller::stopTheRobot(RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy)

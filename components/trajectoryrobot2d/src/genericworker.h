@@ -53,7 +53,8 @@ class GenericWorker :
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
 #else
-public QObject
+//public QObject
+public QWidget, public Ui_guiDlg
 #endif
 {
 Q_OBJECT
