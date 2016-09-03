@@ -39,8 +39,6 @@ namespace og = ompl::geometric;
 
 class PlannerOMPL : public QObject
 {
-    Q_OBJECT
-
 	public:
 		PlannerOMPL(){}
 		PlannerOMPL(InnerModel *innerModel_, QObject *parent=0);

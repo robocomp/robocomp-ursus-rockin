@@ -97,6 +97,12 @@ std::tuple<bool, QString> Sampler::checkRobotValidStateAtTarget(const QVec &targ
 	return std::make_tuple(true, diagnosis);
 }
 
+std::tuple< bool, QString > Sampler::checkRobotValidStateAtTarget(const QVec& target) const
+{
+	if( target.size() != 6 )
+		return std::make_tuple(false, QString("Invalid target vector. A 6D vector is required"));
+	return checkRobotValidStateAtTarget(target.subVector(0,2), target.subVector(3,5));
+}
 
 /**
  * @brief Samples nPoints from robot free space delimited by the union of rectangles in outerregion and 

@@ -32,6 +32,7 @@ class Sampler
 		Sampler();
 		void initialize(InnerModel* inner, const QRectF& outerRegion_, const QList< QRectF >& innerRegions_);
 		std::tuple< bool, QString > checkRobotValidStateAtTarget(const QVec& targetPos, const QVec& targetRot) const;
+		std::tuple< bool, QString > checkRobotValidStateAtTarget(const QVec& target) const;
 		QList<QVec> sampleFreeSpaceR2(uint nPoints = 1);
 		QList<QVec> sampleFreeSpaceR2Uniform(const QRectF &box, uint32_t i=1);
 		QList<QVec> sampleFreeSpaceR2Gaussian(float meanX, float meanY, float sigma1, float sigma2, uint32_t nPoints = 1);

@@ -34,11 +34,11 @@
 
 //#include "ParabolicPathSmooth/smoother.h"
 
-#ifdef USE_QTGUI
-	#include <osgviewer/osgview.h>
-	#include <innermodel/innermodelviewer.h>
-	#include <innermodeldraw.h>
-#endif
+// #ifdef USE_QTGUI
+// 	#include <osgviewer/osgview.h>
+// 	#include <innermodel/innermodelviewer.h>
+// 	#include <innermodeldraw.h>
+// #endif
 
 /**
        \brief Code to control de robot along a trajectory defined by a set of points
@@ -177,9 +177,9 @@ class SpecificWorker : public GenericWorker
 		void mapBasedTarget(const NavigationParameterMap  &parameters);
 		
 	#ifdef USE_QTGUI
-		OsgView *osgView;
-		InnerModelViewer *innerViewer;
-		InnerModel *innerVisual;
+// 		OsgView *osgView;
+// 		InnerModelViewer *innerViewer;
+//			InnerModel *innerVisual;
 	#endif
 
 		InnerViewer *viewer;

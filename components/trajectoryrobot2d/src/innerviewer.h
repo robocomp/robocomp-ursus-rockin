@@ -33,8 +33,6 @@
 
 class InnerViewer: public QThread
 {
-	Q_OBJECT
-
 	public:
 		InnerViewer(InnerModel *innerModel_, QObject *parent = 0);
 		~InnerViewer(){};

@@ -29,15 +29,15 @@ SpecificWorker::SpecificWorker(MapPrx &mprx, QWidget *parent) : GenericWorker(mp
 	this->params = params;
 	tState.setState("IDLE");
 #ifdef USE_QTGUI
-	innerViewer = NULL;
-	osgView = new OsgView(this);
-	osgGA::TrackballManipulator *tb = new osgGA::TrackballManipulator;
-	osg::Vec3d eye(osg::Vec3(4000., 4000., -1000.));
-	osg::Vec3d center(osg::Vec3(0., 0., -0.));
-	osg::Vec3d up(osg::Vec3(0., 1., 0.));
-	tb->setHomePosition(eye, center, up, true);
-	tb->setByMatrix(osg::Matrixf::lookAt(eye, center, up));
-	osgView->setCameraManipulator(tb);
+// 	innerViewer = NULL;
+// 	osgView = new OsgView(this);
+// 	osgGA::TrackballManipulator *tb = new osgGA::TrackballManipulator;
+// 	osg::Vec3d eye(osg::Vec3(4000., 4000., -1000.));
+// 	osg::Vec3d center(osg::Vec3(0., 0., -0.));
+// 	osg::Vec3d up(osg::Vec3(0., 1., 0.));
+// 	tb->setHomePosition(eye, center, up, true);
+// 	tb->setByMatrix(osg::Matrixf::lookAt(eye, center, up));
+// 	osgView->setCameraManipulator(tb);
 #else
 	show();
 #endif
@@ -68,13 +68,14 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		if (QFile::exists(QString::fromStdString(par.value)))
 		{
 			innerModel = new InnerModel(par.value);
-#ifdef USE_QTGUI
-			innerVisual = new InnerModel(par.value);    //USED TO REPRESENT innerModel in innerViewer CAN'T THIS BE THE ORIGINAL?
-			innerViewer = new InnerModelViewer(innerVisual, "root", osgView->getRootGroup(), true);
-			show();
-#endif
-			viewer = new InnerViewer(innerModel);
+//#ifdef USE_QTGUI
+	//		innerVisual = new InnerModel(par.value);    //USED TO REPRESENT innerModel in innerViewer CAN'T THIS BE THE ORIGINAL?
+  //		innerViewer = new InnerModelViewer(innerVisual, "root", osgView->getRootGroup(), true);
+  //		show();
+			viewer = new InnerViewer(innerModel);  //makes a copy of innermodel for internal use
 			viewer->start();
+//#endif
+
 		}
 		else
 		{
@@ -140,11 +141,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	///////////////////
 	plannerPRM.initialize(&sampler, 100, 20);  //100 points for the initial graph and 20 neighbours for each one
 
-#ifdef USE_QTGUI
-	plannerPRM.cleanGraph(innerViewer);
-	plannerPRM.drawGraph(innerViewer);
-#endif
-
+// #ifdef USE_QTGUI
+// 	plannerPRM.cleanGraph(innerViewer);
+// 	plannerPRM.drawGraph(innerViewer);
+// #endif
+	
 	plannerPRM.cleanGraph(viewer->innerViewer);
 	plannerPRM.drawGraph(viewer->innerViewer);
 
@@ -163,7 +164,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//by computing VAdv and VRot from the relative position wrt to the local road
 	/////////////////////////////////////////////////////////////////////////////////
 	controller = new Controller(innerModel, laserData, 2);
-
 
 	Period = 100;
 	timer.start(Period);
@@ -218,30 +218,38 @@ void SpecificWorker::compute()
 			{
 				if (plannerPRM.learnForAWhile(150, false)) //Max number of nodes in the graph
 					//plannerPRM.drawGraph(innerViewer);
-					int a=1;
+				{}
 				learnReloj.restart();
-			}
+			}	
+			///////////////////////////////////////////////
+			// Check if robot is inside limits and not in collision.
+			///////////////////////////////////////////////
+			QVec robot = innerModel->transform6D("world", "robot");
+			auto r = sampler.checkRobotValidStateAtTarget(robot);
+			if (std::get<bool>(r))
+				tState.setState("IDLE");
 			break;
 	}
 
 	if (reloj.elapsed() > 1000)    //to draw only every 2 secs
 	{
-#ifdef USE_QTGUI
-		//road.draw(innerViewer, innerModel, currentTarget);
-//		if (innerViewer)
-//		{
-//			QMutexLocker ml(&mutex_inner);
-//			innerViewer->update();
-//			osgView->autoResize();
-//			osgView->frame();
-//		}
-#endif
-		//road.draw(innerViewer, innerModel, currentTarget);
 		qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed() / cont << "State. Robot at:" << innerModel->transform("world", "robot");
 		cont = 0;
 		reloj.restart();
 	}
 	cont++;
+	
+	//road.draw(viewer->innerViewer, innerModel, currentTarget);
+	#ifdef USE_QTGUI
+// 		if (innerViewer)
+// 		{
+// 			road.draw(innerViewer, innerModel, currentTarget);	
+// 			innerViewer->update();
+// 			osgView->autoResize();
+// 			osgView->frame();
+// 		}
+	#endif
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -258,7 +266,7 @@ bool SpecificWorker::stopCommand(CurrentTarget &target, WayPoints &myRoad, Traje
 	myRoad.reset();
 	myRoad.endRoad();
 #ifdef USE_QTGUI
-	myRoad.clearDraw(innerViewer);
+	myRoad.clearDraw(viewer->innerViewer);
 #endif
 	drawGreenBoxOnTarget(target.getTranslation());
 	target.reset();
@@ -283,7 +291,7 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
 	myRoad.reset();
 	myRoad.endRoad();
 #ifdef USE_QTGUI
-	myRoad.clearDraw(innerViewer);
+	myRoad.clearDraw(viewer->innerViewer);
 #endif
 	target.reset();
 	//changeCommand(target,CurrentTarget::State::IDLE);
@@ -367,10 +375,8 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 	}
 
 #ifdef USE_QTGUI
-	myRoad.draw(innerViewer, innerModel, target);
-#endif
-
 	//myRoad.draw(viewer->innerViewer, innerModel, target);
+#endif
 
 	///////////////////////////////////
 	// Update the band
@@ -646,7 +652,7 @@ SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const 
 	///////////////////////////////////////////////
 	// Check if robot is inside limits and not in collision.
 	///////////////////////////////////////////////
-	auto r = sampler.checkRobotValidStateAtTarget(targetT, targetRot);
+	auto r = sampler.checkRobotValidStateAtTarget(robotT, robotRot);
 	if (std::get<bool>(r) == false)
 	{
 		qDebug() << __FUNCTION__ << std::get<QString>(r);
@@ -801,20 +807,19 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 {
 	// 	qDebug()<< __FUNCTION__ << "Sending robot to initial position";
 #ifdef USE_QTGUI
-	innerVisual->updateTransformValues("initialRobotPose", 0, 0, 0, 0, 0, 0);
-	innerVisual->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
+// 	innerVisual->updateTransformValues("initialRobotPose", 0, 0, 0, 0, 0, 0);
+// 	innerVisual->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
+ 	  viewer->innerModel->updateTransformValues("initialRobotPose", 0, 0, 0, 0, 0, 0);
+		viewer->innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
 #endif
 
 	try
-	{
-		omnirobot_proxy->setOdometerPose(x, z, alpha);
-	}
+	{		omnirobot_proxy->setOdometerPose(x, z, alpha);	}
 	catch (...)
 	{
 		qDebug() << __FUNCTION__ << "Error setting robot odometer";
 	}
 }
-
 
 float SpecificWorker::angmMPI(float angle)
 {
@@ -843,7 +848,7 @@ void SpecificWorker::drawTarget(const QVec &target)
 #ifdef USE_QTGUI
 	//Draw target as red box
 	QMutexLocker ml(&mutex_inner);
-	InnerModelDraw::addPlane_ignoreExisting(innerViewer, "target", "world", QVec::vec3(target(0), 5, target(2)),
+	InnerModelDraw::addPlane_ignoreExisting(viewer->innerViewer, "target", "world", QVec::vec3(target(0), 5, target(2)),
 	                                        QVec::vec3(1, 0, 0), "#990000", QVec::vec3(80, 80, 80));
 #endif
 }
@@ -851,7 +856,7 @@ void SpecificWorker::drawTarget(const QVec &target)
 void SpecificWorker::drawGreenBoxOnTarget(const QVec &target)
 {
 #ifdef USE_QTGUI
-	InnerModelDraw::addPlane_ignoreExisting(innerViewer, "target", "world", QVec::vec3(target(0), 1800, target(2)),
+	InnerModelDraw::addPlane_ignoreExisting(viewer->innerViewer, "target", "world", QVec::vec3(target(0), 1800, target(2)),
 	                                        QVec::vec3(1, 0, 0), "#009900", QVec::vec3(100, 100, 150));
 #endif
 

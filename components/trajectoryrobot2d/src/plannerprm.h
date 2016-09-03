@@ -77,8 +77,6 @@ typedef std::vector<CComponent> ConnectedComponents;
 
 class PlannerPRM : public QObject
 {
-  Q_OBJECT
-    
 	public:
 		PlannerPRM();
 		void initialize(Sampler *sampler_, int nPointsInGraph, int nNeighboursInGraph);

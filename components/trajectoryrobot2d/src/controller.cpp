@@ -172,34 +172,35 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	lastVrot=vrot;
 
 	//Pre-limiting filter to avoid displacements in very closed turns
-	if( fabs(vrot) == 0.3)
+	if( fabs(vrot) > 0.3)
+	{
 		vadvance = 0;
 		vside = 0;
+	}
 	
 	//stopping speed jump
-// 	if(fabs(vadvance - lastVadvance) > umbral)
-// 	{
-// 		//qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
-// 		if(vadvance > lastVadvance)
-// 			vadvance = lastVadvance + umbral;
-// 		else vadvance = lastVadvance - umbral;
-// 	}
+	// 	if(fabs(vadvance - lastVadvance) > umbral)
+	// 	{
+	// 		//qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
+	// 		if(vadvance > lastVadvance)
+	// 			vadvance = lastVadvance + umbral;
+	// 		else vadvance = lastVadvance - umbral;
+	// 	}
 	lastVadvance=vadvance;
 
 	// Limiting filter
 	if( vadvance > MAX_ADV_SPEED )
 		vadvance = MAX_ADV_SPEED;
 	
-
-	//vside = vrot*MAX_ADV_SPEED;
+	vside = vrot*MAX_ADV_SPEED;
 	
 	/////////////////////////////////////////////////
 	//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 	////////////////////////////////////////////////
 
 	//bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
-//  		if( collision )
-//  			road.setBlocked(true);
+	//  		if( collision )
+	//  			road.setBlocked(true);
 
 	/////////////////////////////////////////////////
 	///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
@@ -217,13 +218,13 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//////   EXECUTION
 	////////////////////////////////////////////////
 
-// 		qDebug() << "------------------Controller Report ---------------;";
-// 		qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
-// 		qDebug() << "---------------------------------------------------;";
-							
-		try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
-		catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
-	
+	// 		qDebug() << "------------------Controller Report ---------------;";
+	// 		qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
+	// 		qDebug() << "---------------------------------------------------;";
+								
+	try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
+	catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
+
 	epoch = reloj.restart();  //epoch time in ms
 	return false;
 

@@ -232,6 +232,7 @@ bool WayPoints::draw(InnerModelViewer *innerViewer, InnerModel *innerModel, cons
 		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();        //OJO, PETA SI NO ESTA LA TG CALCULADA ANTES
 		QString item = "p_" + QString::number(i);
 		InnerModelDraw::addTransform_ignoreExisting(innerViewer, item, "road");
+		
 		innerViewer->innerModel->updateTransformValues(item, w.pos.x(), 10, w.pos.z(), 0, 0, 0);
 
 		if ((int) i == (int) indexOfCurrentPoint + 1) //CHANGE TO getIndexOfClosestPointToRobot()

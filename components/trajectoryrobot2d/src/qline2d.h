@@ -29,7 +29,6 @@ using namespace RMat;
 
 class QLine2D : public QVec
 {
-
 	public:
 		QLine2D() : QVec(3,0.f) {};               
 		QLine2D(const QVec &p1, const QVec &p2);
