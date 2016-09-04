@@ -18,6 +18,7 @@
 #ifndef PLANNERPRM_H
 #define PLANNERPRM_H
 
+#include "config.h"
 #include <QObject>
 #include <qmat/QMatAll>
 #include <innermodel/innermodel.h>
@@ -177,37 +178,3 @@ template <class DistanceMap> inline edge_writer<DistanceMap> make_edge_writer(Di
 	return edge_writer<DistanceMap>(d);
 }
 #endif // PLANNERPRM_H
-// struct Point3D
-// {
-// 	float x;
-// 	float y;
-// 	float z;
-// 	Point3D(){};
-// 	Point3D(const Point3D &p) { x = p.x; y = p.y; z=p.z;};
-// 	Point3D(float i, float j, float k) { x = i; y = j; z = k;};
-// 	operator QVec() const { return QVec::vec3(x,y,z);}
-// 	Point3D operator =(const QVec &v) const { return Point3D(v.x(),v.y(),v.z()); };		
-// 	inline friend std::istream& operator >> ( std::istream& i, Point3D& p )
-//     {
-//         i >> p.x;
-// 		if((i.flags() & std::ios_base::skipws) == 0) 
-// 		{
-// 			char whitespace;
-// 			i >> whitespace;
-// 		}
-// 		i >> p.y;
-// 		if((i.flags() & std::ios_base::skipws) == 0)
-// 		{
-// 			char whitespace;
-// 			i >> whitespace;
-// 		}
-// 		i >> p.z; 	
-//         return i;
-//     }
-// 
-//     inline friend std::ostream& operator << ( std::ostream& o, const Point3D& p )
-//     {
-//         o << p.x << " " << p.y << " " << p.z;
-//         return o;
-//     } 
-// };

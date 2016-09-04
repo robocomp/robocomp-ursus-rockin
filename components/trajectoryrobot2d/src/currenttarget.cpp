@@ -63,6 +63,15 @@ void CurrentTarget::setRotation(const QVec& r)
 	targetRot = r;
 }
 
+QVec CurrentTarget::getFullPose() const
+{
+	QMutexLocker ml(&mutex);
+	QVec r(6);
+	r.inject(targetTr,0);
+	r.inject(targetRot,3);
+	return r;
+}
+
 void CurrentTarget::setHasRotation(bool a)
 {
 	QMutexLocker ml(&mutex);

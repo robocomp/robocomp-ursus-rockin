@@ -215,7 +215,7 @@ void WayPoints::print() const
 	}
 }
 
-bool WayPoints::draw(InnerModelViewer *innerViewer, InnerModel *innerModel, const CurrentTarget &currentTarget)
+bool WayPoints::draw(InnerModelViewer *innerViewer, const CurrentTarget &currentTarget)
 {
 	clearDraw(innerViewer);
 	if (size() == 0) return false;
@@ -253,7 +253,6 @@ bool WayPoints::draw(InnerModelViewer *innerViewer, InnerModel *innerModel, cons
 		QString item = "p_" + QString::number(this->size() - 1);
 		InnerModelDraw::drawLine(innerViewer, item + "_line", item, ln, 600, 30, "#400055");
 	}
-
 	return true;
 }
 

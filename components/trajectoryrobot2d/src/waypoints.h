@@ -68,7 +68,7 @@ class WayPoints : public QList< WayPoint >
 		void readRoadFromList(QList<QVec> list);
 		void printRobotState(InnerModel* innerModel, const CurrentTarget& currentTarget);
 		void print() const;
-		bool draw(InnerModelViewer *innerViewer, InnerModel *innerModel, const CurrentTarget &currentTarget);  //Default in upTo means all list
+		bool draw(InnerModelViewer* innerViewer, const CurrentTarget& currentTarget);  //Default in upTo means all list
 		void clearDraw(InnerModelViewer *innerViewer);
 		QList<QVec> backList;
 		void update();

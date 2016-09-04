@@ -34,6 +34,7 @@ class CurrentTarget
 		void setTranslation(const QVec &t);
 		QVec getRotation() const;		
 		void setRotation(const QVec &r);
+		QVec getFullPose() const;
 		bool isWithoutPlan() const ;
 		void setWithoutPlan(bool w); 
 		void print();
@@ -41,7 +42,7 @@ class CurrentTarget
 		bool hasRotation() const;
 		bool isBlocked() const;
 		void setHasRotation(bool a);
-		enum class State { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE, DISCONNECTED, LEARNPATH};
+		enum class State { GOTO, SETHEADING, STOP, CHANGETARGET, GOBACKWARDS, IDLE, DISCONNECTED, ROBOT_COLLISION, TARGET_COLLISION, LEARNING};
 		State state;
 		void setState(State st);
 		

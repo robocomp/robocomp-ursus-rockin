@@ -68,31 +68,26 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		if (QFile::exists(QString::fromStdString(par.value)))
 		{
 			innerModel = new InnerModel(par.value);
-//#ifdef USE_QTGUI
-	//		innerVisual = new InnerModel(par.value);    //USED TO REPRESENT innerModel in innerViewer CAN'T THIS BE THE ORIGINAL?
-  //		innerViewer = new InnerModelViewer(innerVisual, "root", osgView->getRootGroup(), true);
-  //		show();
-			viewer = new InnerViewer(innerModel);  //makes a copy of innermodel for internal use
-			viewer->start();
-//#endif
-
+			#ifdef USE_QTGUI
+				viewer = new InnerViewer(innerModel);  //makes a copy of innermodel for internal use
+			#endif
 		}
 		else
 		{
-			std::cout << "Innermodel path " << par.value << " not found. ";
-			qFatal("Abort");
+			std::cout << "Aborting. Innermodel path " << par.value << " not found. ";
+			qFatal("Bye");
 		}
 	}
 	catch (std::exception e)
 	{
-		qFatal("Error reading config params");
+		qFatal("Aborting. Error reading config params");
 	}
 
 	//////////////////////////////
 	//Initial update InnerModel from robot
 	//////////////////////////////
-	updateInnerModel(innerModel, tState);
 	innerModel->newTransform("virtualRobot", "static", innerModel->getNode("robot"));
+	updateInnerModel(innerModel, tState);
 
 	//////////////////////////////////////
 	/// Initialize sampler of free space
@@ -141,14 +136,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	///////////////////
 	plannerPRM.initialize(&sampler, 100, 20);  //100 points for the initial graph and 20 neighbours for each one
 
-// #ifdef USE_QTGUI
-// 	plannerPRM.cleanGraph(innerViewer);
-// 	plannerPRM.drawGraph(innerViewer);
-// #endif
-	
-	plannerPRM.cleanGraph(viewer->innerViewer);
-	plannerPRM.drawGraph(viewer->innerViewer);
-
 	///////////////////
 	//Initializes the elastic band structure "road"
 	///////////////////
@@ -165,6 +152,13 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	/////////////////////////////////////////////////////////////////////////////////
 	controller = new Controller(innerModel, laserData, 2);
 
+	
+#ifdef USE_QTGUI
+	plannerPRM.cleanGraph(viewer->innerViewer);
+	plannerPRM.drawGraph(viewer->innerViewer);
+	viewer->start();	
+#endif
+	
 	Period = 100;
 	timer.start(Period);
 	return true;
@@ -179,7 +173,7 @@ void SpecificWorker::compute()
 {
 	static QTime reloj = QTime::currentTime();
 	static QTime learnReloj = QTime::currentTime();
-	static int cont = 0;
+	//static int cont = 0;
 
 	// Check for connection failure
 	if (updateInnerModel(innerModel, tState) == false)
@@ -189,7 +183,7 @@ void SpecificWorker::compute()
 		tState.setState("DISCONNECTED");
 		currentTarget.state = CurrentTarget::State::DISCONNECTED;
 	}
-
+		
 	switch (currentTarget.state)
 	{
 		case CurrentTarget::State::STOP:
@@ -199,6 +193,7 @@ void SpecificWorker::compute()
 			currentTarget.setState(CurrentTarget::State::GOTO);
 			break;
 		case CurrentTarget::State::GOTO:
+			timer.setInterval(Period);
 			gotoCommand(innerModel, currentTarget, tState, road, laserData);
 			break;
 		case CurrentTarget::State::SETHEADING:
@@ -207,38 +202,43 @@ void SpecificWorker::compute()
 		case CurrentTarget::State::GOBACKWARDS:
 			goBackwardsCommand(innerModel, currentTargetBack, currentTarget, tState, road);
 			break;
-		case CurrentTarget::State::LEARNPATH:
-			learnCommand(currentTarget, road);
-			break;
 		case CurrentTarget::State::DISCONNECTED:
 			timer.setInterval(2000);
 			break;
-		case CurrentTarget::State::IDLE:
-			if (learnReloj.elapsed() > 3000)
-			{
-				if (plannerPRM.learnForAWhile(150, false)) //Max number of nodes in the graph
-					//plannerPRM.drawGraph(innerViewer);
-				{}
-				learnReloj.restart();
-			}	
-			///////////////////////////////////////////////
-			// Check if robot is inside limits and not in collision.
-			///////////////////////////////////////////////
-			QVec robot = innerModel->transform6D("world", "robot");
-			auto r = sampler.checkRobotValidStateAtTarget(robot);
-			if (std::get<bool>(r))
+		case CurrentTarget::State::ROBOT_COLLISION:			// Check if robot is inside limits and not in collision.
+			timer.setInterval(1000);
+			if (std::get<bool>(sampler.checkRobotValidStateAtTarget(innerModel->transform6D("world", "robot"))))
 				tState.setState("IDLE");
+			break;
+		case CurrentTarget::State::TARGET_COLLISION:			// Check if robot is inside limits and not in collision.
+			timer.setInterval(300);
+			if (std::get<bool>(sampler.checkRobotValidStateAtTarget(currentTarget.getFullPose())))
+				tState.setState("IDLE");
+			break;
+		case CurrentTarget::State::LEARNING:	
+			if(plannerPRM.learnForAWhile(150, false)) //150, Max number of nodes in the graph. 
+			{
+				#ifdef USE_QTGUI
+					//drawGraph();  
+				#endif
+			}
+			currentTarget.setState(CurrentTarget::State::IDLE);
+			break;
+		case CurrentTarget::State::IDLE:
+			timer.setInterval(1500);
+			qDebug() << __FUNCTION__ << "Computed period" << reloj.restart()  << "State. Robot at:" << innerModel->transform("world", "robot");
+			currentTarget.setState(CurrentTarget::State::LEARNING);
 			break;
 	}
 
-	if (reloj.elapsed() > 1000)    //to draw only every 2 secs
-	{
-		qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed() / cont << "State. Robot at:" << innerModel->transform("world", "robot");
-		cont = 0;
-		reloj.restart();
-	}
-	cont++;
-	
+// 	if (reloj.elapsed() > 1000)    //to draw only every 2 secs
+// 	{
+// 		qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed() / cont << "State. Robot at:" << innerModel->transform("world", "robot");
+// 		cont = 0;
+// 		reloj.restart();
+// 	}
+// 	cont++;
+// 	
 	//road.draw(viewer->innerViewer, innerModel, currentTarget);
 	#ifdef USE_QTGUI
 // 		if (innerViewer)
@@ -266,9 +266,9 @@ bool SpecificWorker::stopCommand(CurrentTarget &target, WayPoints &myRoad, Traje
 	myRoad.reset();
 	myRoad.endRoad();
 #ifdef USE_QTGUI
-	myRoad.clearDraw(viewer->innerViewer);
+	//myRoad.clearDraw(viewer->innerViewer);
 #endif
-	drawGreenBoxOnTarget(target.getTranslation());
+	//drawGreenBoxOnTarget(target.getTranslation());
 	target.reset();
 	state.setElapsedTime(taskReloj.elapsed());
 	state.setState("IDLE");
@@ -291,7 +291,7 @@ bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &
 	myRoad.reset();
 	myRoad.endRoad();
 #ifdef USE_QTGUI
-	myRoad.clearDraw(viewer->innerViewer);
+	//myRoad.clearDraw(viewer->innerViewer);
 #endif
 	target.reset();
 	//changeCommand(target,CurrentTarget::State::IDLE);
@@ -348,6 +348,7 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 	bool coolPlan = true;
 	if (target.isWithoutPlan() == true)
 	{
+		state.setState("PLANNING");
 		QVec localT = target.getTranslation();
 		coolPlan = plannerPRM.computePath(localT, innerModel);
 		if (coolPlan == false)
@@ -362,7 +363,6 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 		updateInnerModel(innerModel, state);
 		target.setWithoutPlan(false);
 
-
 		//Init road
 		myRoad.reset();
 		myRoad.readRoadFromList(plannerPRM.getPath());
@@ -373,10 +373,6 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 		state.setPlanningTime(reloj.elapsed());
 		state.setState("EXECUTING");
 	}
-
-#ifdef USE_QTGUI
-	//myRoad.draw(viewer->innerViewer, innerModel, target);
-#endif
 
 	///////////////////////////////////
 	// Update the band
@@ -402,6 +398,11 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 // 		//qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
 // 		//computePlan(innerModel);
 // 	}
+	
+	#ifdef USE_QTGUI
+		myRoad.draw(viewer->innerViewer,  target);
+	#endif
+
 	state.setEstimatedTime(myRoad.getETA());
 	return true;
 }
@@ -428,7 +429,6 @@ SpecificWorker::setHeadingCommand(InnerModel *innerModel, float alfa, CurrentTar
 
 	const float MAX_ORIENTATION_ERROR = 0.04;
 
-	//float angRobot = angmMPI(innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y());
 	float angRobot = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
 
 	alfa = angmMPI(alfa);
@@ -503,7 +503,7 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 	{
 //		current.setHasRotation(false);
 //		myRoad.setFinished(true);
-		drawGreenBoxOnTarget(current.getTranslation());
+//		drawGreenBoxOnTarget(current.getTranslation());
 // 		current.print();
 // 		current.reset();
 // 		myRoad.reset();
@@ -645,7 +645,7 @@ SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const 
 		qDebug() << __FUNCTION__ << s;
 		RoboCompTrajectoryRobot2D::RoboCompException ex;
 		ex.text = s.toStdString();
-		tState.setState("IDLE - TARGET TOO CLOSE");
+		tState.setDescription("Target too close");
 		throw ex;
 	}
 
@@ -659,7 +659,8 @@ SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const 
 		RoboCompTrajectoryRobot2D::RoboCompException ex;
 		ex.text = "Fail. Robot is outside limits or colliding. Ignoring request. " +
 		          std::get<QString>(r).toStdString();
-		tState.setState("IDLE - COLLISION AT ORIGIN");
+		tState.setDescription("Robot collision at origin");
+		currentTarget.setState(CurrentTarget::State::ROBOT_COLLISION);
 		throw ex;
 	}
 
@@ -673,7 +674,8 @@ SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const 
 		RoboCompTrajectoryRobot2D::RoboCompException ex;
 		ex.text = "Fail. Target outside limits or colliding. Ignoring request. " +
 		          std::get<QString>(r).toStdString();
-		tState.setState("IDLE - COLLISION AT TARGET");
+		tState.setDescription("Collision at target");
+		currentTarget.setState(CurrentTarget::State::TARGET_COLLISION);
 		throw ex;
 	}
 
@@ -686,17 +688,14 @@ SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const 
 
 	//innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");
 	//InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,1000,50));
-
-	tState.setState("EXECUTING");
 	//road.setThreshold(threshold);
-	currentTarget.reset(targetT, targetRot);
+
+	currentTarget.reset(targetT, targetRot, target_.doRotation);
 	currentTarget.setState(CurrentTarget::State::GOTO);
-	if (target_.doRotation == true)
-		currentTarget.setHasRotation(true);
+	tState.setState("EXECUTING");	
 	//drawTarget(targetT);
 	taskReloj.restart();
 	return (robotT - targetT).norm2();
-
 }
 
 RoboCompTrajectoryRobot2D::NavState SpecificWorker::getState()
@@ -749,7 +748,7 @@ float SpecificWorker::goBackwards(const TargetPose &target)
 		currentTarget.setState(CurrentTarget::State::GOBACKWARDS);
 		if (target.doRotation == true)
 			currentTarget.setHasRotation(true);
-		drawTarget(QVec::vec3(target.x, target.y, target.z));
+		//drawTarget(QVec::vec3(target.x, target.y, target.z));
 		taskReloj.restart();
 		qDebug() << __FUNCTION__
 		         << "-------------------------------------------------------------------------GOBACKWARDS command received, with target"
@@ -826,13 +825,13 @@ float SpecificWorker::angmMPI(float angle)
 	float a = angle;
 	while (angle > +M_PI) angle -= 2. * M_PI;
 	while (angle < -M_PI) angle += 2. * M_PI;
-	if (fmod(a, M_PI) != angle)
-	{
-		qDebug() << __FUNCTION__ << a << angle << fmod(a, M_PI);
-		//qFatal("FMOD SUCKS");
+// 	if (fmod(a, M_PI) != angle)
+// 	{
+// 		qDebug() << __FUNCTION__ << a << angle << fmod(a, M_PI);
+// 		//qFatal("FMOD SUCKS");
+// 	}
+	return angle;
 	}
-	return fmod(a, M_PI);
-}
 
 void SpecificWorker::mapBasedTarget(const NavigationParameterMap &parameters)
 {

@@ -59,6 +59,7 @@ class TrajectoryState
 		void setEstimatedTime(long t){ QMutexLocker l(&m); estimatedTime = t;};
 		void setPlanningTime(long t){ QMutexLocker l(&m); planningTime = t;};
 		void setState(const std::string &state_){ state = state_;}
+		void setDescription(const std::string &desc_){ description = desc_;}
 		long getElapsedTime(){ QMutexLocker l(&m); return elapsedTime;};
 		long getEstimatedtime(){ QMutexLocker l(&m); return estimatedTime;};
 		long getPlanningTime(){ QMutexLocker l(&m); return planningTime;};
@@ -68,6 +69,7 @@ class TrajectoryState
 			QMutexLocker l(&m);
 			RoboCompTrajectoryRobot2D::NavState n;
 			n.state = state;
+			n.description = description;
 			n.elapsedTime = elapsedTime;
 			n.planningTime = planningTime;
 			n.estimatedTime = estimatedTime;
@@ -85,7 +87,7 @@ class TrajectoryState
 		long elapsedTime;
 		long estimatedTime;
 		long planningTime;
-		std::string state;
+		std::string state, description;
 };
 
 
@@ -113,7 +115,7 @@ class SpecificWorker : public GenericWorker
 		
 	private:
 		RoboCompOmniRobot::TBaseState bState;
-		TrajectoryState tState;
+		TrajectoryState tState;	// public state for interface
 		RoboCompCommonBehavior::ParameterList params;
 		RoboCompLaser::TLaserData laserData;
 		RoboCompLaser::TLaserData datos;

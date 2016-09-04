@@ -118,7 +118,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	}
 	
 	/////////////////////////////////////////////////
-	//////   ROTATION SPEED
+	///  ROTATION SPEED
 	////////////////////////////////////////////////
 
 	// VRot is computed as the sum of three terms: 
@@ -126,20 +126,28 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	// --   atan(perp. distance to road), to force an inwards turn when the robot is off the center line
 	// --   road curvature, to reduce speed inside curves
 	//
-	// as descirbed in Thrun's paper on DARPA challenge
+	// as described in Thrun's paper on DARPA challenge
 	
-	float vrot = 0.5 * road.getAngleWithTangentAtClosestPoint() + 
-							 1.0 * atan( road.getRobotPerpendicularDistanceToRoad()/1000.) + 
-							 0.8 * road.getRoadCurvatureAtClosestPoint() ;  //350->800.
+	//If target is closer than the size of the robot, cancel VROT and use sideways vel
+	float vrot;
+	if(road.getRobotDistanceToTarget() < 700)
+		vrot = 0;
+	else
+	{
+		vrot = 0.5 * road.getAngleWithTangentAtClosestPoint() + 
+					 1.0 * atan( road.getRobotPerpendicularDistanceToRoad()/1000.) + 
+					 0.8 * road.getRoadCurvatureAtClosestPoint() ;  //350->800.
 	
-	// Limiting filter
-	if( vrot > MAX_ROT_SPEED )
-		vrot = MAX_ROT_SPEED;
-	if( vrot < -MAX_ROT_SPEED )
-		vrot = -MAX_ROT_SPEED;
-
+		// Limiting filter
+		if( vrot > MAX_ROT_SPEED )
+			vrot = MAX_ROT_SPEED;
+		if( vrot < -MAX_ROT_SPEED )
+			vrot = -MAX_ROT_SPEED;
+	}
+	lastVrot = vrot;
+	
 	/////////////////////////////////////////////////
-	//////   ADVANCE SPEED
+	///   ADVANCE SPEED
 	////////////////////////////////////////////////
 	//float vside = 0;
 	// Factor to be used in speed control when approaching the end of the road
@@ -161,41 +169,31 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 								* teta;
 								//* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
 								//* sunk;
-
-// 	if(fabs(vrot - lastVrot) > umbralrot)
-// 	{
-// 		//qDebug()<<"lastrot "<<lastVrot << "\n vrot "<< vrot;
-// 		if(vrot > lastVrot)
-// 			vrot = lastVrot + umbralrot;
-// 		else vrot = lastVrot - umbralrot;
-// 	}
-	lastVrot=vrot;
-
+								
 	//Pre-limiting filter to avoid displacements in very closed turns
 	if( fabs(vrot) > 0.3)
 	{
 		vadvance = 0;
-		vside = 0;
 	}
 	
-	//stopping speed jump
-	// 	if(fabs(vadvance - lastVadvance) > umbral)
-	// 	{
-	// 		//qDebug()<<"lastadvanced "<<lastVadvance << "\n vadvance "<< vadvance;
-	// 		if(vadvance > lastVadvance)
-	// 			vadvance = lastVadvance + umbral;
-	// 		else vadvance = lastVadvance - umbral;
-	// 	}
 	lastVadvance=vadvance;
 
 	// Limiting filter
 	if( vadvance > MAX_ADV_SPEED )
 		vadvance = MAX_ADV_SPEED;
 	
-	vside = vrot*MAX_ADV_SPEED;
+	/////////////////////////////////////////////////
+	///  LATERAL SPEED
+	////////////////////////////////////////////////
+	
+	vside = 0.2 * road.getRobotPerpendicularDistanceToRoad();
+	if(vside > MAX_SIDE_SPEED)
+		vside = MAX_SIDE_SPEED;
+	if(vside < -MAX_SIDE_SPEED)
+		vside = -MAX_SIDE_SPEED;
 	
 	/////////////////////////////////////////////////
-	//////  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
+	//  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 	////////////////////////////////////////////////
 
 	//bool collision = avoidanceControl(innerModel, laserData, vadvance, vrot);
@@ -203,7 +201,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//  			road.setBlocked(true);
 
 	/////////////////////////////////////////////////
-	///  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
+	//  SIDEWAYS LASTMINUTE AVOIDING WITH THE OMNI BASE
 	/////////////////////////////////////////////////
 	//TODO: PROBAR EN URSUS A VER COMO QUEDA..
 	
@@ -218,10 +216,12 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//////   EXECUTION
 	////////////////////////////////////////////////
 
-	// 		qDebug() << "------------------Controller Report ---------------;";
-	// 		qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " << vside;
-	// 		qDebug() << "---------------------------------------------------;";
-								
+	qDebug() << "------------------Controller Report ---------------;";
+	qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " 
+					 << vside << "\n Dist2Target: " << road.getRobotDistanceToTarget()
+					 << "\n PerpDist: " << road.getRobotPerpendicularDistanceToRoad();
+	qDebug() << "---------------------------------------------------;";
+						
 	try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
 	catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 

@@ -38,7 +38,7 @@ PlannerPRM::PlannerPRM()
 }
 
 void PlannerPRM::initialize(Sampler* sampler_, int nPointsInGraph, int nNeighboursInGraph)
-{
+{	
 	sampler = sampler_;
 	
 	////////////////////////
@@ -63,6 +63,7 @@ void PlannerPRM::initialize(Sampler* sampler_, int nPointsInGraph, int nNeighbou
 		writeGraphToFile(graphFileName);
 	}
 	graphDirtyBit = true;
+
 }
 /**
  * @brief Main callable method. Computes a path for the robot given a target pose and a point to Innermodel. inner is used to synchronize the current copy of Innermodel.
@@ -830,7 +831,6 @@ bool PlannerPRM::learnForAWhile(uint maxGraphNodes, bool print, bool save)
 	ComponentMap componentMap;
 	ConnectedComponents compList;
 	connectedComponents(componentMap, compList);
-	rInfo("");
 	int nComps = compList.size();
 	
 	if( print )
@@ -858,11 +858,13 @@ bool PlannerPRM::learnForAWhile(uint maxGraphNodes, bool print, bool save)
 		{
 			if( connectCloseElements(300) > 0 )
 				if( save ) writeGraphToFile();
-			firstTime = false;
+			firstTime = false;		
 			return true;
 		}
 		return false;
 	}
+	
+	rInfo("");
 	
 	/////////////////////////
 	// First try to connect everything

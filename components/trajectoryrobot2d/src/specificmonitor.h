@@ -21,6 +21,8 @@
 #define SPECIFICMONITOR_H
 
 #include "genericmonitor.h"
+#include <fstream>
+
 
 /**
        \brief
@@ -37,9 +39,9 @@ class SpecificMonitor : public GenericMonitor
 	void readConfig(RoboCompCommonBehavior::ParameterList &params );
 	void run();
 	void initialize();
-    
 	bool sendParamsToWorker(RoboCompCommonBehavior::ParameterList params);
-	bool checkParams(RoboCompCommonBehavior::ParameterList l);
+ 	virtual bool checkParams(RoboCompCommonBehavior::ParameterList l);
+	bool ready;
 };
 
 #endif // GENERICMONITOR_H

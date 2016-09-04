@@ -22,9 +22,9 @@
 InnerViewer::InnerViewer( InnerModel *innerModel_, QObject *parent )
 {
 	osgGA::TrackballManipulator *tb = new osgGA::TrackballManipulator;
-	osg::Vec3d eye(osg::Vec3(4000., 4000., -1000.));
+	osg::Vec3d eye(osg::Vec3(4000., 4000., 1000.));
 	osg::Vec3d center(osg::Vec3(0., 0., -0.));
-	osg::Vec3d up(osg::Vec3(0., 1., 0.));
+	osg::Vec3d up(osg::Vec3(0., -1., 0.));
 	tb->setHomePosition(eye, center, up, true);
 	tb->setByMatrix(osg::Matrixf::lookAt(eye, center, up));
 	viewer.setCameraManipulator(tb);
@@ -34,12 +34,12 @@ InnerViewer::InnerViewer( InnerModel *innerModel_, QObject *parent )
 	// add the window size toggle handler
 	viewer.addEventHandler(new osgViewer::WindowSizeHandler);
 	osg::Group *root = new osg::Group();
+	
 	innerModel = innerModel_->copy();
-	innerViewer = new InnerModelViewer(innerModel, "root", root, false);
+	innerViewer = new InnerModelViewer(innerModel, "root", root, true);
 	viewer.setSceneData(root);
 	viewer.realize();
 }
-
 
 void InnerViewer::createWindow(osgViewer::Viewer& viewer)
 {
@@ -56,8 +56,8 @@ void InnerViewer::createWindow(osgViewer::Viewer& viewer)
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
 	traits->x = 0;
 	traits->y = 0;
-	traits->width = width/3;
-	traits->height = height/2;
+	traits->width = 400;
+	traits->height = 400;
 	traits->windowDecoration = true;
 	traits->doubleBuffer = true;
 	traits->sharedContext = 0;
@@ -91,13 +91,14 @@ void InnerViewer::createWindow(osgViewer::Viewer& viewer)
 	}
 }
 
-
 void InnerViewer::run()
 {
 	while( true)
 	{
-		innerViewer->update();
-		viewer.frame();
-		usleep(100000);
+		innerViewer->mutex->lock();
+			innerViewer->update();
+			viewer.frame();
+		innerViewer->mutex->unlock();
+		usleep(70000);
 	}
 }

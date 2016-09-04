@@ -48,6 +48,8 @@ class Controller
 	  // Constants that should be out
 		float MAX_ADV_SPEED = 500.f;
 		float MAX_ROT_SPEED = 0.3;
+		float MAX_SIDE_SPEED = 200.f;
+		
 };
 
 #endif // CONTROLLER_H
