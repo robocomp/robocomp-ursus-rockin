@@ -830,6 +830,7 @@ float SpecificWorker::angmMPI(float angle)
 // 		qDebug() << __FUNCTION__ << a << angle << fmod(a, M_PI);
 // 		//qFatal("FMOD SUCKS");
 // 	}
+	
 	return angle;
 	}
 
