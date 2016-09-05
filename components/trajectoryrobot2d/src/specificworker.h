@@ -31,6 +31,7 @@
 #include "innerviewer.h"
 #include "currenttarget.h"
 #include "sampler.h"
+#include "graphdraw.h"
 
 //#include "ParabolicPathSmooth/smoother.h"
 
@@ -84,9 +85,9 @@ class TrajectoryState
 		};
 	private:
 		QMutex m;
-		long elapsedTime;
-		long estimatedTime;
-		long planningTime;
+		long elapsedTime = 0;
+		long estimatedTime = 0;
+		long planningTime = 0;
 		std::string state, description;
 };
 
@@ -99,9 +100,9 @@ class SpecificWorker : public GenericWorker
 		~SpecificWorker();
 		bool setParams(RoboCompCommonBehavior::ParameterList params);
 		
-		//////////
-		//SERVANTS
-		//////////
+		////////////////////////////////////////
+		//SERVANTS ATTENDING EXTERNAL INTERFACE
+		////////////////////////////////////////
 		RoboCompTrajectoryRobot2D::NavState	getState();
 		float goBackwards(const TargetPose &target);
 		void stop();
@@ -115,23 +116,18 @@ class SpecificWorker : public GenericWorker
 		
 	private:
 		RoboCompOmniRobot::TBaseState bState;
-		TrajectoryState tState;	// public state for interface
+		TrajectoryState tState;	// object coding changing state for external interface
 		RoboCompCommonBehavior::ParameterList params;
 		RoboCompLaser::TLaserData laserData;
-		RoboCompLaser::TLaserData datos;
-
 		CurrentTarget currentTarget;
 		CurrentTarget currentTargetAnt, currentTargetBack;
-		
 		InnerModel *innerModel;
 		
 		//Sampler of robot's freespace
 		Sampler sampler;
 		QList<QRectF> innerRegions;
 		QRectF outerRegion;
-
-		QMutex mutex_inner,mutex_command; //mutex_inner es TEMPORAL HASTA QUE INNERMODEL TENGA SU PROPIO MUTEX
-		
+	
 		// Road structure
 		WayPoints road;
 		
@@ -146,9 +142,16 @@ class SpecificWorker : public GenericWorker
 		// Access to OMPL planners
 		PlannerPRM plannerPRM;
 		
+		//GraphDraw
+		GraphDraw *graphdraw;
+		
+		#ifdef USE_QTGUI
+			InnerViewer *viewer;
+		#endif
+			
 		//Timers to control real time events
-		QTime relojForInputRateControl;
-		QTime taskReloj;
+		QTime relojForInputRateControl;  //used to limit input frequency
+		QTime taskReloj;  //Measures duration of commands
 
 
 		////////////////////////////////////////////////////////////////////////
@@ -177,14 +180,7 @@ class SpecificWorker : public GenericWorker
 		float angmMPI(float angle);
 
 		void mapBasedTarget(const NavigationParameterMap  &parameters);
-		
-	#ifdef USE_QTGUI
-// 		OsgView *osgView;
-// 		InnerModelViewer *innerViewer;
-//			InnerModel *innerVisual;
-	#endif
 
-		InnerViewer *viewer;
 };
 
 

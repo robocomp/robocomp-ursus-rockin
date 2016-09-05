@@ -14,6 +14,7 @@ SET ( SOURCES
   sampler.cpp
   linesimplifier/simplifyPath.cpp
   innerviewer.cpp
+  graphdraw.cpp
 )
 
 # Headers set

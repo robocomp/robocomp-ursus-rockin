@@ -141,9 +141,9 @@ QLine2D WayPoints::getRobotZAxis(InnerModel *innerModel)
 {
 	Q_ASSERT(currentPoint + 1 < road.size() and road.size() > 0);
 
-	QVec robotPos = innerModel->transform("world", QVec::zeros(3), "base");
+	QVec robotPos = innerModel->transform("world", QVec::zeros(3), "robot");
 	//QVec robot2DPos = QVec::vec2( innerModel->getBaseX(), innerModel->getBaseZ());
-	QVec nose = innerModel->transform("world", QVec::vec3(0, 0, 1000), "base");
+	QVec nose = innerModel->transform("world", QVec::vec3(0, 0, 1000), "robot");
 	//QVec noseR = QVec::vec2(nose.x(),nose.z());
 	return QLine2D(robotPos, nose);
 
@@ -152,12 +152,12 @@ QLine2D WayPoints::getRobotZAxis(InnerModel *innerModel)
 
 float WayPoints::robotDistanceToCurrentPoint(InnerModel *innerModel)
 {
-	return (innerModel->transform("world", QVec::zeros(3), "base") - (*this)[indexOfCurrentPoint].pos).norm2();
+	return (innerModel->transform("world", QVec::zeros(3), "robot") - (*this)[indexOfCurrentPoint].pos).norm2();
 }
 
 float WayPoints::robotDistanceToNextPoint(InnerModel *innerModel)
 {
-	return (innerModel->transform("world", QVec::zeros(3), "base") - (*this)[indexOfNextPoint].pos).norm2();
+	return (innerModel->transform("world", QVec::zeros(3), "robot") - (*this)[indexOfNextPoint].pos).norm2();
 }
 
 QLine2D WayPoints::getTangentToCurrentPoint()
@@ -167,6 +167,17 @@ QLine2D WayPoints::getTangentToCurrentPoint()
 	QVec p1 = QVec::vec2((*this)[indexOfCurrentPoint].pos.x(), (*this)[indexOfCurrentPoint].pos.z());
 	QVec p2 = QVec::vec2((*this)[indexOfCurrentPoint + 1].pos.x(), (*this)[indexOfCurrentPoint + 1].pos.z());
 	QLine2D line(p1, p2);
+	return line;
+}
+
+QLine2D WayPoints::getTangentToCurrentPointInRobot(InnerModel *innerModel)
+{
+	Q_ASSERT (currentPoint + 1 < size() and size() > 0);
+
+	QVec p1 = QVec::vec3((*this)[indexOfCurrentPoint].pos.x(), 0., (*this)[indexOfCurrentPoint].pos.z());
+	QVec p2 = QVec::vec3((*this)[indexOfCurrentPoint + 1].pos.x(), 0., (*this)[indexOfCurrentPoint + 1].pos.z());
+	//Use the 3D vector constructor
+	QLine2D line(innerModel->transform("robot", p1, "world"), innerModel->transform("robot", p2, "world"));
 	return line;
 }
 
@@ -294,19 +305,12 @@ WayPoints::iterator WayPoints::computeClosestPointToRobot(const QVec &robot)
 	}
 
 	robotDistanceToClosestPoint = min;
-	indexOfCurrentPoint = index;   //DEPRECATED
+	indexOfCurrentPoint = index;  
 	indexOfClosestPointToRobot = index;
-	iterToClosestPointToRobot = res;  // INDICES SHOULD NOT BE USED WITH LISTS
+	iterToClosestPointToRobot = res; 
 	return res;
 }
 
-
-/**
- * @brief Computes the road tangent at point pointed by iterator w.
- *
- * @param w WayPoints::iterator pointing to the point of interest
- * @return QLine2D
- */
 QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 {
 	static QLine2D antLine = QLine2D(QVec::zeros(3), QVec::vec3(0, 0, 1));  //Initial well formed tangent
@@ -448,11 +452,6 @@ void WayPoints::setETA()
 	elapsedTime = reloj.elapsed();
 }
 
-/**
- * @brief Computes all scalar values used by the Controller to obtain the force field that acts on the robot
- *
- * @return void
- */
 void WayPoints::update()
 {
 	//////////////////////////////////////////////////////

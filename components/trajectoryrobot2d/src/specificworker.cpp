@@ -26,22 +26,8 @@
 */
 SpecificWorker::SpecificWorker(MapPrx &mprx, QWidget *parent) : GenericWorker(mprx)
 {
-	this->params = params;
 	tState.setState("IDLE");
-#ifdef USE_QTGUI
-// 	innerViewer = NULL;
-// 	osgView = new OsgView(this);
-// 	osgGA::TrackballManipulator *tb = new osgGA::TrackballManipulator;
-// 	osg::Vec3d eye(osg::Vec3(4000., 4000., -1000.));
-// 	osg::Vec3d center(osg::Vec3(0., 0., -0.));
-// 	osg::Vec3d up(osg::Vec3(0., 1., 0.));
-// 	tb->setHomePosition(eye, center, up, true);
-// 	tb->setByMatrix(osg::Matrixf::lookAt(eye, center, up));
-// 	osgView->setCameraManipulator(tb);
-#else
-	show();
-#endif
-
+	hide();
 	relojForInputRateControl.start();
 }
 
@@ -62,6 +48,7 @@ SpecificWorker::~SpecificWorker()
  */
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
+	this->params = params;
 	try
 	{
 		RoboCompCommonBehavior::Parameter par = params.at("InnerModel");
@@ -154,8 +141,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	
 #ifdef USE_QTGUI
-	plannerPRM.cleanGraph(viewer->innerViewer);
-	plannerPRM.drawGraph(viewer->innerViewer);
+	graphdraw = new GraphDraw(&plannerPRM);
+	graphdraw->draw(viewer);
 	viewer->start();	
 #endif
 	
@@ -172,8 +159,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 void SpecificWorker::compute()
 {
 	static QTime reloj = QTime::currentTime();
-	static QTime learnReloj = QTime::currentTime();
-	//static int cont = 0;
 
 	// Check for connection failure
 	if (updateInnerModel(innerModel, tState) == false)
@@ -208,48 +193,34 @@ void SpecificWorker::compute()
 		case CurrentTarget::State::ROBOT_COLLISION:			// Check if robot is inside limits and not in collision.
 			timer.setInterval(1000);
 			if (std::get<bool>(sampler.checkRobotValidStateAtTarget(innerModel->transform6D("world", "robot"))))
-				tState.setState("IDLE");
+			{
+				tState.setState("IDLE"); tState.setDescription("");
+				currentTarget.setState(CurrentTarget::State::IDLE);
+			}
 			break;
 		case CurrentTarget::State::TARGET_COLLISION:			// Check if robot is inside limits and not in collision.
 			timer.setInterval(300);
 			if (std::get<bool>(sampler.checkRobotValidStateAtTarget(currentTarget.getFullPose())))
-				tState.setState("IDLE");
+			{
+				tState.setState("IDLE"); tState.setDescription("");
+				currentTarget.setState(CurrentTarget::State::IDLE);
+			}
 			break;
 		case CurrentTarget::State::LEARNING:	
 			if(plannerPRM.learnForAWhile(150, false)) //150, Max number of nodes in the graph. 
 			{
 				#ifdef USE_QTGUI
-					//drawGraph();  
+					//plannerPRM.drawGraph(viewer->innerViewer);  
 				#endif
 			}
 			currentTarget.setState(CurrentTarget::State::IDLE);
 			break;
 		case CurrentTarget::State::IDLE:
-			timer.setInterval(1500);
+			timer.setInterval(700);
 			qDebug() << __FUNCTION__ << "Computed period" << reloj.restart()  << "State. Robot at:" << innerModel->transform("world", "robot");
 			currentTarget.setState(CurrentTarget::State::LEARNING);
 			break;
 	}
-
-// 	if (reloj.elapsed() > 1000)    //to draw only every 2 secs
-// 	{
-// 		qDebug() << __FUNCTION__ << "Computed period" << reloj.elapsed() / cont << "State. Robot at:" << innerModel->transform("world", "robot");
-// 		cont = 0;
-// 		reloj.restart();
-// 	}
-// 	cont++;
-// 	
-	//road.draw(viewer->innerViewer, innerModel, currentTarget);
-	#ifdef USE_QTGUI
-// 		if (innerViewer)
-// 		{
-// 			road.draw(innerViewer, innerModel, currentTarget);	
-// 			innerViewer->update();
-// 			osgView->autoResize();
-// 			osgView->frame();
-// 		}
-	#endif
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -822,7 +793,7 @@ void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 
 float SpecificWorker::angmMPI(float angle)
 {
-	float a = angle;
+	//float a = angle;
 	while (angle > +M_PI) angle -= 2. * M_PI;
 	while (angle < -M_PI) angle += 2. * M_PI;
 // 	if (fmod(a, M_PI) != angle)
@@ -847,7 +818,6 @@ void SpecificWorker::drawTarget(const QVec &target)
 {
 #ifdef USE_QTGUI
 	//Draw target as red box
-	QMutexLocker ml(&mutex_inner);
 	InnerModelDraw::addPlane_ignoreExisting(viewer->innerViewer, "target", "world", QVec::vec3(target(0), 5, target(2)),
 	                                        QVec::vec3(1, 0, 0), "#990000", QVec::vec3(80, 80, 80));
 #endif

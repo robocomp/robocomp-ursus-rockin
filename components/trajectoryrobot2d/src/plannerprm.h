@@ -19,7 +19,6 @@
 #define PLANNERPRM_H
 
 #include "config.h"
-#include <QObject>
 #include <qmat/QMatAll>
 #include <innermodel/innermodel.h>
 #include <iostream>
@@ -76,7 +75,7 @@ typedef std::map<Vertex, int32_t> ComponentMap;
 typedef std::vector<CComponent> ConnectedComponents;
 
 
-class PlannerPRM : public QObject
+class PlannerPRM
 {
 	public:
 		PlannerPRM();
@@ -85,8 +84,6 @@ class PlannerPRM : public QObject
 		void initialize(const Sampler &sampler);
 		QList<QVec> getPath() { return currentPath; }
 		void setSpaceLimits(float xmin, float xmax, float zmin, float zmax) {xMin = xmin; xMax = xmax, zMin = zmin; zMax = zMax;}
-		bool drawGraph(InnerModelViewer *innerViewer);
-		void cleanGraph(InnerModelViewer *innerViewer);
 		void removeGraph(InnerModelViewer *innerViewer);
 			
 		// Learning
@@ -95,18 +92,20 @@ class PlannerPRM : public QObject
 		
 		//Sampler
 		Sampler *sampler;
-		
+	
+		void connectedComponents( ComponentMap &componentMap, ConnectedComponents &comps, bool print = false) const;
+	
+		Graph graph;
+			
 	private:
 		InnerModel innerPlanner;
 		
-		Graph graph;
 		int32_t constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS=20, float MAX_DISTANTE_TO_CHECK=2000.f, uint robotSize=400);
 		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
 		bool rebuildExternalData();
 		void readGraphFromFile(QString name);
 		void writeGraphToFile(const QString& fileName = "");
 		void searchClosestPoints(const QVec& origin, const QVec& target, Vertex& originVertex, Vertex& targetVertex);
-		void connectedComponents( ComponentMap &componentMap, ConnectedComponents &comps, bool print = false) const;
 		
 		//smoothers
 		bool pathSmoother(QList<QVec> & pointlist);

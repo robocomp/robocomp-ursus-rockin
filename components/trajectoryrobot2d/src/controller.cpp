@@ -37,8 +37,8 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 {
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
 	long epoch = 100;
- 	static float lastVadvance = 0.f;
- 	static float lastVrot = 0.f;
+//  	static float lastVadvance = 0.f;
+//  	static float lastVrot = 0.f;
 // 	const float umbral = 25.f;	//salto maximo de velocidad
 // 	const float umbralrot = 0.08f;	//salto maximo de rotación
 
@@ -68,7 +68,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	}
 		
 	//////////////////////////////////////////////	
-	///CHECK ROBOT FOR INMINENT COLLISION
+	///CHECK ROBOT FOR INMINENT COLLISION. MOVE TO ELASTICBAND.CPP
 	///////////////////////////////////////////////
 	float vside = 0;
 	int j=0;
@@ -117,81 +117,109 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		//float vrot = 0;
 	}
 	
-	/////////////////////////////////////////////////
-	///  ROTATION SPEED
-	////////////////////////////////////////////////
-
-	// VRot is computed as the sum of three terms: 
-	// --   angle between robot nose and tangent to road at its closest point
-	// --   atan(perp. distance to road), to force an inwards turn when the robot is off the center line
-	// --   road curvature, to reduce speed inside curves
-	//
-	// as described in Thrun's paper on DARPA challenge
-	
-	//If target is closer than the size of the robot, cancel VROT and use sideways vel
-	float vrot;
-	if(road.getRobotDistanceToTarget() < 700)
-		vrot = 0;
-	else
-	{
-		vrot = 0.5 * road.getAngleWithTangentAtClosestPoint() + 
-					 1.0 * atan( road.getRobotPerpendicularDistanceToRoad()/1000.) + 
-					 0.8 * road.getRoadCurvatureAtClosestPoint() ;  //350->800.
-	
-		// Limiting filter
-		if( vrot > MAX_ROT_SPEED )
-			vrot = MAX_ROT_SPEED;
-		if( vrot < -MAX_ROT_SPEED )
-			vrot = -MAX_ROT_SPEED;
-	}
-	lastVrot = vrot;
 	
 	/////////////////////////////////////////////////
-	///   ADVANCE SPEED
+	///  SPEED DIRECTION AND MODULUS
 	////////////////////////////////////////////////
-	//float vside = 0;
-	// Factor to be used in speed control when approaching the end of the road
-	float teta;
-	if( road.getRobotDistanceToTarget() < 1000)
-		teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
-	else
-		teta= 1;
+  //We want the speed vector to align with the tangent to road at the current point.
+  
+  //First get the radial line leaving the robot along the road:
+  QLine2D radialLine = road.getTangentToCurrentPointInRobot(innerModel);
 	
-	//VAdv is computed as a factored reduction of MAX_ADV_SPEED by three computed functions:
-	//				* road curvature reduces forward speed
-	//				* VRot reduces forward speed
-	//				* reduction is 1 if there are not obstacle.
-	//				* teta that applies when getting close to the target (1/roadGetCurvature)
-	//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
-	float vadvance = MAX_ADV_SPEED 
-								* exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
-								* exponentialFunction(vrot, 0.6, 0.01)
-								* teta;
-								//* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
-								//* sunk;
-								
-	//Pre-limiting filter to avoid displacements in very closed turns
-	if( fabs(vrot) > 0.3)
-	{
-		vadvance = 0;
-	}
+	//Normalize it into a unitary 2D vector
+	QVec radialDir = radialLine.getNormalizedDirectionVector();
 	
-	lastVadvance=vadvance;
-
-	// Limiting filter
-	if( vadvance > MAX_ADV_SPEED )
-		vadvance = MAX_ADV_SPEED;
+	//Now change sense and scale according to properties of the road and target
+	float modulus = MAX_ADV_SPEED 
+									* exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
+									* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
+									
+	radialDir = radialDir * (T)-modulus;
 	
-	/////////////////////////////////////////////////
-	///  LATERAL SPEED
-	////////////////////////////////////////////////
+	//Next, decompose it into vadvance and vside componentes by projecting on robot's Z and X axis
+	vside = radialDir * QVec::vec2(1.,0.);
+	float vadvance = radialDir * QVec::vec2(0.,1.);
 	
-	vside = 0.2 * road.getRobotPerpendicularDistanceToRoad();
-	if(vside > MAX_SIDE_SPEED)
-		vside = MAX_SIDE_SPEED;
-	if(vside < -MAX_SIDE_SPEED)
-		vside = -MAX_SIDE_SPEED;
+	//Now we incorporate the rotational component without changing the advance speed
+	float vrot = 0;
+	if( road.getRobotDistanceToTarget() > 500 )
+		vrot = 0.5 * road.getAngleWithTangentAtClosestPoint();
 	
+// 	/////////////////////////////////////////////////
+// 	///  ROTATION SPEED
+// 	////////////////////////////////////////////////
+// 
+// 	// VRot is computed as the sum of three terms: 
+// 	// --   angle between robot nose and tangent to road at its closest point
+// 	// --   atan(perp. distance to road), to force an inwards turn when the robot is off the center line
+// 	// --   road curvature, to reduce speed inside curves
+// 	//
+// 	// as described in Thrun's paper on DARPA challenge
+// 	
+// 	//If target is closer than the size of the robot, cancel VROT and use sideways vel
+// 	float vrot;
+// 	if(road.getRobotDistanceToTarget() < 700)
+// 		vrot = 0;
+// 	else
+// 	{
+// 		vrot = 0.5 * road.getAngleWithTangentAtClosestPoint() + 
+// 					 1.0 * atan( road.getRobotPerpendicularDistanceToRoad()/1000.) + 
+// 					 0.8 * road.getRoadCurvatureAtClosestPoint() ;  //350->800.
+// 	
+// 		// Limiting filter
+// 		if( vrot > MAX_ROT_SPEED )
+// 			vrot = MAX_ROT_SPEED;
+// 		if( vrot < -MAX_ROT_SPEED )
+// 			vrot = -MAX_ROT_SPEED;
+// 	}
+// 	lastVrot = vrot;
+// 	
+// 	/////////////////////////////////////////////////
+// 	///   ADVANCE SPEED
+// 	////////////////////////////////////////////////
+// 	//float vside = 0;
+// 	// Factor to be used in speed control when approaching the end of the road
+// 	float teta;
+// 	if( road.getRobotDistanceToTarget() < 1000)
+// 		teta = exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
+// 	else
+// 		teta= 1;
+// 	
+// 	//VAdv is computed as a factored reduction of MAX_ADV_SPEED by three computed functions:
+// 	//				* road curvature reduces forward speed
+// 	//				* VRot reduces forward speed
+// 	//				* reduction is 1 if there are not obstacle.
+// 	//				* teta that applies when getting close to the target (1/roadGetCurvature)
+// 	//				* a Delta that takes 1 if approaching the target is true, 0 otherwise. It applies only if at less than 1000m to the target
+// 	float vadvance = MAX_ADV_SPEED 
+// 								* exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
+// 								* exponentialFunction(vrot, 0.6, 0.01)
+// 								* teta;
+// 								//* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
+// 								//* sunk;
+// 								
+// 	//Pre-limiting filter to avoid displacements in very closed turns
+// 	if( fabs(vrot) > 0.3)
+// 	{
+// 		vadvance = 0;
+// 	}
+// 	
+// 	lastVadvance=vadvance;
+// 
+// 	// Limiting filter
+// 	if( vadvance > MAX_ADV_SPEED )
+// 		vadvance = MAX_ADV_SPEED;
+// 	
+// 	/////////////////////////////////////////////////
+// 	///  LATERAL SPEED
+// 	////////////////////////////////////////////////
+// 	
+// 	vside = 0.2 * road.getRobotPerpendicularDistanceToRoad();
+// 	if(vside > MAX_SIDE_SPEED)
+// 		vside = MAX_SIDE_SPEED;
+// 	if(vside < -MAX_SIDE_SPEED)
+// 		vside = -MAX_SIDE_SPEED;
+// 	
 	/////////////////////////////////////////////////
 	//  LOWEST-LEVEL COLLISION AVOIDANCE CONTROL
 	////////////////////////////////////////////////

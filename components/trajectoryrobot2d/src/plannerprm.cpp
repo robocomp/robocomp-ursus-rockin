@@ -27,14 +27,6 @@
  */
 PlannerPRM::PlannerPRM()
 {	
-	//Number of points in graph
-	//graphNumPoints = nPoints;
-	
-	//Number of neighbours in the graph
-	//graphNeighPoints = neigh;
-	
-	//Default file name
-	
 }
 
 void PlannerPRM::initialize(Sampler* sampler_, int nPointsInGraph, int nNeighboursInGraph)
@@ -968,8 +960,6 @@ void PlannerPRM::smoothPath( const QList<QVec> & list)
 
 void PlannerPRM::smoothPathIter(QList<QVec> & list)
 {
-	
-
 	//pick two ordered points and check free path between them
 	int tam = list.size()*3;
 	int i=0;
@@ -994,78 +984,10 @@ void PlannerPRM::smoothPathIter(QList<QVec> & list)
 	}
 }
 
-
-///////////////////////////////////////////////////////////////////////
-/// DRAW
-////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief Draws the graph on a InnerModelViewer instance
- * 
- * @param innerViewer ...
- * @return bool
- */
-bool PlannerPRM::drawGraph(InnerModelViewer *innerViewer)
-{
-	cleanGraph(innerViewer);
-	InnerModelDraw::addTransform(innerViewer, "graph", "world");
-
-	//compute connected components
-	ComponentMap componentMap;
-	ConnectedComponents compList;
-	connectedComponents(componentMap, compList);
-
-	QString item;
-	int i=0;
-	QStringList color;
-	color << "#AA0000" << "#00AA00" << "#0000AA" << "#AA00AA" << "#AAAA00";
-	int j=0;
-	for(auto comp : compList)
-	{
-		QString c = color.at(j++%color.size());
-		qDebug() << __FUNCTION__<< "color C" << c << comp.second.size();
-		for(auto elem : comp.second)
-		{
-			item = "g_" + QString::number(i);
-			QString  parentT = QString("g_") + QString::number(i);
-			InnerModelDraw::addTransform(innerViewer, parentT, "graph");
-			innerViewer->innerModel->updateTransformValues(parentT, graph[elem].pose.x(), 10, graph[elem].pose.z(), 0,0,0);
-			InnerModelDraw::addPlane_ignoreExisting(innerViewer, item + "_plane", parentT, QVec::vec3(0,0,0), QVec::vec3(0,1,0),c, QVec::vec3(60,60,10));
-			i++;
-		}
-	}
-
-	i=0;
-	BGL_FORALL_EDGES(e, graph, Graph)
-    {
-		item = "ge_" + QString::number(i);
-		QVec p1 = graph[boost::source(e,graph)].pose;
-		QVec p2 = graph[boost::target(e,graph)].pose;
-		QVec center = (p2-p1)/(T)2.f;
-
-		QString  parentTE = QString("ge_") + QString::number(i);
-		InnerModelDraw::addTransform(innerViewer, parentTE, "graph");
-		innerViewer->innerModel->updateTransformValues(parentTE, p1.x()+center.x(), p1.y()+center.y(), p1.z()+center.z(), 0, QLine2D(p1,p2).getAngleWithZAxis()+M_PI/2, 0 );
-		InnerModelDraw::addPlane_ignoreExisting(innerViewer, QString("ge_")+QString::number(i)+"_plane", parentTE, QVec::vec3(0,0,0), QVec::vec3(0,1,0), "#00A0A0", QVec::vec3((p1-p2).norm2(), 15 , 15));
-		i++;
-	}
-	return true;
-}
-
-void PlannerPRM::cleanGraph(InnerModelViewer *innerViewer)
-{
-  if (innerViewer->innerModel->getNode("graph"))
-	 InnerModelDraw::removeNode(innerViewer, "graph");
-}
-
 void PlannerPRM::removeGraph(InnerModelViewer* innerViewer)
 {
-  cleanGraph(innerViewer);
-  graph.clear();
   data.resize(0,0);
   qDebug() << __FUNCTION__	<< "graph size" << boost::num_vertices(graph);
-
-  
 }
 
 // /**
