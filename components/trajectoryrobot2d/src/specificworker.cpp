@@ -141,8 +141,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	
 #ifdef USE_QTGUI
-	graphdraw = new GraphDraw(&plannerPRM);
-	graphdraw->draw(viewer);
+	graphdraw.draw(plannerPRM, viewer);
 	viewer->start();	
 #endif
 	
@@ -364,16 +363,16 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 
 
 	// Get here when robot is stuck
-// 	if(myRoad.requiresReplanning == true)
-// 	{
-// 		//qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
-// 		//computePlan(innerModel);
-// 	}
+	// 	if(myRoad.requiresReplanning == true)
+	// 	{
+	// 		//qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
+	// 		//computePlan(innerModel);
+	// 	}
 	
 	#ifdef USE_QTGUI
-		myRoad.draw(viewer->innerViewer,  target);
+		waypointsRoad.draw(myRoad, viewer,  target);
 	#endif
-
+	
 	state.setEstimatedTime(myRoad.getETA());
 	return true;
 }
@@ -441,16 +440,21 @@ SpecificWorker::setHeadingCommand(InnerModel *innerModel, float alfa, CurrentTar
 }
 
 /** REVISARRRRRRRRRRRRRRRRRRRRRRRRRrr
- * @brief Sends the robot bakcwards on a stright line until target is reached.
+ * @brief Sends the robot bakcwards on a straight line until targetT is reached.
  *
  * @param innerModel ...
  * @param target position in World Reference System
  * @return bool
  */
-bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &current, CurrentTarget &currentT,
-                                        TrajectoryState &state, WayPoints &myRoad)
+bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &current, CurrentTarget &currentT, TrajectoryState &state, WayPoints &myRoad)
 {
+	const float MAX_ADV_SPEED = 400.f;
+	const float MAX_POSITIONING_ERROR = 40;  //mm
+	static float errorAnt = std::numeric_limits<float>::max();
+	
+	///////////////////
 	//CHECK PARAMETERS
+	///////////////////
 	QVec target = current.getTranslation();
 	if (target.size() < 3 or std::isnan(target.x()) or std::isnan(target.y()) or std::isnan(target.z()))
 	{
@@ -460,70 +464,35 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 		throw ex;
 		return false;
 	}
-	float MAX_ADV_SPEED = 600.f;
-	const float MAX_POSITIONING_ERROR = 40;  //mm
-	state.setState("EXECUTING");
+	
+	state.setState("BACKWARDS");
 	QVec rPose = innerModel->transform("world", "robot");
 	float error = (rPose - target).norm2();
+	bool errorIncreasing = false;
+	if (error > errorAnt)
+		errorIncreasing = true;
 	qDebug() << __FUNCTION__ << "doing backwards" << error;
 
-	//float error = target.norm2();
-	// 	qDebug() << __FUNCTION__ << "Error: " << error;
-
-	if (error < MAX_POSITIONING_ERROR)        //TASK IS FINISHED
+	if ((error < MAX_POSITIONING_ERROR) or (errorIncreasing == true))        //TASK IS FINISHED
 	{
-//		current.setHasRotation(false);
-//		myRoad.setFinished(true);
-//		drawGreenBoxOnTarget(current.getTranslation());
-// 		current.print();
-// 		current.reset();
-// 		myRoad.reset();
-// 		myRoad.endRoad();
-		state.setElapsedTime(taskReloj.elapsed());
-		//state.setState("IDLE");
-		try
-		{
-			omnirobot_proxy->setSpeedBase(0, 0, 0);
-		} catch (const Ice::Exception &ex)
-		{ std::cout << ex << std::endl; }
-		//myRoad.requiresReplanning = true;
-
+		controller->stopTheRobot(omnirobot_proxy);
+		myRoad.requiresReplanning = true;
 		currentT.setWithoutPlan(true);
-		///////
-		//agregar plane		AQUI HAY QUE AGREGAR EL PLANO Y DAR LA ORDEN DE REPLANIFICAR!!
-
-		//changeCommand(currentT,CurrentTarget::Command::INSERTOBSTACLE);
 		currentT.setState(CurrentTarget::State::GOTO);
-
+		errorAnt = std::numeric_limits<float>::max();
 	}
 	else
 	{
 		float vadv = -0.5 * error;  //Proportional controller
 		if (vadv < -MAX_ADV_SPEED) vadv = -MAX_ADV_SPEED;
 		try
-		{
-			//differentialrobot_proxy->setSpeedBase(vadv, 0);
-			omnirobot_proxy->setSpeedBase(0, vadv, 0);
-// 		  omnirobot2_proxy->setSpeedBase(0, vadv, 0);
-		} catch (const Ice::Exception &ex)
+		{	omnirobot_proxy->setSpeedBase(0, vadv, 0);	} 
+		catch (const Ice::Exception &ex)
 		{ std::cout << ex << std::endl; }
 	}
-
-
+	errorAnt = error;
 	return true;
 }
-
-bool SpecificWorker::learnCommand(CurrentTarget &target, const WayPoints &myRoad)
-{
-// 		plannerPRM.learnPath(myRoad.backList);
-// 		#ifdef USE_QTGUI
-// 			plannerPRM.drawGraph(innerViewer);
-// 		#endif
-	target.setState(CurrentTarget::State::SETHEADING);
-	return true;
-}
-
-
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -607,7 +576,9 @@ SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const 
 	///////////////////////////////////////////////
 	// Minimun change admitted 60mm and 0.05rads
 	///////////////////////////////////////////////
-	if ((targetT - robotT).norm2() < 60 and fabs(targetRot.y() - robotRot.y()) < 0.05)
+	const int MINCHANGE = 7;
+	const float MINROTATION = 0.03;
+	if ((targetT - robotT).norm2() < MINCHANGE and fabs(targetRot.y() - robotRot.y()) < MINROTATION)
 	{
 
 		QString s = "Fail. Target too close to current pose. TDist=" + QString::number((targetT - robotT).norm2()) +

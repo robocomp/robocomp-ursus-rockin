@@ -33,7 +33,7 @@ Controller::~Controller()
 {
 }
 
-bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints &road)
+bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints &road, bool print)
 {
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
 	long epoch = 100;
@@ -240,16 +240,24 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 // 			else vside = 30;
 // 		}
 	
-	/////////////////////////////////////////////////
+
+	////////////////////////////////////////////////
+	//////   Print control values
+	////////////////////////////////////////////////
+	
+	if( print )
+	{
+		qDebug() << "------------------Controller Report ---------------;";
+		qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " 
+						<< vside << "\n Dist2Target: " << road.getRobotDistanceToTarget()
+						<< "\n PerpDist: " << road.getRobotPerpendicularDistanceToRoad();
+		qDebug() << "---------------------------------------------------;";
+	}
+	
+	////////////////////////////////////////////////
 	//////   EXECUTION
 	////////////////////////////////////////////////
-
-	qDebug() << "------------------Controller Report ---------------;";
-	qDebug() <<"	VAdv: " << vadvance << "|\nVRot: " << vrot << "\nVSide: " 
-					 << vside << "\n Dist2Target: " << road.getRobotDistanceToTarget()
-					 << "\n PerpDist: " << road.getRobotPerpendicularDistanceToRoad();
-	qDebug() << "---------------------------------------------------;";
-						
+	
 	try { omnirobot_proxy->setSpeedBase(vside, vadvance, vrot);}
 	catch (const Ice::Exception &e) { std::cout << e << "Omni robot not responding" << std::endl; }
 

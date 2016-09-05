@@ -149,7 +149,6 @@ QLine2D WayPoints::getRobotZAxis(InnerModel *innerModel)
 
 }
 
-
 float WayPoints::robotDistanceToCurrentPoint(InnerModel *innerModel)
 {
 	return (innerModel->transform("world", QVec::zeros(3), "robot") - (*this)[indexOfCurrentPoint].pos).norm2();
@@ -225,55 +224,6 @@ void WayPoints::print() const
 		         << w.visibleLaserDist << "in robot frame" << w.posInRobotFrame;
 	}
 }
-
-bool WayPoints::draw(InnerModelViewer *innerViewer, const CurrentTarget &currentTarget)
-{
-	clearDraw(innerViewer);
-	if (size() == 0) return false;
-	InnerModelDraw::addTransform_ignoreExisting(innerViewer, "road", "world");
-
-	//Draw all points now
-	for (int i = 1; i < size(); i++)
-	{
-		WayPoint &w = (*this)[i];
-		WayPoint &wAnt = (*this)[i - 1];
-		QLine2D l(wAnt.pos, w.pos);
-		QLine2D lp = l.getPerpendicularLineThroughPoint(QVec::vec2(w.pos.x(), w.pos.z()));
-		QVec normal = lp.getNormalForOSGLineDraw();  //3D vector
-		QVec tangent = roadTangentAtClosestPoint.getNormalForOSGLineDraw();        //OJO, PETA SI NO ESTA LA TG CALCULADA ANTES
-		QString item = "p_" + QString::number(i);
-		InnerModelDraw::addTransform_ignoreExisting(innerViewer, item, "road");
-		
-		innerViewer->innerModel->updateTransformValues(item, w.pos.x(), 10, w.pos.z(), 0, 0, 0);
-
-		if ((int) i == (int) indexOfCurrentPoint + 1) //CHANGE TO getIndexOfClosestPointToRobot()
-		{
-			InnerModelDraw::drawLine(innerViewer, item + "_line", item, tangent, 600, 30, "#000055");
-		}
-		if (w.isVisible)
-			InnerModelDraw::drawLine(innerViewer, item + "_point", item, normal, 250, 50, "#005500");
-		else
-			InnerModelDraw::drawLine(innerViewer, item + "_point", item, normal, 250, 50, "#550099");  //Morado
-	}
-	if (currentTarget.hasRotation() == true)    //Draw an arrow indicating final desired orientation
-	{
-		float rot = currentTarget.getRotation().y();
-		WayPoint &w = this->last();
-		QLine2D l(w.pos, w.pos + QVec::vec3((T) (500 * sin(rot)), 0, (T) (500 * cos(rot))));
-		QVec ln = l.getNormalForOSGLineDraw();
-		QString item = "p_" + QString::number(this->size() - 1);
-		InnerModelDraw::drawLine(innerViewer, item + "_line", item, ln, 600, 30, "#400055");
-	}
-	return true;
-}
-
-
-void WayPoints::clearDraw(InnerModelViewer *innerViewer)
-{
-	if (innerViewer->innerModel->getNode("road"))
-		InnerModelDraw::removeNode(innerViewer, "road");
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////COMPUTATION OF SCALAR MAGNITUDES OF FORCEFIELD

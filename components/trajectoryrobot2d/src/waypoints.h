@@ -68,8 +68,8 @@ class WayPoints : public QList< WayPoint >
 		void readRoadFromList(QList<QVec> list);
 		void printRobotState(InnerModel* innerModel, const CurrentTarget& currentTarget);
 		void print() const;
-		bool draw(InnerModelViewer* innerViewer, const CurrentTarget& currentTarget);  
-		void clearDraw(InnerModelViewer *innerViewer);
+// 		bool draw(InnerModelViewer* innerViewer, const CurrentTarget& currentTarget);  
+// 		void clearDraw(InnerModelViewer *innerViewer);
 		QList<QVec> backList;
 		
 		/**
@@ -155,6 +155,7 @@ class WayPoints : public QList< WayPoint >
 		* @return float distance in mm
 		*/
 		float getRobotPerpendicularDistanceToRoad()	const													{ return robotPerpendicularDistanceToRoad;};
+		QLine2D roadTangentAtClosestPoint;
 		float getAngleWithTangentAtClosestPoint() const														{ return angleWithTangentAtClosestPoint;};
 		uint getIndexOfCurrentPoint() const																				{ return indexOfCurrentPoint;};
 		uint getIndexOfNextPoint() const																					{ return indexOfNextPoint;};
@@ -184,7 +185,6 @@ class WayPoints : public QList< WayPoint >
 	private:
 		float robotDistanceToClosestPoint;
 		float robotPerpendicularDistanceToRoad;
-		QLine2D roadTangentAtClosestPoint;
 		WayPoints::iterator iterToClosestPointToRobot, iterToLastVisiblePoint;
 		uint32_t indexOfClosestPointToRobot;
 		uint indexOfCurrentPoint;

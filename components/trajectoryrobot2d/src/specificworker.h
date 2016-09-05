@@ -32,6 +32,7 @@
 #include "currenttarget.h"
 #include "sampler.h"
 #include "graphdraw.h"
+#include "waypointsdraw.h"
 
 //#include "ParabolicPathSmooth/smoother.h"
 
@@ -142,9 +143,13 @@ class SpecificWorker : public GenericWorker
 		// Access to OMPL planners
 		PlannerPRM plannerPRM;
 		
-		//GraphDraw
-		GraphDraw *graphdraw;
-		
+		//GraphDraw and RoadDrar
+		#ifdef USE_QTGUI
+			GraphDraw graphdraw;
+			WaypointsDraw waypointsRoad;
+		#endif
+	
+		//Threaded InnerModelViewer
 		#ifdef USE_QTGUI
 			InnerViewer *viewer;
 		#endif

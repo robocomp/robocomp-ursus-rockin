@@ -15,22 +15,23 @@
  * 
  */
 
-#ifndef GRAPHDRAW_H
-#define GRAPHDRAW_H
+#ifndef WAYPOINTSDRAW_H
+#define WAYPOINTSDRAW_H
 
-#include "plannerprm.h"
 #include "innerviewer.h"
+#include "waypoints.h"
+#include "qline2d.h"
 
-class GraphDraw
+class WaypointsDraw
 {
 	public:
-		GraphDraw();
-		~GraphDraw();
+		WaypointsDraw();
+		~WaypointsDraw();
 		
-		bool draw(const PlannerPRM &planner, InnerViewer* viewer);
-		void cleanGraph(InnerViewer *viewer);
-		void removeGraph(InnerViewer* viewer);
+		bool draw(WayPoints& road, InnerViewer* viewer, const CurrentTarget& currentTarget);
 	
+	private:
+		void clearDraw(InnerViewer *viewer);	
 };
 
-#endif // GRAPHDRAW_H
+#endif // WAYPOINTSDRAW_H

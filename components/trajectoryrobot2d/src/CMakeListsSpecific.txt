@@ -15,6 +15,7 @@ SET ( SOURCES
   linesimplifier/simplifyPath.cpp
   innerviewer.cpp
   graphdraw.cpp
+  waypointsdraw.cpp
 )
 
 # Headers set
