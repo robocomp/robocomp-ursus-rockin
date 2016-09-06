@@ -18,30 +18,15 @@
 #include "waypoints.h"
 
 WayPoints::WayPoints()
-{
-	iterToClosestPointToRobot = 0;
-	robotDistanceToClosestPoint = 0;
-	robotPerpendicularDistanceToRoad = 0;
-	iterToClosestPointToRobot = 0;
-	indexOfCurrentPoint = 0;
-	angleWithTangentAtClosestPoint = 0;
-	roadCurvatureAtClosestPoint = 0;
-	robotDistanceToTarget = 0;
-	robotDistanceToLastVisible = 0;
-	indexOfCurrentPoint = 0;
-	indexOfNextPoint = 1;
-	finish = false;
-	blockedRoad = false;
-	isLost = false;
-	currentCollisionIndex = 0;
-	currentDistanceToFrontier = 0;
-	requiresReplanning = false;
-	meanSpeed = 300.f;  //Initial speed. Should be read from disk
-	antDist = std::numeric_limits<float>::max();
-}
+{}
 
 WayPoints::~WayPoints()
+{}
+
+void WayPoints::initialize(InnerModel* inner, const RoboCompCommonBehavior::ParameterList& params)
 {
+	innerModel = inner;
+	threshold = std::stof(params.at("ArrivalTolerance").value);
 }
 
 void WayPoints::reset()
@@ -122,15 +107,15 @@ void WayPoints::computeDistancesToNext()
 	}
 }
 
-void WayPoints::removeFirst(InnerModelViewer *innerViewer)
-{
-	InnerModelDraw::removeObject(innerViewer, first().centerTransformName);
-	InnerModelDraw::removeObject(innerViewer, first().centerMeshName);
-	InnerModelDraw::removeObject(innerViewer, first().ballTransformName);
-	InnerModelDraw::removeObject(innerViewer, first().ballMeshName);
-
-	QList<WayPoint>::removeFirst();
-}
+// void WayPoints::removeFirst(InnerModelViewer *innerViewer)
+// {
+// 	InnerModelDraw::removeObject(innerViewer, first().centerTransformName);
+// 	InnerModelDraw::removeObject(innerViewer, first().centerMeshName);
+// 	InnerModelDraw::removeObject(innerViewer, first().ballTransformName);
+// 	InnerModelDraw::removeObject(innerViewer, first().ballMeshName);
+// 
+// 	QList<WayPoint>::removeFirst();
+// }
 
 /**
  * @brief Compute QLine2D corresponding to the robot Z axis in World reference frame
@@ -412,11 +397,11 @@ void WayPoints::update()
 	QLine2D nose = QLine2D(QVec::vec2(robot3DPos.x(), robot3DPos.z()), QVec::vec2(noseInRobot.x(), noseInRobot.z()));
 
 	////////////////////////////////////////////////////
-	//Compute closest existing trajectory point to robot
+	//Compute closest point in road to robot. If closer than 1000mm it will use the virtual point (tip) instead of the center of the robot.
 	///////////////////////////////////////////////////
 	if (getRobotDistanceToTarget() < 1000)
 	{
-		robot3DPos = innerModel->transform("world", "virtualRobot");
+	 		robot3DPos = innerModel->transform("world", "virtualRobot");
 	}
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 
@@ -476,7 +461,7 @@ void WayPoints::update()
 	///////////////////////////////////////////
 	//Check for arrival to target (translation)  TOO SIMPLE
 	///////////////////////////////////////////
-	if (((((int) getIndexOfCurrentPoint() + 1 == (int) size()) or  (getRobotDistanceToTarget() < 50))) or
+	if (((((int) getIndexOfCurrentPoint() + 1 == (int) this->size()) or  (getRobotDistanceToTarget() < threshold))) or
 	    ((getRobotDistanceToTarget() < 100) and (getRobotDistanceVariationToTarget() > 0)))
 	{
 		setFinished(true);

@@ -50,9 +50,9 @@ bool WaypointsDraw::draw(WayPoints &road, InnerViewer *viewer, const CurrentTarg
 			InnerModelDraw::drawLine(viewer->innerViewer, item + "_line", item, tangent, 600, 30, "#000055");
 		}
 		if (w.isVisible)
-			InnerModelDraw::drawLine(viewer->innerViewer, item + "_point", item, normal, 250, 50, "#005500");
+			InnerModelDraw::drawLine(viewer->innerViewer, item + "_point", item, normal, 500, 50, "#005500"); //TAKE NUMBER FROM ROBOT!!!
 		else
-			InnerModelDraw::drawLine(viewer->innerViewer, item + "_point", item, normal, 250, 50, "#550099");  //Morado
+			InnerModelDraw::drawLine(viewer->innerViewer, item + "_point", item, normal, 500, 50, "#550099");  //Morado
 	}
 	if (currentTarget.hasRotation() == true)    //Draws an arrow indicating final desired orientation
 	{

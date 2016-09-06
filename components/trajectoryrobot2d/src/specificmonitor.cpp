@@ -70,9 +70,67 @@ void SpecificMonitor::initialize()
 void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList& params )
 {
 	RoboCompCommonBehavior::Parameter aux;
+	
 	aux.editable = false;
-	configGetString( "","InnerModel", aux.value,"/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
+	configGetString( "TrajectoryRobot2D","InnerModel", aux.value,"/home/robocomp/robocomp/components/robocomp-ursus-rockin/files/RoCKIn@home/world/rockinSimple.xml");
 	params["InnerModel"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","ArrivalTolerance", aux.value,"20");
+	params["ArrivalTolerance"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","MaxZSpeed", aux.value,"400");
+	params["MaxZSpeed"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","MaxXSpeed", aux.value,"200");
+	params["MaxXSpeed"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","MaxRotationSpeed", aux.value,"0.3");
+	params["MaxRotationSpeed"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","RobotXWidth", aux.value,"500");
+	params["RobotXWidth"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","RobotZLong", aux.value,"500");
+	params["RobotZLong"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","RobotRadius", aux.value,"300");
+	params["RobotRadius"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","MinControllerPeriod", aux.value,"100");
+	params["MinControllerPeriod"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","PlannerGraphPoints", aux.value,"100");
+	params["PlannerGraphPoints"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","PlannerGraphNeighbours", aux.value,"20");
+	params["PlannerGraphNeighbours"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","OuterRegionLeft", aux.value,"0");
+	params["OuterRegionLeft"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","OuterRegionRight", aux.value,"6000");
+	params["OuterRegionRight"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","OuterRegionBottom", aux.value,"-4250");
+	params["OuterRegionBottom"] = aux;
+	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","OuterRegionTop", aux.value,"4250");
+	params["OuterRegionTop"] = aux;
+	
 }
 
 

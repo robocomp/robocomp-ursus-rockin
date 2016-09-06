@@ -20,13 +20,23 @@
 
 #include "controller.h"
 
-Controller::Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, int delay)  //in secs
+Controller::Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, const RoboCompCommonBehavior::ParameterList &params, int delay)  //in secs
 {
 	this->time = QTime::currentTime();
 	this->delay = delay*1000;	//msecs
 
 	//compute offsets from laser center to the border of the robot base
 	baseOffsets = computeRobotOffsets(innerModel, laserData);
+	
+	try
+	{
+		MAX_ADV_SPEED = std::stof(params.at("MaxZSpeed").value);
+		MAX_ROT_SPEED = std::stof(params.at("MaxRotationSpeed").value);;
+		MAX_SIDE_SPEED = std::stof(params.at("MaxZSpeed").value);;
+		MAX_LAG = std::stof(params.at("MinControllerPeriod").value);;
+	}
+	catch (const std::out_of_range& oor) 
+	{   std::cerr << "Controller. Out of Range error reading parameters: " << oor.what() << '\n'; }
 }
 
 Controller::~Controller()
@@ -37,10 +47,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 {
 	static QTime reloj = QTime::currentTime();   //TO be used for a more accurate control (predictive).
 	long epoch = 100;
-//  	static float lastVadvance = 0.f;
-//  	static float lastVrot = 0.f;
-// 	const float umbral = 25.f;	//salto maximo de velocidad
-// 	const float umbralrot = 0.08f;	//salto maximo de rotación
 
 	//Estimate the space that will be blindly covered and reduce Adv speed to remain within some boundaries
 	//qDebug() << __FILE__ << __FUNCTION__ << "entering update with" << road.at(road.getIndexOfClosestPointToRobot()).pos;
@@ -68,7 +74,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	}
 		
 	//////////////////////////////////////////////	
-	///CHECK ROBOT FOR INMINENT COLLISION. MOVE TO ELASTICBAND.CPP
+	///CHECK ROBOT FOR INMINENT COLLISION. 																								MOVE TO ELASTICBAND.CPP !!!!!!!!!!!!!!!!!!!!!
 	///////////////////////////////////////////////
 	float vside = 0;
 	int j=0;

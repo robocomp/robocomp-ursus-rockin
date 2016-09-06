@@ -21,18 +21,18 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include <CommonBehavior.h>
 #include <QtCore>
 #include <OmniRobot.h>
 #include "waypoints.h"
 #include <innermodel/innermodel.h>
 #include <Laser.h>
 
-#define MAX_LAG 100  
 
 class Controller
 {
 	public:
-		Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, int delay); //in secs
+		Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData, const RoboCompCommonBehavior::ParameterList &params, int delay=2); //in secs
 		~Controller();
 		bool update(InnerModel* innerModel, RoboCompLaser::TLaserData& laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints& road, bool print = false);
 		void stopTheRobot(RoboCompOmniRobot::OmniRobotPrx differentialrobot_proxy);
@@ -45,10 +45,11 @@ class Controller
 		std::vector<float> computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData);
 		std::vector<float> baseOffsets;
 		
-	  // Constants that should be out
+	  // Constants reassigned to the params values
 		float MAX_ADV_SPEED = 500.f;
 		float MAX_ROT_SPEED = 0.3;
 		float MAX_SIDE_SPEED = 200.f;
+		float MAX_LAG = 100; //ms
 		
 };
 

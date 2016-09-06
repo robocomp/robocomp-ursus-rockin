@@ -19,11 +19,6 @@
 
 #include "specificworker.h"
 
-#define RCIS
-
-/**
-* \brief Default constructor of trajectory2D main class
-*/
 SpecificWorker::SpecificWorker(MapPrx &mprx, QWidget *parent) : GenericWorker(mprx)
 {
 	tState.setState("IDLE");
@@ -31,21 +26,10 @@ SpecificWorker::SpecificWorker(MapPrx &mprx, QWidget *parent) : GenericWorker(mp
 	relojForInputRateControl.start();
 }
 
-/**
-* \brief Default destructor
-*/
 SpecificWorker::~SpecificWorker()
 {
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief Reads run time parameters from config file
- *
- * @param params ...
- * @return bool
- */
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	this->params = params;
@@ -82,30 +66,38 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	InnerModelPlane *floor = NULL;
 	try
 	{
-		floor = innerModel->getPlane("floor_plane");  ///TIENE QUE HABER UN FLOOR_PLANE
-		qDebug() << __FUNCTION__ << "floor_plane dimensions from InnerModel: " << floor->width << "W" << floor->height << "H";
-		QVec upperLeft = innerModel->transform("world", QVec::vec3(floor->width / 2, 0, floor->height / 2), "floor");
-		QVec downRight = innerModel->transform("world", QVec::vec3(-floor->width / 2, 0, -floor->height / 2), "floor");
-		qDebug() << __FUNCTION__ << "QRect representation:";
-		upperLeft.print("	UL");
-		downRight.print("	DR");
-
-		outerRegion.setLeft(upperLeft.x());
-		outerRegion.setRight(downRight.x());
-		outerRegion.setBottom(downRight.z());
-		outerRegion.setTop(upperLeft.z());
-		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
+		// 		floor = innerModel->getPlane("floor_plane");  ///TIENE QUE HABER UN FLOOR_PLANE
+		// 		qDebug() << __FUNCTION__ << "floor_plane dimensions from InnerModel: " << floor->width << "W" << floor->height << "H";
+		// 		QVec upperLeft = innerModel->transform("world", QVec::vec3(floor->width / 2, 0, floor->height / 2), "floor");
+		// 		QVec downRight = innerModel->transform("world", QVec::vec3(-floor->width / 2, 0, -floor->height / 2), "floor");
+		// 		qDebug() << __FUNCTION__ << "QRect representation:";
+		// 		upperLeft.print("	UL");
+		// 		downRight.print("	DR");
+		// 
+		// 		outerRegion.setLeft(upperLeft.x());
+		// 		outerRegion.setRight(downRight.x());
+		// 		outerRegion.setBottom(downRight.z());
+		// 		outerRegion.setTop(upperLeft.z());
+		// 		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
+		
 		/*
 		outerRegion.setLeft( upperLeft.x() + floor->point.x() );
 		outerRegion.setRight( downRight.x() + floor->point.x() );
 		outerRegion.setBottom( downRight.z() + floor->point.z() );
 		outerRegion.setTop( upperLeft.z() + floor->point.z() );
 		*/
-		outerRegion.setLeft(0);
-		outerRegion.setRight(6000);
-		outerRegion.setBottom(-4250);
-		outerRegion.setTop(4250);
-		qDebug() << __FUNCTION__ << "HARD SET OuterRegion" << outerRegion;
+		// 		outerRegion.setLeft(0);
+		// 		outerRegion.setRight(6000);
+		// 		outerRegion.setBottom(-4250);
+		// 		outerRegion.setTop(4250);
+		// 		
+		
+		outerRegion.setLeft(std::stof(params.at("OuterRegionLeft").value));
+		outerRegion.setRight(std::stof(params.at("OuterRegionRight").value));
+		outerRegion.setBottom(std::stof(params.at("OuterRegionBottom").value));
+		outerRegion.setTop(std::stof(params.at("OuterRegionTop").value));
+		
+		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
 	}
 	catch (QString err)
 	{
@@ -114,19 +106,19 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	}
 
 	// for Rocking apartment                         y = x       x = -y
-	// 	innerRegions << QRectF(-6000,-5000, 12000, 1000) << QRectF(-6000, -2700, 2900, 3500)
-	// 				 << QRectF(6000, 0, -2900 , -5000) << QRectF(4500, 5000, 1800, -10000)<< QRectF(-1800, 3000, 7800, 2000);// << QRectF(-200, -200, 1800, -5000);
+	// 	innerRegions << QRectF(-6000,-5000, 12000, 1000) << QRectF(-6000, -2700, 2900, 3500) << QRectF(6000, 0, -2900 , -5000) << QRectF(4500, 5000, 1800, -10000)<< QRectF(-1800, 3000, 7800, 2000);// << QRectF(-200, -200, 1800, -5000);
+	
 	sampler.initialize(innerModel, outerRegion, innerRegions);
 
 	///////////////////
 	//Planner
 	///////////////////
-	plannerPRM.initialize(&sampler, 100, 20);  //100 points for the initial graph and 20 neighbours for each one
-
+	plannerPRM.initialize(&sampler, std::stoi(params.at("PlannerGraphPoints").value) , std::stoi(params.at("PlannerGraphNeighbours").value));  
+	
 	///////////////////
 	//Initializes the elastic band structure "road"
 	///////////////////
-	road.setInnerModel(innerModel);
+	road.initialize(innerModel, params);
 
 	///////////////////
 	//This object creates and maintains the road (elastic band) adapting it to the real world using a laser device
@@ -137,7 +129,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//Low level controller that drives the robot on the road
 	//by computing VAdv and VRot from the relative position wrt to the local road
 	/////////////////////////////////////////////////////////////////////////////////
-	controller = new Controller(innerModel, laserData, 2);
+	controller = new Controller(innerModel, laserData, params, 2 );
 
 	
 #ifdef USE_QTGUI
@@ -237,8 +229,8 @@ bool SpecificWorker::stopCommand(CurrentTarget &target, WayPoints &myRoad, Traje
 	myRoad.endRoad();
 #ifdef USE_QTGUI
 	//myRoad.clearDraw(viewer->innerViewer);
-#endif
 	//drawGreenBoxOnTarget(target.getTranslation());
+#endif
 	target.reset();
 	state.setElapsedTime(taskReloj.elapsed());
 	state.setState("IDLE");
@@ -252,21 +244,12 @@ bool SpecificWorker::stopCommand(CurrentTarget &target, WayPoints &myRoad, Traje
  * @param innerModel
  * @return bool
  */
-//REVISAR!!!!!!!!!
 bool SpecificWorker::changeTargetCommand(InnerModel *innerModel, CurrentTarget &target, TrajectoryState &state,
                                          WayPoints &myRoad)
 {
-	// 	qDebug() << __FUNCTION__ ;
-	myRoad.setFinished(true);
-	myRoad.reset();
-	myRoad.endRoad();
-#ifdef USE_QTGUI
-	//myRoad.clearDraw(viewer->innerViewer);
-#endif
-	target.reset();
-	//changeCommand(target,CurrentTarget::State::IDLE);
-	state.setState("IDLE");
-	return true;
+	//DEPRECATED
+	qDebug() << __FUNCTION__ << "DEPRECATED";
+	return false;
 }
 
 /**
@@ -400,16 +383,10 @@ SpecificWorker::setHeadingCommand(InnerModel *innerModel, float alfa, CurrentTar
 	const float MAX_ORIENTATION_ERROR = 0.04;
 
 	float angRobot = innerModel->getRotationMatrixTo("world", "robot").extractAnglesR_min().y();
-
 	alfa = angmMPI(alfa);
-	//alfa = fmod(alfa, M_PI);
-
 	float error = angmMPI(angRobot - alfa);
-	//float error = fmod(angRobot-alfa, M_PI);
-
 	state.setState("EXECUTING-TURNING");
-	//qDebug() << __FUNCTION__ <<"Error" << fabs(error);
-
+	
 	/////////////////////////////
 	/// Check for minimun admisible orientation error
 	//////////////////////////////
@@ -439,7 +416,7 @@ SpecificWorker::setHeadingCommand(InnerModel *innerModel, float alfa, CurrentTar
 	}
 }
 
-/** REVISARRRRRRRRRRRRRRRRRRRRRRRRRrr
+/** REVISARRRR
  * @brief Sends the robot bakcwards on a straight line until targetT is reached.
  *
  * @param innerModel ...
@@ -508,33 +485,16 @@ bool SpecificWorker::goBackwardsCommand(InnerModel *innerModel, CurrentTarget &c
 float SpecificWorker::changeTarget(const TargetPose &target)
 {
 	qDebug() << __FUNCTION__ << "DEPRECATED";
-	return 100;
+	return 0;
 }
 
-/**
- * @brief Sends the robot to a new target position. 
- * There can be only one active target
- * A new target overrides the existing one without stopping the robot
- * The state of the process is recorded in the TrajectoryState structure that cnan be accessed through the getState() method
- * @param target RoboCompTrajectoryRobot2D struct with the desired (x,z) coordinates of the robot. y is ignored
- * @return void
- */
 float SpecificWorker::go(const TargetPose &target)
 {
 	return goReferenced(target, 0, 0, 100);
 }
 
-/**
- * @brief ...
- * 
- * @param target 6D target pose
- * @param xRef ...
- * @param zRef ...
- * @param threshold ...
- * @return float current distance to target
- */
-float
-SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const float zRef, const float threshold)
+
+float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const float zRef, const float threshold)
 {
 	/////////////////////
 	//CHECK PARAMETERS
@@ -623,14 +583,12 @@ SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const 
 
 	///////////////////////////////////////////////
 	// Let's see what these guys want
-	// Everything here must be thread safe
 	///////////////////////////////////////////////
 
-	//CHECK IF ALL THESE TWO ARE THREAD SAFE
-
-	//innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");
+	// move virtualrobot to xref, zRef to act as a surrogate
+	innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");
 	//InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,1000,50));
-	//road.setThreshold(threshold);
+	road.setThreshold(threshold);
 
 	currentTarget.reset(targetT, targetRot, target_.doRotation);
 	currentTarget.setState(CurrentTarget::State::GOTO);
@@ -650,56 +608,114 @@ void SpecificWorker::stop()
 	currentTarget.setState(CurrentTarget::State::STOP);
 }
 
-/**
- * @brief Integrator to orient the robot making an alfa angle with the world's Z axis
- *
- * @param alfa ...
- * @return void
- */
 void SpecificWorker::setHeadingTo(const TargetPose &target)
 {
-	currentTarget.setState(CurrentTarget::State::SETHEADING);
 	qDebug() << __FUNCTION__ << "SETHEADING command received";
+	currentTarget.setState(CurrentTarget::State::SETHEADING);
 }
 
-/**
- * @brief Moves the rogbot backwards
- *
- * @param target ...
- * @return void
- */
 float SpecificWorker::goBackwards(const TargetPose &target)
 {
-	qDebug() << __FUNCTION__ << "GOBACKWARDS command received";
+	qDebug() << __FUNCTION__ << "GOBACKWARDS command received to target:" << target.x << target.y << target.z << target.rz << target.doRotation;
 
-	//PARAMETERS CHECK
-	if (isnan(target.x) or std::isnan(target.y) or std::isnan(target.z))
+	/////////////////////
+	// CHECK PARAMETERS
+	/////////////////////
+	if (isnan(target.x) or std::isnan(target.y) or std::isnan(target.z) or std::isnan(target.ry))
 	{
-		qDebug() << __FUNCTION__ << "Returning. Input parameter -target- is not valid";
+		qDebug() << __FUNCTION__ << "Returning. Input parameter -target- is not valid." << target.x << target.y << target.z << target.rz << target.doRotation;
 		RoboCompTrajectoryRobot2D::RoboCompException ex;
-		ex.text = "Doing nothing. Invalid Target with nan in it";
+		ex.text = "Doing nothing. Invalid Target with NAN in it";
 		throw ex;
+		return 0.;
 	}
-	else
+	
+	currentTarget.setState( CurrentTarget::State::STOP );
+	taskReloj.restart();
+	
+	///////////////////////////////////
+	// Wait until the robot has stopped or 5secs
+	////////////////////////////////////
+	while( (currentTarget.state !=  CurrentTarget::State::IDLE) and taskReloj.elapsed() < 5000 )
+	{};
+	
+	if( currentTarget.state ==  CurrentTarget::State::IDLE)
 	{
-		stop();
-		while (tState.getState() != "IDLE")
-		{};
 		currentTarget.setTranslation(QVec::vec3(target.x, target.y, target.z));
 		currentTarget.setRotation(QVec::vec3(target.rx, target.ry, target.rz));
 		currentTarget.setState(CurrentTarget::State::GOBACKWARDS);
 		if (target.doRotation == true)
 			currentTarget.setHasRotation(true);
-		//drawTarget(QVec::vec3(target.x, target.y, target.z));
 		taskReloj.restart();
-		qDebug() << __FUNCTION__
-		         << "-------------------------------------------------------------------------GOBACKWARDS command received, with target"
-		         << currentTarget.getTranslation() << currentTarget.getRotation();
 	}
-
+	else 
+	{
+		RoboCompTrajectoryRobot2D::RoboCompException ex;
+		ex.text = "Doing nothing. Cannot stop the robot";
+		throw ex;
+	}
 	return 0;
 }
 
+/////////////////////
+// In development
+/////////////////////
+void SpecificWorker::mapBasedTarget(const NavigationParameterMap &parameters)
+{
+	//Examples of task specification
+	for( auto p : parameters )
+		qDebug() << __FUNCTION__ << QString::fromStdString(p.first) << QString::fromStdString(p.second);
+
+	std::string command;
+	try 
+	{ 
+		command = parameters.at("command"); 	
+		if( command == "go")  //Fill go params
+		{
+			QVec target = QVec::zeros(6);
+			QVec tip = QVec::zeros(6);
+			bool hasRotation = false;
+			bool hasTip = false;
+			float tolerance = 20;
+			try 
+			{ 
+				target[0] = std::stof(parameters.at("tx")); 
+				target[2] = std::stof(parameters.at("tz")); 
+			} 
+			catch(...){};
+			try 
+			{ 
+				target[5] = std::stof(parameters.at("ry")); 
+				hasRotation = true;
+			} 
+			catch(...){};
+			try
+			{ 
+				tip[0] = std::stof(parameters.at("tip_x")); 
+				tip[2] = std::stof(parameters.at("tip_z")); 
+				hasTip = true;
+			} 
+			catch(...){};
+			try
+			{ 
+				tolerance = std::stof(parameters.at("tolerance")); 
+			} 
+			catch(...){};
+			//goReferenced(target, tip, tolerance);
+		}
+		if( command == "stop")  //Fill stop params
+		{
+			currentTarget.setState(CurrentTarget::State::STOP);
+		}
+	}
+	catch (const std::out_of_range& oor) 
+	{ 
+		std::cerr << "Error, command not found in parameters list" << std::endl;
+		RoboCompTrajectoryRobot2D::RoboCompException ex;
+		ex.text = "Error, command not found in parameters list";
+		throw ex;
+	};
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// CLASS PRIVATE AUXILIARY METHODS
@@ -775,11 +791,6 @@ float SpecificWorker::angmMPI(float angle)
 	
 	return angle;
 	}
-
-void SpecificWorker::mapBasedTarget(const NavigationParameterMap &parameters)
-{
-
-}
 
 /////////////////////////////////////////////////////////////////////////////
 //// DRAWING METHODS

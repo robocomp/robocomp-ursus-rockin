@@ -18,12 +18,12 @@
 #ifndef WAYPOINTS_H
 #define WAYPOINTS_H
 
-#include <QObject>
+#include <CommonBehavior.h>
 #include <qmat/QMatAll>
 #include <innermodel/innermodel.h>
 #include <iostream>
 #include <fstream>
-#include <innermodeldraw.h>
+//#include <innermodeldraw.h>
 #include <float.h>
 #include "qline2d.h"
 #include "currenttarget.h"
@@ -62,14 +62,12 @@ class WayPoints : public QList< WayPoint >
 		void reset();
 		void startRoad();
 		void endRoad();
-		void setThreshold(const float _threshold) 														{ threshold = _threshold;};
-		void setInnerModel( InnerModel *inner) 																{ innerModel = inner;};
+		void setThreshold(const float _threshold) 																												{ QMutexLocker ml(&mutex); threshold = _threshold;};
+		void initialize( InnerModel *inner, const RoboCompCommonBehavior::ParameterList &params);
 		void readRoadFromFile(InnerModel *innerModel, std::string name);
 		void readRoadFromList(QList<QVec> list);
 		void printRobotState(InnerModel* innerModel, const CurrentTarget& currentTarget);
 		void print() const;
-// 		bool draw(InnerModelViewer* innerViewer, const CurrentTarget& currentTarget);  
-// 		void clearDraw(InnerModelViewer *innerViewer);
 		QList<QVec> backList;
 		
 		/**
@@ -173,35 +171,34 @@ class WayPoints : public QList< WayPoint >
 		bool isVisible(int i) const  																					    { if( i>=0 and i< this->size()) return (*this)[i].isVisible; else return false;};
 		void setFinished( bool b)																									{ QMutexLocker ml(&mutex); finish = b; }
 		void setBlocked(bool b)																										{ blockedRoad = b;};
-		void removeFirst(InnerModelViewer *innerViewer);
-	
-		int indexOfNextPoint;
-		bool blockedRoad;
-		bool isLost;
-		int currentCollisionIndex;
-		float currentDistanceToFrontier;
-		bool requiresReplanning;
+		
+		int indexOfNextPoint = 1;
+		bool blockedRoad = false;
+		bool isLost = false;
+		int currentCollisionIndex = 0;
+		float currentDistanceToFrontier = 0;
+		bool requiresReplanning = false;
 	
 	private:
-		float robotDistanceToClosestPoint;
-		float robotPerpendicularDistanceToRoad;
+		float robotDistanceToClosestPoint = 0.f;
+		float robotPerpendicularDistanceToRoad = 0.f;
 		WayPoints::iterator iterToClosestPointToRobot, iterToLastVisiblePoint;
-		uint32_t indexOfClosestPointToRobot;
-		uint indexOfCurrentPoint;
-		float angleWithTangentAtClosestPoint;
-		float roadCurvatureAtClosestPoint;
-		float robotDistanceToTarget;
-		float robotDistanceVariationToTarget;
-		float robotDistanceToLastVisible;
-		float threshold;
-		bool finish;
-		ulong estimatedTimeOfArrival;
+		uint32_t indexOfClosestPointToRobot = 0;
+		uint indexOfCurrentPoint = 0;
+		float angleWithTangentAtClosestPoint = 0.f;
+		float roadCurvatureAtClosestPoint = 0.f;
+		float robotDistanceToTarget = 0.f;
+		float robotDistanceVariationToTarget = 0.f;
+		float robotDistanceToLastVisible = 0.f;
+		float threshold = 20.f;  //Default tolerance on arrival
+		bool finish = false;
+		ulong estimatedTimeOfArrival = 0;
 		InnerModel *innerModel;
 		QTime reloj;
-		float meanSpeed;  
-		long elapsedTime;
-		int initialDurationEstimation;
-		float antDist; //To be used in robotDistanceVariationToTarget computation
+		float meanSpeed = 200;  
+		long elapsedTime = 0;
+		int initialDurationEstimation = 0;
+		float antDist = std::numeric_limits<float>::max(); 
 
 		void setclosestPointToRobot(WayPoints::iterator it) 				    							{ iterToClosestPointToRobot = it;};
 		void setTangentAtClosestPoint(const QLine2D &tangent) 												{ roadTangentAtClosestPoint = tangent;};

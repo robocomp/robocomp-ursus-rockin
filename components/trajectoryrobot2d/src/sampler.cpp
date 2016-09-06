@@ -34,6 +34,7 @@ Sampler::Sampler()
  */
 void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QList< QRectF> &innerRegions_)
 {
+	qDebug() << __FUNCTION__ << "Sampler: Copying InnerModel...";
 	innerModelSampler = inner->copy();
 	innerRegions = innerRegions_;
 	outerRegion = outerRegion_;
