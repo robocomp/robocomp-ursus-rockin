@@ -586,7 +586,7 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 	///////////////////////////////////////////////
 
 	// move virtualrobot to xref, zRef to act as a surrogate
-	innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");
+	//innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");
 	//InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,1000,50));
 	road.setThreshold(threshold);
 

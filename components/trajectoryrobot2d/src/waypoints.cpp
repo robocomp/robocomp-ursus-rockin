@@ -399,10 +399,10 @@ void WayPoints::update()
 	////////////////////////////////////////////////////
 	//Compute closest point in road to robot. If closer than 1000mm it will use the virtual point (tip) instead of the center of the robot.
 	///////////////////////////////////////////////////
-	if (getRobotDistanceToTarget() < 1000)
-	{
-	 		robot3DPos = innerModel->transform("world", "virtualRobot");
-	}
+// 	if (getRobotDistanceToTarget() < 1000)
+// 	{
+// 	 		robot3DPos = innerModel->transform("world", "virtualRobot");
+// 	}
 	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
 
 	///////////////////////////////////////
