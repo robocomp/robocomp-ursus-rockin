@@ -288,12 +288,12 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 		target.setState(CurrentTarget::State::SETHEADING);
 		return true;
 	}
-	if (myRoad.isBlocked() == true)
-	{
-		currentTargetBack.setTranslation(innerModel->transform("world", QVec::vec3(0, 0, -250), "robot"));
-		target.setState(CurrentTarget::State::GOBACKWARDS);
-		return true;
-	}
+// 	if (myRoad.isBlocked() == true)
+// 	{
+// 		currentTargetBack.setTranslation(innerModel->transform("world", QVec::vec3(0, 0, -250), "robot"));
+// 		target.setState(CurrentTarget::State::GOBACKWARDS);
+// 		return true;
+// 	}
 
 	//////////////////////////////////////////
 	// Check if there is a plan for the target
