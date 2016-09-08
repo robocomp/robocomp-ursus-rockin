@@ -208,7 +208,7 @@ void SpecificWorker::compute()
 			break;
 		case CurrentTarget::State::IDLE:
 			timer.setInterval(700);
-			qDebug() << __FUNCTION__ << "Computed period" << reloj.restart()  << "State. Robot at:" << innerModel->transform("world", "robot");
+			qDebug() << __FUNCTION__ << "Computed period" << reloj.restart()  << "ms. State. Robot at:" << innerModel->transform6D("world", "robot");
 			currentTarget.setState(CurrentTarget::State::LEARNING);
 			break;
 	}
@@ -666,55 +666,55 @@ void SpecificWorker::mapBasedTarget(const NavigationParameterMap &parameters)
 	for( auto p : parameters )
 		qDebug() << __FUNCTION__ << QString::fromStdString(p.first) << QString::fromStdString(p.second);
 
-	std::string command;
-	try 
-	{ 
-		command = parameters.at("command"); 	
-		if( command == "go")  //Fill go params
-		{
-			QVec target = QVec::zeros(6);
-			QVec tip = QVec::zeros(6);
-			bool hasRotation = false;
-			bool hasTip = false;
-			float tolerance = 20;
-			try 
-			{ 
-				target[0] = std::stof(parameters.at("tx")); 
-				target[2] = std::stof(parameters.at("tz")); 
-			} 
-			catch(...){};
-			try 
-			{ 
-				target[5] = std::stof(parameters.at("ry")); 
-				hasRotation = true;
-			} 
-			catch(...){};
-			try
-			{ 
-				tip[0] = std::stof(parameters.at("tip_x")); 
-				tip[2] = std::stof(parameters.at("tip_z")); 
-				hasTip = true;
-			} 
-			catch(...){};
-			try
-			{ 
-				tolerance = std::stof(parameters.at("tolerance")); 
-			} 
-			catch(...){};
-			//goReferenced(target, tip, tolerance);
-		}
-		if( command == "stop")  //Fill stop params
-		{
-			currentTarget.setState(CurrentTarget::State::STOP);
-		}
-	}
-	catch (const std::out_of_range& oor) 
-	{ 
-		std::cerr << "Error, command not found in parameters list" << std::endl;
-		RoboCompTrajectoryRobot2D::RoboCompException ex;
-		ex.text = "Error, command not found in parameters list";
-		throw ex;
-	};
+// 	std::string command;
+// 	try 
+// 	{ 
+// 		command = parameters.at("command"); 	
+// 		if( command == "go")  //Fill go params
+// 		{
+// 			QVec target = QVec::zeros(6);
+// 			QVec tip = QVec::zeros(6);
+// 			bool hasRotation = false;
+// 			bool hasTip = false;
+// 			float tolerance = 20;
+// 			try 
+// 			{ 
+// 				target[0] = std::stof(parameters.at("tx")); 
+// 				target[2] = std::stof(parameters.at("tz")); 
+// 			} 
+// 			catch(...){};
+// 			try 
+// 			{ 
+// 				target[5] = std::stof(parameters.at("ry")); 
+// 				hasRotation = true;
+// 			} 
+// 			catch(...){};
+// 			try
+// 			{ 
+// 				tip[0] = std::stof(parameters.at("tip_x")); 
+// 				tip[2] = std::stof(parameters.at("tip_z")); 
+// 				hasTip = true;
+// 			} 
+// 			catch(...){};
+// 			try
+// 			{ 
+// 				tolerance = std::stof(parameters.at("tolerance")); 
+// 			} 
+// 			catch(...){};
+// 			//goReferenced(target, tip, tolerance);
+// 		}
+// 		if( command == "stop")  //Fill stop params
+// 		{
+// 			currentTarget.setState(CurrentTarget::State::STOP);
+// 		}
+// 	}
+// 	catch (const std::out_of_range& oor) 
+// 	{ 
+// 		std::cerr << "Error, command not found in parameters list" << std::endl;
+// 		RoboCompTrajectoryRobot2D::RoboCompException ex;
+// 		ex.text = "Error, command not found in parameters list";
+// 		throw ex;
+// 	};
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

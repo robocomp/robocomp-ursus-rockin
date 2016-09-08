@@ -36,13 +36,11 @@ class Controller
 		~Controller();
 		bool update(InnerModel* innerModel, RoboCompLaser::TLaserData& laserData, RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy, WayPoints& road, bool print = false);
 		void stopTheRobot(RoboCompOmniRobot::OmniRobotPrx differentialrobot_proxy);
-		float exponentialFunction(float value, float xValue, float yValue, float min = 0.f);
 
 	private:
 		QTime time;
 		int delay;
 		bool avoidanceControl(InnerModel* innerModel, const RoboCompLaser::TLaserData& laserData, float& vadvance, float& vrot);
-		std::vector<float> computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData);
 		std::vector<float> baseOffsets;
 		
 	  // Constants reassigned to the params values
@@ -50,6 +48,25 @@ class Controller
 		float MAX_ROT_SPEED = 0.3;
 		float MAX_SIDE_SPEED = 200.f;
 		float MAX_LAG = 100; //ms
+
+		/**
+		* @brief Computes de exponential of value with parameters computed from anchor points
+		* @param value quantity to be tranformed
+		* @param xValue for a point with xValue in X axis
+		* @param yValue we want an yValue in Y axis
+		* @param min ad if the result is less than min then the result is min
+		* @return float
+		*/
+		float exponentialFunction(float value, float xValue, float yValue, float min = 0.f);
+
+		/**
+		* @brief Computes the distance from the laser center to the external limit of robot base, along each beam angle
+		* @param innerModel ...
+		* @param laserData ...
+		* @return std::vector< float, std::allocator >
+		*/
+		std::vector<float> computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData);
+	
 		
 };
 
