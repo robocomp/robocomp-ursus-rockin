@@ -18,6 +18,7 @@
 #ifndef SAMPLER_H
 #define SAMPLER_H
 
+#include <CommonBehavior.h>
 #include <qmat/QMatAll>
 #include <innermodel/innermodel.h>
 #include <QtCore>
@@ -30,7 +31,7 @@ class Sampler
 {
 	public:
 		Sampler();
-		void initialize(InnerModel* inner, const QRectF& outerRegion_, const QList< QRectF >& innerRegions_);
+		void initialize(InnerModel* inner, const RoboCompCommonBehavior::ParameterList &params);
 		std::tuple< bool, QString > checkRobotValidStateAtTarget(const QVec& targetPos, const QVec& targetRot) const;
 		std::tuple< bool, QString > checkRobotValidStateAtTarget(const QVec& target) const;
 		QList<QVec> sampleFreeSpaceR2(uint nPoints = 1);

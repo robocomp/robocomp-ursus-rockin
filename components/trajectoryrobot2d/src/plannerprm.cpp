@@ -29,7 +29,7 @@ PlannerPRM::PlannerPRM()
 {	
 }
 
-void PlannerPRM::initialize(Sampler* sampler_, int nPointsInGraph, int nNeighboursInGraph)
+void PlannerPRM::initialize(Sampler* sampler_, const RoboCompCommonBehavior::ParameterList &params)
 {	
 	sampler = sampler_;
 	
@@ -49,9 +49,25 @@ void PlannerPRM::initialize(Sampler* sampler_, int nPointsInGraph, int nNeighbou
 	}
 	else
 	{
-		qDebug() << __FUNCTION__ << "Graph file DOES NOT exit. Creating with " << nPointsInGraph << "nodes and " << nNeighboursInGraph << "neighboors";
+		try
+		{
+			nPointsInGraph = std::stoi(params.at("PlannerGraphPoints").value);
+			nNeighboursInGraph = std::stoi(params.at("PlannerGraphNeighbours").value);
+			maxDistToSearchmm = std::stof(params.at("PlannerGraphMaxDistanceToSearch").value);
+			robotRadiusmm = std::stof(params.at("RobotRadius").value);
+		}
+		catch(...)
+		{ qFatal("Planner-Initialize. Aborting. Some Planner graph parameters not found in config file"); }
+		
+		qDebug() << __FUNCTION__ << "No graph file found. Creating with " << nPointsInGraph << "nodes and " << nNeighboursInGraph << "neighboors";
 		QList<QVec> pointList = sampler->sampleFreeSpaceR2(nPointsInGraph);
-    	constructGraph(pointList, nNeighboursInGraph, 3500.f, 500);  ///GET From IM ----------------------------------
+		
+		if( pointList.size() < nNeighboursInGraph )
+			qFatal("Planner-Initialize. Aborting. Could not find enough free points to build de graph"); 
+		
+		qDebug() << __FUNCTION__ << "Creating with " << nPointsInGraph << "nodes and " << nNeighboursInGraph << "neighboors";
+    constructGraph(pointList, nNeighboursInGraph, maxDistToSearchmm, robotRadiusmm);  ///GET From IM ----------------------------------
+		qDebug() << __FUNCTION__ << "Graph constructed with " << pointList.size() << "points";
 		writeGraphToFile(graphFileName);
 	}
 	graphDirtyBit = true;
@@ -402,25 +418,13 @@ void PlannerPRM::connectedComponents(ComponentMap &componentMap, ConnectedCompon
 		}
 }
 
-/**
- * @brief Expand an existing graph by adding pointList and trying to connect the new points to the existing ones 
- * It uses original algorithm: 
- * 		for each new point, NEIGHBOURS points are searched in the existing graph sorted by distance.
- * 		each point in the sorted list is tried to connect to the graph point using Sampler
- * 
- * @param pointList list of smapled points
- * @param NEIGHBOORS max number of neighbours
- * @param MAX_DISTANTE_TO_CHECK max distance to check free space
- * @param robotSize ...
- * @return int32_t
- */
-int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS, float MAX_DISTANTE_TO_CHECK, uint robotSize)
+int32_t PlannerPRM::constructGraph(const QList< QVec >& pointList, uint neighboors, float max_distance_to_check, uint RobotRadius)
 {
 
-	qDebug() << __FUNCTION__ << "Constructing graph with " << pointList.size() << " new points and " <<  NEIGHBOORS << "neighboors";
+	qDebug() << __FUNCTION__ << "Constructing graph with " << pointList.size() << " new points and " <<  neighboors << "neighboors";
 
-	int ROBOT_SIZE_SQR = robotSize*robotSize; //mm  OBTAIN FROM ROBOT'S BOUNDING BOX!!!!!
-	float MAX_DISTANTE_TO_CHECK_SQR = MAX_DISTANTE_TO_CHECK * MAX_DISTANTE_TO_CHECK;
+	int ROBOT_SIZE_SQR = (int)pow(RobotRadius,2); //mm  OBTAIN FROM ROBOT'S BOUNDING BOX!!!!!
+	float MAX_DISTANTE_TO_CHECK_SQR = max_distance_to_check * max_distance_to_check;
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//Expand the matrix with new points, insert new vertices and update de <int,vertex> map
@@ -452,6 +456,7 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 		//qDebug() << __FUNCTION__ << "Inserted vertex " << i;
 	}
 
+	qDebug() << __FUNCTION__ << "Computing KdTree...";
 	/////////////////////
 	//Compute KdTree
 	/////////////////////
@@ -461,15 +466,16 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 	////////////////////////////////////////////////////
 	//Query KDTree for sorted distances to NEIGHBOORS neighbours
 	//////////////////////////////////////////////////////
-	Eigen::MatrixXi indices(NEIGHBOORS, pointList.size() );
-	Eigen::MatrixXf distsTo(NEIGHBOORS, pointList.size() );
-	if( NEIGHBOORS >= data.cols())
-		NEIGHBOORS = data.cols()-1;
-	nabo->knn(query, indices, distsTo, NEIGHBOORS, 0, Nabo::NNSearchF::SORT_RESULTS);
+	Eigen::MatrixXi indices(neighboors, pointList.size() );
+	Eigen::MatrixXf distsTo(neighboors, pointList.size() );
+	if( neighboors >= data.cols())
+		neighboors = data.cols()-1;
+	nabo->knn(query, indices, distsTo, neighboors, 0, Nabo::NNSearchF::SORT_RESULTS);
 
 	/////////////////////////
 	//Connect the new points
 	//////////////////////////
+	qDebug() << __FUNCTION__ << "Connecting points...";
 	bool reachEnd;
 	int32_t numExit = 0;
 	
@@ -478,7 +484,7 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 	{
 		Vertex vertexNew = vertexMap.value(i);
 		//for each new point locate a set of neighbours sorted by increasing distance
-		for(uint k=0; k<NEIGHBOORS; k++)
+		for(uint k=0; k<neighboors; k++)
 		{
 			int indKI = indices(k,j);
 			Vertex vertexOld = vertexMap.value(indKI);
@@ -515,6 +521,8 @@ int32_t PlannerPRM::constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS
 			}
 		}
 	}
+	
+	qDebug() << __FUNCTION__ << "Cleaning up...";
 	if( numExit > 0 ) 
 		graphDirtyBit = true;
 	removeSmallComponents(3); //This will rebuild data hash and indices
@@ -874,8 +882,8 @@ bool PlannerPRM::learnForAWhile(uint maxGraphNodes, bool print, bool save)
 	///////////////////////////////////////////
 	QList<QVec> points;
 	int32_t pointsAdded;
-	points = sampler->sampleFreeSpaceR2( 5 );  //THE sampler could be more "smart" to bias zones around less visited nodes in the graph
-	pointsAdded = constructGraph(points);
+	points = sampler->sampleFreeSpaceR2( 5 );  			//THE sampler could be more "smart" to bias zones around less visited nodes in the graph
+	pointsAdded = constructGraph(points, nNeighboursInGraph, maxDistToSearchmm, robotRadiusmm);
 	qDebug() << __FUNCTION__ << "After EXPANDING the graph has " << pointsAdded << "new nodes";
 	if( save ) writeGraphToFile();
 	return true;

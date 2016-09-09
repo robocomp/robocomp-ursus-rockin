@@ -18,9 +18,7 @@
 #include "sampler.h"
 
 Sampler::Sampler()
-{
-	//mutex = new QMutex();
-}
+{}
 
 /**
  * @brief Initializes the Sampler with the limits of robot's workspace and a point to innermodel.
@@ -32,15 +30,33 @@ Sampler::Sampler()
  * @param innerRegions_ List of QRectF polygons delimiting forbidden regions inside robot's workspace
  * @return void
  */
-void Sampler::initialize(InnerModel *inner, const QRectF& outerRegion_, const QList< QRectF> &innerRegions_)
+void Sampler::initialize(InnerModel *inner, const RoboCompCommonBehavior::ParameterList &params)
 {
 	qDebug() << __FUNCTION__ << "Sampler: Copying InnerModel...";
 	innerModelSampler = inner->copy();
-	innerRegions = innerRegions_;
-	outerRegion = outerRegion_;
+	
+	try
+	{
+		outerRegion.setLeft(std::stof(params.at("OuterRegionLeft").value));
+		outerRegion.setRight(std::stof(params.at("OuterRegionRight").value));
+		outerRegion.setBottom(std::stof(params.at("OuterRegionBottom").value));
+		outerRegion.setTop(std::stof(params.at("OuterRegionTop").value));
+		qDebug() << __FUNCTION__ << "OuterRegion from config: " << outerRegion;
+	}
+	catch(...)
+	{ qFatal("Sampler-Initialize. Aborting. OuterRegion parameters not found in config file");}    //CHANGE TO THROW
+	
+	//innerRegions = innerRegions_;
+	// 	foreach(QRectF ir,  innerRegions_)
+	// 		if( ir.isNull() == false)
+	// 			qFatal("Sampler-Initialize. Aborting. An InnerRegion is not a valid rectangle");
+	// 	
+
+	if(outerRegion.isNull())  
+		qFatal("Sampler-Initialize. Aborting. OuterRegion is not properly initialized");    //CHANGE TO THROW
 
 	robotNodes.clear(); restNodes.clear(); 
-	excludedNodes.insert("floor_plane");
+	excludedNodes.insert(QString::fromStdString(params.at("ExcludedObjectsInCollisionCheck").value));
 	
 	// Compute the list of meshes that correspond to robot, world and possibly some additionally excluded ones
 	recursiveIncludeMeshes(innerModelSampler->getRoot(), "robot", false, robotNodes, restNodes, excludedNodes);
@@ -63,7 +79,8 @@ std::tuple<bool, QString> Sampler::checkRobotValidStateAtTarget(const QVec &targ
 {
  	QMutexLocker ml(&mutex);
 	QString diagnosis;
-	//First we move our virtual robot to its current coordinates
+	
+	//First we move the robot in our copy of innermodel to its current coordinates
 	innerModelSampler->updateTransformValues("robot", targetPos.x(), targetPos.y(), targetPos.z(), targetRot.x(), targetRot.y(), targetRot.z());
 
 	///////////////////////
@@ -114,16 +131,19 @@ std::tuple< bool, QString > Sampler::checkRobotValidStateAtTarget(const QVec& ta
  */
 QList<QVec> Sampler::sampleFreeSpaceR2(uint nPoints)  
 {
+	QTime reloj;
  	bool validState = false;
 	QVec p,q,res(3,0.f);
 	QList<QVec> list;
 
 	for(uint32_t i=0; i<nPoints;i++)
 	{
-		while( validState == false )   ///SHOULD CHECK ALSO FOR TIMEOUT
+		reloj.start();
+		validState = false;
+		while( validState == false and reloj.elapsed() < 2000 )
 		{
 			p =	QVec::uniformVector(1, outerRegion.left(), outerRegion.right());
-			q =	QVec::uniformVector(1, outerRegion.top(), outerRegion.bottom());
+			q =	QVec::uniformVector(1, outerRegion.bottom(), outerRegion.top());
 			QPointF s(p.x(),q.x());
 			bool in = false;
 			foreach(QRectF rect, innerRegions)
@@ -141,8 +161,8 @@ QList<QVec> Sampler::sampleFreeSpaceR2(uint nPoints)
 				validState = std::get<bool>(checkRobotValidStateAtTarget(res, QVec::zeros(3)));  //ROTATION COULD BE RANDOMIZED HERE
 			}
 		}
-		list.append(res);
-		validState = false;
+		if( validState )
+			list.append(res);
 	}
 	return list;
 }
@@ -548,3 +568,51 @@ bool Sampler::searchRobotValidStateCloseToTarget(QVec& target)
 	else
 		return false;
 }
+
+
+///////////////////////
+// 	InnerModelPlane *floor = NULL;
+// 	try
+// 	{
+// 		// 		floor = innerModel->getPlane("floor_plane");  ///TIENE QUE HABER UN FLOOR_PLANE
+// 		// 		qDebug() << __FUNCTION__ << "floor_plane dimensions from InnerModel: " << floor->width << "W" << floor->height << "H";
+// 		// 		QVec upperLeft = innerModel->transform("world", QVec::vec3(floor->width / 2, 0, floor->height / 2), "floor");
+// 		// 		QVec downRight = innerModel->transform("world", QVec::vec3(-floor->width / 2, 0, -floor->height / 2), "floor");
+// 		// 		qDebug() << __FUNCTION__ << "QRect representation:";
+// 		// 		upperLeft.print("	UL");
+// 		// 		downRight.print("	DR");
+// 		// 
+// 		// 		outerRegion.setLeft(upperLeft.x());
+// 		// 		outerRegion.setRight(downRight.x());
+// 		// 		outerRegion.setBottom(downRight.z());
+// 		// 		outerRegion.setTop(upperLeft.z());
+// 		// 		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
+// 		
+// 		/*
+// 		outerRegion.setLeft( upperLeft.x() + floor->point.x() );
+// 		outerRegion.setRight( downRight.x() + floor->point.x() );
+// 		outerRegion.setBottom( downRight.z() + floor->point.z() );
+// 		outerRegion.setTop( upperLeft.z() + floor->point.z() );
+// 		*/
+// 		// 		outerRegion.setLeft(0);
+// 		// 		outerRegion.setRight(6000);
+// 		// 		outerRegion.setBottom(-4250);
+// 		// 		outerRegion.setTop(4250);
+// 		// 		
+// 		
+// // 		outerRegion.setLeft(std::stof(params.at("OuterRegionLeft").value));
+// // 		outerRegion.setRight(std::stof(params.at("OuterRegionRight").value));
+// // 		outerRegion.setBottom(std::stof(params.at("OuterRegionBottom").value));
+// // 		outerRegion.setTop(std::stof(params.at("OuterRegionTop").value));
+// 		
+// 		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
+// 	}
+// 	catch (QString err)
+// 	{
+// 		qDebug() << __FUNCTION__ << "Aborting. We need a plane named 'floor_plane' in InnerModel.xml to delimit robot's space";
+// 		throw err;
+// 	}
+// 
+// 	// for Rocking apartment                         y = x       x = -y
+// 	// 	innerRegions << QRectF(-6000,-5000, 12000, 1000) << QRectF(-6000, -2700, 2900, 3500) << QRectF(6000, 0, -2900 , -5000) << QRectF(4500, 5000, 1800, -10000)<< QRectF(-1800, 3000, 7800, 2000);// << QRectF(-200, -200, 1800, -5000);
+// 	

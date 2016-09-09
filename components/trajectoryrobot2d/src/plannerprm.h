@@ -18,6 +18,7 @@
 #ifndef PLANNERPRM_H
 #define PLANNERPRM_H
 
+#include <CommonBehavior.h>
 #include "config.h"
 #include <qmat/QMatAll>
 #include <innermodel/innermodel.h>
@@ -79,7 +80,7 @@ class PlannerPRM
 {
 	public:
 		PlannerPRM();
-		void initialize(Sampler *sampler_, int nPointsInGraph, int nNeighboursInGraph);
+		void initialize(Sampler* sampler_, const RoboCompCommonBehavior::ParameterList& params);
 		bool computePath(QVec& target,  InnerModel* inner);
 		void initialize(const Sampler &sampler);
 		QList<QVec> getPath() { return currentPath; }
@@ -100,7 +101,18 @@ class PlannerPRM
 	private:
 		InnerModel innerPlanner;
 		
-		int32_t constructGraph(const QList<QVec> &pointList, uint NEIGHBOORS=20, float MAX_DISTANTE_TO_CHECK=2000.f, uint robotSize=400);
+		/**
+		* @brief Expand an existing graph by adding pointList and trying to connect the new points to the existing ones 
+		* It uses original algorithm: 
+		* 		for each new point, NEIGHBOURS points are searched in the existing graph sorted by distance.
+		* 		each point in the sorted list is tried to connect to the graph point using Sampler 
+		* @param pointList list of smapled points
+		* @param NEIGHBOORS max number of neighbours
+		* @param MAX_DISTANTE_TO_CHECK max distance to check free space
+		* @param robotSize ...
+		* @return int32_t
+		*/
+		int32_t constructGraph(const QList<QVec> &pointList, uint neighboors, float max_distance_to_check, uint robotDiameter);
 		bool searchGraph(const Vertex& originVertex, const Vertex& targetVertex,  std::vector<Vertex> &vertexPath);
 		bool rebuildExternalData();
 		void readGraphFromFile(QString name);
@@ -127,18 +139,15 @@ class PlannerPRM
 		QHash<int,Vertex> vertexMap;
 		//Eigen matrix holding the initial points: size(2,NUM_POINTS)
 		Eigen::MatrixXf data;
-		//number of points given in constructor
-		uint NUM_POINTS;
-		uint NEIGHBOORS;
 		
 		//embedded RRTConnect Planner
 		PlannerOMPL plannerRRT;
 		bool planWithRRT(const QVec& origin, const QVec& target, QList<QVec> &path);
 		
 		bool graphDirtyBit;
-		uint graphNumPoints;
 		QString graphFileName = "grafo.dot";
-		uint graphNeighPoints;
+		int nPointsInGraph, nNeighboursInGraph; 
+		float maxDistToSearchmm, robotRadiusmm;
 };
 
 //Graph writing classes

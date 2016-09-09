@@ -35,23 +35,14 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	this->params = params;
 	try
 	{
-		RoboCompCommonBehavior::Parameter par = params.at("InnerModel");
-		if (QFile::exists(QString::fromStdString(par.value)))
-		{
-			innerModel = new InnerModel(par.value);
-			#ifdef USE_QTGUI
-				viewer = new InnerViewer(innerModel);  //makes a copy of innermodel for internal use
-			#endif
-		}
-		else
-		{
-			std::cout << "Aborting. Innermodel path " << par.value << " not found. ";
-			qFatal("Bye");
-		}
+		innerModel = new InnerModel(params.at("InnerModel").value);
+		#ifdef USE_QTGUI
+			viewer = new InnerViewer(innerModel);  //makes a copy of innermodel for internal use
+	  #endif
 	}
 	catch (std::exception e)
 	{
-		qFatal("Aborting. Error reading config params");
+		qFatal("Aborting. Error reading config params");		//WE COULD THROW HERE AND HAVA A NICE EXIT FROM MAIN
 	}
 
 	//////////////////////////////
@@ -63,57 +54,12 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//////////////////////////////////////
 	/// Initialize sampler of free space
 	/////////////////////////////////////
-	InnerModelPlane *floor = NULL;
-	try
-	{
-		// 		floor = innerModel->getPlane("floor_plane");  ///TIENE QUE HABER UN FLOOR_PLANE
-		// 		qDebug() << __FUNCTION__ << "floor_plane dimensions from InnerModel: " << floor->width << "W" << floor->height << "H";
-		// 		QVec upperLeft = innerModel->transform("world", QVec::vec3(floor->width / 2, 0, floor->height / 2), "floor");
-		// 		QVec downRight = innerModel->transform("world", QVec::vec3(-floor->width / 2, 0, -floor->height / 2), "floor");
-		// 		qDebug() << __FUNCTION__ << "QRect representation:";
-		// 		upperLeft.print("	UL");
-		// 		downRight.print("	DR");
-		// 
-		// 		outerRegion.setLeft(upperLeft.x());
-		// 		outerRegion.setRight(downRight.x());
-		// 		outerRegion.setBottom(downRight.z());
-		// 		outerRegion.setTop(upperLeft.z());
-		// 		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
-		
-		/*
-		outerRegion.setLeft( upperLeft.x() + floor->point.x() );
-		outerRegion.setRight( downRight.x() + floor->point.x() );
-		outerRegion.setBottom( downRight.z() + floor->point.z() );
-		outerRegion.setTop( upperLeft.z() + floor->point.z() );
-		*/
-		// 		outerRegion.setLeft(0);
-		// 		outerRegion.setRight(6000);
-		// 		outerRegion.setBottom(-4250);
-		// 		outerRegion.setTop(4250);
-		// 		
-		
-		outerRegion.setLeft(std::stof(params.at("OuterRegionLeft").value));
-		outerRegion.setRight(std::stof(params.at("OuterRegionRight").value));
-		outerRegion.setBottom(std::stof(params.at("OuterRegionBottom").value));
-		outerRegion.setTop(std::stof(params.at("OuterRegionTop").value));
-		
-		qDebug() << __FUNCTION__ << "OuterRegion" << outerRegion;
-	}
-	catch (QString err)
-	{
-		qDebug() << __FUNCTION__ << "Aborting. We need a plane named 'floor_plane' in InnerModel.xml to delimit robot's space";
-		throw err;
-	}
-
-	// for Rocking apartment                         y = x       x = -y
-	// 	innerRegions << QRectF(-6000,-5000, 12000, 1000) << QRectF(-6000, -2700, 2900, 3500) << QRectF(6000, 0, -2900 , -5000) << QRectF(4500, 5000, 1800, -10000)<< QRectF(-1800, 3000, 7800, 2000);// << QRectF(-200, -200, 1800, -5000);
-	
-	sampler.initialize(innerModel, outerRegion, innerRegions);
+	sampler.initialize(innerModel, params);
 
 	///////////////////
 	//Planner
 	///////////////////
-	plannerPRM.initialize(&sampler, std::stoi(params.at("PlannerGraphPoints").value) , std::stoi(params.at("PlannerGraphNeighbours").value));  
+	plannerPRM.initialize(&sampler, params);  
 	
 	///////////////////
 	//Initializes the elastic band structure "road"

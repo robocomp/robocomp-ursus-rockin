@@ -114,6 +114,10 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList& params )
 	aux.editable = false;
 	configGetString( "TrajectoryRobot2D","PlannerGraphNeighbours", aux.value,"20");
 	params["PlannerGraphNeighbours"] = aux;
+
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","PlannerGraphMaxDistanceToSearch", aux.value,"2500");
+	params["PlannerGraphMaxDistanceToSearch"] = aux;
 	
 	aux.editable = false;
 	configGetString( "TrajectoryRobot2D","OuterRegionLeft", aux.value,"0");
@@ -131,6 +135,9 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList& params )
 	configGetString( "TrajectoryRobot2D","OuterRegionTop", aux.value,"4250");
 	params["OuterRegionTop"] = aux;
 	
+	aux.editable = false;
+	configGetString( "TrajectoryRobot2D","ExcludedObjectsInCollisionCheck", aux.value,"floor_plane");
+	params["ExcludedObjectsInCollisionCheck"] = aux;
 }
 
 
@@ -138,8 +145,8 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList& params )
 bool SpecificMonitor::checkParams(RoboCompCommonBehavior::ParameterList l)
 {
 	bool correct = true;
-	//Check parameters
 	
+	//Check InnerModel exists
 	std::ifstream f(l["InnerModel"].value);
 	if(f.good() == false)
 		correct = false;
