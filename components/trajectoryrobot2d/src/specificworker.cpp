@@ -80,7 +80,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	
 #ifdef USE_QTGUI
 	graphdraw.draw(plannerPRM, viewer);
-	viewer->start();	
+	//viewer->start();	
 #endif
 	
 	Period = 100;
@@ -116,6 +116,7 @@ void SpecificWorker::compute()
 			break;
 		case CurrentTarget::State::GOTO:
 			timer.setInterval(Period);
+			//qDebug() << __FUNCTION__ << "GOTO:" << "Robot at:" << innerModel->transform6D("world", "robot") << "Target:" << currentTarget.getFullPose();
 			gotoCommand(innerModel, currentTarget, tState, road, laserData);
 			break;
 		case CurrentTarget::State::SETHEADING:
@@ -155,7 +156,7 @@ void SpecificWorker::compute()
 		case CurrentTarget::State::IDLE:
 			timer.setInterval(700);
 			qDebug() << __FUNCTION__ << "Computed period" << reloj.restart()  << "ms. State. Robot at:" << innerModel->transform6D("world", "robot");
-			currentTarget.setState(CurrentTarget::State::LEARNING);
+			//currentTarget.setState(CurrentTarget::State::LEARNING);
 			break;
 	}
 }
@@ -439,7 +440,6 @@ float SpecificWorker::go(const TargetPose &target)
 	return goReferenced(target, 0, 0, 100);
 }
 
-
 float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, const float zRef, const float threshold)
 {
 	/////////////////////
@@ -460,7 +460,8 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 	QVec robotRot = innerModel->transform6D("world", "robot").subVector(3, 5);
 	QVec targetT = QVec::vec3(target_.x, target_.y, target_.z);
 	QVec targetRot = QVec::vec3(target_.rx, target_.ry, target_.rz);
-
+	drawTarget(targetT);
+	
 	qDebug() << __FUNCTION__
 	         << "----------------------------------------------------------------------------------------------";
 	qDebug() << __FUNCTION__ << ": Target received" << targetT << targetRot << "with ROBOT at" << robotT << robotRot;
@@ -503,11 +504,10 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 	auto r = sampler.checkRobotValidStateAtTarget(robotT, robotRot);
 	if (std::get<bool>(r) == false)
 	{
-		qDebug() << __FUNCTION__ << std::get<QString>(r);
 		RoboCompTrajectoryRobot2D::RoboCompException ex;
-		ex.text = "Fail. Robot is outside limits or colliding. Ignoring request. " +
-		          std::get<QString>(r).toStdString();
-		tState.setDescription("Robot collision at origin");
+		ex.text = "Execption: Robot is outside limits or colliding. Ignoring request. " + std::get<QString>(r).toStdString();
+		qDebug() << __FUNCTION__ << QString::fromStdString(ex.text);
+		tState.setDescription(ex.text);
 		currentTarget.setState(CurrentTarget::State::ROBOT_COLLISION);
 		throw ex;
 	}
@@ -518,11 +518,10 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 	r = sampler.checkRobotValidStateAtTarget(targetT, targetRot);
 	if (std::get<bool>(r) == false)
 	{
-		qDebug() << __FUNCTION__ << std::get<QString>(r);
 		RoboCompTrajectoryRobot2D::RoboCompException ex;
-		ex.text = "Fail. Target outside limits or colliding. Ignoring request. " +
-		          std::get<QString>(r).toStdString();
-		tState.setDescription("Collision at target");
+		ex.text = "Exception: Target outside limits or colliding. Ignoring request. " + std::get<QString>(r).toStdString();
+		qDebug() << __FUNCTION__ << QString::fromStdString(ex.text);
+		tState.setDescription(ex.text);
 		currentTarget.setState(CurrentTarget::State::TARGET_COLLISION);
 		throw ex;
 	}
@@ -534,12 +533,13 @@ float SpecificWorker::goReferenced(const TargetPose &target_, const float xRef, 
 	// move virtualrobot to xref, zRef to act as a surrogate
 	//innerModel->updateTransformValues("virtualRobot", xRef, 0, zRef, 0, 0, 0, "robot");
 	//InnerModelDraw::addPlane_ignoreExisting(innerViewer, "virtualRobot", "robot", QVec::vec3(xRef,0,zRef), QVec::vec3(0,0,0), "#555555", QVec::vec3(50,1000,50));
+	
 	road.setThreshold(threshold);
 
 	currentTarget.reset(targetT, targetRot, target_.doRotation);
 	currentTarget.setState(CurrentTarget::State::GOTO);
 	tState.setState("EXECUTING");	
-	//drawTarget(targetT);
+	
 	taskReloj.restart();
 	return (robotT - targetT).norm2();
 }

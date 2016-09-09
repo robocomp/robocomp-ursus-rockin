@@ -27,6 +27,100 @@ void WayPoints::initialize(InnerModel* inner, const RoboCompCommonBehavior::Para
 {
 	innerModel = inner;
 	threshold = std::stof(params.at("ArrivalTolerance").value);
+	
+}
+
+//////////////////
+/// Main method
+/////////////////
+void WayPoints::update()
+{
+	//////////////////////////////////////////////////////
+	//Get robot's position in world and create robot's nose
+	//////////////////////////////////////////////////////
+	QVec robot3DPos = innerModel->transform("world", "robot");
+	QVec noseInRobot = innerModel->transform("world", QVec::vec3(0, 0, 1000), "robot");
+	QLine2D nose = QLine2D(QVec::vec2(robot3DPos.x(), robot3DPos.z()), QVec::vec2(noseInRobot.x(), noseInRobot.z()));
+
+	////////////////////////////////////////////////////
+	//Compute closest point in road to robot. If closer than 1000mm it will use the virtual point (tip) instead of the center of the robot.
+	///////////////////////////////////////////////////
+// 	if (getRobotDistanceToTarget() < 1000)
+// 	{
+// 	 		robot3DPos = innerModel->transform("world", "virtualRobot");
+// 	}
+	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
+
+	///////////////////////////////////////
+	//Compute roadTangent at closestPoint
+	///////////////////////////////////////
+	QLine2D tangent = computeTangentAt(closestPoint);
+	setTangentAtClosestPoint(tangent);
+
+	//////////////////////////////////////////////////////////////////////////////
+	//Compute signed perpenduicular distance from robot to tangent at closest point
+	///////////////////////////////////////////////////////////////////////////////
+	setRobotPerpendicularDistanceToRoad(tangent.perpendicularDistanceToPoint(robot3DPos));
+
+	////////////////////////////////////////////////////
+	//Compute signed angle between nose and tangent at closest point
+	////////////////////////////////////////////////////
+	float ang = nose.signedAngleWithLine2D(tangent);
+	if (std::isnan(ang))
+		ang = 0;
+	setAngleWithTangentAtClosestPoint(ang);
+
+	/////////////////////////////////////////////
+	//Compute distance to target along trajectory
+	/////////////////////////////////////////////
+	setRobotDistanceToTarget(computeDistanceToTarget(closestPoint, robot3DPos));  //computes robotDistanceVariationToTarget
+	setRobotDistanceVariationToTarget(robotDistanceVariationToTarget);
+
+	//////////////////////////////////
+	//Update estimated time of arrival
+	//////////////////////////////////
+	setETA();
+
+	////////////////////////////////////////////////////////////
+	//Compute curvature of trajectory at closest point to robot
+	////////////////////////////////////////////////////////////
+	setRoadCurvatureAtClosestPoint(computeRoadCurvature(closestPoint, 3));
+
+	////////////////////////////////////////////////////////////
+	//Compute distance to last road point visible with laser field
+	////////////////////////////////////////////////////////////
+	setRobotDistanceToLastVisible(computeDistanceToLastVisible(closestPoint, robot3DPos));
+
+	////////////////////////////////////////////////////////////
+	// Compute robot angle in each point
+	// //////////////////////////////////////////////////////////
+	for( WayPoints::iterator it = this->begin(); it != this->end(); ++it )
+	{
+		QLine2D l = computeTangentAt(it);
+		QVec d = l.getDirectionVector();
+		float ang =  atan2(d.x(), d.y());
+		if(ang>0) ang -= M_PI;
+		else ang += M_PI;
+		it->rot = QVec::vec3(0, ang, 0);
+	}
+
+	//////////////////////////////////////////////////////////
+	//Check for arrival to target (translation)  TOO SIMPLE
+	/////////////////////////////////////////////////////////
+	threshold = 20;
+	qDebug() << __FUNCTION__ << "Arrived:" << getRobotDistanceToTarget() <<  this->threshold << getRobotDistanceVariationToTarget();
+	
+	if (((((int) getIndexOfCurrentPoint() + 1 == (int) this->size()) or  (getRobotDistanceToTarget() < threshold))) or
+	    ((getRobotDistanceToTarget() < 100) and (getRobotDistanceVariationToTarget() > 0)))	
+	{
+		setFinished(true);
+	}
+
+	///////////////////////////////////////////
+	//Check for blocked road
+	///////////////////////////////////////////
+//	if( isVisible(indexOfNextPoint) == false)
+//		setBlocked(true);
 }
 
 void WayPoints::reset()
@@ -387,92 +481,4 @@ void WayPoints::setETA()
 	elapsedTime = reloj.elapsed();
 }
 
-void WayPoints::update()
-{
-	//////////////////////////////////////////////////////
-	//Get robot's position in world and create robot's nose
-	//////////////////////////////////////////////////////
-	QVec robot3DPos = innerModel->transform("world", "robot");
-	QVec noseInRobot = innerModel->transform("world", QVec::vec3(0, 0, 1000), "robot");
-	QLine2D nose = QLine2D(QVec::vec2(robot3DPos.x(), robot3DPos.z()), QVec::vec2(noseInRobot.x(), noseInRobot.z()));
-
-	////////////////////////////////////////////////////
-	//Compute closest point in road to robot. If closer than 1000mm it will use the virtual point (tip) instead of the center of the robot.
-	///////////////////////////////////////////////////
-// 	if (getRobotDistanceToTarget() < 1000)
-// 	{
-// 	 		robot3DPos = innerModel->transform("world", "virtualRobot");
-// 	}
-	WayPoints::iterator closestPoint = computeClosestPointToRobot(robot3DPos);
-
-	///////////////////////////////////////
-	//Compute roadTangent at closestPoint
-	///////////////////////////////////////
-	QLine2D tangent = computeTangentAt(closestPoint);
-	setTangentAtClosestPoint(tangent);
-
-	//////////////////////////////////////////////////////////////////////////////
-	//Compute signed perpenduicular distance from robot to tangent at closest point
-	///////////////////////////////////////////////////////////////////////////////
-	setRobotPerpendicularDistanceToRoad(tangent.perpendicularDistanceToPoint(robot3DPos));
-
-	////////////////////////////////////////////////////
-	//Compute signed angle between nose and tangent at closest point
-	////////////////////////////////////////////////////
-	float ang = nose.signedAngleWithLine2D(tangent);
-	if (std::isnan(ang))
-		ang = 0;
-	setAngleWithTangentAtClosestPoint(ang);
-
-	/////////////////////////////////////////////
-	//Compute distance to target along trajectory
-	/////////////////////////////////////////////
-	setRobotDistanceToTarget(computeDistanceToTarget(closestPoint, robot3DPos));  //computes robotDistanceVariationToTarget
-	setRobotDistanceVariationToTarget(robotDistanceVariationToTarget);
-
-	//////////////////////////////////
-	//Update estimated time of arrival
-	//////////////////////////////////
-	setETA();
-
-	////////////////////////////////////////////////////////////
-	//Compute curvature of trajectory at closest point to robot
-	////////////////////////////////////////////////////////////
-	setRoadCurvatureAtClosestPoint(computeRoadCurvature(closestPoint, 3));
-
-	////////////////////////////////////////////////////////////
-	//Compute distance to last road point visible with laser field
-	////////////////////////////////////////////////////////////
-	setRobotDistanceToLastVisible(computeDistanceToLastVisible(closestPoint, robot3DPos));
-
-	////////////////////////////////////////////////////////////
-	// Compute robot angle in each point
-	// //////////////////////////////////////////////////////////
-	for( WayPoints::iterator it = this->begin(); it != this->end(); ++it )
-	{
-		QLine2D l = computeTangentAt(it);
-		QVec d = l.getDirectionVector();
-		float ang =  atan2(d.x(), d.y());
-		if(ang>0) ang -= M_PI;
-		else ang += M_PI;
-		it->rot = QVec::vec3(0, ang, 0);
-	}
-
-	///////////////////////////////////////////
-	//Check for arrival to target (translation)  TOO SIMPLE
-	///////////////////////////////////////////
-	if (((((int) getIndexOfCurrentPoint() + 1 == (int) this->size()) or  (getRobotDistanceToTarget() < threshold))) or
-	    ((getRobotDistanceToTarget() < 100) and (getRobotDistanceVariationToTarget() > 0)))
-	{
-		setFinished(true);
-		//		qDebug() << __FUNCTION__ << "Arrived:" << (int)getCurrentPointIndex()+1 << (int)getCurrentPointIndex()+1 << getRobotDistanceToTarget() << getRobotDistanceVariationToTarget();
-		// 		getIndexOfClosestPointToRobot()->pos.print("closest point");
-	}
-
-	///////////////////////////////////////////
-	//Check for blocked road
-	///////////////////////////////////////////
-//	if( isVisible(indexOfNextPoint) == false)
-//		setBlocked(true);
-}
 
