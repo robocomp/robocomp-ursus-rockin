@@ -37,7 +37,7 @@ ElasticBand::ElasticBand(InnerModel *inner)
 	float ys = robot_base->height;
 	qDebug() << __FUNCTION__ << xs << ys << zs;
 
-	pointsMat = QMat::zeros(8,4);
+	pointsMat = QMat::zeros(3,4);
 
 	//upper
 	pointsMat(0,0) = -xs/2;
@@ -51,25 +51,25 @@ ElasticBand::ElasticBand(InnerModel *inner)
 	pointsMat(2,3) =  1.f;
 
 	//lower
-	pointsMat(3,0) = -xs/2;
-	pointsMat(3,2) = -zs/2;
-	pointsMat(3,3) =  1.f;
-	pointsMat(4,0) =  xs/2;
-	pointsMat(4,2) = -zs/2;
-	pointsMat(4,3) =  1.f;
-
-	pointsMat(5,0) =  0;
-	pointsMat(5,2) = -zs/2;
-	pointsMat(5,3) =  1.f;
+// 	pointsMat(3,0) = -xs/2;
+// 	pointsMat(3,2) = -zs/2;
+// 	pointsMat(3,3) =  1.f;
+// 	pointsMat(4,0) =  xs/2;
+// 	pointsMat(4,2) = -zs/2;
+// 	pointsMat(4,3) =  1.f;
+// 
+// 	pointsMat(5,0) =  0;
+// 	pointsMat(5,2) = -zs/2;
+// 	pointsMat(5,3) =  1.f;
 
 	//middle
-	pointsMat(6,0) = -xs/2;
-	pointsMat(6,2) =  0;
-	pointsMat(6,3) =  1.f;
-
-	pointsMat(7,0) =  xs/2;
-	pointsMat(7,2) =  0;
-	pointsMat(7,3) =  1.f;
+// 	pointsMat(6,0) = -xs/2;
+// 	pointsMat(6,2) =  0;
+// 	pointsMat(6,3) =  1.f;
+// 
+// 	pointsMat(7,0) =  xs/2;
+// 	pointsMat(7,2) =  0;
+// 	pointsMat(7,3) =  1.f;
 
 	pointsMat = pointsMat.transpose();
 }
@@ -275,14 +275,17 @@ bool ElasticBand::checkVisiblePoints(InnerModel *innermodel, WayPoints &road, co
 		innermodel->updateTransformValues("robot", road[it].pos.x(), road[it].pos.y(), road[it].pos.z(), 0, road[it].rot.y(), 0);
 		//get Robot transformation matrix
 		QMat m = innermodel->getTransformationMatrix("world", "robot");
-		// Transform all points at one
+		// Transform all points at one to world RS
 		//m.print("m");
 		//pointsMat.print("pointsMat");
 		QMat newPoints = m * pointsMat;
 
 		//Check if they are inside the laser polygon
-		for (int i = 0; i < newPoints.nRows(); i++)
+		for (int i = 0; i < newPoints.nCols(); i++)
 		{
+// 			qDebug() << __FUNCTION__ << "----------------------------------";
+// 			qDebug() << __FUNCTION__ << QPointF(newPoints(0, i), newPoints(2, i));
+// 			qDebug() << __FUNCTION__ << polygon;
 			if (polygon.containsPoint(QPointF(newPoints(0, i), newPoints(2, i)),Qt::OddEvenFill) == false)
 			{
 				road[it].isVisible = false;
@@ -442,7 +445,7 @@ float ElasticBand::computeForces(InnerModel *innermodel, WayPoints &road, const 
 		}
 
 		float alpha = -0.3; //Negative values between -0.1 and -1. The bigger in magnitude, the stiffer the road becomes
-		float beta = 0.80;  //Posibite values between  0.1 and 1	 The bigger in magnitude, more separation from obstacles
+		float beta = 2.7;  //Posibite values between  0.1 and 1	 The bigger in magnitude, more separation from obstacles
 
 		QVec change = (atractionForce * alpha) + (repulsionForce * beta);
 		if (std::isnan(change.x()) or std::isnan(change.y()) or std::isnan(change.z()))

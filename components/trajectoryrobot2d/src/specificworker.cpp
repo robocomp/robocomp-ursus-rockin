@@ -80,7 +80,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	
 #ifdef USE_QTGUI
 	graphdraw.draw(plannerPRM, viewer);
-	//viewer->start();	
+	viewer->start();	
 #endif
 	
 	Period = 100;
@@ -121,6 +121,14 @@ void SpecificWorker::compute()
 			break;
 		case CurrentTarget::State::SETHEADING:
 			setHeadingCommand(innerModel, currentTarget.getRotation().y(), currentTarget, tState, road);
+			break;		
+		case CurrentTarget::State::BLOCKED:
+				road.update();
+				elasticband->update(innerModel, road, laserData, currentTarget);
+				if( road.isBlocked() == false)
+					currentTarget.setState(CurrentTarget::State::GOTO);
+				else
+					qDebug() << __FUNCTION__ << "Blocked";
 			break;
 		case CurrentTarget::State::GOBACKWARDS:
 			goBackwardsCommand(innerModel, currentTargetBack, currentTarget, tState, road);
@@ -129,7 +137,7 @@ void SpecificWorker::compute()
 			timer.setInterval(2000);
 			break;
 		case CurrentTarget::State::ROBOT_COLLISION:			// Check if robot is inside limits and not in collision.
-			timer.setInterval(1000);
+			
 			if (std::get<bool>(sampler.checkRobotValidStateAtTarget(innerModel->transform6D("world", "robot"))))
 			{
 				tState.setState("IDLE"); tState.setDescription("");
@@ -235,13 +243,21 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 		target.setState(CurrentTarget::State::SETHEADING);
 		return true;
 	}
-// 	if (myRoad.isBlocked() == true)
-// 	{
-// 		currentTargetBack.setTranslation(innerModel->transform("world", QVec::vec3(0, 0, -250), "robot"));
-// 		target.setState(CurrentTarget::State::GOBACKWARDS);
-// 		return true;
-// 	}
+ 	if (myRoad.isBlocked() == true)		//Road BLOCKED, go to BLOCKED state and wait it the obstacle moves
+ 	{
+		controller->stopTheRobot(omnirobot_proxy);
+ 		//currentTargetBack.setTranslation(innerModel->transform("world", QVec::vec3(0, 0, -250), "robot"));
+ 		target.setState(CurrentTarget::State::BLOCKED);
+		return false;
+ 	}
 
+	// Get here when robot is stuck
+// 	if(myRoad.requiresReplanning == true)
+// 	{
+// 	 		//qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
+// 	 		//computePlan(innerModel);
+// 	}
+	
 	//////////////////////////////////////////
 	// Check if there is a plan for the target
 	//////////////////////////////////////////
@@ -268,7 +284,7 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 		myRoad.readRoadFromList(plannerPRM.getPath());
 		myRoad.requiresReplanning = false;
 		myRoad.computeDistancesToNext();
-		myRoad.update();  //NOT SURE IF NEEDED HERE
+		//myRoad.update();  //NOT SURE IF NEEDED HERE
 		myRoad.startRoad();
 		state.setPlanningTime(reloj.elapsed());
 		state.setState("EXECUTING");
@@ -291,13 +307,6 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 	//////////////////////////////////////////////////////
 	controller->update(innerModel, lData, omnirobot_proxy, myRoad);
 
-
-	// Get here when robot is stuck
-	// 	if(myRoad.requiresReplanning == true)
-	// 	{
-	// 		//qDebug() << __FUNCTION__ << "STUCK, PLANNING REQUIRED";
-	// 		//computePlan(innerModel);
-	// 	}
 	
 	#ifdef USE_QTGUI
 		waypointsRoad.draw(myRoad, viewer,  target);
@@ -679,14 +688,15 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 	{
 		omnirobot_proxy->getBaseState(bState);
 		inner->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
-		//innerVisual->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
-		viewer->innerModel->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		#ifdef USE_QTGUI
+			viewer->innerModel->updateTransformValues("robot", bState.correctedX, 0, bState.correctedZ, 0, bState.correctedAlpha, 0);
+		#endif
 	}
 	catch (const Ice::Exception &ex)
 	{
 		qDebug() << __FUNCTION__ << "Can't connect to OmniRobot proxy. Retrying...";
 		return false;
-	}
+	}	
 	try
 	{	laserData = laser_proxy->getLaserData();	}
 	catch (const Ice::Exception &ex)
@@ -709,12 +719,10 @@ bool SpecificWorker::updateInnerModel(InnerModel *inner, TrajectoryState &state)
 void SpecificWorker::setRobotInitialPose(float x, float z, float alpha)
 {
 	// 	qDebug()<< __FUNCTION__ << "Sending robot to initial position";
-#ifdef USE_QTGUI
-// 	innerVisual->updateTransformValues("initialRobotPose", 0, 0, 0, 0, 0, 0);
-// 	innerVisual->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
+	#ifdef USE_QTGUI
  	  viewer->innerModel->updateTransformValues("initialRobotPose", 0, 0, 0, 0, 0, 0);
 		viewer->innerModel->updateTransformValues("robot", x, 0, z, 0, alpha, 0);
-#endif
+	#endif
 
 	try
 	{		omnirobot_proxy->setOdometerPose(x, z, alpha);	}

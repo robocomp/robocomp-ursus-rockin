@@ -73,41 +73,6 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 		return false;
 	}
 		
-	//////////////////////////////////////////////	
-	///CHECK ROBOT FOR INMINENT COLLISION. 																								MOVE TO ELASTICBAND.CPP !!!!!!!!!!!!!!!!!!!!!
-	///////////////////////////////////////////////
-	float vside = 0;
-	int j=0;
-	road.setBlocked(false);
-	for(auto i : laserData)
-	{
-		if(i.dist < 10) i.dist = 30000;
-		if( i.dist < baseOffsets[j] + 50 )
-		{
-			if( i.angle > -1.30 and i.angle < 1.30)
-			{
-				qDebug() << __FUNCTION__<< "Controller: robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
-				stopTheRobot(omnirobot_proxy);
-				road.setBlocked(true);		// MIRAR ESTO
-				break;
-			}
-		}
-		else
-		{
-			if (i.dist < baseOffsets[j] + 150) 
-			{
-				if (i.angle > 0)
-				{
-					vside  = -80;
-				}
-				else
-				{
-					vside = 80;
-				}
-			}
-		}
-		j++;
-	}
 
 	/////////////////////////////////////////////////
 	//////  CHECK CPU AVAILABILITY. If lagging reduce speed
@@ -143,7 +108,7 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	radialDir = radialDir * (T)-modulus;
 	
 	//Next, decompose it into vadvance and vside componentes by projecting on robot's Z and X axis
-	vside = radialDir * QVec::vec2(1.,0.);
+	float vside = radialDir * QVec::vec2(1.,0.);
 	float vadvance = radialDir * QVec::vec2(0.,1.);
 	
 	//Now we incorporate the rotational component without changing the advance speed

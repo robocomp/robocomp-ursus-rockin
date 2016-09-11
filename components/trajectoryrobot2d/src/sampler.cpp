@@ -56,7 +56,10 @@ void Sampler::initialize(InnerModel *inner, const RoboCompCommonBehavior::Parame
 		qFatal("Sampler-Initialize. Aborting. OuterRegion is not properly initialized");    //CHANGE TO THROW
 
 	robotNodes.clear(); restNodes.clear(); 
-	excludedNodes.insert(QString::fromStdString(params.at("ExcludedObjectsInCollisionCheck").value));
+	QStringList ls = QString::fromStdString(params.at("ExcludedObjectsInCollisionCheck").value).replace(" ", "" ).split(',');
+	qDebug() << __FUNCTION__ << ls.size() << "objects read for exclusion list";
+	foreach( QString s, ls)
+		excludedNodes.insert(s);
 	
 	// Compute the list of meshes that correspond to robot, world and possibly some additionally excluded ones
 	recursiveIncludeMeshes(innerModelSampler->getRoot(), "robot", false, robotNodes, restNodes, excludedNodes);
@@ -348,7 +351,15 @@ void Sampler::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool
 			}
 			else
 			{
-				out.push_back(node->id);
+				if(mesh)
+					if(mesh->id == "gualzru_mesh")
+						qDebug() << __FUNCTION__ << mesh->id << mesh->collidable;
+				if( mesh ) 
+					if( mesh->collidable )
+						out.push_back(node->id);
+				if( plane ) 
+					if( plane->collidable )
+						out.push_back(node->id);
 			}
 		}
 	}

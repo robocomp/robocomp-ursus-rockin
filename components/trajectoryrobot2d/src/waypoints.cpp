@@ -107,21 +107,65 @@ void WayPoints::update()
 	//////////////////////////////////////////////////////////
 	//Check for arrival to target (translation)  TOO SIMPLE
 	/////////////////////////////////////////////////////////
-	threshold = 20;
-	qDebug() << __FUNCTION__ << "Arrived:" << getRobotDistanceToTarget() <<  this->threshold << getRobotDistanceVariationToTarget();
+	threshold = 20;   //////////////////////////////////////////////////FIX THIS
+	//qDebug() << __FUNCTION__ << "Arrived:" << getRobotDistanceToTarget() <<  this->threshold << getRobotDistanceVariationToTarget();
 	
 	if (((((int) getIndexOfCurrentPoint() + 1 == (int) this->size()) or  (getRobotDistanceToTarget() < threshold))) or
 	    ((getRobotDistanceToTarget() < 100) and (getRobotDistanceVariationToTarget() > 0)))	
 	{
+		qDebug() << __FUNCTION__ << "FINISHED";
 		setFinished(true);
 	}
-
-	///////////////////////////////////////////
-	//Check for blocked road
-	///////////////////////////////////////////
-//	if( isVisible(indexOfNextPoint) == false)
-//		setBlocked(true);
+  else
+	{
+		///////////////////////////////////////////
+		//Check for blocked road
+		///////////////////////////////////////////
+		qDebug() << __FUNCTION__ << "ROAD: Robot distance to closest point" << getRobotDistanceToLastVisible();
+		//print();
+		if( getRobotDistanceToLastVisible() < 100  and getIterToLastVisiblePoint() < this->end())
+			setBlocked(true);
+		else
+			setBlocked(false);
+	}
 }
+
+
+	//////////////////////////////////////////////	
+	///CHECK ROBOT FOR INMINENT COLLISION. 																						
+	///////////////////////////////////////////////
+// 	float vside = 0;
+// 	int j=0;
+// 	road.setBlocked(false);
+// 	for(auto i : laserData)
+// 	{
+// 		if(i.dist < 10) i.dist = 30000;
+// 		if( i.dist < baseOffsets[j] + 50 )
+// 		{
+// 			if( i.angle > -1.30 and i.angle < 1.30)
+// 			{
+// 				qDebug() << __FUNCTION__<< "Controller: robot stopped to avoid collision because distance to obstacle is less than " << baseOffsets[j] << " "<<i.dist << " " << i.angle;
+// 				stopTheRobot(omnirobot_proxy);
+// 				road.setBlocked(true);		// MIRAR ESTO
+// 				break;
+// 			}
+// 		}
+// 		else
+// 		{
+// 			if (i.dist < baseOffsets[j] + 150) 
+// 			{
+// 				if (i.angle > 0)
+// 				{
+// 					vside  = -80;
+// 				}
+// 				else
+// 				{
+// 					vside = 80;
+// 				}
+// 			}
+// 		}
+// 		j++;
+// 	}
 
 void WayPoints::reset()
 {
@@ -393,15 +437,17 @@ QLine2D WayPoints::computeTangentAt(WayPoints::iterator w) const
 float WayPoints::computeDistanceToLastVisible(WayPoints::iterator closestPoint, const QVec &robotPos)
 {
 	float dist = (robotPos - closestPoint->pos).norm2();
-	WayPoints::iterator it;
+	WayPoints::iterator it = closestPoint;
+	if(it->isVisible == false)
+		return 0;
 	for (it = closestPoint; it != end() - 1; ++it)
 	{
-		if (it->isVisible == true)
+		if ((it+1)->isVisible == true)
 			dist += (it->pos - (it + 1)->pos).norm2();
 		else
 			break;
 	}
-	iterToLastVisiblePoint = it;
+	iterToLastVisiblePoint = it+1;
 	return dist;
 }
 
