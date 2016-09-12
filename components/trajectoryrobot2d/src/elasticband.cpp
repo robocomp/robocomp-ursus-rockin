@@ -17,59 +17,51 @@
 
 #include "elasticband.h"
 
-ElasticBand::ElasticBand(InnerModel *inner)
-{
-	// Get the base mesh
-	InnerModelPlane *robot_base;
-	try
-	{
-		robot_base = inner->getPlane("base_mesh");
-	}
-	catch (QString err)
-	{
-		qDebug() << __FUNCTION__ << "Aborting. We need a plane named 'base_plane' in InnerModel.xml to delimit robot's base perimeter";
-		throw err;
-	}
+ElasticBand::ElasticBand()
+{}
 
-	//Extract 8 surrounding points from robot's adapted dimensions
-	float xs = robot_base->width * 1.15;
-	float zs = robot_base->depth * 0.80;  //To compensate
-	float ys = robot_base->height;
-	qDebug() << __FUNCTION__ << xs << ys << zs;
+void ElasticBand::initialize( const RoboCompCommonBehavior::ParameterList& params )
+{
+	ROBOT_WIDTH = std::stof(params.at("RobotXWidth").value);
+	ROBOT_LENGTH = std::stoi(params.at("RobotZLong").value);
+	
+	qDebug() << __FUNCTION__ << "Robot dimensions in ElasticBand: " << ROBOT_WIDTH  << ROBOT_LENGTH;
+	
+	
+	////////////////////////////
+	/// points if the frontal edge of the robot used to test robot's hypothetical positions in the laser field
+	////////////////////////////
 
 	pointsMat = QMat::zeros(3,4);
 
-	//upper
-	pointsMat(0,0) = -xs/2;
-	pointsMat(0,2) =  zs/2;
+	//front edge
+	pointsMat(0,0) = -ROBOT_WIDTH/2;
+	pointsMat(0,2) =  ROBOT_LENGTH/2;
 	pointsMat(0,3) =  1.f;
-	pointsMat(1,0) =  xs/2;
-	pointsMat(1,2) =  zs/2;
+	pointsMat(1,0) =  ROBOT_WIDTH/2;
+	pointsMat(1,2) =  ROBOT_LENGTH/2;
 	pointsMat(1,3) =  1.f;
 	pointsMat(2,0) =  0;
-	pointsMat(2,2) =  zs/2;
+	pointsMat(2,2) =  ROBOT_LENGTH/2;
 	pointsMat(2,3) =  1.f;
 
 	//lower
-// 	pointsMat(3,0) = -xs/2;
-// 	pointsMat(3,2) = -zs/2;
-// 	pointsMat(3,3) =  1.f;
-// 	pointsMat(4,0) =  xs/2;
-// 	pointsMat(4,2) = -zs/2;
-// 	pointsMat(4,3) =  1.f;
-// 
-// 	pointsMat(5,0) =  0;
-// 	pointsMat(5,2) = -zs/2;
-// 	pointsMat(5,3) =  1.f;
-
+	// 	pointsMat(3,0) = -xs/2;
+	// 	pointsMat(3,2) = -zs/2;
+	// 	pointsMat(3,3) =  1.f;
+	// 	pointsMat(4,0) =  xs/2;
+	// 	pointsMat(4,2) = -zs/2;
+	// 	pointsMat(4,3) =  1.f; 
+	// 	pointsMat(5,0) =  0;
+	// 	pointsMat(5,2) = -zs/2;
+	// 	pointsMat(5,3) =  1.f;
 	//middle
-// 	pointsMat(6,0) = -xs/2;
-// 	pointsMat(6,2) =  0;
-// 	pointsMat(6,3) =  1.f;
-// 
-// 	pointsMat(7,0) =  xs/2;
-// 	pointsMat(7,2) =  0;
-// 	pointsMat(7,3) =  1.f;
+	// 	pointsMat(6,0) = -xs/2;
+	// 	pointsMat(6,2) =  0;
+	// 	pointsMat(6,3) =  1.f;
+	// 	pointsMat(7,0) =  xs/2;
+	// 	pointsMat(7,2) =  0;
+	// 	pointsMat(7,3) =  1.f;
 
 	pointsMat = pointsMat.transpose();
 }

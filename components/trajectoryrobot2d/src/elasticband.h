@@ -18,6 +18,7 @@
 #ifndef ELASTICBAND_H
 #define ELASTICBAND_H
 
+#include <CommonBehavior.h>
 #include <QtCore>
 #include <qmat/QMatAll>
 #include <innermodel/innermodel.h>
@@ -29,12 +30,10 @@
 #include "currenttarget.h"
 #include "linesimplifier/simplifyPath.h"
 
-#define FORCE_DISTANCE_LIMIT 600  //mm
-#define ROBOT_STEP 50
-#define DELTA_H 50
-#define ROAD_STEP_SEPARATION 400
-#define ROBOT_WIDTH 500
-#define ROBOT_LENGTH 500
+#define FORCE_DISTANCE_LIMIT (ROBOT_WIDTH * 2)  //mm
+#define ROBOT_STEP (ROBOT_WIDTH * 0.1)
+#define DELTA_H (ROBOT_WIDTH * 0.1)
+#define ROAD_STEP_SEPARATION (ROBOT_LENGTH * 0.7)
 
 /**
  * @brief This class computes laser-road force interaction, effectively projecting the "mental" road onto the physical world of distances
@@ -43,8 +42,9 @@
 class ElasticBand
 {
 	public:
-		ElasticBand(InnerModel *inner);
+		ElasticBand();
 		~ElasticBand();
+		void initialize(const RoboCompCommonBehavior::ParameterList& params);
 		bool update(InnerModel* innermodel, WayPoints& road, const RoboCompLaser::TLaserData& laserData, const CurrentTarget& currentTarget, uint iter = 1);
 		void addPoints(WayPoints &road, const CurrentTarget &currentTarget);
 
@@ -66,6 +66,10 @@ class ElasticBand
 
 		// Points along robot's contour in robot's coordinate system
 		QMat pointsMat;
+		
+		//Robot dimensions
+		float ROBOT_LENGTH;
+		float ROBOT_WIDTH;
 
 };
 

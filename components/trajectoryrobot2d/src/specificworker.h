@@ -160,7 +160,7 @@ class SpecificWorker : public GenericWorker
 		 * obstacles into a repulsion force acting on the road. It also computes an internal string-type force that straightens the road, effectively smoothing the path.
 		 * It has an update method that has to be called.
 		 */
-		ElasticBand *elasticband;
+		ElasticBand elasticband;
 		
 		/**
 		 * @brief Adpapter for the OMPL library. Not too generic so far but works. It is instantiated here to connecto to the RRT algorithm. It is used when 
@@ -182,7 +182,7 @@ class SpecificWorker : public GenericWorker
 		 */
 		#ifdef USE_QTGUI
 			GraphDraw graphdraw;
-			WaypointsDraw waypointsRoad;
+			WaypointsDraw waypointsdraw;
 		#endif
 	
 		/**

@@ -44,7 +44,6 @@
 #include <innermodeldraw.h>
 #include "sampler.h"
 #include <qlog/qlog.h>
-
 #include "plannerompl.h"
 
 struct VertexPayload

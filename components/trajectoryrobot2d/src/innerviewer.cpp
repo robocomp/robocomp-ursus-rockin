@@ -99,6 +99,6 @@ void InnerViewer::run()
 			innerViewer->update();
 			viewer.frame();
 		innerViewer->mutex->unlock();
-		usleep(70000);
+		usleep(10000);
 	}
 }

@@ -146,6 +146,11 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	return false;
 }
 
+
+////////////////////////////////////////
+//// Auxiliary functions
+///////////////////////////////////////
+
 std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const RoboCompLaser::TLaserData &laserData)
 {
 	//Base geometry GET FROM IM!!!
@@ -154,14 +159,20 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 	QVec p(3,0.f);
 	int k;
 
+	if(	innerModel->getNode("robot") == false or innerModel->getNode("laser") == false)	
+	{
+		qDebug() << __FUNCTION__ << "No laser or robot nodes in InnerModel. Aborting";
+		throw;
+	}
+
 	for(auto i : laserData)
 	{
 		for(k = 10; k < 4000; k++)
 		{
-			p = innerModel->laserTo("robot","laser",k,i.angle);
-			if( sqrt(p.x()*p.x() + p.z()*p.z()) - 250 >= 0) 
-			//if( base.contains( QPointF( p.x(), p.z() ) ) == false )
-				break;
+				p = innerModel->getNode<InnerModelLaser>("laser")->laserTo("robot", k, i.angle);
+				if( sqrt(p.x()*p.x() + p.z()*p.z()) - 250 >= 0) 
+				//if( base.contains( QPointF( p.x(), p.z() ) ) == false )
+					break;
 		}
 		baseOffsets.push_back(k);
 	}
@@ -170,7 +181,6 @@ std::vector<float> Controller::computeRobotOffsets(InnerModel *innerModel, const
 
 void Controller::stopTheRobot(RoboCompOmniRobot::OmniRobotPrx omnirobot_proxy)
 {
-	///CHECK IF ROBOT IS MOVING BEFORE
 	qDebug() << __FUNCTION__ << "Stopping the robot";
 	try {	omnirobot_proxy->setSpeedBase( 0.f, 0.f, 0.f);	}
 	catch (const Ice::Exception &e) { std::cout << e << std::endl;}

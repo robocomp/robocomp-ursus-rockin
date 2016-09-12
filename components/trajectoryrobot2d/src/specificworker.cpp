@@ -69,7 +69,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	///////////////////
 	//This object creates and maintains the road (elastic band) adapting it to the real world using a laser device
 	///////////////////
-	elasticband = new ElasticBand(innerModel);
+	elasticband.initialize( params);
 
 	//////////////////////////////////////////////////////////////////////////
 	//Low level controller that drives the robot on the road
@@ -77,6 +77,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	/////////////////////////////////////////////////////////////////////////////////
 	controller = new Controller(innerModel, laserData, params, 2 );
 
+	qDebug() << __FUNCTION__ << "All objects initialized";
 	
 #ifdef USE_QTGUI
 	graphdraw.draw(plannerPRM, viewer);
@@ -124,7 +125,7 @@ void SpecificWorker::compute()
 			break;		
 		case CurrentTarget::State::BLOCKED:
 				road.update();
-				elasticband->update(innerModel, road, laserData, currentTarget);
+				elasticband.update(innerModel, road, laserData, currentTarget);
 				if( road.isBlocked() == false)
 					currentTarget.setState(CurrentTarget::State::GOTO);
 				else
@@ -279,12 +280,11 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 		updateInnerModel(innerModel, state);
 		target.setWithoutPlan(false);
 
-		//Init road
+		//Init road   REMOVE TRASH FROM HERE
 		myRoad.reset();
 		myRoad.readRoadFromList(plannerPRM.getPath());
 		myRoad.requiresReplanning = false;
 		myRoad.computeDistancesToNext();
-		//myRoad.update();  //NOT SURE IF NEEDED HERE
 		myRoad.startRoad();
 		state.setPlanningTime(reloj.elapsed());
 		state.setState("EXECUTING");
@@ -293,7 +293,7 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 	///////////////////////////////////
 	// Update the band
 	/////////////////////////////////
-	elasticband->update(innerModel, myRoad, laserData, target);
+	elasticband.update(innerModel, myRoad, laserData, target);
 
 	///////////////////////////////////
 	// compute all measures relating the robot to the road
@@ -309,7 +309,7 @@ SpecificWorker::gotoCommand(InnerModel *innerModel, CurrentTarget &target, Traje
 
 	
 	#ifdef USE_QTGUI
-		waypointsRoad.draw(myRoad, viewer,  target);
+		waypointsdraw.draw(myRoad, viewer,  target);
 	#endif
 	
 	state.setEstimatedTime(myRoad.getETA());
