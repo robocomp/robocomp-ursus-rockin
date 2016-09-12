@@ -92,9 +92,19 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	/////////////////////////////////////////////////
 	///  SPEED DIRECTION AND MODULUS
 	////////////////////////////////////////////////
+	
+	//Rotational speed 
+	//Now we incorporate the rotational component without changing the advance speed
+	//	- We want the most of the turn required to align with the road be made ASAP, so laser field becomes effective
+	//	- We also want the final orientation is solved before arriving to the target, so a subsequent turniong action is avoided
+	//	- Also, is the target is very close, <500mm, avoid turning to allow for small correcting displacements
+	float vrot = 0;
+	if( road.getRobotDistanceToTarget() > 500 )
+		vrot = 0.5 * road.getAngleWithTangentAtClosestPoint();
+	
+	//Translational speed
   //We want the speed vector to align with the tangent to road at the current point.
-  
-  //First get the radial line leaving the robot along the road:
+  //	First get the radial line leaving the robot along the road:
   QLine2D radialLine = road.getTangentToCurrentPointInRobot(innerModel);
 	
 	//Normalize it into a unitary 2D vector
@@ -103,19 +113,14 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//Now change sense and scale according to properties of the road and target
 	float modulus = MAX_ADV_SPEED 
 									* exp(-fabs(1.6 * road.getRoadCurvatureAtClosestPoint()))
-									* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1);
+									* exponentialFunction(1./road.getRobotDistanceToTarget(),1./500,0.5, 0.1)
+									* exponentialFunction(vrot, 0.6, 0.01);
 									
 	radialDir = radialDir * (T)-modulus;
 	
 	//Next, decompose it into vadvance and vside componentes by projecting on robot's Z and X axis
 	float vside = radialDir * QVec::vec2(1.,0.);
 	float vadvance = radialDir * QVec::vec2(0.,1.);
-	
-	//Now we incorporate the rotational component without changing the advance speed
-	float vrot = 0;
-	if( road.getRobotDistanceToTarget() > 500 )
-		vrot = 0.5 * road.getAngleWithTangentAtClosestPoint();
-	
 
 	////////////////////////////////////////////////
 	//////   Print control values
