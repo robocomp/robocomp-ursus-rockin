@@ -21,6 +21,9 @@
 
 InnerViewer::InnerViewer( InnerModel *innerModel_, QObject *parent )
 {
+	QGLFormat fmt;
+	fmt.setDoubleBuffer(true);
+	QGLFormat::setDefaultFormat(fmt);
 	osgGA::TrackballManipulator *tb = new osgGA::TrackballManipulator;
 	osg::Vec3d eye(osg::Vec3(4000., 4000., 1000.));
 	osg::Vec3d center(osg::Vec3(0., 0., -0.));
@@ -30,15 +33,55 @@ InnerViewer::InnerViewer( InnerModel *innerModel_, QObject *parent )
 	viewer.setCameraManipulator(tb);
 	osgViewer::Viewer::ThreadingModel threadingModel = osgViewer::Viewer::AutomaticSelection;
 	viewer.setThreadingModel(threadingModel);
-	createWindow(viewer);
-	// add the window size toggle handler
 	viewer.addEventHandler(new osgViewer::WindowSizeHandler);
+	createWindow(viewer);
 	osg::Group *root = new osg::Group();
+	
+	osg::Vec4 p = viewer.getLight()->getPosition();
+	p.set(p.x(),1,p.z(),p.w());
+	viewer.getLight()->setPosition(p);
 	
 	innerModel = innerModel_->copy();
 	innerViewer = new InnerModelViewer(innerModel, "root", root, true);
 	viewer.setSceneData(root);
+	
+	//////////////////////////
+	//RESTORE FORMER VIEW					QUEDA CAPTURAR EL EVENTO DE CIERRE DE LA VENTANA PARA GUARDAR LA MATRIZ ACTUAL
+	/////////////////////////
+	QSettings *settings = new QSettings("RoboComp", "InnerViewer");
+	QString path(".");
+	if (path == settings->value("path").toString() )
+	{
+		QStringList l = settings->value("matrix").toStringList();
+		if (l.size() > 0)
+		{
+			osg::Matrixd m;
+			for (int i=0; i<4; i++ )
+				for (int j=0; j<4; j++ )
+					m(i,j)=l.takeFirst().toDouble();
+			tb->setByMatrix(m);
+		}
+		else
+			innerViewer->setMainCamera(tb, InnerModelViewer::TOP_POV);
+	}
+	else
+		settings->setValue("path",path);
+	
+	
+	// 	osg::Matrixd m = tb->getMatrix();
+	// 	QString s="";
+	// 	QStringList l;
+	// 	for (int i=0; i<4; i++ )
+	// 		for (int j=0; j<4; j++ )
+	// 			l.append(s.number(m(i,j)));
+	// 	settings->setValue("matrix", l);
+	// 	settings->sync();
+ 	
 	viewer.realize();
+}
+
+InnerViewer::~InnerViewer()
+{
 }
 
 void InnerViewer::createWindow(osgViewer::Viewer& viewer)
@@ -90,6 +133,7 @@ void InnerViewer::createWindow(osgViewer::Viewer& viewer)
 		viewer.addSlave(camera.get(), osg::Matrixd(), osg::Matrixd::scale(aspectRatioScale,1.0,1.0));
 	}
 }
+
 
 void InnerViewer::run()
 {

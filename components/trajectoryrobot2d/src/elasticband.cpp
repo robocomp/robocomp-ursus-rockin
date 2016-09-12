@@ -437,7 +437,7 @@ float ElasticBand::computeForces(InnerModel *innermodel, WayPoints &road, const 
 		}
 
 		float alpha = -0.3; //Negative values between -0.1 and -1. The bigger in magnitude, the stiffer the road becomes
-		float beta = 2.7;  //Posibite values between  0.1 and 1	 The bigger in magnitude, more separation from obstacles
+		float beta = 0.75;  //Posibite values between  0.1 and 1	 The bigger in magnitude, more separation from obstacles
 
 		QVec change = (atractionForce * alpha) + (repulsionForce * beta);
 		if (std::isnan(change.x()) or std::isnan(change.y()) or std::isnan(change.z()))

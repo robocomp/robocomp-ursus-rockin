@@ -35,7 +35,7 @@ class InnerViewer: public QThread
 {
 	public:
 		InnerViewer(InnerModel *innerModel_, QObject *parent = 0);
-		~InnerViewer(){};
+		virtual ~InnerViewer();
 		void run();
 		InnerModelViewer *innerViewer;
 		InnerModel *innerModel;
