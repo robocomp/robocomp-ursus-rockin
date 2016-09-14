@@ -80,7 +80,7 @@ bool ElasticBand::update(InnerModel *innermodel, WayPoints &road, const RoboComp
 	/////////////////////////////////////////////
 	//Tags all points in the road ar visible or blocked, depending on laser visibility. Only visible points are processed in this iteration
 	/////////////////////////////////////////////
-	checkVisiblePoints(innermodel, road, laserData);
+	//checkVisiblePoints(innermodel, road, laserData);
 
 	/////////////////////////////////////////////
 	//Check if there is a sudden shortcut to take
@@ -107,9 +107,9 @@ bool ElasticBand::update(InnerModel *innermodel, WayPoints &road, const RoboComp
 	/////////////////////////////////////////////
 	if (road.getIndexOfClosestPointToRobot() > 6)
 	{
-		for (auto it = road.begin(); it != road.begin() + (road.getIndexOfClosestPointToRobot() / 2); ++it)
+		for (auto it = road.begin(); it != road.begin() + (road.getIndexOfCurrentPoint() / 2); ++it)
 			road.backList.append(it->pos);
-		road.erase(road.begin(), road.begin() + (road.getIndexOfClosestPointToRobot() / 2));
+		road.erase(road.begin(), road.begin() + (road.getIndexOfCurrentPoint() / 2));
 	}
 	return true;
 }
@@ -247,10 +247,11 @@ bool ElasticBand::checkVisiblePoints(InnerModel *innermodel, WayPoints &road, co
 	QVec wd;
 	for (auto &ld : laserData)
 	{
-		wd = innermodel->laserTo("world", "laser", ld.dist, ld.angle);      //OPTIMIZE THIS FOR ALL CLASS METHODS
+		//wd = innermodel->laserTo("world", "laser", ld.dist, ld.angle); //OPTIMIZE THIS FOR ALL CLASS METHODS
+		wd = innermodel->getNode<InnerModelLaser>("laser")->laserTo("world", ld.dist, ld.angle);
 		points.push_back(Point(wd.x(), wd.z()));
 	}
-	res = simPath.simplifyWithRDP(points, 70);
+	res = simPath.simplifyWithRDP(points, 70); 
 	//qDebug() << __FUNCTION__ << "laser polygon after simp" << res.size();
 
 	// Create a QPolygon so we can check if robot outline falls inside
@@ -436,8 +437,8 @@ float ElasticBand::computeForces(InnerModel *innermodel, WayPoints &road, const 
 
 		}
 
-		float alpha = -0.3; //Negative values between -0.1 and -1. The bigger in magnitude, the stiffer the road becomes
-		float beta = 0.75;  //Posibite values between  0.1 and 1	 The bigger in magnitude, more separation from obstacles
+		float alpha = -0.5; //Negative values between -0.1 and -1. The bigger in magnitude, the stiffer the road becomes
+		float beta = 0.55;  //Posibite values between  0.1 and 1	 The bigger in magnitude, more separation from obstacles
 
 		QVec change = (atractionForce * alpha) + (repulsionForce * beta);
 		if (std::isnan(change.x()) or std::isnan(change.y()) or std::isnan(change.z()))

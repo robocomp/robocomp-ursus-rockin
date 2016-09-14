@@ -44,10 +44,10 @@ class Controller
 		std::vector<float> baseOffsets;
 		
 	  // Constants reassigned to the params values
-		float MAX_ADV_SPEED = 500.f;
-		float MAX_ROT_SPEED = 0.3;
-		float MAX_SIDE_SPEED = 200.f;
-		float MAX_LAG = 100; //ms
+		float MAX_ADV_SPEED;
+		float MAX_ROT_SPEED;
+		float MAX_SIDE_SPEED;
+		float MAX_LAG; //ms
 
 		/**
 		* @brief Computes de exponential of value with parameters computed from anchor points

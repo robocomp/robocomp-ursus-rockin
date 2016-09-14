@@ -30,10 +30,13 @@ Controller::Controller(InnerModel *innerModel, const RoboCompLaser::TLaserData &
 	
 	try
 	{
-		MAX_ADV_SPEED = std::stof(params.at("MaxZSpeed").value);
-		MAX_ROT_SPEED = std::stof(params.at("MaxRotationSpeed").value);;
-		MAX_SIDE_SPEED = std::stof(params.at("MaxZSpeed").value);;
-		MAX_LAG = std::stof(params.at("MinControllerPeriod").value);;
+		MAX_ADV_SPEED = QString::fromStdString(params.at("MaxZSpeed").value).toFloat();
+		MAX_ROT_SPEED = QString::fromStdString(params.at("MaxRotationSpeed").value).toFloat();
+		MAX_SIDE_SPEED = QString::fromStdString(params.at("MaxXSpeed").value).toFloat();
+		MAX_LAG = std::stof(params.at("MinControllerPeriod").value);
+		
+		qDebug() << "SHIRTTTTTTTTT" << MAX_ADV_SPEED << MAX_ROT_SPEED << MAX_SIDE_SPEED;
+		
 	}
 	catch (const std::out_of_range& oor) 
 	{   std::cerr << "Controller. Out of Range error reading parameters: " << oor.what() << '\n'; }
@@ -93,6 +96,8 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	///  SPEED DIRECTION AND MODULUS
 	////////////////////////////////////////////////
 	
+	
+	
 	//Rotational speed 
 	//Now we incorporate the rotational component without changing the advance speed
 	//	- We want the most of the turn required to align with the road be made ASAP, so laser field becomes effective
@@ -100,12 +105,16 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	//	- Also, is the target is very close, <500mm, avoid turning to allow for small correcting displacements
 	float vrot = 0;
 	if( road.getRobotDistanceToTarget() > 500 )
+	{
 		vrot = 0.5 * road.getAngleWithTangentAtClosestPoint();
+ 		if(vrot > MAX_ROT_SPEED) vrot = MAX_ROT_SPEED;
+ 		if(vrot < -MAX_ROT_SPEED) vrot = -MAX_ROT_SPEED;
+	}
 	
 	//Translational speed
-  //We want the speed vector to align with the tangent to road at the current point.
-  //	First get the radial line leaving the robot along the road:
-  QLine2D radialLine = road.getTangentToCurrentPointInRobot(innerModel);
+	//We want the speed vector to align with the tangent to road at the current point.
+	//	First get the radial line leaving the robot along the road:
+	QLine2D radialLine = road.getTangentToCurrentPointInRobot(innerModel);
 	
 	//Normalize it into a unitary 2D vector
 	QVec radialDir = radialLine.getNormalizedDirectionVector();
@@ -122,6 +131,12 @@ bool Controller::update(InnerModel *innerModel, RoboCompLaser::TLaserData &laser
 	float vside = radialDir * QVec::vec2(1.,0.);
 	float vadvance = radialDir * QVec::vec2(0.,1.);
 
+	if(vadvance > MAX_ADV_SPEED) vadvance = MAX_ADV_SPEED;
+	if(vadvance < -MAX_ADV_SPEED) vadvance = -MAX_ADV_SPEED;
+	
+	if(vside > MAX_SIDE_SPEED) vside = MAX_SIDE_SPEED;
+	if(vside < -MAX_SIDE_SPEED) vside = -MAX_SIDE_SPEED;
+	
 	////////////////////////////////////////////////
 	//////   Print control values
 	////////////////////////////////////////////////

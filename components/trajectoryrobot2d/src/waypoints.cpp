@@ -121,12 +121,12 @@ void WayPoints::update()
 		///////////////////////////////////////////
 		//Check for blocked road
 		///////////////////////////////////////////
-		qDebug() << __FUNCTION__ << "ROAD: Robot distance to closest point" << getRobotDistanceToLastVisible();
+		qDebug() << __FUNCTION__ << "ROAD: Robot distance to last visible" << getRobotDistanceToLastVisible();
 		//print();
-		if( getRobotDistanceToLastVisible() < 150  and getIterToLastVisiblePoint() < this->end())
+/*		if( getRobotDistanceToLastVisible() < 150  and getIterToLastVisiblePoint() < this->end())
 			setBlocked(true);
 		else
-			setBlocked(false);
+			setBlocked(false);*/
 	}
 }
 
